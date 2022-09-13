@@ -7,8 +7,9 @@ import (
 	"github.com/iotexproject/w3bstream/pkg/enums"
 )
 
-// Publisher database model
-// @def primary
+// Publisher database model demo
+// @def primary                        ID
+// @def unique_index UI_publisher_id   PublisherID
 //
 //go:generate toolkit gen model Publisher --database DB
 type Publisher struct {

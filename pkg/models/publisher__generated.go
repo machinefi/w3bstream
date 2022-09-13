@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/iotexproject/Bumblebee/base/types"
 	"github.com/iotexproject/Bumblebee/kit/sqlx"
 	"github.com/iotexproject/Bumblebee/kit/sqlx/builder"
 )
@@ -34,7 +35,7 @@ func (Publisher) TableName() string {
 
 func (Publisher) TableDesc() []string {
 	return []string{
-		"Publisher database model",
+		"Publisher database model demo",
 	}
 }
 
@@ -50,8 +51,29 @@ func (Publisher) ColRel() map[string][]string {
 	return map[string][]string{}
 }
 
+func (Publisher) PrimaryKey() []string {
+	return []string{
+		"ID",
+	}
+}
+
 func (m *Publisher) IndexFieldNames() []string {
-	return []string{}
+	return []string{
+		"ID",
+		"PublisherID",
+	}
+}
+
+func (Publisher) UniqueIndexes() builder.Indexes {
+	return builder.Indexes{
+		"ui_publisher_id": []string{
+			"PublisherID",
+		},
+	}
+}
+
+func (Publisher) UniqueIndexUIPublisherID() string {
+	return "ui_publisher_id"
 }
 
 func (m *Publisher) ColID() *builder.Column {
@@ -163,6 +185,102 @@ func (m *Publisher) Count(db sqlx.DBExecutor, cond builder.SqlCondition, adds ..
 	return
 }
 
+func (m *Publisher) FetchByID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	err := db.QueryAndScan(
+		builder.Select(nil).
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("ID").Eq(m.ID),
+					),
+				),
+				builder.Comment("Publisher.FetchByID"),
+			),
+		m,
+	)
+	return err
+}
+
+func (m *Publisher) FetchByPublisherID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	err := db.QueryAndScan(
+		builder.Select(nil).
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("PublisherID").Eq(m.PublisherID),
+					),
+				),
+				builder.Comment("Publisher.FetchByPublisherID"),
+			),
+		m,
+	)
+	return err
+}
+
+func (m *Publisher) UpdateByIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	tbl := db.T(m)
+	res, err := db.Exec(
+		builder.Update(tbl).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("ID").Eq(m.ID),
+				),
+				builder.Comment("Publisher.UpdateByIDWithFVs"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
+	)
+	if err != nil {
+		return err
+	}
+	if affected, _ := res.RowsAffected(); affected == 0 {
+		return m.FetchByID(db)
+	}
+	return nil
+}
+
+func (m *Publisher) UpdateByID(db sqlx.DBExecutor, zeros ...string) error {
+	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
+	return m.UpdateByIDWithFVs(db, fvs)
+}
+
+func (m *Publisher) UpdateByPublisherIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	tbl := db.T(m)
+	res, err := db.Exec(
+		builder.Update(tbl).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("PublisherID").Eq(m.PublisherID),
+				),
+				builder.Comment("Publisher.UpdateByPublisherIDWithFVs"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
+	)
+	if err != nil {
+		return err
+	}
+	if affected, _ := res.RowsAffected(); affected == 0 {
+		return m.FetchByPublisherID(db)
+	}
+	return nil
+}
+
+func (m *Publisher) UpdateByPublisherID(db sqlx.DBExecutor, zeros ...string) error {
+	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
+	return m.UpdateByPublisherIDWithFVs(db, fvs)
+}
+
 func (m *Publisher) Delete(db sqlx.DBExecutor) error {
 	_, err := db.Exec(
 		builder.Delete().
@@ -170,6 +288,40 @@ func (m *Publisher) Delete(db sqlx.DBExecutor) error {
 				db.T(m),
 				builder.Where(m.CondByValue(db)),
 				builder.Comment("Publisher.Delete"),
+			),
+	)
+	return err
+}
+
+func (m *Publisher) DeleteByID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	_, err := db.Exec(
+		builder.Delete().
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("ID").Eq(m.ID),
+					),
+				),
+				builder.Comment("Publisher.DeleteByID"),
+			),
+	)
+	return err
+}
+
+func (m *Publisher) DeleteByPublisherID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	_, err := db.Exec(
+		builder.Delete().
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("PublisherID").Eq(m.PublisherID),
+					),
+				),
+				builder.Comment("Publisher.DeleteByPublisherID"),
 			),
 	)
 	return err
