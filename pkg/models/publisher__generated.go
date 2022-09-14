@@ -100,20 +100,12 @@ func (Publisher) FieldPublisherID() string {
 	return "PublisherID"
 }
 
-func (m *Publisher) ColProtocol() *builder.Column {
-	return PublisherTable.ColByFieldName(m.FieldProtocol())
+func (m *Publisher) ColName() *builder.Column {
+	return PublisherTable.ColByFieldName(m.FieldName())
 }
 
-func (Publisher) FieldProtocol() string {
-	return "Protocol"
-}
-
-func (m *Publisher) ColData() *builder.Column {
-	return PublisherTable.ColByFieldName(m.FieldData())
-}
-
-func (Publisher) FieldData() string {
-	return "Data"
+func (Publisher) FieldName() string {
+	return "Name"
 }
 
 func (m *Publisher) ColCreatedAt() *builder.Column {
