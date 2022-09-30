@@ -12,6 +12,7 @@ import (
 
 type ListApplet struct {
 	httpx.MethodGet
+	ProjectID string `in:"path" name:"projectID"`
 	applet.ListAppletReq
 }
 

@@ -77,10 +77,10 @@ func UpdateApplet(ctx context.Context, appletID string, r *UpdateAppletReq) erro
 }
 
 type ListAppletReq struct {
-	ProjectID string   `in:"path"  name:"projectID"`
 	IDs       []string `in:"query" name:"id,omitempty"`
 	AppletIDs []string `in:"query" name:"appletID,omitempty"`
-	Names     []string `in:"query" name:"name,omitempty"`
+	Names     []string `in:"query" name:"names,omitempty"`
+	NameLike  string   `in:"query" name:"name,omitempty"`
 	datatypes.Pager
 }
 
@@ -97,6 +97,9 @@ func (r *ListAppletReq) Condition() builder.SqlCondition {
 	}
 	if len(r.Names) > 0 {
 		cs = append(cs, m.ColName().In(r.Names))
+	}
+	if r.NameLike != "" {
+		cs = append(cs, m.ColName().Like(r.NameLike))
 	}
 	return builder.And(cs...)
 }
