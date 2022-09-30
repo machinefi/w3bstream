@@ -3,9 +3,8 @@ module github.com/iotexproject/w3bstream
 go 1.18
 
 require (
-	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.3.0
-	github.com/iotexproject/Bumblebee v0.0.0-20220926043041-10669d26479e
+	github.com/iotexproject/Bumblebee v0.0.0-20220930045222-20cf5cda980f
 	github.com/onsi/gomega v1.20.0
 	github.com/pkg/errors v0.9.1
 	github.com/saitofun/qlib v0.0.0-20220822220243-9fdd3992fe4b
@@ -53,5 +52,3 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-// replace github.com/iotexproject/Bumblebee => /Users/sincos/sincos/src/github.com/iotexproject/Bumblebee
