@@ -4,10 +4,10 @@ import (
 	"context"
 	"strings"
 
-	"github.com/iotexproject/Bumblebee/x/misc/must"
 	"github.com/pkg/errors"
 
 	"github.com/iotexproject/Bumblebee/x/contextx"
+	"github.com/iotexproject/Bumblebee/x/misc/must"
 )
 
 type Auth struct {

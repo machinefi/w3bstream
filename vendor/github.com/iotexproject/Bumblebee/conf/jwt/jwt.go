@@ -4,8 +4,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/pkg/errors"
-
 	"github.com/iotexproject/Bumblebee/base/types"
 )
 
@@ -41,14 +39,14 @@ func (c *Jwt) ParseToken(v string) (*Claims, error) {
 		},
 	)
 	if err != nil {
-		return nil, err
+		return nil, InvalidToken.StatusErr().WithDesc(err.Error())
 	}
 	if t == nil {
-		return nil, ErrNilToken
+		return nil, InvalidToken
 	}
 	claim, ok := t.Claims.(*Claims)
 	if !ok || !t.Valid {
-		return nil, ErrInvalidClaim
+		return nil, InvalidClaim
 	}
 	return claim, nil
 }
@@ -57,8 +55,3 @@ type Claims struct {
 	Payload interface{}
 	jwt.RegisteredClaims
 }
-
-var (
-	ErrNilToken     = errors.New("nil token")
-	ErrInvalidClaim = errors.New("invalid claim")
-)

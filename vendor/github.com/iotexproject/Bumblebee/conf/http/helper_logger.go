@@ -15,9 +15,8 @@ import (
 
 	"github.com/iotexproject/Bumblebee/conf/log"
 	"github.com/iotexproject/Bumblebee/kit/httptransport/httpx"
-	"github.com/iotexproject/Bumblebee/x/misc/timer"
-
 	"github.com/iotexproject/Bumblebee/kit/metax"
+	"github.com/iotexproject/Bumblebee/x/misc/timer"
 )
 
 func NewLogRoundTripper(logger *logrus.Entry) func(http.RoundTripper) http.RoundTripper {

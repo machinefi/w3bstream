@@ -15,7 +15,6 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/iotexproject/Bumblebee/base/consts"
-
 	"github.com/iotexproject/Bumblebee/base/types"
 	"github.com/iotexproject/Bumblebee/conf/deploy"
 	"github.com/iotexproject/Bumblebee/conf/env"

@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/iotexproject/Bumblebee/x/ptrx"
 	"github.com/sirupsen/logrus"
+
+	"github.com/iotexproject/Bumblebee/x/ptrx"
 )
 
 func Std() Logger { return &std{lvl: DebugLevel} }
