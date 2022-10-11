@@ -8,12 +8,11 @@ import (
 
 	"github.com/iotexproject/Bumblebee/kit/kit"
 
-	"github.com/iotexproject/w3bstream/pkg/modules/deploy"
-
-	"github.com/iotexproject/w3bstream/pkg/modules/account"
-
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis"
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/global"
+	"github.com/iotexproject/w3bstream/pkg/modules/account"
+	"github.com/iotexproject/w3bstream/pkg/modules/blockchain"
+	"github.com/iotexproject/w3bstream/pkg/modules/deploy"
 )
 
 var app = global.App
@@ -48,6 +47,9 @@ func main() {
 				); err != nil {
 					panic(err)
 				}
+			},
+			func() {
+				go blockchain.ListenContractLog(global.WithContext(context.Background()))
 			},
 		)
 	})
