@@ -1,10 +1,10 @@
 #!/bin/sh
 #init pg
 if [ ! -d "/var/lib/postgresql_data/13" ]; then
-   echo "PG data is not exsit!"
+   echo "PG data does not exsit!"
    cp -r /var/lib/postgresql/13 /var/lib/postgresql_data/
 else
-   echo "PG data is exsit!"
+   echo "PG data exists!"
 fi
 chown -R postgres:postgres /var/lib/postgresql_data/13
 chmod -R 700 /var/lib/postgresql_data/13
@@ -26,7 +26,7 @@ su postgres sh -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE test to test_user;
 #sleep 10
 
 cd /w3bstream/build && ./srv-applet-mgr migrate
-cd /w3bstream/build && ./srv-applet-mgr init_admin &
+#cd /w3bstream/build && ./srv-applet-mgr init_admin &
 cd /w3bstream/build && ./srv-applet-mgr &
 
 sleep 3

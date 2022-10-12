@@ -28,11 +28,7 @@ make build_image
 
 Visit http://localhost:3000 to get started.
 
-The default admin password is located in docker log. You can run `docker logs w3bstreamapp` to see the logs. An example of the admin password is
-
-<img width="602" alt="image" src="https://user-images.githubusercontent.com/448293/194420837-fc3e9f30-e445-4648-839b-504ca0f50926.png">
-
-
+The default admin password is `iotex.W3B.admin`
 
 ## Run with binary
 ### Dependencies:
@@ -54,21 +50,6 @@ make migrate     # create or update schema
 make run_server
 ```
 keep the terminal alive, and open a new terminal for the other commands.
-
-### create admin account
-
-> if admin already created, skip this step
-
-```sh
-make create_admin
-```
-
-output like
-```sh
-> username: admin
-> password: {$password}
-> please remember it
-```
 
 ### login (fetch auth token)
 
