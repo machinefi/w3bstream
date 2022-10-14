@@ -54,6 +54,7 @@ func CheckDatabaseError(err error, msg ...string) error {
 		desc = msg[0]
 	}
 	if err != nil {
+		desc = desc + ":" + err.Error()
 		e := sqlx.DBErr(err)
 		if e.IsNotFound() {
 			return NotFound.StatusErr().WithDesc(desc)

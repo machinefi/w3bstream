@@ -28,7 +28,7 @@ type RelStrategy struct {
 
 type StrategyInfo struct {
 	EventType enums.EventType `db:"f_event_type" json:"eventType"`
-	Handler   string          `db:"f_handler"    json:"handlers"`
+	Handler   string          `db:"f_handler"    json:"handler"`
 }
 
 var DefaultStrategyInfo = StrategyInfo{

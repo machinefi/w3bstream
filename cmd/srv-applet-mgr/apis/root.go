@@ -5,8 +5,6 @@ import (
 	"github.com/iotexproject/Bumblebee/kit/httptransport"
 	"github.com/iotexproject/Bumblebee/kit/kit"
 
-	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/publisher"
-
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/account"
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/applet"
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/deploy"
@@ -15,6 +13,7 @@ import (
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/monitor"
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/project"
+	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/publisher"
 )
 
 var (
