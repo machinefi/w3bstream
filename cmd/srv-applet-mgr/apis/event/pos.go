@@ -5,6 +5,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/iotexproject/Bumblebee/kit/httptransport/httpx"
+
 	"github.com/iotexproject/w3bstream/pkg/enums"
 	"github.com/iotexproject/w3bstream/pkg/modules/strategy"
 	"github.com/iotexproject/w3bstream/pkg/modules/vm"

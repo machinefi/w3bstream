@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/iotexproject/Bumblebee/base/types"
 	"github.com/iotexproject/Bumblebee/kit/sqlx/datatypes"
 )
 
@@ -16,7 +17,7 @@ type Contractlog struct {
 }
 
 type RelContractlog struct {
-	ContractlogID string `db:"f_contractlog_id" json:"contractlogID"`
+	ContractlogID types.SFID `db:"f_contractlog_id" json:"contractlogID"`
 }
 
 type ContractlogInfo struct {
@@ -25,8 +26,9 @@ type ContractlogInfo struct {
 	ChainID         uint64 `db:"f_chainID"                      json:"chainID"`
 	ContractAddress string `db:"f_contractAddress"              json:"contractAddress"`
 	BlockStart      uint64 `db:"f_blockStart"                   json:"blockStart"`
-	BlockCurrent    uint64 `db:"f_blockCurrent"                 json:"blockCurrent"`
+	BlockCurrent    uint64 `db:"f_blockCurrent"                 json:"blockCurrent,omitempty"`
 	BlockEnd        uint64 `db:"f_blockEnd,default='0'"         json:"blockEnd,omitempty"`
+	Topic0          string `db:"f_topic0,default=''"            json:"topic0,omitempty"`
 	Topic1          string `db:"f_topic1,default=''"            json:"topic1,omitempty"`
 	Topic2          string `db:"f_topic2,default=''"            json:"topic2,omitempty"`
 	Topic3          string `db:"f_topic3,default=''"            json:"topic3,omitempty"`

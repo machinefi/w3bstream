@@ -135,6 +135,14 @@ func (*Contractlog) FieldBlockEnd() string {
 	return "BlockEnd"
 }
 
+func (m *Contractlog) ColTopic0() *builder.Column {
+	return ContractlogTable.ColByFieldName(m.FieldTopic0())
+}
+
+func (*Contractlog) FieldTopic0() string {
+	return "Topic0"
+}
+
 func (m *Contractlog) ColTopic1() *builder.Column {
 	return ContractlogTable.ColByFieldName(m.FieldTopic1())
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/iotexproject/Bumblebee/base/types"
 	"github.com/iotexproject/Bumblebee/kit/httptransport/httpx"
+
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/iotexproject/w3bstream/pkg/modules/publisher"
 )

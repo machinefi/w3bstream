@@ -49,6 +49,13 @@ func main() {
 				log.Printf("admin created, default password: iotex.W3B.admin")
 			},
 			func() {
+				ctx := global.WithContext(context.Background())
+				if err := blockchain.InitChainDB(ctx); err != nil {
+					log.Panicf("init chain db faild: %s", err.Error())
+					return
+				}
+			},
+			func() {
 				go blockchain.ListenContractlog(global.WithContext(context.Background()))
 			},
 		)
