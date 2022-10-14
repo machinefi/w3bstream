@@ -5,11 +5,17 @@ import (
 	"unicode/utf8"
 
 	"github.com/iotexproject/Bumblebee/kit/httptransport/httpx"
+	"github.com/iotexproject/w3bstream/pkg/enums"
+	"github.com/iotexproject/w3bstream/pkg/modules/strategy"
+	"github.com/iotexproject/w3bstream/pkg/modules/vm"
+	"github.com/iotexproject/w3bstream/pkg/types/wasm"
+
+	"github.com/iotexproject/w3bstream/pkg/depends/protocol/eventpb"
+
+	"github.com/iotexproject/w3bstream/pkg/types"
 
 	"github.com/iotexproject/w3bstream/pkg/depends/unit"
 	"github.com/iotexproject/w3bstream/pkg/errors/status"
-	me "github.com/iotexproject/w3bstream/pkg/modules/event"
-	"github.com/iotexproject/w3bstream/pkg/modules/event/proxy"
 )
 
 const (
@@ -17,55 +23,60 @@ const (
 	dataSizeLimit = 2 * unit.KiB
 )
 
-// TODO should define to pkg/depends/protocol/eventpb/event
-
-type RecvEvent struct {
+type HandleEvent struct {
 	httpx.MethodPost
-	ProjectID string `in:"path" name:"project"`
-	AppletID  string `in:"path" name:"applet"`
-	Handler   string `in:"path" name:"handler"`
-	Publisher string `in:"header" name:"publisher"`
-	Data      []byte `in:"body" name:"data"`
+	ProjectName   string `in:"path" name:"projectName"`
+	eventpb.Event `in:"body"`
 }
 
-func (r *RecvEvent) Path() string {
-	return "/:project/:applet/:handler"
-}
+func (r *HandleEvent) Path() string { return "/:projectName" }
 
-func (r *RecvEvent) Output(ctx context.Context) (interface{}, error) {
-	if !check(r.ProjectID, r.AppletID, r.Handler, r.Publisher) {
+func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
+	// TODO validate publisher belongs to Project @ZhiweiSun
+
+	// TODO check publisher key
+	//eventProto := models.EventProto{}
+	//if err := json.Unmarshal(r.Data, &eventProto); err != nil {
+	//
+	//}
+	//eventProto.PublisherKey -> projectID -> == r.ProjectID -> next
+
+	eventType := enums.EVENT_TYPE__ANY
+	if r.Header != nil {
+		eventType = enums.EventType(r.Header.EventType)
+	}
+
+	instances, err := strategy.FindStrategyInstances(ctx, r.ProjectName, eventType)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(r.Payload) > dataSizeLimit {
 		return nil, status.BadRequest
 	}
-	if len(r.Data) > dataSizeLimit {
-		return nil, status.BadRequest
-	}
 
-	res := make(chan me.Result, 1)
-	proxy.Proxy(ctx, &event{
-		projectID:   r.ProjectID,
-		handler:     r.Handler,
-		appletID:    r.AppletID,
-		publisherID: r.Publisher,
-		data:        r.Data,
-		result:      res,
-	})
-	// TODO timeout
-	result := <-res
-	if !result.Success {
-		return nil, status.InternalServerError
+	ret := make([]HandleEventRsp, 0, len(instances))
+
+	for _, v := range instances {
+		consumer := vm.GetConsumer(v.InstanceID.String())
+		if consumer == nil {
+			continue
+		}
+		// TODO
+		_, code := consumer.HandleEvent(v.Handler, []byte(r.Payload))
+		ret = append(ret, HandleEventRsp{
+			InstanceID: v.InstanceID,
+			ResultCode: code,
+		})
 	}
-	return result.Data, nil
+	return ret, nil
 }
 
-func check(projectID, appletID, handler, publisher string) bool {
-	if l := utf8.RuneCountInString(projectID); l <= 0 || l > strLenLimit {
-		return false
-	}
-	if l := utf8.RuneCountInString(appletID); l <= 0 || l > strLenLimit {
-		return false
-	}
-	if l := utf8.RuneCountInString(publisher); l <= 0 || l > strLenLimit {
-		return false
-	}
+type HandleEventRsp struct {
+	InstanceID types.SFID            `json:"instanceID"`
+	ResultCode wasm.ResultStatusCode `json:"resultCode"`
+}
+
+func check(projectID, appletID, publisher types.SFID, handler string) bool {
 	return utf8.RuneCountInString(handler) <= strLenLimit
 }

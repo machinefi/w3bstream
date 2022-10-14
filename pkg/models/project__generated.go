@@ -85,15 +85,13 @@ func (m *Project) IndexFieldNames() []string {
 		"ID",
 		"Name",
 		"ProjectID",
-		"Version",
 	}
 }
 
 func (*Project) UniqueIndexes() builder.Indexes {
 	return builder.Indexes{
-		"ui_name_version": []string{
+		"ui_name": []string{
 			"Name",
-			"Version",
 			"DeletedAt",
 		},
 		"ui_project_id": []string{
@@ -103,8 +101,8 @@ func (*Project) UniqueIndexes() builder.Indexes {
 	}
 }
 
-func (*Project) UniqueIndexUINameVersion() string {
-	return "ui_name_version"
+func (*Project) UniqueIndexUIName() string {
+	return "ui_name"
 }
 
 func (*Project) UniqueIndexUIProjectID() string {
@@ -276,7 +274,7 @@ func (m *Project) FetchByProjectID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *Project) FetchByNameAndVersion(db sqlx.DBExecutor) error {
+func (m *Project) FetchByName(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	err := db.QueryAndScan(
 		builder.Select(nil).
@@ -285,11 +283,10 @@ func (m *Project) FetchByNameAndVersion(db sqlx.DBExecutor) error {
 				builder.Where(
 					builder.And(
 						tbl.ColByFieldName("Name").Eq(m.Name),
-						tbl.ColByFieldName("Version").Eq(m.Version),
 						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
-				builder.Comment("Project.FetchByNameAndVersion"),
+				builder.Comment("Project.FetchByName"),
 			),
 		m,
 	)
@@ -358,7 +355,7 @@ func (m *Project) UpdateByProjectID(db sqlx.DBExecutor, zeros ...string) error {
 	return m.UpdateByProjectIDWithFVs(db, fvs)
 }
 
-func (m *Project) UpdateByNameAndVersionWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+func (m *Project) UpdateByNameWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
 		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
@@ -369,10 +366,9 @@ func (m *Project) UpdateByNameAndVersionWithFVs(db sqlx.DBExecutor, fvs builder.
 			Where(
 				builder.And(
 					tbl.ColByFieldName("Name").Eq(m.Name),
-					tbl.ColByFieldName("Version").Eq(m.Version),
 					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
-				builder.Comment("Project.UpdateByNameAndVersionWithFVs"),
+				builder.Comment("Project.UpdateByNameWithFVs"),
 			).
 			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
@@ -380,14 +376,14 @@ func (m *Project) UpdateByNameAndVersionWithFVs(db sqlx.DBExecutor, fvs builder.
 		return err
 	}
 	if affected, _ := res.RowsAffected(); affected == 0 {
-		return m.FetchByNameAndVersion(db)
+		return m.FetchByName(db)
 	}
 	return nil
 }
 
-func (m *Project) UpdateByNameAndVersion(db sqlx.DBExecutor, zeros ...string) error {
+func (m *Project) UpdateByName(db sqlx.DBExecutor, zeros ...string) error {
 	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
-	return m.UpdateByNameAndVersionWithFVs(db, fvs)
+	return m.UpdateByNameWithFVs(db, fvs)
 }
 
 func (m *Project) Delete(db sqlx.DBExecutor) error {
@@ -488,7 +484,7 @@ func (m *Project) SoftDeleteByProjectID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *Project) DeleteByNameAndVersion(db sqlx.DBExecutor) error {
+func (m *Project) DeleteByName(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	_, err := db.Exec(
 		builder.Delete().
@@ -497,17 +493,16 @@ func (m *Project) DeleteByNameAndVersion(db sqlx.DBExecutor) error {
 				builder.Where(
 					builder.And(
 						tbl.ColByFieldName("Name").Eq(m.Name),
-						tbl.ColByFieldName("Version").Eq(m.Version),
 						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
-				builder.Comment("Project.DeleteByNameAndVersion"),
+				builder.Comment("Project.DeleteByName"),
 			),
 	)
 	return err
 }
 
-func (m *Project) SoftDeleteByNameAndVersion(db sqlx.DBExecutor) error {
+func (m *Project) SoftDeleteByName(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	fvs := builder.FieldValues{}
 
@@ -523,10 +518,9 @@ func (m *Project) SoftDeleteByNameAndVersion(db sqlx.DBExecutor) error {
 			Where(
 				builder.And(
 					tbl.ColByFieldName("Name").Eq(m.Name),
-					tbl.ColByFieldName("Version").Eq(m.Version),
 					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
-				builder.Comment("Project.SoftDeleteByNameAndVersion"),
+				builder.Comment("Project.SoftDeleteByName"),
 			).
 			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)

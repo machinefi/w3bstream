@@ -1,4 +1,4 @@
-package vm
+package wazero
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ func (i *Instance) Log(offset, size uint32) {
 }
 
 func (i *Instance) GetData(rid uint32, vmAddrPtr, vmSizePtr uint32) wasm.ResultStatusCode {
-	if i.malloc == nil {
+	if i.alloc == nil {
 		return wasm.ResultStatusCode_ImportNotFound
 	}
 
@@ -24,7 +24,7 @@ func (i *Instance) GetData(rid uint32, vmAddrPtr, vmSizePtr uint32) wasm.ResultS
 		return wasm.ResultStatusCode_ResourceNotFound
 	}
 	size := len(data)
-	results, err := i.malloc.Call(i.ctx, uint64(size))
+	results, err := i.alloc.Call(i.ctx, uint64(size))
 	if err != nil {
 		return wasm.ResultStatusCode_ImportCallFailed
 	}

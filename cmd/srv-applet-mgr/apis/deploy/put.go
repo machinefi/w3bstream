@@ -3,6 +3,7 @@ package deploy
 import (
 	"context"
 
+	"github.com/iotexproject/Bumblebee/base/types"
 	"github.com/iotexproject/Bumblebee/kit/httptransport/httpx"
 
 	"github.com/iotexproject/w3bstream/pkg/enums"
@@ -11,7 +12,7 @@ import (
 
 type ControlInstance struct {
 	httpx.MethodPut
-	InstanceID string          `in:"path" name:"instanceID"`
+	InstanceID types.SFID      `in:"path" name:"instanceID"`
 	Cmd        enums.DeployCmd `in:"path" name:"cmd"`
 }
 

@@ -51,15 +51,6 @@ drop_image:
 run_image:
 	@docker run -d -it --name iotex_w3bstream -p 5432:5432 -p 8888:8888 -p 3000:3000 -v $(shell pwd)/build_image/pgdata:/var/lib/postgresql_data iotex/w3bstream:v3 /bin/bash /w3bstream/build_image/cmd/docker_init.sh
 
-build_server_vendor: vendor
-	@cd cmd/srv-applet-mgr && go build -mod vendor
-	@mkdir -p build
-	@mv cmd/srv-applet-mgr/srv-applet-mgr build
-	@cp -r cmd/srv-applet-mgr/config build/config
-	@echo 'succeed! srv-applet-mgr =>build/srv-applet-mgr*'
-	@echo 'succeed! config =>build/config/'
-	@echo 'modify config/local.yaml to use your server config'
-
 ## migrate first
 run_server: build_server
 	@cd build && ./srv-applet-mgr

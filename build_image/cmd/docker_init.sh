@@ -3,9 +3,12 @@
 if [ ! -d "/var/lib/postgresql_data/13" ]; then
    echo "PG data does not exsit!"
    cp -r /var/lib/postgresql/13 /var/lib/postgresql_data/
+   rm -rf /var/lib/postgresql/13
 else
    echo "PG data exists!"
 fi
+rm -f /etc/postgresql/13/main/postgresql.conf
+ln -s /w3bstream/build_image/conf/postgresql.conf /etc/postgresql/13/main/postgresql.conf 
 chown -R postgres:postgres /var/lib/postgresql_data/13
 chmod -R 700 /var/lib/postgresql_data/13
 #Start postgres

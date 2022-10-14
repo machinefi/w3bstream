@@ -3,6 +3,7 @@ package deploy
 import (
 	"context"
 
+	"github.com/iotexproject/Bumblebee/base/types"
 	"github.com/iotexproject/Bumblebee/kit/httptransport/httpx"
 
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/middleware"
@@ -12,7 +13,7 @@ import (
 
 type CreateInstance struct {
 	httpx.MethodPost
-	AppletID string `in:"path" name:"appletID"`
+	AppletID types.SFID `in:"path" name:"appletID"`
 }
 
 func (r *CreateInstance) Path() string {

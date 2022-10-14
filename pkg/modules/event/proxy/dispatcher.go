@@ -20,7 +20,7 @@ func dispatch(ctx context.Context, e event.Event) ([]byte, error) {
 	if len(ins) == 0 {
 		return nil, fmt.Errorf("applet not found")
 	}
-	consumer := vm.GetConsumer(ins[0].InstanceID)
+	consumer := vm.GetConsumer(ins[0].InstanceID.String())
 	if consumer == nil {
 		return nil, fmt.Errorf("instance not found")
 	}

@@ -8,6 +8,8 @@ import (
 	"github.com/iotexproject/Bumblebee/conf/jwt"
 	"github.com/iotexproject/Bumblebee/kit/httptransport/httpx"
 
+	"github.com/iotexproject/w3bstream/pkg/types"
+
 	"github.com/iotexproject/w3bstream/pkg/errors/status"
 	"github.com/iotexproject/w3bstream/pkg/modules/account"
 )
@@ -23,7 +25,7 @@ type InBody struct {
 }
 
 type Response struct {
-	AccountID string         `json:"accountID"`
+	AccountID types.SFID     `json:"accountID"`
 	Token     string         `json:"token"`
 	ExpireAt  base.Timestamp `json:"expireAt"`
 	Issuer    string         `json:"issuer"`

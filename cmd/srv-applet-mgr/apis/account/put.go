@@ -3,6 +3,7 @@ package account
 import (
 	"context"
 
+	"github.com/iotexproject/Bumblebee/base/types"
 	"github.com/iotexproject/Bumblebee/kit/httptransport/httpx"
 
 	"github.com/iotexproject/w3bstream/pkg/modules/account"
@@ -10,7 +11,7 @@ import (
 
 type UpdatePasswordByAccountID struct {
 	httpx.MethodPut
-	AccountID                 string `in:"path" name:"accountID"`
+	AccountID                 types.SFID `in:"path" name:"accountID"`
 	account.UpdatePasswordReq `in:"body"`
 }
 

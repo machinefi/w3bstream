@@ -7,6 +7,7 @@ import (
 	"github.com/iotexproject/Bumblebee/base/consts"
 	confapp "github.com/iotexproject/Bumblebee/conf/app"
 	confhttp "github.com/iotexproject/Bumblebee/conf/http"
+	confid "github.com/iotexproject/Bumblebee/conf/id"
 	confjwt "github.com/iotexproject/Bumblebee/conf/jwt"
 	conflog "github.com/iotexproject/Bumblebee/conf/log"
 	confmqtt "github.com/iotexproject/Bumblebee/conf/mqtt"
@@ -57,6 +58,7 @@ func init() {
 		types.WithLoggerContext(conflog.Std()),
 		types.WithMqttBrokerContext(mqtt),
 		types.WithUploadConfigContext(uploadConf),
+		confid.WithSFIDGeneratorContext(confid.MustNewSFIDGenerator()),
 		confjwt.WithConfContext(jwt),
 	)
 }

@@ -2,15 +2,17 @@
 
 package event
 
+import "github.com/iotexproject/Bumblebee/base/types"
+
 type Event interface {
 	Meta() MetaData
 	Raw() []byte
 }
 
 type MetaData struct {
-	PublisherID string
-	ProjectID   string
-	AppletID    string
+	PublisherID types.SFID
+	ProjectID   types.SFID
+	AppletID    types.SFID
 	Handler     string // optional
 }
 

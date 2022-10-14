@@ -28,6 +28,6 @@ func (a *ABI) SetInstance(i Instance) { a.Instance = i }
 
 func (a *ABI) Start() {}
 
-func (a *ABI) Malloc() {}
+func (a *ABI) Alloc() {}
 
 func (a *ABI) Free() {}

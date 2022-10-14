@@ -42,7 +42,7 @@ RUN /etc/init.d/postgresql start && \
 #RUN add-apt-repository ppa:mosquitto-dev/mosquitto-ppa
 RUN apt install mosquitto mosquitto-clients -y
 RUN mkdir /var/run/mosquitto -p
-RUN rm -f /etc/mosquitto/mosquitto.conf && ln -s /w3bstream/build/var/mqtt/conf/mosquitto.conf /etc/mosquitto/mosquitto.conf 
+RUN rm -f /etc/mosquitto/mosquitto.conf && ln -s /w3bstream/build_image/conf/mosquitto.conf /etc/mosquitto/mosquitto.conf 
 RUN /etc/init.d/mosquitto start
 
 #Install Nginx

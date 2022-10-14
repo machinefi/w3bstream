@@ -3,7 +3,7 @@ package account
 import (
 	"context"
 
-	"github.com/google/uuid"
+	confid "github.com/iotexproject/Bumblebee/conf/id"
 	"github.com/iotexproject/Bumblebee/kit/sqlx/builder"
 
 	"github.com/iotexproject/w3bstream/pkg/depends/util"
@@ -20,8 +20,9 @@ type CreateAccountByUsernameReq struct {
 func CreateAccountByUsername(ctx context.Context, r *CreateAccountByUsernameReq) (*models.Account, error) {
 	d := types.MustDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
+	g := confid.MustSFIDGeneratorFromContext(ctx)
 
-	accountID := uuid.New().String()
+	accountID := g.MustGenSFID()
 	m := &models.Account{
 		RelAccount: models.RelAccount{AccountID: accountID},
 		AccountInfo: models.AccountInfo{
@@ -31,7 +32,7 @@ func CreateAccountByUsername(ctx context.Context, r *CreateAccountByUsernameReq)
 			Password: models.AccountPassword{
 				Type: enums.PASSWORD_TYPE__LOGIN,
 				Password: util.HashOfAccountPassword(
-					accountID,
+					accountID.String(),
 					string(util.GenRandomPassword(8, 3)),
 				),
 			},
@@ -52,7 +53,7 @@ type UpdatePasswordReq struct {
 	Password string `json:"password"`
 }
 
-func UpdateAccountPassword(ctx context.Context, accountID, password string) error {
+func UpdateAccountPassword(ctx context.Context, accountID types.SFID, password string) error {
 	d := types.MustDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 
@@ -66,7 +67,7 @@ func UpdateAccountPassword(ctx context.Context, accountID, password string) erro
 	}
 
 	// TODO should check account type and password type
-	m.Password.Password = util.HashOfAccountPassword(accountID, password)
+	m.Password.Password = util.HashOfAccountPassword(accountID.String(), password)
 
 	if err := m.UpdateByAccountID(d); err != nil {
 		return status.CheckDatabaseError(err, "UpdateByAccountID")
@@ -83,13 +84,13 @@ func ValidateAccountByLogin(ctx context.Context, username, password string) (*mo
 	if err := m.FetchByUsername(d); err != nil {
 		return nil, status.CheckDatabaseError(err, "FetchByUsername")
 	}
-	if m.Password.Password == util.HashOfAccountPassword(m.AccountID, password) {
+	if m.Password.Password == util.HashOfAccountPassword(m.AccountID.String(), password) {
 		return m, nil
 	}
 	return nil, status.Unauthorized.StatusErr().WithDesc("invalid password")
 }
 
-func GetAccountByAccountID(ctx context.Context, accountID string) (*models.Account, error) {
+func GetAccountByAccountID(ctx context.Context, accountID types.SFID) (*models.Account, error) {
 	d := types.MustDBExecutorFromContext(ctx)
 	m := &models.Account{RelAccount: models.RelAccount{AccountID: accountID}}
 	err := m.FetchByAccountID(d)
@@ -101,9 +102,9 @@ func GetAccountByAccountID(ctx context.Context, accountID string) (*models.Accou
 
 func CreateAdminIfNotExist(ctx context.Context) (string, error) {
 	d := types.MustDBExecutorFromContext(ctx)
+	idg := confid.MustSFIDGeneratorFromContext(ctx)
 
-	accountID := uuid.New().String()
-	// password := string(util.GenRandomPassword(8, 3))
+	accountID := idg.MustGenSFID()
 	password := "iotex.W3B.admin"
 	m := &models.Account{
 		RelAccount: models.RelAccount{AccountID: accountID},
@@ -114,7 +115,7 @@ func CreateAdminIfNotExist(ctx context.Context) (string, error) {
 			Password: models.AccountPassword{
 				Type: enums.PASSWORD_TYPE__LOGIN,
 				Password: util.HashOfAccountPassword(
-					accountID,
+					accountID.String(),
 					password,
 				),
 				Scope: "admin",

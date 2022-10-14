@@ -1,14 +1,16 @@
 package event
 
 import (
+	"github.com/iotexproject/Bumblebee/base/types"
+
 	me "github.com/iotexproject/w3bstream/pkg/modules/event"
 )
 
 type event struct {
 	handler     string
-	projectID   string
-	appletID    string
-	publisherID string
+	projectID   types.SFID
+	appletID    types.SFID
+	publisherID types.SFID
 	data        []byte
 	result      chan me.Result
 }

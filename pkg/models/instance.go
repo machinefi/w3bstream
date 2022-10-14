@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/iotexproject/Bumblebee/base/types"
 	"github.com/iotexproject/Bumblebee/kit/sqlx/datatypes"
 
 	"github.com/iotexproject/w3bstream/pkg/enums"
@@ -22,7 +23,7 @@ type Instance struct {
 }
 
 type RelInstance struct {
-	InstanceID string `db:"f_instance_id" json:"instanceID"`
+	InstanceID types.SFID `db:"f_instance_id" json:"instanceID"`
 }
 
 type InstanceInfo struct {

@@ -14,20 +14,30 @@ import (
 func main() {}
 
 //go:wasm-module env
-//export log
-func _log(ptr uint32, size uint32)
+//export ws_log
+func _ws_log(ptr uint32, size uint32)
 
 //go:wasm-module env
-//export get_data
-func _get_data(rid uint32, ptr uint32, size uint32) int32
+//export ws_get_data
+func _ws_get_data(rid uint32, ptr uint32, size uint32) int32
 
 //go:wasm-module env
-//export get_db
-func _get_db(kaddr, ksize uint32) (v int32)
+//export ws_get_db
+func _ws_get_db(kaddr, ksize uint32) (v int32)
 
 //go:wasm-module env
-//export set_db
-func _set_db(kaddr, ksize uint32, v int32)
+//export ws_set_db
+func _ws_set_db(kaddr, ksize uint32, v int32)
+
+var allocs = make(map[uintptr][]byte)
+
+//export alloc
+func alloc(size uintptr) unsafe.Pointer {
+	buf := make([]byte, size)
+	ptr := unsafe.Pointer(&buf[0])
+	allocs[uintptr(ptr)] = buf
+	return ptr
+}
 
 //export count
 func _start(rid uint32) int32 {
@@ -43,7 +53,7 @@ func _start(rid uint32) int32 {
 	for _, w := range words {
 		if _, ok := counts[w]; !ok {
 			kaddr, ksize := stringToPtr(w)
-			counts[w] = _get_db(kaddr, ksize) + 1
+			counts[w] = _ws_get_db(kaddr, ksize) + 1
 		} else {
 			counts[w]++
 		}
@@ -51,7 +61,7 @@ func _start(rid uint32) int32 {
 
 	for k, cnt := range counts {
 		kaddr, ksize := stringToPtr(k)
-		_set_db(kaddr, ksize, cnt)
+		_ws_set_db(kaddr, ksize, cnt)
 		if _, ok := records[k]; !ok {
 			records[k] = cnt
 		} else {
@@ -71,14 +81,14 @@ var records = make(map[string]int32)
 // log a message to the console using _log.
 func log(message string) {
 	ptr, size := stringToPtr(message)
-	_log(ptr, size)
+	_ws_log(ptr, size)
 }
 
 func getData(rid uint32) (string, error) {
 	addr := uintptr(unsafe.Pointer(new(uint32)))
 	size := uintptr(unsafe.Pointer(new(uint32)))
 
-	code := _get_data(rid, uint32(addr), uint32(size))
+	code := _ws_get_data(rid, uint32(addr), uint32(size))
 	if code != 0 {
 		return "", fmt.Errorf("get data failed: [rid:%d] [code:%d]", rid, code)
 	}

@@ -3,6 +3,7 @@ package applet
 import (
 	"context"
 
+	"github.com/iotexproject/Bumblebee/base/types"
 	"github.com/iotexproject/Bumblebee/kit/httptransport/httpx"
 
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/middleware"
@@ -11,7 +12,7 @@ import (
 
 type UpdateApplet struct {
 	httpx.MethodPut
-	AppletID string `in:"path" name:"appletID"`
+	AppletID types.SFID `in:"path" name:"appletID"`
 	applet.UpdateAppletReq
 }
 

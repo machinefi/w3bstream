@@ -23,7 +23,7 @@ func init() {
 	Root.Register(kit.NewRouter(&ControlInstance{}))
 }
 
-func validateByInstance(ctx context.Context, instanceID string) (*models.Instance, error) {
+func validateByInstance(ctx context.Context, instanceID types.SFID) (*models.Instance, error) {
 	d := types.MustDBExecutorFromContext(ctx)
 	ca := middleware.CurrentAccountFromContext(ctx)
 
@@ -41,7 +41,7 @@ func validateByInstance(ctx context.Context, instanceID string) (*models.Instanc
 	tApplet := d.T(mApplet)
 
 	mProject := make([]struct {
-		ProjectID string `db:"t_applet_f_project_id"`
+		ProjectID types.SFID `db:"t_applet_f_project_id"`
 	}, 0)
 
 	err = d.QueryAndScan(

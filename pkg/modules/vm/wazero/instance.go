@@ -1,8 +1,7 @@
-package vm
+package wazero
 
 import (
 	"context"
-	"os"
 
 	"github.com/google/uuid"
 	"github.com/iotexproject/Bumblebee/x/mapx"
@@ -11,41 +10,21 @@ import (
 	"github.com/tetratelabs/wazero/imports/wasi_snapshot_preview1"
 
 	"github.com/iotexproject/w3bstream/pkg/enums"
+	"github.com/iotexproject/w3bstream/pkg/modules/vm/common"
 	"github.com/iotexproject/w3bstream/pkg/types/wasm"
 )
 
-func NewInstance(path string, opts ...InstanceOptionSetter) (string, error) {
-	code, err := os.ReadFile(path)
-	if err != nil {
-		return "", err
-	}
-	i, err := NewInstanceByCode(code, opts...)
-	if err != nil {
-		return "", err
-	}
-	return AddInstance(i), nil
-}
+var defaultRuntimeConfig = wazero.NewRuntimeConfig().
+	WithFeatureBulkMemoryOperations(true).
+	WithFeatureNonTrappingFloatToIntConversion(true).
+	WithFeatureSignExtensionOps(true).
+	WithFeatureMultiValue(true)
 
-func NewInstanceWithID(path string, by string, opts ...InstanceOptionSetter) error {
-	code, err := os.ReadFile(path)
-	if err != nil {
-		return err
-	}
-	i, err := NewInstanceByCode(code, opts...)
-	if err != nil {
-		return err
-	}
-
-	AddInstanceByID(by, i)
-	return nil
-}
-
-func NewInstanceByCode(code []byte, opts ...InstanceOptionSetter) (*Instance, error) {
+func NewInstanceByCode(code []byte, opts ...common.InstanceOptionSetter) (wasm.Instance, error) {
 	ctx := context.Background()
-	opt := &InstanceOption{
-		RuntimeConfig: DefaultRuntimeConfig,
-		Logger:        DefaultLogger,
-		Tasks:         &TaskQueue{ch: make(chan *Task)},
+	opt := &common.InstanceOption{
+		Logger: common.DefaultLogger,
+		Tasks:  &common.TaskQueue{Ch: make(chan *common.Task)},
 	}
 
 	for _, set := range opts {
@@ -55,18 +34,18 @@ func NewInstanceByCode(code []byte, opts ...InstanceOptionSetter) (*Instance, er
 	i := &Instance{
 		opt:      opt,
 		state:    enums.INSTANCE_STATE__CREATED,
-		rt:       wazero.NewRuntimeWithConfig(ctx, opt.RuntimeConfig),
+		rt:       wazero.NewRuntimeWithConfig(ctx, defaultRuntimeConfig),
 		handlers: make(map[string]api.Function),
 		db:       make(map[string]int32),
 	}
 
 	{
 		_, err := i.rt.NewModuleBuilder("env").
-			ExportFunction("get_data", i.GetData).
-			ExportFunction("set_data", i.SetData).
-			ExportFunction("get_db", i.GetDB).
-			ExportFunction("set_db", i.SetDB).
-			ExportFunction("log", i.Log).
+			ExportFunction("ws_get_data", i.GetData).
+			ExportFunction("ws_set_data", i.SetData).
+			ExportFunction("ws_get_db", i.GetDB).
+			ExportFunction("ws_set_db", i.SetDB).
+			ExportFunction("ws_log", i.Log).
 			Instantiate(ctx, i.rt)
 		if err != nil {
 			return nil, err
@@ -82,7 +61,7 @@ func NewInstanceByCode(code []byte, opts ...InstanceOptionSetter) (*Instance, er
 	if err != nil {
 		return nil, err
 	}
-	i.malloc = i.mod.ExportedFunction("malloc")
+	i.alloc = i.mod.ExportedFunction("alloc")
 	i.free = i.mod.ExportedFunction("free")
 
 	i.res = mapx.New[uint32, []byte]()
@@ -92,14 +71,14 @@ func NewInstanceByCode(code []byte, opts ...InstanceOptionSetter) (*Instance, er
 }
 
 type Instance struct {
-	opt      *InstanceOption
+	opt      *common.InstanceOption
 	ctx      context.Context
 	cancel   context.CancelFunc
 	state    wasm.InstanceState
 	rt       wazero.Runtime
 	mod      api.Module
 	res      *mapx.Map[uint32, []byte]
-	malloc   api.Function
+	alloc    api.Function
 	free     api.Function
 	handlers map[string]api.Function
 	db       map[string]int32
@@ -126,10 +105,10 @@ func (i *Instance) Stop() {
 func (i *Instance) State() wasm.InstanceState { return i.state }
 
 func (i *Instance) HandleEvent(fn string, data []byte) ([]byte, wasm.ResultStatusCode) {
-	task := &Task{
+	task := &common.Task{
 		Handler: fn,
 		Payload: data,
-		Res:     make(chan *EventHandleResult),
+		Res:     make(chan *common.EventHandleResult),
 	}
 	i.opt.Tasks.Push(task)
 
@@ -137,7 +116,7 @@ func (i *Instance) HandleEvent(fn string, data []byte) ([]byte, wasm.ResultStatu
 	return res.Response, res.Code
 }
 
-func (i *Instance) handleEvent(t *Task) *EventHandleResult {
+func (i *Instance) handleEvent(t *common.Task) *common.EventHandleResult {
 	rid := i.AddResource(t.Payload)
 	defer i.RmvResource(rid)
 
@@ -145,17 +124,17 @@ func (i *Instance) handleEvent(t *Task) *EventHandleResult {
 	if !ok {
 		hdl = i.mod.ExportedFunction(t.Handler)
 		if hdl == nil {
-			return &EventHandleResult{nil, wasm.ResultStatusCode_UnexportedHandler}
+			return &common.EventHandleResult{nil, wasm.ResultStatusCode_UnexportedHandler}
 		}
 		i.handlers[t.Handler] = hdl
 	}
 
 	results, err := hdl.Call(i.ctx, uint64(rid))
 	if err != nil {
-		return &EventHandleResult{nil, wasm.ResultStatusCode_Failed}
+		return &common.EventHandleResult{nil, wasm.ResultStatusCode_Failed}
 	}
 
-	return &EventHandleResult{nil, wasm.ResultStatusCode(results[0])}
+	return &common.EventHandleResult{nil, wasm.ResultStatusCode(results[0])}
 }
 
 func (i *Instance) AddResource(data []byte) uint32 {

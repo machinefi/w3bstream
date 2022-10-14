@@ -3,16 +3,16 @@ package applet
 import (
 	"context"
 
+	"github.com/iotexproject/Bumblebee/base/types"
 	"github.com/iotexproject/Bumblebee/kit/httptransport/httpx"
 
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/middleware"
-
 	"github.com/iotexproject/w3bstream/pkg/modules/applet"
 )
 
 type ListApplet struct {
 	httpx.MethodGet
-	ProjectID string `in:"path" name:"projectID"`
+	ProjectID types.SFID `in:"path" name:"projectID"`
 	applet.ListAppletReq
 }
 

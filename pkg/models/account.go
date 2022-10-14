@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql/driver"
 
+	"github.com/iotexproject/Bumblebee/base/types"
 	"github.com/iotexproject/Bumblebee/kit/sqlx/datatypes"
 
 	"github.com/iotexproject/w3bstream/pkg/enums"
@@ -21,7 +22,7 @@ type Account struct {
 
 type RelAccount struct {
 	// @rel Account.AccountID
-	AccountID string `db:"f_account_id" json:"accountID"` // AccountID  account id
+	AccountID types.SFID `db:"f_account_id" json:"accountID"` // AccountID  account id
 }
 
 type AccountInfo struct {

@@ -1,4 +1,4 @@
-package vm_test
+package wazero_test
 
 import (
 	_ "embed"
@@ -10,11 +10,16 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/iotexproject/w3bstream/pkg/modules/vm"
+	"github.com/iotexproject/w3bstream/pkg/modules/vm/common"
+	"github.com/iotexproject/w3bstream/pkg/modules/vm/wazero"
 	"github.com/iotexproject/w3bstream/pkg/types/wasm"
 )
 
 // //go:embed ../../../examples/log/log.wasm
 var wasmLogCode []byte
+
+// //go:embed ../../../examples/json/parse_json.wasm
+var wasmJsonCode []byte
 
 // //go:embed ../../../examples/word_count/word_count.wasm
 var wasmWordCountCode []byte
@@ -25,7 +30,7 @@ var wasmWordCountV2Code []byte
 func init() {
 	wd, _ := os.Getwd()
 	fmt.Println(wd)
-	root := filepath.Join(wd, "../../../examples")
+	root := filepath.Join(wd, "../../../../examples")
 	fmt.Println(root)
 
 	var err error
@@ -34,6 +39,10 @@ func init() {
 		panic(err)
 	}
 
+	wasmJsonCode, err = os.ReadFile(filepath.Join(root, "json/parse_json.wasm"))
+	if err != nil {
+		panic(err)
+	}
 	wasmWordCountCode, err = os.ReadFile(filepath.Join(root, "word_count/word_count.wasm"))
 	if err != nil {
 		panic(err)
@@ -45,7 +54,7 @@ func init() {
 }
 
 func TestInstance_LogWASM(t *testing.T) {
-	i, err := vm.NewInstanceByCode(wasmLogCode, vm.DefaultInstanceOptionSetter)
+	i, err := wazero.NewInstanceByCode(wasmLogCode, common.DefaultInstanceOptionSetter)
 	NewWithT(t).Expect(err).To(BeNil())
 	id := vm.AddInstance(i)
 
@@ -60,8 +69,21 @@ func TestInstance_LogWASM(t *testing.T) {
 	NewWithT(t).Expect(code).To(Equal(wasm.ResultStatusCode_UnexportedHandler))
 }
 
+func TestInstance_JsonWASM(t *testing.T) {
+	i, err := wazero.NewInstanceByCode(wasmJsonCode, common.DefaultInstanceOptionSetter)
+	NewWithT(t).Expect(err).To(BeNil())
+	id := vm.AddInstance(i)
+
+	err = vm.StartInstance(id)
+	NewWithT(t).Expect(err).To(BeNil())
+	defer vm.StopInstance(id)
+
+	_, code := i.HandleEvent("start", []byte(`{"IoTeX":"W3BStream"}`))
+	NewWithT(t).Expect(code).To(Equal(wasm.ResultStatusCode_OK))
+}
+
 func TestInstance_WordCount(t *testing.T) {
-	i, err := vm.NewInstanceByCode(wasmWordCountCode, vm.DefaultInstanceOptionSetter)
+	i, err := wazero.NewInstanceByCode(wasmWordCountCode, common.DefaultInstanceOptionSetter)
 	NewWithT(t).Expect(err).To(BeNil())
 	id := vm.AddInstance(i)
 
@@ -87,7 +109,7 @@ func TestInstance_WordCount(t *testing.T) {
 }
 
 func TestInstance_WordCountV2(t *testing.T) {
-	i, err := vm.NewInstanceByCode(wasmWordCountV2Code, vm.DefaultInstanceOptionSetter)
+	i, err := wazero.NewInstanceByCode(wasmWordCountV2Code, common.DefaultInstanceOptionSetter)
 	NewWithT(t).Expect(err).To(BeNil())
 	id := vm.AddInstance(i)
 

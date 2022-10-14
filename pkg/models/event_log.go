@@ -1,6 +1,9 @@
 package models
 
-import "github.com/iotexproject/Bumblebee/kit/sqlx/datatypes"
+import (
+	"github.com/iotexproject/Bumblebee/base/types"
+	"github.com/iotexproject/Bumblebee/kit/sqlx/datatypes"
+)
 
 // EventLog database model event
 // @def primary                     ID
@@ -18,7 +21,7 @@ type EventLog struct {
 }
 
 type RefEventID struct {
-	EventID string `db:"f_event_id" json:"eventID"`
+	EventID types.SFID `db:"f_event_id" json:"eventID"`
 }
 
 type EventInfo struct {

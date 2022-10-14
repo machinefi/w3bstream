@@ -46,7 +46,7 @@ func main() {
 					log.Printf("admin already created")
 					return
 				}
-				log.Printf("admin created")
+				log.Printf("admin created, default password: iotex.W3B.admin")
 			},
 			func() {
 				go blockchain.ListenContractlog(global.WithContext(context.Background()))

@@ -13,12 +13,14 @@ import (
 	"github.com/pkg/errors"
 	"github.com/shirou/gopsutil/v3/disk"
 
+	"github.com/iotexproject/w3bstream/pkg/depends/util"
+
 	"github.com/iotexproject/w3bstream/pkg/types"
 )
 
 var reserve = int64(100 * 1024 * 1024)
 
-func Upload(ctx context.Context, f *multipart.FileHeader, id string) (root, filename string, err error) {
+func Upload(ctx context.Context, f *multipart.FileHeader, id string) (root, filename, sum string, err error) {
 	conf := types.MustUploadConfigFromContext(ctx)
 	var (
 		fr       io.ReadSeekCloser
@@ -64,6 +66,8 @@ func Upload(ctx context.Context, f *multipart.FileHeader, id string) (root, file
 	if _, err = io.Copy(fw, fr); err != nil {
 		return
 	}
+
+	sum, err = util.FileMD5(filename)
 	return
 }
 

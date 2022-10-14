@@ -61,6 +61,7 @@ func (m *Applet) IndexFieldNames() []string {
 	return []string{
 		"AppletID",
 		"ID",
+		"Md5",
 		"Name",
 	}
 }
@@ -70,6 +71,9 @@ func (*Applet) UniqueIndexes() builder.Indexes {
 		"ui_applet_id": []string{
 			"AppletID",
 		},
+		"ui_md5": []string{
+			"Md5",
+		},
 		"ui_name": []string{
 			"Name",
 		},
@@ -78,6 +82,10 @@ func (*Applet) UniqueIndexes() builder.Indexes {
 
 func (*Applet) UniqueIndexUIAppletID() string {
 	return "ui_applet_id"
+}
+
+func (*Applet) UniqueIndexUIMd5() string {
+	return "ui_md5"
 }
 
 func (*Applet) UniqueIndexUIName() string {
@@ -124,12 +132,12 @@ func (*Applet) FieldPath() string {
 	return "Path"
 }
 
-func (m *Applet) ColConfig() *builder.Column {
-	return AppletTable.ColByFieldName(m.FieldConfig())
+func (m *Applet) ColMd5() *builder.Column {
+	return AppletTable.ColByFieldName(m.FieldMd5())
 }
 
-func (*Applet) FieldConfig() string {
-	return "Config"
+func (*Applet) FieldMd5() string {
+	return "Md5"
 }
 
 func (m *Applet) ColCreatedAt() *builder.Column {
@@ -219,24 +227,6 @@ func (m *Applet) FetchByID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *Applet) FetchByAppletID(db sqlx.DBExecutor) error {
-	tbl := db.T(m)
-	err := db.QueryAndScan(
-		builder.Select(nil).
-			From(
-				tbl,
-				builder.Where(
-					builder.And(
-						tbl.ColByFieldName("AppletID").Eq(m.AppletID),
-					),
-				),
-				builder.Comment("Applet.FetchByAppletID"),
-			),
-		m,
-	)
-	return err
-}
-
 func (m *Applet) FetchByName(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	err := db.QueryAndScan(
@@ -249,6 +239,42 @@ func (m *Applet) FetchByName(db sqlx.DBExecutor) error {
 					),
 				),
 				builder.Comment("Applet.FetchByName"),
+			),
+		m,
+	)
+	return err
+}
+
+func (m *Applet) FetchByMd5(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	err := db.QueryAndScan(
+		builder.Select(nil).
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("Md5").Eq(m.Md5),
+					),
+				),
+				builder.Comment("Applet.FetchByMd5"),
+			),
+		m,
+	)
+	return err
+}
+
+func (m *Applet) FetchByAppletID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	err := db.QueryAndScan(
+		builder.Select(nil).
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("AppletID").Eq(m.AppletID),
+					),
+				),
+				builder.Comment("Applet.FetchByAppletID"),
 			),
 		m,
 	)
@@ -285,36 +311,6 @@ func (m *Applet) UpdateByID(db sqlx.DBExecutor, zeros ...string) error {
 	return m.UpdateByIDWithFVs(db, fvs)
 }
 
-func (m *Applet) UpdateByAppletIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
-
-	if _, ok := fvs["UpdatedAt"]; !ok {
-		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
-	}
-	tbl := db.T(m)
-	res, err := db.Exec(
-		builder.Update(tbl).
-			Where(
-				builder.And(
-					tbl.ColByFieldName("AppletID").Eq(m.AppletID),
-				),
-				builder.Comment("Applet.UpdateByAppletIDWithFVs"),
-			).
-			Set(tbl.AssignmentsByFieldValues(fvs)...),
-	)
-	if err != nil {
-		return err
-	}
-	if affected, _ := res.RowsAffected(); affected == 0 {
-		return m.FetchByAppletID(db)
-	}
-	return nil
-}
-
-func (m *Applet) UpdateByAppletID(db sqlx.DBExecutor, zeros ...string) error {
-	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
-	return m.UpdateByAppletIDWithFVs(db, fvs)
-}
-
 func (m *Applet) UpdateByNameWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
@@ -343,6 +339,66 @@ func (m *Applet) UpdateByNameWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues
 func (m *Applet) UpdateByName(db sqlx.DBExecutor, zeros ...string) error {
 	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
 	return m.UpdateByNameWithFVs(db, fvs)
+}
+
+func (m *Applet) UpdateByMd5WithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	tbl := db.T(m)
+	res, err := db.Exec(
+		builder.Update(tbl).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("Md5").Eq(m.Md5),
+				),
+				builder.Comment("Applet.UpdateByMd5WithFVs"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
+	)
+	if err != nil {
+		return err
+	}
+	if affected, _ := res.RowsAffected(); affected == 0 {
+		return m.FetchByMd5(db)
+	}
+	return nil
+}
+
+func (m *Applet) UpdateByMd5(db sqlx.DBExecutor, zeros ...string) error {
+	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
+	return m.UpdateByMd5WithFVs(db, fvs)
+}
+
+func (m *Applet) UpdateByAppletIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	tbl := db.T(m)
+	res, err := db.Exec(
+		builder.Update(tbl).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("AppletID").Eq(m.AppletID),
+				),
+				builder.Comment("Applet.UpdateByAppletIDWithFVs"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
+	)
+	if err != nil {
+		return err
+	}
+	if affected, _ := res.RowsAffected(); affected == 0 {
+		return m.FetchByAppletID(db)
+	}
+	return nil
+}
+
+func (m *Applet) UpdateByAppletID(db sqlx.DBExecutor, zeros ...string) error {
+	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
+	return m.UpdateByAppletIDWithFVs(db, fvs)
 }
 
 func (m *Applet) Delete(db sqlx.DBExecutor) error {
@@ -374,23 +430,6 @@ func (m *Applet) DeleteByID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *Applet) DeleteByAppletID(db sqlx.DBExecutor) error {
-	tbl := db.T(m)
-	_, err := db.Exec(
-		builder.Delete().
-			From(
-				tbl,
-				builder.Where(
-					builder.And(
-						tbl.ColByFieldName("AppletID").Eq(m.AppletID),
-					),
-				),
-				builder.Comment("Applet.DeleteByAppletID"),
-			),
-	)
-	return err
-}
-
 func (m *Applet) DeleteByName(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	_, err := db.Exec(
@@ -403,6 +442,40 @@ func (m *Applet) DeleteByName(db sqlx.DBExecutor) error {
 					),
 				),
 				builder.Comment("Applet.DeleteByName"),
+			),
+	)
+	return err
+}
+
+func (m *Applet) DeleteByMd5(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	_, err := db.Exec(
+		builder.Delete().
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("Md5").Eq(m.Md5),
+					),
+				),
+				builder.Comment("Applet.DeleteByMd5"),
+			),
+	)
+	return err
+}
+
+func (m *Applet) DeleteByAppletID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	_, err := db.Exec(
+		builder.Delete().
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("AppletID").Eq(m.AppletID),
+					),
+				),
+				builder.Comment("Applet.DeleteByAppletID"),
 			),
 	)
 	return err

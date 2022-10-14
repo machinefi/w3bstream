@@ -3,17 +3,17 @@ package deploy
 import (
 	"context"
 
+	"github.com/iotexproject/Bumblebee/base/types"
 	"github.com/iotexproject/Bumblebee/kit/httptransport/httpx"
 
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/iotexproject/w3bstream/pkg/modules/applet"
-
 	"github.com/iotexproject/w3bstream/pkg/modules/deploy"
 )
 
 type GetInstanceByInstanceID struct {
 	httpx.MethodGet
-	InstanceID string `in:"path" name:"instanceID"`
+	InstanceID types.SFID `in:"path" name:"instanceID"`
 }
 
 func (r *GetInstanceByInstanceID) Path() string {
@@ -31,7 +31,7 @@ func (r *GetInstanceByInstanceID) Output(ctx context.Context) (interface{}, erro
 
 type GetInstanceByAppletID struct {
 	httpx.MethodGet
-	AppletID string `in:"path" name:"appletID"`
+	AppletID types.SFID `in:"path" name:"appletID"`
 }
 
 func (r *GetInstanceByAppletID) Path() string {

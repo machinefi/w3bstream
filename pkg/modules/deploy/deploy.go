@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	confid "github.com/iotexproject/Bumblebee/conf/id"
 	"github.com/iotexproject/Bumblebee/kit/sqlx/builder"
 	"github.com/pkg/errors"
 
@@ -11,16 +12,18 @@ import (
 	"github.com/iotexproject/w3bstream/pkg/errors/status"
 	"github.com/iotexproject/w3bstream/pkg/models"
 	"github.com/iotexproject/w3bstream/pkg/modules/vm"
+	"github.com/iotexproject/w3bstream/pkg/modules/vm/common"
 	"github.com/iotexproject/w3bstream/pkg/types"
 )
 
 type CreateInstanceRsp struct {
-	InstanceID    string              `json:"instanceID"`
+	InstanceID    types.SFID          `json:"instanceID"`
 	InstanceState enums.InstanceState `json:"instanceState"`
 }
 
-func CreateInstance(ctx context.Context, path, appletID string) (*CreateInstanceRsp, error) {
+func CreateInstance(ctx context.Context, path string, appletID types.SFID) (*CreateInstanceRsp, error) {
 	d := types.MustDBExecutorFromContext(ctx)
+	idg := confid.MustSFIDGeneratorFromContext(ctx)
 	m := &models.Instance{
 		RelApplet: models.RelApplet{AppletID: appletID},
 	}
@@ -35,7 +38,9 @@ func CreateInstance(ctx context.Context, path, appletID string) (*CreateInstance
 		}
 	}
 
-	m.InstanceID, err = vm.NewInstance(path, vm.DefaultInstanceOptionSetter)
+	m.InstanceID = idg.MustGenSFID()
+
+	err = vm.NewInstanceWithID(path, m.InstanceID.String(), common.DefaultInstanceOptionSetter)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +48,7 @@ func CreateInstance(ctx context.Context, path, appletID string) (*CreateInstance
 	m.Path = path
 
 	if err = m.Create(d); err != nil {
-		_ = vm.DelInstance(m.InstanceID)
+		_ = vm.DelInstance(m.InstanceID.String())
 		return nil, err
 	}
 
@@ -53,7 +58,7 @@ func CreateInstance(ctx context.Context, path, appletID string) (*CreateInstance
 	}, nil
 }
 
-func ControlInstance(ctx context.Context, instanceID string, cmd enums.DeployCmd) (err error) {
+func ControlInstance(ctx context.Context, instanceID types.SFID, cmd enums.DeployCmd) (err error) {
 	var (
 		d = types.MustDBExecutorFromContext(ctx)
 		l = types.MustLoggerFromContext(ctx)
@@ -75,27 +80,27 @@ func ControlInstance(ctx context.Context, instanceID string, cmd enums.DeployCmd
 
 	switch cmd {
 	case enums.DEPLOY_CMD__REMOVE:
-		if err = vm.DelInstance(instanceID); err != nil {
+		if err = vm.DelInstance(instanceID.String()); err != nil {
 			return err
 		}
 		return status.CheckDatabaseError(m.DeleteByInstanceID(d), "DeleteInstanceByInstanceID")
 	case enums.DEPLOY_CMD__STOP:
-		if err = vm.StopInstance(instanceID); err != nil {
+		if err = vm.StopInstance(instanceID.String()); err != nil {
 			return err
 		}
 		m.State = enums.INSTANCE_STATE__STOPPED
 		return status.CheckDatabaseError(m.UpdateByInstanceID(d), "UpdateInstanceByInstanceID")
 	case enums.DEPLOY_CMD__START:
-		if err = vm.StartInstance(instanceID); err != nil {
+		if err = vm.StartInstance(instanceID.String()); err != nil {
 			return err
 		}
 		m.State = enums.INSTANCE_STATE__STARTED
 		return status.CheckDatabaseError(m.UpdateByInstanceID(d), "UpdateInstanceByInstanceID")
 	case enums.DEPLOY_CMD__RESTART:
-		if err = vm.StopInstance(instanceID); err != nil {
+		if err = vm.StopInstance(instanceID.String()); err != nil {
 			return err
 		}
-		if err = vm.StartInstance(instanceID); err != nil {
+		if err = vm.StartInstance(instanceID.String()); err != nil {
 			return err
 		}
 		m.State = enums.INSTANCE_STATE__CREATED
@@ -105,7 +110,7 @@ func ControlInstance(ctx context.Context, instanceID string, cmd enums.DeployCmd
 	}
 }
 
-func GetInstanceByInstanceID(ctx context.Context, instanceID string) (*models.Instance, error) {
+func GetInstanceByInstanceID(ctx context.Context, instanceID types.SFID) (*models.Instance, error) {
 	d := types.MustDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	m := &models.Instance{RelInstance: models.RelInstance{InstanceID: instanceID}}
@@ -116,7 +121,7 @@ func GetInstanceByInstanceID(ctx context.Context, instanceID string) (*models.In
 		return nil, status.CheckDatabaseError(err, "FetchInstanceByInstanceID")
 	}
 
-	state, ok := vm.GetInstanceState(instanceID)
+	state, ok := vm.GetInstanceState(instanceID.String())
 	if !ok {
 		return nil, status.NotFound.StatusErr().WithDesc("instance not found in mgr")
 	}
@@ -132,7 +137,7 @@ func GetInstanceByInstanceID(ctx context.Context, instanceID string) (*models.In
 	return m, nil
 }
 
-func GetInstanceByAppletID(ctx context.Context, appletID string) (ret []models.Instance, err error) {
+func GetInstanceByAppletID(ctx context.Context, appletID types.SFID) (ret []models.Instance, err error) {
 	d := types.MustDBExecutorFromContext(ctx)
 	m := &models.Instance{}
 
@@ -159,7 +164,7 @@ func StartInstances(ctx context.Context) error {
 	}
 	for _, i := range list {
 		if i.State == enums.INSTANCE_STATE__CREATED || i.State == enums.INSTANCE_STATE__STARTED {
-			err = vm.NewInstanceWithID(i.Path, i.InstanceID, vm.DefaultInstanceOptionSetter)
+			err = vm.NewInstanceWithID(i.Path, i.InstanceID.String(), common.DefaultInstanceOptionSetter)
 			if err != nil {
 				if err := i.DeleteByInstanceID(d); err != nil {
 					return err

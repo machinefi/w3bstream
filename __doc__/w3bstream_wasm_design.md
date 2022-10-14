@@ -71,7 +71,7 @@ Examples:
 - Func exported by wasm
 
 ```rust
-fn malloc(size: usize) -> *mut c_void {
+fn alloc(size: usize) -> *mut c_void {
     return ptr;
 }
 
@@ -83,30 +83,30 @@ fn _start(resource_id i32) -> i32 {
 - Func imported to wasm
 
 ```rust
-fn getData(resource_id i32, return_ptr i32, return_size i32) i32 {
+fn ws_get_data(resource_id i32, return_ptr i32, return_size i32) i32 {
     copy(data_ptr, return_ptr, return_size)
     return Result_OK
 }
 
-fn setData(resource_id i32, ptr i32, size i32) i32 {
+fn ws_set_data(resource_id i32, ptr i32, size i32) i32 {
     return Result_OK
 }
 
-fn getDB(namespace_data i32, namespace_size i32, key_data i32, key_size i32,
+fn ws_get_dB(namespace_data i32, namespace_size i32, key_data i32, key_size i32,
     return_value_ptr i32, return_value_size i32) i32 {
     return Result_OK
 }
 
-fn setDB(namespace_data i32, namespace_size i32, key_data i32, key_size i32,
+fn ws_set_dB(namespace_data i32, namespace_size i32, key_data i32, key_size i32,
     value_ptr i32, value_size i32) i32 {
     return Result_OK
 }
 
-fn log(logLevel i32, ptr i32, size i32) i32 {
+fn ws_log(logLevel i32, ptr i32, size i32) i32 {
     return Result_OK
 }
 
-fn callContract() {}
+fn ws_call_contract() {}
 
-fn writeContract() {}
+fn ws_write_contract() {}
 ```

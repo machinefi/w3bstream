@@ -8,5 +8,5 @@ import (
 var Root = kit.NewRouter(httptransport.Group("/event"))
 
 func init() {
-	Root.Register(kit.NewRouter(&RecvEvent{}))
+	Root.Register(kit.NewRouter(&HandleEvent{}))
 }

@@ -108,6 +108,14 @@ func (*Publisher) FieldName() string {
 	return "Name"
 }
 
+func (m *Publisher) ColKey() *builder.Column {
+	return PublisherTable.ColByFieldName(m.FieldKey())
+}
+
+func (*Publisher) FieldKey() string {
+	return "Key"
+}
+
 func (m *Publisher) ColToken() *builder.Column {
 	return PublisherTable.ColByFieldName(m.FieldToken())
 }

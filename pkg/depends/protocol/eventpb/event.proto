@@ -3,13 +3,14 @@ package eventpb;
 option go_package = ".;eventpb";
 
 message Header {
-  string project = 1;
-  string applet = 2;
-  string appletVersion = 3;
-  string handler = 4;
+  uint32 EventType = 1;
+  string PubID = 2; // the unique identifier for publisher
+  string Token = 3;
+  int64 PubTime = 4; // event pub timestamp
+  string EventID = 5; // event id for tracing
 }
 
 message Event {
   Header header = 1;
-  bytes payload = 2;
+  string payload = 2;
 }

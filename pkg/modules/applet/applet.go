@@ -6,7 +6,7 @@ import (
 	"mime/multipart"
 	"os"
 
-	"github.com/google/uuid"
+	confid "github.com/iotexproject/Bumblebee/conf/id"
 	"github.com/iotexproject/Bumblebee/kit/sqlx"
 	"github.com/iotexproject/Bumblebee/kit/sqlx/builder"
 	"github.com/iotexproject/Bumblebee/kit/sqlx/datatypes"
@@ -25,63 +25,137 @@ type CreateAppletReq struct {
 }
 
 type Info struct {
-	ProjectID  string               `json:"projectID"`
-	AppletName string               `json:"appletName"`
-	Config     *models.AppletConfig `json:"config,omitempty"`
+	AppletName string                `json:"appletName"`
+	Strategies []models.StrategyInfo `json:"strategies,omitempty"`
 }
 
-func CreateApplet(ctx context.Context, r *CreateAppletReq) (*models.Applet, error) {
-	appletID := uuid.New().String()
-	_, filename, err := resource.Upload(ctx, r.File, appletID)
+func CreateApplet(ctx context.Context, projectID types.SFID, r *CreateAppletReq) (*models.Applet, error) {
+	d := types.MustDBExecutorFromContext(ctx)
+	idg := confid.MustSFIDGeneratorFromContext(ctx)
+
+	appletID := idg.MustGenSFID()
+	_, filename, sum, err := resource.Upload(ctx, r.File, appletID.String())
 	if err != nil {
 		return nil, status.UploadFileFailed.StatusErr().WithDesc(err.Error())
 	}
 
-	d := types.MustDBExecutorFromContext(ctx)
-
 	m := &models.Applet{
-		RelProject: models.RelProject{ProjectID: r.ProjectID},
+		RelProject: models.RelProject{ProjectID: projectID},
 		RelApplet:  models.RelApplet{AppletID: appletID},
-		AppletInfo: models.AppletInfo{Name: r.AppletName, Path: filename, Config: r.Config},
+		AppletInfo: models.AppletInfo{
+			Name: r.AppletName,
+			Path: filename,
+			Md5:  sum,
+		},
+	}
+	if len(r.Info.Strategies) == 0 {
+		r.Info.Strategies = append(r.Info.Strategies, models.DefaultStrategyInfo)
 	}
 
-	if err = m.Create(d); err != nil {
+	err = sqlx.NewTasks(d).With(
+		func(db sqlx.DBExecutor) error {
+			return m.Create(db)
+		},
+		func(db sqlx.DBExecutor) error {
+			for i := range r.Info.Strategies {
+				if err := (&models.Strategy{
+					RelStrategy:  models.RelStrategy{StrategyID: idg.MustGenSFID()},
+					RelProject:   models.RelProject{ProjectID: projectID},
+					RelApplet:    models.RelApplet{AppletID: m.AppletID},
+					StrategyInfo: r.Info.Strategies[i],
+				}).Create(db); err != nil {
+					return err
+				}
+			}
+			return nil
+		},
+	).Do()
+
+	if err != nil {
 		defer os.RemoveAll(filename)
-		return nil, err
+		return nil, status.CheckDatabaseError(err, "CreateApplet")
 	}
 
 	return m, nil
 }
 
 type UpdateAppletReq struct {
-	File *multipart.FileHeader `name:"file"`
+	File  *multipart.FileHeader `name:"file"`
+	*Info `name:"info"`
 }
 
-func UpdateApplet(ctx context.Context, appletID string, r *UpdateAppletReq) error {
-	_, filename, err := resource.Upload(ctx, r.File, appletID)
+func UpdateApplet(ctx context.Context, appletID types.SFID, r *UpdateAppletReq) error {
+	_, filename, sum, err := resource.Upload(ctx, r.File, appletID.String())
 	if err != nil {
 		return status.UploadFileFailed.StatusErr().WithDesc(err.Error())
 	}
 
 	d := types.MustDBExecutorFromContext(ctx)
 	m := &models.Applet{RelApplet: models.RelApplet{AppletID: appletID}}
+	idg := confid.MustSFIDGeneratorFromContext(ctx)
 
-	if err := m.FetchByAppletID(d); err != nil {
-		return status.CheckDatabaseError(err, "FetchAppletByAppletID")
+	oldPath := ""
+	needUpdateStrategies := r.Info != nil && len(r.Strategies) > 0
+
+	sqlx.NewTasks(d).With(
+		func(db sqlx.DBExecutor) error {
+			return m.FetchByAppletID(d)
+		},
+		func(db sqlx.DBExecutor) error {
+			oldPath = m.Path
+			m.Path, m.Md5 = filename, sum
+			if r.Info != nil {
+				m.Name = r.AppletName
+			}
+			return m.UpdateByAppletID(d)
+		},
+		func(db sqlx.DBExecutor) error {
+			if !needUpdateStrategies {
+				return nil
+			}
+			s := &models.Strategy{}
+			_, err := db.Exec(
+				builder.Delete().From(
+					db.T(s),
+					builder.Where(
+						builder.And(
+							s.ColProjectID().Eq(m.ProjectID),
+							s.ColAppletID().Eq(m.AppletID),
+						),
+					),
+				),
+			)
+			return err
+		},
+		func(db sqlx.DBExecutor) error {
+			for i := range r.Info.Strategies {
+				if err := (&models.Strategy{
+					RelStrategy:  models.RelStrategy{StrategyID: idg.MustGenSFID()},
+					RelProject:   models.RelProject{ProjectID: m.ProjectID},
+					RelApplet:    models.RelApplet{AppletID: m.AppletID},
+					StrategyInfo: r.Info.Strategies[i],
+				}).Create(db); err != nil {
+					return err
+				}
+			}
+			return nil
+		},
+	).Do()
+
+	if err != nil {
+		os.RemoveAll(filename)
+	} else {
+		os.RemoveAll(oldPath)
 	}
-	m.Path = filename
-	if err := m.UpdateByAppletID(d); err != nil {
-		defer os.RemoveAll(filename)
-		return status.CheckDatabaseError(err, "UpdateAppletByAppletID")
-	}
+
 	return nil
 }
 
 type ListAppletReq struct {
-	IDs       []string `in:"query" name:"id,omitempty"`
-	AppletIDs []string `in:"query" name:"appletID,omitempty"`
-	Names     []string `in:"query" name:"names,omitempty"`
-	NameLike  string   `in:"query" name:"name,omitempty"`
+	IDs       []uint64     `in:"query" name:"id,omitempty"`
+	AppletIDs []types.SFID `in:"query" name:"appletID,omitempty"`
+	Names     []string     `in:"query" name:"names,omitempty"`
+	NameLike  string       `in:"query" name:"name,omitempty"`
 	datatypes.Pager
 }
 
@@ -141,8 +215,8 @@ func ListApplets(ctx context.Context, r *ListAppletReq) (*ListAppletRsp, error) 
 }
 
 type RemoveAppletReq struct {
-	ProjectID string `in:"path"  name:"projectID"`
-	AppletID  string `in:"path"  name:"appletID"`
+	ProjectID types.SFID `in:"path"  name:"projectID"`
+	AppletID  types.SFID `in:"path"  name:"appletID"`
 }
 
 func RemoveApplet(ctx context.Context, r *RemoveAppletReq) error {
@@ -173,7 +247,7 @@ func RemoveApplet(ctx context.Context, r *RemoveAppletReq) error {
 		},
 		func(d sqlx.DBExecutor) error {
 			for _, i := range instances {
-				if err = vm.DelInstance(i.InstanceID); err != nil {
+				if err = vm.DelInstance(i.InstanceID.String()); err != nil {
 					return status.InternalServerError.StatusErr().WithDesc(
 						fmt.Sprintf("delete instance %s failed: %s",
 							i.InstanceID, err.Error(),
@@ -189,15 +263,15 @@ func RemoveApplet(ctx context.Context, r *RemoveAppletReq) error {
 		func(d sqlx.DBExecutor) error {
 			return status.CheckDatabaseError(
 				mApplet.DeleteByAppletID(d),
-				"delete applet by applet id",
+				"DeleteAppletByAppletID",
 			)
 		},
 	).Do()
 }
 
 type GetAppletReq struct {
-	ProjectID string `in:"path" name:"projectID"`
-	AppletID  string `in:"path" name:"appletID"`
+	ProjectID types.SFID `in:"path" name:"projectID"`
+	AppletID  types.SFID `in:"path" name:"appletID"`
 }
 
 type GetAppletRsp struct {
@@ -205,14 +279,12 @@ type GetAppletRsp struct {
 	Instances []models.Instance `json:"instances"`
 }
 
-func GetAppletByAppletID(ctx context.Context, appletID string) (*GetAppletRsp, error) {
+func GetAppletByAppletID(ctx context.Context, appletID types.SFID) (*GetAppletRsp, error) {
 	d := types.MustDBExecutorFromContext(ctx)
 	m := &models.Applet{RelApplet: models.RelApplet{AppletID: appletID}}
 	err := m.FetchByAppletID(d)
 	if err != nil {
 		return nil, status.CheckDatabaseError(err, "FetchByAppletID")
 	}
-	return &GetAppletRsp{
-		Applet: *m,
-	}, err
+	return &GetAppletRsp{Applet: *m}, err
 }

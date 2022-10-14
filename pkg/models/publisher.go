@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/iotexproject/Bumblebee/base/types"
 	"github.com/iotexproject/Bumblebee/kit/sqlx/datatypes"
 )
 
@@ -18,10 +19,11 @@ type Publisher struct {
 }
 
 type RelPublisher struct {
-	PublisherID string `db:"f_publisher_id" json:"publisherID"`
+	PublisherID types.SFID `db:"f_publisher_id" json:"publisherID"`
 }
 
 type PublisherInfo struct {
 	Name  string `db:"f_name"             json:"name"`
+	Key   string `db:"f_key"              json:"key"`
 	Token string `db:"f_token,default=''" json:"token"`
 }

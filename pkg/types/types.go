@@ -1,5 +1,7 @@
 package types
 
+import "github.com/iotexproject/Bumblebee/base/types"
+
 type UploadConfig struct {
 	Root          string `env:""`
 	FileSizeLimit int64  `env:""`
@@ -13,3 +15,8 @@ func (c *UploadConfig) SetDefault() {
 		c.FileSizeLimit = 100 * 1024 * 1024
 	}
 }
+
+type (
+	SFID  = types.SFID
+	SFIDs = types.SFIDs
+)
