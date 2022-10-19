@@ -23,11 +23,11 @@ type RelContractlog struct {
 type ContractlogInfo struct {
 	ProjectName     string `db:"f_project_name"                 json:"projectName"`
 	EventType       string `db:"f_event_type"                   json:"eventType"`
-	ChainID         uint64 `db:"f_chainID"                      json:"chainID"`
-	ContractAddress string `db:"f_contractAddress"              json:"contractAddress"`
-	BlockStart      uint64 `db:"f_blockStart"                   json:"blockStart"`
-	BlockCurrent    uint64 `db:"f_blockCurrent"                 json:"blockCurrent,omitempty"`
-	BlockEnd        uint64 `db:"f_blockEnd,default='0'"         json:"blockEnd,omitempty"`
+	ChainID         uint64 `db:"f_chain_id"                     json:"chainID"`
+	ContractAddress string `db:"f_contract_address"             json:"contractAddress"`
+	BlockStart      uint64 `db:"f_block_start"                  json:"blockStart"`
+	BlockCurrent    uint64 `db:"f_block_current"                json:"blockCurrent,omitempty"`
+	BlockEnd        uint64 `db:"f_block_end,default='0'"        json:"blockEnd,omitempty"`
 	Topic0          string `db:"f_topic0,default=''"            json:"topic0,omitempty"`
 	Topic1          string `db:"f_topic1,default=''"            json:"topic1,omitempty"`
 	Topic2          string `db:"f_topic2,default=''"            json:"topic2,omitempty"`

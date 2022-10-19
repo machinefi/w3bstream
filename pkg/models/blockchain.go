@@ -21,5 +21,5 @@ type RelBlockchain struct {
 }
 
 type BlockchainInfo struct {
-	Address string `db:"f_chainaddress"         json:"chainAddress"`
+	Address string `db:"f_chain_address"         json:"chainAddress"`
 }
