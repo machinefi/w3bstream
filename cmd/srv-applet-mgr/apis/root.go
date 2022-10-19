@@ -13,6 +13,7 @@ import (
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/monitor"
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/project"
+	projectm "github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/project/monitor"
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/publisher"
 )
 
@@ -38,5 +39,6 @@ func init() {
 		RouterAuth.Register(applet.Root)
 		RouterAuth.Register(deploy.Root)
 		RouterAuth.Register(publisher.Root)
+		RouterAuth.Register(projectm.Root)
 	}
 }

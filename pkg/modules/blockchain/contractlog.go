@@ -9,7 +9,7 @@ import (
 	"github.com/iotexproject/w3bstream/pkg/types"
 )
 
-type CreateContractlogReq = models.ContractlogInfo
+type CreateContractlogReq = models.ContractlogData
 
 func CreateContractlog(ctx context.Context, r *CreateContractlogReq) (*models.Contractlog, error) {
 	d := types.MustDBExecutorFromContext(ctx)
@@ -19,7 +19,7 @@ func CreateContractlog(ctx context.Context, r *CreateContractlogReq) (*models.Co
 	n.BlockCurrent = n.BlockStart
 	m := &models.Contractlog{
 		RelContractlog:  models.RelContractlog{ContractlogID: idg.MustGenSFID()},
-		ContractlogInfo: n,
+		ContractlogData: n,
 	}
 
 	if err := m.Create(d); err != nil {

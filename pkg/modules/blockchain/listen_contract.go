@@ -17,6 +17,7 @@ import (
 	"github.com/iotexproject/Bumblebee/kit/sqlx/builder"
 
 	"github.com/iotexproject/w3bstream/pkg/depends/protocol/eventpb"
+	"github.com/iotexproject/w3bstream/pkg/enums"
 	"github.com/iotexproject/w3bstream/pkg/errors/status"
 	"github.com/iotexproject/w3bstream/pkg/models"
 	"github.com/iotexproject/w3bstream/pkg/types"
@@ -62,7 +63,7 @@ func ListenContractlog(ctx context.Context) {
 	defer ticker.Stop()
 
 	for range ticker.C {
-		cs, err := m.List(d, nil)
+		cs, err := m.List(d, m.ColBlockCurrent().Lt(m.ColBlockEnd()))
 		if err != nil {
 			l.WithValues("info", "list contractlog db failed").Error(err)
 			continue
@@ -180,7 +181,7 @@ func parseTopic(ts string) []common.Hash {
 	return res
 }
 
-func sendEvent(data []byte, url string, et string) error {
+func sendEvent(data []byte, url string, et enums.EventType) error {
 	// TODO event type
 	e := &eventpb.Event{
 		Payload: string(data),
