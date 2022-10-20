@@ -4,6 +4,7 @@ import (
 	"context"
 
 	confid "github.com/iotexproject/Bumblebee/conf/id"
+
 	"github.com/iotexproject/w3bstream/pkg/enums"
 	"github.com/iotexproject/w3bstream/pkg/errors/status"
 	"github.com/iotexproject/w3bstream/pkg/models"
