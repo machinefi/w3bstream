@@ -124,11 +124,12 @@ func (i *Instance) HandleEvent(fn string, data []byte) ([]byte, wasm.ResultStatu
 	task := &common.Task{
 		Handler: fn,
 		Payload: data,
-		Res:     make(chan *common.EventHandleResult),
+		Res:     make(chan *common.EventHandleResult, 1),
 	}
 	i.tasks.Push(task)
 
 	res := <-task.Res
+
 	return res.Response, res.Code
 }
 

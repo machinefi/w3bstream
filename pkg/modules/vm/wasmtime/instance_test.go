@@ -8,12 +8,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/require"
-
 	"github.com/iotexproject/w3bstream/pkg/modules/vm"
 	"github.com/iotexproject/w3bstream/pkg/modules/vm/wasmtime"
 	"github.com/iotexproject/w3bstream/pkg/types/wasm"
+	. "github.com/onsi/gomega"
 )
 
 var (
@@ -61,13 +59,12 @@ func init() {
 }
 
 func TestInstance_LogWASM(t *testing.T) {
-	require := require.New(t)
 	i, err := wasmtime.NewInstanceByCode(context.Background(), wasmLogCode)
-	require.NoError(err)
+	NewWithT(t).Expect(err).To(BeNil())
 	id := vm.AddInstance(i)
 
 	err = vm.StartInstance(id)
-	require.NoError(err)
+	NewWithT(t).Expect(err).To(BeNil())
 	defer vm.StopInstance(id)
 
 	_, code := i.HandleEvent("start", []byte("IoTeX"))
@@ -78,13 +75,12 @@ func TestInstance_LogWASM(t *testing.T) {
 }
 
 func TestInstance_GJsonWASM(t *testing.T) {
-	require := require.New(t)
 	i, err := wasmtime.NewInstanceByCode(context.Background(), wasmGJsonCode)
-	require.NoError(err)
+	NewWithT(t).Expect(err).To(BeNil())
 	id := vm.AddInstance(i)
 
 	err = vm.StartInstance(id)
-	require.NoError(err)
+	NewWithT(t).Expect(err).To(BeNil())
 	defer vm.StopInstance(id)
 
 	_, code := i.HandleEvent("start", []byte(`{
@@ -99,13 +95,12 @@ func TestInstance_GJsonWASM(t *testing.T) {
 }
 
 func TestInstance_EasyJsonWASM(t *testing.T) {
-	require := require.New(t)
 	i, err := wasmtime.NewInstanceByCode(context.Background(), wasmEasyJsonCode)
-	require.NoError(err)
+	NewWithT(t).Expect(err).To(BeNil())
 	id := vm.AddInstance(i)
 
 	err = vm.StartInstance(id)
-	require.NoError(err)
+	NewWithT(t).Expect(err).To(BeNil())
 	defer vm.StopInstance(id)
 
 	_, code := i.HandleEvent("start", []byte(`{"id":11,"student_name":"Tom","student_school":
