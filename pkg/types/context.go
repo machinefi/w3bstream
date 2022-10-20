@@ -9,6 +9,7 @@ import (
 	"github.com/iotexproject/Bumblebee/kit/sqlx"
 	"github.com/iotexproject/Bumblebee/x/contextx"
 	"github.com/iotexproject/Bumblebee/x/misc/must"
+
 	"github.com/iotexproject/w3bstream/pkg/types/wasm"
 )
 

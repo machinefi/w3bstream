@@ -16,20 +16,14 @@ import (
 	"github.com/iotexproject/w3bstream/pkg/types/wasm"
 )
 
-// //go:embed ../../../../examples/log/log.wasm
-var wasmLogCode []byte
-
-// //go:embed ../../../examples/gjson/gjson.wasm
-var wasmGJsonCode []byte
-
-// //go:embed ../../../examples/easyjson/easyjson.wasm
-var wasmEasyJsonCode []byte
-
-// //go:embed ../../../../examples/word_count/word_count.wasm
-var wasmWordCountCode []byte
-
-// //go:embed ../../../../examples/word_count_v2/word_count_v2.wasm
-var wasmWordCountV2Code []byte
+var (
+	wasmLogCode             []byte
+	wasmGJsonCode           []byte
+	wasmEasyJsonCode        []byte
+	wasmWordCountCode       []byte
+	wasmWordCountV2Code     []byte
+	wasmTokenDistributeCode []byte
+)
 
 func init() {
 	wd, _ := os.Getwd()
@@ -56,6 +50,11 @@ func init() {
 		panic(err)
 	}
 	wasmWordCountV2Code, err = os.ReadFile(filepath.Join(root, "word_count_v2/word_count_v2.wasm"))
+	if err != nil {
+		panic(err)
+	}
+
+	wasmTokenDistributeCode, err = os.ReadFile(filepath.Join(root, "token_distribute/token_distribute.wasm"))
 	if err != nil {
 		panic(err)
 	}
@@ -116,43 +115,15 @@ func TestInstance_EasyJsonWASM(t *testing.T) {
 }
 
 func TestInstance_WordCount(t *testing.T) {
-	require := require.New(t)
 	i, err := wasmtime.NewInstanceByCode(context.Background(), wasmWordCountCode)
-	require.NoError(err)
+	NewWithT(t).Expect(err).To(BeNil())
 	id := vm.AddInstance(i)
 
 	err = vm.StartInstance(id)
-	require.NoError(err)
+	NewWithT(t).Expect(err).To(BeNil())
 	defer vm.StopInstance(id)
 
 	_, code := i.HandleEvent("start", []byte("a b c d a"))
-	require.Equal(wasm.ResultStatusCode_OK, code)
-
-	require.Equal(int32(2), i.Get("a"))
-	require.Equal(int32(1), i.Get("b"))
-	require.Equal(int32(1), i.Get("c"))
-	require.Equal(int32(1), i.Get("d"))
-
-	_, code = i.HandleEvent("start", []byte("a b c d a"))
-	require.Equal(wasm.ResultStatusCode_OK, code)
-
-	require.Equal(int32(4), i.Get("a"))
-	require.Equal(int32(2), i.Get("b"))
-	require.Equal(int32(2), i.Get("c"))
-	require.Equal(int32(2), i.Get("d"))
-}
-
-func TestInstance_WordCountV2(t *testing.T) {
-	require := require.New(t)
-	i, err := wasmtime.NewInstanceByCode(context.Background(), wasmWordCountV2Code)
-	require.NoError(err)
-	id := vm.AddInstance(i)
-
-	err = vm.StartInstance(id)
-	require.NoError(err)
-	defer vm.StopInstance(id)
-
-	_, code := i.HandleEvent("count", []byte("a b c d a"))
 	NewWithT(t).Expect(code).To(Equal(wasm.ResultStatusCode_OK))
 
 	NewWithT(t).Expect(i.Get("a")).To(Equal(int32(2)))
@@ -160,7 +131,33 @@ func TestInstance_WordCountV2(t *testing.T) {
 	NewWithT(t).Expect(i.Get("c")).To(Equal(int32(1)))
 	NewWithT(t).Expect(i.Get("d")).To(Equal(int32(1)))
 
-	_, code = i.HandleEvent("count", []byte("a b c d a"))
+	_, code = i.HandleEvent("start", []byte("a b c d a"))
+	NewWithT(t).Expect(code).To(Equal(wasm.ResultStatusCode_OK))
+
+	NewWithT(t).Expect(i.Get("a")).To(Equal(int32(4)))
+	NewWithT(t).Expect(i.Get("b")).To(Equal(int32(2)))
+	NewWithT(t).Expect(i.Get("c")).To(Equal(int32(2)))
+	NewWithT(t).Expect(i.Get("d")).To(Equal(int32(2)))
+}
+
+func TestInstance_WordCountV2(t *testing.T) {
+	i, err := wasmtime.NewInstanceByCode(context.Background(), wasmWordCountV2Code)
+	NewWithT(t).Expect(err).To(BeNil())
+	id := vm.AddInstance(i)
+
+	err = vm.StartInstance(id)
+	NewWithT(t).Expect(err).To(BeNil())
+	defer vm.StopInstance(id)
+
+	_, code := i.HandleEvent("start", []byte("a b c d a"))
+	NewWithT(t).Expect(code).To(Equal(wasm.ResultStatusCode_OK))
+
+	NewWithT(t).Expect(i.Get("a")).To(Equal(int32(2)))
+	NewWithT(t).Expect(i.Get("b")).To(Equal(int32(1)))
+	NewWithT(t).Expect(i.Get("c")).To(Equal(int32(1)))
+	NewWithT(t).Expect(i.Get("d")).To(Equal(int32(1)))
+
+	_, code = i.HandleEvent("start", []byte("a b c d a"))
 	NewWithT(t).Expect(code).To(Equal(wasm.ResultStatusCode_OK))
 
 	NewWithT(t).Expect(i.Get("a")).To(Equal(int32(4)))
@@ -168,6 +165,22 @@ func TestInstance_WordCountV2(t *testing.T) {
 	NewWithT(t).Expect(i.Get("c")).To(Equal(int32(2)))
 	NewWithT(t).Expect(i.Get("d")).To(Equal(int32(2)))
 
-	_, unique := i.HandleEvent("unique", nil)
+	_, unique := i.HandleEvent("word_count", nil)
 	NewWithT(t).Expect(unique).To(Equal(wasm.ResultStatusCode(4)))
+}
+
+func TestInstance_TokenDistribute(t *testing.T) {
+	i, err := wasmtime.NewInstanceByCode(context.Background(), wasmTokenDistributeCode)
+	NewWithT(t).Expect(err).To(BeNil())
+	id := vm.AddInstance(i)
+
+	err = vm.StartInstance(id)
+	NewWithT(t).Expect(err).To(BeNil())
+	defer vm.StopInstance(id)
+
+	for idx := int32(0); idx < 20; idx++ {
+		_, code := i.HandleEvent("start", []byte("test"))
+		NewWithT(t).Expect(code).To(Equal(wasm.ResultStatusCode_OK))
+		NewWithT(t).Expect(i.Get("clicks")).To(Equal(idx + 1))
+	}
 }

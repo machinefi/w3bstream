@@ -39,6 +39,7 @@ RUN /etc/init.d/postgresql start && \
  su postgres sh -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE test to test_user;;\""
 
 RUN echo "host all all 0.0.0.0/0 md5" >> /etc/postgresql/13/main/pg_hba.conf
+RUN echo "listen_addresses='*'" >> /etc/postgresql/13/main/postgresql.conf
 #Install mqtt
 #RUN apt-get install add-apt-repository
 #RUN add-apt-repository ppa:mosquitto-dev/mosquitto-ppa

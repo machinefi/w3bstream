@@ -17,8 +17,9 @@ import (
 	"github.com/iotexproject/Bumblebee/x/mapx"
 	"github.com/pkg/errors"
 
-	"github.com/iotexproject/w3bstream/pkg/types/wasm"
 	"github.com/tidwall/gjson"
+
+	"github.com/iotexproject/w3bstream/pkg/types/wasm"
 )
 
 type (
