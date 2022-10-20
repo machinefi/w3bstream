@@ -69,7 +69,7 @@ func main() {
 				}
 			},
 			func() {
-				go blockchain.ListenContractlog(global.WithContext(context.Background()))
+				blockchain.Monitor(global.WithContext(context.Background()))
 			},
 		)
 	})

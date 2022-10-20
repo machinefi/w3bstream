@@ -267,7 +267,7 @@ server log like
 ### Post blockchain contract event log monitor 
 
 ```sh
-echo '{"contractlog":{"chainID": 4690, "contractAddress": "${contractAddress}","blockStart": ${blockStart},"blockEnd": ${blockEnd},"topic0":"${topic0}"}}' | http :8888/srv-applet-mgr/v0/project/monitor/$PROJECTID -A bearer -a $TOK
+echo '{"contractLog":{"chainID": 4690, "contractAddress": "${contractAddress}","blockStart": ${blockStart},"blockEnd": ${blockEnd},"topic0":"${topic0}"}}' | http :8888/srv-applet-mgr/v0/project/monitor/$PROJECTID -A bearer -a $TOK
 ```
 
 output like
