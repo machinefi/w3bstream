@@ -31,6 +31,7 @@ build_server: update_go_module
 	@cd cmd/srv-applet-mgr && go build
 	@mkdir -p build
 	@mv cmd/srv-applet-mgr/srv-applet-mgr build
+	@rm -rf build/config
 	@cp -r cmd/srv-applet-mgr/config build/config
 	@echo 'succeed! srv-applet-mgr =>build/srv-applet-mgr*'
 	@echo 'succeed! config =>build/config/'
