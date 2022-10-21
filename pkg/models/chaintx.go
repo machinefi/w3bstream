@@ -24,7 +24,7 @@ type RelChaintx struct {
 
 type ChaintxData struct {
 	ProjectName string `db:"f_project_name"                 json:"projectName"`
-	Finished    bool   `db:"f_finished"                     json:"finished,omitempty"`
+	Finished    bool   `db:"f_finished,default='false'"     json:"finished,omitempty"`
 	ChaintxInfo
 }
 

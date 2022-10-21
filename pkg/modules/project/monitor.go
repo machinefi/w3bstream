@@ -66,11 +66,13 @@ func createChainTx(d sqlx.DBExecutor, projectName string, r *CreateChaintxReq, i
 		return nil, err
 	}
 
+	n := *r
+	n.EventType = enums.EVENT_TYPE__ANY // TODO support event type
 	m := &models.Chaintx{
 		RelChaintx: models.RelChaintx{ChaintxID: idg.MustGenSFID()},
 		ChaintxData: models.ChaintxData{
 			ProjectName: projectName,
-			ChaintxInfo: *r,
+			ChaintxInfo: n,
 		},
 	}
 	if err := m.Create(d); err != nil {
@@ -84,11 +86,13 @@ func createChainHeight(d sqlx.DBExecutor, projectName string, r *CreateChainHeig
 		return nil, err
 	}
 
+	n := *r
+	n.EventType = enums.EVENT_TYPE__ANY // TODO support event type
 	m := &models.ChainHeight{
 		RelChainHeight: models.RelChainHeight{ChainHeightID: idg.MustGenSFID()},
 		ChainHeightData: models.ChainHeightData{
 			ProjectName:     projectName,
-			ChainHeightInfo: *r,
+			ChainHeightInfo: n,
 		},
 	}
 	if err := m.Create(d); err != nil {

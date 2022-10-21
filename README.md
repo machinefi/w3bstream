@@ -274,9 +274,9 @@ output like
 
 ```json
 {
-    "blockCurrent": ${blockCurrent},
-    "blockEnd": ${blockEnd},
-    "blockStart": ${blockStart},
+    "blockCurrent": 16737070,
+    "blockEnd": 16740080,
+    "blockStart": 16737070,
     "chainID": 4690,
     "contractAddress": "${contractAddress}",
     "contractlogID": "2162022028435556",
@@ -285,5 +285,45 @@ output like
     "projectName": "${projectName}",
     "topic0": "${topic0}",
     "updatedAt": "2022-10-19T21:21:30.220198+08:00"
+}
+```
+
+### Post blockchain transaction monitor 
+
+```sh
+echo '{"chainTx":{"chainID": 4690, "txAddress": "${txAddress}"}}' | http :8888/srv-applet-mgr/v0/project/monitor/$PROJECTID -A bearer -a $TOK
+```
+
+output like
+
+```json
+{
+    "chainID": 4690,
+    "chaintxID": "2724127039316068",
+    "createdAt": "2022-10-21T10:35:06.498594+08:00",
+    "eventType": "ANY",
+    "projectName": "testproject",
+    "txAddress": "${txAddress}",
+    "updatedAt": "2022-10-21T10:35:06.498594+08:00"
+}
+```
+
+### Post blockchain height monitor 
+
+```sh
+echo '{"chainHeight":{"chainID": 4690, "height": ${height}}}' | http :8888/srv-applet-mgr/v0/project/monitor/$PROJECTID -A bearer -a $TOK
+```
+
+output like
+
+```json
+{
+    "chainHeightID": "2727219570933860",
+    "chainID": 4690,
+    "createdAt": "2022-10-21T10:47:23.815552+08:00",
+    "eventType": "ANY",
+    "height": 16910805,
+    "projectName": "testproject",
+    "updatedAt": "2022-10-21T10:47:23.815553+08:00"
 }
 ```
