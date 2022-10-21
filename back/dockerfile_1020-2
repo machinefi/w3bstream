@@ -1,4 +1,4 @@
-#base image 
+#base image
 FROM golang:1.19 AS build-env
 
 MAINTAINER The Iotex Project <jeson@iotex.io>
@@ -59,7 +59,7 @@ RUN ln -s /root/.local/share/pnpm/pnpm /usr/bin/pnpm
 
 #Build vendor
 WORKDIR /w3bstream
-RUN cd cmd/srv-applet-mgr && go build -mod vendor
+RUN cd cmd/srv-applet-mgr && GOWORK=off go build -mod vendor
 RUN mkdir -p build
 RUN mv cmd/srv-applet-mgr/srv-applet-mgr build
 RUN cp -r cmd/srv-applet-mgr/config build/config

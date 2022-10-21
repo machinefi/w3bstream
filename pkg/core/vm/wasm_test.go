@@ -5,14 +5,13 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	. "github.com/onsi/gomega"
 	w "github.com/wasmerio/wasmer-go/wasmer"
 )
 
 func TestNewWasm(t *testing.T) {
 	var wasm *Wasm
 
-	require := require.New(t)
 	code, _ := ioutil.ReadFile("release.wasm")
 
 	imports := []WasmImport{
@@ -52,15 +51,15 @@ func TestNewWasm(t *testing.T) {
 	}
 
 	wasm, e := NewWasm(code, imports)
-	require.NoError(e)
+	NewWithT(t).Expect(e).To(BeNil())
 
 	sum, e := wasm.ExecuteFunction("add", 1, 2)
-	require.NoError(e)
+	NewWithT(t).Expect(e).To(BeNil())
 
 	v, ok := sum.(int32)
-	require.Equal(ok, true)
-	require.Equal(v, int32(3))
+	NewWithT(t).Expect(ok).To(BeTrue())
+	NewWithT(t).Expect(v).To(Equal(3))
 
 	_, e = wasm.ExecuteFunction("hello")
-	require.NoError(e)
+	NewWithT(t).Expect(e).To(BeNil())
 }
