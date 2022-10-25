@@ -15,7 +15,7 @@ import (
 var ContractlogTable *builder.Table
 
 func init() {
-	ContractlogTable = DB.Register(&Contractlog{})
+	ContractlogTable = MonitorDB.Register(&Contractlog{})
 }
 
 type ContractlogIterator struct {

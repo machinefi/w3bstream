@@ -8,7 +8,7 @@ import (
 // @def primary                   ID
 // @def unique_index UI_chain_id ChainID
 //
-//go:generate toolkit gen model Blockchain --database DB
+//go:generate toolkit gen model Blockchain --database MonitorDB
 type Blockchain struct {
 	datatypes.PrimaryID
 	RelBlockchain

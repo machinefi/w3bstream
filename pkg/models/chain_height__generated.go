@@ -15,7 +15,7 @@ import (
 var ChainHeightTable *builder.Table
 
 func init() {
-	ChainHeightTable = DB.Register(&ChainHeight{})
+	ChainHeightTable = MonitorDB.Register(&ChainHeight{})
 }
 
 type ChainHeightIterator struct {

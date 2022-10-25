@@ -10,7 +10,7 @@ import (
 // Chaintx database model chaintx
 // @def primary                   ID
 //
-//go:generate toolkit gen model Chaintx --database DB
+//go:generate toolkit gen model Chaintx --database MonitorDB
 type Chaintx struct {
 	datatypes.PrimaryID
 	RelChaintx

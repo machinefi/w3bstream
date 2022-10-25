@@ -15,7 +15,7 @@ import (
 var ChaintxTable *builder.Table
 
 func init() {
-	ChaintxTable = DB.Register(&Chaintx{})
+	ChaintxTable = MonitorDB.Register(&Chaintx{})
 }
 
 type ChaintxIterator struct {

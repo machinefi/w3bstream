@@ -14,7 +14,7 @@ import (
 type CreateContractlogReq = models.ContractlogData
 
 func CreateContractlog(ctx context.Context, r *CreateContractlogReq) (*models.Contractlog, error) {
-	d := types.MustDBExecutorFromContext(ctx)
+	d := types.MustMonitorDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 
@@ -38,7 +38,7 @@ func CreateContractlog(ctx context.Context, r *CreateContractlogReq) (*models.Co
 type CreateChaintxReq = models.ChaintxData
 
 func CreateChaintx(ctx context.Context, r *CreateChaintxReq) (*models.Chaintx, error) {
-	d := types.MustDBExecutorFromContext(ctx)
+	d := types.MustMonitorDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 
@@ -59,7 +59,7 @@ func CreateChaintx(ctx context.Context, r *CreateChaintxReq) (*models.Chaintx, e
 type CreateChainHeightReq = models.ChainHeightData
 
 func CreateChainHeight(ctx context.Context, r *CreateChainHeightReq) (*models.ChainHeight, error) {
-	d := types.MustDBExecutorFromContext(ctx)
+	d := types.MustMonitorDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 

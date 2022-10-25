@@ -15,7 +15,7 @@ import (
 var BlockchainTable *builder.Table
 
 func init() {
-	BlockchainTable = DB.Register(&Blockchain{})
+	BlockchainTable = MonitorDB.Register(&Blockchain{})
 }
 
 type BlockchainIterator struct {

@@ -10,7 +10,7 @@ import (
 // Contractlog database model contractlog
 // @def primary                   ID
 //
-//go:generate toolkit gen model Contractlog --database DB
+//go:generate toolkit gen model Contractlog --database MonitorDB
 type Contractlog struct {
 	datatypes.PrimaryID
 	RelContractlog

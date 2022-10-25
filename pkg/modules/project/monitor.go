@@ -25,7 +25,7 @@ type (
 )
 
 func CreateMonitor(ctx context.Context, projectName string, r *CreateMonitorReq) (interface{}, error) {
-	d := types.MustDBExecutorFromContext(ctx)
+	d := types.MustMonitorDBExecutorFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 	switch {
 	case r.Contractlog != nil:

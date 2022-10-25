@@ -24,7 +24,7 @@ const (
 )
 
 func InitChainDB(ctx context.Context) error {
-	d := types.MustDBExecutorFromContext(ctx)
+	d := types.MustMonitorDBExecutorFromContext(ctx)
 
 	m := &models.Blockchain{
 		RelBlockchain:  models.RelBlockchain{ChainID: 4690},

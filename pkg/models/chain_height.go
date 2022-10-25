@@ -10,7 +10,7 @@ import (
 // ChainHeight database model chainheight
 // @def primary                   ID
 //
-//go:generate toolkit gen model ChainHeight --database DB
+//go:generate toolkit gen model ChainHeight --database MonitorDB
 type ChainHeight struct {
 	datatypes.PrimaryID
 	RelChainHeight

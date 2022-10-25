@@ -21,7 +21,7 @@ type contract struct {
 }
 
 func (t *contract) run(ctx context.Context) {
-	d := types.MustDBExecutorFromContext(ctx)
+	d := types.MustMonitorDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	m := &models.Contractlog{}
 

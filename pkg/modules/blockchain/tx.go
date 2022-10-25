@@ -18,7 +18,7 @@ type tx struct {
 }
 
 func (t *tx) run(ctx context.Context) {
-	d := types.MustDBExecutorFromContext(ctx)
+	d := types.MustMonitorDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	m := &models.Chaintx{}
 	ticker := time.NewTicker(t.interval)

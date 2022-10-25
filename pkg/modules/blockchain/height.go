@@ -16,7 +16,7 @@ type height struct {
 }
 
 func (h *height) run(ctx context.Context) {
-	d := types.MustDBExecutorFromContext(ctx)
+	d := types.MustMonitorDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	m := &models.ChainHeight{}
 

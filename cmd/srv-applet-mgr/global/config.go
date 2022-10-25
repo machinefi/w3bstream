@@ -25,6 +25,7 @@ import (
 
 var (
 	postgres      = &confpostgres.Endpoint{Database: models.DB}
+	monitorDB     = &confpostgres.Endpoint{Database: models.MonitorDB}
 	mqtt          = &confmqtt.Broker{}
 	server        = &confhttp.Server{}
 	jwt           = &confjwt.Jwt{}
@@ -49,13 +50,14 @@ func init() {
 		confapp.WithVersion("0.0.1"),
 		confapp.WithLogger(conflog.Std()),
 	)
-	App.Conf(postgres, server, jwt, logger, mqtt, uploadConf, ethClientConf)
+	App.Conf(postgres, monitorDB, server, jwt, logger, mqtt, uploadConf, ethClientConf)
 
 	confhttp.RegisterCheckerBy(postgres, mqtt, server)
 	std.(conflog.LevelSetter).SetLevel(conflog.InfoLevel)
 
 	WithContext = contextx.WithContextCompose(
 		types.WithDBExecutorContext(postgres),
+		types.WithMonitorDBExecutorContext(monitorDB),
 		types.WithPgEndpointContext(postgres),
 		types.WithLoggerContext(conflog.Std()),
 		types.WithMqttBrokerContext(mqtt),
@@ -76,6 +78,9 @@ func Migrate() {
 	log.Start(ctx, "Migrate")
 	defer log.End()
 	if err := migration.Migrate(postgres.WithContext(ctx), nil); err != nil {
+		log.Panic(err)
+	}
+	if err := migration.Migrate(monitorDB.WithContext(ctx), nil); err != nil {
 		log.Panic(err)
 	}
 }

@@ -16,12 +16,13 @@ import (
 type Context uint8
 
 type (
-	CtxDBExecutor   struct{} // CtxDBExecutor sqlx.DBExecutor
-	CtxPgEndpoint   struct{} // CtxPgEndpoint postgres.Endpoint
-	CtxLogger       struct{} // CtxLogger log.Logger
-	CtxMqttBroker   struct{} // CtxMqttBroker mqtt.Broker
-	CtxUploadConfig struct{} // CtxUploadConfig UploadConfig
-	CtxEthClient    struct{} // CtxEthClient ETHClientConfig
+	CtxDBExecutor        struct{} // CtxDBExecutor sqlx.DBExecutor
+	CtxMonitorDBExecutor struct{} // CtxMonitorDBExecutor sqlx.DBExecutor
+	CtxPgEndpoint        struct{} // CtxPgEndpoint postgres.Endpoint
+	CtxLogger            struct{} // CtxLogger log.Logger
+	CtxMqttBroker        struct{} // CtxMqttBroker mqtt.Broker
+	CtxUploadConfig      struct{} // CtxUploadConfig UploadConfig
+	CtxEthClient         struct{} // CtxEthClient ETHClientConfig
 )
 
 func WithDBExecutor(ctx context.Context, v sqlx.DBExecutor) context.Context {
@@ -41,6 +42,27 @@ func DBExecutorFromContext(ctx context.Context) (sqlx.DBExecutor, bool) {
 
 func MustDBExecutorFromContext(ctx context.Context) sqlx.DBExecutor {
 	v, ok := DBExecutorFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithMonitorDBExecutor(ctx context.Context, v sqlx.DBExecutor) context.Context {
+	return contextx.WithValue(ctx, CtxMonitorDBExecutor{}, v)
+}
+
+func WithMonitorDBExecutorContext(v sqlx.DBExecutor) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxMonitorDBExecutor{}, v)
+	}
+}
+
+func MonitorDBExecutorFromContext(ctx context.Context) (sqlx.DBExecutor, bool) {
+	v, ok := ctx.Value(CtxMonitorDBExecutor{}).(sqlx.DBExecutor)
+	return v, ok
+}
+
+func MustMonitorDBExecutorFromContext(ctx context.Context) sqlx.DBExecutor {
+	v, ok := MonitorDBExecutorFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

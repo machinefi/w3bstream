@@ -7,7 +7,10 @@ import (
 	"github.com/iotexproject/Bumblebee/kit/sqlx/datatypes"
 )
 
-var DB = sqlx.NewDatabase("demo").WithSchema("applet_management")
+var (
+	DB        = sqlx.NewDatabase("demo").WithSchema("applet_management")
+	MonitorDB = sqlx.NewDatabase("demo").WithSchema("monitor")
+)
 
 type Meta map[string]string
 
