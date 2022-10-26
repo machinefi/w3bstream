@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/iotexproject/w3bstream/pkg/depends/protocol/eventpb"
-	"github.com/iotexproject/w3bstream/pkg/enums"
 	"github.com/iotexproject/w3bstream/pkg/errors/status"
 	"github.com/iotexproject/w3bstream/pkg/modules/project"
 	"github.com/iotexproject/w3bstream/pkg/modules/publisher"
@@ -33,11 +32,11 @@ func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) 
 
 	l = l.WithValues("project_name", projectName)
 
-	eventType := enums.EVENT_TYPE__ANY
+	eventType := types.EVENTTYPEDEFAULT
 	if r.Header != nil {
-		eventType = enums.EventType(r.Header.EventType)
+		eventType = r.Header.EventType
 	}
-	l = l.WithValues("event_type", eventType.String())
+	l = l.WithValues("event_type", eventType)
 
 	if r.Header != nil && len(r.Header.PubId) > 0 {
 		puber, err := publisher.GetPublisherByPublisherKey(ctx, r.Header.PubId)

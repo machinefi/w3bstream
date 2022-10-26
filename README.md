@@ -133,7 +133,7 @@ upload wasm script
 export PROJECTID=${project_id}
 export PROJECTNAME=${project_name}
 export WASMFILE=examples/log/log.wasm
-http --form post :8888/srv-applet-mgr/v0/applet/$PROJECTID file@$WASMFILE info='{"appletName":"log","strategies":[{"eventType":"ANY","handler":"start"}]}' -A bearer -a $TOK
+http --form post :8888/srv-applet-mgr/v0/applet/$PROJECTID file@$WASMFILE info='{"appletName":"log","strategies":[{"eventType":"DEFAULT","handler":"start"}]}' -A bearer -a $TOK
 ```
 
 output like
@@ -201,23 +201,21 @@ Create a strategy of handler in applet and eventType
 ## The value of eventType is one of EXAMP1, EXAMP2, EXAMP3, EXAMP4, EXAMP5, EXAMP6, ANY
 export EVENTTYPE=${event_type}
 export HANDLER=${applet_handler}
-echo '{"strategies":[{"appletID":"'$APPLETID'", "eventType":"'$EVENTTYPE'", "handler":"'$HANDLER'"}]}' | http post :8888/srv-applet-mgr/v0/strategy/$PROJECTID -A bearer -a $TOK
+echo '{"strategies":[{"appletID":"'$APPLETID'", "eventType":"'$EVENTTYPE'", "handler":"'$HANDLER'"}]}' | http post :8888/srv-applet-mgr/v0/strategy/$PROJECTNAME -A bearer -a $TOK
 ```
 
 get strategy info in the applet
 
 ```sh
-http -v get :8888/srv-applet-mgr/v0/strategy/$PROJECTID appletID==$APPLETID -A bearer -a $TOK
+http -v get :8888/srv-applet-mgr/v0/strategy/$PROJECTNAME appletID==$APPLETID -A bearer -a $TOK
 ```
 
 ### Publish event to server by http
 
 ```sh
 export PUBTOKEN=${pub_token}
-# if $EVENTTYPE is EXAMP1, the $EVENTTYPEKEY should be 1.
-# EXAMP2:2, EXAMP3:3, EXAMP4:4, EXAMP5:5, EXAMP6:6, ANY:2147483647
-export EVENTTYPEKEY=2147483647 # 0x7FFFFFFF means any type
-echo '{"header":{"event_type":'$EVENTTYPE',"pub_id":"'$PUBKEY'","pub_time":'`date +%s`',"token":"'$PUBTOKEN'"},"payload":"xxx yyy zzz"}' | http post :8888/srv-applet-mgr/v0/event/$PROJECTNAME
+export EVENTTYPE=DEFAULT # default means start handler
+echo '{"header":{"event_type":"'$EVENTTYPE'","pub_id":"'$PUBKEY'","pub_time":'`date +%s`',"token":"'$PUBTOKEN'"},"payload":"xxx yyy zzz"}' | http post :8888/srv-applet-mgr/v0/event/$PROJECTNAME
 ```
 
 output like
@@ -232,6 +230,14 @@ output like
 ```
 
 that means some instance handled this event successfully
+
+### Delete project 
+
+Be careful.
+It will delete anything in the project, contains applet, publisher, strategy etc.
+```sh
+http delete :8888/srv-applet-mgr/v0/project/$PROJECTNAME -A bearer -a $TOK
+```
 
 ### Publish event to server through MQTT
 

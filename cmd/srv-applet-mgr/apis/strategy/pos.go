@@ -7,24 +7,23 @@ import (
 
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/iotexproject/w3bstream/pkg/modules/strategy"
-	"github.com/iotexproject/w3bstream/pkg/types"
 )
 
 type CreateStrategy struct {
 	httpx.MethodPost
-	ProjectID                       types.SFID `in:"path" name:"projectID"`
+	ProjectName                     string `in:"path" name:"projectName"`
 	strategy.CreateStrategyBatchReq `in:"body"`
 }
 
 func (r *CreateStrategy) Path() string {
-	return "/:projectID"
+	return "/:projectName"
 }
 
 func (r *CreateStrategy) Output(ctx context.Context) (interface{}, error) {
 	a := middleware.CurrentAccountFromContext(ctx)
-	if _, err := a.ValidateProjectPerm(ctx, r.ProjectID); err != nil {
+	if m, err := a.ValidateProjectPermByPrjName(ctx, r.ProjectName); err != nil {
 		return nil, err
+	} else {
+		return nil, strategy.CreateStrategy(ctx, m.ProjectID, &r.CreateStrategyBatchReq)
 	}
-
-	return nil, strategy.CreateStrategy(ctx, r.ProjectID, &r.CreateStrategyBatchReq)
 }

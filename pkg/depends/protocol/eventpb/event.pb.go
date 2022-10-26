@@ -26,11 +26,11 @@ type Header struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	EventType uint32 `protobuf:"varint,1,opt,name=event_type,json=eventType,proto3" json:"event_type,omitempty"` // event type
-	PubId     string `protobuf:"bytes,2,opt,name=pub_id,json=pubId,proto3" json:"pub_id,omitempty"`              // the unique identifier for publisher
-	Token     string `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`                           // for validation message
-	PubTime   int64  `protobuf:"varint,4,opt,name=pub_time,json=pubTime,proto3" json:"pub_time,omitempty"`       // event pub timestamp
-	EventId   string `protobuf:"bytes,5,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`        // event id for tracing
+	EventType string `protobuf:"bytes,1,opt,name=event_type,json=eventType,proto3" json:"event_type,omitempty"` // event type
+	PubId     string `protobuf:"bytes,2,opt,name=pub_id,json=pubId,proto3" json:"pub_id,omitempty"`             // the unique identifier for publisher
+	Token     string `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`                          // for validation message
+	PubTime   int64  `protobuf:"varint,4,opt,name=pub_time,json=pubTime,proto3" json:"pub_time,omitempty"`      // event pub timestamp
+	EventId   string `protobuf:"bytes,5,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`       // event id for tracing
 }
 
 func (x *Header) Reset() {
@@ -65,11 +65,11 @@ func (*Header) Descriptor() ([]byte, []int) {
 	return file_event_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Header) GetEventType() uint32 {
+func (x *Header) GetEventType() string {
 	if x != nil {
 		return x.EventType
 	}
-	return 0
+	return ""
 }
 
 func (x *Header) GetPubId() string {
@@ -161,7 +161,7 @@ var file_event_proto_rawDesc = []byte{
 	0x0a, 0x0b, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x07, 0x65,
 	0x76, 0x65, 0x6e, 0x74, 0x70, 0x62, 0x22, 0x8a, 0x01, 0x0a, 0x06, 0x48, 0x65, 0x61, 0x64, 0x65,
 	0x72, 0x12, 0x1d, 0x0a, 0x0a, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x09, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x54, 0x79, 0x70, 0x65,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x54, 0x79, 0x70, 0x65,
 	0x12, 0x15, 0x0a, 0x06, 0x70, 0x75, 0x62, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
 	0x52, 0x05, 0x70, 0x75, 0x62, 0x49, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e,
 	0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x19, 0x0a,

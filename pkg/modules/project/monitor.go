@@ -6,7 +6,6 @@ import (
 	confid "github.com/iotexproject/Bumblebee/conf/id"
 	"github.com/iotexproject/Bumblebee/kit/sqlx"
 
-	"github.com/iotexproject/w3bstream/pkg/enums"
 	"github.com/iotexproject/w3bstream/pkg/errors/status"
 	"github.com/iotexproject/w3bstream/pkg/models"
 	"github.com/iotexproject/w3bstream/pkg/types"
@@ -47,7 +46,7 @@ func createContractLog(d sqlx.DBExecutor, projectName string, r *CreateContractl
 
 	n := *r
 	n.BlockCurrent = n.BlockStart
-	n.EventType = enums.EVENT_TYPE__ANY // TODO support event type
+	n.EventType = types.EVENTTYPEDEFAULT // TODO support event type
 	m := &models.Contractlog{
 		RelContractlog: models.RelContractlog{ContractlogID: idg.MustGenSFID()},
 		ContractlogData: models.ContractlogData{
@@ -67,7 +66,7 @@ func createChainTx(d sqlx.DBExecutor, projectName string, r *CreateChaintxReq, i
 	}
 
 	n := *r
-	n.EventType = enums.EVENT_TYPE__ANY // TODO support event type
+	n.EventType = types.EVENTTYPEDEFAULT // TODO support event type
 	m := &models.Chaintx{
 		RelChaintx: models.RelChaintx{ChaintxID: idg.MustGenSFID()},
 		ChaintxData: models.ChaintxData{
@@ -87,7 +86,7 @@ func createChainHeight(d sqlx.DBExecutor, projectName string, r *CreateChainHeig
 	}
 
 	n := *r
-	n.EventType = enums.EVENT_TYPE__ANY // TODO support event type
+	n.EventType = types.EVENTTYPEDEFAULT // TODO support event type
 	m := &models.ChainHeight{
 		RelChainHeight: models.RelChainHeight{ChainHeightID: idg.MustGenSFID()},
 		ChainHeightData: models.ChainHeightData{

@@ -22,14 +22,14 @@ type InstanceHandler struct {
 	Handler    string
 }
 
-func FindStrategyInstances(ctx context.Context, prjName string, eventType enums.EventType) ([]*InstanceHandler, error) {
+func FindStrategyInstances(ctx context.Context, prjName string, eventType string) ([]*InstanceHandler, error) {
 	l := types.MustLoggerFromContext(ctx)
 	d := types.MustDBExecutorFromContext(ctx)
 
 	_, l = l.Start(ctx, "FindStrategyInstances")
 	defer l.End()
 
-	l = l.WithValues("project", prjName, "event_type", eventType.String())
+	l = l.WithValues("project", prjName, "event_type", eventType)
 
 	mProject := &models.Project{ProjectInfo: models.ProjectInfo{Name: prjName}}
 
@@ -45,7 +45,7 @@ func FindStrategyInstances(ctx context.Context, prjName string, eventType enums.
 			mStrategy.ColProjectID().Eq(mProject.ProjectID),
 			builder.Or(
 				mStrategy.ColEventType().Eq(eventType),
-				mStrategy.ColEventType().Eq(enums.EVENT_TYPE__ANY),
+				mStrategy.ColEventType().Eq(types.EVENTTYPEDEFAULT),
 			),
 		),
 	)
@@ -182,10 +182,10 @@ func GetStrategyByStrategyID(ctx context.Context, strategyID types.SFID) (*model
 
 type ListStrategyReq struct {
 	projectID   types.SFID
-	IDs         []uint64          `in:"query" name:"id,omitempty"`
-	AppletIDs   []types.SFID      `in:"query" name:"appletID,omitempty"`
-	StrategyIDs []types.SFID      `in:"query" name:"strategyID,omitempty"`
-	EventTypes  []enums.EventType `in:"query" name:"eventType,omitempty"`
+	IDs         []uint64     `in:"query" name:"id,omitempty"`
+	AppletIDs   []types.SFID `in:"query" name:"appletID,omitempty"`
+	StrategyIDs []types.SFID `in:"query" name:"strategyID,omitempty"`
+	EventTypes  []string     `in:"query" name:"eventType,omitempty"`
 	datatypes.Pager
 }
 
@@ -235,19 +235,19 @@ type Detail struct {
 }
 
 type InfoDetail struct {
-	StrategyID types.SFID      `json:"strategyID"`
-	AppletID   types.SFID      `json:"appletID"`
-	AppletName string          `json:"appletName"`
-	EventType  enums.EventType `json:"eventType"`
-	Handler    string          `json:"handler"`
+	StrategyID types.SFID `json:"strategyID"`
+	AppletID   types.SFID `json:"appletID"`
+	AppletName string     `json:"appletName"`
+	EventType  string     `json:"eventType"`
+	Handler    string     `json:"handler"`
 }
 
 type detail struct {
-	StrategyID types.SFID      `db:"f_strategy_id"`
-	AppletID   types.SFID      `db:"f_applet_id"`
-	AppletName string          `db:"f_applet_name"`
-	EventType  enums.EventType `db:"f_event_type"`
-	Handler    string          `db:"f_handler"`
+	StrategyID types.SFID `db:"f_strategy_id"`
+	AppletID   types.SFID `db:"f_applet_id"`
+	AppletName string     `db:"f_applet_name"`
+	EventType  string     `db:"f_event_type"`
+	Handler    string     `db:"f_handler"`
 	datatypes.OperationTimes
 }
 
@@ -300,8 +300,8 @@ func ListStrategy(ctx context.Context, r *ListStrategyReq) (*ListStrategyRsp, er
 
 	detailsMap := make(map[types.SFID][]*detail)
 	for i := range details {
-		prjID := details[i].StrategyID
-		detailsMap[prjID] = append(detailsMap[prjID], &details[i])
+		appletID := details[i].AppletID
+		detailsMap[appletID] = append(detailsMap[appletID], &details[i])
 	}
 
 	for _, vmap := range detailsMap {
@@ -335,7 +335,7 @@ func ListStrategy(ctx context.Context, r *ListStrategyReq) (*ListStrategyRsp, er
 }
 
 type RemoveStrategyReq struct {
-	ProjectID   types.SFID   `in:"path" name:"projectID"`
+	ProjectName string       `in:"path" name:"projectName"`
 	StrategyIDs []types.SFID `in:"query" name:"strategyID"`
 }
 

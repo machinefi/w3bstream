@@ -29,7 +29,7 @@ func dispatch(ctx context.Context, e Event) ([]byte, error) {
 		l.Warn(err)
 		return nil, err
 	}
-	consumer := vm.GetConsumer(ins[0].InstanceID.String())
+	consumer := vm.GetConsumer(ins[0].InstanceID)
 	if consumer == nil {
 		err = errors.Errorf("instance not found")
 		l.Error(err)

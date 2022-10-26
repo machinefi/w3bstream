@@ -58,3 +58,17 @@ func (v *CurrentAccount) ValidateProjectPerm(ctx context.Context, prjID types.SF
 	}
 	return m, nil
 }
+
+func (v *CurrentAccount) ValidateProjectPermByPrjName(ctx context.Context, projectName string) (*models.Project, error) {
+	d := types.MustDBExecutorFromContext(ctx)
+	a := CurrentAccountFromContext(ctx)
+	m := &models.Project{ProjectInfo: models.ProjectInfo{Name: projectName}}
+
+	if err := m.FetchByName(d); err != nil {
+		return nil, status.CheckDatabaseError(err, "GetProjectByProjectID")
+	}
+	if a.AccountID != m.AccountID {
+		return nil, status.Unauthorized.StatusErr().WithDesc("no project permission")
+	}
+	return m, nil
+}

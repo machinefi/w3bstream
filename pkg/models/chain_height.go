@@ -3,8 +3,6 @@ package models
 import (
 	"github.com/iotexproject/Bumblebee/base/types"
 	"github.com/iotexproject/Bumblebee/kit/sqlx/datatypes"
-
-	"github.com/iotexproject/w3bstream/pkg/enums"
 )
 
 // ChainHeight database model chainheight
@@ -29,7 +27,7 @@ type ChainHeightData struct {
 }
 
 type ChainHeightInfo struct {
-	EventType enums.EventType `db:"f_event_type"                   json:"eventType,omitempty"`
-	ChainID   uint64          `db:"f_chain_id"                     json:"chainID"`
-	Height    uint64          `db:"f_height"                       json:"height"`
+	EventType string `db:"f_event_type"                   json:"eventType,omitempty"`
+	ChainID   uint64 `db:"f_chain_id"                     json:"chainID"`
+	Height    uint64 `db:"f_height"                       json:"height"`
 }

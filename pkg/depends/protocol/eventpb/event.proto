@@ -3,7 +3,7 @@ package eventpb;
 option go_package = ".;eventpb";
 
 message Header {
-  uint32 event_type = 1; // event type
+  string event_type = 1; // event type
   string pub_id = 2;     // the unique identifier for publisher
   string token = 3;      // for validation message
   int64 pub_time = 4;    // event pub timestamp

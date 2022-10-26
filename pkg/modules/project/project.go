@@ -6,6 +6,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/iotexproject/Bumblebee/kit/sqlx"
+
+	"github.com/iotexproject/w3bstream/pkg/modules/vm"
+
 	confid "github.com/iotexproject/Bumblebee/conf/id"
 	"github.com/iotexproject/Bumblebee/kit/sqlx/builder"
 	"github.com/iotexproject/Bumblebee/kit/sqlx/datatypes"
@@ -300,4 +304,130 @@ func InitChannels(ctx context.Context, hdl mq.OnMessage) error {
 		l.WithValues("project_name", v.Name).Info("mqtt subscribe started")
 	}
 	return nil
+}
+
+func RemoveProjectByProjectID(ctx context.Context, prjID types.SFID) error {
+	var (
+		d          = types.MustDBExecutorFromContext(ctx)
+		l          = types.MustLoggerFromContext(ctx)
+		mProject   = &models.Project{}
+		mStrategy  = &models.Strategy{}
+		strategies []models.Strategy
+		mPublisher = &models.Publisher{}
+		publishers []models.Publisher
+		mApplet    = &models.Applet{}
+		applets    []models.Applet
+		mInstance  = &models.Instance{}
+		instances  []models.Instance
+		err        error
+	)
+
+	_, l = l.Start(ctx, "RemoveProjectByProjectID")
+	defer l.End()
+
+	return sqlx.NewTasks(d).With(
+		func(db sqlx.DBExecutor) error {
+			mProject.ProjectID = prjID
+			err = mProject.FetchByProjectID(d)
+			if err != nil {
+				l.Error(err)
+				return status.CheckDatabaseError(err, "fetch by project id")
+			}
+			return nil
+		},
+		func(db sqlx.DBExecutor) error {
+			mStrategy.ProjectID = prjID
+			strategies, err = mStrategy.List(d, mStrategy.ColProjectID().Eq(prjID))
+			if err != nil {
+				l.Error(err)
+				return status.CheckDatabaseError(err, "ListStrategiesByProjectID")
+			}
+			return nil
+		},
+		func(db sqlx.DBExecutor) error {
+			mPublisher.ProjectID = prjID
+			publishers, err = mPublisher.List(d, mPublisher.ColProjectID().Eq(prjID))
+			if err != nil {
+				l.Error(err)
+				return status.CheckDatabaseError(err, "ListPublishersByProjectID")
+			}
+			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			mApplet.ProjectID = prjID
+			applets, err = mApplet.List(d, mApplet.ColProjectID().Eq(prjID))
+			if err != nil {
+				l.Error(err)
+				return status.CheckDatabaseError(err, "ListAppletsByProjectID")
+			}
+			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			for _, app := range applets {
+				mInstance.AppletID = app.AppletID
+				if tmp, e := mInstance.List(d, mInstance.ColAppletID().Eq(app.AppletID)); e != nil {
+					l.Error(err)
+					return status.CheckDatabaseError(err, "ListByAppletID")
+				} else {
+					instances = append(instances, tmp...)
+				}
+			}
+			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			for _, i := range instances {
+				if err = vm.DelInstance(ctx, i.InstanceID); err != nil {
+					l.Error(err)
+					return status.InternalServerError.StatusErr().WithDesc(
+						fmt.Sprintf("delete instance %s failed: %s",
+							i.InstanceID, err.Error(),
+						),
+					)
+				}
+				if err = i.DeleteByInstanceID(d); err != nil {
+					l.Error(err)
+					return status.CheckDatabaseError(err, "DeleteByInstanceID")
+				}
+			}
+			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			for _, app := range applets {
+				err = app.DeleteByAppletID(d)
+				if err != nil {
+					l.Error(err)
+					return status.CheckDatabaseError(err, "DeleteAppletByAppletID")
+				}
+			}
+			return nil
+		},
+		func(db sqlx.DBExecutor) error {
+			for _, strategy := range strategies {
+				err = strategy.DeleteByStrategyID(d)
+				if err != nil {
+					l.Error(err)
+					return status.CheckDatabaseError(err, "DeleteStrategyByStrategyID")
+				}
+			}
+			return nil
+		},
+		func(db sqlx.DBExecutor) error {
+			for _, publisher := range publishers {
+				err = publisher.DeleteByPublisherID(d)
+				if err != nil {
+					l.Error(err)
+					return status.CheckDatabaseError(err, "DeletePublisherByStrategyID")
+				}
+			}
+			return nil
+		},
+		func(db sqlx.DBExecutor) error {
+			err = mProject.DeleteByProjectID(d)
+			if err != nil {
+				l.Error(err)
+				return status.CheckDatabaseError(err, "DeleteProjectByProjectID")
+			}
+			return nil
+		},
+	).Do()
 }

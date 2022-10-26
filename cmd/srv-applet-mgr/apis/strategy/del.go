@@ -14,11 +14,11 @@ type RemoveStrategy struct {
 	strategy.RemoveStrategyReq
 }
 
-func (r *RemoveStrategy) Path() string { return "/:projectID" }
+func (r *RemoveStrategy) Path() string { return "/:projectName" }
 
 func (r *RemoveStrategy) Output(ctx context.Context) (interface{}, error) {
 	a := middleware.CurrentAccountFromContext(ctx)
-	if _, err := a.ValidateProjectPerm(ctx, r.ProjectID); err != nil {
+	if _, err := a.ValidateProjectPermByPrjName(ctx, r.ProjectName); err != nil {
 		return nil, err
 	}
 
