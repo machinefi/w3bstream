@@ -59,8 +59,21 @@ func (*ChainHeight) PrimaryKey() []string {
 
 func (m *ChainHeight) IndexFieldNames() []string {
 	return []string{
+		"ChainHeightID",
 		"ID",
 	}
+}
+
+func (*ChainHeight) UniqueIndexes() builder.Indexes {
+	return builder.Indexes{
+		"ui_chain_height_id": []string{
+			"ChainHeightID",
+		},
+	}
+}
+
+func (*ChainHeight) UniqueIndexUIChainHeightID() string {
+	return "ui_chain_height_id"
 }
 
 func (m *ChainHeight) ColID() *builder.Column {
@@ -206,6 +219,24 @@ func (m *ChainHeight) FetchByID(db sqlx.DBExecutor) error {
 	return err
 }
 
+func (m *ChainHeight) FetchByChainHeightID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	err := db.QueryAndScan(
+		builder.Select(nil).
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("ChainHeightID").Eq(m.ChainHeightID),
+					),
+				),
+				builder.Comment("ChainHeight.FetchByChainHeightID"),
+			),
+		m,
+	)
+	return err
+}
+
 func (m *ChainHeight) UpdateByIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
@@ -236,6 +267,36 @@ func (m *ChainHeight) UpdateByID(db sqlx.DBExecutor, zeros ...string) error {
 	return m.UpdateByIDWithFVs(db, fvs)
 }
 
+func (m *ChainHeight) UpdateByChainHeightIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	tbl := db.T(m)
+	res, err := db.Exec(
+		builder.Update(tbl).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("ChainHeightID").Eq(m.ChainHeightID),
+				),
+				builder.Comment("ChainHeight.UpdateByChainHeightIDWithFVs"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
+	)
+	if err != nil {
+		return err
+	}
+	if affected, _ := res.RowsAffected(); affected == 0 {
+		return m.FetchByChainHeightID(db)
+	}
+	return nil
+}
+
+func (m *ChainHeight) UpdateByChainHeightID(db sqlx.DBExecutor, zeros ...string) error {
+	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
+	return m.UpdateByChainHeightIDWithFVs(db, fvs)
+}
+
 func (m *ChainHeight) Delete(db sqlx.DBExecutor) error {
 	_, err := db.Exec(
 		builder.Delete().
@@ -260,6 +321,23 @@ func (m *ChainHeight) DeleteByID(db sqlx.DBExecutor) error {
 					),
 				),
 				builder.Comment("ChainHeight.DeleteByID"),
+			),
+	)
+	return err
+}
+
+func (m *ChainHeight) DeleteByChainHeightID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	_, err := db.Exec(
+		builder.Delete().
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("ChainHeightID").Eq(m.ChainHeightID),
+					),
+				),
+				builder.Comment("ChainHeight.DeleteByChainHeightID"),
 			),
 	)
 	return err

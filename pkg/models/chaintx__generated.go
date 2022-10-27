@@ -59,8 +59,21 @@ func (*Chaintx) PrimaryKey() []string {
 
 func (m *Chaintx) IndexFieldNames() []string {
 	return []string{
+		"ChaintxID",
 		"ID",
 	}
+}
+
+func (*Chaintx) UniqueIndexes() builder.Indexes {
+	return builder.Indexes{
+		"ui_chain_tx_id": []string{
+			"ChaintxID",
+		},
+	}
+}
+
+func (*Chaintx) UniqueIndexUIChainTxID() string {
+	return "ui_chain_tx_id"
 }
 
 func (m *Chaintx) ColID() *builder.Column {
@@ -206,6 +219,24 @@ func (m *Chaintx) FetchByID(db sqlx.DBExecutor) error {
 	return err
 }
 
+func (m *Chaintx) FetchByChaintxID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	err := db.QueryAndScan(
+		builder.Select(nil).
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("ChaintxID").Eq(m.ChaintxID),
+					),
+				),
+				builder.Comment("Chaintx.FetchByChaintxID"),
+			),
+		m,
+	)
+	return err
+}
+
 func (m *Chaintx) UpdateByIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
@@ -236,6 +267,36 @@ func (m *Chaintx) UpdateByID(db sqlx.DBExecutor, zeros ...string) error {
 	return m.UpdateByIDWithFVs(db, fvs)
 }
 
+func (m *Chaintx) UpdateByChaintxIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	tbl := db.T(m)
+	res, err := db.Exec(
+		builder.Update(tbl).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("ChaintxID").Eq(m.ChaintxID),
+				),
+				builder.Comment("Chaintx.UpdateByChaintxIDWithFVs"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
+	)
+	if err != nil {
+		return err
+	}
+	if affected, _ := res.RowsAffected(); affected == 0 {
+		return m.FetchByChaintxID(db)
+	}
+	return nil
+}
+
+func (m *Chaintx) UpdateByChaintxID(db sqlx.DBExecutor, zeros ...string) error {
+	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
+	return m.UpdateByChaintxIDWithFVs(db, fvs)
+}
+
 func (m *Chaintx) Delete(db sqlx.DBExecutor) error {
 	_, err := db.Exec(
 		builder.Delete().
@@ -260,6 +321,23 @@ func (m *Chaintx) DeleteByID(db sqlx.DBExecutor) error {
 					),
 				),
 				builder.Comment("Chaintx.DeleteByID"),
+			),
+	)
+	return err
+}
+
+func (m *Chaintx) DeleteByChaintxID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	_, err := db.Exec(
+		builder.Delete().
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("ChaintxID").Eq(m.ChaintxID),
+					),
+				),
+				builder.Comment("Chaintx.DeleteByChaintxID"),
 			),
 	)
 	return err

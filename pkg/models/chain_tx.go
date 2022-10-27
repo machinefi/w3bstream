@@ -7,6 +7,7 @@ import (
 
 // Chaintx database model chaintx
 // @def primary                   ID
+// @def unique_index UI_chain_tx_id   ChaintxID
 //
 //go:generate toolkit gen model Chaintx --database MonitorDB
 type Chaintx struct {

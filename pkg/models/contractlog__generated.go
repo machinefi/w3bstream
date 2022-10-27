@@ -59,8 +59,21 @@ func (*Contractlog) PrimaryKey() []string {
 
 func (m *Contractlog) IndexFieldNames() []string {
 	return []string{
+		"ContractlogID",
 		"ID",
 	}
+}
+
+func (*Contractlog) UniqueIndexes() builder.Indexes {
+	return builder.Indexes{
+		"ui_contract_log_id": []string{
+			"ContractlogID",
+		},
+	}
+}
+
+func (*Contractlog) UniqueIndexUIContractLogID() string {
+	return "ui_contract_log_id"
 }
 
 func (m *Contractlog) ColID() *builder.Column {
@@ -254,6 +267,24 @@ func (m *Contractlog) FetchByID(db sqlx.DBExecutor) error {
 	return err
 }
 
+func (m *Contractlog) FetchByContractlogID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	err := db.QueryAndScan(
+		builder.Select(nil).
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("ContractlogID").Eq(m.ContractlogID),
+					),
+				),
+				builder.Comment("Contractlog.FetchByContractlogID"),
+			),
+		m,
+	)
+	return err
+}
+
 func (m *Contractlog) UpdateByIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
@@ -284,6 +315,36 @@ func (m *Contractlog) UpdateByID(db sqlx.DBExecutor, zeros ...string) error {
 	return m.UpdateByIDWithFVs(db, fvs)
 }
 
+func (m *Contractlog) UpdateByContractlogIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	tbl := db.T(m)
+	res, err := db.Exec(
+		builder.Update(tbl).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("ContractlogID").Eq(m.ContractlogID),
+				),
+				builder.Comment("Contractlog.UpdateByContractlogIDWithFVs"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
+	)
+	if err != nil {
+		return err
+	}
+	if affected, _ := res.RowsAffected(); affected == 0 {
+		return m.FetchByContractlogID(db)
+	}
+	return nil
+}
+
+func (m *Contractlog) UpdateByContractlogID(db sqlx.DBExecutor, zeros ...string) error {
+	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
+	return m.UpdateByContractlogIDWithFVs(db, fvs)
+}
+
 func (m *Contractlog) Delete(db sqlx.DBExecutor) error {
 	_, err := db.Exec(
 		builder.Delete().
@@ -308,6 +369,23 @@ func (m *Contractlog) DeleteByID(db sqlx.DBExecutor) error {
 					),
 				),
 				builder.Comment("Contractlog.DeleteByID"),
+			),
+	)
+	return err
+}
+
+func (m *Contractlog) DeleteByContractlogID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	_, err := db.Exec(
+		builder.Delete().
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("ContractlogID").Eq(m.ContractlogID),
+					),
+				),
+				builder.Comment("Contractlog.DeleteByContractlogID"),
 			),
 	)
 	return err
