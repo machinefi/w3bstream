@@ -2,7 +2,7 @@ package event
 
 import (
 	"context"
-	"time"
+	"sync"
 
 	"github.com/pkg/errors"
 
@@ -16,15 +16,11 @@ import (
 	"github.com/iotexproject/w3bstream/pkg/types/wasm"
 )
 
-type HandleEventResult struct {
-	InstanceID types.SFID            `json:"instanceID"`
-	Error      string                `json:"error"`
-	ResultCode wasm.ResultStatusCode `json:"resultCode"`
+type HandleEventRsp struct {
+	Results []wasm.EventHandleResult `json:"results"`
 }
 
-type HandleEventRsp []HandleEventResult
-
-func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) (HandleEventRsp, error) {
+func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) (*HandleEventRsp, error) {
 	l := types.MustLoggerFromContext(ctx)
 
 	_, l = l.Start(ctx, "OnEventReceived")
@@ -65,31 +61,30 @@ func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) 
 		return nil, err
 	}
 
-	l.Info("Event Received")
+	l.Info("matched strategies: %d", len(instances))
 
-	ret := make(HandleEventRsp, 0, len(instances))
+	res := make(chan *wasm.EventHandleResult, len(instances))
+	wg := &sync.WaitGroup{}
 
 	for _, v := range instances {
-		consumer := vm.GetConsumer(v.InstanceID)
-		if consumer == nil {
+		i := vm.GetConsumer(v.InstanceID)
+		if i == nil {
 			continue
 		}
-		cctx, _ := context.WithTimeout(ctx, 3*time.Second)
-		_, code, err := consumer.HandleEvent(cctx, v.Handler, []byte(r.Payload))
 
-		if err != nil {
-			l.Error(err)
-			ret = append(ret, HandleEventResult{
-				InstanceID: v.InstanceID,
-				Error:      err.Error(),
-				ResultCode: code,
-			})
-		} else {
-			ret = append(ret, HandleEventResult{
-				InstanceID: v.InstanceID,
-				ResultCode: code,
-			})
-		}
+		wg.Add(1)
+		go func() {
+			res <- i.HandleEvent(ctx, v.Handler, []byte(r.Payload))
+			wg.Done()
+		}()
+	}
+
+	wg.Wait()
+	close(res)
+
+	ret := &HandleEventRsp{}
+	for v := range res {
+		ret.Results = append(ret.Results, *v)
 	}
 	return ret, nil
 }

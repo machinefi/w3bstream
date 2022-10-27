@@ -7,13 +7,12 @@ require (
 	github.com/eclipse/paho.mqtt.golang v1.4.1
 	github.com/ethereum/go-ethereum v1.10.25
 	github.com/google/uuid v1.3.0
-	github.com/iotexproject/Bumblebee v0.0.0-20221027032553-1566703f8914
+	github.com/iotexproject/Bumblebee v0.0.0-20221027134924-ba80dc0de133
 	github.com/mailru/easyjson v0.7.7
 	github.com/onsi/gomega v1.20.0
 	github.com/pkg/errors v0.9.1
 	github.com/saitofun/qlib v0.0.0-20220822220243-9fdd3992fe4b
 	github.com/shirou/gopsutil/v3 v3.22.8
-	github.com/tetratelabs/wazero v1.0.0-pre.1
 	github.com/tidwall/gjson v1.14.3
 	github.com/wasmerio/wasmer-go v1.0.4
 	google.golang.org/protobuf v1.28.0
@@ -47,6 +46,7 @@ require (
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/spf13/cobra v1.5.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/tetratelabs/wazero v1.0.0-pre.2 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.10 // indirect

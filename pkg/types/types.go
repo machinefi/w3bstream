@@ -16,6 +16,11 @@ func (c *UploadConfig) SetDefault() {
 	}
 }
 
+type ETHClientConfig struct {
+	PrivateKey    string `env:""`
+	ChainEndpoint string `env:""`
+}
+
 type (
 	SFID  = types.SFID
 	SFIDs = types.SFIDs

@@ -6,11 +6,10 @@ import (
 	"github.com/iotexproject/Bumblebee/conf/log"
 	"github.com/iotexproject/Bumblebee/conf/mqtt"
 	"github.com/iotexproject/Bumblebee/conf/postgres"
+	"github.com/iotexproject/Bumblebee/kit/mq"
 	"github.com/iotexproject/Bumblebee/kit/sqlx"
 	"github.com/iotexproject/Bumblebee/x/contextx"
 	"github.com/iotexproject/Bumblebee/x/misc/must"
-
-	"github.com/iotexproject/w3bstream/pkg/types/wasm"
 )
 
 type Context uint8
@@ -23,6 +22,8 @@ type (
 	CtxMqttBroker        struct{} // CtxMqttBroker mqtt.Broker
 	CtxUploadConfig      struct{} // CtxUploadConfig UploadConfig
 	CtxEthClient         struct{} // CtxEthClient ETHClientConfig
+	CtxTaskWorker        struct{}
+	CtxTaskBoard         struct{}
 )
 
 func WithDBExecutor(ctx context.Context, v sqlx.DBExecutor) context.Context {
@@ -151,23 +152,65 @@ func MustUploadConfigFromContext(ctx context.Context) *UploadConfig {
 	return v
 }
 
-func WithETHClientConfig(ctx context.Context, v *wasm.ETHClientConfig) context.Context {
+func WithETHClientConfig(ctx context.Context, v *ETHClientConfig) context.Context {
 	return contextx.WithValue(ctx, CtxEthClient{}, v)
 }
 
-func WithETHClientConfigContext(v *wasm.ETHClientConfig) contextx.WithContext {
+func WithETHClientConfigContext(v *ETHClientConfig) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
 		return contextx.WithValue(ctx, CtxEthClient{}, v)
 	}
 }
 
-func ETHClientConfigFromContext(ctx context.Context) (*wasm.ETHClientConfig, bool) {
-	v, ok := ctx.Value(CtxEthClient{}).(*wasm.ETHClientConfig)
+func ETHClientConfigFromContext(ctx context.Context) (*ETHClientConfig, bool) {
+	v, ok := ctx.Value(CtxEthClient{}).(*ETHClientConfig)
 	return v, ok
 }
 
-func MustETHClientConfigFromContext(ctx context.Context) *wasm.ETHClientConfig {
+func MustETHClientConfigFromContext(ctx context.Context) *ETHClientConfig {
 	v, ok := ETHClientConfigFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithTaskBoard(ctx context.Context, tb *mq.TaskBoard) context.Context {
+	return contextx.WithValue(ctx, CtxTaskBoard{}, tb)
+}
+
+func WithTaskBoardContext(tb *mq.TaskBoard) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return WithTaskBoard(ctx, tb)
+	}
+}
+
+func TaskBoardFromContext(ctx context.Context) (*mq.TaskBoard, bool) {
+	v, ok := ctx.Value(CtxTaskBoard{}).(*mq.TaskBoard)
+	return v, ok
+}
+
+func MustTaskBoardFromContext(ctx context.Context) *mq.TaskBoard {
+	v, ok := TaskBoardFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithTaskWorker(ctx context.Context, tw *mq.TaskWorker) context.Context {
+	return contextx.WithValue(ctx, CtxTaskWorker{}, tw)
+}
+
+func WithTaskWorkerContext(tw *mq.TaskWorker) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return WithTaskWorker(ctx, tw)
+	}
+}
+
+func TaskWorkerFromContext(ctx context.Context) (*mq.TaskWorker, bool) {
+	v, ok := ctx.Value(CtxTaskWorker{}).(*mq.TaskWorker)
+	return v, ok
+}
+
+func MustTaskWorkerFromContext(ctx context.Context) *mq.TaskWorker {
+	v, ok := TaskWorkerFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

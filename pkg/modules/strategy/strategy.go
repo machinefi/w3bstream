@@ -10,7 +10,6 @@ import (
 	"github.com/iotexproject/Bumblebee/kit/sqlx/builder"
 	"github.com/pkg/errors"
 
-	"github.com/iotexproject/w3bstream/pkg/enums"
 	"github.com/iotexproject/w3bstream/pkg/errors/status"
 	"github.com/iotexproject/w3bstream/pkg/models"
 	"github.com/iotexproject/w3bstream/pkg/types"
@@ -71,20 +70,10 @@ func FindStrategyInstances(ctx context.Context, prjName string, eventType string
 
 	mInstance := &models.Instance{}
 
-	instances, err := mInstance.List(d,
-		builder.And(
-			mInstance.ColAppletID().In(appletIDs),
-			mInstance.ColState().Eq(enums.INSTANCE_STATE__STARTED),
-		),
-	)
+	instances, err := mInstance.List(d, mInstance.ColAppletID().In(appletIDs))
 	if err != nil {
 		l.Error(err)
 		return nil, status.CheckDatabaseError(err, "ListInstances")
-	}
-
-	if len(instances) == 0 {
-		l.Warn(errors.New("started instance not found"))
-		return nil, status.NotFound.StatusErr().WithDesc("not found started instance")
 	}
 
 	handlers := make([]*InstanceHandler, 0)

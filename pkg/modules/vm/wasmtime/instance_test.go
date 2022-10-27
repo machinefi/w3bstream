@@ -7,14 +7,14 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
 	confid "github.com/iotexproject/Bumblebee/conf/id"
-	conflog "github.com/iotexproject/Bumblebee/conf/log"
+	"github.com/iotexproject/Bumblebee/kit/kit"
+	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/global"
+	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/tasks"
 	. "github.com/onsi/gomega"
 
 	"github.com/iotexproject/w3bstream/pkg/modules/vm"
-	"github.com/iotexproject/w3bstream/pkg/modules/vm/common"
 	"github.com/iotexproject/w3bstream/pkg/modules/vm/wasmtime"
 	"github.com/iotexproject/w3bstream/pkg/types"
 	"github.com/iotexproject/w3bstream/pkg/types/wasm"
@@ -28,8 +28,8 @@ var (
 	wasmWordCountV2Code     []byte
 	wasmTokenDistributeCode []byte
 
-	ctx  context.Context
-	cctx context.Context
+	ctx context.Context
+	idg confid.SFIDGenerator
 )
 
 func init() {
@@ -66,19 +66,19 @@ func init() {
 		panic(err)
 	}
 
-	ctx = context.Background()
-	ctx = types.WithETHClientConfig(ctx, &wasm.ETHClientConfig{
+	ctx = global.WithContext(context.Background())
+	ctx = types.WithETHClientConfig(ctx, &types.ETHClientConfig{
 		PrivateKey:    "",
 		ChainEndpoint: "https://babel-api.testnet.iotex.io",
 	})
-	ctx = types.WithLogger(ctx, conflog.Std())
-	ctx = confid.WithSFIDGenerator(ctx, confid.MustNewSFIDGenerator())
 
-	cctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
+	idg = confid.MustSFIDGeneratorFromContext(ctx)
+
+	go kit.Run(tasks.Root, global.TaskServer())
 }
 
 func TestInstance_LogWASM(t *testing.T) {
-	i, err := wasmtime.NewInstanceByCode(ctx, wasmLogCode)
+	i, err := wasmtime.NewInstanceByCode(ctx, idg.MustGenSFID(), wasmLogCode)
 	NewWithT(t).Expect(err).To(BeNil())
 	id := vm.AddInstance(ctx, i)
 
@@ -86,17 +86,16 @@ func TestInstance_LogWASM(t *testing.T) {
 	NewWithT(t).Expect(err).To(BeNil())
 	defer vm.StopInstance(ctx, id)
 
-	_, code, err := i.HandleEvent(cctx, "start", []byte("IoTeX"))
-	NewWithT(t).Expect(code).To(Equal(wasm.ResultStatusCode_OK))
-	NewWithT(t).Expect(err).To(BeNil())
+	ret := i.HandleEvent(ctx, "start", []byte("IoTeX"))
+	NewWithT(t).Expect(ret.Code).To(Equal(wasm.ResultStatusCode_OK))
+	NewWithT(t).Expect(ret.ErrMsg).To(Equal(""))
 
-	_, code, err = i.HandleEvent(cctx, "not_exported", []byte("IoTeX"))
-	NewWithT(t).Expect(code).To(Equal(wasm.ResultStatusCode_UnexportedHandler))
-	NewWithT(t).Expect(err).To(BeNil())
+	ret = i.HandleEvent(ctx, "not_exported", []byte("IoTeX"))
+	NewWithT(t).Expect(ret.Code).To(Equal(wasm.ResultStatusCode_UnexportedHandler))
 }
 
 func TestInstance_GJsonWASM(t *testing.T) {
-	i, err := wasmtime.NewInstanceByCode(ctx, wasmGJsonCode)
+	i, err := wasmtime.NewInstanceByCode(ctx, idg.MustGenSFID(), wasmGJsonCode)
 	NewWithT(t).Expect(err).To(BeNil())
 	id := vm.AddInstance(ctx, i)
 
@@ -104,7 +103,7 @@ func TestInstance_GJsonWASM(t *testing.T) {
 	NewWithT(t).Expect(err).To(BeNil())
 	defer vm.StopInstance(ctx, id)
 
-	_, code, err := i.HandleEvent(cctx, "start", []byte(`
+	ret := i.HandleEvent(ctx, "start", []byte(`
 {
   "name": {
     "first": "Tom",
@@ -142,12 +141,11 @@ func TestInstance_GJsonWASM(t *testing.T) {
     }
   ]
 }`))
-	NewWithT(t).Expect(code).To(Equal(wasm.ResultStatusCode_OK))
-	NewWithT(t).Expect(err).To(BeNil())
+	NewWithT(t).Expect(ret.Code).To(Equal(wasm.ResultStatusCode_OK))
 }
 
 func TestInstance_EasyJsonWASM(t *testing.T) {
-	i, err := wasmtime.NewInstanceByCode(ctx, wasmEasyJsonCode)
+	i, err := wasmtime.NewInstanceByCode(ctx, idg.MustGenSFID(), wasmEasyJsonCode)
 	NewWithT(t).Expect(err).To(BeNil())
 	id := vm.AddInstance(ctx, i)
 
@@ -155,7 +153,7 @@ func TestInstance_EasyJsonWASM(t *testing.T) {
 	NewWithT(t).Expect(err).To(BeNil())
 	defer vm.StopInstance(ctx, id)
 
-	_, code, err := i.HandleEvent(cctx, "start", []byte(`
+	ret := i.HandleEvent(ctx, "start", []byte(`
 {
   "id": 11,
   "student_name": "Tom",
@@ -165,12 +163,11 @@ func TestInstance_EasyJsonWASM(t *testing.T) {
   },
   "birthday": "2017-08-04T20:58:07.9894603+08:00"
 }`))
-	NewWithT(t).Expect(code).To(Equal(wasm.ResultStatusCode_OK))
-	NewWithT(t).Expect(err).To(BeNil())
+	NewWithT(t).Expect(ret.Code).To(Equal(wasm.ResultStatusCode_OK))
 }
 
 func TestInstance_WordCount(t *testing.T) {
-	i, err := wasmtime.NewInstanceByCode(ctx, wasmWordCountCode)
+	i, err := wasmtime.NewInstanceByCode(ctx, idg.MustGenSFID(), wasmWordCountCode)
 	NewWithT(t).Expect(err).To(BeNil())
 	id := vm.AddInstance(ctx, i)
 
@@ -178,18 +175,16 @@ func TestInstance_WordCount(t *testing.T) {
 	NewWithT(t).Expect(err).To(BeNil())
 	defer vm.StopInstance(ctx, id)
 
-	_, code, err := i.HandleEvent(cctx, "start", []byte("a b c d a"))
-	NewWithT(t).Expect(code).To(Equal(wasm.ResultStatusCode_OK))
-	NewWithT(t).Expect(err).To(BeNil())
+	ret := i.HandleEvent(ctx, "start", []byte("a b c d a"))
+	NewWithT(t).Expect(ret.Code).To(Equal(wasm.ResultStatusCode_OK))
 
 	NewWithT(t).Expect(i.Get("a")).To(Equal(int32(2)))
 	NewWithT(t).Expect(i.Get("b")).To(Equal(int32(1)))
 	NewWithT(t).Expect(i.Get("c")).To(Equal(int32(1)))
 	NewWithT(t).Expect(i.Get("d")).To(Equal(int32(1)))
 
-	_, code, err = i.HandleEvent(cctx, "start", []byte("a b c d a"))
-	NewWithT(t).Expect(code).To(Equal(wasm.ResultStatusCode_OK))
-	NewWithT(t).Expect(err).To(BeNil())
+	ret = i.HandleEvent(ctx, "start", []byte("a b c d a"))
+	NewWithT(t).Expect(ret.Code).To(Equal(wasm.ResultStatusCode_OK))
 
 	NewWithT(t).Expect(i.Get("a")).To(Equal(int32(4)))
 	NewWithT(t).Expect(i.Get("b")).To(Equal(int32(2)))
@@ -198,7 +193,7 @@ func TestInstance_WordCount(t *testing.T) {
 }
 
 func TestInstance_WordCountV2(t *testing.T) {
-	i, err := wasmtime.NewInstanceByCode(ctx, wasmWordCountV2Code)
+	i, err := wasmtime.NewInstanceByCode(ctx, idg.MustGenSFID(), wasmWordCountV2Code)
 	NewWithT(t).Expect(err).To(BeNil())
 	id := vm.AddInstance(ctx, i)
 
@@ -206,29 +201,28 @@ func TestInstance_WordCountV2(t *testing.T) {
 	NewWithT(t).Expect(err).To(BeNil())
 	defer vm.StopInstance(ctx, id)
 
-	_, code, err := i.HandleEvent(cctx, "start", []byte("a b c d a"))
-	NewWithT(t).Expect(code).To(Equal(wasm.ResultStatusCode_OK))
-	NewWithT(t).Expect(err).To(BeNil())
+	ret := i.HandleEvent(ctx, "start", []byte("a b c d a"))
+	NewWithT(t).Expect(ret.Code).To(Equal(wasm.ResultStatusCode_OK))
 
 	NewWithT(t).Expect(i.Get("a")).To(Equal(int32(2)))
 	NewWithT(t).Expect(i.Get("b")).To(Equal(int32(1)))
 	NewWithT(t).Expect(i.Get("c")).To(Equal(int32(1)))
 	NewWithT(t).Expect(i.Get("d")).To(Equal(int32(1)))
 
-	_, code, err = i.HandleEvent(cctx, "start", []byte("a b c d a"))
-	NewWithT(t).Expect(code).To(Equal(wasm.ResultStatusCode_OK))
+	ret = i.HandleEvent(ctx, "start", []byte("a b c d a"))
+	NewWithT(t).Expect(ret.Code).To(Equal(wasm.ResultStatusCode_OK))
 
 	NewWithT(t).Expect(i.Get("a")).To(Equal(int32(4)))
 	NewWithT(t).Expect(i.Get("b")).To(Equal(int32(2)))
 	NewWithT(t).Expect(i.Get("c")).To(Equal(int32(2)))
 	NewWithT(t).Expect(i.Get("d")).To(Equal(int32(2)))
 
-	_, unique, err := i.HandleEvent(cctx, "word_count", nil)
-	NewWithT(t).Expect(unique).To(Equal(wasm.ResultStatusCode(4)))
+	ret = i.HandleEvent(ctx, "word_count", nil)
+	NewWithT(t).Expect(ret.Code).To(Equal(wasm.ResultStatusCode(4)))
 }
 
 func TestInstance_TokenDistribute(t *testing.T) {
-	i, err := wasmtime.NewInstanceByCode(ctx, wasmTokenDistributeCode)
+	i, err := wasmtime.NewInstanceByCode(ctx, idg.MustGenSFID(), wasmTokenDistributeCode)
 	NewWithT(t).Expect(err).To(BeNil())
 	id := vm.AddInstance(ctx, i)
 
@@ -237,9 +231,8 @@ func TestInstance_TokenDistribute(t *testing.T) {
 	defer vm.StopInstance(ctx, id)
 
 	for idx := int32(0); idx < 20; idx++ {
-		_, code, err := i.HandleEvent(cctx, "start", []byte("test"))
-		NewWithT(t).Expect(code).To(Equal(wasm.ResultStatusCode_OK))
-		NewWithT(t).Expect(err).To(BeNil())
+		ret := i.HandleEvent(ctx, "start", []byte("test"))
+		NewWithT(t).Expect(ret.Code).To(Equal(wasm.ResultStatusCode_OK))
 		NewWithT(t).Expect(i.Get("clicks")).To(Equal(idx + 1))
 	}
 }
@@ -306,8 +299,7 @@ func TestInstance_SentTx(t *testing.T) {
 	 }
 	`
 
-	i, err := wasmtime.NewInstanceByCode(ctx,
-		wasmSentTxCode, common.DefaultInstanceOptionSetter)
+	i, err := wasmtime.NewInstanceByCode(ctx, idg.MustGenSFID(), wasmSentTxCode)
 	NewWithT(t).Expect(err).To(BeNil())
 	id := vm.AddInstance(ctx, i)
 
@@ -315,17 +307,13 @@ func TestInstance_SentTx(t *testing.T) {
 	NewWithT(t).Expect(err).To(BeNil())
 	defer vm.StopInstance(ctx, id)
 
-	_, code, err := i.HandleEvent(cctx, "start", []byte(data1))
-	NewWithT(t).Expect(code).To(Equal(wasm.ResultStatusCode_OK))
-	NewWithT(t).Expect(err).To(BeNil())
-	_, code, err = i.HandleEvent(cctx, "start", []byte(data2))
-	NewWithT(t).Expect(code).To(Equal(wasm.ResultStatusCode_OK))
-	NewWithT(t).Expect(err).To(BeNil())
-	_, code, err = i.HandleEvent(cctx, "start", []byte(data3))
-	NewWithT(t).Expect(code).To(Equal(wasm.ResultStatusCode_OK))
-	NewWithT(t).Expect(err).To(BeNil())
+	ret := i.HandleEvent(ctx, "start", []byte(data1))
+	NewWithT(t).Expect(ret.Code).To(Equal(wasm.ResultStatusCode_OK))
+	ret = i.HandleEvent(ctx, "start", []byte(data2))
+	NewWithT(t).Expect(ret.Code).To(Equal(wasm.ResultStatusCode_OK))
+	ret = i.HandleEvent(ctx, "start", []byte(data3))
+	NewWithT(t).Expect(ret.Code).To(Equal(wasm.ResultStatusCode_OK))
 
-	_, code, err = i.HandleEvent(cctx, "claim", []byte(queryData))
-	NewWithT(t).Expect(code).To(Equal(wasm.ResultStatusCode_OK))
-	NewWithT(t).Expect(err).To(BeNil())
+	ret = i.HandleEvent(ctx, "claim", []byte(queryData))
+	NewWithT(t).Expect(ret.Code).To(Equal(wasm.ResultStatusCode_OK))
 }

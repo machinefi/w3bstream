@@ -11,7 +11,6 @@ import (
 	"github.com/iotexproject/w3bstream/pkg/errors/status"
 	"github.com/iotexproject/w3bstream/pkg/models"
 	"github.com/iotexproject/w3bstream/pkg/modules/vm"
-	"github.com/iotexproject/w3bstream/pkg/modules/vm/common"
 	"github.com/iotexproject/w3bstream/pkg/types"
 )
 
@@ -44,7 +43,7 @@ func CreateInstance(ctx context.Context, path string, appletID types.SFID) (*Cre
 
 	m.InstanceID = idg.MustGenSFID()
 
-	err = vm.NewInstanceWithID(ctx, path, m.InstanceID, common.DefaultInstanceOptionSetter)
+	err = vm.NewInstance(ctx, path, m.InstanceID)
 	if err != nil {
 		l.Error(err)
 		return nil, err
@@ -197,32 +196,28 @@ func StartInstances(ctx context.Context) error {
 		return err
 	}
 	for _, i := range list {
-		if i.State == enums.INSTANCE_STATE__CREATED || i.State == enums.INSTANCE_STATE__STARTED {
-			err = vm.NewInstanceWithID(ctx, i.Path, i.InstanceID, common.DefaultInstanceOptionSetter)
-			l = l.WithValues("instance", i.InstanceID, "applet", i.AppletID)
-			if err != nil {
-				l.Error(err)
-				if err := i.DeleteByInstanceID(d); err != nil {
-					l.Error(err)
-					return err
-				}
-				if err := (&models.Applet{RelApplet: models.RelApplet{AppletID: i.AppletID}}).
-					DeleteByAppletID(d); err != nil {
-					l.Error(err)
-					return err
-				}
-				l.Warn(errors.New("start failed and removed"))
-				return nil
-			} else {
-				l.Info("started")
+		l = l.WithValues("instance", i.InstanceID, "applet", i.AppletID)
+		err = vm.NewInstance(ctx, i.Path, i.InstanceID)
+		cmd := enums.DEPLOY_CMD_UNKNOWN
+
+		if err != nil {
+			l.Warn(err)
+			cmd = enums.DEPLOY_CMD__REMOVE
+		} else {
+			switch i.State {
+			case enums.INSTANCE_STATE__CREATED:
+				l.Info("created")
+				continue
+			case enums.INSTANCE_STATE__STARTED:
+				cmd = enums.DEPLOY_CMD__START
+			case enums.INSTANCE_STATE__STOPPED:
+				cmd = enums.DEPLOY_CMD__STOP
 			}
-			m.State = enums.INSTANCE_STATE__CREATED
 		}
-		if i.State == enums.INSTANCE_STATE__STARTED {
-			err = ControlInstance(ctx, i.InstanceID, enums.DEPLOY_CMD__START)
-			if err != nil {
-				l.Warn(err)
-			}
+
+		l = l.WithValues("cmd", cmd)
+		if err = ControlInstance(ctx, i.InstanceID, cmd); err != nil {
+			l.Error(err)
 		}
 	}
 	return nil

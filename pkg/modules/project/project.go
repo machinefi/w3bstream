@@ -111,10 +111,11 @@ type Detail struct {
 }
 
 type AppletDetail struct {
-	AppletID      types.SFID          `json:"appletID"`
-	AppletName    string              `json:"appletName"`
-	InstanceID    types.SFID          `json:"instanceID,omitempty"`
-	InstanceState enums.InstanceState `json:"instanceState,omitempty"`
+	AppletID        types.SFID          `json:"appletID"`
+	AppletName      string              `json:"appletName"`
+	InstanceID      types.SFID          `json:"instanceID,omitempty"`
+	InstanceState   enums.InstanceState `json:"instanceState,omitempty"`
+	InstanceVMState enums.InstanceState `json:"instanceStateVM,omitempty"`
 }
 
 type detail struct {
@@ -196,11 +197,16 @@ func ListProject(ctx context.Context, r *ListProjectReq) (*ListProjectRsp, error
 			if v.AppletID == 0 {
 				continue
 			}
+			state, ok := vm.GetInstanceState(v.InstanceID)
+			if !ok {
+				l.Warn(errors.New("instance not found in vms"))
+			}
 			appletDetails = append(appletDetails, AppletDetail{
-				AppletID:      v.AppletID,
-				AppletName:    v.AppletName,
-				InstanceID:    v.InstanceID,
-				InstanceState: v.InstanceState,
+				AppletID:        v.AppletID,
+				AppletName:      v.AppletName,
+				InstanceID:      v.InstanceID,
+				InstanceState:   v.InstanceState,
+				InstanceVMState: state,
 			})
 		}
 		if len(appletDetails) == 0 {

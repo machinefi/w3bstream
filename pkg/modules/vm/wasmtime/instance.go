@@ -4,41 +4,32 @@ import (
 	"bytes"
 	"context"
 	"encoding/binary"
+	"time"
 
 	"github.com/bytecodealliance/wasmtime-go"
 	gethCommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/google/uuid"
+	"github.com/iotexproject/Bumblebee/conf/log"
 	"github.com/iotexproject/Bumblebee/x/mapx"
-
 	"github.com/iotexproject/w3bstream/pkg/enums"
-	"github.com/iotexproject/w3bstream/pkg/modules/vm/common"
+	"github.com/iotexproject/w3bstream/pkg/modules/job"
 	"github.com/iotexproject/w3bstream/pkg/types"
 	"github.com/iotexproject/w3bstream/pkg/types/wasm"
 )
 
-func NewInstanceByCode(ctx context.Context, code []byte, opts ...common.InstanceOptionSetter) (wasm.Instance, error) {
+func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte) (*Instance, error) {
 	l := types.MustLoggerFromContext(ctx)
 
 	_, l = l.Start(ctx, "NewInstanceByCode")
 	defer l.End()
 
-	opt := &common.InstanceOption{
-		Logger: common.DefaultLogger,
-		Tasks:  &common.TaskQueue{Ch: make(chan *common.Task)},
-	}
-
-	for _, set := range opts {
-		set(opt)
-	}
-
-	res := mapx.New[uint32, []byte]()
-	db := make(map[string][]byte)
-
 	vmEngine := wasmtime.NewEngineWithConfig(wasmtime.NewConfig())
 	vmStore := wasmtime.NewStore(vmEngine)
 	linker := wasmtime.NewLinker(vmEngine)
+	res := mapx.New[uint32, []byte]()
+	db := make(map[string][]byte)
 
 	var cl *ChainClient
 	if ethConf, ok := types.ETHClientConfigFromContext(ctx); ok {
@@ -53,7 +44,13 @@ func NewInstanceByCode(ctx context.Context, code []byte, opts ...common.Instance
 		}
 	}
 
-	ef := ExportFuncs{vmStore, res, db, opt.Logger, cl}
+	ef := ExportFuncs{
+		store:  vmStore,
+		res:    res,
+		db:     db,
+		logger: types.MustLoggerFromContext(ctx).WithValues("@src", "wasm"),
+		cl:     cl,
+	}
 	_ = linker.FuncWrap("env", "ws_get_data", ef.GetData)
 	_ = linker.FuncWrap("env", "ws_set_data", ef.SetData)
 	_ = linker.FuncWrap("env", "ws_get_db", ef.GetDB)
@@ -78,12 +75,8 @@ func NewInstanceByCode(ctx context.Context, code []byte, opts ...common.Instance
 		return nil, err
 	}
 
-	cctx, cancel := context.WithCancel(context.Background())
-
 	return &Instance{
-		tasks:      opt.Tasks,
-		ctx:        cctx,
-		cancel:     cancel,
+		id:         id,
 		state:      enums.INSTANCE_STATE__CREATED,
 		vmEngine:   vmEngine,
 		vmStore:    vmStore,
@@ -96,9 +89,7 @@ func NewInstanceByCode(ctx context.Context, code []byte, opts ...common.Instance
 }
 
 type Instance struct {
-	tasks      *common.TaskQueue
-	ctx        context.Context
-	cancel     context.CancelFunc
+	id         types.SFID
 	state      wasm.InstanceState
 	vmEngine   *wasmtime.Engine
 	vmStore    *wasmtime.Store
@@ -111,52 +102,40 @@ type Instance struct {
 
 var _ wasm.Instance = (*Instance)(nil)
 
+func (i *Instance) ID() string { return i.id.String() }
+
 func (i *Instance) Start(ctx context.Context) error {
-	l := types.MustLoggerFromContext(ctx)
-
-	_, l = l.Start(ctx, "instance.Start")
-	defer l.End()
-
-	for {
-		select {
-		case <-i.ctx.Done():
-			l.Error(i.ctx.Err())
-			return ctx.Err()
-		case task := <-i.tasks.Wait():
-			task.Res <- i.handleEvent(ctx, task)
-		}
-	}
+	log.FromContext(ctx).WithValues("instance", i.ID()).Info("started")
+	i.state = enums.INSTANCE_STATE__STARTED
+	return nil
 }
 
-func (i *Instance) Stop() {
+func (i *Instance) Stop(ctx context.Context) error {
+	log.FromContext(ctx).WithValues("instance", i.ID()).Info("stopped")
 	i.state = enums.INSTANCE_STATE__STOPPED
-	i.cancel()
+	return nil
 }
 
 func (i *Instance) State() wasm.InstanceState { return i.state }
 
-func (i *Instance) HandleEvent(ctx context.Context, fn string, data []byte) ([]byte, wasm.ResultStatusCode, error) {
-	select {
-	case <-ctx.Done():
-		return nil, -1, ctx.Err()
-	default:
-		task := &common.Task{
-			Handler: fn,
-			Payload: data,
-			Res:     make(chan *common.EventHandleResult),
+func (i *Instance) HandleEvent(ctx context.Context, fn string, data []byte) *wasm.EventHandleResult {
+	if i.state != enums.INSTANCE_STATE__STARTED {
+		return &wasm.EventHandleResult{
+			InstanceID: i.id.String(),
+			Code:       wasm.ResultStatusCode_Failed,
+			ErrMsg:     "instance not running",
 		}
-		i.tasks.Push(task)
-
-		res := <-task.Res
-
-		return res.Response, res.Code, nil
 	}
+
+	t := NewTask(i, fn, data)
+	job.Dispatch(ctx, t)
+	return t.Wait(time.Second * 5)
 }
 
-func (i *Instance) handleEvent(ctx context.Context, t *common.Task) *common.EventHandleResult {
+func (i *Instance) Handle(ctx context.Context, t *Task) *wasm.EventHandleResult {
 	l := types.MustLoggerFromContext(ctx)
 
-	_, l = l.Start(ctx, "instance.handleEvent")
+	_, l = l.Start(ctx, "instance.Handle")
 	defer l.End()
 
 	rid := i.AddResource(ctx, t.Payload)
@@ -166,20 +145,31 @@ func (i *Instance) handleEvent(ctx context.Context, t *common.Task) *common.Even
 	if !ok {
 		hdl = i.vmInstance.GetFunc(i.vmStore, t.Handler)
 		if hdl == nil {
-			return &common.EventHandleResult{Code: wasm.ResultStatusCode_UnexportedHandler}
+			return &wasm.EventHandleResult{
+				InstanceID: i.id.String(),
+				ErrMsg:     "handler not exists",
+				Code:       wasm.ResultStatusCode_UnexportedHandler,
+			}
 		}
 		i.handlers[t.Handler] = hdl
 	}
 
-	l.Info("call hanlder:%s", t.Handler)
+	l.Info("call handler:%s", t.Handler)
 
 	result, err := hdl.Call(i.vmStore, int32(rid))
 	if err != nil {
 		l.Error(err)
-		return &common.EventHandleResult{Code: wasm.ResultStatusCode_Failed}
+		return &wasm.EventHandleResult{
+			InstanceID: i.id.String(),
+			ErrMsg:     err.Error(),
+			Code:       wasm.ResultStatusCode_Failed,
+		}
 	}
 
-	return &common.EventHandleResult{Code: wasm.ResultStatusCode(result.(int32))}
+	return &wasm.EventHandleResult{
+		InstanceID: i.id.String(),
+		Code:       wasm.ResultStatusCode(result.(int32)),
+	}
 }
 
 const MaxUint = ^uint32(0)

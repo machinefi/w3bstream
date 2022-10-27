@@ -21,6 +21,7 @@ format: install_goimports
 generate: install_toolkit install_easyjson install_goimports
 	go generate ./...
 	goimports -w -l -local "${MODULE_NAME}" ./
+	toolkit patch goid
 
 ## to migrate database models, if model defines changed, make this entry
 migrate: install_toolkit install_easyjson install_goimports
