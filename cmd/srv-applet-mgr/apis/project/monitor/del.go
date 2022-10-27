@@ -6,14 +6,14 @@ import (
 	"github.com/iotexproject/Bumblebee/kit/httptransport/httpx"
 
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/middleware"
-	"github.com/iotexproject/w3bstream/pkg/modules/project"
+	"github.com/iotexproject/w3bstream/pkg/modules/blockchain"
 	"github.com/iotexproject/w3bstream/pkg/types"
 )
 
 type RemoveMonitor struct {
 	httpx.MethodDelete
-	ProjectID                types.SFID `in:"path" name:"projectID"`
-	project.RemoveMonitorReq `in:"body"`
+	ProjectID                   types.SFID `in:"path" name:"projectID"`
+	blockchain.RemoveMonitorReq `in:"body"`
 }
 
 func (r *RemoveMonitor) Path() string { return "/:projectID" }
@@ -24,5 +24,5 @@ func (r *RemoveMonitor) Output(ctx context.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return nil, project.RemoveMonitor(ctx, p.Name, &r.RemoveMonitorReq)
+	return nil, blockchain.RemoveMonitor(ctx, p.Name, &r.RemoveMonitorReq)
 }

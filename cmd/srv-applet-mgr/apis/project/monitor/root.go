@@ -9,4 +9,5 @@ var Root = kit.NewRouter(httptransport.Group("/project/monitor"))
 
 func init() {
 	Root.Register(kit.NewRouter(&CreateMonitor{}))
+	Root.Register(kit.NewRouter(&RemoveMonitor{}))
 }
