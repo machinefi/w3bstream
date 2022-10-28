@@ -7,9 +7,8 @@ import (
 	"github.com/iotexproject/Bumblebee/x/mapx"
 	"github.com/pkg/errors"
 
-	"github.com/iotexproject/w3bstream/pkg/types"
-
 	"github.com/iotexproject/w3bstream/pkg/enums"
+	"github.com/iotexproject/w3bstream/pkg/types"
 	"github.com/iotexproject/w3bstream/pkg/types/wasm"
 )
 
@@ -27,9 +26,9 @@ func AddInstance(ctx context.Context, i wasm.Instance) types.SFID {
 	defer l.End()
 
 	id := idg.MustGenSFID()
-	instances.Store(id, i)
 
-	l.WithValues("instance", id).Info("created")
+	AddInstanceByID(ctx, id, i)
+
 	return id
 }
 func AddInstanceByID(ctx context.Context, id types.SFID, i wasm.Instance) {
@@ -52,10 +51,7 @@ func DelInstance(ctx context.Context, id types.SFID) error {
 	if i == nil {
 		return ErrNotFound
 	}
-	if i.State() == enums.INSTANCE_STATE__STARTED {
-		i.Stop()
-	}
-	return nil
+	return i.Stop(ctx)
 }
 
 func StartInstance(ctx context.Context, id types.SFID) error {
@@ -72,8 +68,15 @@ func StartInstance(ctx context.Context, id types.SFID) error {
 		return ErrNotFound
 	}
 
-	go i.Start(ctx)
+	if i.State() == enums.INSTANCE_STATE__STARTED {
+		return nil
+	}
 
+	if err := i.Start(ctx); err != nil {
+		l.Error(err)
+		return err
+	}
+	l.Info("started")
 	return nil
 }
 
@@ -90,7 +93,10 @@ func StopInstance(ctx context.Context, id types.SFID) error {
 		l.Warn(ErrNotFound)
 		return ErrNotFound
 	}
-	i.Stop()
+	if err := i.Stop(ctx); err != nil {
+		l.Error(err)
+		return err
+	}
 	l.Info("stopped")
 	return nil
 }
@@ -103,10 +109,10 @@ func GetInstanceState(id types.SFID) (enums.InstanceState, bool) {
 	return i.State(), true
 }
 
-func GetConsumer(id types.SFID) wasm.EventConsumer {
+func GetConsumer(id types.SFID) wasm.Instance {
 	i, ok := instances.Load(id)
 	if !ok || i == nil {
 		return nil
 	}
-	return i.(wasm.EventConsumer)
+	return i
 }

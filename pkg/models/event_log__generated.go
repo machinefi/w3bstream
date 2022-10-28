@@ -21,11 +21,11 @@ func init() {
 type EventLogIterator struct {
 }
 
-func (EventLogIterator) New() interface{} {
+func (*EventLogIterator) New() interface{} {
 	return &EventLog{}
 }
 
-func (EventLogIterator) Resolve(v interface{}) *EventLog {
+func (*EventLogIterator) Resolve(v interface{}) *EventLog {
 	return v.(*EventLog)
 }
 

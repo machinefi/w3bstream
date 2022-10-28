@@ -21,11 +21,11 @@ func init() {
 type ProjectIterator struct {
 }
 
-func (ProjectIterator) New() interface{} {
+func (*ProjectIterator) New() interface{} {
 	return &Project{}
 }
 
-func (ProjectIterator) Resolve(v interface{}) *Project {
+func (*ProjectIterator) Resolve(v interface{}) *Project {
 	return v.(*Project)
 }
 
@@ -255,25 +255,6 @@ func (m *Project) FetchByID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *Project) FetchByProjectID(db sqlx.DBExecutor) error {
-	tbl := db.T(m)
-	err := db.QueryAndScan(
-		builder.Select(nil).
-			From(
-				tbl,
-				builder.Where(
-					builder.And(
-						tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
-						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
-					),
-				),
-				builder.Comment("Project.FetchByProjectID"),
-			),
-		m,
-	)
-	return err
-}
-
 func (m *Project) FetchByName(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	err := db.QueryAndScan(
@@ -287,6 +268,25 @@ func (m *Project) FetchByName(db sqlx.DBExecutor) error {
 					),
 				),
 				builder.Comment("Project.FetchByName"),
+			),
+		m,
+	)
+	return err
+}
+
+func (m *Project) FetchByProjectID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	err := db.QueryAndScan(
+		builder.Select(nil).
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
+					),
+				),
+				builder.Comment("Project.FetchByProjectID"),
 			),
 		m,
 	)
@@ -324,37 +324,6 @@ func (m *Project) UpdateByID(db sqlx.DBExecutor, zeros ...string) error {
 	return m.UpdateByIDWithFVs(db, fvs)
 }
 
-func (m *Project) UpdateByProjectIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
-
-	if _, ok := fvs["UpdatedAt"]; !ok {
-		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
-	}
-	tbl := db.T(m)
-	res, err := db.Exec(
-		builder.Update(tbl).
-			Where(
-				builder.And(
-					tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
-					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
-				),
-				builder.Comment("Project.UpdateByProjectIDWithFVs"),
-			).
-			Set(tbl.AssignmentsByFieldValues(fvs)...),
-	)
-	if err != nil {
-		return err
-	}
-	if affected, _ := res.RowsAffected(); affected == 0 {
-		return m.FetchByProjectID(db)
-	}
-	return nil
-}
-
-func (m *Project) UpdateByProjectID(db sqlx.DBExecutor, zeros ...string) error {
-	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
-	return m.UpdateByProjectIDWithFVs(db, fvs)
-}
-
 func (m *Project) UpdateByNameWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
@@ -384,6 +353,37 @@ func (m *Project) UpdateByNameWithFVs(db sqlx.DBExecutor, fvs builder.FieldValue
 func (m *Project) UpdateByName(db sqlx.DBExecutor, zeros ...string) error {
 	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
 	return m.UpdateByNameWithFVs(db, fvs)
+}
+
+func (m *Project) UpdateByProjectIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	tbl := db.T(m)
+	res, err := db.Exec(
+		builder.Update(tbl).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
+				),
+				builder.Comment("Project.UpdateByProjectIDWithFVs"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
+	)
+	if err != nil {
+		return err
+	}
+	if affected, _ := res.RowsAffected(); affected == 0 {
+		return m.FetchByProjectID(db)
+	}
+	return nil
+}
+
+func (m *Project) UpdateByProjectID(db sqlx.DBExecutor, zeros ...string) error {
+	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
+	return m.UpdateByProjectIDWithFVs(db, fvs)
 }
 
 func (m *Project) Delete(db sqlx.DBExecutor) error {
@@ -441,49 +441,6 @@ func (m *Project) SoftDeleteByID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *Project) DeleteByProjectID(db sqlx.DBExecutor) error {
-	tbl := db.T(m)
-	_, err := db.Exec(
-		builder.Delete().
-			From(
-				tbl,
-				builder.Where(
-					builder.And(
-						tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
-						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
-					),
-				),
-				builder.Comment("Project.DeleteByProjectID"),
-			),
-	)
-	return err
-}
-
-func (m *Project) SoftDeleteByProjectID(db sqlx.DBExecutor) error {
-	tbl := db.T(m)
-	fvs := builder.FieldValues{}
-
-	if _, ok := fvs["DeletedAt"]; !ok {
-		fvs["DeletedAt"] = types.Timestamp{Time: time.Now()}
-	}
-
-	if _, ok := fvs["UpdatedAt"]; !ok {
-		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
-	}
-	_, err := db.Exec(
-		builder.Update(db.T(m)).
-			Where(
-				builder.And(
-					tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
-					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
-				),
-				builder.Comment("Project.SoftDeleteByProjectID"),
-			).
-			Set(tbl.AssignmentsByFieldValues(fvs)...),
-	)
-	return err
-}
-
 func (m *Project) DeleteByName(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	_, err := db.Exec(
@@ -521,6 +478,49 @@ func (m *Project) SoftDeleteByName(db sqlx.DBExecutor) error {
 					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
 				builder.Comment("Project.SoftDeleteByName"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
+	)
+	return err
+}
+
+func (m *Project) DeleteByProjectID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	_, err := db.Exec(
+		builder.Delete().
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
+					),
+				),
+				builder.Comment("Project.DeleteByProjectID"),
+			),
+	)
+	return err
+}
+
+func (m *Project) SoftDeleteByProjectID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	fvs := builder.FieldValues{}
+
+	if _, ok := fvs["DeletedAt"]; !ok {
+		fvs["DeletedAt"] = types.Timestamp{Time: time.Now()}
+	}
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	_, err := db.Exec(
+		builder.Update(db.T(m)).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
+				),
+				builder.Comment("Project.SoftDeleteByProjectID"),
 			).
 			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)

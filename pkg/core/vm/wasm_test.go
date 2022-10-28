@@ -58,7 +58,7 @@ func TestNewWasm(t *testing.T) {
 
 	v, ok := sum.(int32)
 	NewWithT(t).Expect(ok).To(BeTrue())
-	NewWithT(t).Expect(v).To(Equal(3))
+	NewWithT(t).Expect(v).To(Equal(int32(3)))
 
 	_, e = wasm.ExecuteFunction("hello")
 	NewWithT(t).Expect(e).To(BeNil())

@@ -48,6 +48,7 @@ func (ef *ExportFuncs) Log(c *wasmtime.Caller, logLevel, ptr, size int32) int32 
 	membuf := c.GetExport("memory").Memory().UnsafeData(ef.store)
 	buf, err := read(membuf, ptr, size)
 	if err != nil {
+		ef.logger.Error(err)
 		return wasm.ResultStatusCode_Failed
 	}
 	switch uint32(logLevel) {
@@ -74,6 +75,7 @@ func (ef *ExportFuncs) GetData(c *wasmtime.Caller, rid, vmAddrPtr, vmSizePtr int
 	}
 
 	if err := ef.copyDataIntoWasm(c, data, vmAddrPtr, vmSizePtr); err != nil {
+		ef.logger.Error(err)
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
 
@@ -121,6 +123,7 @@ func (ef *ExportFuncs) SetData(c *wasmtime.Caller, rid, addr, size int32) int32 
 	}
 	buf, err := read(memBuf, addr, size)
 	if err != nil {
+		ef.logger.Error(err)
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
 	ef.res.Store(uint32(rid), buf)
@@ -131,10 +134,12 @@ func (ef *ExportFuncs) SetDB(c *wasmtime.Caller, kAddr, kSize, vAddr, vSize int3
 	memBuf := c.GetExport("memory").Memory().UnsafeData(ef.store)
 	key, err := read(memBuf, kAddr, kSize)
 	if err != nil {
+		ef.logger.Error(err)
 		return int32(wasm.ResultStatusCode_ResourceNotFound)
 	}
 	value, err := read(memBuf, vAddr, vSize)
 	if err != nil {
+		ef.logger.Error(err)
 		return int32(wasm.ResultStatusCode_ResourceNotFound)
 	}
 
@@ -152,6 +157,7 @@ func (ef *ExportFuncs) GetDB(c *wasmtime.Caller,
 	memBuf := c.GetExport("memory").Memory().UnsafeData(ef.store)
 	key, err := read(memBuf, kAddr, kSize)
 	if err != nil {
+		ef.logger.Error(err)
 		return int32(wasm.ResultStatusCode_ResourceNotFound)
 	}
 
@@ -166,6 +172,7 @@ func (ef *ExportFuncs) GetDB(c *wasmtime.Caller,
 	).Info("host.GetDB")
 
 	if err := ef.copyDataIntoWasm(c, val, vmAddrPtr, vmSizePtr); err != nil {
+		ef.logger.Error(err)
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
 
@@ -176,33 +183,44 @@ func (ef *ExportFuncs) GetDB(c *wasmtime.Caller,
 // TODO: make sendTX async, and add callback if possible
 func (ef *ExportFuncs) SendTX(c *wasmtime.Caller, offset, size int32) int32 {
 	if ef.cl == nil {
+		ef.logger.Error(errors.New("eth client doesn't exist"))
+		return wasm.ResultStatusCode_Failed
+	}
+	if ef.cl.pvk == nil {
+		ef.logger.Error(errors.New("private key is empty"))
 		return wasm.ResultStatusCode_Failed
 	}
 	memBuf := c.GetExport("memory").Memory().UnsafeData(ef.store)
 	buf, err := read(memBuf, offset, size)
 	if err != nil {
+		ef.logger.Error(err)
 		return wasm.ResultStatusCode_Failed
 	}
 	ret := gjson.Parse(string(buf))
 	// fmt.Println(ret)
-	txHash, err := sentETHTx(ef.cl, ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String())
+	txHash, err := sendETHTx(ef.cl, ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String())
 	if err != nil {
+		ef.logger.Error(err)
 		return wasm.ResultStatusCode_Failed
 	}
 	ef.logger.Info("tx hash: %s", txHash)
 	return int32(wasm.ResultStatusCode_OK)
 }
 
-func sentETHTx(cl *ChainClient, toStr string, valueStr string, dataStr string) (string, error) {
+func sendETHTx(cl *ChainClient, toStr string, valueStr string, dataStr string) (string, error) {
 	var (
 		sender = crypto.PubkeyToAddress(cl.pvk.PublicKey)
+		to     = common.HexToAddress(toStr)
 	)
-	var (
-		to       = common.HexToAddress(toStr)
-		value, _ = new(big.Int).SetString(valueStr, 10)
-		data, _  = hex.DecodeString(dataStr)
-	)
+	value, ok := new(big.Int).SetString(valueStr, 10)
+	if !ok {
+		return "", errors.New("fail to read tx value")
+	}
+	data, err := hex.DecodeString(dataStr)
+	if err != nil {
+		return "", err
 
+	}
 	nonce, err := cl.chain.PendingNonceAt(context.Background(), sender)
 	if err != nil {
 		return "", err
@@ -240,7 +258,10 @@ func sentETHTx(cl *ChainClient, toStr string, valueStr string, dataStr string) (
 	if err != nil {
 		return "", err
 	}
-	signedTx, _ := types.SignTx(tx, types.NewLondonSigner(chainid), cl.pvk)
+	signedTx, err := types.SignTx(tx, types.NewLondonSigner(chainid), cl.pvk)
+	if err != nil {
+		return "", err
+	}
 	err = cl.chain.SendTransaction(context.Background(), signedTx)
 	if err != nil {
 		return "", err
@@ -251,20 +272,28 @@ func sentETHTx(cl *ChainClient, toStr string, valueStr string, dataStr string) (
 func (ef *ExportFuncs) CallContract(c *wasmtime.Caller,
 	offset, size int32, vmAddrPtr, vmSizePtr int32) int32 {
 	if ef.cl == nil {
+		ef.logger.Error(errors.New("eth client doesn't exist"))
+		return wasm.ResultStatusCode_Failed
+	}
+	if ef.cl.pvk == nil {
+		ef.logger.Error(errors.New("private key is empty"))
 		return wasm.ResultStatusCode_Failed
 	}
 	memBuf := c.GetExport("memory").Memory().UnsafeData(ef.store)
 	buf, err := read(memBuf, offset, size)
 	if err != nil {
+		ef.logger.Error(err)
 		return wasm.ResultStatusCode_Failed
 	}
 	ret := gjson.Parse(string(buf))
 	// fmt.Println(ret)
 	data, err := callContract(ef.cl.chain, ret.Get("to").String(), ret.Get("data").String())
 	if err != nil {
+		ef.logger.Error(err)
 		return wasm.ResultStatusCode_Failed
 	}
 	if err := ef.copyDataIntoWasm(c, data, vmAddrPtr, vmSizePtr); err != nil {
+		ef.logger.Error(err)
 		return wasm.ResultStatusCode_Failed
 	}
 	return int32(wasm.ResultStatusCode_OK)

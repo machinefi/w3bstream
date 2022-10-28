@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/iotexproject/Bumblebee/kit/kit"
+	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/tasks"
+
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis"
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/global"
 	"github.com/iotexproject/w3bstream/pkg/depends/protocol/eventpb"
@@ -27,6 +29,9 @@ func main() {
 		BatchRun(
 			func() {
 				kit.Run(apis.Root, global.Server())
+			},
+			func() {
+				kit.Run(tasks.Root, global.TaskServer())
 			},
 			func() {
 				if err := project.InitChannels(

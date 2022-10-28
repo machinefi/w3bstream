@@ -2,7 +2,9 @@ package publisher
 
 import (
 	"context"
+
 	"github.com/iotexproject/Bumblebee/kit/httptransport/httpx"
+
 	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/iotexproject/w3bstream/pkg/modules/publisher"
 	"github.com/iotexproject/w3bstream/pkg/types"

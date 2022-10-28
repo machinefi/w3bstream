@@ -11,7 +11,6 @@ import (
 	"github.com/iotexproject/w3bstream/pkg/errors/status"
 	"github.com/iotexproject/w3bstream/pkg/models"
 	"github.com/iotexproject/w3bstream/pkg/modules/vm"
-	"github.com/iotexproject/w3bstream/pkg/modules/vm/common"
 	"github.com/iotexproject/w3bstream/pkg/types"
 )
 
@@ -44,7 +43,20 @@ func CreateInstance(ctx context.Context, path string, appletID types.SFID) (*Cre
 
 	m.InstanceID = idg.MustGenSFID()
 
-	err = vm.NewInstanceWithID(ctx, path, m.InstanceID, common.DefaultInstanceOptionSetter)
+	mApp := &models.Applet{RelApplet: models.RelApplet{AppletID: appletID}}
+	if err := mApp.FetchByAppletID(d); err != nil {
+		l.Error(err)
+		return nil, status.CheckDatabaseError(err)
+	}
+	mPrj := &models.Project{RelProject: models.RelProject{ProjectID: mApp.ProjectID}}
+	if err := mPrj.FetchByProjectID(d); err != nil {
+		l.Error(err)
+		return nil, status.CheckDatabaseError(err)
+	}
+
+	ctx = types.WithProject(ctx, mPrj)
+	ctx = types.WithApplet(ctx, mApp)
+	err = vm.NewInstance(ctx, path, m.InstanceID)
 	if err != nil {
 		l.Error(err)
 		return nil, err
@@ -131,7 +143,7 @@ func ControlInstance(ctx context.Context, instanceID types.SFID, cmd enums.Deplo
 			l.Error(err)
 			return err
 		}
-		m.State = enums.INSTANCE_STATE__CREATED
+		m.State = enums.INSTANCE_STATE__STARTED
 		if err = m.UpdateByInstanceID(d); err != nil {
 			l.Error(err)
 			return status.CheckDatabaseError(err, "UpdateInstanceByInstanceID")
@@ -197,32 +209,42 @@ func StartInstances(ctx context.Context) error {
 		return err
 	}
 	for _, i := range list {
-		if i.State == enums.INSTANCE_STATE__CREATED || i.State == enums.INSTANCE_STATE__STARTED {
-			err = vm.NewInstanceWithID(ctx, i.Path, i.InstanceID, common.DefaultInstanceOptionSetter)
-			l = l.WithValues("instance", i.InstanceID, "applet", i.AppletID)
-			if err != nil {
-				l.Error(err)
-				if err := i.DeleteByInstanceID(d); err != nil {
-					l.Error(err)
-					return err
-				}
-				if err := (&models.Applet{RelApplet: models.RelApplet{AppletID: i.AppletID}}).
-					DeleteByAppletID(d); err != nil {
-					l.Error(err)
-					return err
-				}
-				l.Warn(errors.New("start failed and removed"))
-				return nil
-			} else {
-				l.Info("started")
-			}
-			m.State = enums.INSTANCE_STATE__CREATED
+		l = l.WithValues("instance", i.InstanceID, "applet", i.AppletID)
+
+		mApp := &models.Applet{RelApplet: models.RelApplet{AppletID: i.AppletID}}
+		if err := mApp.FetchByAppletID(d); err != nil {
+			l.Warn(err)
+			continue
 		}
-		if i.State == enums.INSTANCE_STATE__STARTED {
-			err = ControlInstance(ctx, i.InstanceID, enums.DEPLOY_CMD__START)
-			if err != nil {
-				l.Warn(err)
+		mPrj := &models.Project{RelProject: models.RelProject{ProjectID: mApp.ProjectID}}
+		if err := mPrj.FetchByProjectID(d); err != nil {
+			l.Warn(err)
+			continue
+		}
+
+		ctx = types.WithProject(ctx, mPrj)
+		ctx = types.WithApplet(ctx, mApp)
+		err = vm.NewInstance(ctx, i.Path, i.InstanceID)
+		cmd := enums.DEPLOY_CMD_UNKNOWN
+
+		if err != nil {
+			l.Warn(err)
+			cmd = enums.DEPLOY_CMD__REMOVE
+		} else {
+			switch i.State {
+			case enums.INSTANCE_STATE__CREATED:
+				l.Info("created")
+				continue
+			case enums.INSTANCE_STATE__STARTED:
+				cmd = enums.DEPLOY_CMD__START
+			case enums.INSTANCE_STATE__STOPPED:
+				cmd = enums.DEPLOY_CMD__STOP
 			}
+		}
+
+		l = l.WithValues("cmd", cmd)
+		if err = ControlInstance(ctx, i.InstanceID, cmd); err != nil {
+			l.Error(err)
 		}
 	}
 	return nil

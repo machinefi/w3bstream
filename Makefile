@@ -21,6 +21,7 @@ format: install_goimports
 generate: install_toolkit install_easyjson install_goimports
 	go generate ./...
 	goimports -w -l -local "${MODULE_NAME}" ./
+	toolkit patch goid
 
 ## to migrate database models, if model defines changed, make this entry
 migrate: install_toolkit install_easyjson install_goimports
@@ -32,7 +33,9 @@ build_server: update_go_module generate format
 	@mkdir -p build
 	@mv cmd/srv-applet-mgr/srv-applet-mgr build
 	@rm -rf build/config
-	@cp -r cmd/srv-applet-mgr/config build/config
+	@mkdir -p build/config
+	@cp cmd/srv-applet-mgr/config/default.yml build/config/default.yml
+	@cp build_image/conf/srv-applet-mgr/config/local.yml build/config/local.yml
 	@echo 'succeed! srv-applet-mgr =>build/srv-applet-mgr*'
 	@echo 'succeed! config =>build/config/'
 	@echo 'modify config/local.yaml to use your server config'

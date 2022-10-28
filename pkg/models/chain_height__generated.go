@@ -21,11 +21,11 @@ func init() {
 type ChainHeightIterator struct {
 }
 
-func (ChainHeightIterator) New() interface{} {
+func (*ChainHeightIterator) New() interface{} {
 	return &ChainHeight{}
 }
 
-func (ChainHeightIterator) Resolve(v interface{}) *ChainHeight {
+func (*ChainHeightIterator) Resolve(v interface{}) *ChainHeight {
 	return v.(*ChainHeight)
 }
 

@@ -19,8 +19,9 @@ type Module interface {
 }
 
 type Instance interface {
+	ID() string
 	Start(context.Context) error
-	Stop()
+	Stop(context.Context) error
 	State() enums.InstanceState
 	AddResource(context.Context, []byte) uint32
 	RmvResource(context.Context, uint32)
@@ -30,15 +31,73 @@ type Instance interface {
 	EventConsumer
 }
 
+type EventHandleResult struct {
+	InstanceID string           `json:"instanceID"`
+	Rsp        []byte           `json:"-"`
+	Code       ResultStatusCode `json:"code"`
+	ErrMsg     string           `json:"errMsg"`
+}
+
 type EventConsumer interface {
-	HandleEvent(ctx context.Context, handler string, payload []byte) ([]byte, ResultStatusCode, error)
+	HandleEvent(ctx context.Context, handler string, payload []byte) *EventHandleResult
 }
 
 type KVStore interface {
 	Get(string) int32
 }
 
-type ETHClientConfig struct {
-	PrivateKey    string `env:""`
-	ChainEndpoint string `env:""`
+type ContextHandler interface {
+	Name() string
+	GetImports() ImportsHandler
+	SetImports(ImportsHandler)
+	GetExports() ExportsHandler
+	GetInstance() Instance
+	SetInstance(Instance)
+}
+
+type ABI struct {
+	Imports  ImportsHandler
+	Instance Instance
+}
+
+func (a *ABI) Name() string { return NameVersion }
+
+func (a *ABI) GetExports() ExportsHandler { return a }
+
+func (a *ABI) GetImports() ImportsHandler { return a.Imports }
+
+func (a *ABI) SetImports(i ImportsHandler) { a.Imports = i }
+
+func (a *ABI) GetInstance() Instance { return a.Instance }
+
+func (a *ABI) SetInstance(i Instance) { a.Instance = i }
+
+func (a *ABI) Start() {}
+
+func (a *ABI) Alloc() {}
+
+func (a *ABI) Free() {}
+
+type Memory interface {
+	Read(context.Context, uint32, uint32) ([]byte, error)
+	Write(context.Context, []byte)
+}
+
+type ImportsHandler interface {
+	GetDB(keyAddr, keySize, valAddr, valSize uint32) (code int32)
+	SetDB()
+	GetData()
+	SetData()
+	Log(level uint32)
+}
+
+type Handler interface {
+	Name() string
+	Call(context.Context, ...interface{})
+}
+
+type ExportsHandler interface {
+	Start()
+	Alloc()
+	Free()
 }

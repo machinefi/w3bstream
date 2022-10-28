@@ -21,11 +21,11 @@ func init() {
 type InstanceIterator struct {
 }
 
-func (InstanceIterator) New() interface{} {
+func (*InstanceIterator) New() interface{} {
 	return &Instance{}
 }
 
-func (InstanceIterator) Resolve(v interface{}) *Instance {
+func (*InstanceIterator) Resolve(v interface{}) *Instance {
 	return v.(*Instance)
 }
 

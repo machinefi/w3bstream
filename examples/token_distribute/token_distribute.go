@@ -20,7 +20,7 @@ func _start(rid uint32) int32 {
 	count := common.GetDB("clicks") + 1
 	if count%5 == 0 {
 		/*
-			ptr, size := stringToPtr(fmt.Sprintf(
+			common.SendTx(fmt.Sprintf(
 				`{
 					"to": "%s",
 					"value": "0",
@@ -29,10 +29,8 @@ func _start(rid uint32) int32 {
 				"0x1ED83F5AD999262eC06Ed8f3B801e108024b3e9c",
 				"97186a21fa8e7955c0f154f960d588c3aca44f14",
 			))
-			_ws_send_tx(ptr, size)
 		*/
 		common.Log("send tx")
-		// call _ws_send_tx
 	}
 	common.SetDB("clicks", count)
 	return 0

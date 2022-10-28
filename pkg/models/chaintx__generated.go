@@ -21,11 +21,11 @@ func init() {
 type ChaintxIterator struct {
 }
 
-func (ChaintxIterator) New() interface{} {
+func (*ChaintxIterator) New() interface{} {
 	return &Chaintx{}
 }
 
-func (ChaintxIterator) Resolve(v interface{}) *Chaintx {
+func (*ChaintxIterator) Resolve(v interface{}) *Chaintx {
 	return v.(*Chaintx)
 }
 

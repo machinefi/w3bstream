@@ -13,12 +13,13 @@ import (
 	confmqtt "github.com/iotexproject/Bumblebee/conf/mqtt"
 	confpostgres "github.com/iotexproject/Bumblebee/conf/postgres"
 	"github.com/iotexproject/Bumblebee/kit/kit"
+	"github.com/iotexproject/Bumblebee/kit/mq"
+	"github.com/iotexproject/Bumblebee/kit/mq/mem_mq"
 	"github.com/iotexproject/Bumblebee/kit/sqlx/migration"
 	"github.com/iotexproject/Bumblebee/x/contextx"
 
 	"github.com/iotexproject/w3bstream/pkg/models"
 	"github.com/iotexproject/w3bstream/pkg/types"
-	"github.com/iotexproject/w3bstream/pkg/types/wasm"
 )
 
 // global vars
@@ -32,9 +33,14 @@ var (
 	logger        = &conflog.Log{Name: "srv-demo"}
 	std           = conflog.Std()
 	uploadConf    = &types.UploadConfig{}
-	ethClientConf = &wasm.ETHClientConfig{}
+	ethClientConf = &types.ETHClientConfig{}
 
 	App *confapp.Ctx
+)
+
+var (
+	tasks  mq.TaskManager
+	worker *mq.TaskWorker
 )
 
 func init() {
@@ -55,6 +61,9 @@ func init() {
 	confhttp.RegisterCheckerBy(postgres, mqtt, server)
 	std.(conflog.LevelSetter).SetLevel(conflog.InfoLevel)
 
+	tasks = mem_mq.New(0)
+	worker = mq.NewTaskWorker(tasks, mq.WithWorkerCount(3), mq.WithChannel(name))
+
 	WithContext = contextx.WithContextCompose(
 		types.WithDBExecutorContext(postgres),
 		types.WithMonitorDBExecutorContext(monitorDB),
@@ -65,12 +74,16 @@ func init() {
 		confid.WithSFIDGeneratorContext(confid.MustNewSFIDGenerator()),
 		confjwt.WithConfContext(jwt),
 		types.WithETHClientConfigContext(ethClientConf),
+		types.WithTaskWorkerContext(worker),
+		types.WithTaskBoardContext(mq.NewTaskBoard(tasks)),
 	)
 }
 
 var WithContext contextx.WithContext
 
 func Server() kit.Transport { return server.WithContextInjector(WithContext) }
+
+func TaskServer() kit.Transport { return worker.WithContextInjector(WithContext) }
 
 func Migrate() {
 	ctx, log := conflog.StdContext(context.Background())

@@ -21,11 +21,11 @@ func init() {
 type ContractlogIterator struct {
 }
 
-func (ContractlogIterator) New() interface{} {
+func (*ContractlogIterator) New() interface{} {
 	return &Contractlog{}
 }
 
-func (ContractlogIterator) Resolve(v interface{}) *Contractlog {
+func (*ContractlogIterator) Resolve(v interface{}) *Contractlog {
 	return v.(*Contractlog)
 }
 

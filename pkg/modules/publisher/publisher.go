@@ -2,10 +2,10 @@ package publisher
 
 import (
 	"context"
-	"github.com/iotexproject/Bumblebee/kit/sqlx"
 
 	confid "github.com/iotexproject/Bumblebee/conf/id"
 	"github.com/iotexproject/Bumblebee/conf/jwt"
+	"github.com/iotexproject/Bumblebee/kit/sqlx"
 	"github.com/iotexproject/Bumblebee/kit/sqlx/builder"
 
 	"github.com/iotexproject/w3bstream/pkg/errors/status"

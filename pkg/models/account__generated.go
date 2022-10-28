@@ -21,11 +21,11 @@ func init() {
 type AccountIterator struct {
 }
 
-func (AccountIterator) New() interface{} {
+func (*AccountIterator) New() interface{} {
 	return &Account{}
 }
 
-func (AccountIterator) Resolve(v interface{}) *Account {
+func (*AccountIterator) Resolve(v interface{}) *Account {
 	return v.(*Account)
 }
 

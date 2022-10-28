@@ -21,11 +21,11 @@ func init() {
 type PublisherIterator struct {
 }
 
-func (PublisherIterator) New() interface{} {
+func (*PublisherIterator) New() interface{} {
 	return &Publisher{}
 }
 
-func (PublisherIterator) Resolve(v interface{}) *Publisher {
+func (*PublisherIterator) Resolve(v interface{}) *Publisher {
 	return v.(*Publisher)
 }
 
