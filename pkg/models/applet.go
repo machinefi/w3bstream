@@ -6,10 +6,10 @@ import (
 )
 
 // Applet database model applet
-// @def primary                   ID
-// @def unique_index UI_applet_id AppletID
-// @def unique_index UI_name      Name
-// @def unique_index UI_md5       Md5
+// @def primary                     ID
+// @def unique_index UI_applet_id   AppletID
+// @def unique_index UI_name        Name
+// @def unique_index UI_project_md5 ProjectID Md5
 //
 //go:generate toolkit gen model Applet --database DB
 type Applet struct {
