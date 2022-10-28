@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/iotexproject/Bumblebee/kit/sqlx/datatypes"
+	"github.com/iotexproject/w3bstream/pkg/enums"
 
 	confid "github.com/iotexproject/Bumblebee/conf/id"
 	"github.com/iotexproject/Bumblebee/kit/sqlx"
@@ -44,7 +45,7 @@ func FindStrategyInstances(ctx context.Context, prjName string, eventType string
 			mStrategy.ColProjectID().Eq(mProject.ProjectID),
 			builder.Or(
 				mStrategy.ColEventType().Eq(eventType),
-				mStrategy.ColEventType().Eq(types.EVENTTYPEDEFAULT),
+				mStrategy.ColEventType().Eq(enums.EVENTTYPEDEFAULT),
 			),
 		),
 	)

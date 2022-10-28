@@ -43,6 +43,19 @@ func CreateInstance(ctx context.Context, path string, appletID types.SFID) (*Cre
 
 	m.InstanceID = idg.MustGenSFID()
 
+	mApp := &models.Applet{RelApplet: models.RelApplet{AppletID: appletID}}
+	if err := mApp.FetchByAppletID(d); err != nil {
+		l.Error(err)
+		return nil, status.CheckDatabaseError(err)
+	}
+	mPrj := &models.Project{RelProject: models.RelProject{ProjectID: mApp.ProjectID}}
+	if err := mPrj.FetchByProjectID(d); err != nil {
+		l.Error(err)
+		return nil, status.CheckDatabaseError(err)
+	}
+
+	ctx = types.WithProject(ctx, mPrj)
+	ctx = types.WithApplet(ctx, mApp)
 	err = vm.NewInstance(ctx, path, m.InstanceID)
 	if err != nil {
 		l.Error(err)
@@ -197,6 +210,20 @@ func StartInstances(ctx context.Context) error {
 	}
 	for _, i := range list {
 		l = l.WithValues("instance", i.InstanceID, "applet", i.AppletID)
+
+		mApp := &models.Applet{RelApplet: models.RelApplet{AppletID: i.AppletID}}
+		if err := mApp.FetchByAppletID(d); err != nil {
+			l.Warn(err)
+			continue
+		}
+		mPrj := &models.Project{RelProject: models.RelProject{ProjectID: mApp.ProjectID}}
+		if err := mPrj.FetchByProjectID(d); err != nil {
+			l.Warn(err)
+			continue
+		}
+
+		ctx = types.WithProject(ctx, mPrj)
+		ctx = types.WithApplet(ctx, mApp)
 		err = vm.NewInstance(ctx, i.Path, i.InstanceID)
 		cmd := enums.DEPLOY_CMD_UNKNOWN
 

@@ -49,11 +49,15 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte) (*Instan
 	}
 
 	ef := ExportFuncs{
-		store:  vmStore,
-		res:    res,
-		db:     db,
-		logger: types.MustLoggerFromContext(ctx).WithValues("@src", "wasm"),
-		cl:     cl,
+		store: vmStore,
+		res:   res,
+		db:    db,
+		cl:    cl,
+		logger: types.MustLoggerFromContext(ctx).WithValues(
+			"@src", "wasm",
+			"@namespace", types.MustProjectFromContext(ctx).Name,
+			"@applet", types.MustAppletFromContext(ctx).Name,
+		),
 	}
 	_ = linker.FuncWrap("env", "ws_get_data", ef.GetData)
 	_ = linker.FuncWrap("env", "ws_set_data", ef.SetData)

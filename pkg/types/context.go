@@ -10,6 +10,7 @@ import (
 	"github.com/iotexproject/Bumblebee/kit/sqlx"
 	"github.com/iotexproject/Bumblebee/x/contextx"
 	"github.com/iotexproject/Bumblebee/x/misc/must"
+	"github.com/iotexproject/w3bstream/pkg/models"
 )
 
 type Context uint8
@@ -24,6 +25,8 @@ type (
 	CtxEthClient         struct{} // CtxEthClient ETHClientConfig
 	CtxTaskWorker        struct{}
 	CtxTaskBoard         struct{}
+	CtxProject           struct{}
+	CtxApplet            struct{}
 )
 
 func WithDBExecutor(ctx context.Context, v sqlx.DBExecutor) context.Context {
@@ -211,6 +214,50 @@ func TaskWorkerFromContext(ctx context.Context) (*mq.TaskWorker, bool) {
 
 func MustTaskWorkerFromContext(ctx context.Context) *mq.TaskWorker {
 	v, ok := TaskWorkerFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithProject(ctx context.Context, p *models.Project) context.Context {
+	_p := *p
+	return contextx.WithValue(ctx, CtxProject{}, &_p)
+}
+
+func WithProjectContext(p *models.Project) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return WithProject(ctx, p)
+	}
+}
+
+func ProjectFromContext(ctx context.Context) (*models.Project, bool) {
+	v, ok := ctx.Value(CtxProject{}).(*models.Project)
+	return v, ok
+}
+
+func MustProjectFromContext(ctx context.Context) *models.Project {
+	v, ok := ProjectFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithApplet(ctx context.Context, a *models.Applet) context.Context {
+	_a := *a
+	return contextx.WithValue(ctx, CtxApplet{}, &_a)
+}
+
+func WithAppletContext(a *models.Applet) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return WithApplet(ctx, a)
+	}
+}
+
+func AppletFromContext(ctx context.Context) (*models.Applet, bool) {
+	v, ok := ctx.Value(CtxApplet{}).(*models.Applet)
+	return v, ok
+}
+
+func MustAppletFromContext(ctx context.Context) *models.Applet {
+	v, ok := AppletFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

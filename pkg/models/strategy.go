@@ -1,9 +1,9 @@
 package models
 
 import (
+	"github.com/iotexproject/Bumblebee/base/types"
 	"github.com/iotexproject/Bumblebee/kit/sqlx/datatypes"
-
-	"github.com/iotexproject/w3bstream/pkg/types"
+	"github.com/iotexproject/w3bstream/pkg/enums"
 )
 
 // Strategy event route strategy
@@ -31,6 +31,6 @@ type StrategyInfo struct {
 }
 
 var DefaultStrategyInfo = StrategyInfo{
-	EventType: types.EVENTTYPEDEFAULT,
+	EventType: enums.EVENTTYPEDEFAULT,
 	Handler:   "start",
 }

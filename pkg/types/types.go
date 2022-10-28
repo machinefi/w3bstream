@@ -25,7 +25,3 @@ type (
 	SFID  = types.SFID
 	SFIDs = types.SFIDs
 )
-
-var (
-	EVENTTYPEDEFAULT = "DEFAULT"
-)

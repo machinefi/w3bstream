@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	"github.com/iotexproject/w3bstream/pkg/enums"
 	"github.com/pkg/errors"
 
 	"github.com/iotexproject/w3bstream/pkg/depends/protocol/eventpb"
@@ -28,7 +29,7 @@ func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) 
 
 	l = l.WithValues("project_name", projectName)
 
-	eventType := types.EVENTTYPEDEFAULT
+	eventType := enums.EVENTTYPEDEFAULT
 	if r.Header != nil && len(r.Header.EventType) > 0 {
 		eventType = r.Header.EventType
 	}

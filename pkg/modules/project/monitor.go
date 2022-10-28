@@ -5,6 +5,7 @@ import (
 
 	confid "github.com/iotexproject/Bumblebee/conf/id"
 	"github.com/iotexproject/Bumblebee/kit/sqlx"
+	"github.com/iotexproject/w3bstream/pkg/enums"
 
 	"github.com/iotexproject/w3bstream/pkg/errors/status"
 	"github.com/iotexproject/w3bstream/pkg/models"
@@ -66,7 +67,7 @@ func createChainTx(d sqlx.DBExecutor, projectName string, r *CreateChaintxReq, i
 	}
 
 	n := *r
-	n.EventType = types.EVENTTYPEDEFAULT // TODO support event type
+	n.EventType = enums.EVENTTYPEDEFAULT // TODO support event type
 	m := &models.Chaintx{
 		RelChaintx: models.RelChaintx{ChaintxID: idg.MustGenSFID()},
 		ChaintxData: models.ChaintxData{
@@ -86,7 +87,7 @@ func createChainHeight(d sqlx.DBExecutor, projectName string, r *CreateChainHeig
 	}
 
 	n := *r
-	n.EventType = types.EVENTTYPEDEFAULT // TODO support event type
+	n.EventType = enums.EVENTTYPEDEFAULT // TODO support event type
 	m := &models.ChainHeight{
 		RelChainHeight: models.RelChainHeight{ChainHeightID: idg.MustGenSFID()},
 		ChainHeightData: models.ChainHeightData{
