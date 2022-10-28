@@ -48,7 +48,7 @@ func (cc *ChannelContext) Run(ctx context.Context) {
 						l.Error(err)
 						return
 					}
-					_, err = cc.hdl(cc.ctx, cc.Name, ev)
+					_, err = cc.hdl(ctx, cc.Name, ev)
 					if err != nil {
 						l.Error(err)
 					}
