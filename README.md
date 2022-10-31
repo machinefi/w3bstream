@@ -85,4 +85,4 @@ keep the terminal alive, and open a new terminal for the other commands.
 
 ### Interact with W3bstream using CLI
 
-Please refer to (HOWTO.md)[./HOWTO.md] for more details.
+Please refer to [HOWTO.md](./HOWTO.md) for more details.
