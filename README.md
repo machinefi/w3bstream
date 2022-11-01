@@ -69,6 +69,7 @@ The default admin password is `iotex.W3B.admin`
 - Tinygo: to build wasm code
 - make: run makefile
 - GCC: 11.3.0
+- protobuf: 3.12+
 - Httpie: (optional) a simple curl command (used to interact with W3bstream node via cli)
 
 ### Init protocols and database
