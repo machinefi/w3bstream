@@ -71,16 +71,15 @@ func Monitor(ctx context.Context) {
 
 type monitor struct{}
 
-func (l *monitor) sendEvent(ctx context.Context, data []byte, projectName string, et string) error {
+func (l *monitor) sendEvent(ctx context.Context, data []byte, projectName string, eventType string) error {
 	logger := types.MustLoggerFromContext(ctx)
 
 	_, logger = logger.Start(ctx, "monitor.sendEvent")
 	defer logger.End()
 
-	// TODO: fill event header
 	e := &eventpb.Event{
 		Header: &eventpb.Header{
-			EventType: et,
+			EventType: eventType,
 		},
 		Payload: string(data),
 	}

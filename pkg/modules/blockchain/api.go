@@ -48,7 +48,9 @@ func createContractLog(d sqlx.DBExecutor, projectName string, r *CreateContractl
 
 	n := *r
 	n.BlockCurrent = n.BlockStart
-	// n.EventType = types.EVENTTYPEDEFAULT // TODO support event type
+	if n.EventType == "" {
+		n.EventType = enums.MONITOR_EVENTTYPEDEFAULT
+	}
 	m := &models.Contractlog{
 		RelContractlog: models.RelContractlog{ContractlogID: idg.MustGenSFID()},
 		ContractlogData: models.ContractlogData{
@@ -68,7 +70,9 @@ func createChainTx(d sqlx.DBExecutor, projectName string, r *CreateChaintxReq, i
 	}
 
 	n := *r
-	n.EventType = enums.EVENTTYPEDEFAULT // TODO support event type
+	if n.EventType == "" {
+		n.EventType = enums.MONITOR_EVENTTYPEDEFAULT
+	}
 	m := &models.Chaintx{
 		RelChaintx: models.RelChaintx{ChaintxID: idg.MustGenSFID()},
 		ChaintxData: models.ChaintxData{
@@ -88,7 +92,9 @@ func createChainHeight(d sqlx.DBExecutor, projectName string, r *CreateChainHeig
 	}
 
 	n := *r
-	n.EventType = enums.EVENTTYPEDEFAULT // TODO support event type
+	if n.EventType == "" {
+		n.EventType = enums.MONITOR_EVENTTYPEDEFAULT
+	}
 	m := &models.ChainHeight{
 		RelChainHeight: models.RelChainHeight{ChainHeightID: idg.MustGenSFID()},
 		ChainHeightData: models.ChainHeightData{
