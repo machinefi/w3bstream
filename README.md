@@ -64,9 +64,12 @@ The default admin password is `iotex.W3B.admin`
 ### Dependencies:
 
 - OS : macOS(11.0+) / Linux (tested on Ubuntu 16+)
+- Go: golang (1.18+)
 - Docker: to start a postgres
-- Httpie: a simple curl command (used to interact with W3bstream node via cli)
 - Tinygo: to build wasm code
+- make: run makefile
+- GCC: 11.3.0
+- Httpie: (optional) a simple curl command (used to interact with W3bstream node via cli)
 
 ### Init protocols and database
 
