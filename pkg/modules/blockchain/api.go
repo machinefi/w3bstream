@@ -48,9 +48,7 @@ func createContractLog(d sqlx.DBExecutor, projectName string, r *CreateContractl
 
 	n := *r
 	n.BlockCurrent = n.BlockStart
-	if n.EventType == "" {
-		n.EventType = enums.MONITOR_EVENTTYPEDEFAULT
-	}
+	n.EventType = getEventType(n.EventType)
 	m := &models.Contractlog{
 		RelContractlog: models.RelContractlog{ContractlogID: idg.MustGenSFID()},
 		ContractlogData: models.ContractlogData{
@@ -70,9 +68,7 @@ func createChainTx(d sqlx.DBExecutor, projectName string, r *CreateChaintxReq, i
 	}
 
 	n := *r
-	if n.EventType == "" {
-		n.EventType = enums.MONITOR_EVENTTYPEDEFAULT
-	}
+	n.EventType = getEventType(n.EventType)
 	m := &models.Chaintx{
 		RelChaintx: models.RelChaintx{ChaintxID: idg.MustGenSFID()},
 		ChaintxData: models.ChaintxData{
@@ -92,9 +88,7 @@ func createChainHeight(d sqlx.DBExecutor, projectName string, r *CreateChainHeig
 	}
 
 	n := *r
-	if n.EventType == "" {
-		n.EventType = enums.MONITOR_EVENTTYPEDEFAULT
-	}
+	n.EventType = getEventType(n.EventType)
 	m := &models.ChainHeight{
 		RelChainHeight: models.RelChainHeight{ChainHeightID: idg.MustGenSFID()},
 		ChainHeightData: models.ChainHeightData{
@@ -181,4 +175,11 @@ func checkProjectName(want, curr string, l log.Logger) error {
 		return status.BadRequest.StatusErr().WithDesc("monitor project mismatch")
 	}
 	return nil
+}
+
+func getEventType(eventType string) string {
+	if eventType == "" {
+		return enums.MONITOR_EVENTTYPEDEFAULT
+	}
+	return eventType
 }
