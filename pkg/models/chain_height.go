@@ -8,7 +8,6 @@ import (
 // ChainHeight database model chainheight
 // @def primary                   ID
 // @def unique_index UI_chain_height_id   ChainHeightID
-// @def unique_index UI_chain_height_data   ChainHeightID
 //
 //go:generate toolkit gen model ChainHeight --database MonitorDB
 type ChainHeight struct {
