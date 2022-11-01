@@ -9,7 +9,9 @@ import (
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/pkg/errors"
 
+	"github.com/iotexproject/Bumblebee/kit/sqlx/builder"
 	"github.com/iotexproject/w3bstream/pkg/models"
 	"github.com/iotexproject/w3bstream/pkg/types"
 )
@@ -21,41 +23,49 @@ type contract struct {
 }
 
 func (t *contract) run(ctx context.Context) {
+	ticker := time.NewTicker(t.listInterval)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		t.do(ctx)
+	}
+}
+
+func (t *contract) do(ctx context.Context) {
 	d := types.MustMonitorDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	m := &models.Contractlog{}
 
-	ticker := time.NewTicker(t.listInterval)
-	defer ticker.Stop()
-
 	_, l = l.Start(ctx, "contract.run")
 	defer l.End()
 
-	for range ticker.C {
-		cs, err := m.List(d, m.ColBlockCurrent().Lt(m.ColBlockEnd()).Or(m.ColBlockEnd().Eq(0)))
-		if err != nil {
-			l.WithValues("info", "list contractlog db failed").Error(err)
-			continue
+	cs, err := m.List(d, builder.Or(
+		m.ColBlockCurrent().Lt(m.ColBlockEnd()),
+		m.ColBlockEnd().Eq(0),
+	))
+	if err != nil {
+		l.Error(errors.Wrap(err, "list contractlog db failed"))
+		return
+	}
+	for _, c := range cs {
+		b := &models.Blockchain{RelBlockchain: models.RelBlockchain{ChainID: c.ChainID}}
+		if err := b.FetchByChainID(d); err != nil {
+			l.WithValues("chainID", c.ChainID).Error(errors.Wrap(err, "get chain info failed"))
+			return
 		}
-		for _, c := range cs {
-			b := &models.Blockchain{RelBlockchain: models.RelBlockchain{ChainID: c.ChainID}}
-			if err := b.FetchByChainID(d); err != nil {
-				l.WithValues("info", "get chain info failed", "chainID", c.ChainID).Error(err)
-				continue
-			}
-			toBlock, err := t.listChainAndSendEvent(ctx, &c, b.Address)
-			if err != nil {
-				l.WithValues("info", "list contractlog db failed").Error(err)
-				continue
-			}
+		toBlock, err := t.listChainAndSendEvent(ctx, &c, b.Address)
+		if err != nil {
+			l.Error(errors.Wrap(err, "list contractlog db failed"))
+			return
+		}
 
-			c.BlockCurrent = toBlock
-			if err := c.UpdateByID(d); err != nil {
-				l.WithValues("info", "update contractlog db failed").Error(err)
-				continue
-			}
+		c.BlockCurrent = toBlock
+		if err := c.UpdateByID(d); err != nil {
+			l.Error(errors.Wrap(err, "update contractlog db failed"))
+			return
 		}
 	}
+
 }
 
 func (t *contract) listChainAndSendEvent(ctx context.Context, c *models.Contractlog, address string) (uint64, error) {
@@ -63,6 +73,8 @@ func (t *contract) listChainAndSendEvent(ctx context.Context, c *models.Contract
 
 	_, l = l.Start(ctx, "contract.listChainAndSendEvent")
 	defer l.End()
+
+	l = l.WithValues("type", "contract_log", "contract_log_id", c.ContractlogID)
 
 	cli, err := ethclient.Dial(address)
 	if err != nil {

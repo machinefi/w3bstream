@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/pkg/errors"
 
 	"github.com/iotexproject/w3bstream/pkg/models"
 	"github.com/iotexproject/w3bstream/pkg/types"
@@ -16,41 +17,46 @@ type height struct {
 }
 
 func (h *height) run(ctx context.Context) {
+	ticker := time.NewTicker(h.interval)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		h.do(ctx)
+	}
+}
+
+func (h *height) do(ctx context.Context) {
 	d := types.MustMonitorDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	m := &models.ChainHeight{}
 
-	ticker := time.NewTicker(h.interval)
-	defer ticker.Stop()
-
 	_, l = l.Start(ctx, "height.run")
 	defer l.End()
 
-	for range ticker.C {
-		cs, err := m.List(d, m.ColFinished().Eq(false))
-		if err != nil {
-			l.WithValues("info", "list chain height db failed").Error(err)
-			continue
+	cs, err := m.List(d, m.ColFinished().Eq(false))
+	if err != nil {
+		l.Error(errors.Wrap(err, "list chain height db failed"))
+		return
+	}
+	for _, c := range cs {
+		b := &models.Blockchain{RelBlockchain: models.RelBlockchain{ChainID: c.ChainID}}
+		if err := b.FetchByChainID(d); err != nil {
+			l.WithValues("chainID", c.ChainID).Error(errors.Wrap(err, "get chain info failed"))
+			return
 		}
-		for _, c := range cs {
-			b := &models.Blockchain{RelBlockchain: models.RelBlockchain{ChainID: c.ChainID}}
-			if err := b.FetchByChainID(d); err != nil {
-				l.WithValues("info", "get chain info failed", "chainID", c.ChainID).Error(err)
-				continue
-			}
-			res, err := h.checkHeightAndSendEvent(ctx, &c, b.Address)
-			if err != nil {
-				l.WithValues("info", "check chain height and send event failed").Error(err)
-				continue
-			}
-			if res {
-				c.Finished = true
-				if err := c.UpdateByID(d); err != nil {
-					l.WithValues("info", "update chain height db failed").Error(err)
-				}
+		res, err := h.checkHeightAndSendEvent(ctx, &c, b.Address)
+		if err != nil {
+			l.Error(errors.Wrap(err, "check chain height and send event failed"))
+			return
+		}
+		if res {
+			c.Finished = true
+			if err := c.UpdateByID(d); err != nil {
+				l.Error(errors.Wrap(err, "update chain height db failed"))
 			}
 		}
 	}
+
 }
 
 func (h *height) checkHeightAndSendEvent(ctx context.Context, c *models.ChainHeight, address string) (bool, error) {
@@ -58,6 +64,8 @@ func (h *height) checkHeightAndSendEvent(ctx context.Context, c *models.ChainHei
 
 	_, l = l.Start(ctx, "height.checkHeightAndSendEvent")
 	defer l.End()
+
+	l = l.WithValues("type", "chain_height", "chain_height_id", c.ChainHeightID)
 
 	client, err := ethclient.Dial(address)
 	if err != nil {
@@ -70,8 +78,7 @@ func (h *height) checkHeightAndSendEvent(ctx context.Context, c *models.ChainHei
 		return false, err
 	}
 	if headerNumber := header.Number.Uint64(); headerNumber < c.Height {
-		l.WithValues("headerNumber", headerNumber, "chainHeight", c.Height).
-			Error(err)
+		l.WithValues("headerNumber", headerNumber, "chainHeight", c.Height).Debug("did not arrive")
 		return false, nil
 	}
 	data, err := header.MarshalJSON()
