@@ -14,6 +14,8 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
+const chainUniqFlag = 0
+
 type CreateMonitorReq struct {
 	Contractlog *CreateContractlogReq `json:"contractLog,omitempty"`
 	Chaintx     *CreateChaintxReq     `json:"chainTx,omitempty"`
@@ -53,6 +55,7 @@ func createContractLog(d sqlx.DBExecutor, projectName string, r *CreateContractl
 		RelContractlog: models.RelContractlog{ContractlogID: idg.MustGenSFID()},
 		ContractlogData: models.ContractlogData{
 			ProjectName:     projectName,
+			Uniq:            chainUniqFlag,
 			ContractlogInfo: n,
 		},
 	}
@@ -73,6 +76,7 @@ func createChainTx(d sqlx.DBExecutor, projectName string, r *CreateChaintxReq, i
 		RelChaintx: models.RelChaintx{ChaintxID: idg.MustGenSFID()},
 		ChaintxData: models.ChaintxData{
 			ProjectName: projectName,
+			Uniq:        chainUniqFlag,
 			ChaintxInfo: n,
 		},
 	}
@@ -93,6 +97,7 @@ func createChainHeight(d sqlx.DBExecutor, projectName string, r *CreateChainHeig
 		RelChainHeight: models.RelChainHeight{ChainHeightID: idg.MustGenSFID()},
 		ChainHeightData: models.ChainHeightData{
 			ProjectName:     projectName,
+			Uniq:            chainUniqFlag,
 			ChainHeightInfo: n,
 		},
 	}

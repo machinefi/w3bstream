@@ -42,21 +42,21 @@ func (h *height) do(ctx context.Context) {
 		b := &models.Blockchain{RelBlockchain: models.RelBlockchain{ChainID: c.ChainID}}
 		if err := b.FetchByChainID(d); err != nil {
 			l.WithValues("chainID", c.ChainID).Error(errors.Wrap(err, "get chain info failed"))
-			return
+			continue
 		}
 		res, err := h.checkHeightAndSendEvent(ctx, &c, b.Address)
 		if err != nil {
 			l.Error(errors.Wrap(err, "check chain height and send event failed"))
-			return
+			continue
 		}
 		if res {
 			c.Finished = true
+			c.Uniq = c.ChainHeightID
 			if err := c.UpdateByID(d); err != nil {
 				l.Error(errors.Wrap(err, "update chain height db failed"))
 			}
 		}
 	}
-
 }
 
 func (h *height) checkHeightAndSendEvent(ctx context.Context, c *models.ChainHeight, address string) (bool, error) {

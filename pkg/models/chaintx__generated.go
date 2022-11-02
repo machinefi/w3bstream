@@ -59,8 +59,13 @@ func (*Chaintx) PrimaryKey() []string {
 
 func (m *Chaintx) IndexFieldNames() []string {
 	return []string{
+		"ChainID",
 		"ChaintxID",
+		"EventType",
 		"ID",
+		"ProjectName",
+		"TxAddress",
+		"Uniq",
 	}
 }
 
@@ -69,11 +74,22 @@ func (*Chaintx) UniqueIndexes() builder.Indexes {
 		"ui_chain_tx_id": []string{
 			"ChaintxID",
 		},
+		"ui_chain_tx_uniq": []string{
+			"ProjectName",
+			"EventType",
+			"ChainID",
+			"TxAddress",
+			"Uniq",
+		},
 	}
 }
 
 func (*Chaintx) UniqueIndexUIChainTxID() string {
 	return "ui_chain_tx_id"
+}
+
+func (*Chaintx) UniqueIndexUIChainTxUniq() string {
+	return "ui_chain_tx_uniq"
 }
 
 func (m *Chaintx) ColID() *builder.Column {
@@ -106,6 +122,14 @@ func (m *Chaintx) ColFinished() *builder.Column {
 
 func (*Chaintx) FieldFinished() string {
 	return "Finished"
+}
+
+func (m *Chaintx) ColUniq() *builder.Column {
+	return ChaintxTable.ColByFieldName(m.FieldUniq())
+}
+
+func (*Chaintx) FieldUniq() string {
+	return "Uniq"
 }
 
 func (m *Chaintx) ColEventType() *builder.Column {
@@ -237,6 +261,28 @@ func (m *Chaintx) FetchByChaintxID(db sqlx.DBExecutor) error {
 	return err
 }
 
+func (m *Chaintx) FetchByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniq(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	err := db.QueryAndScan(
+		builder.Select(nil).
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("ProjectName").Eq(m.ProjectName),
+						tbl.ColByFieldName("EventType").Eq(m.EventType),
+						tbl.ColByFieldName("ChainID").Eq(m.ChainID),
+						tbl.ColByFieldName("TxAddress").Eq(m.TxAddress),
+						tbl.ColByFieldName("Uniq").Eq(m.Uniq),
+					),
+				),
+				builder.Comment("Chaintx.FetchByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniq"),
+			),
+		m,
+	)
+	return err
+}
+
 func (m *Chaintx) UpdateByIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
@@ -297,6 +343,40 @@ func (m *Chaintx) UpdateByChaintxID(db sqlx.DBExecutor, zeros ...string) error {
 	return m.UpdateByChaintxIDWithFVs(db, fvs)
 }
 
+func (m *Chaintx) UpdateByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniqWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	tbl := db.T(m)
+	res, err := db.Exec(
+		builder.Update(tbl).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("ProjectName").Eq(m.ProjectName),
+					tbl.ColByFieldName("EventType").Eq(m.EventType),
+					tbl.ColByFieldName("ChainID").Eq(m.ChainID),
+					tbl.ColByFieldName("TxAddress").Eq(m.TxAddress),
+					tbl.ColByFieldName("Uniq").Eq(m.Uniq),
+				),
+				builder.Comment("Chaintx.UpdateByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniqWithFVs"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
+	)
+	if err != nil {
+		return err
+	}
+	if affected, _ := res.RowsAffected(); affected == 0 {
+		return m.FetchByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniq(db)
+	}
+	return nil
+}
+
+func (m *Chaintx) UpdateByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniq(db sqlx.DBExecutor, zeros ...string) error {
+	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
+	return m.UpdateByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniqWithFVs(db, fvs)
+}
+
 func (m *Chaintx) Delete(db sqlx.DBExecutor) error {
 	_, err := db.Exec(
 		builder.Delete().
@@ -338,6 +418,27 @@ func (m *Chaintx) DeleteByChaintxID(db sqlx.DBExecutor) error {
 					),
 				),
 				builder.Comment("Chaintx.DeleteByChaintxID"),
+			),
+	)
+	return err
+}
+
+func (m *Chaintx) DeleteByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniq(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	_, err := db.Exec(
+		builder.Delete().
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("ProjectName").Eq(m.ProjectName),
+						tbl.ColByFieldName("EventType").Eq(m.EventType),
+						tbl.ColByFieldName("ChainID").Eq(m.ChainID),
+						tbl.ColByFieldName("TxAddress").Eq(m.TxAddress),
+						tbl.ColByFieldName("Uniq").Eq(m.Uniq),
+					),
+				),
+				builder.Comment("Chaintx.DeleteByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniq"),
 			),
 	)
 	return err

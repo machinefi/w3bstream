@@ -24,7 +24,7 @@ type RelContractlog struct {
 
 type ContractlogData struct {
 	ProjectName string     `db:"f_project_name"                 json:"projectName"`
-	Uniq        types.SFID `db:"f_uniq"                         json:"uniq,omitempty"`
+	Uniq        types.SFID `db:"f_uniq,default='0'"             json:"uniq,omitempty"`
 	ContractlogInfo
 }
 

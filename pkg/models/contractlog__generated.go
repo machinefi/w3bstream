@@ -59,8 +59,17 @@ func (*Contractlog) PrimaryKey() []string {
 
 func (m *Contractlog) IndexFieldNames() []string {
 	return []string{
+		"ChainID",
+		"ContractAddress",
 		"ContractlogID",
+		"EventType",
 		"ID",
+		"ProjectName",
+		"Topic0",
+		"Topic1",
+		"Topic2",
+		"Topic3",
+		"Uniq",
 	}
 }
 
@@ -69,11 +78,26 @@ func (*Contractlog) UniqueIndexes() builder.Indexes {
 		"ui_contract_log_id": []string{
 			"ContractlogID",
 		},
+		"ui_contract_log_uniq": []string{
+			"ProjectName",
+			"EventType",
+			"ChainID",
+			"ContractAddress",
+			"Topic0",
+			"Topic1",
+			"Topic2",
+			"Topic3",
+			"Uniq",
+		},
 	}
 }
 
 func (*Contractlog) UniqueIndexUIContractLogID() string {
 	return "ui_contract_log_id"
+}
+
+func (*Contractlog) UniqueIndexUIContractLogUniq() string {
+	return "ui_contract_log_uniq"
 }
 
 func (m *Contractlog) ColID() *builder.Column {
@@ -98,6 +122,14 @@ func (m *Contractlog) ColProjectName() *builder.Column {
 
 func (*Contractlog) FieldProjectName() string {
 	return "ProjectName"
+}
+
+func (m *Contractlog) ColUniq() *builder.Column {
+	return ContractlogTable.ColByFieldName(m.FieldUniq())
+}
+
+func (*Contractlog) FieldUniq() string {
+	return "Uniq"
 }
 
 func (m *Contractlog) ColEventType() *builder.Column {
@@ -285,6 +317,32 @@ func (m *Contractlog) FetchByContractlogID(db sqlx.DBExecutor) error {
 	return err
 }
 
+func (m *Contractlog) FetchByProjectNameAndEventTypeAndChainIDAndContractAddressAndTopic0AndTopic1AndTopic2AndTopic3AndUniq(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	err := db.QueryAndScan(
+		builder.Select(nil).
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("ProjectName").Eq(m.ProjectName),
+						tbl.ColByFieldName("EventType").Eq(m.EventType),
+						tbl.ColByFieldName("ChainID").Eq(m.ChainID),
+						tbl.ColByFieldName("ContractAddress").Eq(m.ContractAddress),
+						tbl.ColByFieldName("Topic0").Eq(m.Topic0),
+						tbl.ColByFieldName("Topic1").Eq(m.Topic1),
+						tbl.ColByFieldName("Topic2").Eq(m.Topic2),
+						tbl.ColByFieldName("Topic3").Eq(m.Topic3),
+						tbl.ColByFieldName("Uniq").Eq(m.Uniq),
+					),
+				),
+				builder.Comment("Contractlog.FetchByProjectNameAndEventTypeAndChainIDAndContractAddressAndTopic0AndTopic1AndTopic2AndTopic3AndUniq"),
+			),
+		m,
+	)
+	return err
+}
+
 func (m *Contractlog) UpdateByIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
@@ -345,6 +403,44 @@ func (m *Contractlog) UpdateByContractlogID(db sqlx.DBExecutor, zeros ...string)
 	return m.UpdateByContractlogIDWithFVs(db, fvs)
 }
 
+func (m *Contractlog) UpdateByProjectNameAndEventTypeAndChainIDAndContractAddressAndTopic0AndTopic1AndTopic2AndTopic3AndUniqWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	tbl := db.T(m)
+	res, err := db.Exec(
+		builder.Update(tbl).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("ProjectName").Eq(m.ProjectName),
+					tbl.ColByFieldName("EventType").Eq(m.EventType),
+					tbl.ColByFieldName("ChainID").Eq(m.ChainID),
+					tbl.ColByFieldName("ContractAddress").Eq(m.ContractAddress),
+					tbl.ColByFieldName("Topic0").Eq(m.Topic0),
+					tbl.ColByFieldName("Topic1").Eq(m.Topic1),
+					tbl.ColByFieldName("Topic2").Eq(m.Topic2),
+					tbl.ColByFieldName("Topic3").Eq(m.Topic3),
+					tbl.ColByFieldName("Uniq").Eq(m.Uniq),
+				),
+				builder.Comment("Contractlog.UpdateByProjectNameAndEventTypeAndChainIDAndContractAddressAndTopic0AndTopic1AndTopic2AndTopic3AndUniqWithFVs"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
+	)
+	if err != nil {
+		return err
+	}
+	if affected, _ := res.RowsAffected(); affected == 0 {
+		return m.FetchByProjectNameAndEventTypeAndChainIDAndContractAddressAndTopic0AndTopic1AndTopic2AndTopic3AndUniq(db)
+	}
+	return nil
+}
+
+func (m *Contractlog) UpdateByProjectNameAndEventTypeAndChainIDAndContractAddressAndTopic0AndTopic1AndTopic2AndTopic3AndUniq(db sqlx.DBExecutor, zeros ...string) error {
+	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
+	return m.UpdateByProjectNameAndEventTypeAndChainIDAndContractAddressAndTopic0AndTopic1AndTopic2AndTopic3AndUniqWithFVs(db, fvs)
+}
+
 func (m *Contractlog) Delete(db sqlx.DBExecutor) error {
 	_, err := db.Exec(
 		builder.Delete().
@@ -386,6 +482,31 @@ func (m *Contractlog) DeleteByContractlogID(db sqlx.DBExecutor) error {
 					),
 				),
 				builder.Comment("Contractlog.DeleteByContractlogID"),
+			),
+	)
+	return err
+}
+
+func (m *Contractlog) DeleteByProjectNameAndEventTypeAndChainIDAndContractAddressAndTopic0AndTopic1AndTopic2AndTopic3AndUniq(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	_, err := db.Exec(
+		builder.Delete().
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("ProjectName").Eq(m.ProjectName),
+						tbl.ColByFieldName("EventType").Eq(m.EventType),
+						tbl.ColByFieldName("ChainID").Eq(m.ChainID),
+						tbl.ColByFieldName("ContractAddress").Eq(m.ContractAddress),
+						tbl.ColByFieldName("Topic0").Eq(m.Topic0),
+						tbl.ColByFieldName("Topic1").Eq(m.Topic1),
+						tbl.ColByFieldName("Topic2").Eq(m.Topic2),
+						tbl.ColByFieldName("Topic3").Eq(m.Topic3),
+						tbl.ColByFieldName("Uniq").Eq(m.Uniq),
+					),
+				),
+				builder.Comment("Contractlog.DeleteByProjectNameAndEventTypeAndChainIDAndContractAddressAndTopic0AndTopic1AndTopic2AndTopic3AndUniq"),
 			),
 	)
 	return err

@@ -43,15 +43,16 @@ func (t *tx) do(ctx context.Context) {
 		b := &models.Blockchain{RelBlockchain: models.RelBlockchain{ChainID: c.ChainID}}
 		if err := b.FetchByChainID(d); err != nil {
 			l.WithValues("chainID", c.ChainID).Error(errors.Wrap(err, "get chain info failed"))
-			return
+			continue
 		}
 		res, err := t.checkTxAndSendEvent(ctx, &c, b.Address)
 		if err != nil {
 			l.Error(errors.Wrap(err, "check chain tx and send event failed"))
-			return
+			continue
 		}
 		if res {
 			c.Finished = true
+			c.Uniq = c.ChaintxID
 			if err := c.UpdateByID(d); err != nil {
 				l.Error(errors.Wrap(err, "update chain tx db failed"))
 			}
