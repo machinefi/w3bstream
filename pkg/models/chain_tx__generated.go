@@ -1,5 +1,5 @@
 // This is a generated source file. DO NOT EDIT
-// Source: models/chaintx__generated.go
+// Source: models/chain_tx__generated.go
 
 package models
 
@@ -12,55 +12,55 @@ import (
 	"github.com/machinefi/Bumblebee/kit/sqlx/builder"
 )
 
-var ChaintxTable *builder.Table
+var ChainTxTable *builder.Table
 
 func init() {
-	ChaintxTable = MonitorDB.Register(&Chaintx{})
+	ChainTxTable = MonitorDB.Register(&ChainTx{})
 }
 
-type ChaintxIterator struct {
+type ChainTxIterator struct {
 }
 
-func (*ChaintxIterator) New() interface{} {
-	return &Chaintx{}
+func (*ChainTxIterator) New() interface{} {
+	return &ChainTx{}
 }
 
-func (*ChaintxIterator) Resolve(v interface{}) *Chaintx {
-	return v.(*Chaintx)
+func (*ChainTxIterator) Resolve(v interface{}) *ChainTx {
+	return v.(*ChainTx)
 }
 
-func (*Chaintx) TableName() string {
-	return "t_chaintx"
+func (*ChainTx) TableName() string {
+	return "t_chain_tx"
 }
 
-func (*Chaintx) TableDesc() []string {
+func (*ChainTx) TableDesc() []string {
 	return []string{
-		"Chaintx database model chaintx",
+		"ChainTx database model chain tx",
 	}
 }
 
-func (*Chaintx) Comments() map[string]string {
+func (*ChainTx) Comments() map[string]string {
 	return map[string]string{}
 }
 
-func (*Chaintx) ColDesc() map[string][]string {
+func (*ChainTx) ColDesc() map[string][]string {
 	return map[string][]string{}
 }
 
-func (*Chaintx) ColRel() map[string][]string {
+func (*ChainTx) ColRel() map[string][]string {
 	return map[string][]string{}
 }
 
-func (*Chaintx) PrimaryKey() []string {
+func (*ChainTx) PrimaryKey() []string {
 	return []string{
 		"ID",
 	}
 }
 
-func (m *Chaintx) IndexFieldNames() []string {
+func (m *ChainTx) IndexFieldNames() []string {
 	return []string{
 		"ChainID",
-		"ChaintxID",
+		"ChainTxID",
 		"EventType",
 		"ID",
 		"ProjectName",
@@ -69,10 +69,10 @@ func (m *Chaintx) IndexFieldNames() []string {
 	}
 }
 
-func (*Chaintx) UniqueIndexes() builder.Indexes {
+func (*ChainTx) UniqueIndexes() builder.Indexes {
 	return builder.Indexes{
 		"ui_chain_tx_id": []string{
-			"ChaintxID",
+			"ChainTxID",
 		},
 		"ui_chain_tx_uniq": []string{
 			"ProjectName",
@@ -84,95 +84,95 @@ func (*Chaintx) UniqueIndexes() builder.Indexes {
 	}
 }
 
-func (*Chaintx) UniqueIndexUIChainTxID() string {
+func (*ChainTx) UniqueIndexUIChainTxID() string {
 	return "ui_chain_tx_id"
 }
 
-func (*Chaintx) UniqueIndexUIChainTxUniq() string {
+func (*ChainTx) UniqueIndexUIChainTxUniq() string {
 	return "ui_chain_tx_uniq"
 }
 
-func (m *Chaintx) ColID() *builder.Column {
-	return ChaintxTable.ColByFieldName(m.FieldID())
+func (m *ChainTx) ColID() *builder.Column {
+	return ChainTxTable.ColByFieldName(m.FieldID())
 }
 
-func (*Chaintx) FieldID() string {
+func (*ChainTx) FieldID() string {
 	return "ID"
 }
 
-func (m *Chaintx) ColChaintxID() *builder.Column {
-	return ChaintxTable.ColByFieldName(m.FieldChaintxID())
+func (m *ChainTx) ColChainTxID() *builder.Column {
+	return ChainTxTable.ColByFieldName(m.FieldChainTxID())
 }
 
-func (*Chaintx) FieldChaintxID() string {
-	return "ChaintxID"
+func (*ChainTx) FieldChainTxID() string {
+	return "ChainTxID"
 }
 
-func (m *Chaintx) ColProjectName() *builder.Column {
-	return ChaintxTable.ColByFieldName(m.FieldProjectName())
+func (m *ChainTx) ColProjectName() *builder.Column {
+	return ChainTxTable.ColByFieldName(m.FieldProjectName())
 }
 
-func (*Chaintx) FieldProjectName() string {
+func (*ChainTx) FieldProjectName() string {
 	return "ProjectName"
 }
 
-func (m *Chaintx) ColFinished() *builder.Column {
-	return ChaintxTable.ColByFieldName(m.FieldFinished())
+func (m *ChainTx) ColFinished() *builder.Column {
+	return ChainTxTable.ColByFieldName(m.FieldFinished())
 }
 
-func (*Chaintx) FieldFinished() string {
+func (*ChainTx) FieldFinished() string {
 	return "Finished"
 }
 
-func (m *Chaintx) ColUniq() *builder.Column {
-	return ChaintxTable.ColByFieldName(m.FieldUniq())
+func (m *ChainTx) ColUniq() *builder.Column {
+	return ChainTxTable.ColByFieldName(m.FieldUniq())
 }
 
-func (*Chaintx) FieldUniq() string {
+func (*ChainTx) FieldUniq() string {
 	return "Uniq"
 }
 
-func (m *Chaintx) ColEventType() *builder.Column {
-	return ChaintxTable.ColByFieldName(m.FieldEventType())
+func (m *ChainTx) ColEventType() *builder.Column {
+	return ChainTxTable.ColByFieldName(m.FieldEventType())
 }
 
-func (*Chaintx) FieldEventType() string {
+func (*ChainTx) FieldEventType() string {
 	return "EventType"
 }
 
-func (m *Chaintx) ColChainID() *builder.Column {
-	return ChaintxTable.ColByFieldName(m.FieldChainID())
+func (m *ChainTx) ColChainID() *builder.Column {
+	return ChainTxTable.ColByFieldName(m.FieldChainID())
 }
 
-func (*Chaintx) FieldChainID() string {
+func (*ChainTx) FieldChainID() string {
 	return "ChainID"
 }
 
-func (m *Chaintx) ColTxAddress() *builder.Column {
-	return ChaintxTable.ColByFieldName(m.FieldTxAddress())
+func (m *ChainTx) ColTxAddress() *builder.Column {
+	return ChainTxTable.ColByFieldName(m.FieldTxAddress())
 }
 
-func (*Chaintx) FieldTxAddress() string {
+func (*ChainTx) FieldTxAddress() string {
 	return "TxAddress"
 }
 
-func (m *Chaintx) ColCreatedAt() *builder.Column {
-	return ChaintxTable.ColByFieldName(m.FieldCreatedAt())
+func (m *ChainTx) ColCreatedAt() *builder.Column {
+	return ChainTxTable.ColByFieldName(m.FieldCreatedAt())
 }
 
-func (*Chaintx) FieldCreatedAt() string {
+func (*ChainTx) FieldCreatedAt() string {
 	return "CreatedAt"
 }
 
-func (m *Chaintx) ColUpdatedAt() *builder.Column {
-	return ChaintxTable.ColByFieldName(m.FieldUpdatedAt())
+func (m *ChainTx) ColUpdatedAt() *builder.Column {
+	return ChainTxTable.ColByFieldName(m.FieldUpdatedAt())
 }
 
-func (*Chaintx) FieldUpdatedAt() string {
+func (*ChainTx) FieldUpdatedAt() string {
 	return "UpdatedAt"
 }
 
-func (m *Chaintx) CondByValue(db sqlx.DBExecutor) builder.SqlCondition {
+func (m *ChainTx) CondByValue(db sqlx.DBExecutor) builder.SqlCondition {
 	var (
 		tbl  = db.T(m)
 		fvs  = builder.FieldValueFromStructByNoneZero(m)
@@ -194,7 +194,7 @@ func (m *Chaintx) CondByValue(db sqlx.DBExecutor) builder.SqlCondition {
 	return builder.And(cond...)
 }
 
-func (m *Chaintx) Create(db sqlx.DBExecutor) error {
+func (m *ChainTx) Create(db sqlx.DBExecutor) error {
 
 	if m.CreatedAt.IsZero() {
 		m.CreatedAt.Set(time.Now())
@@ -208,24 +208,24 @@ func (m *Chaintx) Create(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *Chaintx) List(db sqlx.DBExecutor, cond builder.SqlCondition, adds ...builder.Addition) ([]Chaintx, error) {
+func (m *ChainTx) List(db sqlx.DBExecutor, cond builder.SqlCondition, adds ...builder.Addition) ([]ChainTx, error) {
 	var (
 		tbl = db.T(m)
-		lst = make([]Chaintx, 0)
+		lst = make([]ChainTx, 0)
 	)
-	adds = append([]builder.Addition{builder.Where(cond), builder.Comment("Chaintx.List")}, adds...)
+	adds = append([]builder.Addition{builder.Where(cond), builder.Comment("ChainTx.List")}, adds...)
 	err := db.QueryAndScan(builder.Select(nil).From(tbl, adds...), &lst)
 	return lst, err
 }
 
-func (m *Chaintx) Count(db sqlx.DBExecutor, cond builder.SqlCondition, adds ...builder.Addition) (cnt int64, err error) {
+func (m *ChainTx) Count(db sqlx.DBExecutor, cond builder.SqlCondition, adds ...builder.Addition) (cnt int64, err error) {
 	tbl := db.T(m)
-	adds = append([]builder.Addition{builder.Where(cond), builder.Comment("Chaintx.List")}, adds...)
+	adds = append([]builder.Addition{builder.Where(cond), builder.Comment("ChainTx.List")}, adds...)
 	err = db.QueryAndScan(builder.Select(builder.Count()).From(tbl, adds...), &cnt)
 	return
 }
 
-func (m *Chaintx) FetchByID(db sqlx.DBExecutor) error {
+func (m *ChainTx) FetchByID(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	err := db.QueryAndScan(
 		builder.Select(nil).
@@ -236,14 +236,14 @@ func (m *Chaintx) FetchByID(db sqlx.DBExecutor) error {
 						tbl.ColByFieldName("ID").Eq(m.ID),
 					),
 				),
-				builder.Comment("Chaintx.FetchByID"),
+				builder.Comment("ChainTx.FetchByID"),
 			),
 		m,
 	)
 	return err
 }
 
-func (m *Chaintx) FetchByChaintxID(db sqlx.DBExecutor) error {
+func (m *ChainTx) FetchByChainTxID(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	err := db.QueryAndScan(
 		builder.Select(nil).
@@ -251,17 +251,17 @@ func (m *Chaintx) FetchByChaintxID(db sqlx.DBExecutor) error {
 				tbl,
 				builder.Where(
 					builder.And(
-						tbl.ColByFieldName("ChaintxID").Eq(m.ChaintxID),
+						tbl.ColByFieldName("ChainTxID").Eq(m.ChainTxID),
 					),
 				),
-				builder.Comment("Chaintx.FetchByChaintxID"),
+				builder.Comment("ChainTx.FetchByChainTxID"),
 			),
 		m,
 	)
 	return err
 }
 
-func (m *Chaintx) FetchByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniq(db sqlx.DBExecutor) error {
+func (m *ChainTx) FetchByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniq(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	err := db.QueryAndScan(
 		builder.Select(nil).
@@ -276,14 +276,14 @@ func (m *Chaintx) FetchByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniq(db
 						tbl.ColByFieldName("Uniq").Eq(m.Uniq),
 					),
 				),
-				builder.Comment("Chaintx.FetchByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniq"),
+				builder.Comment("ChainTx.FetchByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniq"),
 			),
 		m,
 	)
 	return err
 }
 
-func (m *Chaintx) UpdateByIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+func (m *ChainTx) UpdateByIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
 		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
@@ -295,7 +295,7 @@ func (m *Chaintx) UpdateByIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues)
 				builder.And(
 					tbl.ColByFieldName("ID").Eq(m.ID),
 				),
-				builder.Comment("Chaintx.UpdateByIDWithFVs"),
+				builder.Comment("ChainTx.UpdateByIDWithFVs"),
 			).
 			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
@@ -308,12 +308,12 @@ func (m *Chaintx) UpdateByIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues)
 	return nil
 }
 
-func (m *Chaintx) UpdateByID(db sqlx.DBExecutor, zeros ...string) error {
+func (m *ChainTx) UpdateByID(db sqlx.DBExecutor, zeros ...string) error {
 	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
 	return m.UpdateByIDWithFVs(db, fvs)
 }
 
-func (m *Chaintx) UpdateByChaintxIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+func (m *ChainTx) UpdateByChainTxIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
 		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
@@ -323,9 +323,9 @@ func (m *Chaintx) UpdateByChaintxIDWithFVs(db sqlx.DBExecutor, fvs builder.Field
 		builder.Update(tbl).
 			Where(
 				builder.And(
-					tbl.ColByFieldName("ChaintxID").Eq(m.ChaintxID),
+					tbl.ColByFieldName("ChainTxID").Eq(m.ChainTxID),
 				),
-				builder.Comment("Chaintx.UpdateByChaintxIDWithFVs"),
+				builder.Comment("ChainTx.UpdateByChainTxIDWithFVs"),
 			).
 			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
@@ -333,17 +333,17 @@ func (m *Chaintx) UpdateByChaintxIDWithFVs(db sqlx.DBExecutor, fvs builder.Field
 		return err
 	}
 	if affected, _ := res.RowsAffected(); affected == 0 {
-		return m.FetchByChaintxID(db)
+		return m.FetchByChainTxID(db)
 	}
 	return nil
 }
 
-func (m *Chaintx) UpdateByChaintxID(db sqlx.DBExecutor, zeros ...string) error {
+func (m *ChainTx) UpdateByChainTxID(db sqlx.DBExecutor, zeros ...string) error {
 	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
-	return m.UpdateByChaintxIDWithFVs(db, fvs)
+	return m.UpdateByChainTxIDWithFVs(db, fvs)
 }
 
-func (m *Chaintx) UpdateByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniqWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+func (m *ChainTx) UpdateByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniqWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
 		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
@@ -359,7 +359,7 @@ func (m *Chaintx) UpdateByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniqWi
 					tbl.ColByFieldName("TxAddress").Eq(m.TxAddress),
 					tbl.ColByFieldName("Uniq").Eq(m.Uniq),
 				),
-				builder.Comment("Chaintx.UpdateByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniqWithFVs"),
+				builder.Comment("ChainTx.UpdateByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniqWithFVs"),
 			).
 			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
@@ -372,24 +372,24 @@ func (m *Chaintx) UpdateByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniqWi
 	return nil
 }
 
-func (m *Chaintx) UpdateByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniq(db sqlx.DBExecutor, zeros ...string) error {
+func (m *ChainTx) UpdateByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniq(db sqlx.DBExecutor, zeros ...string) error {
 	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
 	return m.UpdateByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniqWithFVs(db, fvs)
 }
 
-func (m *Chaintx) Delete(db sqlx.DBExecutor) error {
+func (m *ChainTx) Delete(db sqlx.DBExecutor) error {
 	_, err := db.Exec(
 		builder.Delete().
 			From(
 				db.T(m),
 				builder.Where(m.CondByValue(db)),
-				builder.Comment("Chaintx.Delete"),
+				builder.Comment("ChainTx.Delete"),
 			),
 	)
 	return err
 }
 
-func (m *Chaintx) DeleteByID(db sqlx.DBExecutor) error {
+func (m *ChainTx) DeleteByID(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	_, err := db.Exec(
 		builder.Delete().
@@ -400,13 +400,13 @@ func (m *Chaintx) DeleteByID(db sqlx.DBExecutor) error {
 						tbl.ColByFieldName("ID").Eq(m.ID),
 					),
 				),
-				builder.Comment("Chaintx.DeleteByID"),
+				builder.Comment("ChainTx.DeleteByID"),
 			),
 	)
 	return err
 }
 
-func (m *Chaintx) DeleteByChaintxID(db sqlx.DBExecutor) error {
+func (m *ChainTx) DeleteByChainTxID(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	_, err := db.Exec(
 		builder.Delete().
@@ -414,16 +414,16 @@ func (m *Chaintx) DeleteByChaintxID(db sqlx.DBExecutor) error {
 				tbl,
 				builder.Where(
 					builder.And(
-						tbl.ColByFieldName("ChaintxID").Eq(m.ChaintxID),
+						tbl.ColByFieldName("ChainTxID").Eq(m.ChainTxID),
 					),
 				),
-				builder.Comment("Chaintx.DeleteByChaintxID"),
+				builder.Comment("ChainTx.DeleteByChainTxID"),
 			),
 	)
 	return err
 }
 
-func (m *Chaintx) DeleteByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniq(db sqlx.DBExecutor) error {
+func (m *ChainTx) DeleteByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniq(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	_, err := db.Exec(
 		builder.Delete().
@@ -438,7 +438,7 @@ func (m *Chaintx) DeleteByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniq(d
 						tbl.ColByFieldName("Uniq").Eq(m.Uniq),
 					),
 				),
-				builder.Comment("Chaintx.DeleteByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniq"),
+				builder.Comment("ChainTx.DeleteByProjectNameAndEventTypeAndChainIDAndTxAddressAndUniq"),
 			),
 	)
 	return err

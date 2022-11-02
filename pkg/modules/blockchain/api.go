@@ -136,25 +136,25 @@ func RemoveMonitor(ctx context.Context, projectName string, r *RemoveMonitorReq)
 	switch {
 	case r.ContractlogID != 0:
 		m := &models.ContractLog{RelContractlog: models.RelContractlog{ContractLogID: r.ContractlogID}}
-		if err := m.FetchByContractlogID(d); err != nil {
+		if err := m.FetchByContractLogID(d); err != nil {
 			return status.CheckDatabaseError(err, "FetchByContractlogID")
 		}
 		if err := checkProjectName(m.ProjectName, projectName, l); err != nil {
 			return err
 		}
-		if err := m.DeleteByContractlogID(d); err != nil {
+		if err := m.DeleteByContractLogID(d); err != nil {
 			return status.CheckDatabaseError(err, "DeleteByContractlogID")
 		}
 
 	case r.ChaintxID != 0:
 		m := &models.ChainTx{RelChainTx: models.RelChainTx{ChainTxID: r.ChaintxID}}
-		if err := m.FetchByChaintxID(d); err != nil {
+		if err := m.FetchByChainTxID(d); err != nil {
 			return status.CheckDatabaseError(err, "FetchByChaintxID")
 		}
 		if err := checkProjectName(m.ProjectName, projectName, l); err != nil {
 			return err
 		}
-		if err := m.DeleteByChaintxID(d); err != nil {
+		if err := m.DeleteByChainTxID(d); err != nil {
 			return status.CheckDatabaseError(err, "DeleteByChaintxID")
 		}
 

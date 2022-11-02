@@ -10,6 +10,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/Bumblebee/kit/sqlx/datatypes"
+
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
 )

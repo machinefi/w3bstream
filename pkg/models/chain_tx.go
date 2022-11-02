@@ -24,7 +24,7 @@ type RelChainTx struct {
 
 type ChainTxData struct {
 	ProjectName string         `db:"f_project_name"                 json:"projectName"`
-	Finished    datatypes.Bool `db:"f_finished,default='false'"     json:"-"`
+	Finished    datatypes.Bool `db:"f_finished,default='2'"         json:"-"`
 	Uniq        types.SFID     `db:"f_uniq,default='0'"             json:"-"`
 	ChainTxInfo
 }
