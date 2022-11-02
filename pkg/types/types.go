@@ -17,8 +17,8 @@ func (c *UploadConfig) SetDefault() {
 }
 
 type ETHClientConfig struct {
-	PrivateKey    string `env:""`
-	ChainEndpoint string `env:""`
+	PrivateKey    string `env:"" yaml:"privateKey"`
+	ChainEndpoint string `env:"" yaml:"chainEndpoint"`
 }
 
 type (

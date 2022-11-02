@@ -2,7 +2,11 @@ package global
 
 import (
 	"context"
+	"log"
 	"os"
+	"path/filepath"
+
+	uconfig "go.uber.org/config"
 
 	"github.com/machinefi/Bumblebee/base/consts"
 	confapp "github.com/machinefi/Bumblebee/conf/app"
@@ -43,6 +47,10 @@ var (
 	worker *mq.TaskWorker
 )
 
+type Config struct {
+	ethClient types.ETHClientConfig `yaml:"ethClient"`
+}
+
 func init() {
 	name := os.Getenv(consts.EnvProjectName)
 	if name == "" {
@@ -56,6 +64,38 @@ func init() {
 		confapp.WithVersion("0.0.1"),
 		confapp.WithLogger(conflog.Std()),
 	)
+	// TODO: read config file path from parameter
+	configFile := filepath.Join(App.Root(), "config.yml")
+	switch _, err := os.Stat(configFile); {
+	case os.IsNotExist(err):
+	case err == nil:
+		// var cfg Config
+		yaml, err := uconfig.NewYAML(uconfig.File(configFile))
+		if err != nil {
+			log.Fatalln("failed to load yaml file", err)
+		}
+		var config Config
+		if err := yaml.Get(uconfig.Root).Populate(&config); err != nil {
+			log.Fatalln("failed to populate config", err)
+		}
+		if config.ethClient.ChainEndpoint != "" {
+			if _, ok := os.LookupEnv("SRV_APPLET_MGR__ETHCLIENTCONFIG__ChainEndpoint"); !ok {
+				if err := os.Setenv("SRV_APPLET_MGR__ETHCLIENTCONFIG__ChainEndpoint", config.ethClient.ChainEndpoint); err != nil {
+					log.Fatalln("failed to set env", err)
+				}
+			}
+		}
+		if config.ethClient.PrivateKey != "" {
+			if _, ok := os.LookupEnv("SRV_APPLET_MGR__ETHCLIENTCONFIG__PrivateKey"); !ok {
+				if err := os.Setenv("SRV_APPLET_MGR__ETHCLIENTCONFIG__PrivateKey", config.ethClient.PrivateKey); err != nil {
+					log.Fatalln("failed to set env", err)
+				}
+			}
+		}
+	default:
+		log.Fatalln("failed to load", configFile, err)
+	}
+
 	App.Conf(postgres, monitorDB, server, jwt, logger, mqtt, uploadConf, ethClientConf)
 
 	confhttp.RegisterCheckerBy(postgres, mqtt, server)
