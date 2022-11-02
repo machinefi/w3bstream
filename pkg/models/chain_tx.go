@@ -8,6 +8,7 @@ import (
 // Chaintx database model chaintx
 // @def primary                   ID
 // @def unique_index UI_chain_tx_id   ChaintxID
+// @def unique_index UI_chain_tx_uniq ProjectName EventType ChainID TxAddress Uniq
 //
 //go:generate toolkit gen model Chaintx --database MonitorDB
 type Chaintx struct {
@@ -22,8 +23,9 @@ type RelChaintx struct {
 }
 
 type ChaintxData struct {
-	ProjectName string `db:"f_project_name"                 json:"projectName"`
-	Finished    bool   `db:"f_finished,default='false'"     json:"finished,omitempty"`
+	ProjectName string     `db:"f_project_name"                 json:"projectName"`
+	Finished    bool       `db:"f_finished,default='false'"     json:"finished,omitempty"`
+	Uniq        types.SFID `db:"f_uniq"                         json:"uniq,omitempty"`
 	ChaintxInfo
 }
 

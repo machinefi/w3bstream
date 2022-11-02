@@ -8,6 +8,7 @@ import (
 // Contractlog database model contractlog
 // @def primary                   ID
 // @def unique_index UI_contract_log_id   ContractlogID
+// @def unique_index UI_contract_log_uniq ProjectName EventType ChainID ContractAddress Topic0 Topic1 Topic2 Topic3 Uniq
 //
 //go:generate toolkit gen model Contractlog --database MonitorDB
 type Contractlog struct {
@@ -22,7 +23,8 @@ type RelContractlog struct {
 }
 
 type ContractlogData struct {
-	ProjectName string `db:"f_project_name"                 json:"projectName"`
+	ProjectName string     `db:"f_project_name"                 json:"projectName"`
+	Uniq        types.SFID `db:"f_uniq"                         json:"uniq,omitempty"`
 	ContractlogInfo
 }
 
