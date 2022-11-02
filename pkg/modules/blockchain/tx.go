@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
@@ -76,6 +77,10 @@ func (t *tx) checkTxAndSendEvent(ctx context.Context, c *models.Chaintx, address
 	}
 	tx, p, err := client.TransactionByHash(context.Background(), common.HexToHash(c.TxAddress))
 	if err != nil {
+		if err == ethereum.NotFound {
+			l.WithValues("tx_hash", c.TxAddress).Debug("transaction not found")
+			return false, nil
+		}
 		l.Error(err)
 		return false, err
 	}
