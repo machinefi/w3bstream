@@ -1,4 +1,5 @@
 MODULE_NAME = $(shell cat go.mod | grep "^module" | sed -e "s/module //g")
+DOCKER_IMAGE = $(USER)/w3bstream:main
 
 update_go_module:
 	go mod tidy
@@ -52,13 +53,11 @@ init_frontend:
 build_image: update_go_module init_frontend update_frontend
 	@mkdir -p build_image/pgdata
 	@mkdir -p build_image/asserts
-	@docker build -t iotex/w3bstream:v3 .
+	@docker build -t ${DOCKER_IMAGE} .
 
 # drop docker container
 drop_image:
 	@docker-compose -f ./docker-compose.yaml down
-	#@docker stop iotex_w3bstream
-	#@docker rm iotex_w3bstream
 
 # restart docker container
 restart_image:
@@ -68,13 +67,7 @@ restart_image:
 
 # run docker image
 run_image:
-	@WS_WORKING_DIR=$(shell pwd)/build_image docker-compose -p w3bstream -f ./docker-compose.yaml up -d
-	#@docker run -d -it --name iotex_w3bstream  -e DATABASE_URL="postgresql://test_user:test_passwd@127.0.0.1/test?schema=applet_management" -e NEXT_PUBLIC_API_URL="http://127.0.0.1:8888" -p 5432:5432 -p 8888:8888 -p 1883:1883  -p 3000:3000 -v $(shell pwd)/build_image/pgdata:/var/lib/postgresql_data -v $(shell pwd)/build_image/asserts:/w3bstream/cmd/srv-applet-mgr/asserts -v $(shell pwd)/build_image/conf/srv-applet-mgr/config/local.yml:/w3bstream/cmd/srv-applet-mgr/config/local.yml iotex/w3bstream:v3 /bin/sh /init.sh
-
-## run docker image fast
-#run_fast:
-#	@sh ./build_image/run_fast/run_w3bstream.sh start
-
+	@WS_WORKING_DIR=$(shell pwd)/build_image DOCKER_IMAGE=${DOCKER_IMAGE} docker-compose -p w3bstream -f ./docker-compose.yaml up -d
 
 ## migrate first
 run_server: build_server
