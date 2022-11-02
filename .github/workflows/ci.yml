@@ -8,7 +8,7 @@ on:
         
 env:
   REGISTRY: ghcr.io
-  IMAGE: imjeson/w3bstream
+  IMAGE: machinefi/w3bstream
 
       
 jobs:
@@ -58,8 +58,8 @@ jobs:
       uses: docker/login-action@v1
       with:
         registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.TOKEN_GITHUB }}
 
     - name: Extract metadata for Docker
       id: meta

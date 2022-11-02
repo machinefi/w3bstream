@@ -12,10 +12,10 @@ if [ -f "${pg_config}" ]; then
       rm -rf /var/lib/postgresql/13
       chown -R postgres:postgres ${pg_data}/13
       chmod -R 700 ${pg_data}/13
-      su postgres -c "/usr/lib/postgresql/13/bin/postgres -D /var/lib/postgresql_data/13/main -c config_file=/etc/postgresql/13/main/postgresql.conf"&
    else
       echo "PG data exists!"
    fi
+   su postgres -c "/usr/lib/postgresql/13/bin/postgres -D /var/lib/postgresql_data/13/main -c config_file=/etc/postgresql/13/main/postgresql.conf"&
 else
    su postgres -c "/usr/lib/postgresql/13/bin/postgres -D /var/lib/postgresql/13/main -c config_file=/etc/postgresql/13/main/postgresql.conf"&
 fi
