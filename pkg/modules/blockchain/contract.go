@@ -35,7 +35,7 @@ func (t *contract) run(ctx context.Context) {
 func (t *contract) do(ctx context.Context) {
 	d := types.MustMonitorDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
-	m := &models.Contractlog{}
+	m := &models.ContractLog{}
 
 	_, l = l.Start(ctx, "contract.run")
 	defer l.End()
@@ -62,7 +62,7 @@ func (t *contract) do(ctx context.Context) {
 
 		c.BlockCurrent = toBlock
 		if c.BlockEnd > 0 && toBlock >= c.BlockEnd {
-			c.Uniq = c.ContractlogID
+			c.Uniq = c.ContractLogID
 		}
 		if err := c.UpdateByID(d); err != nil {
 			l.Error(errors.Wrap(err, "update contractlog db failed"))
@@ -70,13 +70,13 @@ func (t *contract) do(ctx context.Context) {
 	}
 }
 
-func (t *contract) listChainAndSendEvent(ctx context.Context, c *models.Contractlog, address string) (uint64, error) {
+func (t *contract) listChainAndSendEvent(ctx context.Context, c *models.ContractLog, address string) (uint64, error) {
 	l := types.MustLoggerFromContext(ctx)
 
 	_, l = l.Start(ctx, "contract.listChainAndSendEvent")
 	defer l.End()
 
-	l = l.WithValues("type", "contract_log", "contract_log_id", c.ContractlogID)
+	l = l.WithValues("type", "contract_log", "contract_log_id", c.ContractLogID)
 
 	cli, err := ethclient.Dial(address)
 	if err != nil {
@@ -120,7 +120,7 @@ func (t *contract) listChainAndSendEvent(ctx context.Context, c *models.Contract
 	return to, nil
 }
 
-func (t *contract) getBlockRange(ctx context.Context, cli *ethclient.Client, c *models.Contractlog) (uint64, uint64, error) {
+func (t *contract) getBlockRange(ctx context.Context, cli *ethclient.Client, c *models.ContractLog) (uint64, uint64, error) {
 	l := types.MustLoggerFromContext(ctx)
 
 	_, l = l.Start(ctx, "contract.getBlockRange")
@@ -142,7 +142,7 @@ func (t *contract) getBlockRange(ctx context.Context, cli *ethclient.Client, c *
 	return from, to, nil
 }
 
-func (t *contract) getTopic(c *models.Contractlog) [][]common.Hash {
+func (t *contract) getTopic(c *models.ContractLog) [][]common.Hash {
 	res := make([][]common.Hash, 4)
 	res[0] = t.parseTopic(c.Topic0)
 	res[1] = t.parseTopic(c.Topic1)

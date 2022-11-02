@@ -7,6 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/Bumblebee/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -33,7 +34,7 @@ func (h *height) do(ctx context.Context) {
 	_, l = l.Start(ctx, "height.run")
 	defer l.End()
 
-	cs, err := m.List(d, m.ColFinished().Eq(false))
+	cs, err := m.List(d, m.ColFinished().Eq(datatypes.FALSE))
 	if err != nil {
 		l.Error(errors.Wrap(err, "list chain height db failed"))
 		return
@@ -50,7 +51,7 @@ func (h *height) do(ctx context.Context) {
 			continue
 		}
 		if res {
-			c.Finished = true
+			c.Finished = datatypes.TRUE
 			c.Uniq = c.ChainHeightID
 			if err := c.UpdateByID(d); err != nil {
 				l.Error(errors.Wrap(err, "update chain height db failed"))

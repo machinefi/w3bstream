@@ -5,31 +5,31 @@ import (
 	"github.com/machinefi/Bumblebee/kit/sqlx/datatypes"
 )
 
-// Chaintx database model chaintx
+// ChainTx database model chain tx
 // @def primary                   ID
-// @def unique_index UI_chain_tx_id   ChaintxID
+// @def unique_index UI_chain_tx_id   ChainTxID
 // @def unique_index UI_chain_tx_uniq ProjectName EventType ChainID TxAddress Uniq
 //
-//go:generate toolkit gen model Chaintx --database MonitorDB
-type Chaintx struct {
+//go:generate toolkit gen model ChainTx --database MonitorDB
+type ChainTx struct {
 	datatypes.PrimaryID
-	RelChaintx
-	ChaintxData
+	RelChainTx
+	ChainTxData
 	datatypes.OperationTimes
 }
 
-type RelChaintx struct {
-	ChaintxID types.SFID `db:"f_chaintx_id" json:"chaintxID"`
+type RelChainTx struct {
+	ChainTxID types.SFID `db:"f_chaintx_id" json:"chaintxID"`
 }
 
-type ChaintxData struct {
-	ProjectName string     `db:"f_project_name"                 json:"projectName"`
-	Finished    bool       `db:"f_finished,default='false'"     json:"finished,omitempty"`
-	Uniq        types.SFID `db:"f_uniq,default='0'"             json:"uniq,omitempty"`
-	ChaintxInfo
+type ChainTxData struct {
+	ProjectName string         `db:"f_project_name"                 json:"projectName"`
+	Finished    datatypes.Bool `db:"f_finished,default='false'"     json:"-"`
+	Uniq        types.SFID     `db:"f_uniq,default='0'"             json:"-"`
+	ChainTxInfo
 }
 
-type ChaintxInfo struct {
+type ChainTxInfo struct {
 	EventType string `db:"f_event_type"                   json:"eventType,omitempty"`
 	ChainID   uint64 `db:"f_chain_id"                     json:"chainID"`
 	TxAddress string `db:"f_tx_address"                   json:"txAddress"`

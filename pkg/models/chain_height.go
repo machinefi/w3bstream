@@ -23,9 +23,9 @@ type RelChainHeight struct {
 }
 
 type ChainHeightData struct {
-	ProjectName string     `db:"f_project_name"                 json:"projectName"`
-	Finished    bool       `db:"f_finished,default='false'"     json:"finished,omitempty"`
-	Uniq        types.SFID `db:"f_uniq,default='0'"             json:"uniq,omitempty"`
+	ProjectName string         `db:"f_project_name"                 json:"projectName"`
+	Finished    datatypes.Bool `db:"f_finished,default='false'"     json:"-"`
+	Uniq        types.SFID     `db:"f_uniq,default='0'"             json:"-"`
 	ChainHeightInfo
 }
 

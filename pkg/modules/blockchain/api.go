@@ -6,6 +6,7 @@ import (
 	confid "github.com/machinefi/Bumblebee/conf/id"
 	"github.com/machinefi/Bumblebee/conf/log"
 	"github.com/machinefi/Bumblebee/kit/sqlx"
+	"github.com/machinefi/Bumblebee/kit/sqlx/datatypes"
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/enums"
@@ -23,8 +24,8 @@ type CreateMonitorReq struct {
 }
 
 type (
-	CreateContractlogReq = models.ContractlogInfo
-	CreateChaintxReq     = models.ChaintxInfo
+	CreateContractlogReq = models.ContractLogInfo
+	CreateChaintxReq     = models.ChainTxInfo
 	CreateChainHeightReq = models.ChainHeightInfo
 )
 
@@ -43,7 +44,7 @@ func CreateMonitor(ctx context.Context, projectName string, r *CreateMonitorReq)
 	}
 }
 
-func createContractLog(d sqlx.DBExecutor, projectName string, r *CreateContractlogReq, idg confid.SFIDGenerator) (*models.Contractlog, error) {
+func createContractLog(d sqlx.DBExecutor, projectName string, r *CreateContractlogReq, idg confid.SFIDGenerator) (*models.ContractLog, error) {
 	if err := checkChainID(d, r.ChainID); err != nil {
 		return nil, err
 	}
@@ -51,12 +52,12 @@ func createContractLog(d sqlx.DBExecutor, projectName string, r *CreateContractl
 	n := *r
 	n.BlockCurrent = n.BlockStart
 	n.EventType = getEventType(n.EventType)
-	m := &models.Contractlog{
-		RelContractlog: models.RelContractlog{ContractlogID: idg.MustGenSFID()},
-		ContractlogData: models.ContractlogData{
+	m := &models.ContractLog{
+		RelContractlog: models.RelContractlog{ContractLogID: idg.MustGenSFID()},
+		ContractLogData: models.ContractLogData{
 			ProjectName:     projectName,
 			Uniq:            chainUniqFlag,
-			ContractlogInfo: n,
+			ContractLogInfo: n,
 		},
 	}
 	if err := m.Create(d); err != nil {
@@ -65,19 +66,20 @@ func createContractLog(d sqlx.DBExecutor, projectName string, r *CreateContractl
 	return m, nil
 }
 
-func createChainTx(d sqlx.DBExecutor, projectName string, r *CreateChaintxReq, idg confid.SFIDGenerator) (*models.Chaintx, error) {
+func createChainTx(d sqlx.DBExecutor, projectName string, r *CreateChaintxReq, idg confid.SFIDGenerator) (*models.ChainTx, error) {
 	if err := checkChainID(d, r.ChainID); err != nil {
 		return nil, err
 	}
 
 	n := *r
 	n.EventType = getEventType(n.EventType)
-	m := &models.Chaintx{
-		RelChaintx: models.RelChaintx{ChaintxID: idg.MustGenSFID()},
-		ChaintxData: models.ChaintxData{
+	m := &models.ChainTx{
+		RelChainTx: models.RelChainTx{ChainTxID: idg.MustGenSFID()},
+		ChainTxData: models.ChainTxData{
 			ProjectName: projectName,
 			Uniq:        chainUniqFlag,
-			ChaintxInfo: n,
+			Finished:    datatypes.FALSE,
+			ChainTxInfo: n,
 		},
 	}
 	if err := m.Create(d); err != nil {
@@ -98,6 +100,7 @@ func createChainHeight(d sqlx.DBExecutor, projectName string, r *CreateChainHeig
 		ChainHeightData: models.ChainHeightData{
 			ProjectName:     projectName,
 			Uniq:            chainUniqFlag,
+			Finished:        datatypes.FALSE,
 			ChainHeightInfo: n,
 		},
 	}
@@ -132,7 +135,7 @@ func RemoveMonitor(ctx context.Context, projectName string, r *RemoveMonitorReq)
 
 	switch {
 	case r.ContractlogID != 0:
-		m := &models.Contractlog{RelContractlog: models.RelContractlog{ContractlogID: r.ContractlogID}}
+		m := &models.ContractLog{RelContractlog: models.RelContractlog{ContractLogID: r.ContractlogID}}
 		if err := m.FetchByContractlogID(d); err != nil {
 			return status.CheckDatabaseError(err, "FetchByContractlogID")
 		}
@@ -144,7 +147,7 @@ func RemoveMonitor(ctx context.Context, projectName string, r *RemoveMonitorReq)
 		}
 
 	case r.ChaintxID != 0:
-		m := &models.Chaintx{RelChaintx: models.RelChaintx{ChaintxID: r.ChaintxID}}
+		m := &models.ChainTx{RelChainTx: models.RelChainTx{ChainTxID: r.ChaintxID}}
 		if err := m.FetchByChaintxID(d); err != nil {
 			return status.CheckDatabaseError(err, "FetchByChaintxID")
 		}

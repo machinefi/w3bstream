@@ -5,30 +5,30 @@ import (
 	"github.com/machinefi/Bumblebee/kit/sqlx/datatypes"
 )
 
-// Contractlog database model contractlog
+// ContractLog database model contract log
 // @def primary                   ID
-// @def unique_index UI_contract_log_id   ContractlogID
+// @def unique_index UI_contract_log_id   ContractLogID
 // @def unique_index UI_contract_log_uniq ProjectName EventType ChainID ContractAddress Topic0 Topic1 Topic2 Topic3 Uniq
 //
-//go:generate toolkit gen model Contractlog --database MonitorDB
-type Contractlog struct {
+//go:generate toolkit gen model ContractLog --database MonitorDB
+type ContractLog struct {
 	datatypes.PrimaryID
 	RelContractlog
-	ContractlogData
+	ContractLogData
 	datatypes.OperationTimes
 }
 
 type RelContractlog struct {
-	ContractlogID types.SFID `db:"f_contractlog_id" json:"contractlogID"`
+	ContractLogID types.SFID `db:"f_contractlog_id" json:"contractlogID"`
 }
 
-type ContractlogData struct {
+type ContractLogData struct {
 	ProjectName string     `db:"f_project_name"                 json:"projectName"`
-	Uniq        types.SFID `db:"f_uniq,default='0'"             json:"uniq,omitempty"`
-	ContractlogInfo
+	Uniq        types.SFID `db:"f_uniq,default='0'"             json:"-"`
+	ContractLogInfo
 }
 
-type ContractlogInfo struct {
+type ContractLogInfo struct {
 	EventType       string `db:"f_event_type"                   json:"eventType,omitempty"`
 	ChainID         uint64 `db:"f_chain_id"                     json:"chainID"`
 	ContractAddress string `db:"f_contract_address"             json:"contractAddress"`
