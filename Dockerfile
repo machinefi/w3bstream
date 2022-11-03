@@ -3,7 +3,7 @@ FROM golang:1.19 AS build-go
 COPY . /w3bstream/
 
 WORKDIR /w3bstream
-RUN cd cmd/srv-applet-mgr && GOWORK=off GOOS=linux CGO_ENABLED=1 go build -mod vendor
+RUN cd cmd/srv-applet-mgr && GOWORK=off GOOS=linux CGO_ENABLED=1 go build
 RUN mkdir -p build
 
 #Build noodjs

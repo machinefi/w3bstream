@@ -3,9 +3,7 @@
 
 package demo
 
-import (
-	"github.com/machinefi/Bumblebee/base/types"
-)
+import "github.com/machinefi/w3bstream/pkg/depends/base/types"
 
 // User User Table
 // @def primary                  ID

@@ -5,9 +5,8 @@ import (
 
 	"github.com/mailru/easyjson"
 
-	common "github.com/machinefi/w3bstream/_examples/wasm_common_go"
-
 	"github.com/machinefi/w3bstream/_examples/easyjson/model"
+	common "github.com/machinefi/w3bstream/_examples/wasm_common_go"
 )
 
 func main() {}

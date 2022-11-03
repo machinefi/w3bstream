@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/machinefi/Bumblebee/kit/mq"
-
+	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 

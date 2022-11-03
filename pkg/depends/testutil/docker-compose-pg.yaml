@@ -1,0 +1,18 @@
+version: '3.3'
+services:
+  postgres:
+    image: postgis/postgis
+    container_name: postgis
+    restart: always
+    volumes:
+      - ./var/postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_passwd
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U test_user" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5

@@ -3,9 +3,8 @@ package deploy
 import (
 	"context"
 
-	"github.com/machinefi/Bumblebee/base/types"
-	"github.com/machinefi/Bumblebee/kit/httptransport/httpx"
-
+	"github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
 )

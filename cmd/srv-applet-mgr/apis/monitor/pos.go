@@ -3,9 +3,8 @@ package monitor
 import (
 	"context"
 
-	"github.com/machinefi/Bumblebee/kit/httptransport/httpx"
-
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/modules/blockchain"
 	"github.com/machinefi/w3bstream/pkg/types"
 )

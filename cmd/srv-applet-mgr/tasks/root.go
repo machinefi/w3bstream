@@ -1,6 +1,6 @@
 package tasks
 
-import "github.com/machinefi/Bumblebee/kit/kit"
+import "github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 
 var Root = kit.NewRouter()
 

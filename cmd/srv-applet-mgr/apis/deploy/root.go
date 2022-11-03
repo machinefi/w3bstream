@@ -3,12 +3,11 @@ package deploy
 import (
 	"context"
 
-	"github.com/machinefi/Bumblebee/kit/httptransport"
-	"github.com/machinefi/Bumblebee/kit/kit"
-	"github.com/machinefi/Bumblebee/kit/sqlx"
-	"github.com/machinefi/Bumblebee/kit/sqlx/builder"
-
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"

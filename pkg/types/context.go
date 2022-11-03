@@ -3,14 +3,13 @@ package types
 import (
 	"context"
 
-	"github.com/machinefi/Bumblebee/conf/log"
-	"github.com/machinefi/Bumblebee/conf/mqtt"
-	"github.com/machinefi/Bumblebee/conf/postgres"
-	"github.com/machinefi/Bumblebee/kit/mq"
-	"github.com/machinefi/Bumblebee/kit/sqlx"
-	"github.com/machinefi/Bumblebee/x/contextx"
-	"github.com/machinefi/Bumblebee/x/misc/must"
-
+	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
+	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
+	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
 	"github.com/machinefi/w3bstream/pkg/models"
 )
 

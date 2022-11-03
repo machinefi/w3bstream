@@ -6,20 +6,18 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/machinefi/Bumblebee/kit/sqlx"
-
-	"github.com/machinefi/w3bstream/pkg/modules/vm"
-
-	confid "github.com/machinefi/Bumblebee/conf/id"
-	"github.com/machinefi/Bumblebee/kit/sqlx/builder"
-	"github.com/machinefi/Bumblebee/kit/sqlx/datatypes"
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
+	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/mq"
+	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 

@@ -3,9 +3,8 @@ package models
 import (
 	"database/sql/driver"
 
-	"github.com/machinefi/Bumblebee/base/types"
-	"github.com/machinefi/Bumblebee/kit/sqlx/datatypes"
-
+	"github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/enums"
 )
 

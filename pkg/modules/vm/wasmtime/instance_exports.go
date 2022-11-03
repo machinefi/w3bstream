@@ -13,11 +13,11 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
-	conflog "github.com/machinefi/Bumblebee/conf/log"
-	"github.com/machinefi/Bumblebee/x/mapx"
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 
+	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 

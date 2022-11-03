@@ -9,10 +9,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	g "github.com/machinefi/Bumblebee/gen/codegen"
-	"github.com/machinefi/Bumblebee/kit/modelgen"
-	"github.com/machinefi/Bumblebee/x/pkgx"
 	"github.com/saitofun/qlib/util/qnaming"
+
+	g "github.com/machinefi/w3bstream/pkg/depends/gen/codegen"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/modelgen"
+	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"
 )
 
 type Table struct {

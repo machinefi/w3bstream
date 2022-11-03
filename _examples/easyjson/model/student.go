@@ -1,8 +1,6 @@
 package model
 
-import (
-	"time"
-)
+import "time"
 
 //go:generate easyjson -all student.go
 //easyjson:json

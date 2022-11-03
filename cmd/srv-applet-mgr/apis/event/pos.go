@@ -3,8 +3,7 @@ package event
 import (
 	"context"
 
-	"github.com/machinefi/Bumblebee/kit/httptransport/httpx"
-
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
 )

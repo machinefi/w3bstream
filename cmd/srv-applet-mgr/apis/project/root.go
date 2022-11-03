@@ -1,8 +1,8 @@
 package project
 
 import (
-	"github.com/machinefi/Bumblebee/kit/httptransport"
-	"github.com/machinefi/Bumblebee/kit/kit"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 )
 
 var Root = kit.NewRouter(httptransport.Group("/project"))

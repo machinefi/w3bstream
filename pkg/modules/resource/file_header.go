@@ -14,7 +14,6 @@ import (
 	"github.com/shirou/gopsutil/v3/disk"
 
 	"github.com/machinefi/w3bstream/pkg/depends/util"
-
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 

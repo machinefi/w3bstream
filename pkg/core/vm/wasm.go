@@ -1,8 +1,6 @@
 package vm
 
-import (
-	w "github.com/wasmerio/wasmer-go/wasmer"
-)
+import w "github.com/wasmerio/wasmer-go/wasmer"
 
 type Wasm struct {
 	code     []byte

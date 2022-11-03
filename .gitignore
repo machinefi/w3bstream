@@ -7,3 +7,5 @@ build
 asserts
 vendor
 pgdata
+cmd/srv-applet-mgr/config/local.yml
+cmd/srv-applet-mgr/config/local.yaml

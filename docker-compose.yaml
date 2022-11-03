@@ -1,7 +1,7 @@
 version: '3.6'
 services:
   w3bapp:
-    image: iotex/w3bstream:v3
+    image: ${DOCKER_IMAGE:-ghcr.io/machinefi/w3bstream:main}
     restart: always
     ports:
     - "5432:5432"
@@ -10,8 +10,8 @@ services:
     - "3000:3000"
     command: ["/bin/sh","/init.sh"]
     volumes:
-    - ${WS_WORKING_DIR:-./build_image}/data/pgdata:/var/lib/postgresql_data
-    - ${WS_WORKING_DIR:-./build_image}/data/asserts:/w3bstream/cmd/srv-applet-mgr/asserts
+    - ${WS_WORKING_DIR:-./build_image}/pgdata:/var/lib/postgresql_data
+    - ${WS_WORKING_DIR:-./build_image}/asserts:/w3bstream/cmd/srv-applet-mgr/asserts
     - ${WS_WORKING_DIR:-./build_image}/etc/srv-applet-mgr/config/local.yml:/w3bstream/cmd/srv-applet-mgr/config/local.yml
     - ${WS_WORKING_DIR:-./build_image}/etc/config:/w3bstream/build_image/config
     environment:

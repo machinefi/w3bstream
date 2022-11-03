@@ -1,34 +1,30 @@
 MODULE_NAME = $(shell cat go.mod | grep "^module" | sed -e "s/module //g")
+DOCKER_IMAGE = $(USER)/w3bstream:main
 
 update_go_module:
 	go mod tidy
 
 install_toolkit: update_go_module
-	@go install github.com/machinefi/Bumblebee/gen/cmd/...@latest
-
-install_goimports: update_go_module
-	@go install golang.org/x/tools/cmd/goimports@latest
+	@go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/...
 
 install_easyjson: update_go_module
 	@go install github.com/mailru/easyjson/...@latest
 
 ## TODO add source format as a githook
-format: install_goimports
-	go mod tidy
-	goimports -w -l -local "${MODULE_NAME}" ./
+format: install_toolkit
+	@toolkit fmt
 
 ## gen code
-generate: install_toolkit install_easyjson install_goimports
-	go generate ./...
-	goimports -w -l -local "${MODULE_NAME}" ./
-	toolkit patch goid
+generate: install_toolkit install_easyjson
+	@go generate ./...
+	@toolkit fmt
 
 ## to migrate database models, if model defines changed, make this entry
-migrate: install_toolkit install_easyjson install_goimports
+migrate: install_toolkit install_easyjson
 	go run cmd/srv-applet-mgr/main.go migrate
 
 ## build srv-applet-mgr
-build_server: update_go_module generate format
+build_server:
 	@cd cmd/srv-applet-mgr && go build
 	@mkdir -p build
 	@mv cmd/srv-applet-mgr/srv-applet-mgr build
@@ -40,15 +36,11 @@ build_server: update_go_module generate format
 	@echo 'succeed! config =>build/config/'
 	@echo 'modify config/local.yaml to use your server config'
 
-build_server_for_docker: update_go_module vendor
-	@cd cmd/srv-applet-mgr && GOOS=linux GOWORK=off CGO_ENABLED=1 go build -mod vendor
+build_server_for_docker: update_go_module
+	@cd cmd/srv-applet-mgr && GOOS=linux GOWORK=off CGO_ENABLED=1 go build
 	@mkdir -p build
 	@mv cmd/srv-applet-mgr/srv-applet-mgr build
 	@cp -r cmd/srv-applet-mgr/config build/config
-	@rm -rf vendor
-
-vendor: update_go_module
-	@go mod vendor
 
 #
 update_frontend:
@@ -58,17 +50,14 @@ init_frontend:
 	@git submodule update --init
 
 # build docker image
-build_image: update_go_module vendor init_frontend update_frontend
+build_image: update_go_module init_frontend update_frontend
 	@mkdir -p build_image/pgdata
 	@mkdir -p build_image/asserts
-	@docker build -t iotex/w3bstream:v3 .
-	@rm -rf vendor
+	@docker build -t ${DOCKER_IMAGE} .
 
 # drop docker container
 drop_image:
 	@docker-compose -f ./docker-compose.yaml down
-	#@docker stop iotex_w3bstream
-	#@docker rm iotex_w3bstream
 
 # restart docker container
 restart_image:
@@ -78,13 +67,7 @@ restart_image:
 
 # run docker image
 run_image:
-	@WS_WORKING_DIR=$(shell pwd)/build_image docker-compose -p w3bstream -f ./docker-compose.yaml up -d
-	#@docker run -d -it --name iotex_w3bstream  -e DATABASE_URL="postgresql://test_user:test_passwd@127.0.0.1/test?schema=applet_management" -e NEXT_PUBLIC_API_URL="http://127.0.0.1:8888" -p 5432:5432 -p 8888:8888 -p 1883:1883  -p 3000:3000 -v $(shell pwd)/build_image/pgdata:/var/lib/postgresql_data -v $(shell pwd)/build_image/asserts:/w3bstream/cmd/srv-applet-mgr/asserts -v $(shell pwd)/build_image/conf/srv-applet-mgr/config/local.yml:/w3bstream/cmd/srv-applet-mgr/config/local.yml iotex/w3bstream:v3 /bin/sh /init.sh
-
-## run docker image fast
-#run_fast:
-#	@sh ./build_image/run_fast/run_w3bstream.sh start
-
+	@WS_WORKING_DIR=$(shell pwd)/build_image DOCKER_IMAGE=${DOCKER_IMAGE} docker-compose -p w3bstream -f ./docker-compose.yaml up -d
 
 ## migrate first
 run_server: build_server
@@ -102,8 +85,12 @@ clean:
 	@echo 'remove build/{config,pub_client,srv-applet-mgr}'
 
 run_depends:
-	docker-compose -f testutil/docker-compose-pg.yaml up -d
-	docker-compose -f testutil/docker-compose-mqtt.yaml up -d
+	@docker-compose -f testutil/docker-compose-pg.yaml up -d
+	@docker-compose -f testutil/docker-compose-mqtt.yaml up -d
+
+stop_depends:
+	@docker-compose -f testutil/docker-compose-pg.yaml stop
+	@docker-compose -f testutil/docker-compose-mqtt.yaml stop
 
 wasm_demo: update_go_module
 	@cd _examples && make all

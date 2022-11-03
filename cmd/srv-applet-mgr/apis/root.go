@@ -1,10 +1,6 @@
 package apis
 
 import (
-	"github.com/machinefi/Bumblebee/conf/jwt"
-	"github.com/machinefi/Bumblebee/kit/httptransport"
-	"github.com/machinefi/Bumblebee/kit/kit"
-
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/account"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/applet"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/deploy"
@@ -15,6 +11,9 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/project"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/publisher"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/strategy"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 )
 
 var (

@@ -3,10 +3,10 @@ package vm
 import (
 	"context"
 
-	confid "github.com/machinefi/Bumblebee/conf/id"
-	"github.com/machinefi/Bumblebee/x/mapx"
 	"github.com/pkg/errors"
 
+	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"

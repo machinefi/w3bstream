@@ -6,9 +6,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/machinefi/w3bstream/pkg/enums"
-
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
+	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/modules/publisher"

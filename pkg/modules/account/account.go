@@ -3,10 +3,10 @@ package account
 import (
 	"context"
 
-	confid "github.com/machinefi/Bumblebee/conf/id"
-	"github.com/machinefi/Bumblebee/kit/sqlx/builder"
 	"github.com/pkg/errors"
 
+	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/util"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"

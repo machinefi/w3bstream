@@ -3,9 +3,7 @@
 
 package demo
 
-import (
-	"github.com/machinefi/Bumblebee/kit/sqlx/builder"
-)
+import "github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 
 var UserTable *builder.Table
 

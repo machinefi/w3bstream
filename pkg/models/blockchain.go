@@ -1,8 +1,6 @@
 package models
 
-import (
-	"github.com/machinefi/Bumblebee/kit/sqlx/datatypes"
-)
+import "github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 
 // Blockchain database model blockchain
 // @def primary                   ID

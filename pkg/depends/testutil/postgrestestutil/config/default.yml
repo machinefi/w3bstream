@@ -1,0 +1,6 @@
+TEST__PGCLI__ConnMaxLifetime: 1h
+TEST__PGCLI__Master: postgres://test_user:test_passwd@127.0.0.1:5432/test?sslmode=disable
+TEST__PGCLI__PoolSize: "10"
+TEST__PGCLI__Retry_Interval: 3s
+TEST__PGCLI__Retry_Repeats: "3"
+TEST__PGCLI__Slave: //localhost

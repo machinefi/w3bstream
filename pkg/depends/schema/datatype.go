@@ -1,8 +1,6 @@
 package schema
 
-import (
-	"github.com/machinefi/Bumblebee/gen/codegen"
-)
+import "github.com/machinefi/w3bstream/pkg/depends/gen/codegen"
 
 //go:generate toolkit gen enum Datatype
 type Datatype uint8
@@ -56,4 +54,4 @@ func (d *Datatype) CodeGenType(f *codegen.File) codegen.SnippetType {
 	return codegen.Int
 }
 
-var PkgTypes = "github.com/machinefi/Bumblebee/base/types"
+var PkgTypes = "github.com/machinefi/w3bstream/pkg/depends/base/types"
