@@ -17,14 +17,14 @@ import (
 const chainUniqFlag = 0
 
 type CreateMonitorReq struct {
-	Contractlog *CreateContractlogReq `json:"contractLog,omitempty"`
-	Chaintx     *CreateChaintxReq     `json:"chainTx,omitempty"`
+	ContractLog *CreateContractLogReq `json:"contractLog,omitempty"`
+	ChainTx     *CreateChainTxReq     `json:"chainTx,omitempty"`
 	ChainHeight *CreateChainHeightReq `json:"chainHeight,omitempty"`
 }
 
 type (
-	CreateContractlogReq = models.ContractLogInfo
-	CreateChaintxReq     = models.ChainTxInfo
+	CreateContractLogReq = models.ContractLogInfo
+	CreateChainTxReq     = models.ChainTxInfo
 	CreateChainHeightReq = models.ChainHeightInfo
 )
 
@@ -32,10 +32,10 @@ func CreateMonitor(ctx context.Context, projectName string, r *CreateMonitorReq)
 	d := types.MustMonitorDBExecutorFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 	switch {
-	case r.Contractlog != nil:
-		return createContractLog(d, projectName, r.Contractlog, idg)
-	case r.Chaintx != nil:
-		return createChainTx(d, projectName, r.Chaintx, idg)
+	case r.ContractLog != nil:
+		return createContractLog(d, projectName, r.ContractLog, idg)
+	case r.ChainTx != nil:
+		return createChainTx(d, projectName, r.ChainTx, idg)
 	case r.ChainHeight != nil:
 		return createChainHeight(d, projectName, r.ChainHeight, idg)
 	default:
@@ -43,7 +43,7 @@ func CreateMonitor(ctx context.Context, projectName string, r *CreateMonitorReq)
 	}
 }
 
-func createContractLog(d sqlx.DBExecutor, projectName string, r *CreateContractlogReq, idg confid.SFIDGenerator) (*models.ContractLog, error) {
+func createContractLog(d sqlx.DBExecutor, projectName string, r *CreateContractLogReq, idg confid.SFIDGenerator) (*models.ContractLog, error) {
 	if err := checkChainID(d, r.ChainID); err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func createContractLog(d sqlx.DBExecutor, projectName string, r *CreateContractl
 	return m, nil
 }
 
-func createChainTx(d sqlx.DBExecutor, projectName string, r *CreateChaintxReq, idg confid.SFIDGenerator) (*models.ChainTx, error) {
+func createChainTx(d sqlx.DBExecutor, projectName string, r *CreateChainTxReq, idg confid.SFIDGenerator) (*models.ChainTx, error) {
 	if err := checkChainID(d, r.ChainID); err != nil {
 		return nil, err
 	}
