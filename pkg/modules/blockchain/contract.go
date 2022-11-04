@@ -59,8 +59,8 @@ func (t *contract) do(ctx context.Context) {
 			continue
 		}
 
-		c.BlockCurrent = toBlock
-		if c.BlockEnd > 0 && toBlock >= c.BlockEnd {
+		c.BlockCurrent = toBlock + 1
+		if c.BlockEnd > 0 && c.BlockCurrent >= c.BlockEnd {
 			c.Uniq = c.ContractLogID
 		}
 		if err := c.UpdateByID(d); err != nil {

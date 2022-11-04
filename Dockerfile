@@ -94,6 +94,7 @@ RUN ln -s /root/.local/share/pnpm/pnpm /usr/bin/pnpm
 RUN mkdir -p /w3bstream/cmd/srv-applet-mgr/config
 COPY --from=build-go /w3bstream/cmd/srv-applet-mgr/srv-applet-mgr /w3bstream/cmd/srv-applet-mgr/srv-applet-mgr
 COPY --from=build-go /w3bstream/cmd/srv-applet-mgr/config/default.yml /w3bstream/cmd/srv-applet-mgr/config/default.yml
+#COPY --from=build-go /w3bstream/cmd/srv-applet-mgr/config/local.yml /w3bstream/cmd/srv-applet-mgr/config/local.yml
 
 
 #COPY --from=build-nodejs /w3bstream/frontend /w3bstream/frontend

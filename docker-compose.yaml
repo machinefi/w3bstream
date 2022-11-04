@@ -2,6 +2,7 @@ version: '3.6'
 services:
   w3bapp:
     image: ${DOCKER_IMAGE:-ghcr.io/machinefi/w3bstream:main}
+    container_name: w3bstream
     restart: always
     ports:
     - "5432:5432"

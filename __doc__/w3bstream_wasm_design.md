@@ -110,7 +110,7 @@ fn ws_log(logLevel i32, ptr i32, size i32) -> i32 {
 //        "value": "0",
 //        "data":  "..."  // hex encoding 
 // }`
-fn ws_write_contract(key_data i32, key_size i32, return_value_ptr i32, return_value_size i32) -> i32 {}
+fn ws_send_tx(encoded_data i32, encoded_size i32, return_value_ptr i32, return_value_size i32) -> i32 {}
 
 // an example of encoded data
 // `{
