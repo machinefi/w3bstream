@@ -9,19 +9,53 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-type RemoveMonitor struct {
+type RemoveContractLog struct {
 	httpx.MethodDelete
-	ProjectID                   types.SFID `in:"path" name:"projectID"`
-	blockchain.RemoveMonitorReq `in:"body"`
+	ProjectID     types.SFID `in:"path" name:"projectID"`
+	ContractLogID types.SFID `in:"path" name:"contractLogID"`
 }
 
-func (r *RemoveMonitor) Path() string { return "/:projectID" }
+func (r *RemoveContractLog) Path() string { return "/contract_log/:projectID" }
 
-func (r *RemoveMonitor) Output(ctx context.Context) (interface{}, error) {
+func (r *RemoveContractLog) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.CurrentAccountFromContext(ctx)
 	p, err := ca.ValidateProjectPerm(ctx, r.ProjectID)
 	if err != nil {
 		return nil, err
 	}
-	return nil, blockchain.RemoveMonitor(ctx, p.Name, &r.RemoveMonitorReq)
+	return nil, blockchain.RemoveContractLog(ctx, p.Name, r.ContractLogID)
+}
+
+type RemoveChainTx struct {
+	httpx.MethodDelete
+	ProjectID types.SFID `in:"path" name:"projectID"`
+	ChainTxID types.SFID `in:"path" name:"chainTxID"`
+}
+
+func (r *RemoveChainTx) Path() string { return "/chain_tx/:projectID" }
+
+func (r *RemoveChainTx) Output(ctx context.Context) (interface{}, error) {
+	ca := middleware.CurrentAccountFromContext(ctx)
+	p, err := ca.ValidateProjectPerm(ctx, r.ProjectID)
+	if err != nil {
+		return nil, err
+	}
+	return nil, blockchain.RemoveChainTx(ctx, p.Name, r.ChainTxID)
+}
+
+type RemoveChainHeight struct {
+	httpx.MethodDelete
+	ProjectID     types.SFID `in:"path" name:"projectID"`
+	ChainHeightID types.SFID `in:"path" name:"chainHeightID"`
+}
+
+func (r *RemoveChainHeight) Path() string { return "/chain_height/:projectID" }
+
+func (r *RemoveChainHeight) Output(ctx context.Context) (interface{}, error) {
+	ca := middleware.CurrentAccountFromContext(ctx)
+	p, err := ca.ValidateProjectPerm(ctx, r.ProjectID)
+	if err != nil {
+		return nil, err
+	}
+	return nil, blockchain.RemoveChainHeight(ctx, p.Name, r.ChainHeightID)
 }

@@ -13,12 +13,12 @@ import (
 //go:generate toolkit gen model ContractLog --database MonitorDB
 type ContractLog struct {
 	datatypes.PrimaryID
-	RelContractlog
+	RelContractLog
 	ContractLogData
 	datatypes.OperationTimes
 }
 
-type RelContractlog struct {
+type RelContractLog struct {
 	ContractLogID types.SFID `db:"f_contractlog_id" json:"contractlogID"`
 }
 

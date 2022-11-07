@@ -9,19 +9,53 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-type CreateMonitor struct {
+type CreateContractLog struct {
 	httpx.MethodPost
-	ProjectID                   types.SFID `in:"path" name:"projectID"`
-	blockchain.CreateMonitorReq `in:"body"`
+	ProjectID                       types.SFID `in:"path" name:"projectID"`
+	blockchain.CreateContractLogReq `in:"body"`
 }
 
-func (r *CreateMonitor) Path() string { return "/:projectID" }
+func (r *CreateContractLog) Path() string { return "/contract_log/:projectID" }
 
-func (r *CreateMonitor) Output(ctx context.Context) (interface{}, error) {
+func (r *CreateContractLog) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.CurrentAccountFromContext(ctx)
 	p, err := ca.ValidateProjectPerm(ctx, r.ProjectID)
 	if err != nil {
 		return nil, err
 	}
-	return blockchain.CreateMonitor(ctx, p.Name, &r.CreateMonitorReq)
+	return blockchain.CreateContractLog(ctx, p.Name, &r.CreateContractLogReq)
+}
+
+type CreateChainTx struct {
+	httpx.MethodPost
+	ProjectID                   types.SFID `in:"path" name:"projectID"`
+	blockchain.CreateChainTxReq `in:"body"`
+}
+
+func (r *CreateChainTx) Path() string { return "/chain_tx/:projectID" }
+
+func (r *CreateChainTx) Output(ctx context.Context) (interface{}, error) {
+	ca := middleware.CurrentAccountFromContext(ctx)
+	p, err := ca.ValidateProjectPerm(ctx, r.ProjectID)
+	if err != nil {
+		return nil, err
+	}
+	return blockchain.CreateChainTx(ctx, p.Name, &r.CreateChainTxReq)
+}
+
+type CreateChainHeight struct {
+	httpx.MethodPost
+	ProjectID                       types.SFID `in:"path" name:"projectID"`
+	blockchain.CreateChainHeightReq `in:"body"`
+}
+
+func (r *CreateChainHeight) Path() string { return "/chain_height/:projectID" }
+
+func (r *CreateChainHeight) Output(ctx context.Context) (interface{}, error) {
+	ca := middleware.CurrentAccountFromContext(ctx)
+	p, err := ca.ValidateProjectPerm(ctx, r.ProjectID)
+	if err != nil {
+		return nil, err
+	}
+	return blockchain.CreateChainHeight(ctx, p.Name, &r.CreateChainHeightReq)
 }

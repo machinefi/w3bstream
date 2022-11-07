@@ -8,6 +8,6 @@ import (
 var Root = kit.NewRouter(httptransport.Group("/monitor"))
 
 func init() {
-	Root.Register(kit.NewRouter(&CreateMonitor{}))
-	Root.Register(kit.NewRouter(&RemoveMonitor{}))
+	Root.Register(kit.NewRouter(&CreateContractLog{}))
+	Root.Register(kit.NewRouter(&RemoveContractLog{}))
 }
