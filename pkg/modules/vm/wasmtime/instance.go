@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"encoding/binary"
+	"errors"
 	"time"
 
 	"github.com/bytecodealliance/wasmtime-go"
@@ -33,20 +34,10 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte) (*Instan
 	res := mapx.New[uint32, []byte]()
 	db := make(map[string][]byte)
 
-	var cl *ChainClient
-	if ethConf, ok := types.ETHClientConfigFromContext(ctx); ok {
-		chain, err := ethclient.Dial(ethConf.ChainEndpoint)
-		if err != nil {
-			return nil, err
-		}
-		var pvk *ecdsa.PrivateKey
-		if len(ethConf.PrivateKey) > 0 {
-			pvk = crypto.ToECDSAUnsafe(gethCommon.FromHex(ethConf.PrivateKey))
-		}
-		cl = &ChainClient{
-			pvk:   pvk,
-			chain: chain,
-		}
+	cl, err := buildChainClient(l, ctx)
+	if err != nil {
+		l.Error(err)
+		return nil, err
 	}
 
 	ef := ExportFuncs{
@@ -94,6 +85,30 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte) (*Instan
 		res:        res,
 		handlers:   make(map[string]*wasmtime.Func),
 		db:         db,
+	}, nil
+}
+
+func buildChainClient(l log.Logger, ctx context.Context) (*ChainClient, error) {
+	ethConf, ok := types.ETHClientConfigFromContext(ctx)
+	if !ok {
+		return nil, errors.New("fail to read eth client conf")
+	}
+	if len(ethConf.ChainEndpoint) == 0 {
+		l.Warn(errors.New("no chain client is established due to empty chain endpoint"))
+		return nil, nil
+	}
+	chain, err := ethclient.Dial(ethConf.ChainEndpoint)
+	if err != nil {
+		l.Error(errors.New("fail to dial the endpoint of the chain"))
+		return nil, err
+	}
+	var pvk *ecdsa.PrivateKey
+	if len(ethConf.PrivateKey) > 0 {
+		pvk = crypto.ToECDSAUnsafe(gethCommon.FromHex(ethConf.PrivateKey))
+	}
+	return &ChainClient{
+		pvk:   pvk,
+		chain: chain,
 	}, nil
 }
 

@@ -1,5 +1,6 @@
 MODULE_NAME = $(shell cat go.mod | grep "^module" | sed -e "s/module //g")
 DOCKER_IMAGE = $(USER)/w3bstream:main
+STUDIO_DOCKER_IMAGE = $(USER)/w3bstream-studio:main
 
 update_go_module:
 	go mod tidy
@@ -26,15 +27,9 @@ migrate: install_toolkit install_easyjson
 ## build srv-applet-mgr
 build_server:
 	@cd cmd/srv-applet-mgr && go build
-	@mkdir -p build
-	@mv cmd/srv-applet-mgr/srv-applet-mgr build
-	@rm -rf build/config
-	@mkdir -p build/config
-	@cp cmd/srv-applet-mgr/config/default.yml build/config/default.yml
-	@cp build_image/etc/srv-applet-mgr/config/local.yml build/config/local.yml
-	@echo 'succeed! srv-applet-mgr =>build/srv-applet-mgr*'
-	@echo 'succeed! config =>build/config/'
-	@echo 'modify config/local.yaml to use your server config'
+	@echo 'succeed! srv-applet-mgr =>cmd/srv-applet-mgr/srv-applet-mgrr*'
+	@echo 'succeed! config =>cmd/srv-applet-mgr/config'
+	@echo 'modify cmd/srv-applet-mgr/config/local.yaml to use your server config'
 
 build_server_for_docker: update_go_module
 	@cd cmd/srv-applet-mgr && GOOS=linux GOWORK=off CGO_ENABLED=1 go build
@@ -43,31 +38,37 @@ build_server_for_docker: update_go_module
 	@cp -r cmd/srv-applet-mgr/config build/config
 
 #
-update_frontend:
-	@cd frontend &&	git pull origin main
+update_studio:
+	@cd studio && git pull origin main
 
-init_frontend:
+init_submodules:
 	@git submodule update --init
 
-# build docker image
-build_image: update_go_module init_frontend update_frontend
-	@mkdir -p build_image/pgdata
-	@mkdir -p build_image/asserts
-	@docker build -t ${DOCKER_IMAGE} .
+# build docker images
+build_backend_image: update_go_module
+	@docker build -f Dockerfile -t ${DOCKER_IMAGE} .
 
-# drop docker container
-drop_image:
+build_studio_image: init_submodules update_studio
+	@cd studio && docker build -f Dockerfile -t ${STUDIO_DOCKER_IMAGE} .
+
+build_docker_images: build_backend_image build_studio_image
+
+# stop server running in docker containers
+stop_docker:
+	@docker-compose -f ./docker-compose.yaml stop
+
+# stop docker and delete docker resouces
+drop_docker:
 	@docker-compose -f ./docker-compose.yaml down
 
-# restart docker container
-restart_image:
-	@docker-compose -f ./docker-compose.yaml down
-	@echo "The container was shut down before, now restart it"
-	@WS_WORKING_DIR=$(shell pwd)/build_image docker-compose -p w3bstream -f ./docker-compose.yaml up -d
+# restart server in docker containers
+restart_docker: drop_docker
+	@echo "The containers have been shut down, now restart the server"
+	@WS_WORKING_DIR=$(shell pwd)/working_dir WS_BACKEND_IMAGE=${DOCKER_IMAGE} WS_STUDIO_IMAGE=${STUDIO_DOCKER_IMAGE} docker-compose -p w3bstream -f ./docker-compose.yaml up -d
 
-# run docker image
-run_image:
-	@WS_WORKING_DIR=$(shell pwd)/build_image DOCKER_IMAGE=${DOCKER_IMAGE} docker-compose -p w3bstream -f ./docker-compose.yaml up -d
+# run server in docker containers
+run_docker:
+	@WS_WORKING_DIR=$(shell pwd)/working_dir WS_BACKEND_IMAGE=${DOCKER_IMAGE} WS_STUDIO_IMAGE=${STUDIO_DOCKER_IMAGE} docker-compose -p w3bstream -f ./docker-compose.yaml up -d
 
 ## migrate first
 run_server: build_server

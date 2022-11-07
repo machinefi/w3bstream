@@ -1,0 +1,365 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: w3bstream-example
+  app: w3bstream
+data:
+  HASURA_GRAPHQL_ADMIN_SECRET: "w3baAdmiNsecrEtkey"
+  HASURA_GRAPHQL_DATABASE_URL: "postgresql://w3badmin:PaSsW0Rd@postgres-example:5432/w3bstream"
+  POSTGRES_USER: "w3badmin"
+  POSTGRES_PASSWORD: "PaSsW0Rd"
+  POSTGRES_DB: "w3bstream"
+  NEXT_PUBLIC_API_URL: "http://w3bstream-example:8888"
+  DATABASE_URL: "postgresql://w3badmin:PaSsW0Rd@postgres-example:5432/w3bstream?schema=applet_management"
+  DATABASE_URL_MONITOR: "postgresql://w3badmin:PaSsW0Rd@postgres-example:5432/w3bstream?schema=monitor"
+  SRV_APPLET_MGR__ETHCLIENTCONFIG__ChainEndpoint: "https://babel-api.testnet.iotex.io/"
+  SRV_APPLET_MGR__ETHCLIENTCONFIG__PrivateKey: ""
+  SRV_APPLET_MGR__JWT__ExpIn: 1h
+  SRV_APPLET_MGR__JWT__Issuer: "w3bstream"
+  SRV_APPLET_MGR__JWT__SignKey: "xxxx"
+  SRV_APPLET_MGR__PGCLI__Master: "postgresql://w3badmin:PaSsW0Rd@postgres-example:5432/w3bstream?sslmode=disable"
+  SRV_APPLET_MGR__SERVER__Port: "8888"
+  SRV_APPLET_MGR__BROKER__Server: mqtt://mqtt_server-example:1883
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: w3bstream-example
+  app: w3bstream
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: w3bstream-example
+      app: w3bstream
+  template:
+    metadata:
+      labels:
+        name: w3bstream-example
+        app: w3bstream
+    spec:
+      containers:
+        - name: w3bstream
+          image: ghcr.io/machinefi/w3bstream:main
+          resources:
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+          envFrom:
+            - configMapKeyRef:
+                name: w3bstream-example
+                key: SRV_APPLET_MGR__ETHCLIENTCONFIG__ChainEndpoint
+            - configMapKeyRef:
+                name: w3bstream-example
+                key: SRV_APPLET_MGR__ETHCLIENTCONFIG__PrivateKey
+            - configMapKeyRef:
+                name: w3bstream-example
+                key: SRV_APPLET_MGR__JWT__ExpIn
+            - configMapKeyRef:
+                name: w3bstream-example
+                key: SRV_APPLET_MGR__JWT__Issuer
+            - configMapKeyRef:
+                name: w3bstream-example
+                key: SRV_APPLET_MGR__JWT__SignKey
+            - configMapKeyRef:
+                name: w3bstream-example
+                key: SRV_APPLET_MGR__PGCLI__Master
+            - configMapKeyRef:
+                name: w3bstream-example
+                key: SRV_APPLET_MGR__SERVER__Port
+            - configMapKeyRef:
+                name: w3bstream-example
+                key: SRV_APPLET_MGR__BROKER__Server
+          ports:
+            - containerPort: 8888
+          volumeMounts:
+            - mountPath: /w3bstream/asserts
+              name: asserts
+      volumes:
+        - name: asserts
+          persistentVolumeClaim:
+            claimName: w3bstream-example-asserts
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: w3bstream-example-asserts
+  app: w3bstream
+spec:
+  resources:
+    requests:
+      storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: w3bstream-example
+  app: w3bstream
+spec:
+  selector:
+    name: w3bstream-example
+    app: w3bstream
+  ports:
+    - port: 8888
+      targetPort: 8888
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: w3bstream-studio-example
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: w3bstream-studio-example
+      app: w3bstream
+  template:
+    metadata:
+      labels:
+        name: w3bstream-studio-example
+        app: w3bstream
+    spec:
+      containers:
+        - name: w3bstream
+          image: ghcr.io/machinefi/w3bstream-studio:main
+          command:
+            - node
+            - server.js
+          envFrom:
+            - configMapKeyRef:
+                name: w3bstream-example
+                key: DATABASE_URL
+            - configMapKeyRef:
+                name: w3bstream-example
+                key: DATABASE_URL_MONITOR
+            - configMapKeyRef:
+                name: w3bstream-example
+                key: NEXT_PUBLIC_API_URL
+          resources:
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: w3bstream-studio-example
+  app: w3bstream
+spec:
+  selector:
+    name: w3bstream-studio-example
+    app: w3bstream
+  ports:
+    - port: 3000
+      targetPort: 3000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-example
+  labels:
+    app: w3bstream
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+  selector:
+    name: postgres-example
+    app: w3bstream
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-example
+  labels:
+    name: postgres-example
+    app: w3bstream
+spec:
+  replicas: 1
+  serviceName: postgres-example
+  selector:
+    matchLabels:
+      name: postgres-example
+      app: w3bstream
+  template:
+    metadata:
+      labels:
+        name: postgres-example
+        app: w3bstream
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:13
+          imagePullPolicy: Always
+          command: ["postgres", "-cshared_preload_libraries=pg_stat_statements"]
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: datadir
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              memory: 1Gi
+              cpu: 1
+            limits:
+              memory: 1Gi
+              cpu: 1
+          envFrom:
+            - configMapKeyRef:
+                name: w3bstream-example
+                key: POSTGRES_USER
+            - configMapKeyRef:
+                name: w3bstream-example
+                key: POSTGRES_PASSWORD
+            - configMapKeyRef:
+                name: w3bstream-example
+                key: POSTGRES_DB
+
+  volumeClaimTemplates:
+    - metadata:
+        name: datadir
+        labels:
+          name: postgres-example
+          app: w3bstream
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 100Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mqtt_server-example
+  labels:
+    app: w3bstream
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 1883
+      targetPort: 1883
+  selector:
+    name: mqtt_server-example
+    app: w3bstream
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mqtt_server-example
+  labels:
+    name: mqtt_server-example
+    app: w3bstream
+spec:
+  replicas: 1
+  serviceName: mqtt_server-example
+  selector:
+    matchLabels:
+      name: mqtt_server-example
+      app: w3bstream
+  template:
+    metadata:
+      labels:
+        name: mqtt_server-example
+        app: w3bstream
+    spec:
+      containers:
+        - name: mqtt_server-example
+          image: eclipse-mosquitto:1.6.15
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 1883
+          volumeMounts:
+            - name: datadir
+              mountPath: /mosquitto/data
+          resources:
+            requests:
+              memory: 1Gi
+              cpu: 1
+            limits:
+              memory: 1Gi
+              cpu: 1
+
+  volumeClaimTemplates:
+    - metadata:
+        name: datadir
+        labels:
+          name: mqtt_server-example
+          app: w3bstream
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 50Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hasura-example
+  app: w3bstream
+spec:
+  replicas: 1
+  serviceName: hasura-example
+  selector:
+    matchLabels:
+      name: hasura-example
+      app: w3bstream
+  template:
+    metadata:
+      labels:
+        name: hasura-example
+        app: w3bstream
+    spec:
+      containers:
+        - name: hasura
+          image: hasura/graphql-engine:v2.14.0
+          envFrom:
+            - configMapKeyRef:
+                name: w3bstream-example
+                key: HASURA_GRAPHQL_DATABASE_URL
+            - configMapKeyRef:
+                name: w3bstream-example
+                key: HASURA_GRAPHQL_ADMIN_SECRET
+          env:
+            - name: HASURA_GRAPHQL_ENABLE_CONSOLE
+              value: "true"
+            - name: example_GRAPHQL_DEV_MODE
+              value: "true"
+            - name: HASURA_GRAPHQL_UNAUTHORIZED_ROLE
+              value: "anonymous"
+          resources:
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+            requests:
+              memory: "1Gi"
+              cpu: "1"
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hasura-example
+  app: w3bstream
+spec:
+  selector:
+    name: hasura-example
+    app: w3bstream
+  ports:
+    - port: 8080
+      targetPort: 8080

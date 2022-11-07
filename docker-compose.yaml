@@ -1,42 +1,72 @@
-version: '3.6'
+version: "3.6"
+
 services:
   w3bapp:
-    image: ${DOCKER_IMAGE:-ghcr.io/machinefi/w3bstream:main}
-    container_name: w3bstream
-    restart: always
-    ports:
-    - "5432:5432"
-    - "8888:8888"
-    - "1883:1883"
-    - "3000:3000"
-    command: ["/bin/sh","/init.sh"]
-    volumes:
-    - ${WS_WORKING_DIR:-./build_image}/pgdata:/var/lib/postgresql_data
-    - ${WS_WORKING_DIR:-./build_image}/asserts:/w3bstream/cmd/srv-applet-mgr/asserts
-    - ${WS_WORKING_DIR:-./build_image}/etc/srv-applet-mgr/config/local.yml:/w3bstream/cmd/srv-applet-mgr/config/local.yml
-    - ${WS_WORKING_DIR:-./build_image}/etc/config:/w3bstream/build_image/config
-    environment:
-      DATABASE_URL: "postgresql://test_user:test_passwd@127.0.0.1/test?schema=applet_management"
-      DATABASE_URL_MONITOR: "postgresql://test_user:test_passwd@127.0.0.1/test?schema=monitor"
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://127.0.0.1:8888}
-  graphql-engine:
-    image: hasura/graphql-engine:v2.2.0
+    image: ${WS_BACKEND_IMAGE:-ghcr.io/machinefi/w3bstream:main}
     depends_on:
-    - "w3bapp"
+      - "postgres"
+      - "mqtt_server"
+    container_name: w3bstream
+    working_dir: /w3bstream
     restart: always
     ports:
-    - "8080:8080"
+      - "8888:8888"
     environment:
-      ## postgres database to store Hasura metadata
-      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgresql://test_user:test_passwd@w3bapp/test
-      ## enable the console served by server
-      HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set "false" to disable console
-      ## enable debugging mode. It is recommended to disable this in production
-      HASURA_GRAPHQL_DEV_MODE: "true"
-      ## enable debugging mode. It is recommended to disable this in production
+      SRV_APPLET_MGR__ETHCLIENTCONFIG__ChainEndpoint: ${CHAIN_ENDPOINT:-https://babel-api.testnet.iotex.io/}
+      SRV_APPLET_MGR__ETHCLIENTCONFIG__PrivateKey: ${PRIVATE_KEY:-""}
+      SRV_APPLET_MGR__JWT__ExpIn: 1h
+      SRV_APPLET_MGR__JWT__Issuer: ${JWT_ISSUER:-w3bstream}
+      SRV_APPLET_MGR__JWT__SignKey: ${JWT_SIGN_KEY:-xxxx}
+      SRV_APPLET_MGR__PGCLI__Master: "postgresql://${POSTGRES_USER:-w3badmin}:${POSTGRES_PASSWORD:-PaSsW0Rd}@postgres:5432/${POSTGRES_DB:-w3bstream}?sslmode=disable"
+      SRV_APPLET_MGR__SERVER__Port: "8888"
+      SRV_APPLET_MGR__BROKER__Server: mqtt://mqtt_server:1883
+    volumes:
+      - ${WS_WORKING_DIR:-.}/asserts:/w3bstream/asserts
+
+  w3bstream-studio:
+    image: ${WS_STUDIO_IMAGE:-ghcr.io/machinefi/w3bstream-studio:main}
+    container_name: w3bstream-studio
+    restart: always
+    working_dir: /w3bstream-studio
+    command: ["node", "server.js"]
+    depends_on:
+      - "postgres"
+      - "w3bapp"
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-w3badmin}:${POSTGRES_PASSWORD:-PaSsW0Rd}@postgres:5432/${POSTGRES_DB:-w3bstream}?schema=applet_management"
+      DATABASE_URL_MONITOR: "postgresql://${POSTGRES_USER:-w3badmin}:${POSTGRES_PASSWORD:-PaSsW0Rd}@postgres:5432/${POSTGRES_DB:-w3bstream}?schema=monitor"
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8888}
+
+  mqtt_server:
+    image: eclipse-mosquitto:1.6.15
+    container_name: mosquitto
+    restart: always
+    volumes:
+      - ${WS_WORKING_DIR:-.}/mqtt:/mosquitto/data
+
+  postgres:
+    image: postgres:13
+    restart: always
+    command: ["postgres", "-cshared_preload_libraries=pg_stat_statements"]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-w3badmin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-PaSsW0Rd}
+      POSTGRES_DB: ${POSTGRES_DB:-w3bstream}
+    volumes:
+      - ${WS_WORKING_DIR:-.}/postgres:/var/lib/postgresql/data
+
+  graphql-engine:
+    image: hasura/graphql-engine:v2.14.0
+    depends_on:
+      - "postgres"
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      HASURA_GRAPHQL_METADATA_DATABASE_URL: "postgresql://${POSTGRES_USER:-w3badmin}:${POSTGRES_PASSWORD:-PaSsW0Rd}@postgres:5432/${POSTGRES_DB:-w3bstream}"
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
       HASURA_GRAPHQL_DEV_MODE: "true"
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
-      ## uncomment next line to run console offline (i.e load console assets from server instead of CDN)
-      # HASURA_GRAPHQL_CONSOLE_ASSETS_DIR: /srv/console-assets
-      ## uncomment next line to set an admin secret
-      HASURA_GRAPHQL_ADMIN_SECRET: w3baAdmiNsecrEtkey
+      HASURA_GRAPHQL_ADMIN_SECRET: ${ADMIN_SECRET:-w3baAdmiNsecrEtkey}
