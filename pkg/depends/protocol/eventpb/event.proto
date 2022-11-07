@@ -1,6 +1,6 @@
 syntax = "proto3";
 package eventpb;
-option go_package = ".;eventpb";
+option go_package = "./;eventpb";
 
 message Header {
   string event_type = 1; // event type

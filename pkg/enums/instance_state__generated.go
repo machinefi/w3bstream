@@ -8,7 +8,7 @@ import (
 	"database/sql/driver"
 	"errors"
 
-	"github.com/iotexproject/Bumblebee/kit/enum"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/enum"
 )
 
 var InvalidInstanceState = errors.New("invalid InstanceState type")
@@ -78,7 +78,7 @@ func (v InstanceState) Label() string {
 }
 
 func (v InstanceState) TypeName() string {
-	return "github.com/iotexproject/w3bstream/pkg/enums.InstanceState"
+	return "github.com/machinefi/w3bstream/pkg/enums.InstanceState"
 }
 
 func (v InstanceState) ConstValues() []enum.IntStringerEnum {

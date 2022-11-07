@@ -3,7 +3,7 @@ package wasm
 import (
 	"context"
 
-	"github.com/iotexproject/w3bstream/pkg/enums"
+	"github.com/machinefi/w3bstream/pkg/enums"
 )
 
 type VM interface {

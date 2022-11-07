@@ -4,8 +4,8 @@ import (
 	"context"
 	"os"
 
-	"github.com/iotexproject/w3bstream/pkg/modules/vm/wasmtime"
-	"github.com/iotexproject/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/modules/vm/wasmtime"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 func NewInstance(ctx context.Context, path string, id types.SFID) error {

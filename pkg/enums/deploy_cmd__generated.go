@@ -8,7 +8,7 @@ import (
 	"database/sql/driver"
 	"errors"
 
-	"github.com/iotexproject/Bumblebee/kit/enum"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/enum"
 )
 
 var InvalidDeployCmd = errors.New("invalid DeployCmd type")
@@ -94,7 +94,7 @@ func (v DeployCmd) Label() string {
 }
 
 func (v DeployCmd) TypeName() string {
-	return "github.com/iotexproject/w3bstream/pkg/enums.DeployCmd"
+	return "github.com/machinefi/w3bstream/pkg/enums.DeployCmd"
 }
 
 func (v DeployCmd) ConstValues() []enum.IntStringerEnum {

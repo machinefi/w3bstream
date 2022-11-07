@@ -3,11 +3,10 @@ package project
 import (
 	"context"
 
-	"github.com/iotexproject/Bumblebee/kit/httptransport/httpx"
-
-	"github.com/iotexproject/w3bstream/pkg/depends/protocol/eventpb"
-	"github.com/iotexproject/w3bstream/pkg/modules/event"
-	"github.com/iotexproject/w3bstream/pkg/modules/project"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
+	"github.com/machinefi/w3bstream/pkg/modules/event"
+	"github.com/machinefi/w3bstream/pkg/modules/project"
 )
 
 type CreateProject struct {

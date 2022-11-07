@@ -1,10 +1,9 @@
 package model
 
-import (
-	"time"
-)
+import "time"
 
-//go:generate easyjson -all student.go
+// //go:generate easyjson -all student.go
+//
 //easyjson:json
 type School struct {
 	Name string `json:"school_name"`

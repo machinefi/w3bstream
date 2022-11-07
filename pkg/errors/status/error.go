@@ -3,7 +3,7 @@ package status
 import (
 	"net/http"
 
-	"github.com/iotexproject/Bumblebee/kit/sqlx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 )
 
 //go:generate toolkit gen status Error

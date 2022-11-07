@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	common "github.com/iotexproject/w3bstream/examples/wasm_common_go"
+	common "github.com/machinefi/w3bstream/_examples/wasm_common_go"
 )
 
 // main is required for TinyGo to compile to Wasm.

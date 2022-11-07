@@ -8,7 +8,7 @@ import (
 	"database/sql/driver"
 	"errors"
 
-	"github.com/iotexproject/Bumblebee/kit/enum"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/enum"
 )
 
 var InvalidAccountIdentityType = errors.New("invalid AccountIdentityType type")
@@ -86,7 +86,7 @@ func (v AccountIdentityType) Label() string {
 }
 
 func (v AccountIdentityType) TypeName() string {
-	return "github.com/iotexproject/w3bstream/pkg/enums.AccountIdentityType"
+	return "github.com/machinefi/w3bstream/pkg/enums.AccountIdentityType"
 }
 
 func (v AccountIdentityType) ConstValues() []enum.IntStringerEnum {

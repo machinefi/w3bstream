@@ -1,3 +1,31 @@
+# How to run a w3bstream node with docker
+Suppose `$working_dir` is the directory you want to store your data.
+
+## Install docker-compose
+
+https://docker-docs.netlify.app/compose/install/
+
+## Download docker-compose.yaml
+
+```bash
+cd $working_dir
+curl https://raw.githubusercontent.com/machinefi/w3bstream/main/docker-compose.yaml > docker-compose.yaml
+
+docker-compose up -d
+```
+You are all set.
+
+## Customize settings
+```bash
+cd $working_dir
+curl https://raw.githubusercontent.com/machinefi/w3bstream/main/.env.tmpl > .env
+```
+
+then modify the corresponding parameters in `.env`, and restart your docker containers
+```bash
+docker-compose restart
+```
+
 # How to interact with W3bstream Node Using CLI
 
 ### Login (fetch auth token)
@@ -46,20 +74,20 @@ output like
 ### Build demo wasm scripts
 
 ```sh
-make wasm_demo ## build to `examples` use to deploy wasm applet
+make wasm_demo ## build to `_examples` use to deploy wasm applet
 ```
 
 ### Create and deploy applet
 
 upload wasm script
 
-> use `examples/word_count/word_count.wasm` or `examples/log/log.wasm`
+> use `_examples/word_count/word_count.wasm` or `_examples/log/log.wasm`
 
 ```sh
 ## set env vars
 export PROJECTID=${project_id}
 export PROJECTNAME=${project_name}
-export WASMFILE=examples/log/log.wasm
+export WASMFILE=_examples/log/log.wasm
 http --form post :8888/srv-applet-mgr/v0/applet/$PROJECTID file@$WASMFILE info='{"appletName":"log","strategies":[{"eventType":"DEFAULT","handler":"start"}]}' -A bearer -a $TOK
 ```
 

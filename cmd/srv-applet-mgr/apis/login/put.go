@@ -4,14 +4,12 @@ import (
 	"context"
 	"time"
 
-	base "github.com/iotexproject/Bumblebee/base/types"
-	"github.com/iotexproject/Bumblebee/conf/jwt"
-	"github.com/iotexproject/Bumblebee/kit/httptransport/httpx"
-
-	"github.com/iotexproject/w3bstream/pkg/types"
-
-	"github.com/iotexproject/w3bstream/pkg/errors/status"
-	"github.com/iotexproject/w3bstream/pkg/modules/account"
+	base "github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/errors/status"
+	"github.com/machinefi/w3bstream/pkg/modules/account"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 type Login struct {

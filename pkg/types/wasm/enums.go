@@ -1,6 +1,6 @@
 package wasm
 
-import "github.com/iotexproject/w3bstream/pkg/enums"
+import "github.com/machinefi/w3bstream/pkg/enums"
 
 var NameVersion = "w3bstream@v0.0.1"
 

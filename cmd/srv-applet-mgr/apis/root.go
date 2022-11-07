@@ -1,20 +1,19 @@
 package apis
 
 import (
-	"github.com/iotexproject/Bumblebee/conf/jwt"
-	"github.com/iotexproject/Bumblebee/kit/httptransport"
-	"github.com/iotexproject/Bumblebee/kit/kit"
-
-	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/account"
-	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/applet"
-	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/deploy"
-	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/event"
-	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/login"
-	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/middleware"
-	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/monitor"
-	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/project"
-	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/publisher"
-	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/strategy"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/account"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/applet"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/deploy"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/event"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/login"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/monitor"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/project"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/publisher"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/strategy"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 )
 
 var (

@@ -9,10 +9,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	g "github.com/iotexproject/Bumblebee/gen/codegen"
-	"github.com/iotexproject/Bumblebee/kit/modelgen"
-	"github.com/iotexproject/Bumblebee/x/pkgx"
 	"github.com/saitofun/qlib/util/qnaming"
+
+	g "github.com/machinefi/w3bstream/pkg/depends/gen/codegen"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/modelgen"
+	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"
 )
 
 type Table struct {
@@ -220,7 +221,7 @@ func (c *Schema) SnippetStruct(comments map[string][]string) map[string]g.Snippe
 func (c *Schema) SnippetSchema(f *g.File) g.Snippet {
 	return g.DeclVar(g.Assign(g.Ident("DB")).By(
 		g.Exprer(
-			f.Use("github.com/iotexproject/w3bstream/pkg/models", "DB")+`.?(?)`,
+			f.Use("github.com/machinefi/w3bstream/pkg/models", "DB")+`.?(?)`,
 			g.Ident("WithSchema"),
 			g.Valuer(c.SchemaName())),
 	))

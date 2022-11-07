@@ -3,14 +3,14 @@ package types
 import (
 	"context"
 
-	"github.com/iotexproject/Bumblebee/conf/log"
-	"github.com/iotexproject/Bumblebee/conf/mqtt"
-	"github.com/iotexproject/Bumblebee/conf/postgres"
-	"github.com/iotexproject/Bumblebee/kit/mq"
-	"github.com/iotexproject/Bumblebee/kit/sqlx"
-	"github.com/iotexproject/Bumblebee/x/contextx"
-	"github.com/iotexproject/Bumblebee/x/misc/must"
-	"github.com/iotexproject/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
+	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
+	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
+	"github.com/machinefi/w3bstream/pkg/models"
 )
 
 type Context uint8

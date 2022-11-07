@@ -1,10 +1,10 @@
 package core
 
 import (
-	"github.com/iotexproject/w3bstream/pkg/core/access"
-	"github.com/iotexproject/w3bstream/pkg/core/storage"
-	"github.com/iotexproject/w3bstream/pkg/core/types"
-	"github.com/iotexproject/w3bstream/pkg/core/web3"
+	"github.com/machinefi/w3bstream/pkg/core/access"
+	"github.com/machinefi/w3bstream/pkg/core/storage"
+	"github.com/machinefi/w3bstream/pkg/core/types"
+	"github.com/machinefi/w3bstream/pkg/core/web3"
 )
 
 type (

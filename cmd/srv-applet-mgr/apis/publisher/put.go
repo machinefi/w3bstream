@@ -3,11 +3,10 @@ package publisher
 import (
 	"context"
 
-	"github.com/iotexproject/Bumblebee/kit/httptransport/httpx"
-
-	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/middleware"
-	"github.com/iotexproject/w3bstream/pkg/modules/publisher"
-	"github.com/iotexproject/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/modules/publisher"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 type UpdatePublisher struct {

@@ -13,14 +13,13 @@ import (
 	"github.com/pkg/errors"
 	"github.com/shirou/gopsutil/v3/disk"
 
-	"github.com/iotexproject/w3bstream/pkg/depends/util"
-
-	"github.com/iotexproject/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/depends/util"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 var reserve = int64(100 * 1024 * 1024)
 
-func Upload(ctx context.Context, f *multipart.FileHeader, id string) (root, filename, sum string, err error) {
+func Upload(ctx context.Context, f *multipart.FileHeader, id string) (root, fullName, fileName, sum string, err error) {
 	l := types.MustLoggerFromContext(ctx)
 	conf := types.MustUploadConfigFromContext(ctx)
 	var (
@@ -33,7 +32,8 @@ func Upload(ctx context.Context, f *multipart.FileHeader, id string) (root, file
 	defer l.End()
 
 	root = filepath.Join(conf.Root, id)
-	filename = filepath.Join(conf.Root, id, f.Filename)
+	fullName = filepath.Join(conf.Root, id, f.Filename)
+	fileName = f.Filename
 
 	if !IsDirExists(root) {
 		if err = os.MkdirAll(root, 0777); err != nil {
@@ -68,7 +68,7 @@ func Upload(ctx context.Context, f *multipart.FileHeader, id string) (root, file
 		l.Error(err)
 		return
 	}
-	if fw, err = os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0666); err != nil {
+	if fw, err = os.OpenFile(fullName, os.O_RDWR|os.O_CREATE, 0666); err != nil {
 		l.Error(err)
 		return
 	}
@@ -78,7 +78,7 @@ func Upload(ctx context.Context, f *multipart.FileHeader, id string) (root, file
 		return
 	}
 
-	sum, err = util.FileMD5(filename)
+	sum, err = util.FileMD5(fullName)
 	if err != nil {
 		l.Error(err)
 	}

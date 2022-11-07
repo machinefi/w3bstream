@@ -7,7 +7,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	"github.com/iotexproject/w3bstream/pkg/depends/schema"
+	"github.com/machinefi/w3bstream/pkg/depends/schema"
 )
 
 var c = &schema.Schema{}

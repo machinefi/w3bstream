@@ -11,9 +11,9 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
 
-	"github.com/iotexproject/Bumblebee/kit/sqlx/builder"
-	"github.com/iotexproject/w3bstream/pkg/models"
-	"github.com/iotexproject/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
+	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 type contract struct {
@@ -59,7 +59,7 @@ func (t *contract) do(ctx context.Context) {
 			return
 		}
 
-		c.BlockCurrent = toBlock
+		c.BlockCurrent = toBlock + 1
 		if err := c.UpdateByID(d); err != nil {
 			l.Error(errors.Wrap(err, "update contractlog db failed"))
 			return

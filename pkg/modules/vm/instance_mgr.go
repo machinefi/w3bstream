@@ -3,13 +3,13 @@ package vm
 import (
 	"context"
 
-	confid "github.com/iotexproject/Bumblebee/conf/id"
-	"github.com/iotexproject/Bumblebee/x/mapx"
 	"github.com/pkg/errors"
 
-	"github.com/iotexproject/w3bstream/pkg/enums"
-	"github.com/iotexproject/w3bstream/pkg/types"
-	"github.com/iotexproject/w3bstream/pkg/types/wasm"
+	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
+	"github.com/machinefi/w3bstream/pkg/enums"
+	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
 var instances = mapx.New[types.SFID, wasm.Instance]()

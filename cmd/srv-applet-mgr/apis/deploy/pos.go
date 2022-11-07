@@ -3,12 +3,11 @@ package deploy
 import (
 	"context"
 
-	"github.com/iotexproject/Bumblebee/base/types"
-	"github.com/iotexproject/Bumblebee/kit/httptransport/httpx"
-
-	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/apis/middleware"
-	"github.com/iotexproject/w3bstream/pkg/modules/applet"
-	"github.com/iotexproject/w3bstream/pkg/modules/deploy"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
+	"github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/modules/applet"
+	"github.com/machinefi/w3bstream/pkg/modules/deploy"
 )
 
 type CreateInstance struct {

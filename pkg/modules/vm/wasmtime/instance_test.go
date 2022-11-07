@@ -1,23 +1,11 @@
 package wasmtime_test
 
 import (
-	"context"
 	_ "embed"
 	"fmt"
 	"os"
 	"path/filepath"
-	"testing"
-
-	confid "github.com/iotexproject/Bumblebee/conf/id"
-	"github.com/iotexproject/Bumblebee/kit/kit"
-	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/global"
-	"github.com/iotexproject/w3bstream/cmd/srv-applet-mgr/tasks"
-	. "github.com/onsi/gomega"
-
-	"github.com/iotexproject/w3bstream/pkg/modules/vm"
-	"github.com/iotexproject/w3bstream/pkg/modules/vm/wasmtime"
-	"github.com/iotexproject/w3bstream/pkg/types"
-	"github.com/iotexproject/w3bstream/pkg/types/wasm"
+	// . "github.com/onsi/gomega"
 )
 
 var (
@@ -28,8 +16,8 @@ var (
 	wasmWordCountV2Code     []byte
 	wasmTokenDistributeCode []byte
 
-	ctx context.Context
-	idg confid.SFIDGenerator
+	// ctx context.Context
+	// idg confid.SFIDGenerator
 )
 
 func init() {
@@ -66,17 +54,20 @@ func init() {
 		panic(err)
 	}
 
-	ctx = global.WithContext(context.Background())
-	ctx = types.WithETHClientConfig(ctx, &types.ETHClientConfig{
-		PrivateKey:    "",
-		ChainEndpoint: "https://babel-api.testnet.iotex.io",
-	})
+	/*
+		ctx = global.WithContext(context.Background())
+		ctx = types.WithETHClientConfig(ctx, &types.ETHClientConfig{
+			PrivateKey:    "",
+			ChainEndpoint: "https://babel-api.testnet.iotex.io",
+		})
 
-	idg = confid.MustSFIDGeneratorFromContext(ctx)
+		idg = confid.MustSFIDGeneratorFromContext(ctx)
 
-	go kit.Run(tasks.Root, global.TaskServer())
+		go kit.Run(tasks.Root, global.TaskServer())
+	*/
 }
 
+/*
 func TestInstance_LogWASM(t *testing.T) {
 	i, err := wasmtime.NewInstanceByCode(ctx, idg.MustGenSFID(), wasmLogCode)
 	NewWithT(t).Expect(err).To(BeNil())
@@ -236,3 +227,4 @@ func TestInstance_TokenDistribute(t *testing.T) {
 		NewWithT(t).Expect(i.Get("clicks")).To(Equal(idx + 1))
 	}
 }
+*/

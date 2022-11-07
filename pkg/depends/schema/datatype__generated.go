@@ -8,7 +8,7 @@ import (
 	"database/sql/driver"
 	"errors"
 
-	"github.com/iotexproject/Bumblebee/kit/enum"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/enum"
 )
 
 var InvalidDatatype = errors.New("invalid Datatype type")
@@ -158,7 +158,7 @@ func (v Datatype) Label() string {
 }
 
 func (v Datatype) TypeName() string {
-	return "github.com/iotexproject/w3bstream/pkg/depends/schema.Datatype"
+	return "github.com/machinefi/w3bstream/pkg/depends/schema.Datatype"
 }
 
 func (v Datatype) ConstValues() []enum.IntStringerEnum {

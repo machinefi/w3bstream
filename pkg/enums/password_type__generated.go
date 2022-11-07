@@ -8,7 +8,7 @@ import (
 	"database/sql/driver"
 	"errors"
 
-	"github.com/iotexproject/Bumblebee/kit/enum"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/enum"
 )
 
 var InvalidPasswordType = errors.New("invalid PasswordType type")
@@ -70,7 +70,7 @@ func (v PasswordType) Label() string {
 }
 
 func (v PasswordType) TypeName() string {
-	return "github.com/iotexproject/w3bstream/pkg/enums.PasswordType"
+	return "github.com/machinefi/w3bstream/pkg/enums.PasswordType"
 }
 
 func (v PasswordType) ConstValues() []enum.IntStringerEnum {

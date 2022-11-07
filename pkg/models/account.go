@@ -3,10 +3,9 @@ package models
 import (
 	"database/sql/driver"
 
-	"github.com/iotexproject/Bumblebee/base/types"
-	"github.com/iotexproject/Bumblebee/kit/sqlx/datatypes"
-
-	"github.com/iotexproject/w3bstream/pkg/enums"
+	"github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
+	"github.com/machinefi/w3bstream/pkg/enums"
 )
 
 // Account w3bstream account

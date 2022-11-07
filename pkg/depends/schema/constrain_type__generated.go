@@ -8,7 +8,7 @@ import (
 	"database/sql/driver"
 	"errors"
 
-	"github.com/iotexproject/Bumblebee/kit/enum"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/enum"
 )
 
 var InvalidConstrainType = errors.New("invalid ConstrainType type")
@@ -78,7 +78,7 @@ func (v ConstrainType) Label() string {
 }
 
 func (v ConstrainType) TypeName() string {
-	return "github.com/iotexproject/w3bstream/pkg/depends/schema.ConstrainType"
+	return "github.com/machinefi/w3bstream/pkg/depends/schema.ConstrainType"
 }
 
 func (v ConstrainType) ConstValues() []enum.IntStringerEnum {

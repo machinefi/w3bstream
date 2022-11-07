@@ -21,7 +21,7 @@ CMD su postgres && pg_ctl start -D ${PG_DATA_DIR}
 # setup private depends
 ARG REPO_ACESS_TOKEN=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
 ARG REPO_HOST=github.com
-ARG REPO_ORGNIZE=iotexproject
+ARG REPO_ORGNIZE=machinefi
 ARG REPO_NAME=w3bstream
 ARG REPO_URL=${REPO_HOST}:${REPO_ORGNIZE}/${REPO_NAME}
 # RUN git config --global url."git@${REPO_HOST}:".insteadOf "https://${REPO_ORGNIZE}:${REPO_ACESS_TOKEN}@${REPO_HOST}/"
@@ -33,7 +33,7 @@ WORKDIR /go/src
 RUN git clone ${REPO}
 
 WORKDIR /go/src/w3bstream
-ENV GOPRIVATE=github.com/iotexproject/Bumblebee
+ENV GOPRIVATE=github.com/machinefi/Bumblebee
 RUN cd cmd/srv-applet-mgr && go build -mod vendor
 RUN mkdir -pv build
 RUN cp -r cmd/srv-applet-mgr/config build/

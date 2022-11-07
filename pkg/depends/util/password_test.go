@@ -5,7 +5,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	"github.com/iotexproject/w3bstream/pkg/depends/util"
+	"github.com/machinefi/w3bstream/pkg/depends/util"
 )
 
 var (

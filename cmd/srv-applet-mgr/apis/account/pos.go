@@ -3,9 +3,8 @@ package account
 import (
 	"context"
 
-	"github.com/iotexproject/Bumblebee/kit/httptransport/httpx"
-
-	"github.com/iotexproject/w3bstream/pkg/modules/account"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/modules/account"
 )
 
 type CreateAccount struct {

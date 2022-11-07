@@ -3,15 +3,15 @@ package account
 import (
 	"context"
 
-	confid "github.com/iotexproject/Bumblebee/conf/id"
-	"github.com/iotexproject/Bumblebee/kit/sqlx/builder"
 	"github.com/pkg/errors"
 
-	"github.com/iotexproject/w3bstream/pkg/depends/util"
-	"github.com/iotexproject/w3bstream/pkg/enums"
-	"github.com/iotexproject/w3bstream/pkg/errors/status"
-	"github.com/iotexproject/w3bstream/pkg/models"
-	"github.com/iotexproject/w3bstream/pkg/types"
+	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
+	"github.com/machinefi/w3bstream/pkg/depends/util"
+	"github.com/machinefi/w3bstream/pkg/enums"
+	"github.com/machinefi/w3bstream/pkg/errors/status"
+	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 type CreateAccountByUsernameReq struct {

@@ -4,8 +4,9 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/iotexproject/w3bstream/pkg/modules/vm/wasmtime"
 	"github.com/pkg/errors"
+
+	"github.com/machinefi/w3bstream/pkg/modules/vm/wasmtime"
 )
 
 type HandleEvent struct {

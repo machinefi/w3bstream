@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/iotexproject/Bumblebee/kit/mq"
-	"github.com/iotexproject/w3bstream/pkg/types/wasm"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
+	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
 func NewTask(vm *Instance, fn string, pl []byte) *Task {

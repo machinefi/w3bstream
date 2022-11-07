@@ -8,7 +8,7 @@ import (
 	"database/sql/driver"
 	"errors"
 
-	"github.com/iotexproject/Bumblebee/kit/enum"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/enum"
 )
 
 var InvalidDefType = errors.New("invalid DefType type")
@@ -78,7 +78,7 @@ func (v DefType) Label() string {
 }
 
 func (v DefType) TypeName() string {
-	return "github.com/iotexproject/w3bstream/pkg/depends/schema.DefType"
+	return "github.com/machinefi/w3bstream/pkg/depends/schema.DefType"
 }
 
 func (v DefType) ConstValues() []enum.IntStringerEnum {
