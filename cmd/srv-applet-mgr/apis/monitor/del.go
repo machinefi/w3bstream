@@ -11,51 +11,51 @@ import (
 
 type RemoveContractLog struct {
 	httpx.MethodDelete
-	ProjectID     types.SFID `in:"path" name:"projectID"`
+	ProjectName   string     `in:"path" name:"projectName"`
 	ContractLogID types.SFID `in:"path" name:"contractLogID"`
 }
 
-func (r *RemoveContractLog) Path() string { return "/contract_log/:projectID" }
+func (r *RemoveContractLog) Path() string { return "/contract_log/:projectName" }
 
 func (r *RemoveContractLog) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.CurrentAccountFromContext(ctx)
-	p, err := ca.ValidateProjectPerm(ctx, r.ProjectID)
+	_, err := ca.ValidateProjectPermByPrjName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err
 	}
-	return nil, blockchain.RemoveContractLog(ctx, p.Name, r.ContractLogID)
+	return nil, blockchain.RemoveContractLog(ctx, r.ProjectName, r.ContractLogID)
 }
 
 type RemoveChainTx struct {
 	httpx.MethodDelete
-	ProjectID types.SFID `in:"path" name:"projectID"`
-	ChainTxID types.SFID `in:"path" name:"chainTxID"`
+	ProjectName string     `in:"path" name:"projectName"`
+	ChainTxID   types.SFID `in:"path" name:"chainTxID"`
 }
 
-func (r *RemoveChainTx) Path() string { return "/chain_tx/:projectID" }
+func (r *RemoveChainTx) Path() string { return "/chain_tx/:projectName" }
 
 func (r *RemoveChainTx) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.CurrentAccountFromContext(ctx)
-	p, err := ca.ValidateProjectPerm(ctx, r.ProjectID)
+	_, err := ca.ValidateProjectPermByPrjName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err
 	}
-	return nil, blockchain.RemoveChainTx(ctx, p.Name, r.ChainTxID)
+	return nil, blockchain.RemoveChainTx(ctx, r.ProjectName, r.ChainTxID)
 }
 
 type RemoveChainHeight struct {
 	httpx.MethodDelete
-	ProjectID     types.SFID `in:"path" name:"projectID"`
+	ProjectName   string     `in:"path" name:"projectName"`
 	ChainHeightID types.SFID `in:"path" name:"chainHeightID"`
 }
 
-func (r *RemoveChainHeight) Path() string { return "/chain_height/:projectID" }
+func (r *RemoveChainHeight) Path() string { return "/chain_height/:projectName" }
 
 func (r *RemoveChainHeight) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.CurrentAccountFromContext(ctx)
-	p, err := ca.ValidateProjectPerm(ctx, r.ProjectID)
+	_, err := ca.ValidateProjectPermByPrjName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err
 	}
-	return nil, blockchain.RemoveChainHeight(ctx, p.Name, r.ChainHeightID)
+	return nil, blockchain.RemoveChainHeight(ctx, r.ProjectName, r.ChainHeightID)
 }
