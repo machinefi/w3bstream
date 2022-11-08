@@ -280,6 +280,7 @@ func GetProjectByProjectName(ctx context.Context, prjName string) (*models.Proje
 
 func DeleteProject(_ context.Context, _ string) error {
 	// TODO
+	// same as RemoveProjectByProjectID?  by zhiwei
 	return nil
 }
 

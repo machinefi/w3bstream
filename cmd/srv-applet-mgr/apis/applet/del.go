@@ -13,7 +13,7 @@ type RemoveApplet struct {
 	applet.RemoveAppletReq
 }
 
-func (r *RemoveApplet) Path() string { return "/:projectID" }
+func (r *RemoveApplet) Path() string { return "/:projectID/:appletID" }
 
 func (r *RemoveApplet) Output(ctx context.Context) (interface{}, error) {
 	a := middleware.CurrentAccountFromContext(ctx)

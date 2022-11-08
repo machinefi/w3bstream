@@ -61,7 +61,6 @@ func (m *Applet) IndexFieldNames() []string {
 	return []string{
 		"AppletID",
 		"ID",
-		"Md5",
 		"Name",
 		"ProjectID",
 	}
@@ -72,12 +71,9 @@ func (*Applet) UniqueIndexes() builder.Indexes {
 		"ui_applet_id": []string{
 			"AppletID",
 		},
-		"ui_name": []string{
-			"Name",
-		},
-		"ui_project_md5": []string{
+		"ui_project_name": []string{
 			"ProjectID",
-			"Md5",
+			"Name",
 		},
 	}
 }
@@ -86,12 +82,8 @@ func (*Applet) UniqueIndexUIAppletID() string {
 	return "ui_applet_id"
 }
 
-func (*Applet) UniqueIndexUIName() string {
-	return "ui_name"
-}
-
-func (*Applet) UniqueIndexUIProjectMd5() string {
-	return "ui_project_md5"
+func (*Applet) UniqueIndexUIProjectName() string {
+	return "ui_project_name"
 }
 
 func (m *Applet) ColID() *builder.Column {
@@ -118,6 +110,14 @@ func (*Applet) FieldAppletID() string {
 	return "AppletID"
 }
 
+func (m *Applet) ColResourceID() *builder.Column {
+	return AppletTable.ColByFieldName(m.FieldResourceID())
+}
+
+func (*Applet) FieldResourceID() string {
+	return "ResourceID"
+}
+
 func (m *Applet) ColName() *builder.Column {
 	return AppletTable.ColByFieldName(m.FieldName())
 }
@@ -126,20 +126,12 @@ func (*Applet) FieldName() string {
 	return "Name"
 }
 
-func (m *Applet) ColPath() *builder.Column {
-	return AppletTable.ColByFieldName(m.FieldPath())
+func (m *Applet) ColWasmName() *builder.Column {
+	return AppletTable.ColByFieldName(m.FieldWasmName())
 }
 
-func (*Applet) FieldPath() string {
-	return "Path"
-}
-
-func (m *Applet) ColMd5() *builder.Column {
-	return AppletTable.ColByFieldName(m.FieldMd5())
-}
-
-func (*Applet) FieldMd5() string {
-	return "Md5"
+func (*Applet) FieldWasmName() string {
+	return "WasmName"
 }
 
 func (m *Applet) ColCreatedAt() *builder.Column {
@@ -247,25 +239,7 @@ func (m *Applet) FetchByAppletID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *Applet) FetchByName(db sqlx.DBExecutor) error {
-	tbl := db.T(m)
-	err := db.QueryAndScan(
-		builder.Select(nil).
-			From(
-				tbl,
-				builder.Where(
-					builder.And(
-						tbl.ColByFieldName("Name").Eq(m.Name),
-					),
-				),
-				builder.Comment("Applet.FetchByName"),
-			),
-		m,
-	)
-	return err
-}
-
-func (m *Applet) FetchByProjectIDAndMd5(db sqlx.DBExecutor) error {
+func (m *Applet) FetchByProjectIDAndName(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	err := db.QueryAndScan(
 		builder.Select(nil).
@@ -274,10 +248,10 @@ func (m *Applet) FetchByProjectIDAndMd5(db sqlx.DBExecutor) error {
 				builder.Where(
 					builder.And(
 						tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
-						tbl.ColByFieldName("Md5").Eq(m.Md5),
+						tbl.ColByFieldName("Name").Eq(m.Name),
 					),
 				),
-				builder.Comment("Applet.FetchByProjectIDAndMd5"),
+				builder.Comment("Applet.FetchByProjectIDAndName"),
 			),
 		m,
 	)
@@ -344,37 +318,7 @@ func (m *Applet) UpdateByAppletID(db sqlx.DBExecutor, zeros ...string) error {
 	return m.UpdateByAppletIDWithFVs(db, fvs)
 }
 
-func (m *Applet) UpdateByNameWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
-
-	if _, ok := fvs["UpdatedAt"]; !ok {
-		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
-	}
-	tbl := db.T(m)
-	res, err := db.Exec(
-		builder.Update(tbl).
-			Where(
-				builder.And(
-					tbl.ColByFieldName("Name").Eq(m.Name),
-				),
-				builder.Comment("Applet.UpdateByNameWithFVs"),
-			).
-			Set(tbl.AssignmentsByFieldValues(fvs)...),
-	)
-	if err != nil {
-		return err
-	}
-	if affected, _ := res.RowsAffected(); affected == 0 {
-		return m.FetchByName(db)
-	}
-	return nil
-}
-
-func (m *Applet) UpdateByName(db sqlx.DBExecutor, zeros ...string) error {
-	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
-	return m.UpdateByNameWithFVs(db, fvs)
-}
-
-func (m *Applet) UpdateByProjectIDAndMd5WithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+func (m *Applet) UpdateByProjectIDAndNameWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
 		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
@@ -385,9 +329,9 @@ func (m *Applet) UpdateByProjectIDAndMd5WithFVs(db sqlx.DBExecutor, fvs builder.
 			Where(
 				builder.And(
 					tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
-					tbl.ColByFieldName("Md5").Eq(m.Md5),
+					tbl.ColByFieldName("Name").Eq(m.Name),
 				),
-				builder.Comment("Applet.UpdateByProjectIDAndMd5WithFVs"),
+				builder.Comment("Applet.UpdateByProjectIDAndNameWithFVs"),
 			).
 			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
@@ -395,14 +339,14 @@ func (m *Applet) UpdateByProjectIDAndMd5WithFVs(db sqlx.DBExecutor, fvs builder.
 		return err
 	}
 	if affected, _ := res.RowsAffected(); affected == 0 {
-		return m.FetchByProjectIDAndMd5(db)
+		return m.FetchByProjectIDAndName(db)
 	}
 	return nil
 }
 
-func (m *Applet) UpdateByProjectIDAndMd5(db sqlx.DBExecutor, zeros ...string) error {
+func (m *Applet) UpdateByProjectIDAndName(db sqlx.DBExecutor, zeros ...string) error {
 	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
-	return m.UpdateByProjectIDAndMd5WithFVs(db, fvs)
+	return m.UpdateByProjectIDAndNameWithFVs(db, fvs)
 }
 
 func (m *Applet) Delete(db sqlx.DBExecutor) error {
@@ -451,24 +395,7 @@ func (m *Applet) DeleteByAppletID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *Applet) DeleteByName(db sqlx.DBExecutor) error {
-	tbl := db.T(m)
-	_, err := db.Exec(
-		builder.Delete().
-			From(
-				tbl,
-				builder.Where(
-					builder.And(
-						tbl.ColByFieldName("Name").Eq(m.Name),
-					),
-				),
-				builder.Comment("Applet.DeleteByName"),
-			),
-	)
-	return err
-}
-
-func (m *Applet) DeleteByProjectIDAndMd5(db sqlx.DBExecutor) error {
+func (m *Applet) DeleteByProjectIDAndName(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	_, err := db.Exec(
 		builder.Delete().
@@ -477,10 +404,10 @@ func (m *Applet) DeleteByProjectIDAndMd5(db sqlx.DBExecutor) error {
 				builder.Where(
 					builder.And(
 						tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
-						tbl.ColByFieldName("Md5").Eq(m.Md5),
+						tbl.ColByFieldName("Name").Eq(m.Name),
 					),
 				),
-				builder.Comment("Applet.DeleteByProjectIDAndMd5"),
+				builder.Comment("Applet.DeleteByProjectIDAndName"),
 			),
 	)
 	return err
