@@ -1,6 +1,7 @@
 MODULE_NAME = $(shell cat go.mod | grep "^module" | sed -e "s/module //g")
 DOCKER_IMAGE = $(USER)/w3bstream:main
 STUDIO_DOCKER_IMAGE = $(USER)/w3bstream-studio:main
+DOCKER_COMPOSE_FILE = ./docker-compose.yaml
 
 update_go_module:
 	go mod tidy
@@ -55,20 +56,18 @@ build_docker_images: build_backend_image build_studio_image
 
 # stop server running in docker containers
 stop_docker:
-	@docker-compose -f ./docker-compose.yaml stop
+	@docker-compose -f ${DOCKER_COMPOSE_FILE} stop
 
 # stop docker and delete docker resouces
 drop_docker:
-	@docker-compose -f ./docker-compose.yaml down
+	@docker-compose -f ${DOCKER_COMPOSE_FILE} down
 
 # restart server in docker containers
-restart_docker: drop_docker
-	@echo "The containers have been shut down, now restart the server"
-	@WS_WORKING_DIR=$(shell pwd)/working_dir WS_BACKEND_IMAGE=${DOCKER_IMAGE} WS_STUDIO_IMAGE=${STUDIO_DOCKER_IMAGE} docker-compose -p w3bstream -f ./docker-compose.yaml up -d
+restart_docker: drop_docker run_docker
 
 # run server in docker containers
 run_docker:
-	@WS_WORKING_DIR=$(shell pwd)/working_dir WS_BACKEND_IMAGE=${DOCKER_IMAGE} WS_STUDIO_IMAGE=${STUDIO_DOCKER_IMAGE} docker-compose -p w3bstream -f ./docker-compose.yaml up -d
+	@WS_WORKING_DIR=$(shell pwd)/working_dir WS_BACKEND_IMAGE=${DOCKER_IMAGE} WS_STUDIO_IMAGE=${STUDIO_DOCKER_IMAGE} docker-compose -p w3bstream -f ${DOCKER_COMPOSE_FILE} up -d
 
 ## migrate first
 run_server: build_server
