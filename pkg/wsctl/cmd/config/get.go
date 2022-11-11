@@ -19,11 +19,11 @@ var (
 		config.Chinese: "get 变量",
 	}
 	_configGetUseCmdShorts = map[config.Language]string{
-		config.English: "Get config fields from ioctl",
+		config.English: "Get config fields from wsctl",
 		config.Chinese: "从 wsctl 获取配置字段",
 	}
 	_configGetUseCmdLong = map[config.Language]string{
-		config.English: "Get config fields from ioctl\nValid Variables: [" + strings.Join(_validGetArgs, ", ") + "]",
+		config.English: "Get config fields from wsctl\nValid Variables: [" + strings.Join(_validGetArgs, ", ") + "]",
 		config.Chinese: "从 wsctl 获取配置字段\n有效变量: [" + strings.Join(_validGetArgs, ", ") + "]",
 	}
 )

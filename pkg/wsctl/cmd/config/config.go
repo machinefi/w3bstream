@@ -35,7 +35,7 @@ var (
 var (
 	_configCmdShorts = map[config.Language]string{
 		config.English: "Manage the configuration of wsctl",
-		config.Chinese: "wsctl配置管理",
+		config.Chinese: "wsctl 配置管理",
 	}
 )
 
@@ -50,12 +50,6 @@ func NewConfigCmd(client client.Client) *cobra.Command {
 	cmd.AddCommand(newConfigResetCmd(client))
 
 	return cmd
-}
-
-// info contains the information of config file
-type info struct {
-	config     config.Config
-	configFile string // Path to config file
 }
 
 // InitConfig load config data from default config file
@@ -99,6 +93,12 @@ func InitConfig() (config.Config, string, error) {
 		fmt.Printf("Warn: Language %s is not supported, English instead.\n", info.config.Language)
 	}
 	return info.config, info.configFile, nil
+}
+
+// info contains the information of config file
+type info struct {
+	config     config.Config
+	configFile string // Path to config file
 }
 
 // loadConfig loads config file in yaml format
