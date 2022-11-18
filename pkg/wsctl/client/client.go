@@ -65,11 +65,10 @@ func (c *client) ConfigFilePath() string {
 
 func (c *client) SelectTranslation(trls map[config.Language]string) string {
 	trl, ok := trls[c.cfg.Language]
-	if ok {
-		return trl
+	if !ok {
+		c.logger.Panic(errors.New("failed to pick a translation"))
 	}
-	c.logger.Panic(errors.New("failed to pick a translation"))
-	return ""
+	return trl
 }
 
 type callResp struct {
