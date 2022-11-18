@@ -14,12 +14,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-type Info struct {
-	models.Resource
-	ResourceName string
-}
-
-func FetchOrCreateResource(ctx context.Context, f *multipart.FileHeader) (*Info, error) {
+func FetchOrCreateResource(ctx context.Context, f *multipart.FileHeader) (*models.Resource, error) {
 	d := types.MustDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
@@ -27,7 +22,7 @@ func FetchOrCreateResource(ctx context.Context, f *multipart.FileHeader) (*Info,
 	_, l = l.Start(ctx, "FetchOrCreateResource")
 	defer l.End()
 
-	_, fullName, fileName, md5, err := Upload(ctx, f, idg.MustGenSFID().String())
+	_, fullName, md5, err := Upload(ctx, f, idg.MustGenSFID().String())
 	if err != nil {
 		l.Error(err)
 		return nil, status.UploadFileFailed.StatusErr().WithDesc(err.Error())
@@ -47,5 +42,5 @@ func FetchOrCreateResource(ctx context.Context, f *multipart.FileHeader) (*Info,
 		l.Info("wasm resource created")
 	}
 	l.Info("get wasm resource from db")
-	return &Info{Resource: *m, ResourceName: fileName}, err
+	return m, err
 }

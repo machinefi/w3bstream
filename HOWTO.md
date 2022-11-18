@@ -88,7 +88,7 @@ upload wasm script
 export PROJECTID=${project_id}
 export PROJECTNAME=${project_name}
 export WASMFILE=_examples/log/log.wasm
-http --form post :8888/srv-applet-mgr/v0/applet/$PROJECTID file@$WASMFILE info='{"appletName":"log","strategies":[{"eventType":"DEFAULT","handler":"start"}]}' -A bearer -a $TOK
+http --form post :8888/srv-applet-mgr/v0/applet/$PROJECTID file@$WASMFILE info='{"appletName":"log","wasmName":"log.wasm","strategies":[{"eventType":"DEFAULT","handler":"start"}]}' -A bearer -a $TOK
 ```
 
 output like

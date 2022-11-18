@@ -23,6 +23,7 @@ type CreateAppletReq struct {
 
 type Info struct {
 	AppletName string                `json:"appletName"`
+	WasmName   string                `json:"wasmName"`
 	Strategies []models.StrategyInfo `json:"strategies,omitempty"`
 }
 
@@ -39,8 +40,8 @@ func CreateApplet(ctx context.Context, projectID types.SFID, r *CreateAppletReq)
 	_, l = l.Start(ctx, "CreateApplet")
 	defer l.End()
 
-	resourceInfo := &resource.Info{}
-	if resourceInfo, err = resource.FetchOrCreateResource(ctx, r.File); err != nil {
+	mResource := &models.Resource{}
+	if mResource, err = resource.FetchOrCreateResource(ctx, r.File); err != nil {
 		l.Error(err)
 		return nil, err
 	}
@@ -49,8 +50,8 @@ func CreateApplet(ctx context.Context, projectID types.SFID, r *CreateAppletReq)
 	mApplet = &models.Applet{
 		RelProject:  models.RelProject{ProjectID: projectID},
 		RelApplet:   models.RelApplet{AppletID: appletID},
-		RelResource: models.RelResource{ResourceID: resourceInfo.Resource.RelResource.ResourceID},
-		AppletInfo:  models.AppletInfo{Name: r.AppletName, WasmName: resourceInfo.ResourceName},
+		RelResource: models.RelResource{ResourceID: mResource.RelResource.ResourceID},
+		AppletInfo:  models.AppletInfo{Name: r.AppletName, WasmName: r.WasmName},
 	}
 	if len(r.Info.Strategies) == 0 {
 		r.Info.Strategies = append(r.Info.Strategies, models.DefaultStrategyInfo)
@@ -97,8 +98,8 @@ func UpdateApplet(ctx context.Context, appletID types.SFID, r *UpdateAppletReq) 
 	_, l = l.Start(ctx, "UpdateApplet")
 	defer l.End()
 
-	resourceInfo := &resource.Info{}
-	if resourceInfo, err = resource.FetchOrCreateResource(ctx, r.File); err != nil {
+	mResource := &models.Resource{}
+	if mResource, err = resource.FetchOrCreateResource(ctx, r.File); err != nil {
 		l.Error(err)
 		return err
 	}
@@ -110,8 +111,8 @@ func UpdateApplet(ctx context.Context, appletID types.SFID, r *UpdateAppletReq) 
 			return mApplet.FetchByAppletID(db)
 		},
 		func(db sqlx.DBExecutor) error {
-			mApplet.RelResource = resourceInfo.RelResource
-			mApplet.WasmName = resourceInfo.ResourceName
+			mApplet.RelResource = mResource.RelResource
+			mApplet.WasmName = r.WasmName
 			if r.Info != nil {
 				mApplet.Name = r.AppletName
 			}
@@ -155,7 +156,7 @@ func UpdateApplet(ctx context.Context, appletID types.SFID, r *UpdateAppletReq) 
 		return status.CheckDatabaseError(err, "UpdateApplet")
 	}
 
-	l.WithValues("applet", appletID, "path", resourceInfo.ResourceInfo.Path).Info("applet uploaded")
+	l.WithValues("applet", appletID, "path", mResource.ResourceInfo.Path).Info("applet uploaded")
 	return nil
 }
 

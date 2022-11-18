@@ -19,7 +19,7 @@ import (
 
 var reserve = int64(100 * 1024 * 1024)
 
-func Upload(ctx context.Context, f *multipart.FileHeader, id string) (root, fullName, fileName, sum string, err error) {
+func Upload(ctx context.Context, f *multipart.FileHeader, id string) (root, fullName, sum string, err error) {
 	l := types.MustLoggerFromContext(ctx)
 	conf := types.MustUploadConfigFromContext(ctx)
 	var (
@@ -33,7 +33,6 @@ func Upload(ctx context.Context, f *multipart.FileHeader, id string) (root, full
 
 	root = filepath.Join(conf.Root, id)
 	fullName = filepath.Join(conf.Root, id, f.Filename)
-	fileName = f.Filename
 
 	if !IsDirExists(root) {
 		if err = os.MkdirAll(root, 0777); err != nil {
