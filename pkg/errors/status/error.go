@@ -24,6 +24,9 @@ const (
 const (
 	// @errTalk Unauthorized unauthorized
 	Unauthorized Error = http.StatusUnauthorized*1e6 + iota + 1
+	InvalidAuthValue
+	InvalidAuthAccountID
+	NoProjectPermission
 )
 
 const (

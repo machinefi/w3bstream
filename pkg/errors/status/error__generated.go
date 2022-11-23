@@ -44,6 +44,12 @@ func (v Error) Key() string {
 		return "MD5ChecksumFailed"
 	case Unauthorized:
 		return "Unauthorized"
+	case InvalidAuthValue:
+		return "InvalidAuthValue"
+	case InvalidAuthAccountID:
+		return "InvalidAuthAccountID"
+	case NoProjectPermission:
+		return "NoProjectPermission"
 	case Forbidden:
 		return "Forbidden"
 	case InstanceLimit:
@@ -72,6 +78,12 @@ func (v Error) Msg() string {
 		return ""
 	case Unauthorized:
 		return "Unauthorized unauthorized"
+	case InvalidAuthValue:
+		return ""
+	case InvalidAuthAccountID:
+		return ""
+	case NoProjectPermission:
+		return ""
 	case Forbidden:
 		return ""
 	case InstanceLimit:
@@ -100,6 +112,12 @@ func (v Error) CanBeTalk() bool {
 		return false
 	case Unauthorized:
 		return true
+	case InvalidAuthValue:
+		return false
+	case InvalidAuthAccountID:
+		return false
+	case NoProjectPermission:
+		return false
 	case Forbidden:
 		return false
 	case InstanceLimit:
