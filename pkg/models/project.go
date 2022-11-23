@@ -16,7 +16,8 @@ type Project struct {
 	datatypes.PrimaryID
 	RelProject
 	RelAccount
-	ProjectInfo
+	ProjectName
+	ProjectBase
 	datatypes.OperationTimesWithDeleted
 }
 
@@ -24,8 +25,11 @@ type RelProject struct {
 	ProjectID types.SFID `db:"f_project_id" json:"projectID"`
 }
 
-type ProjectInfo struct {
-	Name    string         `db:"f_name"               json:"name"`               // Name project name
+type ProjectName struct {
+	Name string `db:"f_name" json:"name"` // Name project name
+}
+
+type ProjectBase struct {
 	Version string         `db:"f_version,default=''" json:"version,omitempty"`  // Version project version
 	Proto   enums.Protocol `db:"f_proto,default='0'"  json:"protocol,omitempty"` // Proto project protocol for event publisher
 }

@@ -21,7 +21,10 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-type CreateProjectReq = models.ProjectInfo
+type CreateProjectReq struct {
+	models.ProjectName
+	models.ProjectBase
+}
 
 func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (*models.Project, error) {
 	d := types.MustDBExecutorFromContext(ctx)
@@ -35,7 +38,8 @@ func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (
 	m := &models.Project{
 		RelProject:  models.RelProject{ProjectID: idg.MustGenSFID()},
 		RelAccount:  models.RelAccount{AccountID: a.AccountID},
-		ProjectInfo: *r,
+		ProjectName: r.ProjectName,
+		ProjectBase: r.ProjectBase,
 	}
 
 	if err := mq.CreateChannel(ctx, m.Name, hdl); err != nil {
@@ -265,7 +269,7 @@ func GetProjectByProjectID(ctx context.Context, prjID types.SFID) (*Detail, erro
 func GetProjectByProjectName(ctx context.Context, prjName string) (*models.Project, error) {
 	d := types.MustDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
-	m := &models.Project{ProjectInfo: models.ProjectInfo{Name: prjName}}
+	m := &models.Project{ProjectName: models.ProjectName{Name: prjName}}
 
 	_, l = l.Start(ctx, "GetProjectByProjectName")
 	defer l.End()

@@ -61,7 +61,7 @@ func (v *CurrentAccount) ValidateProjectPerm(ctx context.Context, prjID types.SF
 func (v *CurrentAccount) ValidateProjectPermByPrjName(ctx context.Context, projectName string) (*models.Project, error) {
 	d := types.MustDBExecutorFromContext(ctx)
 	a := CurrentAccountFromContext(ctx)
-	m := &models.Project{ProjectInfo: models.ProjectInfo{Name: projectName}}
+	m := &models.Project{ProjectName: models.ProjectName{Name: projectName}}
 
 	if err := m.FetchByName(d); err != nil {
 		return nil, status.CheckDatabaseError(err, "GetProjectByProjectID")
