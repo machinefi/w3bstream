@@ -6,6 +6,7 @@ import (
 	"crypto/ecdsa"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/bytecodealliance/wasmtime-go"
@@ -24,6 +25,7 @@ import (
 
 func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte) (*Instance, error) {
 	l := types.MustLoggerFromContext(ctx)
+	rds := types.MustRedisEndpointFromContext(ctx)
 
 	_, l = l.Start(ctx, "NewInstanceByCode")
 	defer l.End()
@@ -41,10 +43,12 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte) (*Instan
 	}
 
 	ef := ExportFuncs{
-		store: vmStore,
-		res:   res,
-		db:    db,
-		cl:    cl,
+		store:   vmStore,
+		res:     res,
+		db:      db,
+		redisDB: rds,
+		dbKey:   fmt.Sprintf("%sins:%v", rds.Prefix, id),
+		cl:      cl,
 		logger: types.MustLoggerFromContext(ctx).WithValues(
 			"@src", "wasm",
 			"@namespace", types.MustProjectFromContext(ctx).Name,
@@ -58,6 +62,8 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte) (*Instan
 	_ = linker.FuncWrap("env", "ws_log", ef.Log)
 	_ = linker.FuncWrap("env", "ws_send_tx", ef.SendTX)
 	_ = linker.FuncWrap("env", "ws_call_contract", ef.CallContract)
+	_ = linker.FuncWrap("env", "ws_get_redis_db", ef.GetRedisDB)
+	_ = linker.FuncWrap("env", "ws_set_redis_db", ef.SetRedisDB)
 
 	_ = linker.DefineWasi()
 

@@ -2,10 +2,10 @@ package types
 
 import (
 	"context"
-
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
@@ -21,6 +21,7 @@ type (
 	CtxPgEndpoint        struct{} // CtxPgEndpoint postgres.Endpoint
 	CtxLogger            struct{} // CtxLogger log.Logger
 	CtxMqttBroker        struct{} // CtxMqttBroker mqtt.Broker
+	CtxRedisEndpoint     struct{} // CtxRedisEndpoint redis.Redis
 	CtxUploadConfig      struct{} // CtxUploadConfig UploadConfig
 	CtxEthClient         struct{} // CtxEthClient ETHClientConfig
 	CtxTaskWorker        struct{}
@@ -89,6 +90,23 @@ func PgEndpointFromContext(ctx context.Context) (*postgres.Endpoint, bool) {
 
 func MustPgEndpointFromContext(ctx context.Context) *postgres.Endpoint {
 	v, ok := PgEndpointFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithRedisEndpointContext(v *redis.Redis) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxRedisEndpoint{}, v)
+	}
+}
+
+func RedisEndpointFromContext(ctx context.Context) (*redis.Redis, bool) {
+	v, ok := ctx.Value(CtxRedisEndpoint{}).(*redis.Redis)
+	return v, ok
+}
+
+func MustRedisEndpointFromContext(ctx context.Context) *redis.Redis {
+	v, ok := RedisEndpointFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

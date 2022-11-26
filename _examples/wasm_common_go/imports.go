@@ -87,6 +87,39 @@ func SetDB(key string, v int32) {
 	_ = _ws_set_db(addr, size, vaddr, vsize)
 }
 
+func GetRedisDB(key string) int32 {
+	addr, size := StringToPointer(key)
+
+	rAddr := uintptr(unsafe.Pointer(new(uint32)))
+	rSize := uintptr(unsafe.Pointer(new(uint32)))
+
+	if ret := _ws_get_redis_db(addr, size, uint32(rAddr), uint32(rSize)); ret != 0 {
+		return 0
+	}
+
+	vaddr := *(*uint32)(unsafe.Pointer(rAddr))
+	m := allocations.GetByAddr(vaddr)
+	if m == nil {
+		return 0
+	}
+
+	var ret int32
+	buf := bytes.NewBuffer(m.data)
+	binary.Read(buf, binary.LittleEndian, &ret)
+	return ret
+}
+
+func SetRedisDB(key string, v int32) {
+	addr, size := StringToPointer(key)
+
+	buf := new(bytes.Buffer)
+	binary.Write(buf, binary.LittleEndian, v)
+	vaddr, vsize := BytesToPointer(buf.Bytes())
+
+	// TODO: error handle
+	_ = _ws_set_redis_db(addr, size, vaddr, vsize)
+}
+
 func SendTx(key string) int32 {
 	addr, size := StringToPointer(key)
 	return _ws_send_tx(addr, size)

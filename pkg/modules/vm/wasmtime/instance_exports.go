@@ -5,6 +5,8 @@ import (
 	"crypto/ecdsa"
 	"encoding/binary"
 	"encoding/hex"
+	"github.com/gomodule/redigo/redis"
+	confredis "github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 	"math/big"
 
 	"github.com/bytecodealliance/wasmtime-go"
@@ -31,11 +33,13 @@ const (
 
 type (
 	ExportFuncs struct {
-		store  *wasmtime.Store
-		res    *mapx.Map[uint32, []byte]
-		db     map[string][]byte
-		logger conflog.Logger
-		cl     *ChainClient
+		store   *wasmtime.Store
+		res     *mapx.Map[uint32, []byte]
+		db      map[string][]byte
+		redisDB *confredis.Redis
+		dbKey   string
+		logger  conflog.Logger
+		cl      *ChainClient
 	}
 
 	ChainClient struct {
@@ -170,6 +174,69 @@ func (ef *ExportFuncs) GetDB(c *wasmtime.Caller,
 		"key", string(key),
 		"val", string(val),
 	).Info("host.GetDB")
+
+	if err := ef.copyDataIntoWasm(c, val, vmAddrPtr, vmSizePtr); err != nil {
+		ef.logger.Error(err)
+		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
+	}
+
+	return int32(wasm.ResultStatusCode_OK)
+}
+
+func (ef *ExportFuncs) SetRedisDB(c *wasmtime.Caller, kAddr, kSize, vAddr, vSize int32) int32 {
+	memBuf := c.GetExport("memory").Memory().UnsafeData(ef.store)
+	key, err := read(memBuf, kAddr, kSize)
+	if err != nil {
+		ef.logger.Error(err)
+		return int32(wasm.ResultStatusCode_ResourceNotFound)
+	}
+	value, err := read(memBuf, vAddr, vSize)
+	if err != nil {
+		ef.logger.Error(err)
+		return int32(wasm.ResultStatusCode_ResourceNotFound)
+	}
+
+	ef.logger.WithValues(
+		"key", string(key),
+		"val", string(value),
+	).Info("host.SetRedisDB")
+
+	var args []interface{}
+	args = append(args, ef.dbKey, string(key), string(value))
+	if _, err := ef.redisDB.Exec(&confredis.Cmd{Name: "HSET", Args: args}); err != nil {
+		ef.logger.Error(err)
+		//TODO define error code
+		return int32(wasm.ResultStatusCode_Failed)
+	}
+	return int32(wasm.ResultStatusCode_OK)
+}
+
+func (ef *ExportFuncs) GetRedisDB(c *wasmtime.Caller,
+	kAddr, kSize int32, vmAddrPtr, vmSizePtr int32) int32 {
+	memBuf := c.GetExport("memory").Memory().UnsafeData(ef.store)
+	key, err := read(memBuf, kAddr, kSize)
+	if err != nil {
+		ef.logger.Error(err)
+		return int32(wasm.ResultStatusCode_ResourceNotFound)
+	}
+
+	var args []interface{}
+	args = append(args, ef.dbKey, string(key))
+	result, err := ef.redisDB.Exec(&confredis.Cmd{Name: "HGET", Args: args})
+	if err != nil || result == nil {
+		ef.logger.Error(err)
+		return int32(wasm.ResultStatusCode_ResourceNotFound)
+	}
+	val, err := redis.Bytes(result, nil)
+	if err != nil {
+		ef.logger.Error(err)
+		return int32(wasm.ResultStatusCode_ResourceNotFound)
+	}
+
+	ef.logger.WithValues(
+		"key", string(key),
+		"val", string(val),
+	).Info("host.GetRedisDB")
 
 	if err := ef.copyDataIntoWasm(c, val, vmAddrPtr, vmSizePtr); err != nil {
 		ef.logger.Error(err)

@@ -12,6 +12,7 @@ import (
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	confpostgres "github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
+	confredis "github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq/mem_mq"
@@ -27,6 +28,7 @@ var (
 	postgres      = &confpostgres.Endpoint{Database: models.DB}
 	monitorDB     = &confpostgres.Endpoint{Database: models.MonitorDB}
 	mqtt          = &confmqtt.Broker{}
+	redis         = &confredis.Redis{}
 	server        = &confhttp.Server{}
 	jwt           = &confjwt.Jwt{}
 	logger        = &conflog.Log{Name: "srv-demo"}
@@ -55,9 +57,9 @@ func init() {
 		confapp.WithVersion("0.0.1"),
 		confapp.WithLogger(conflog.Std()),
 	)
-	App.Conf(postgres, monitorDB, server, jwt, logger, mqtt, uploadConf, ethClientConf)
+	App.Conf(postgres, monitorDB, server, jwt, logger, mqtt, redis, uploadConf, ethClientConf)
 
-	confhttp.RegisterCheckerBy(postgres, mqtt, server)
+	confhttp.RegisterCheckerBy(postgres, mqtt, redis, server)
 	std.(conflog.LevelSetter).SetLevel(conflog.InfoLevel)
 
 	tasks = mem_mq.New(0)
@@ -67,6 +69,7 @@ func init() {
 		types.WithDBExecutorContext(postgres),
 		types.WithMonitorDBExecutorContext(monitorDB),
 		types.WithPgEndpointContext(postgres),
+		types.WithRedisEndpointContext(redis),
 		types.WithLoggerContext(conflog.Std()),
 		types.WithMqttBrokerContext(mqtt),
 		types.WithUploadConfigContext(uploadConf),

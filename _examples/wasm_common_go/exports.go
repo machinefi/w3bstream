@@ -23,3 +23,11 @@ func _ws_set_db(kaddr, ksize, vaddr, vsize uint32) int32
 //go:wasm-module env
 //export ws_send_tx
 func _ws_send_tx(kaddr, ksize uint32) (v int32)
+
+//go:wasm-module env
+//export ws_get_redis_db
+func _ws_get_redis_db(kaddr, ksize, ptr, size uint32) int32
+
+//go:wasm-module env
+//export ws_set_redis_db
+func _ws_set_redis_db(kaddr, ksize, vaddr, vsize uint32) int32
