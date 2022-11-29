@@ -2,6 +2,6 @@ build
 .session.vim
 .undodir
 .vscode
-local.yml
-local.yaml
+config.yml
+config.yaml
 var

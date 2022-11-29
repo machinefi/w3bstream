@@ -43,16 +43,24 @@ func New(setters ...OptSetter) *Ctx {
 	if feat, ok := os.LookupEnv(consts.EnvProjectFeat); ok {
 		c.feat = feat
 	}
-	_ = os.Setenv(consts.EnvProjectName, c.String())
+	if version, ok := os.LookupEnv(consts.EnvProjectVersion); ok {
+		c.version = version
+	}
+	if name, ok := os.LookupEnv(consts.EnvProjectName); ok {
+		c.name = name
+	}
+	_ = os.Setenv(consts.EnvProjectName, c.name)
 	return c
 }
 
 func (c *Ctx) Context() context.Context { return c.ctx }
 
 // Conf init all configs from yml file, and do initialization for each config.
-// config dir include `local.yml` `default.yml` and `master.yml`
+// config dir include `config.yml.template` `config.yml` and `master.yml`
+// config.yml.template shows config file template and preset config values
+// config.yml contains all user configured values
 func (c *Ctx) Conf(configs ...interface{}) {
-	local, err := ioutil.ReadFile(filepath.Join(c.root, "./config/local.yml"))
+	local, err := ioutil.ReadFile(filepath.Join(c.root, "./config/config.yml"))
 	if err == nil {
 		kv := make(map[string]string)
 		if err = yaml.Unmarshal(local, &kv); err == nil {
@@ -204,7 +212,7 @@ func (c *Ctx) MarshalDefault() error {
 		}
 	}
 
-	return WriteYamlFile(path.Join(c.root, "./config/default.yml"), m)
+	return WriteYamlFile(path.Join(c.root, "./config/config.yml.template"), m)
 }
 
 func (c *Ctx) log(rv reflect.Value) {

@@ -27,7 +27,11 @@ migrate: install_toolkit install_easyjson
 
 ## build srv-applet-mgr
 build_server:
+	@mkdir -p build
 	@cd cmd/srv-applet-mgr && go build
+	@rm -rf build/{config,srv-applet-mgr}
+	@mv cmd/srv-applet-mgr/srv-applet-mgr build/
+	@cp -r cmd/srv-applet-mgr/config build/config
 	@echo 'succeed! srv-applet-mgr =>cmd/srv-applet-mgr/srv-applet-mgr'
 	@echo 'succeed! config =>cmd/srv-applet-mgr/config'
 	@echo 'modify cmd/srv-applet-mgr/config/local.yaml to use your server config'
