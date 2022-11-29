@@ -62,6 +62,10 @@ func (c *Ctx) Conf(configs ...interface{}) {
 		}
 	}
 
+	if key := os.Getenv(consts.GoRuntimeEnv); key == "" {
+		_ = os.Setenv(consts.GoRuntimeEnv, consts.DevelopEnv)
+	}
+
 	for _, v := range configs {
 		rv := reflect.ValueOf(v)
 		if rv.Kind() != reflect.Ptr {
@@ -189,9 +193,9 @@ func (c *Ctx) marshal(rv reflect.Value) error {
 }
 
 func (c *Ctx) MarshalDefault() error {
-	m := map[string]string{}
-	// TODO parse git info m["GOENV"] = "DEV"
-
+	m := map[string]string{
+		consts.GoRuntimeEnv: consts.DevelopEnv,
+	}
 	for _, vars := range c.vars {
 		for _, v := range vars.Values {
 			if !v.Optional {

@@ -1,0 +1,17 @@
+GO_RUNTIME_ENV: DEV
+TEST__ENDPOINT__Endpoint: tcp://127.0.0.1:6379
+TEST__ENDPOINT__Prefix: 'dev:test:'
+TEST__ENDPOINT__Wait: "true"
+TEST__REDIS__ConnectTimeout: 10s
+TEST__REDIS__DB: "1"
+TEST__REDIS__Host: 127.0.0.1
+TEST__REDIS__IdleTimeout: 4m
+TEST__REDIS__MaxActive: "5"
+TEST__REDIS__MaxIdle: "3"
+TEST__REDIS__Password: ""
+TEST__REDIS__Port: "6379"
+TEST__REDIS__Prefix: 'dev:test:'
+TEST__REDIS__Protocol: tcp
+TEST__REDIS__ReadTimeout: 10s
+TEST__REDIS__Wait: "true"
+TEST__REDIS__WriteTimeout: 10s

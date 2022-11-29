@@ -5,9 +5,9 @@ services:
     container_name: mosquitto
     restart: always
     volumes:
-      - ./var/mqtt/data:/mosquitto/data
-      - ./var/mqtt/conf:/mosquitto/config
-      - ./var/mqtt/log:/mosquitto/log
+      - ../var/mqtt/data:/mosquitto/data
+      - ../var/mqtt/conf:/mosquitto/config
+      - ../var/mqtt/log:/mosquitto/log
     ports:
       - "1883:1883"
       - "9001:9001"

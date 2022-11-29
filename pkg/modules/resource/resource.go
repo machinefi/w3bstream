@@ -44,3 +44,12 @@ func FetchOrCreateResource(ctx context.Context, f *multipart.FileHeader) (*model
 	l.Info("get wasm resource from db")
 	return m, err
 }
+
+func CheckResourceExist(ctx context.Context, path string) bool {
+	l := types.MustLoggerFromContext(ctx)
+
+	_, l = l.Start(ctx, "CheckResourceExist")
+	defer l.End()
+
+	return IsPathExists(path)
+}

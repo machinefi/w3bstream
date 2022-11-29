@@ -37,7 +37,8 @@ services:
     environment:
       DATABASE_URL: "postgresql://${POSTGRES_USER:-w3badmin}:${POSTGRES_PASSWORD:-PaSsW0Rd}@postgres:5432/${POSTGRES_DB:-w3bstream}?schema=applet_management"
       DATABASE_URL_MONITOR: "postgresql://${POSTGRES_USER:-w3badmin}:${POSTGRES_PASSWORD:-PaSsW0Rd}@postgres:5432/${POSTGRES_DB:-w3bstream}?schema=monitor"
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8888}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://w3bapp:8888}
+      NEXT_PUBLIC_MQTT_URL: ${NEXT_PUBLIC_MQTT_URL:-mqtt://mqtt_server:1883}
 
   mqtt_server:
     image: eclipse-mosquitto:1.6.15

@@ -28,7 +28,7 @@ migrate: install_toolkit install_easyjson
 ## build srv-applet-mgr
 build_server:
 	@cd cmd/srv-applet-mgr && go build
-	@echo 'succeed! srv-applet-mgr =>cmd/srv-applet-mgr/srv-applet-mgrr*'
+	@echo 'succeed! srv-applet-mgr =>cmd/srv-applet-mgr/srv-applet-mgr'
 	@echo 'succeed! config =>cmd/srv-applet-mgr/config'
 	@echo 'modify cmd/srv-applet-mgr/config/local.yaml to use your server config'
 
@@ -87,10 +87,12 @@ clean:
 run_depends:
 	@docker-compose -f testutil/docker-compose-pg.yaml up -d
 	@docker-compose -f testutil/docker-compose-mqtt.yaml up -d
+	@docker-compose -f testutil/docker-compose-redis.yaml up -d
 
 stop_depends:
 	@docker-compose -f testutil/docker-compose-pg.yaml stop
 	@docker-compose -f testutil/docker-compose-mqtt.yaml stop
+	@docker-compose -f testutil/docker-compose-redis.yaml stop
 
 wasm_demo: update_go_module
 	@cd _examples && make all

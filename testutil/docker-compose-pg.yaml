@@ -2,7 +2,7 @@ version: '3.3'
 services:
   postgres:
     image: postgis/postgis
-    command: postgres -c stats_temp_directory=/tmp
+    command: postgres
     container_name: postgis
     restart: always
     volumes:

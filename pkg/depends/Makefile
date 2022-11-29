@@ -57,6 +57,11 @@ pg_start:
 		fi \
 	fi ; \
 
+run_depends:
+	@docker-compose -f testutil/docker-compose-redis.yaml up -d
+	@docker-compose -f testutil/docker-compose-pg.yaml up -d
+	@docker-compose -f testutil/docker-compose-mqtt.yaml up -d
+
 test:
 	go test ./...
 	@echo "=================TEST FINISHED================="

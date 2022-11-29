@@ -5,3 +5,10 @@ const (
 	EnvProjectFeat    = "PRJ_FEAT"
 	EnvProjectVersion = "PRJ_VERSION"
 )
+
+const (
+	GoRuntimeEnv = "GO_RUNTIME_ENV"
+
+	DevelopEnv = "DEV"
+	ProduceEnv = "PROD"
+)

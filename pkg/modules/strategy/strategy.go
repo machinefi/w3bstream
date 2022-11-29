@@ -30,7 +30,7 @@ func FindStrategyInstances(ctx context.Context, prjName string, eventType string
 
 	l = l.WithValues("project", prjName, "event_type", eventType)
 
-	mProject := &models.Project{ProjectInfo: models.ProjectInfo{Name: prjName}}
+	mProject := &models.Project{ProjectName: models.ProjectName{Name: prjName}}
 
 	if err := mProject.FetchByName(d); err != nil {
 		l.Error(err)
