@@ -26,6 +26,7 @@ import (
 func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte) (*Instance, error) {
 	l := types.MustLoggerFromContext(ctx)
 	rds := types.MustRedisEndpointFromContext(ctx)
+	pg := types.MustDBExecutorFromContext(ctx)
 
 	_, l = l.Start(ctx, "NewInstanceByCode")
 	defer l.End()
@@ -47,6 +48,7 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte) (*Instan
 		res:     res,
 		db:      db,
 		redisDB: rds,
+		pgDB:    pg,
 		dbKey:   fmt.Sprintf("%sins:%v", rds.Prefix, id),
 		cl:      cl,
 		logger: types.MustLoggerFromContext(ctx).WithValues(
@@ -64,6 +66,7 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte) (*Instan
 	_ = linker.FuncWrap("env", "ws_call_contract", ef.CallContract)
 	_ = linker.FuncWrap("env", "ws_get_redis_db", ef.GetRedisDB)
 	_ = linker.FuncWrap("env", "ws_set_redis_db", ef.SetRedisDB)
+	_ = linker.FuncWrap("env", "ws_set_sql_db", ef.SetSQLDB)
 
 	_ = linker.DefineWasi()
 

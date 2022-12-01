@@ -3,11 +3,15 @@ package wasmtime
 import (
 	"context"
 	"crypto/ecdsa"
+	"encoding/base64"
 	"encoding/binary"
 	"encoding/hex"
+	"math/big"
+	"time"
+
 	"github.com/gomodule/redigo/redis"
 	confredis "github.com/machinefi/w3bstream/pkg/depends/conf/redis"
-	"math/big"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 
 	"github.com/bytecodealliance/wasmtime-go"
 	"github.com/ethereum/go-ethereum"
@@ -37,6 +41,7 @@ type (
 		res     *mapx.Map[uint32, []byte]
 		db      map[string][]byte
 		redisDB *confredis.Redis
+		pgDB    sqlx.DBExecutor
 		dbKey   string
 		logger  conflog.Logger
 		cl      *ChainClient
@@ -154,6 +159,88 @@ func (ef *ExportFuncs) SetDB(c *wasmtime.Caller, kAddr, kSize, vAddr, vSize int3
 
 	ef.db[string(key)] = value
 	return int32(wasm.ResultStatusCode_OK)
+}
+
+func (ef *ExportFuncs) SetSQLDB(c *wasmtime.Caller, addr, size int32) int32 {
+	memBuf := c.GetExport("memory").Memory().UnsafeData(ef.store)
+	data, err := read(memBuf, addr, size)
+	if err != nil {
+		ef.logger.Error(err)
+		return int32(wasm.ResultStatusCode_ResourceNotFound)
+	}
+
+	prestate, params, err := parseSQLQuery(data)
+	if err != nil {
+		ef.logger.Error(err)
+		return wasm.ResultStatusCode_Failed
+	}
+
+	if err := ef.execSQLQuery(prestate, params...); err != nil {
+		ef.logger.Error(err)
+		return wasm.ResultStatusCode_Failed
+	}
+
+	return int32(wasm.ResultStatusCode_OK)
+}
+
+func parseSQLQuery(data []byte) (prestate string, params []interface{}, err error) {
+	if !gjson.ValidBytes(data) {
+		err = errors.New("query is invalid")
+		return
+	}
+
+	res := gjson.ParseBytes(data)
+	prestateRes := res.Get("statement")
+	paramsRes := res.Get("params")
+	if !prestateRes.Exists() || !paramsRes.Exists() {
+		err = errors.New("query is invalid")
+		return
+	}
+	prestate = prestateRes.String()
+
+	params = make([]interface{}, 0)
+	for _, para := range paramsRes.Array() {
+		var res interface{}
+		res, err = decodeSQLQueryParam(&para)
+		if err != nil {
+			return
+		}
+		params = append(params, res)
+	}
+
+	return
+}
+
+func decodeSQLQueryParam(in *gjson.Result) (ret interface{}, err error) {
+	switch {
+	case in.Get("int32").Exists():
+		ret = int32(in.Get("int32").Int())
+	case in.Get("int64").Exists():
+		ret = int64(in.Get("int64").Int())
+	case in.Get("float32").Exists():
+		ret = float32(in.Get("float32").Float())
+	case in.Get("float64").Exists():
+		ret = float64(in.Get("float64").Float())
+	case in.Get("string").Exists():
+		ret = in.Get("string").String()
+	case in.Get("bool").Exists():
+		ret = in.Get("bool").Bool()
+	case in.Get("bytes").Exists():
+		ret, err = base64.StdEncoding.DecodeString(in.Get("bytes").String())
+	case in.Get("time").Exists():
+		ret, err = time.Parse(time.RFC3339, in.Get("time").String())
+	default:
+		err = errors.New("fail to decode the param")
+	}
+	return
+}
+
+func (ef *ExportFuncs) execSQLQuery(prestate string, params ...interface{}) error {
+	_, err := ef.pgDB.ExecContext(context.Background(), prestate, params...)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ef *ExportFuncs) GetDB(c *wasmtime.Caller,
