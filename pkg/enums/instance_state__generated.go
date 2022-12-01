@@ -25,6 +25,8 @@ func ParseInstanceStateFromString(s string) (InstanceState, error) {
 		return INSTANCE_STATE__STARTED, nil
 	case "STOPPED":
 		return INSTANCE_STATE__STOPPED, nil
+	case "LOAD_FAIL":
+		return INSTANCE_STATE__LOAD_FAIL, nil
 	}
 }
 
@@ -40,6 +42,8 @@ func ParseInstanceStateFromLabel(s string) (InstanceState, error) {
 		return INSTANCE_STATE__STARTED, nil
 	case "STOPPED":
 		return INSTANCE_STATE__STOPPED, nil
+	case "LOAD_FAIL":
+		return INSTANCE_STATE__LOAD_FAIL, nil
 	}
 }
 
@@ -59,6 +63,8 @@ func (v InstanceState) String() string {
 		return "STARTED"
 	case INSTANCE_STATE__STOPPED:
 		return "STOPPED"
+	case INSTANCE_STATE__LOAD_FAIL:
+		return "LOAD_FAIL"
 	}
 }
 
@@ -74,6 +80,8 @@ func (v InstanceState) Label() string {
 		return "STARTED"
 	case INSTANCE_STATE__STOPPED:
 		return "STOPPED"
+	case INSTANCE_STATE__LOAD_FAIL:
+		return "LOAD_FAIL"
 	}
 }
 
@@ -82,7 +90,7 @@ func (v InstanceState) TypeName() string {
 }
 
 func (v InstanceState) ConstValues() []enum.IntStringerEnum {
-	return []enum.IntStringerEnum{INSTANCE_STATE__CREATED, INSTANCE_STATE__STARTED, INSTANCE_STATE__STOPPED}
+	return []enum.IntStringerEnum{INSTANCE_STATE__CREATED, INSTANCE_STATE__STARTED, INSTANCE_STATE__STOPPED, INSTANCE_STATE__LOAD_FAIL}
 }
 
 func (v InstanceState) MarshalText() ([]byte, error) {

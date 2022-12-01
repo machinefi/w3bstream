@@ -86,7 +86,7 @@ func Upload(ctx context.Context, f *multipart.FileHeader, id string) (root, full
 
 func IsPathExists(path string) bool {
 	_, err := os.Stat(path)
-	return err == nil || os.IsNotExist(err)
+	return err == nil || !os.IsNotExist(err)
 }
 
 func IsDirExists(path string) bool {

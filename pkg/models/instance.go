@@ -10,7 +10,6 @@ import (
 // @def primary                     ID
 // @def unique_index UI_instance_id InstanceID
 // @def index        I_applet_id    AppletID
-// @def index        I_path         Path
 //
 //go:generate toolkit gen model Instance --database DB
 type Instance struct {
@@ -26,6 +25,5 @@ type RelInstance struct {
 }
 
 type InstanceInfo struct {
-	Path  string              `db:"f_path"  json:"-"`
 	State enums.InstanceState `db:"f_state" json:"state"`
 }

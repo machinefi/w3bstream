@@ -39,7 +39,7 @@ var (
 	}
 )
 
-// NewConfigCmd represents the new node command.
+// NewConfigCmd represents the new config command.
 func NewConfigCmd(client client.Client) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "config",

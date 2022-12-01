@@ -62,9 +62,6 @@ func (*Instance) Indexes() builder.Indexes {
 		"i_applet_id": []string{
 			"AppletID",
 		},
-		"i_path": []string{
-			"Path",
-		},
 	}
 }
 
@@ -73,7 +70,6 @@ func (m *Instance) IndexFieldNames() []string {
 		"AppletID",
 		"ID",
 		"InstanceID",
-		"Path",
 	}
 }
 
@@ -112,14 +108,6 @@ func (m *Instance) ColAppletID() *builder.Column {
 
 func (*Instance) FieldAppletID() string {
 	return "AppletID"
-}
-
-func (m *Instance) ColPath() *builder.Column {
-	return InstanceTable.ColByFieldName(m.FieldPath())
-}
-
-func (*Instance) FieldPath() string {
-	return "Path"
 }
 
 func (m *Instance) ColState() *builder.Column {

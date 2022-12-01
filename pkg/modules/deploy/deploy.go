@@ -2,6 +2,7 @@ package deploy
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/pkg/errors"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/resource"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -62,7 +64,6 @@ func CreateInstance(ctx context.Context, path string, appletID types.SFID) (*Cre
 		return nil, err
 	}
 	m.State = enums.INSTANCE_STATE__CREATED
-	m.Path = path
 
 	if err = m.Create(d); err != nil {
 		l.Error(err)
@@ -81,7 +82,7 @@ func ControlInstance(ctx context.Context, instanceID types.SFID, cmd enums.Deplo
 	var (
 		d = types.MustDBExecutorFromContext(ctx)
 		l = types.MustLoggerFromContext(ctx)
-		m *models.Instance
+		m = &models.Instance{RelInstance: models.RelInstance{InstanceID: instanceID}}
 	)
 
 	_, l = l.Start(ctx, "ControlInstance")
@@ -96,9 +97,9 @@ func ControlInstance(ctx context.Context, instanceID types.SFID, cmd enums.Deplo
 		}
 	}()
 
-	if m, err = GetInstanceByInstanceID(ctx, instanceID); err != nil {
+	if err = m.FetchByInstanceID(d); err != nil {
 		l.Error(err)
-		return err
+		return status.CheckDatabaseError(err, "FetchByInstanceID")
 	}
 
 	switch cmd {
@@ -150,6 +151,11 @@ func ControlInstance(ctx context.Context, instanceID types.SFID, cmd enums.Deplo
 		}
 		return nil
 	default:
+		m.State = enums.INSTANCE_STATE__LOAD_FAIL
+		if err = m.UpdateByInstanceID(d); err != nil {
+			l.Error(err)
+			return status.CheckDatabaseError(err, "UpdateInstanceByInstanceID")
+		}
 		return status.BadRequest.StatusErr().WithDesc("unknown deploy command")
 	}
 }
@@ -224,12 +230,21 @@ func StartInstances(ctx context.Context) error {
 
 		ctx = types.WithProject(ctx, mPrj)
 		ctx = types.WithApplet(ctx, mApp)
-		err = vm.NewInstance(ctx, i.Path, i.InstanceID)
 		cmd := enums.DEPLOY_CMD_UNKNOWN
+
+		mResource := &models.Resource{RelResource: models.RelResource{ResourceID: mApp.ResourceID}}
+		if err := mResource.FetchByResourceID(d); err != nil {
+			l.Warn(err)
+			continue
+		}
+		if isExist := resource.CheckResourceExist(ctx, mResource.ResourceInfo.Path); !isExist {
+			err = errors.New(fmt.Sprintf("The file %s does not exist.", mResource.ResourceInfo.Path))
+		} else {
+			err = vm.NewInstance(ctx, mResource.Path, i.InstanceID)
+		}
 
 		if err != nil {
 			l.Warn(err)
-			cmd = enums.DEPLOY_CMD__REMOVE
 		} else {
 			switch i.State {
 			case enums.INSTANCE_STATE__CREATED:
@@ -239,6 +254,8 @@ func StartInstances(ctx context.Context) error {
 				cmd = enums.DEPLOY_CMD__START
 			case enums.INSTANCE_STATE__STOPPED:
 				cmd = enums.DEPLOY_CMD__STOP
+			case enums.INSTANCE_STATE__LOAD_FAIL:
+				cmd = enums.DEPLOY_CMD__START
 			}
 		}
 
