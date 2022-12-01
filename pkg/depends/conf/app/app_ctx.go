@@ -201,6 +201,7 @@ func (c *Ctx) marshal(rv reflect.Value) error {
 }
 
 func (c *Ctx) MarshalDefault() error {
+	// TODO: add comment for each single config element
 	m := map[string]string{
 		consts.GoRuntimeEnv: consts.DevelopEnv,
 	}
@@ -230,6 +231,9 @@ func (c *Ctx) group(rv reflect.Value) string {
 	group := rv.Elem().Type().Name()
 	if rv.Elem().Type().Implements(types.RTypeNamed) {
 		group = rv.Elem().Interface().(types.Named).Name()
+	}
+	if group == "" {
+		return strings.ToUpper(strings.Replace(c.name, "-", "_", -1))
 	}
 	return strings.ToUpper(strings.Replace(c.name+"__"+group, "-", "_", -1))
 }
