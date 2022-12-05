@@ -15,7 +15,7 @@ WORKDIR /w3bstream
 
 EXPOSE 8888
 
-COPY --from=build-go /w3bstream/cmd/srv-applet-mgr/srv-applet-mgr /w3bstream/srv-applet-mgr
+COPY --from=build-go /w3bstream/build/srv-applet-mgr /w3bstream/srv-applet-mgr
 
 COPY cmd/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod a+x /usr/local/bin/entrypoint.sh
