@@ -61,7 +61,7 @@ services:
       - ${WS_WORKING_DIR:-.}/postgres:/var/lib/postgresql/data
 
   graphql-engine:
-    image: hasura/graphql-engine:v2.14.0
+    image: hasura/graphql-engine:v2.15.2
     depends_on:
       - "postgres"
     restart: always
