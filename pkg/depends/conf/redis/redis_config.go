@@ -36,6 +36,23 @@ func (r *Redis) Get() redis.Conn {
 	return nil
 }
 
+func (r *Redis) clone() *Redis {
+	cloned := *r
+	return &cloned
+}
+
+func (r *Redis) WithPrefix(prefix string) *Redis {
+	cloned := r.clone()
+	cloned.Prefix += "::" + prefix
+	return cloned
+}
+
+func (r *Redis) WithDBIndex(n int) *Redis {
+	cloned := r.clone()
+	cloned.DB = n
+	return cloned
+}
+
 func (r *Redis) Exec(cmd *Cmd, others ...*Cmd) (interface{}, error) {
 	c := r.Get()
 	defer c.Close()
