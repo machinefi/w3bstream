@@ -3,7 +3,6 @@ package models
 import (
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
-	"github.com/machinefi/w3bstream/pkg/depends/schema"
 	"github.com/machinefi/w3bstream/pkg/enums"
 )
 
@@ -33,5 +32,4 @@ type ProjectName struct {
 type ProjectBase struct {
 	Version string         `db:"f_version,default=''" json:"version,omitempty"`  // Version project version
 	Proto   enums.Protocol `db:"f_proto,default='0'"  json:"protocol,omitempty"` // Proto project protocol for event publisher
-	Schema  *schema.Schema `db:"f_schema"             json:"schema,omitempty"`   // Schema project database structure
 }

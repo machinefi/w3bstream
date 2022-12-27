@@ -42,38 +42,6 @@ func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (
 		ProjectBase: r.ProjectBase,
 	}
 
-	if r.Schema != nil {
-		r.Schema.WithName(r.Name)
-		if err := r.Schema.Init(); err != nil {
-			return nil, status.InternalServerError.StatusErr().
-				WithDesc(fmt.Sprintf("init schema failed: [project:%s] [err:%v]",
-					m.Name, err))
-		}
-
-		wasmdb := types.MustWasmDBExecutorFromContext(ctx)
-		if _, err := wasmdb.Exec(r.Schema.CreateSchema()); err != nil {
-			return nil, status.InternalServerError.StatusErr().
-				WithDesc(fmt.Sprintf("create wasm schema failed: [project:%s] [err:%v]",
-					m.Name, err))
-		}
-
-		wasmdb = wasmdb.WithSchema(r.Name)
-		for _, t := range r.Schema.Tables {
-			es := t.CreateIfNotExists()
-			for _, e := range es {
-				if e.IsNil() {
-					continue
-				}
-				l.Info(builder.ResolveExpr(e).Query())
-				if _, err := wasmdb.Exec(e); err != nil {
-					return nil, status.InternalServerError.StatusErr().
-						WithDesc(fmt.Sprintf("create wasm tables failed: [project:%s] [tbl:%s] [err:%v]",
-							m.Name, t.Name, err))
-				}
-			}
-		}
-	}
-
 	if err := mq.CreateChannel(ctx, m.Name, hdl); err != nil {
 		l.Error(err)
 		return nil, status.InternalServerError.StatusErr().

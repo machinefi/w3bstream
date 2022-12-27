@@ -44,7 +44,6 @@ func (*Project) Comments() map[string]string {
 		"AccountID": "AccountID  account id",
 		"Name":      "Name project name",
 		"Proto":     "Proto project protocol for event publisher",
-		"Schema":    "Schema project database structure",
 		"Version":   "Version project version",
 	}
 }
@@ -59,9 +58,6 @@ func (*Project) ColDesc() map[string][]string {
 		},
 		"Proto": []string{
 			"Proto project protocol for event publisher",
-		},
-		"Schema": []string{
-			"Schema project database structure",
 		},
 		"Version": []string{
 			"Version project version",
@@ -159,14 +155,6 @@ func (m *Project) ColProto() *builder.Column {
 
 func (*Project) FieldProto() string {
 	return "Proto"
-}
-
-func (m *Project) ColSchema() *builder.Column {
-	return ProjectTable.ColByFieldName(m.FieldSchema())
-}
-
-func (*Project) FieldSchema() string {
-	return "Schema"
 }
 
 func (m *Project) ColCreatedAt() *builder.Column {

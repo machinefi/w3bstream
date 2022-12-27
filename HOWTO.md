@@ -60,7 +60,8 @@ export TOK=${token}
 command
 
 ```sh
-echo '{"name":"${project_name}"}' | http :8888/srv-applet-mgr/v0/project -A bearer -a $TOK
+export PROJECTNAME=${project_name}
+echo '{"name":"'$PROJECTNAME"}' | http :8888/srv-applet-mgr/v0/project -A bearer -a $TOK
 ```
 
 output like
@@ -116,10 +117,25 @@ export PROJECTSCHEMA='{
     }
   ]
 }'
-echo '{"name":"${project_name}","schema":'$PROJECTSCHEMA'}' | http :8888/srv-applet-mgr/v0/project -A bearer -a $TOK
+echo $PROJECTSCHEMA | http post :8888/srv-applet-mgr/v0/project_config/$PROJECTNAME/PROJECT_SCHEMA -A bearer -a $TOK
 ```
 
-> the database for wasm storage is configured by w3bstream server and the name of schema is name of project.
+### Create or update project env vars
+
+```sh
+export PROJECTENV={"values":[["1","one"],["2","two"],["3","three","33"]]}
+echo $PROJECTENV | http post :8888/srv-applet-mgr/v0/project_config/test/PROJECT_ENV -A bearer -a $TOK
+```
+
+> the database for wasm storage is configured by w3bstream server and the name
+> of schema is name of project.
+
+### Review your project config
+
+```shell
+http get :8888/srv-applet-mgr/v0/project_config/$PROJECTNAME/PROJECT_SCHEMA -A bearer -a $TOK
+http get :8888/srv-applet-mgr/v0/project_config/$PROJECTNAME/PROJECT_ENV -A bearer -a $TOK
+```
 
 ### Build demo wasm scripts
 
@@ -227,17 +243,17 @@ output like
 
 ```json
 [
-    {
-        "eventID": "78C77DA7-8CE3-4E78-B970-95B685B02409",
-        "projectName": "test",
-        "wasmResults": [
-            {
-                "code": 0,
-                "errMsg": "",
-                "instanceID": "2612094299059956738"
-            }
-        ]
-    }
+  {
+    "eventID": "78C77DA7-8CE3-4E78-B970-95B685B02409",
+    "projectName": "test",
+    "wasmResults": [
+      {
+        "code": 0,
+        "errMsg": "",
+        "instanceID": "2612094299059956738"
+      }
+    ]
+  }
 ]
 ```
 
