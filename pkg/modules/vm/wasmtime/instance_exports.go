@@ -21,11 +21,25 @@ const (
 	logErrorLevel
 )
 
-type ABILinker interface {
-	LinkABI(Importer) error
-}
+type (
+	Import func(module, name string, f interface{}) error
 
-func NewExportFuncs(ctx context.Context, code []byte) (*ExportFuncs, error) {
+	ABILinker interface {
+		LinkABI(Import) error
+	}
+
+	ExportFuncs struct {
+		rt  *Runtime
+		res *mapx.Map[uint32, []byte]
+		env *wasm.Env
+		kvs wasm.KVStore
+		db  sqlx.DBExecutor
+		log conflog.Logger
+		cl  *wasm.ChainClient
+	}
+)
+
+func NewExportFuncs(ctx context.Context, rt *Runtime) (*ExportFuncs, error) {
 	ef := &ExportFuncs{
 		res: wasm.MustRuntimeResourceFromContext(ctx),
 		kvs: wasm.MustKVStoreFromContext(ctx),
@@ -34,39 +48,31 @@ func NewExportFuncs(ctx context.Context, code []byte) (*ExportFuncs, error) {
 	ef.cl, _ = wasm.ChainClientFromContext(ctx)
 	ef.db, _ = wasm.DBExecutorFromContext(ctx)
 	ef.env, _ = wasm.EnvFromContext(ctx)
-
-	rt, err := NewRuntime(code, ef)
-	if err != nil {
-		return nil, err
-	}
 	ef.rt = rt
 
 	return ef, nil
 }
 
-type ExportFuncs struct {
-	rt  *Runtime
-	res *mapx.Map[uint32, []byte]
-	env *wasm.Env
-	kvs wasm.KVStore
-	db  sqlx.DBExecutor
-	log conflog.Logger
-	cl  *wasm.ChainClient
-}
-
 var _ wasm.ABI = (*ExportFuncs)(nil)
 
-func (ef *ExportFuncs) LinkABI(fw Importer) error {
-	_ = fw.Import("env", "ws_log", ef.Log)
-	_ = fw.Import("env", "ws_get_data", ef.GetData)
-	_ = fw.Import("env", "ws_set_data", ef.SetData)
-	_ = fw.Import("env", "ws_get_db", ef.GetDB)
-	_ = fw.Import("env", "ws_set_db", ef.SetDB)
-	_ = fw.Import("env", "ws_send_tx", ef.SendTX)
-	_ = fw.Import("env", "ws_call_contract", ef.CallContract)
-	_ = fw.Import("env", "ws_set_sql_db", ef.SetSQLDB)
-	_ = fw.Import("env", "ws_get_sql_db", ef.GetSQLDB)
-	_ = fw.Import("env", "ws_get_env", ef.GetEnv)
+func (ef *ExportFuncs) LinkABI(impt Import) error {
+	for name, ff := range map[string]interface{}{
+		"ws_log":           ef.Log,
+		"ws_get_data":      ef.GetData,
+		"ws_set_data":      ef.SetData,
+		"ws_get_db":        ef.GetDB,
+		"ws_set_db":        ef.SetDB,
+		"ws_send_tx":       ef.SendTX,
+		"ws_call_contract": ef.CallContract,
+		"ws_set_sql_db":    ef.SetSQLDB,
+		"ws_get_sql_db":    ef.GetSQLDB,
+		"ws_get_env":       ef.GetEnv,
+	} {
+		if err := impt("env", name, ff); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 

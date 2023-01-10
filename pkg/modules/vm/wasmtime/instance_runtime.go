@@ -7,52 +7,44 @@ import (
 	"github.com/pkg/errors"
 )
 
-type Importer interface {
-	Import(module, name string, f interface{}) error
+type (
+	Runtime struct {
+		store    *wasmtime.Store
+		instance *wasmtime.Instance
+	}
+)
+
+func NewRuntime() *Runtime {
+	return &Runtime{}
 }
 
-func NewRuntime(code []byte, lk ABILinker) (rt *Runtime, err error) {
-	rt = &Runtime{}
-	rt.engine = wasmtime.NewEngineWithConfig(wasmtime.NewConfig())
-	rt.store = wasmtime.NewStore(rt.engine)
-	rt.linker = wasmtime.NewLinker(rt.engine)
-
-	if err = lk.LinkABI(rt); err != nil {
-		return nil, err
+func (rt *Runtime) Initiate(lk ABILinker, code []byte) error {
+	engine := wasmtime.NewEngineWithConfig(wasmtime.NewConfig())
+	module, err := wasmtime.NewModule(engine, code)
+	if err != nil {
+		return err
+	}
+	linker := wasmtime.NewLinker(engine)
+	if err = lk.LinkABI(func(module, name string, fn interface{}) error {
+		return linker.FuncWrap(module, name, fn)
+	}); err != nil {
+		return err
 	}
 
-	_ = rt.linker.DefineWasi()
+	_ = linker.DefineWasi()
+	rt.store = wasmtime.NewStore(engine)
 	rt.store.SetWasi(wasmtime.NewWasiConfig())
+	rt.instance, err = linker.Instantiate(rt.store, module)
 
-	rt.module, err = wasmtime.NewModule(rt.engine, code)
-	if err != nil {
-		return nil, err
-	}
-	rt.instance, err = rt.linker.Instantiate(rt.store, rt.module)
-	if err != nil {
-		return nil, err
-	}
-	return
+	return err
 }
 
-type Runtime struct {
-	engine   *wasmtime.Engine
-	store    *wasmtime.Store
-	linker   *wasmtime.Linker
-	module   *wasmtime.Module
-	instance *wasmtime.Instance
-}
-
-func (rt *Runtime) NewMemory() []byte {
+func (rt *Runtime) newMemory() []byte {
 	return rt.instance.GetExport(rt.store, "memory").Memory().UnsafeData(rt.store)
 }
 
-func (rt *Runtime) Import(module, name string, fn interface{}) error {
-	return rt.linker.FuncWrap(module, name, fn)
-}
-
-func (rt *Runtime) Alloc(size int32) (int32, []byte, error) {
-	fn := rt.ExportFunc("alloc")
+func (rt *Runtime) alloc(size int32) (int32, []byte, error) {
+	fn := rt.instance.GetExport(rt.store, "alloc")
 	if fn == nil {
 		return 0, nil, errors.New("alloc is nil")
 	}
@@ -60,19 +52,11 @@ func (rt *Runtime) Alloc(size int32) (int32, []byte, error) {
 	if err != nil {
 		return 0, nil, err
 	}
-	return result.(int32), rt.NewMemory(), nil
-}
-
-func (rt *Runtime) ExportFunc(name string) *wasmtime.Extern {
-	return rt.instance.GetExport(rt.store, name)
-}
-
-func (rt *Runtime) GetFunc(name string) *wasmtime.Func {
-	return rt.instance.GetFunc(rt.store, name)
+	return result.(int32), rt.newMemory(), nil
 }
 
 func (rt *Runtime) Call(name string, args ...interface{}) (interface{}, error) {
-	fn := rt.GetFunc(name)
+	fn := rt.instance.GetFunc(rt.store, name)
 	if fn == nil {
 		return nil, errors.Errorf("runtime: %s fn is not imported", name)
 	}
@@ -80,7 +64,7 @@ func (rt *Runtime) Call(name string, args ...interface{}) (interface{}, error) {
 }
 
 func (rt *Runtime) Read(addr, size int32) ([]byte, error) {
-	mem := rt.NewMemory()
+	mem := rt.newMemory()
 	if addr > int32(len(mem)) || addr+size > int32(len(mem)) {
 		return nil, errors.New("overflow")
 	}
@@ -93,7 +77,10 @@ func (rt *Runtime) Read(addr, size int32) ([]byte, error) {
 
 func (rt *Runtime) Copy(hostData []byte, vmAddrPtr, vmSizePtr int32) error {
 	size := len(hostData)
-	addr, mem, err := rt.Alloc(int32(size))
+	addr, mem, err := rt.alloc(int32(size))
+	if err != nil {
+		return err
+	}
 	if copied := copy(mem[addr:], hostData); copied != size {
 		return errors.New("fail to copy data")
 	}
