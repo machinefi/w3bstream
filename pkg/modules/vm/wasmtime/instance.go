@@ -23,14 +23,17 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte) (i *Inst
 	defer l.End()
 
 	res := mapx.New[uint32, []byte]()
-
-	ef, err := NewExportFuncs(wasm.WithRuntimeResource(ctx, res), code)
+	rt := NewRuntime()
+	lk, err := NewExportFuncs(wasm.WithRuntimeResource(ctx, res), rt)
 	if err != nil {
+		return nil, err
+	}
+	if err := rt.Initiate(lk, code); err != nil {
 		return nil, err
 	}
 
 	return &Instance{
-		rt:       ef.rt,
+		rt:       rt,
 		id:       id,
 		state:    enums.INSTANCE_STATE__CREATED,
 		res:      res,
