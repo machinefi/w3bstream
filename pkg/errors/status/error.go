@@ -44,6 +44,7 @@ const (
 	// BadRequest
 	BadRequest Error = http.StatusBadRequest*1e6 + iota + 1
 	MD5ChecksumFailed
+	InvalidChainClient
 )
 
 const (

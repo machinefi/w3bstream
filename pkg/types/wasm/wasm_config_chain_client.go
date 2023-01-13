@@ -28,6 +28,9 @@ func (c *ChainClient) ConfigType() enums.ConfigType {
 }
 
 func (c *ChainClient) WithContext(ctx context.Context) context.Context {
+	if err := c.Build(); err != nil {
+		return ctx
+	}
 	return WithChainClient(ctx, c)
 }
 
