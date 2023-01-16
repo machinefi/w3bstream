@@ -247,7 +247,7 @@ export PUBTOKEN=${pub_token}
 export EVENTTYPE=DEFAULT # default means start handler
 export EVENTID=`uuidgen`
 export PAYLOAD=${payload} # set your payload
-echo '{"events":[{"header":{"event_id":"'$EVENTID'","event_type":"'$EVENTTYPE'","pub_id":"'$PUBKEY'","pub_time":'`date +%s`',"token":"'$PUBTOKEN'"},"payload":"'`echo $PAYLOAD | base64`'"}]}' | http post :8888/srv-applet-mgr/v0/event/$PROJECTNAME
+echo '{"events":[{"header":{"event_id":"'$EVENTID'","event_type":"'$EVENTTYPE'","pub_id":"'$PUBKEY'","pub_time":'`date +%s`',"token":"'$PUBTOKEN'"},"payload":"'`echo $PAYLOAD | base64 -w 0`'"}]}' | http post :8888/srv-applet-mgr/v0/event/$PROJECTNAME
 ```
 
 output like
