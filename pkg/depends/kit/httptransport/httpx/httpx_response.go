@@ -121,12 +121,12 @@ func ResponseFrom(v interface{}) *Response {
 }
 
 type Response struct {
-	Value       interface{} // Value of body
-	Meta        kit.Metadata
-	Cookies     []*http.Cookie
-	Location    *url.URL
-	ContentType string
-	StatusCode  int
+	Value       interface{}    `json:"-"` // Value of body
+	Meta        kit.Metadata   `json:"-"`
+	Cookies     []*http.Cookie `json:"-"`
+	Location    *url.URL       `json:"-"`
+	ContentType string         `json:"-"`
+	StatusCode  int            `json:"-"`
 }
 
 func (r *Response) Unwrap() error {

@@ -5,7 +5,7 @@ import (
 	"log"
 	"path"
 	"path/filepath"
-	"runtime"
+	"reflect"
 
 	gen "github.com/machinefi/w3bstream/pkg/depends/gen/codegen"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
@@ -13,6 +13,8 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/stringsx"
 )
+
+var PkgPath = pkgx.Import(reflect.TypeOf(statusx.StatusErr{}).PkgPath())
 
 func New(pkg *pkgx.Pkg) *Generator {
 	return &Generator{
@@ -191,12 +193,4 @@ func (s *StatusError) WriteToFile(f *gen.File) error {
 	)
 	_, err := f.Write()
 	return err
-}
-
-var PkgPath string
-
-func init() {
-	_, current, _, _ := runtime.Caller(0)
-	dir := filepath.Join(filepath.Dir(current), "../statusx")
-	PkgPath = must.String(pkgx.PkgIdByPath(dir))
 }

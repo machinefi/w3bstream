@@ -88,3 +88,16 @@ func PkgPathByPath(path string, modes ...packages.LoadMode) (string, error) {
 	}
 	return filepath.Dir(pkg.GoFiles[0]), nil
 }
+
+func GetIdentChainOfCallFunc(expr ast.Expr) (list []*ast.Ident) {
+	switch e := expr.(type) {
+	case *ast.CallExpr:
+		list = append(list, GetIdentChainOfCallFunc(e.Fun)...)
+	case *ast.SelectorExpr:
+		list = append(list, GetIdentChainOfCallFunc(e.X)...)
+		list = append(list, e.Sel)
+	case *ast.Ident:
+		list = append(list, expr.(*ast.Ident))
+	}
+	return
+}

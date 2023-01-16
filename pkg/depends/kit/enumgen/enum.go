@@ -1,14 +1,20 @@
 package enumgen
 
 import (
-	"path/filepath"
-	"runtime"
+	"reflect"
 	"strings"
 
 	. "github.com/machinefi/w3bstream/pkg/depends/gen/codegen"
-	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/enum"
 	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/stringsx"
+)
+
+var (
+	PkgPath                 = pkgx.Import(reflect.TypeOf((*enum.Enum)(nil)).Elem().PkgPath())
+	IntStringerName         = "IntStringerEnum"
+	ValueOffsetName         = "ValueOffset"
+	ScanIntEnumStringerName = "ScanIntEnumStringer"
 )
 
 type Enum struct {
@@ -280,17 +286,4 @@ func (e Enum) Valuer(f *File) Snippet {
 				),
 			Return(Exprer(`int64(v) + int64(offset)`), Nil),
 		)
-}
-
-var (
-	PkgPath                 string
-	IntStringerName         = "IntStringerEnum"
-	ValueOffsetName         = "ValueOffset"
-	ScanIntEnumStringerName = "ScanIntEnumStringer"
-)
-
-func init() {
-	_, current, _, _ := runtime.Caller(0)
-	dir := filepath.Join(filepath.Dir(current), "../enum")
-	PkgPath = must.String(pkgx.PkgIdByPath(dir))
 }

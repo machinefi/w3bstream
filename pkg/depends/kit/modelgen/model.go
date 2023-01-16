@@ -4,15 +4,14 @@ import (
 	"bytes"
 	"fmt"
 	"go/types"
-	"path/filepath"
-	"runtime"
+	"reflect"
 	"sort"
 	"strings"
 
 	g "github.com/machinefi/w3bstream/pkg/depends/gen/codegen"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
-	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
 	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/stringsx"
 )
@@ -781,14 +780,6 @@ func (m *Model) WriteTo(f *g.File) {
 }
 
 var (
-	BuilderPkg = "github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
-	SQLxPkg    = "github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
+	BuilderPkg = pkgx.Import(reflect.TypeOf(builder.Column{}).PkgPath())
+	SQLxPkg    = pkgx.Import(reflect.TypeOf(sqlx.Database{}).PkgPath())
 )
-
-func init() {
-	_, current, _, _ := runtime.Caller(0)
-	dir := filepath.Join(filepath.Dir(current), "../sqlx")
-	SQLxPkg = must.String(pkgx.PkgIdByPath(dir))
-	dir = filepath.Join(filepath.Dir(current), "../sqlx/builder")
-	BuilderPkg = must.String(pkgx.PkgIdByPath(dir))
-}
