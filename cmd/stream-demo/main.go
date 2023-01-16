@@ -34,15 +34,45 @@ var (
 
 func main() {
 
+	// 1. prepare
 	global.Migrate()
 
-	ch := make(chan rxgo.Item)
-
 	ctx = global.WithContext(context.Background())
-
 	l = types.MustLoggerFromContext(ctx)
-	d = types.MustDBExecutorFromContext(ctx)
 
+	go kit.Run(tasks.Root, global.TaskServer())
+
+	// 2. create instance
+	id := createInstance(ctx)
+
+	// 3. start instance
+	err = vm.StartInstance(ctx, id)
+	defer vm.StopInstance(ctx, id)
+
+	// 4. source connector
+	ch := initSource(ctx, "mqtt")
+
+	// 5. stream compute -- check ins status
+	observable := streamCompute(ch)
+
+	// 6. sink connector -- check ins status
+	initSink(observable, ctx, "db", "Customer")
+}
+
+func createInstance(ctx context.Context) types.SFID {
+	path := types.MustWasmPathFromContext(ctx)
+
+	// new wasm runtime instance
+	ins, err = newWasmRuntimeInstance(ctx, path)
+	if err != nil {
+		l.Panic(err)
+	}
+	return vm.AddInstance(ctx, ins)
+}
+
+// generated code
+func initSource(ctx context.Context, tye string) chan rxgo.Item {
+	ch := make(chan rxgo.Item)
 	channel := types.MustChannelNameFromContext(ctx)
 
 	go func() {
@@ -52,47 +82,11 @@ func main() {
 			l.Panic(err)
 		}
 	}()
-
-	go kit.Run(tasks.Root, global.TaskServer())
-
-	path := types.MustWasmPathFromContext(ctx)
-
-	// new wasm runtime instance
-	ins, err = newWasmRuntimeInstance(ctx, path)
-	if err != nil {
-		l.Panic(err)
-	}
-	id := vm.AddInstance(ctx, ins)
-
-	//TODO mirco server, Does need mgr instance?
-	err = vm.StartInstance(ctx, id)
-	defer vm.StopInstance(ctx, id)
-
-	observable := rxgo.FromChannel(ch).Filter(filterFunc).Map(mapFunc).
-		GroupByDynamic(groupByKey, rxgo.WithBufferedChannel(10), rxgo.WithErrorStrategy(rxgo.ContinueOnError))
-
-	c := observable.Observe()
-	for item := range c {
-
-		switch item.V.(type) {
-		case rxgo.GroupedObservable: // group operator
-			go func() {
-				obs := item.V.(rxgo.GroupedObservable)
-				for i := range obs.Observe() {
-					sink(i)
-				}
-			}()
-		case rxgo.ObservableImpl: // window operator
-			obs := item.V.(rxgo.ObservableImpl)
-			for i := range obs.Observe() {
-				sink(i)
-			}
-		default:
-			sink(item)
-		}
-	}
+	return ch
 }
 
+// generated code
+// function name from config
 func filterFunc(i interface{}) bool {
 	res := false
 
@@ -135,6 +129,8 @@ func filterFunc(i interface{}) bool {
 	return res
 }
 
+// generated code
+// function name from config
 func mapFunc(c context.Context, i interface{}) (interface{}, error) {
 	// 1.Serialize
 	b, err := json.Marshal(i.(models.SourceCustomer))
@@ -165,6 +161,8 @@ func mapFunc(c context.Context, i interface{}) (interface{}, error) {
 	return customer, err
 }
 
+// generated code
+// function name from config
 func groupByKey(item rxgo.Item) string {
 	// 1.Serialize
 	b, err := json.Marshal(item.V.(models.Customer))
@@ -195,11 +193,51 @@ func groupByKey(item rxgo.Item) string {
 	return groupKey
 }
 
-func sink(item rxgo.Item) {
+// generated code
+func streamCompute(ch chan rxgo.Item) rxgo.Observable {
+	return rxgo.FromChannel(ch).Filter(filterFunc).Map(mapFunc).
+		GroupByDynamic(groupByKey, rxgo.WithBufferedChannel(10), rxgo.WithErrorStrategy(rxgo.ContinueOnError))
+}
+
+// generated code
+func sink(ctx context.Context, item rxgo.Item, tye, schema string) {
 	customer := item.V.(models.Customer)
 	l.Info(fmt.Sprintf("customer: %v", customer))
-	if err := customer.Create(d); err != nil {
-		l.Error(err)
+
+	switch tye {
+	case "db":
+		d = types.MustDBExecutorFromContext(ctx)
+		if err := customer.Create(d); err != nil {
+			l.Error(err)
+		}
+	case "blockchain":
+
+	default:
+
+	}
+}
+
+// generated code
+func initSink(observable rxgo.Observable, ctx context.Context, tye, schema string) {
+	c := observable.Observe()
+	for item := range c {
+
+		switch item.V.(type) {
+		case rxgo.GroupedObservable: // group operator
+			go func() {
+				obs := item.V.(rxgo.GroupedObservable)
+				for i := range obs.Observe() {
+					sink(ctx, i, tye, schema)
+				}
+			}()
+		case rxgo.ObservableImpl: // window operator
+			obs := item.V.(rxgo.ObservableImpl)
+			for i := range obs.Observe() {
+				sink(ctx, i, tye, schema)
+			}
+		default:
+			sink(ctx, item, tye, schema)
+		}
 	}
 }
 

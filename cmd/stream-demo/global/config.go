@@ -31,15 +31,13 @@ var (
 
 	db        = &confpostgres.Endpoint{Database: models.DB}
 	monitordb = &confpostgres.Endpoint{Database: models.MonitorDB}
-	//insDB     = &confpostgres.Endpoint{Database: streammodes.InsDB}
-	server = &confhttp.Server{}
+	server    = &confhttp.Server{}
 )
 
 func init() {
 	config := &struct {
-		Postgres  *confpostgres.Endpoint
-		MonitorDB *confpostgres.Endpoint
-		//InstanceDB *confpostgres.Endpoint
+		Postgres   *confpostgres.Endpoint
+		MonitorDB  *confpostgres.Endpoint
 		MqttBroker *confmqtt.Broker
 		Redis      *confredis.Redis
 		Server     *confhttp.Server
@@ -49,9 +47,8 @@ func init() {
 		UploadConf *types.UploadConfig
 		EthClient  *types.ETHClientConfig
 	}{
-		Postgres:  db,
-		MonitorDB: monitordb,
-		//InstanceDB: insDB,
+		Postgres:   db,
+		MonitorDB:  monitordb,
 		MqttBroker: &confmqtt.Broker{},
 		Redis:      &confredis.Redis{},
 		Server:     server,
@@ -90,7 +87,6 @@ func init() {
 	WithContext = contextx.WithContextCompose(
 		types.WithDBExecutorContext(config.Postgres),
 		types.WithMonitorDBExecutorContext(config.MonitorDB),
-		//types.WithInsDBExecutorContext(config.InstanceDB),
 		types.WithPgEndpointContext(config.Postgres),
 		types.WithRedisEndpointContext(config.Redis),
 		types.WithLoggerContext(conflog.Std()),
@@ -119,7 +115,4 @@ func Migrate() {
 	if err := migration.Migrate(monitordb.WithContext(ctx), nil); err != nil {
 		log.Panic(err)
 	}
-	//if err := migration.Migrate(insDB.WithContext(ctx), nil); err != nil {
-	//	log.Panic(err)
-	//}
 }
