@@ -497,6 +497,19 @@
           "204": {
             "description": ""
           },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[Unauthorized][401999001][Unauthorized]!"
+            ]
+          },
           "499": {
             "description": "",
             "content": {
@@ -521,6 +534,7 @@
             },
             "x-status-errors": [
               "@StatusErr[InternalServerError][500100001][InternalServerError]",
+              "@StatusErr[InternalServerError][500999001][InternalServerError]",
               "@StatusErr[UnknownError][500000000][UnknownError]"
             ]
           }

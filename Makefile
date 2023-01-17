@@ -14,6 +14,11 @@ install_toolkit:
 	fi
 	@echo `which toolkit`
 
+install_toolkit_local:
+	@ rm -rf `which toolkit`
+	@cd pkg/depends/gen/cmd && go install ./...
+	@ls -al `which toolkit`
+
 install_easyjson:
 	@go install github.com/mailru/easyjson/...@latest
 
@@ -109,4 +114,7 @@ wasm_demo: update_go_module
 	@cd _examples && make all
 
 build: build_server build_pub_client
+
+gen_swagger: install_toolkit
+	@cd cmd/srv-applet-mgr && toolkit swagger
 

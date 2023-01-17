@@ -331,9 +331,9 @@ func (scanner *OperatorScanner) scanParameterOrRequestBody(ctx context.Context, 
 	typesx.EachField(typesx.FromGoType(typeStruct), "name", func(field typesx.StructField, fieldDisplayName string, omitempty bool) bool {
 		location, _ := tagValueAndFlagsByTagString(field.Tag().Get("in"))
 
-		if location == "" {
-			panic(errors.Errorf("missing tag `in` for %s of %s", field.Name(), op.ID))
-		}
+		// if location == "" {
+		// 	panic(errors.Errorf("missing tag `in` for %s of %s", field.Name(), op.ID))
+		// }
 
 		name, flags := tagValueAndFlagsByTagString(field.Tag().Get("name"))
 
