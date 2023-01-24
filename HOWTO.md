@@ -188,7 +188,7 @@ output like
 deploy applet with cache and chain client config
 
 ```sh
-echo '{"cache":{"mode": "MEMORY"}, "chainClient":{"privateKey":"xxx"}}' | http post :8888/srv-applet-mgr/v0/deploy/applet/$APPLETID -A bearer -a $TOK
+echo '{"cache":{"mode": "MEMORY"}}' | http post :8888/srv-applet-mgr/v0/deploy/applet/$APPLETID -A bearer -a $TOK
 ```
 
 start applet

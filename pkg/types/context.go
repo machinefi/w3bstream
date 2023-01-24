@@ -29,6 +29,7 @@ type (
 	CtxApplet            struct{}
 	CtxResource          struct{}
 	CtxInstance          struct{}
+	CtxEthPvk            struct{} // CtxEthPvk ETHPvkConfig
 )
 
 func WithMgrDBExecutor(ctx context.Context, v sqlx.DBExecutor) context.Context {
@@ -321,6 +322,27 @@ func InstanceFromContext(ctx context.Context) (*models.Instance, bool) {
 
 func MustInstanceFromContext(ctx context.Context) *models.Instance {
 	v, ok := InstanceFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithETHPvkConfig(ctx context.Context, v *ETHPvkConfig) context.Context {
+	return contextx.WithValue(ctx, CtxEthPvk{}, v)
+}
+
+func WithETHPvkConfigContext(v *ETHPvkConfig) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxEthPvk{}, v)
+	}
+}
+
+func ETHPvkConfigFromContext(ctx context.Context) (*ETHPvkConfig, bool) {
+	v, ok := ctx.Value(CtxEthPvk{}).(*ETHPvkConfig)
+	return v, ok
+}
+
+func MustETHPvkConfigFromContext(ctx context.Context) *ETHPvkConfig {
+	v, ok := ETHPvkConfigFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

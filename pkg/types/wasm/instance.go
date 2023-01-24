@@ -62,7 +62,7 @@ type ABI interface {
 	SetData(rid, addr, size int32) int32
 	GetDB(kAddr, kSize, vmAddrPtr, vmSizePtr int32) int32
 	SetDB(kAddr, kSize, vAddr, vSize int32) int32
-	SendTX(chainid int32, offset, size int32) int32
+	SendTX(chainid int32, offset, size, vmAddrPtr, vmSizePtr int32) int32
 	CallContract(chainid int32, offset, size, vmAddrPtr, vmSizePtr int32) int32
 	SetSQLDB(addr, size int32) int32
 	GetSQLDB(addr, size, vmAddrPtr, vmSizePtr int32) int32

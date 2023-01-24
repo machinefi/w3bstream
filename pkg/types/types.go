@@ -22,3 +22,7 @@ type (
 	SFID  = types.SFID
 	SFIDs = types.SFIDs
 )
+
+type ETHPvkConfig struct {
+	PrivateKey string `env:""`
+}

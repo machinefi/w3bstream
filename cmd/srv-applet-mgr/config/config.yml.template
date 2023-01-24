@@ -1,4 +1,5 @@
 GO_RUNTIME_ENV: DEV
+SRV_APPLET_MGR__EthPvk_PrivateKey: ""
 SRV_APPLET_MGR__Jwt_ExpIn: 0s
 SRV_APPLET_MGR__Jwt_Issuer: ""
 SRV_APPLET_MGR__Jwt_SignKey: ""

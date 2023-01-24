@@ -5,19 +5,19 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 	"math/big"
+	"strings"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/pkg/errors"
+
+	wsTypes "github.com/machinefi/w3bstream/pkg/types"
 )
 
 type ChainClient struct {
-	PrivateKey string `json:"privateKey"`
-
 	pvk       *ecdsa.PrivateKey
 	clientMap map[uint32]*ethclient.Client
 }
@@ -27,28 +27,23 @@ var _web3Endpoint = map[uint32]string{
 	4690: "https://babel-api.testnet.iotex.io",
 }
 
-func (c *ChainClient) ConfigType() enums.ConfigType {
-	return enums.CONFIG_TYPE__CHAIN_CLIENT
-}
-
-func (c *ChainClient) WithContext(ctx context.Context) context.Context {
-	if err := c.Build(); err != nil {
-		return ctx
+func NewChainClient(ctx context.Context) *ChainClient {
+	c := &ChainClient{
+		clientMap: make(map[uint32]*ethclient.Client, 0),
 	}
-	return WithChainClient(ctx, c)
-}
-
-func (c *ChainClient) Build() error {
-	if len(c.PrivateKey) > 0 {
-		c.pvk = crypto.ToECDSAUnsafe(common.FromHex(c.PrivateKey))
+	ethPvk, ok := wsTypes.ETHPvkConfigFromContext(ctx)
+	if ok && len(ethPvk.PrivateKey) > 0 {
+		c.pvk = crypto.ToECDSAUnsafe(common.FromHex(ethPvk.PrivateKey))
 	}
-
-	return nil
+	return c
 }
 
 func (c *ChainClient) SendTX(chainID uint32, toStr, valueStr, dataStr string) (string, error) {
 	if c == nil {
 		return "", nil
+	}
+	if c.pvk == nil {
+		return "", errors.New("private key is empty")
 	}
 	cli, err := c.getEthClient(chainID)
 	if err != nil {
@@ -62,7 +57,7 @@ func (c *ChainClient) SendTX(chainID uint32, toStr, valueStr, dataStr string) (s
 	if !ok {
 		return "", errors.New("fail to read tx value")
 	}
-	data, err := hex.DecodeString(dataStr)
+	data, err := hex.DecodeString(strings.TrimPrefix(dataStr, "0x"))
 	if err != nil {
 		return "", err
 	}
@@ -133,10 +128,12 @@ func (c *ChainClient) getEthClient(chainID uint32) (*ethclient.Client, error) {
 
 func (c *ChainClient) CallContract(chainID uint32, toStr, dataStr string) ([]byte, error) {
 	var (
-		to      = common.HexToAddress(toStr)
-		data, _ = hex.DecodeString(dataStr)
+		to = common.HexToAddress(toStr)
 	)
-
+	data, err := hex.DecodeString(strings.TrimPrefix(dataStr, "0x"))
+	if err != nil {
+		return nil, err
+	}
 	cli, err := c.getEthClient(chainID)
 	if err != nil {
 		return nil, err
@@ -146,6 +143,5 @@ func (c *ChainClient) CallContract(chainID uint32, toStr, dataStr string) ([]byt
 		To:   &to,
 		Data: data,
 	}
-
 	return cli.CallContract(context.Background(), msg, nil)
 }

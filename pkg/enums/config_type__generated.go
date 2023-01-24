@@ -25,8 +25,6 @@ func ParseConfigTypeFromString(s string) (ConfigType, error) {
 		return CONFIG_TYPE__INSTANCE_CACHE, nil
 	case "PROJECT_ENV":
 		return CONFIG_TYPE__PROJECT_ENV, nil
-	case "CHAIN_CLIENT":
-		return CONFIG_TYPE__CHAIN_CLIENT, nil
 	}
 }
 
@@ -42,8 +40,6 @@ func ParseConfigTypeFromLabel(s string) (ConfigType, error) {
 		return CONFIG_TYPE__INSTANCE_CACHE, nil
 	case "PROJECT_ENV":
 		return CONFIG_TYPE__PROJECT_ENV, nil
-	case "CHAIN_CLIENT":
-		return CONFIG_TYPE__CHAIN_CLIENT, nil
 	}
 }
 
@@ -63,8 +59,6 @@ func (v ConfigType) String() string {
 		return "INSTANCE_CACHE"
 	case CONFIG_TYPE__PROJECT_ENV:
 		return "PROJECT_ENV"
-	case CONFIG_TYPE__CHAIN_CLIENT:
-		return "CHAIN_CLIENT"
 	}
 }
 
@@ -80,8 +74,6 @@ func (v ConfigType) Label() string {
 		return "INSTANCE_CACHE"
 	case CONFIG_TYPE__PROJECT_ENV:
 		return "PROJECT_ENV"
-	case CONFIG_TYPE__CHAIN_CLIENT:
-		return "CHAIN_CLIENT"
 	}
 }
 
@@ -90,7 +82,7 @@ func (v ConfigType) TypeName() string {
 }
 
 func (v ConfigType) ConstValues() []enum.IntStringerEnum {
-	return []enum.IntStringerEnum{CONFIG_TYPE__PROJECT_SCHEMA, CONFIG_TYPE__INSTANCE_CACHE, CONFIG_TYPE__PROJECT_ENV, CONFIG_TYPE__CHAIN_CLIENT}
+	return []enum.IntStringerEnum{CONFIG_TYPE__PROJECT_SCHEMA, CONFIG_TYPE__INSTANCE_CACHE, CONFIG_TYPE__PROJECT_ENV}
 }
 
 func (v ConfigType) MarshalText() ([]byte, error) {

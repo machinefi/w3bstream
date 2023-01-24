@@ -15,8 +15,6 @@ func NewConfigurationByType(t enums.ConfigType) Configuration {
 		return &Cache{}
 	case enums.CONFIG_TYPE__PROJECT_ENV:
 		return &Env{}
-	case enums.CONFIG_TYPE__CHAIN_CLIENT:
-		return &ChainClient{}
 	default:
 		panic(errors.Errorf("unknown config type %d", t))
 	}
