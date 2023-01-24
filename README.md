@@ -49,18 +49,6 @@ Interested in W3bstream Studio source code? Check it out here [https://github.co
 
 If you are interested in diving into the code and run the node using a locally built docker, here is the steps of building the docker image from code.
 
-### init submodules
-
-```bash
-make init_submodules
-```
-
-### Update studio to latest if needed
-
-```bash
-make update_studio
-```
-
 ### Build docker images
 
 ```bash

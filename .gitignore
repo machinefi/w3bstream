@@ -2,7 +2,5 @@ build
 .session.vim
 .undodir
 .vscode
-config.yml
-config.yaml
 var
 working_dir

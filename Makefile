@@ -1,35 +1,16 @@
-MODULE_NAME = $(shell cat go.mod | grep "^module" | sed -e "s/module //g")
-DOCKER_IMAGE = $(USER)/w3bstream:main
-STUDIO_DOCKER_IMAGE = $(USER)/w3bstream-studio:main
 DOCKER_COMPOSE_FILE = ./docker-compose.yaml
+WS_BACKEND_IMAGE = $(USER)/w3bstream:main
+WS_STUDIO_IMAGE = $(USER)/w3bstream-studio:main
+WS_WORKING_DIR=$(shell pwd)/working_dir
 
+.PHONY: update_go_module
 update_go_module:
-	go mod tidy
+	@go mod tidy
 
-install_toolkit:
-	@if [ ! -f "$$GOBIN/toolkit" ] ; \
-	then \
-		go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/... ; \
-		echo "toolkit installed" ; \
-	fi
-	@echo `which toolkit`
+.PHONY: build
+build: build_server build_pub_client
 
-install_easyjson:
-	@go install github.com/mailru/easyjson/...@latest
-
-## TODO add source format as a githook
-format: install_toolkit
-	@toolkit fmt
-
-## gen code
-generate: install_toolkit install_easyjson
-	@go generate ./...
-
-## to migrate database models, if model defines changed, make this entry
-migrate: install_toolkit install_easyjson
-	go run cmd/srv-applet-mgr/main.go migrate
-
-## build srv-applet-mgr
+.PHONY: build_server
 build_server:
 	@mkdir -p build
 	@cd cmd/srv-applet-mgr && go build
@@ -40,73 +21,67 @@ build_server:
 	@echo 'succeed! config =>cmd/srv-applet-mgr/config'
 	@echo 'modify cmd/srv-applet-mgr/config/local.yaml to use your server config'
 
-build_server_for_docker: update_go_module
-	@cd cmd/srv-applet-mgr && GOOS=linux GOWORK=off CGO_ENABLED=1 go build
-	@mkdir -p build
-	@mv cmd/srv-applet-mgr/srv-applet-mgr build
-	@cp -r cmd/srv-applet-mgr/config build/config
-
-#
-update_studio:
-	@cd studio && git pull origin main
-
-init_submodules:
-	@git submodule update --init
-
-# build docker images
-build_backend_image: update_go_module
-	@docker build -f Dockerfile -t ${DOCKER_IMAGE} .
-
-build_studio_image: init_submodules update_studio
-	@cd studio && docker build -f Dockerfile -t ${STUDIO_DOCKER_IMAGE} .
-
-build_docker_images: build_backend_image build_studio_image
-
-# stop server running in docker containers
-stop_docker:
-	@docker-compose -f ${DOCKER_COMPOSE_FILE} stop
-
-# stop docker and delete docker resouces
-drop_docker:
-	@docker-compose -f ${DOCKER_COMPOSE_FILE} down
-
-# restart server in docker containers
-restart_docker: drop_docker run_docker
-
-# run server in docker containers
-run_dockerd:
-	@WS_WORKING_DIR=$(shell pwd)/working_dir WS_BACKEND_IMAGE=${DOCKER_IMAGE} WS_STUDIO_IMAGE=${STUDIO_DOCKER_IMAGE} docker-compose -p w3bstream -f ${DOCKER_COMPOSE_FILE} up -d
-
-run_docker:
-	@WS_WORKING_DIR=$(shell pwd)/working_dir WS_BACKEND_IMAGE=${DOCKER_IMAGE} WS_STUDIO_IMAGE=${STUDIO_DOCKER_IMAGE} docker-compose -p w3bstream -f ${DOCKER_COMPOSE_FILE} up
-
-## migrate first
-run_server: build_server
-	@cd build && ./srv-applet-mgr
-
-## make pub_client
+.PHONY: build_pub_client
 build_pub_client: update_go_module
 	@cd cmd/pub_client && go build
 	@mkdir -p build
 	@mv cmd/pub_client/pub_client build
 	@echo 'succeed! pub_client => build/pub_client*'
 
+.PHONY: build_docker_images
+build_docker_images: build_backend_image build_studio_image
+
+.PHONY: build_backend_image
+build_backend_image: update_go_module
+	@docker build -f Dockerfile -t ${WS_BACKEND_IMAGE} .
+
+.PHONY: build_studio_image
+build_studio_image:
+	@git submodule update --init
+	@cd studio && docker build -f Dockerfile -t ${WS_STUDIO_IMAGE} .
+
+# run server in docker containers
+.PHONY: run_docker
+run_docker:
+	@WS_WORKING_DIR=${WS_WORKING_DIR} WS_BACKEND_IMAGE=${WS_BACKEND_IMAGE} WS_STUDIO_IMAGE=${WS_STUDIO_IMAGE} docker-compose -p w3bstream -f ${DOCKER_COMPOSE_FILE} up -d
+
+## migrate first
+.PHONY: run_server
+run_server: build_server
+	@cd build && ./srv-applet-mgr
+
+# stop server running in docker containers
+.PHONY: stop_docker
+stop_docker:
+	@docker-compose -f ${DOCKER_COMPOSE_FILE} stop
+
+# stop docker and delete docker resouces
+.PHONY: drop_docker
+drop_docker:
+	@docker-compose -f ${DOCKER_COMPOSE_FILE} down
+
+# restart server in docker containers
+.PHONY: restart_docker
+restart_docker: drop_docker run_docker
+
+.PHONY: clean
 clean:
-	@rm -rf build/{config,pub_client,srv-applet-mgr}
-	@echo 'remove build/{config,pub_client,srv-applet-mgr}'
+	@rm -rf ./build/config ./build/pub_client ./build/srv-applet-mgr
 
-run_depends:
-	@docker-compose -f testutil/docker-compose-pg.yaml up -d
-	@docker-compose -f testutil/docker-compose-mqtt.yaml up -d
-	@docker-compose -f testutil/docker-compose-redis.yaml up -d
+.PHONY: install_toolkit
+install_toolkit:
+	@if [ ! -f "$$GOBIN/toolkit" ] ; \
+	then \
+		go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/... ; \
+		echo "toolkit installed" ; \
+	fi
+	@echo `which toolkit`
 
-stop_depends:
-	@docker-compose -f testutil/docker-compose-pg.yaml stop
-	@docker-compose -f testutil/docker-compose-mqtt.yaml stop
-	@docker-compose -f testutil/docker-compose-redis.yaml stop
+.PHONY: generate
+generate: install_toolkit 
+	@go generate ./...
 
-wasm_demo: update_go_module
-	@cd _examples && make all
-
-build: build_server build_pub_client
-
+## to migrate database models, if model defines changed, make this entry
+.PHONY: migrate
+migrate: install_toolkit 
+	go run cmd/srv-applet-mgr/main.go migrate

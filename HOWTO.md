@@ -61,7 +61,7 @@ command
 
 ```sh
 export PROJECTNAME=${project_name}
-echo '{"name":"'$PROJECTNAME"}' | http :8888/srv-applet-mgr/v0/project -A bearer -a $TOK
+echo '{"name":"'$PROJECTNAME'"}' | http :8888/srv-applet-mgr/v0/project -A bearer -a $TOK
 ```
 
 output like
