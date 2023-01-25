@@ -123,8 +123,8 @@ echo $PROJECTSCHEMA | http post :8888/srv-applet-mgr/v0/project_config/$PROJECTN
 ### Create or update project env vars
 
 ```sh
-export PROJECTENV={"values":[["1","one"],["2","two"],["3","three","33"]]}
-echo $PROJECTENV | http post :8888/srv-applet-mgr/v0/project_config/test/PROJECT_ENV -A bearer -a $TOK
+export PROJECTENV='[["key1","value1"],["key2","value2"],["key3","value3"]]'
+echo '{"env":'$PROJECTENV'}' | http post :8888/srv-applet-mgr/v0/project_config/$PROJECTNAME/PROJECT_ENV -A bearer -a $TOK
 ```
 
 > the database for wasm storage is configured by w3bstream server and the name

@@ -17,7 +17,7 @@ func NewEvn(prefix string) *Env {
 type Env struct {
 	prefix string
 	values *mapx.Map[string, string]
-	Values [][2]string `json:"values"`
+	Env    [][2]string `json:"env"`
 }
 
 func (env *Env) ConfigType() enums.ConfigType {
@@ -34,7 +34,7 @@ func (env *Env) WithContext(ctx context.Context) context.Context {
 	if env.values == nil {
 		env.values = mapx.New[string, string]()
 	}
-	for _, pair := range env.Values {
+	for _, pair := range env.Env {
 		if pair[0] != "" {
 			env.Set(pair[0], pair[1])
 		}
