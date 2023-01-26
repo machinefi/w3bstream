@@ -47,7 +47,7 @@ func init() {
 		Logger     *conflog.Log
 		StdLogger  conflog.Logger
 		UploadConf *types.UploadConfig
-		EthPvk     *types.ETHPvkConfig
+		EthClient  *types.ETHClientConfig
 	}{
 		Postgres:   db,
 		MonitorDB:  monitordb,
@@ -59,7 +59,7 @@ func init() {
 		Logger:     &conflog.Log{},
 		StdLogger:  conflog.Std(),
 		UploadConf: &types.UploadConfig{},
-		EthPvk:     &types.ETHPvkConfig{},
+		EthClient:  &types.ETHClientConfig{},
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
@@ -102,7 +102,7 @@ func init() {
 		confjwt.WithConfContext(config.Jwt),
 		types.WithTaskWorkerContext(worker),
 		types.WithTaskBoardContext(mq.NewTaskBoard(tasks)),
-		types.WithETHPvkConfigContext(config.EthPvk),
+		types.WithETHClientConfigContext(config.EthClient),
 	)
 }
 

@@ -23,6 +23,7 @@ type (
 	SFIDs = types.SFIDs
 )
 
-type ETHPvkConfig struct {
+type ETHClientConfig struct {
 	PrivateKey string `env:""`
+	Endpoints  string `env:""`
 }

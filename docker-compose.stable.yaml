@@ -12,7 +12,8 @@ services:
     ports:
       - "8888:8888"
     environment:
-      SRV_APPLET_MGR__EthPvk_PrivateKey: ${PRIVATE_KEY:-""}
+      SRV_APPLET_MGR__EthClient_PrivateKey: ${PRIVATE_KEY:-}
+      SRV_APPLET_MGR__EthClient_Endpoints: '{"4689": "https://babel-api.mainnet.iotex.io", "4690": "https://babel-api.testnet.iotex.io"}'
       SRV_APPLET_MGR__JWT__ExpIn: 1h
       SRV_APPLET_MGR__JWT__Issuer: ${JWT_ISSUER:-w3bstream}
       SRV_APPLET_MGR__JWT__SignKey: ${JWT_SIGN_KEY:-xxxx}

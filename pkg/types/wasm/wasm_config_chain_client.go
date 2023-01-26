@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 	"math/big"
+	"strconv"
 	"strings"
 
 	"github.com/ethereum/go-ethereum"
@@ -13,29 +14,49 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
+	"github.com/tidwall/gjson"
 
 	wsTypes "github.com/machinefi/w3bstream/pkg/types"
 )
 
 type ChainClient struct {
 	pvk       *ecdsa.PrivateKey
+	endpoints map[uint32]string
 	clientMap map[uint32]*ethclient.Client
-}
-
-var _web3Endpoint = map[uint32]string{
-	4689: "https://babel-api.mainnet.iotex.io",
-	4690: "https://babel-api.testnet.iotex.io",
 }
 
 func NewChainClient(ctx context.Context) *ChainClient {
 	c := &ChainClient{
 		clientMap: make(map[uint32]*ethclient.Client, 0),
+		endpoints: make(map[uint32]string),
 	}
-	ethPvk, ok := wsTypes.ETHPvkConfigFromContext(ctx)
-	if ok && len(ethPvk.PrivateKey) > 0 {
-		c.pvk = crypto.ToECDSAUnsafe(common.FromHex(ethPvk.PrivateKey))
+	ethcli, ok := wsTypes.ETHClientConfigFromContext(ctx)
+	if !ok || ethcli == nil {
+		return c
+	}
+	if len(ethcli.PrivateKey) > 0 {
+		c.pvk = crypto.ToECDSAUnsafe(common.FromHex(ethcli.PrivateKey))
+	}
+	if len(ethcli.Endpoints) > 0 {
+		c.endpoints = decodeEndpoints(ethcli.Endpoints)
 	}
 	return c
+}
+
+func decodeEndpoints(in string) (ret map[uint32]string) {
+	ret = make(map[uint32]string)
+	if !gjson.Valid(in) {
+		return
+	}
+	for k, v := range gjson.Parse(in).Map() {
+		chainID, err := strconv.Atoi(k)
+		if err != nil {
+			continue
+		}
+		url := v.String()
+		ret[uint32(chainID)] = url
+	}
+	return
 }
 
 func (c *ChainClient) SendTX(chainID uint32, toStr, valueStr, dataStr string) (string, error) {
@@ -114,7 +135,7 @@ func (c *ChainClient) getEthClient(chainID uint32) (*ethclient.Client, error) {
 	if cli, exist := c.clientMap[chainID]; exist {
 		return cli, nil
 	}
-	chainEndpoint, exist := _web3Endpoint[chainID]
+	chainEndpoint, exist := c.endpoints[chainID]
 	if !exist {
 		return nil, errors.Errorf("the chain %d is not supported", chainID)
 	}

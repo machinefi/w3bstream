@@ -29,7 +29,7 @@ type (
 	CtxApplet            struct{}
 	CtxResource          struct{}
 	CtxInstance          struct{}
-	CtxEthPvk            struct{} // CtxEthPvk ETHPvkConfig
+	CtxEthClient         struct{} // CtxEthClient ETHClientConfig
 )
 
 func WithMgrDBExecutor(ctx context.Context, v sqlx.DBExecutor) context.Context {
@@ -326,23 +326,23 @@ func MustInstanceFromContext(ctx context.Context) *models.Instance {
 	return v
 }
 
-func WithETHPvkConfig(ctx context.Context, v *ETHPvkConfig) context.Context {
-	return contextx.WithValue(ctx, CtxEthPvk{}, v)
+func WithETHClientConfig(ctx context.Context, v *ETHClientConfig) context.Context {
+	return contextx.WithValue(ctx, CtxEthClient{}, v)
 }
 
-func WithETHPvkConfigContext(v *ETHPvkConfig) contextx.WithContext {
+func WithETHClientConfigContext(v *ETHClientConfig) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, CtxEthPvk{}, v)
+		return contextx.WithValue(ctx, CtxEthClient{}, v)
 	}
 }
 
-func ETHPvkConfigFromContext(ctx context.Context) (*ETHPvkConfig, bool) {
-	v, ok := ctx.Value(CtxEthPvk{}).(*ETHPvkConfig)
+func ETHClientConfigFromContext(ctx context.Context) (*ETHClientConfig, bool) {
+	v, ok := ctx.Value(CtxEthClient{}).(*ETHClientConfig)
 	return v, ok
 }
 
-func MustETHPvkConfigFromContext(ctx context.Context) *ETHPvkConfig {
-	v, ok := ETHPvkConfigFromContext(ctx)
+func MustETHClientConfigFromContext(ctx context.Context) *ETHClientConfig {
+	v, ok := ETHClientConfigFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
