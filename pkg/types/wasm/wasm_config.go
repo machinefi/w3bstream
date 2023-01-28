@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/machinefi/w3bstream/pkg/enums"
-	"github.com/pkg/errors"
 )
 
 func NewConfigurationByType(t enums.ConfigType) Configuration {
@@ -16,7 +15,7 @@ func NewConfigurationByType(t enums.ConfigType) Configuration {
 	case enums.CONFIG_TYPE__PROJECT_ENV:
 		return &Env{}
 	default:
-		panic(errors.Errorf("unknown config type %d", t))
+		return nil
 	}
 }
 
