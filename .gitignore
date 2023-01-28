@@ -2,7 +2,6 @@
 .session.vim
 .undodir
 .vscode
-var
-working_dir
-config.yml
+/var/
+/working_dir/
 /testutil/
