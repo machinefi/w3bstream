@@ -55,7 +55,7 @@ run_server: build_server
 stop_docker:
 	@docker-compose -f ${DOCKER_COMPOSE_FILE} stop
 
-# stop docker and delete docker resouces
+# stop docker and delete docker resources
 .PHONY: drop_docker
 drop_docker:
 	@docker-compose -f ${DOCKER_COMPOSE_FILE} down

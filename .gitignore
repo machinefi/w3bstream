@@ -1,6 +1,8 @@
-build
+/build/
 .session.vim
 .undodir
 .vscode
 var
 working_dir
+config.yml
+/testutil/

@@ -56,8 +56,9 @@ func FetchConfigValuesByRelIDs(ctx context.Context, relIDs ...types.SFID) ([]was
 
 	configs := make([]wasm.Configuration, 0, len(ms))
 	for _, cfg := range ms {
-		v := wasm.NewConfigurationByType(cfg.Type)
-		if v == nil {
+		v, err := wasm.NewConfigurationByType(cfg.Type)
+		if err != nil {
+			l.Error(err)
 			continue
 		}
 		if err = json.Unmarshal(cfg.Value, v); err != nil {
