@@ -8,7 +8,6 @@ import (
 	"github.com/tidwall/gjson"
 
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
@@ -33,7 +32,7 @@ type (
 		res *mapx.Map[uint32, []byte]
 		env *wasm.Env
 		kvs wasm.KVStore
-		db  sqlx.DBExecutor
+		db  wasm.SQLStore
 		log conflog.Logger
 		cl  *wasm.ChainClient
 	}
@@ -46,7 +45,7 @@ func NewExportFuncs(ctx context.Context, rt *Runtime) (*ExportFuncs, error) {
 		log: wasm.MustLoggerFromContext(ctx),
 	}
 	ef.cl, _ = wasm.ChainClientFromContext(ctx)
-	ef.db, _ = wasm.DBExecutorFromContext(ctx)
+	ef.db, _ = wasm.SQLStoreFromContext(ctx)
 	ef.env, _ = wasm.EnvFromContext(ctx)
 	ef.rt = rt
 

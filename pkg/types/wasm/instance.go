@@ -3,6 +3,7 @@ package wasm
 import (
 	"context"
 
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 )
 
@@ -45,6 +46,10 @@ type EventConsumer interface {
 type KVStore interface {
 	Get(string) ([]byte, error)
 	Set(key string, value []byte) error
+}
+
+type SQLStore interface {
+	sqlx.SqlExecutor
 }
 
 type ContextHandler interface {
