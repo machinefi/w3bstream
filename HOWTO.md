@@ -312,7 +312,8 @@ make build_pub_client
 ```sh
 # -c means published content
 # -t means mqtt topic, the target project name created before
-cd build && ./pub_client -c '{"header":{"event_type":'$EVENTTYPE',"pub_id":"'$PUBKEY'","pub_time":'`date +%s`',"token":"'$PUBTOKEN'"},"payload":"xxx yyy zzz"}' -t $PROJECTNAME
+export PAYLOAD=${payload}
+cd build/pub_client && ./pub_client -c '{"header":{"event_type":"'$EVENTTYPE'","pub_id":"'$PUBKEY'","pub_time":'`date +%s`',"token":"'$PUBTOKEN'"},"payload":"'`echo $PAYLOAD | base64 -w 0`'"}' -t $PROJECTNAME
 ```
 
 server log like
