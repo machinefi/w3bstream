@@ -26,7 +26,6 @@ func (s *Schema) WithContext(ctx context.Context) context.Context {
 		panic(err)
 	}
 	// limit the scope of sql to the schema
-	fmt.Println("schema name", s.Name)
 	if _, err := db.ExecContext(ctx, fmt.Sprintf("SET search_path TO %s", s.Name)); err != nil {
 		panic(err)
 	}
