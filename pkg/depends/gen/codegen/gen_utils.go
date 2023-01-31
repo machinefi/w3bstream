@@ -63,6 +63,7 @@ func IsBuiltinFunc(s string) bool {
 }
 
 const (
+	Any        BuiltInType = "any"
 	Bool       BuiltInType = "bool"
 	Int        BuiltInType = "int"
 	Int8       BuiltInType = "int8"
