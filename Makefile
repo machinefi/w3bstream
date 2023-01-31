@@ -79,6 +79,10 @@ install_toolkit:
 	fi
 	@echo `which toolkit`
 
+.PHONY: format
+format: install_toolkit
+	@toolkit fmt
+
 .PHONY: generate
 generate: install_toolkit 
 	@go generate ./...

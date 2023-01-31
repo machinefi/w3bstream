@@ -3,7 +3,6 @@ package wasmtime
 import (
 	"context"
 
-	"github.com/machinefi/w3bstream/pkg/types/wasm/sql_util"
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
+	"github.com/machinefi/w3bstream/pkg/types/wasm/sql_util"
 )
 
 const (

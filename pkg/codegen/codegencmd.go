@@ -3,8 +3,9 @@ package codegen
 import (
 	"errors"
 
-	"github.com/machinefi/w3bstream/pkg/codegen/operators"
 	"github.com/spf13/cobra"
+
+	"github.com/machinefi/w3bstream/pkg/codegen/operators"
 )
 
 func NewCodeGenCmd() *cobra.Command {
