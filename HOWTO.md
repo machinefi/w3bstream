@@ -61,7 +61,7 @@ command
 
 ```sh
 export PROJECTNAME=${project_name}
-echo '{"name":"'$PROJECTNAME"}' | http :8888/srv-applet-mgr/v0/project -A bearer -a $TOK
+echo '{"name":"'$PROJECTNAME'"}' | http :8888/srv-applet-mgr/v0/project -A bearer -a $TOK
 ```
 
 output like
@@ -185,11 +185,21 @@ output like
 }
 ```
 
+deploy applet with cache and chain client config
+
+```sh
+echo '{"cache":{"mode": "MEMORY"}}' | http post :8888/srv-applet-mgr/v0/deploy/applet/$APPLETID -A bearer -a $TOK
+```
+
 start applet
 
 ```sh
 export INSTANCEID=${instance_id}
 http put :8888/srv-applet-mgr/v0/deploy/$INSTANCEID/START -A bearer -a $TOK
+```
+output like 
+
+```json
 ```
 
 ### Register publisher
@@ -236,7 +246,8 @@ http -v get :8888/srv-applet-mgr/v0/strategy/$PROJECTNAME appletID==$APPLETID -A
 export PUBTOKEN=${pub_token}
 export EVENTTYPE=DEFAULT # default means start handler
 export EVENTID=`uuidgen`
-echo '{"events":[{"header":{"event_id":"'$EVENTID'","event_type":"'$EVENTTYPE'","pub_id":"'$PUBKEY'","pub_time":'`date +%s`',"token":"'$PUBTOKEN'"},"payload":"xxx yyy zzz"}]}' | http post :8888/srv-applet-mgr/v0/event/$PROJECTNAME
+export PAYLOAD=${payload} # set your payload
+echo '{"events":[{"header":{"event_id":"'$EVENTID'","event_type":"'$EVENTTYPE'","pub_id":"'$PUBKEY'","pub_time":'`date +%s`',"token":"'$PUBTOKEN'"},"payload":"'`echo $PAYLOAD | base64 -w 0`'"}]}' | http post :8888/srv-applet-mgr/v0/event/$PROJECTNAME
 ```
 
 output like
@@ -301,7 +312,8 @@ make build_pub_client
 ```sh
 # -c means published content
 # -t means mqtt topic, the target project name created before
-cd build && ./pub_client -c '{"header":{"event_type":'$EVENTTYPE',"pub_id":"'$PUBKEY'","pub_time":'`date +%s`',"token":"'$PUBTOKEN'"},"payload":"xxx yyy zzz"}' -t $PROJECTNAME
+export PAYLOAD=${payload}
+cd build/pub_client && ./pub_client -c '{"header":{"event_type":"'$EVENTTYPE'","pub_id":"'$PUBKEY'","pub_time":'`date +%s`',"token":"'$PUBTOKEN'"},"payload":"'`echo $PAYLOAD | base64 -w 0`'"}' -t $PROJECTNAME
 ```
 
 server log like
@@ -380,4 +392,29 @@ output like
   "projectName": "testproject",
   "updatedAt": "2022-10-21T10:47:23.815553+08:00"
 }
+```
+
+### remove instance
+
+```shell
+export INSTANCEID=${instance_id}
+http put :8888/srv-applet-mgr/v0/deploy/$INSTANCEID/REMOVE -A bearer -a $TOK 
+```
+
+### remove applet
+
+> the instance will be stopped and removed
+
+```shell
+export APPLETID=${applet_id}
+http delete :8888/srv-applet-mgr/v0/applet/$APPLETID -A bearer -a $TOK
+```
+
+### remove project
+
+> the applets and the related instances included in this project will be stopped and removed
+
+```shell
+export PROJECTNAME=${project_name}
+http delete :8888/srv-applet-mgr/v0/project/$PROJECTNAME -A bearer -a $TOK
 ```

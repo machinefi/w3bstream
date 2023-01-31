@@ -7,18 +7,16 @@ import (
 	"github.com/pkg/errors"
 )
 
-func NewConfigurationByType(t enums.ConfigType) Configuration {
+func NewConfigurationByType(t enums.ConfigType) (Configuration, error) {
 	switch t {
 	case enums.CONFIG_TYPE__PROJECT_SCHEMA:
-		return &Schema{}
+		return &Schema{}, nil
 	case enums.CONFIG_TYPE__INSTANCE_CACHE:
-		return &Cache{}
+		return &Cache{}, nil
 	case enums.CONFIG_TYPE__PROJECT_ENV:
-		return &Env{}
-	case enums.CONFIG_TYPE__CHAIN_CLIENT:
-		return &ChainClient{}
+		return &Env{}, nil
 	default:
-		panic(errors.Errorf("unknown config type %d", t))
+		return nil, errors.Errorf("invalid config type: %d", t)
 	}
 }
 

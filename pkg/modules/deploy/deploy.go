@@ -18,8 +18,7 @@ import (
 )
 
 type CreateInstanceReq struct {
-	Cache       *wasm.Cache       `json:"cache,omitempty"`
-	ChainClient *wasm.ChainClient `json:"chainClient,omitempty"`
+	Cache *wasm.Cache `json:"cache,omitempty"`
 }
 
 type CreateInstanceRsp struct {
@@ -57,12 +56,6 @@ func CreateInstance(ctx context.Context, r *CreateInstanceReq) (*CreateInstanceR
 				r.Cache = wasm.DefaultCache()
 			}
 			return config.CreateConfig(ctx, ins.InstanceID, r.Cache)
-		},
-		func(db sqlx.DBExecutor) error {
-			if r.ChainClient != nil {
-				return config.CreateConfig(ctx, ins.InstanceID, r.ChainClient)
-			}
-			return nil
 		},
 		func(db sqlx.DBExecutor) error {
 			var _err error

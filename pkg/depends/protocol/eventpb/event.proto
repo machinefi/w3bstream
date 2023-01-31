@@ -12,5 +12,5 @@ message Header {
 
 message Event {
   Header header = 1;
-  string payload = 2;
+  bytes payload = 2;
 }

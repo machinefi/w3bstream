@@ -80,7 +80,7 @@ func (l *monitor) sendEvent(ctx context.Context, data []byte, projectName string
 		Header: &eventpb.Header{
 			EventType: eventType,
 		},
-		Payload: string(data),
+		Payload: data,
 	}
 	body, err := json.Marshal(e)
 	if err != nil {

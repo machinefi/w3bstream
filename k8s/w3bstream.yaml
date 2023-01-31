@@ -13,8 +13,8 @@ data:
   NEXT_PUBLIC_API_URL: "http://w3bstream-example:8888"
   DATABASE_URL: "postgresql://w3badmin:PaSsW0Rd@postgres-example:5432/w3bstream?schema=applet_management"
   DATABASE_URL_MONITOR: "postgresql://w3badmin:PaSsW0Rd@postgres-example:5432/w3bstream?schema=monitor"
-  SRV_APPLET_MGR__ETHCLIENTCONFIG__ChainEndpoint: "https://babel-api.testnet.iotex.io/"
-  SRV_APPLET_MGR__ETHCLIENTCONFIG__PrivateKey: ""
+  SRV_APPLET_MGR__EthClient_PrivateKey: ""
+  SRV_APPLET_MGR__EthClient_Endpoints: '{"4689": "https://babel-api.mainnet.iotex.io", "4690": "https://babel-api.testnet.iotex.io"}'
   SRV_APPLET_MGR__JWT__ExpIn: 1h
   SRV_APPLET_MGR__JWT__Issuer: "w3bstream"
   SRV_APPLET_MGR__JWT__SignKey: "xxxx"

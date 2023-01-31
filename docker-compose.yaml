@@ -12,16 +12,14 @@ services:
     ports:
       - "8888:8888"
     environment:
-      SRV_APPLET_MGR__ETHCLIENTCONFIG__ChainEndpoint: ${CHAIN_ENDPOINT:-https://babel-api.testnet.iotex.io/}
-      SRV_APPLET_MGR__ETHCLIENTCONFIG__PrivateKey: ${PRIVATE_KEY:-""}
       SRV_APPLET_MGR__JWT__ExpIn: 1h
       SRV_APPLET_MGR__JWT__Issuer: ${JWT_ISSUER:-w3bstream}
       SRV_APPLET_MGR__JWT__SignKey: ${JWT_SIGN_KEY:-xxxx}
       SRV_APPLET_MGR__PGCLI__Master: postgresql://${POSTGRES_USER:-w3badmin}:${POSTGRES_PASSWORD:-PaSsW0Rd}@postgres:5432/${POSTGRES_DB:-w3bstream}?sslmode=disable
       SRV_APPLET_MGR__SERVER__Port: "8888"
       SRV_APPLET_MGR__BROKER__Server: mqtt://mqtt_server:1883
-      SRV_APPLET_MGR__EthClient_PrivateKey: ${PRIVATE_KEY:-""}
-      SRV_APPLET_MGR__EthClient_ChainEndpoint: ${CHAIN_ENDPOINT:-https://babel-api.testnet.iotex.io/}
+      SRV_APPLET_MGR__EthClient_PrivateKey: ${PRIVATE_KEY:-}
+      SRV_APPLET_MGR__EthClient_Endpoints: '{"4689": "https://babel-api.mainnet.iotex.io", "4690": "https://babel-api.testnet.iotex.io"}'
       SRV_APPLET_MGR__Jwt_ExpIn: 1h
       SRV_APPLET_MGR__Jwt_Issuer: ${JWT_ISSUER:-w3bstream}
       SRV_APPLET_MGR__Jwt_SignKey: ${JWT_SIGN_KEY:-xxxx}
@@ -38,7 +36,7 @@ services:
     container_name: w3bstream-studio
     restart: always
     working_dir: /w3bstream-studio
-    command: ["node", "server.js"]
+    command: [ "node", "server.js" ]
     depends_on:
       - "postgres"
       - "w3bapp"
@@ -63,7 +61,11 @@ services:
   postgres:
     image: postgres:13
     restart: always
-    command: ["postgres", "-cshared_preload_libraries=pg_stat_statements"]
+    command:
+      [
+        "postgres",
+        "-cshared_preload_libraries=pg_stat_statements"
+      ]
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-w3badmin}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-PaSsW0Rd}
