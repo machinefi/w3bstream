@@ -3,7 +3,6 @@ package httpx
 import (
 	"context"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/textproto"
 	"net/url"
@@ -89,7 +88,7 @@ func (ri *requestInfo) QueryValues(name string) []string {
 		if ri.request.Method == http.MethodGet && len(ri.query) == 0 &&
 			ri.request.ContentLength > 0 {
 			if strings.HasPrefix(ri.request.Header.Get("Content-Type"), MIME_FORM_URLENCODED) {
-				data, err := ioutil.ReadAll(ri.request.Body)
+				data, err := io.ReadAll(ri.request.Body)
 				if err == nil {
 					ri.request.Body.Close()
 

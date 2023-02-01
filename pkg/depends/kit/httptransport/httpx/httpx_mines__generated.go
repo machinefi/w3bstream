@@ -11,6 +11,12 @@ type ApplicationOgg struct{ bytes.Buffer }
 
 func (ApplicationOgg) ContentType() string { return "application/ogg" }
 
+func NewApplicationProtobuf() *ApplicationProtobuf { return &ApplicationProtobuf{} }
+
+type ApplicationProtobuf struct{ bytes.Buffer }
+
+func (ApplicationProtobuf) ContentType() string { return "application/x-protobuf" }
+
 func NewAudioMidi() *AudioMidi { return &AudioMidi{} }
 
 type AudioMidi struct{ bytes.Buffer }

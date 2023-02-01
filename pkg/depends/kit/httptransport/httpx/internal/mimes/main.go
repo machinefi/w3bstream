@@ -28,6 +28,7 @@ var mimes = []struct{ typ, name string }{
 	{"audio/ogg", "AudioOgg"},
 	{"video/ogg", "VideoOgg"},
 	{"application/ogg", "ApplicationOgg"},
+	{"application/x-protobuf", "ApplicationProtobuf"},
 	{"audio/mpeg", "AudioMp3"},
 }
 

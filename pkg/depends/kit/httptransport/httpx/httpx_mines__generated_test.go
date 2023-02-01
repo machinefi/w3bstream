@@ -16,6 +16,13 @@ func ExampleApplicationOgg() {
 	// application/ogg
 }
 
+func ExampleApplicationProtobuf() {
+	m := httpx.NewApplicationProtobuf()
+	fmt.Println(m.ContentType())
+	// Output:
+	// application/x-protobuf
+}
+
 func ExampleAudioMidi() {
 	m := httpx.NewAudioMidi()
 	fmt.Println(m.ContentType())
