@@ -7,11 +7,16 @@ import (
 	"reflect"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/validator"
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/validator"
 	"github.com/machinefi/w3bstream/pkg/depends/x/typesx"
+)
+
+var (
+	ErrEncodeDataNotProtobuf   = errors.New("encode data must be `proto.Message`")
+	ErrDecodeTargetNotProtobuf = errors.New("decode target must be `proto.Message`")
 )
 
 func init() { DefaultFactory.Register(&Protobuf{}) }
@@ -60,18 +65,10 @@ func (t *Protobuf) DecodeFrom(ctx context.Context, r io.Reader, v interface{}, _
 		return err
 	}
 
-	if err = proto.Unmarshal(data, pv); err != nil {
-		return err
-	}
-	return nil
+	return proto.Unmarshal(data, pv)
 }
 
 // NewValidator returns empty validator to implements interface `MayValidate` to skip protobuf struct validation
 func (t *Protobuf) NewValidator(_ context.Context, _ typesx.Type) (validator.Validator, error) {
 	return nil, nil
 }
-
-var (
-	ErrEncodeDataNotProtobuf   = errors.New("encode data must be `proto.Message`")
-	ErrDecodeTargetNotProtobuf = errors.New("decode target must be `proto.Message`")
-)

@@ -40,6 +40,7 @@ func ExampleHttpRouteMeta() {
 	// GET /demo swagger.OpenAPI
 	// GET /demo/binary/files routes.DownloadFile
 	// GET /demo/binary/images routes.ShowImage
+	// POS /demo/binary/protobuf routes.Protobuf
 	// POS /demo/cookie routes.Cookie
 	// POS /demo/forms/multipart routes.FormMultipartWithFile
 	// POS /demo/forms/multipart-with-files routes.FormMultipartWithFiles

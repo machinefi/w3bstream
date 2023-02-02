@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/golang/protobuf/proto"
+
 	testdatapb "github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/transformer/testdata"
 )
 
