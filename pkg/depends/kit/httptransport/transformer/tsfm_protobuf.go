@@ -7,6 +7,7 @@ import (
 	"reflect"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/validator"
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
@@ -63,6 +64,11 @@ func (t *Protobuf) DecodeFrom(ctx context.Context, r io.Reader, v interface{}, _
 		return err
 	}
 	return nil
+}
+
+// NewValidator returns empty validator to implements interface `MayValidate` to skip protobuf struct validation
+func (t *Protobuf) NewValidator(_ context.Context, _ typesx.Type) (validator.Validator, error) {
+	return nil, nil
 }
 
 var (

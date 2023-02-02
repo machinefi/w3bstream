@@ -18,3 +18,9 @@ message Event {
 message Events {
   repeated Event data = 1;
 }
+
+message HandleResult {
+  string event_id = 1;
+  bool succeeded = 2;
+  string err_msg = 3;
+}
