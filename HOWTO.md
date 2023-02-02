@@ -151,10 +151,8 @@ upload wasm script
 
 ```sh
 ## set env vars
-export PROJECTID=${project_id}
-export PROJECTNAME=${project_name}
 export WASMFILE=_examples/log/log.wasm
-http --form post :8888/srv-applet-mgr/v0/applet/$PROJECTID file@$WASMFILE info='{"appletName":"log","wasmName":"log.wasm","strategies":[{"eventType":"DEFAULT","handler":"start"}]}' -A bearer -a $TOK
+http --form post :8888/srv-applet-mgr/v0/applet/$PROJECTNAME file@$WASMFILE info='{"appletName":"log","wasmName":"log.wasm","strategies":[{"eventType":"DEFAULT","handler":"start"}]}' -A bearer -a $TOK
 ```
 
 output like
@@ -207,7 +205,7 @@ output like
 ```sh
 export PUBNAME=${publisher_name}
 export PUBKEY=${publisher_unique_key} # global unique
-echo '{"name":"'$PUBNAME'", "key":"'$PUBKEY'"}' | http post :8888/srv-applet-mgr/v0/publisher/$PROJECTID -A bearer -a $TOK
+echo '{"name":"'$PUBNAME'", "key":"'$PUBKEY'"}' | http post :8888/srv-applet-mgr/v0/publisher/$PROJECTNAME -A bearer -a $TOK
 ```
 
 output like

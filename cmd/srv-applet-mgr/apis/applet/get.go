@@ -4,22 +4,22 @@ import (
 	"context"
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
-	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
 )
 
 type ListApplet struct {
 	httpx.MethodGet
-	ProjectID types.SFID `in:"path" name:"projectID"`
+	ProjectName string `in:"path" name:"projectName"`
 	applet.ListAppletReq
 }
 
-func (r *ListApplet) Path() string { return "/:projectID" }
+func (r *ListApplet) Path() string { return "/:projectName" }
 
 func (r *ListApplet) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.CurrentAccountFromContext(ctx)
-	if _, err := ca.ValidateProjectPerm(ctx, r.ProjectID); err != nil {
+	ctx, err := ca.WithProjectContextByName(ctx, r.ProjectName)
+	if err != nil {
 		return nil, err
 	}
 
@@ -31,11 +31,12 @@ type GetApplet struct {
 	applet.GetAppletReq
 }
 
-func (r *GetApplet) Path() string { return "/:projectID/:appletID" }
+func (r *GetApplet) Path() string { return "/:projectName/:appletID" }
 
 func (r *GetApplet) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.CurrentAccountFromContext(ctx)
-	if _, err := ca.ValidateProjectPerm(ctx, r.ProjectID); err != nil {
+	ctx, err := ca.WithProjectContextByName(ctx, r.ProjectName)
+	if err != nil {
 		return nil, err
 	}
 
