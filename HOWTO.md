@@ -137,21 +137,14 @@ http get :8888/srv-applet-mgr/v0/project_config/$PROJECTNAME/PROJECT_SCHEMA -A b
 http get :8888/srv-applet-mgr/v0/project_config/$PROJECTNAME/PROJECT_ENV -A bearer -a $TOK
 ```
 
-### Build demo wasm scripts
-
-```sh
-make wasm_demo ## build to `_examples` use to deploy wasm applet
-```
-
 ### Create and deploy applet
 
 upload wasm script
 
-> use `_examples/word_count/word_count.wasm` or `_examples/log/log.wasm`
 
 ```sh
 ## set env vars
-export WASMFILE=_examples/log/log.wasm
+export WASMFILE=${wasm_path}
 http --form post :8888/srv-applet-mgr/v0/applet/$PROJECTNAME file@$WASMFILE info='{"appletName":"log","wasmName":"log.wasm","strategies":[{"eventType":"DEFAULT","handler":"start"}]}' -A bearer -a $TOK
 ```
 
@@ -195,10 +188,7 @@ start applet
 export INSTANCEID=${instance_id}
 http put :8888/srv-applet-mgr/v0/deploy/$INSTANCEID/START -A bearer -a $TOK
 ```
-output like 
 
-```json
-```
 
 ### Register publisher
 
