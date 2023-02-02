@@ -6,18 +6,17 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
-	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-type GetProjectByProjectID struct {
+type GetProject struct {
 	httpx.MethodGet
-	ProjectID types.SFID `in:"path" name:"projectID"`
+	ProjectName string `in:"path" name:"projectName"`
 }
 
-func (r *GetProjectByProjectID) Path() string { return "/:projectID" }
+func (r *GetProject) Path() string { return "/:projectName" }
 
-func (r *GetProjectByProjectID) Output(ctx context.Context) (interface{}, error) {
-	return project.GetProjectByProjectID(ctx, r.ProjectID)
+func (r *GetProject) Output(ctx context.Context) (interface{}, error) {
+	return project.GetProjectByProjectName(ctx, r.ProjectName)
 }
 
 type ListProject struct {

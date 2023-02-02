@@ -74,22 +74,22 @@ func MustMonitorDBExecutorFromContext(ctx context.Context) sqlx.DBExecutor {
 	return v
 }
 
-func WithWasmDBExecutor(ctx context.Context, v sqlx.DBExecutor) context.Context {
+func WithWasmDBExecutor(ctx context.Context, v postgres.Endpoint) context.Context {
 	return contextx.WithValue(ctx, CtxWasmDBExecutor{}, v)
 }
 
-func WithWasmDBExecutorContext(v sqlx.DBExecutor) contextx.WithContext {
+func WithWasmDBExecutorContext(v *postgres.Endpoint) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
 		return contextx.WithValue(ctx, CtxWasmDBExecutor{}, v)
 	}
 }
 
-func WasmDBExecutorFromContext(ctx context.Context) (sqlx.DBExecutor, bool) {
-	v, ok := ctx.Value(CtxWasmDBExecutor{}).(sqlx.DBExecutor)
+func WasmDBExecutorFromContext(ctx context.Context) (*postgres.Endpoint, bool) {
+	v, ok := ctx.Value(CtxWasmDBExecutor{}).(*postgres.Endpoint)
 	return v, ok
 }
 
-func MustWasmDBExecutorFromContext(ctx context.Context) sqlx.DBExecutor {
+func MustWasmDBExecutorFromContext(ctx context.Context) *postgres.Endpoint {
 	v, ok := WasmDBExecutorFromContext(ctx)
 	must.BeTrue(ok)
 	return v

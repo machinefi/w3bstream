@@ -288,8 +288,8 @@ func RemoveApplet(ctx context.Context, r *RemoveAppletReq) error {
 }
 
 type GetAppletReq struct {
-	ProjectID types.SFID `in:"path" name:"projectID"`
-	AppletID  types.SFID `in:"path" name:"appletID"`
+	ProjectName string     `in:"path" name:"projectName"`
+	AppletID    types.SFID `in:"path" name:"appletID"`
 }
 
 type GetAppletRsp struct {

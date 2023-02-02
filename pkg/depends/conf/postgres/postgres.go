@@ -76,11 +76,12 @@ func (e Endpoint) UseSlave() sqlx.DBExecutor {
 	return e.slave
 }
 
-func (e *Endpoint) conn(master, readonly bool) error {
-	url := e.masterURL()
-	if !master {
-		url = e.slaveURL()
-	}
+// Establish a new connection in master mode with pg
+func (e Endpoint) NewConnection() (sqlx.DBExecutor, error) {
+	return e.conn(e.masterURL(), false)
+}
+
+func (e *Endpoint) conn(url string, readonly bool) (*sqlx.DB, error) {
 	connector := &postgres.Connector{
 		Host:  url,
 		Extra: e.Master.Param.Encode(),
@@ -94,14 +95,10 @@ func (e *Endpoint) conn(master, readonly bool) error {
 	db.SetConnMaxLifetime(e.ConnMaxLifetime.Duration())
 
 	_, err := db.ExecContext(context.Background(), "SELECT 1")
-	if err == nil {
-		if master {
-			e.DB = db
-		} else {
-			e.slave = db
-		}
+	if err != nil {
+		return nil, err
 	}
-	return err
+	return db, nil
 }
 
 func (e *Endpoint) Init() {
@@ -110,10 +107,24 @@ func (e *Endpoint) Init() {
 		e.Database.Name = e.Master.Base
 	}
 	// must try master
-	must.NoError(e.Retry.Do(func() error { return e.conn(true, false) }))
+	must.NoError(e.Retry.Do(func() error {
+		db, err := e.conn(e.masterURL(), false)
+		if err != nil {
+			return err
+		}
+		e.DB = db
+		return nil
+	}))
 	// try slave if config
 	if !e.Slave.IsZero() {
-		must.NoError(e.Retry.Do(func() error { return e.conn(false, false) }))
+		must.NoError(e.Retry.Do(func() error {
+			db, err := e.conn(e.slaveURL(), false)
+			if err != nil {
+				return err
+			}
+			e.slave = db
+			return nil
+		}))
 	}
 }
 

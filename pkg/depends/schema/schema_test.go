@@ -54,6 +54,7 @@ func ExampleSchema() {
 
 	// Output:
 	// {
+	//   "name": "demo",
 	//   "tables": [
 	//     {
 	//       "name": "tbl",
@@ -90,12 +91,13 @@ func ExampleSchema() {
 	//     }
 	//   ]
 	// }
-	// {"tables":[{"name":"tbl","desc":"test table","cols":[{"name":"f_username","constrains":{"datatype":"TEXT","length":255,"desc":"user name"}},{"name":"f_gender","constrains":{"datatype":"UINT8","length":255,"desc":"user name"}}],"keys":[{"name":"ui_username","isUnique":true,"columnNames":["f_username"]}],"withSoftDeletion":true,"withPrimaryKey":true}]}
+	// {"name":"demo","tables":[{"name":"tbl","desc":"test table","cols":[{"name":"f_username","constrains":{"datatype":"TEXT","length":255,"desc":"user name"}},{"name":"f_gender","constrains":{"datatype":"UINT8","length":255,"desc":"user name"}}],"keys":[{"name":"ui_username","isUnique":true,"columnNames":["f_username"]}],"withSoftDeletion":true,"withPrimaryKey":true}]}
 }
 
 var (
 	Schema       *schema.Schema
 	SchemaConfig = []byte(`{
+  "name": "demo",
   "tables": [
     {
       "name": "tbl",
