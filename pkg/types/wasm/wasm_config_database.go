@@ -25,6 +25,12 @@ func (s *Schema) WithContext(ctx context.Context) context.Context {
 	if err != nil {
 		panic(err)
 	}
+
+	if s.Name == "" {
+		prj := types.MustProjectFromContext(ctx)
+		s.WithName(prj.Name)
+	}
+
 	// limit the scope of sql to the schema
 	if _, err := db.ExecContext(ctx, fmt.Sprintf("SET search_path TO %s", s.Name)); err != nil {
 		panic(err)
