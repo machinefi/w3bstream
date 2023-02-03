@@ -62,3 +62,63 @@ func ExampleConfig_SnippetFilterFunc() {
 	// return res
 	// }
 }
+
+func ExampleConfig_SnippetMapFunc() {
+	fmt.Println(string(c.SnippetMapFunc(f).Bytes()))
+	// Output:
+	//func MapFunc(ctx context.Context, input interface{}) (interface{}, error) {
+	//var (
+	//res models.Customer
+	//ret []byte
+	//ok bool
+	//)
+	//src, err := json.Marshal(input)
+	//if err != nil {
+	//l.Error(err)
+	//}
+	//code := ins.HandleEvent(ctx, start, src)
+	//if code < 0 {
+	//return nil, errors.New("the value does not support")
+	//}
+	//ret, ok = ins.GetResource(uint32(code))
+	//if ok {
+	//defer ins.RmvResource(ctx, uint32(code))
+	//}
+	//if !ok {
+	//l.Error(err)
+	//return nil, errors.New("the value does not support")
+	//}
+	//err = json.Unmarshal(ret, res)
+	//return res, err
+	//}
+}
+
+func ExampleConfig_SnippetGroupByKey() {
+	fmt.Println(string(c.SnippetGroupByKey(f).Bytes()))
+	// Output:
+	//func GroupByKey(item rxgo.Item) string {
+	//var (
+	//res string
+	//ret []byte
+	//ok bool
+	//)
+	//src, err := json.Marshal(input)
+	//if err != nil {
+	//l.Error(err)
+	//}
+	//code := ins.HandleEvent(ctx, start, src)
+	//if code < 0 {
+	//return error
+	//}
+	//ret, ok = ins.GetResource(uint32(code))
+	//if ok {
+	//defer ins.RmvResource(ctx, uint32(code))
+	//}
+	//if !ok {
+	//l.Error(err)
+	//return error
+	//}
+	//res = string(ret)
+	//return res
+	//}
+}
