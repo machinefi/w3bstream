@@ -30,33 +30,34 @@ func (cc *ChannelContext) Run(ctx context.Context) {
 	_, _l := l.Start(ctx, "ChannelContext.Run")
 	defer _l.End()
 
-	for {
-		select {
-		case <-cc.ctx.Done():
-			_l.Info("channel closed")
-			return
-		default:
-			_ = cc.cli.Subscribe(
-				func(cli mqtt.Client, msg mqtt.Message) {
-					_, l := l.Start(cc.ctx, "OnMessage:"+cc.Name)
-					defer l.End()
+	mqHandler := func(cli mqtt.Client, msg mqtt.Message) {
+		_, l := l.Start(cc.ctx, "OnMessage:"+cc.Name)
+		defer l.End()
 
-					pl := msg.Payload()
-					ev := &eventpb.Event{}
-					err := json.Unmarshal(pl, ev)
-					if err != nil {
-						l.Error(err)
-						return
-					}
-					_, err = cc.hdl(ctx, cc.Name, ev)
-					if err != nil {
-						l.Error(err)
-					}
-					l.WithValues("payload", ev).Info("sub handled")
-				},
-			)
+		pl := msg.Payload()
+		ev := &eventpb.Event{}
+		err := json.Unmarshal(pl, ev)
+		if err != nil {
+			l.Error(err)
+			return
 		}
+		_, err = cc.hdl(ctx, cc.Name, ev)
+		if err != nil {
+			l.Error(err)
+		}
+		l.WithValues("payload", ev).Info("sub handled")
 	}
+	if err := cc.cli.Subscribe(mqHandler); err != nil {
+		return
+	}
+	defer func() {
+		_l.Info("channel closed")
+		if err := cc.cli.Unsubscribe(); err != nil {
+			l.Error(err)
+		}
+	}()
+
+	<-cc.ctx.Done()
 }
 
 func (cc *ChannelContext) Stop() { cc.cancel() }
