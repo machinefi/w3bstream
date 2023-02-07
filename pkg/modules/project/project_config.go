@@ -36,16 +36,16 @@ func CreateProjectSchema(ctx context.Context, schema *wasm.Schema) error {
 	_, l = l.Start(ctx, "CreateProjectSchema")
 	defer l.End()
 
-	if err := config.CreateConfig(ctx, prj.ProjectID, schema); err != nil {
-		l.Error(err)
-		return err
-	}
 	schema.WithName(prj.Name)
 	if err := schema.Init(); err != nil {
 		l.Error(err)
 		return status.InternalServerError.StatusErr().
 			WithDesc(fmt.Sprintf("init schema failed: [project:%s] [err:%v]",
 				prj.Name, err))
+	}
+	if err := config.CreateConfig(ctx, prj.ProjectID, schema); err != nil {
+		l.Error(err)
+		return err
 	}
 
 	wasmdb := types.MustWasmDBExecutorFromContext(ctx)

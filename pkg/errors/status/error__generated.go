@@ -42,6 +42,8 @@ func (v Error) Key() string {
 		return "BadRequest"
 	case MD5ChecksumFailed:
 		return "MD5ChecksumFailed"
+	case InvalidChainClient:
+		return "InvalidChainClient"
 	case Unauthorized:
 		return "Unauthorized"
 	case InvalidAuthValue:
@@ -76,6 +78,8 @@ func (v Error) Msg() string {
 		return "BadRequest"
 	case MD5ChecksumFailed:
 		return ""
+	case InvalidChainClient:
+		return ""
 	case Unauthorized:
 		return "Unauthorized unauthorized"
 	case InvalidAuthValue:
@@ -109,6 +113,8 @@ func (v Error) CanBeTalk() bool {
 	case BadRequest:
 		return false
 	case MD5ChecksumFailed:
+		return false
+	case InvalidChainClient:
 		return false
 	case Unauthorized:
 		return true

@@ -38,6 +38,8 @@ func (v StatusError) Code() int {
 
 func (v StatusError) Key() string {
 	switch v {
+	case BadRequest:
+		return "BadRequest"
 	case Unauthorized:
 		return "Unauthorized"
 	case InternalServerError:
@@ -48,6 +50,8 @@ func (v StatusError) Key() string {
 
 func (v StatusError) Msg() string {
 	switch v {
+	case BadRequest:
+		return "BadRequest"
 	case Unauthorized:
 		return "Unauthorized"
 	case InternalServerError:
@@ -58,6 +62,8 @@ func (v StatusError) Msg() string {
 
 func (v StatusError) CanBeTalk() bool {
 	switch v {
+	case BadRequest:
+		return false
 	case Unauthorized:
 		return true
 	case InternalServerError:

@@ -28,7 +28,7 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte) (i *Inst
 	if err != nil {
 		return nil, err
 	}
-	if err := rt.Initiate(lk, code); err != nil {
+	if err := rt.Link(lk, code); err != nil {
 		return nil, err
 	}
 

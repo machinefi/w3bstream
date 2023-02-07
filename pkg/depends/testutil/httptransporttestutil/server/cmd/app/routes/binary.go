@@ -7,7 +7,9 @@ import (
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	testdatapb "github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/transformer/testdata"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
+	"github.com/machinefi/w3bstream/pkg/depends/testutil/httptransporttestutil/server/pkg/errors"
 )
 
 var BinaryRouter = kit.NewRouter(httptransport.Group("/binary"))
@@ -17,6 +19,7 @@ func init() {
 
 	BinaryRouter.Register(kit.NewRouter(DownloadFile{}))
 	BinaryRouter.Register(kit.NewRouter(ShowImage{}))
+	BinaryRouter.Register(kit.NewRouter(&Protobuf{}))
 }
 
 // download file
@@ -57,4 +60,31 @@ func (req ShowImage) Output(ctx context.Context) (interface{}, error) {
 	}
 
 	return img, nil
+}
+
+type Protobuf struct {
+	httpx.MethodPost
+	testdatapb.Event `in:"body" mime:"protobuf"`
+}
+
+func (*Protobuf) Path() string {
+	return "/protobuf"
+}
+
+func (req *Protobuf) Output(ctx context.Context) (interface{}, error) {
+	var (
+		evID = req.GetHeader().GetEventId()
+		rsp  = &testdatapb.HandleResult{EventId: evID}
+	)
+	if evID == "" {
+		rsp.ErrMsg = "invalid event id"
+	} else {
+		rsp.Succeeded = true
+	}
+
+	pbwr, err := httpx.NewApplicationProtobufWith(rsp)
+	if err != nil {
+		return nil, errors.InternalServerError
+	}
+	return pbwr, nil
 }

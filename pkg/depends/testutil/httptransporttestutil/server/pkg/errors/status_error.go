@@ -19,3 +19,9 @@ const (
 	// @errTalk Unauthorized
 	Unauthorized StatusError = http.StatusUnauthorized*1e6 + iota + 1
 )
+
+const (
+	// BadRequest
+	// Something invalid in request
+	BadRequest StatusError = http.StatusBadRequest*1e6 + iota + 1
+)

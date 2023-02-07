@@ -1,0 +1,26 @@
+syntax = "proto3";
+package testdatapb;
+option go_package = "./;testdatapb";
+
+message Header {
+  string event_type = 1; // event type
+  string pub_id = 2;     // the unique identifier for publisher
+  string token = 3;      // for validation message
+  int64 pub_time = 4;    // event pub timestamp
+  string event_id = 5;   // event id for tracing
+}
+
+message Event {
+  Header header = 1;
+  bytes payload = 2;
+}
+
+message Events {
+  repeated Event data = 1;
+}
+
+message HandleResult {
+  string event_id = 1;
+  bool succeeded = 2;
+  string err_msg = 3;
+}

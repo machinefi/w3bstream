@@ -61,7 +61,7 @@ command
 
 ```sh
 export PROJECTNAME=${project_name}
-echo '{"name":"'$PROJECTNAME"}' | http :8888/srv-applet-mgr/v0/project -A bearer -a $TOK
+echo '{"name":"'$PROJECTNAME'"}' | http :8888/srv-applet-mgr/v0/project -A bearer -a $TOK
 ```
 
 output like
@@ -123,8 +123,8 @@ echo $PROJECTSCHEMA | http post :8888/srv-applet-mgr/v0/project_config/$PROJECTN
 ### Create or update project env vars
 
 ```sh
-export PROJECTENV={"values":[["1","one"],["2","two"],["3","three","33"]]}
-echo $PROJECTENV | http post :8888/srv-applet-mgr/v0/project_config/test/PROJECT_ENV -A bearer -a $TOK
+export PROJECTENV='[["key1","value1"],["key2","value2"],["key3","value3"]]'
+echo '{"env":'$PROJECTENV'}' | http post :8888/srv-applet-mgr/v0/project_config/$PROJECTNAME/PROJECT_ENV -A bearer -a $TOK
 ```
 
 > the database for wasm storage is configured by w3bstream server and the name
@@ -137,24 +137,15 @@ http get :8888/srv-applet-mgr/v0/project_config/$PROJECTNAME/PROJECT_SCHEMA -A b
 http get :8888/srv-applet-mgr/v0/project_config/$PROJECTNAME/PROJECT_ENV -A bearer -a $TOK
 ```
 
-### Build demo wasm scripts
-
-```sh
-make wasm_demo ## build to `_examples` use to deploy wasm applet
-```
-
 ### Create and deploy applet
 
 upload wasm script
 
-> use `_examples/word_count/word_count.wasm` or `_examples/log/log.wasm`
 
 ```sh
 ## set env vars
-export PROJECTID=${project_id}
-export PROJECTNAME=${project_name}
-export WASMFILE=_examples/log/log.wasm
-http --form post :8888/srv-applet-mgr/v0/applet/$PROJECTID file@$WASMFILE info='{"appletName":"log","wasmName":"log.wasm","strategies":[{"eventType":"DEFAULT","handler":"start"}]}' -A bearer -a $TOK
+export WASMFILE=${wasm_path}
+http --form post :8888/srv-applet-mgr/v0/applet/$PROJECTNAME file@$WASMFILE info='{"appletName":"log","wasmName":"log.wasm","strategies":[{"eventType":"DEFAULT","handler":"start"}]}' -A bearer -a $TOK
 ```
 
 output like
@@ -188,7 +179,7 @@ output like
 deploy applet with cache and chain client config
 
 ```sh
-echo '{"cache":{"mode": "MEMORY"}, "chainClient":{"privateKey":"xxx","chainEndpoint":"https://babel-api.testnet.iotex.io/"}}' | http post :8888/srv-applet-mgr/v0/deploy/applet/$APPLETID -A bearer -a $TOK
+echo '{"cache":{"mode": "MEMORY"}}' | http post :8888/srv-applet-mgr/v0/deploy/applet/$APPLETID -A bearer -a $TOK
 ```
 
 start applet
@@ -197,17 +188,14 @@ start applet
 export INSTANCEID=${instance_id}
 http put :8888/srv-applet-mgr/v0/deploy/$INSTANCEID/START -A bearer -a $TOK
 ```
-output like 
 
-```json
-```
 
 ### Register publisher
 
 ```sh
 export PUBNAME=${publisher_name}
 export PUBKEY=${publisher_unique_key} # global unique
-echo '{"name":"'$PUBNAME'", "key":"'$PUBKEY'"}' | http post :8888/srv-applet-mgr/v0/publisher/$PROJECTID -A bearer -a $TOK
+echo '{"name":"'$PUBNAME'", "key":"'$PUBKEY'"}' | http post :8888/srv-applet-mgr/v0/publisher/$PROJECTNAME -A bearer -a $TOK
 ```
 
 output like
@@ -247,7 +235,7 @@ export PUBTOKEN=${pub_token}
 export EVENTTYPE=DEFAULT # default means start handler
 export EVENTID=`uuidgen`
 export PAYLOAD=${payload} # set your payload
-echo '{"events":[{"header":{"event_id":"'$EVENTID'","event_type":"'$EVENTTYPE'","pub_id":"'$PUBKEY'","pub_time":'`date +%s`',"token":"'$PUBTOKEN'"},"payload":"'`echo $PAYLOAD | base64`'"}]}' | http post :8888/srv-applet-mgr/v0/event/$PROJECTNAME
+echo '{"events":[{"header":{"event_id":"'$EVENTID'","event_type":"'$EVENTTYPE'","pub_id":"'$PUBKEY'","pub_time":'`date +%s`',"token":"'$PUBTOKEN'"},"payload":"'`echo $PAYLOAD | base64 -w 0`'"}]}' | http post :8888/srv-applet-mgr/v0/event/$PROJECTNAME
 ```
 
 output like
@@ -312,7 +300,8 @@ make build_pub_client
 ```sh
 # -c means published content
 # -t means mqtt topic, the target project name created before
-cd build && ./pub_client -c '{"header":{"event_type":'$EVENTTYPE',"pub_id":"'$PUBKEY'","pub_time":'`date +%s`',"token":"'$PUBTOKEN'"},"payload":"xxx yyy zzz"}' -t $PROJECTNAME
+export PAYLOAD=${payload}
+cd build/pub_client && ./pub_client -c '{"header":{"event_type":"'$EVENTTYPE'","pub_id":"'$PUBKEY'","pub_time":'`date +%s`',"token":"'$PUBTOKEN'"},"payload":"'`echo $PAYLOAD | base64 -w 0`'"}' -t $PROJECTNAME
 ```
 
 server log like

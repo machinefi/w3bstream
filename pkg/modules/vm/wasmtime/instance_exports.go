@@ -8,7 +8,6 @@ import (
 	"github.com/tidwall/gjson"
 
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
@@ -33,7 +32,7 @@ type (
 		res *mapx.Map[uint32, []byte]
 		env *wasm.Env
 		kvs wasm.KVStore
-		db  sqlx.DBExecutor
+		db  wasm.SQLStore
 		log conflog.Logger
 		cl  *wasm.ChainClient
 	}
@@ -46,7 +45,7 @@ func NewExportFuncs(ctx context.Context, rt *Runtime) (*ExportFuncs, error) {
 		log: wasm.MustLoggerFromContext(ctx),
 	}
 	ef.cl, _ = wasm.ChainClientFromContext(ctx)
-	ef.db, _ = wasm.DBExecutorFromContext(ctx)
+	ef.db, _ = wasm.SQLStoreFromContext(ctx)
 	ef.env, _ = wasm.EnvFromContext(ctx)
 	ef.rt = rt
 
@@ -228,9 +227,8 @@ func (ef *ExportFuncs) GetSQLDB(addr, size int32, vmAddrPtr, vmSizePtr int32) in
 	return int32(wasm.ResultStatusCode_OK)
 }
 
-// TODO: add chainID in sendtx abi
 // TODO: make sendTX async, and add callback if possible
-func (ef *ExportFuncs) SendTX(offset, size int32) int32 {
+func (ef *ExportFuncs) SendTX(chainID int32, offset, size, vmAddrPtr, vmSizePtr int32) int32 {
 	if ef.cl == nil {
 		ef.log.Error(errors.New("eth client doesn't exist"))
 		return wasm.ResultStatusCode_Failed
@@ -241,17 +239,19 @@ func (ef *ExportFuncs) SendTX(offset, size int32) int32 {
 		return wasm.ResultStatusCode_Failed
 	}
 	ret := gjson.Parse(string(buf))
-	// fmt.Println(ret)
-	txHash, err := ef.cl.SendTX(ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String())
+	txHash, err := ef.cl.SendTX(uint32(chainID), ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String())
 	if err != nil {
 		ef.log.Error(err)
 		return wasm.ResultStatusCode_Failed
 	}
-	ef.log.Info("tx hash: %s", txHash)
+	if err := ef.rt.Copy([]byte(txHash), vmAddrPtr, vmSizePtr); err != nil {
+		ef.log.Error(err)
+		return wasm.ResultStatusCode_Failed
+	}
 	return int32(wasm.ResultStatusCode_OK)
 }
 
-func (ef *ExportFuncs) CallContract(offset, size int32, vmAddrPtr, vmSizePtr int32) int32 {
+func (ef *ExportFuncs) CallContract(chainID int32, offset, size int32, vmAddrPtr, vmSizePtr int32) int32 {
 	if ef.cl == nil {
 		ef.log.Error(errors.New("eth client doesn't exist"))
 		return wasm.ResultStatusCode_Failed
@@ -262,8 +262,7 @@ func (ef *ExportFuncs) CallContract(offset, size int32, vmAddrPtr, vmSizePtr int
 		return wasm.ResultStatusCode_Failed
 	}
 	ret := gjson.Parse(string(buf))
-	// fmt.Println(ret)
-	data, err := ef.cl.CallContract(ret.Get("to").String(), ret.Get("data").String())
+	data, err := ef.cl.CallContract(uint32(chainID), ret.Get("to").String(), ret.Get("data").String())
 	if err != nil {
 		ef.log.Error(err)
 		return wasm.ResultStatusCode_Failed

@@ -22,3 +22,8 @@ type (
 	SFID  = types.SFID
 	SFIDs = types.SFIDs
 )
+
+type ETHClientConfig struct {
+	PrivateKey string `env:""`
+	Endpoints  string `env:""`
+}

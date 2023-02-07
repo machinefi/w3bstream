@@ -4,14 +4,13 @@ import (
 	"context"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
 )
 
 type (
-	CtxDBExecutor      struct{}
+	CtxSQLStore        struct{}
 	CtxKVStore         struct{}
 	CtxLogger          struct{}
 	CtxEnv             struct{}
@@ -21,23 +20,23 @@ type (
 	CtxRuntimeResource struct{}
 )
 
-func WithDBExecutor(ctx context.Context, v sqlx.DBExecutor) context.Context {
-	return contextx.WithValue(ctx, CtxDBExecutor{}, v)
+func WithSQLStore(ctx context.Context, v SQLStore) context.Context {
+	return contextx.WithValue(ctx, CtxSQLStore{}, v)
 }
 
-func WithDBExecutorContext(v sqlx.DBExecutor) contextx.WithContext {
+func WithSQLStoreContext(v SQLStore) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, CtxDBExecutor{}, v)
+		return contextx.WithValue(ctx, CtxSQLStore{}, v)
 	}
 }
 
-func DBExecutorFromContext(ctx context.Context) (sqlx.DBExecutor, bool) {
-	v, ok := ctx.Value(CtxDBExecutor{}).(sqlx.DBExecutor)
+func SQLStoreFromContext(ctx context.Context) (SQLStore, bool) {
+	v, ok := ctx.Value(CtxSQLStore{}).(SQLStore)
 	return v, ok
 }
 
-func MustDBExecutorFromContext(ctx context.Context) sqlx.DBExecutor {
-	v, ok := DBExecutorFromContext(ctx)
+func MustSQLStoreFromContext(ctx context.Context) SQLStore {
+	v, ok := SQLStoreFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

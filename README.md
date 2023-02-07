@@ -49,18 +49,6 @@ Interested in W3bstream Studio source code? Check it out here [https://github.co
 
 If you are interested in diving into the code and run the node using a locally built docker, here is the steps of building the docker image from code.
 
-### init submodules
-
-```bash
-make init_submodules
-```
-
-### Update studio to latest if needed
-
-```bash
-make update_studio
-```
-
 ### Build docker images
 
 ```bash
@@ -82,43 +70,21 @@ make build_docker_images
  make drop_docker
  ```
 
-## Build binary from code
-
-This section is for building the W3bstream binary files from code. 
-
-### Dependencies:
-
-- OS : macOS(11.0+) / Linux (tested on Ubuntu 16+)
-- Go: golang (1.18+)
-- Docker: to start a postgres
-- Tinygo: to build wasm code
-- make: run makefile
-- GCC: 11.3.0
-- protobuf: 3.12+
-- Httpie: (optional) a simple curl command (used to interact with W3bstream node via cli)
-
-### Init protocols and database
-
-```sh
-make run_depends # start postgres and mqtt
-make migrate     # create or update schema
-```
-
-### Start a server
-
-```sh
-make run_server
-```
-
 ## Interact with W3bstream using CLI
 
 Please refer to [HOWTO.md](./HOWTO.md) for more details.
 
 ## SDKs
-
+### Devices
 - Android: https://github.com/machinefi/w3bstream-android-sdk
 - iOS: https://github.com/machinefi/w3bstream-ios-sdk
 - Embedded: Coming soon!
+
+### WASM
+- Golang: https://github.com/machinefi/w3bstream-wasm-golang-sdk
+- AssemblyScript: https://github.com/machinefi/w3bstream-wasm-ts-sdk
+- Rust: Coming soon!
+
 
 ## Examples
 
