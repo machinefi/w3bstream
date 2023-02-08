@@ -37,7 +37,7 @@ docker-compose restart
 command
 
 ```sh
-echo '{"username":"admin","password":"${password}"}' | http put :8888/srv-applet-mgr/v0/login
+echo '{"username":"admin","password":"iotex.W3B.admin"}' | http put :8888/srv-applet-mgr/v0/login
 ```
 
 output like
