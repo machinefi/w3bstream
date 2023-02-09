@@ -115,8 +115,7 @@ func (s *StatusError) SnippetCode(f *gen.File) gen.Snippet {
 			f.Expr(`if with, ok := (interface{})(v).(?); ok {
 return with.ServiceCode() + int(v)
 }
-return int(v)
-`,
+return int(v)`,
 				gen.Ident(f.Use(PkgPath, "ServiceCode"))),
 		)
 }
