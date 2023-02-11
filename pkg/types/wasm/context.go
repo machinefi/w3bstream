@@ -18,6 +18,7 @@ type (
 	CtxRedisPrefix     struct{}
 	CtxChainClient     struct{}
 	CtxRuntimeResource struct{}
+	CtxMqttClient      struct{}
 )
 
 func WithSQLStore(ctx context.Context, v SQLStore) context.Context {
@@ -184,6 +185,27 @@ func RuntimeResourceFromContext(ctx context.Context) (*mapx.Map[uint32, []byte],
 
 func MustRuntimeResourceFromContext(ctx context.Context) *mapx.Map[uint32, []byte] {
 	v, ok := RuntimeResourceFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithMQ(ctx context.Context, mq *MqttClient) context.Context {
+	return contextx.WithValue(ctx, CtxMqttClient{}, mq)
+}
+
+func WithMQContext(mq *MqttClient) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxMqttClient{}, mq)
+	}
+}
+
+func MQFromContext(ctx context.Context) (*MqttClient, bool) {
+	v, ok := ctx.Value(CtxMqttClient{}).(*MqttClient)
+	return v, ok
+}
+
+func MustMQFromContext(ctx context.Context) *MqttClient {
+	v, ok := MQFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

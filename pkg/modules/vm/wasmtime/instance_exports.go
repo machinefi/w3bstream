@@ -35,6 +35,7 @@ type (
 		db  wasm.SQLStore
 		log conflog.Logger
 		cl  *wasm.ChainClient
+		mq  *wasm.MqttClient
 	}
 )
 
@@ -47,6 +48,7 @@ func NewExportFuncs(ctx context.Context, rt *Runtime) (*ExportFuncs, error) {
 	ef.cl, _ = wasm.ChainClientFromContext(ctx)
 	ef.db, _ = wasm.SQLStoreFromContext(ctx)
 	ef.env, _ = wasm.EnvFromContext(ctx)
+	ef.mq, _ = wasm.MQFromContext(ctx)
 	ef.rt = rt
 
 	return ef, nil
@@ -66,6 +68,7 @@ func (ef *ExportFuncs) LinkABI(impt Import) error {
 		"ws_set_sql_db":    ef.SetSQLDB,
 		"ws_get_sql_db":    ef.GetSQLDB,
 		"ws_get_env":       ef.GetEnv,
+		"ws_send_mq":       ef.SendMQ,
 	} {
 		if err := impt("env", name, ff); err != nil {
 			return err
@@ -245,6 +248,36 @@ func (ef *ExportFuncs) SendTX(chainID int32, offset, size, vmAddrPtr, vmSizePtr 
 		return wasm.ResultStatusCode_Failed
 	}
 	if err := ef.rt.Copy([]byte(txHash), vmAddrPtr, vmSizePtr); err != nil {
+		ef.log.Error(err)
+		return wasm.ResultStatusCode_Failed
+	}
+	return int32(wasm.ResultStatusCode_OK)
+}
+
+func (ef *ExportFuncs) SendMQ(topicAddr, topicSize, msgAddr, msgSize int32) int32 {
+	if ef.mq == nil {
+		ef.log.Error(errors.New("mq client doesn't exist"))
+		return wasm.ResultStatusCode_Failed
+	}
+
+	var (
+		topicBuf []byte
+		msgBuf   []byte
+		err      error
+	)
+
+	topicBuf, err = ef.rt.Read(topicAddr, topicSize)
+	if err != nil {
+		ef.log.Error(err)
+		return wasm.ResultStatusCode_Failed
+	}
+	msgBuf, err = ef.rt.Read(msgAddr, msgSize)
+	if err != nil {
+		ef.log.Error(err)
+		return wasm.ResultStatusCode_Failed
+	}
+	err = ef.mq.WithTopic(string(topicBuf)).Publish(string(msgBuf))
+	if err != nil {
 		ef.log.Error(err)
 		return wasm.ResultStatusCode_Failed
 	}
