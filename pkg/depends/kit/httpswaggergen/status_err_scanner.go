@@ -36,18 +36,18 @@ type StatusErrScanner struct {
 
 var statusErrPkgPath = reflect.TypeOf(statusx.StatusErr{}).PkgPath()
 
-func (scanner *StatusErrScanner) StatusErrorsInFunc(typeFunc *types.Func) []*statusx.StatusErr {
+func (es *StatusErrScanner) StatusErrorsInFunc(typeFunc *types.Func) []*statusx.StatusErr {
 	if typeFunc == nil {
 		return nil
 	}
 
-	if statusErrList, ok := scanner.errorsUsed[typeFunc]; ok {
+	if statusErrList, ok := es.errorsUsed[typeFunc]; ok {
 		return statusErrList
 	}
 
-	scanner.errorsUsed[typeFunc] = []*statusx.StatusErr{}
+	es.errorsUsed[typeFunc] = []*statusx.StatusErr{}
 
-	pkg := pkgx.New(scanner.pkg.PkgByPath(typeFunc.Pkg().Path()))
+	pkg := pkgx.New(es.pkg.PkgByPath(typeFunc.Pkg().Path()))
 
 	funcDecl := pkg.FuncDeclOf(typeFunc)
 
@@ -93,47 +93,47 @@ func (scanner *StatusErrScanner) StatusErrorsInFunc(typeFunc *types.Func) []*sta
 									msg = key
 								}
 
-								scanner.appendStateErrs(typeFunc, statusx.Wrap(errors.New(""), code, key, append([]string{msg}, desc...)...))
+								es.appendStateErrs(typeFunc, statusx.Wrap(errors.New(""), code, key, append([]string{msg}, desc...)...))
 							}
 
 						}
 					}
 
 					// Deprecated old code defined
-					if obj != nil && obj.Pkg() != nil && obj.Pkg().Path() == scanner.StatusErrType.Obj().Pkg().Path() {
+					if obj != nil && obj.Pkg() != nil && obj.Pkg().Path() == es.StatusErrType.Obj().Pkg().Path() {
 						for i := range identList {
-							scanner.mayAddStateErrorByObject(typeFunc, pkg.TypesInfo.ObjectOf(identList[i]))
+							es.mayAddStateErrorByObject(typeFunc, pkg.TypesInfo.ObjectOf(identList[i]))
 						}
 						return false
 					}
 
 					if nextTypeFunc, ok := obj.(*types.Func); ok && nextTypeFunc != typeFunc && nextTypeFunc.Pkg() != nil {
-						scanner.appendStateErrs(typeFunc, scanner.StatusErrorsInFunc(nextTypeFunc)...)
+						es.appendStateErrs(typeFunc, es.StatusErrorsInFunc(nextTypeFunc)...)
 					}
 				}
 			case *ast.Ident:
-				scanner.mayAddStateErrorByObject(typeFunc, pkg.TypesInfo.ObjectOf(v))
+				es.mayAddStateErrorByObject(typeFunc, pkg.TypesInfo.ObjectOf(v))
 			}
 			return true
 		})
 
 		doc := pkgx.StringifyCommentGroup(funcDecl.Doc)
-		scanner.appendStateErrs(typeFunc, pickStatusErrorsFromDoc(doc)...)
+		es.appendStateErrs(typeFunc, pickStatusErrorsFromDoc(doc)...)
 	}
 
-	return scanner.errorsUsed[typeFunc]
+	return es.errorsUsed[typeFunc]
 }
 
-func (scanner *StatusErrScanner) mayAddStateErrorByObject(typeFunc *types.Func, obj types.Object) {
+func (es *StatusErrScanner) mayAddStateErrorByObject(typeFunc *types.Func, obj types.Object) {
 	if obj == nil {
 		return
 	}
 	if typeConst, ok := obj.(*types.Const); ok {
 		if named, ok := typeConst.Type().(*types.Named); ok {
-			if errs, ok := scanner.statusErrorTypes[named]; ok {
+			if errs, ok := es.statusErrorTypes[named]; ok {
 				for i := range errs {
 					if errs[i].Key == typeConst.Name() {
-						scanner.appendStateErrs(typeFunc, errs[i])
+						es.appendStateErrs(typeFunc, errs[i])
 					}
 				}
 			}
@@ -141,10 +141,10 @@ func (scanner *StatusErrScanner) mayAddStateErrorByObject(typeFunc *types.Func, 
 	}
 }
 
-func (scanner *StatusErrScanner) appendStateErrs(typeFunc *types.Func, statusErrs ...*statusx.StatusErr) {
+func (es *StatusErrScanner) appendStateErrs(typeFunc *types.Func, statusErrs ...*statusx.StatusErr) {
 	m := map[string]*statusx.StatusErr{}
 
-	errs := append(scanner.errorsUsed[typeFunc], statusErrs...)
+	errs := append(es.errorsUsed[typeFunc], statusErrs...)
 	for i := range errs {
 		s := errs[i]
 		m[fmt.Sprintf("%s%d", s.Key, s.Code)] = s
@@ -159,29 +159,29 @@ func (scanner *StatusErrScanner) appendStateErrs(typeFunc *types.Func, statusErr
 		return next[i].Code < next[j].Code
 	})
 
-	scanner.errorsUsed[typeFunc] = next
+	es.errorsUsed[typeFunc] = next
 }
 
-func (scanner *StatusErrScanner) init() {
-	pkg := scanner.pkg.PkgByPath("github.com/machinefi/w3bstream/pkg/depends/kit/statusx")
+func (es *StatusErrScanner) init() {
+	pkg := es.pkg.PkgByPath(pkgPathStatusx)
 	if pkg == nil {
 		return
 	}
 
-	scanner.StatusErrType = pkgx.New(pkg).TypeName("StatusErr").Type().(*types.Named)
+	es.StatusErrType = pkgx.New(pkg).TypeName("StatusErr").Type().(*types.Named)
 	goTypeStatusError := pkgx.New(pkg).TypeName("Error").Type().Underlying().(*types.Interface)
 
 	isStatusError := func(typ *types.TypeName) bool {
 		return types.Implements(typ.Type(), goTypeStatusError)
 	}
 
-	s := statusxgen.NewScanner(scanner.pkg)
+	s := statusxgen.NewScanner(es.pkg)
 
-	for _, pkgInfo := range scanner.pkg.Imports() {
+	for _, pkgInfo := range es.pkg.Imports() {
 		for _, obj := range pkgInfo.TypesInfo.Defs {
 			if typName, ok := obj.(*types.TypeName); ok {
 				if isStatusError(typName) {
-					scanner.statusErrorTypes[typName.Type().(*types.Named)] = s.StatusError(typName)
+					es.statusErrorTypes[typName.Type().(*types.Named)] = s.StatusError(typName)
 				}
 			}
 		}

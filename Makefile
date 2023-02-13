@@ -79,11 +79,24 @@ install_toolkit:
 	fi
 	@echo `which toolkit`
 
+.PHONY: install_toolkit_local
+install_toolkit_local:
+	@cd pkg/depends/gen && go install ./...
+
+.PHONY: update_toolkit
+update_toolkit:
+	@go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/...
+	@echo "toolkit updated"
+
 .PHONY: generate
-generate: install_toolkit 
+generate: install_toolkit
 	@go generate ./...
 
 ## to migrate database models, if model defines changed, make this entry
 .PHONY: migrate
 migrate: install_toolkit 
-	go run cmd/srv-applet-mgr/main.go migrate
+	@go run cmd/srv-applet-mgr/main.go migrate
+
+.PHONY: openapi
+openapi: install_toolkit
+	@cd cmd/srv-applet-mgr && toolkit gen openapi

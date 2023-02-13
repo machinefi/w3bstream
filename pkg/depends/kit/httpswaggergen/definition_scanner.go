@@ -75,12 +75,12 @@ func fullTypeName(typeName *types.TypeName) string {
 	return typeName.Name()
 }
 
-func (scanner *DefinitionScanner) BindSchemas(openapi *oas.OpenAPI) {
-	openapi.Components.Schemas = scanner.schemas
+func (ds *DefinitionScanner) BindSchemas(openapi *oas.OpenAPI) {
+	openapi.Components.Schemas = ds.schemas
 }
 
-func (scanner *DefinitionScanner) Def(ctx context.Context, typeName *types.TypeName) *oas.Schema {
-	if s, ok := scanner.definitions[typeName]; ok {
+func (ds *DefinitionScanner) Def(ctx context.Context, typeName *types.TypeName) *oas.Schema {
+	if s, ok := ds.definitions[typeName]; ok {
 		return s
 	}
 
@@ -90,35 +90,34 @@ func (scanner *DefinitionScanner) Def(ctx context.Context, typeName *types.TypeN
 		typeName = typeName.Type().(*types.Named).Obj()
 	}
 
-	doc := scanner.pkg.CommentsOf(scanner.pkg.IdentOf(typeName.Type().(*types.Named).Obj()))
+	doc := ds.pkg.CommentsOf(ds.pkg.IdentOf(typeName.Type().(*types.Named).Obj()))
 
-	// register empty before scan
-	// to avoid cycle
-	scanner.setDef(typeName, &oas.Schema{})
+	// register empty before scan to avoid cycle
+	ds.setDef(typeName, &oas.Schema{})
 
 	if doc, fmtName := parseStrfmt(doc); fmtName != "" {
 		s := oas.NewSchema(oas.TypeString, fmtName)
 		setMetaFromDoc(s, doc)
-		return scanner.setDef(typeName, s)
+		return ds.setDef(typeName, s)
 	}
 
 	if doc, typ := parseType(doc); typ != "" {
 		s := oas.NewSchema(oas.Type(typ), "")
 		setMetaFromDoc(s, doc)
-		return scanner.setDef(typeName, s)
+		return ds.setDef(typeName, s)
 	}
 
-	if typesx.FromGoType(types.NewPointer(typeName.Type())).Implements(typesx.FromGoType(scanner.ioWriterInterface)) {
-		return scanner.setDef(typeName, oas.Binary())
+	if typesx.FromGoType(types.NewPointer(typeName.Type())).Implements(typesx.FromGoType(ds.ioWriterInterface)) {
+		return ds.setDef(typeName, oas.Binary())
 	}
 
 	if typeName.Pkg() != nil {
 		if typeName.Pkg().Path() == "time" && typeName.Name() == "Time" {
-			return scanner.setDef(typeName, oas.DateTime())
+			return ds.setDef(typeName, oas.DateTime())
 		}
 	}
 
-	if enumOptions, ok := scanner.enumScanner.Options(typeName); ok {
+	if enumOptions, ok := ds.enumScanner.Options(typeName); ok {
 		s := oas.String()
 
 		optionsLabels := make([]string, 0)
@@ -150,7 +149,7 @@ func (scanner *DefinitionScanner) Def(ctx context.Context, typeName *types.TypeN
 
 		s.AddExtension(XEnumLabels, optionsLabels)
 
-		return scanner.setDef(typeName, s)
+		return ds.setDef(typeName, s)
 	}
 
 	s := oas.NewSchema(oas.TypeString, "")
@@ -158,7 +157,7 @@ func (scanner *DefinitionScanner) Def(ctx context.Context, typeName *types.TypeN
 	hasDefinedByInterface := false
 
 	if method, ok := typesx.FromGoType(typeName.Type()).MethodByName("OpenAPISchemaType"); ok {
-		results, n := scanner.pkg.FuncResultsOf(method.(*typesx.GoMethod).Func)
+		results, n := ds.pkg.FuncResultsOf(method.(*typesx.GoMethod).Func)
 		if n == 1 {
 			for _, v := range results[0] {
 				if compositeLit, ok := v.Expr.(*ast.CompositeLit); ok {
@@ -174,7 +173,7 @@ func (scanner *DefinitionScanner) Def(ctx context.Context, typeName *types.TypeN
 	}
 
 	if method, ok := typesx.FromGoType(typeName.Type()).MethodByName("OpenAPISchemaFormat"); ok {
-		results, n := scanner.pkg.FuncResultsOf(method.(*typesx.GoMethod).Func)
+		results, n := ds.pkg.FuncResultsOf(method.(*typesx.GoMethod).Func)
 		if n == 1 {
 			for _, v := range results[0] {
 				s.Format = strings.Trim(v.Value.String(), `"`)
@@ -184,23 +183,23 @@ func (scanner *DefinitionScanner) Def(ctx context.Context, typeName *types.TypeN
 	}
 
 	if !hasDefinedByInterface {
-		s = scanner.GetSchemaByType(ctx, typeName.Type().Underlying())
+		s = ds.GetSchemaByType(ctx, typeName.Type().Underlying())
 	}
 
 	setMetaFromDoc(s, doc)
 
-	return scanner.setDef(typeName, s)
+	return ds.setDef(typeName, s)
 }
 
-func (scanner *DefinitionScanner) isInternal(typeName *types.TypeName) bool {
-	return strings.HasPrefix(typeName.Pkg().Path(), scanner.pkg.PkgPath)
+func (ds *DefinitionScanner) isInternal(typeName *types.TypeName) bool {
+	return strings.HasPrefix(typeName.Pkg().Path(), ds.pkg.PkgPath)
 }
 
-func (scanner *DefinitionScanner) typeUniqueName(typeName *types.TypeName, isExist func(name string) bool) (string, bool) {
+func (ds *DefinitionScanner) typeUniqueName(typeName *types.TypeName, isExist func(name string) bool) (string, bool) {
 	typePkgPath := typeName.Pkg().Path()
 	name := typeName.Name()
 
-	if scanner.isInternal(typeName) {
+	if ds.isInternal(typeName) {
 		pathParts := strings.Split(typePkgPath, "/")
 		count := 1
 		for isExist(name) {
@@ -213,27 +212,27 @@ func (scanner *DefinitionScanner) typeUniqueName(typeName *types.TypeName, isExi
 	return stringsx.UpperCamelCase(typePkgPath) + name, false
 }
 
-func (scanner *DefinitionScanner) reformatSchemas() {
+func (ds *DefinitionScanner) reformatSchemas() {
 	typeNameList := make([]*types.TypeName, 0)
 
-	for typeName := range scanner.definitions {
+	for typeName := range ds.definitions {
 		v := typeName
 		typeNameList = append(typeNameList, v)
 	}
 
 	sort.Slice(typeNameList, func(i, j int) bool {
-		return scanner.isInternal(typeNameList[i]) && fullTypeName(typeNameList[i]) < fullTypeName(typeNameList[j])
+		return ds.isInternal(typeNameList[i]) && fullTypeName(typeNameList[i]) < fullTypeName(typeNameList[j])
 	})
 
 	schemas := map[string]*oas.Schema{}
 
 	for _, typeName := range typeNameList {
-		name, isInternal := scanner.typeUniqueName(typeName, func(name string) bool {
+		name, isInternal := ds.typeUniqueName(typeName, func(name string) bool {
 			_, exists := schemas[name]
 			return exists
 		})
 
-		s := scanner.definitions[typeName]
+		s := ds.definitions[typeName]
 		addExtension(s, XID, name)
 		if !isInternal {
 			addExtension(s, XGoVendorType, fullTypeName(typeName))
@@ -241,15 +240,15 @@ func (scanner *DefinitionScanner) reformatSchemas() {
 		schemas[name] = s
 	}
 
-	scanner.schemas = schemas
+	ds.schemas = schemas
 }
 
-func (scanner *DefinitionScanner) setDef(typeName *types.TypeName, schema *oas.Schema) *oas.Schema {
-	if scanner.definitions == nil {
-		scanner.definitions = map[*types.TypeName]*oas.Schema{}
+func (ds *DefinitionScanner) setDef(typeName *types.TypeName, schema *oas.Schema) *oas.Schema {
+	if ds.definitions == nil {
+		ds.definitions = map[*types.TypeName]*oas.Schema{}
 	}
-	scanner.definitions[typeName] = schema
-	scanner.reformatSchemas()
+	ds.definitions[typeName] = schema
+	ds.reformatSchemas()
 	return schema
 }
 
@@ -271,13 +270,13 @@ func (r SchemaRefer) RefString() string {
 	return oas.NewComponentRefer("schemas", s.Extensions[XID].(string)).RefString()
 }
 
-func (scanner *DefinitionScanner) GetSchemaByType(ctx context.Context, typ types.Type) *oas.Schema {
+func (ds *DefinitionScanner) GetSchemaByType(ctx context.Context, typ types.Type) *oas.Schema {
 	switch t := typ.(type) {
 	case *types.Named:
 		if t.String() == "mime/multipart.FileHeader" {
 			return oas.Binary()
 		}
-		return oas.RefSchemaByRefer(NewSchemaRefer(scanner.Def(ctx, t.Obj())))
+		return oas.RefSchemaByRefer(NewSchemaRefer(ds.Def(ctx, t.Obj())))
 	case *types.Interface:
 		return &oas.Schema{}
 	case *types.Basic:
@@ -298,20 +297,20 @@ func (scanner *DefinitionScanner) GetSchemaByType(ctx context.Context, typ types
 			}
 		}
 
-		s := scanner.GetSchemaByType(ctx, elem)
+		s := ds.GetSchemaByType(ctx, elem)
 		markPointer(s, count)
 		return s
 	case *types.Map:
-		keySchema := scanner.GetSchemaByType(ctx, t.Key())
+		keySchema := ds.GetSchemaByType(ctx, t.Key())
 		if keySchema != nil && len(keySchema.Type) > 0 && keySchema.Type != "string" {
 			panic(errors.New("only support map[string]interface{}"))
 		}
-		return oas.KeyValueOf(keySchema, scanner.GetSchemaByType(ctx, t.Elem()))
+		return oas.KeyValueOf(keySchema, ds.GetSchemaByType(ctx, t.Elem()))
 	case *types.Slice:
-		return oas.ItemsOf(scanner.GetSchemaByType(ctx, t.Elem()))
+		return oas.ItemsOf(ds.GetSchemaByType(ctx, t.Elem()))
 	case *types.Array:
 		length := uint64(t.Len())
-		s := oas.ItemsOf(scanner.GetSchemaByType(ctx, t.Elem()))
+		s := oas.ItemsOf(ds.GetSchemaByType(ctx, t.Elem()))
 		s.MaxItems = &length
 		s.MinItems = &length
 		return s
@@ -345,7 +344,7 @@ func (scanner *DefinitionScanner) GetSchemaByType(ctx context.Context, typ types
 					structSchema = oas.Binary()
 					break
 				}
-				s := scanner.GetSchemaByType(ctx, structFieldType)
+				s := ds.GetSchemaByType(ctx, structFieldType)
 				if s != nil {
 					schemas = append(schemas, s)
 				}
@@ -363,7 +362,7 @@ func (scanner *DefinitionScanner) GetSchemaByType(ctx context.Context, typ types
 
 			structSchema.SetProperty(
 				name,
-				scanner.propSchemaByField(ctx, field.Name(), structFieldType, tags, name, flags, scanner.pkg.CommentsOf(scanner.pkg.IdentOf(field))),
+				ds.propSchemaByField(ctx, field.Name(), structFieldType, tags, name, flags, ds.pkg.CommentsOf(ds.pkg.IdentOf(field))),
 				required,
 			)
 		}
@@ -377,7 +376,7 @@ func (scanner *DefinitionScanner) GetSchemaByType(ctx context.Context, typ types
 	return nil
 }
 
-func (scanner *DefinitionScanner) propSchemaByField(
+func (ds *DefinitionScanner) propSchemaByField(
 	ctx context.Context,
 	fieldName string,
 	fieldType types.Type,
@@ -386,7 +385,7 @@ func (scanner *DefinitionScanner) propSchemaByField(
 	flags map[string]bool,
 	desc string,
 ) *oas.Schema {
-	propSchema := scanner.GetSchemaByType(ctx, fieldType)
+	propSchema := ds.GetSchemaByType(ctx, fieldType)
 
 	refSchema := (*oas.Schema)(nil)
 
@@ -471,29 +470,23 @@ func parseType(doc string) (string, string) {
 
 var basicTypeToSchemaType = map[string][2]string{
 	"invalid": {"null", ""},
-
 	"bool":    {"boolean", ""},
 	"error":   {"string", "string"},
 	"float32": {"number", "float"},
 	"float64": {"number", "double"},
-
-	"int":   {"integer", "int32"},
-	"int8":  {"integer", "int8"},
-	"int16": {"integer", "int16"},
-	"int32": {"integer", "int32"},
-	"int64": {"integer", "int64"},
-
-	"rune": {"integer", "int32"},
-
-	"uint":   {"integer", "uint32"},
-	"uint8":  {"integer", "uint8"},
-	"uint16": {"integer", "uint16"},
-	"uint32": {"integer", "uint32"},
-	"uint64": {"integer", "uint64"},
-
-	"byte": {"integer", "uint8"},
-
-	"string": {"string", ""},
+	"int":     {"integer", "int32"},
+	"int8":    {"integer", "int8"},
+	"int16":   {"integer", "int16"},
+	"int32":   {"integer", "int32"},
+	"int64":   {"integer", "int64"},
+	"rune":    {"integer", "int32"},
+	"uint":    {"integer", "uint32"},
+	"uint8":   {"integer", "uint8"},
+	"uint16":  {"integer", "uint16"},
+	"uint32":  {"integer", "uint32"},
+	"uint64":  {"integer", "uint64"},
+	"byte":    {"integer", "uint8"},
+	"string":  {"string", ""},
 }
 
 func getSchemaTypeFromBasicType(basicTypeName string) (typ oas.Type, format string) {

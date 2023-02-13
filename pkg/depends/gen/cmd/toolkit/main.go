@@ -20,7 +20,6 @@ func init() {
 	command.AddCommand(cmd.Gen)
 	command.AddCommand(cmd.Patch)
 	command.AddCommand(cmd.Format)
-	command.AddCommand(cmd.Swagger)
 }
 
 func main() {

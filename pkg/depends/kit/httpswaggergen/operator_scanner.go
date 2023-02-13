@@ -39,7 +39,7 @@ type OperatorScanner struct {
 	operators map[*types.TypeName]*Operator
 }
 
-func (scanner *OperatorScanner) Operator(ctx context.Context, typeName *types.TypeName) *Operator {
+func (os *OperatorScanner) Operator(ctx context.Context, typeName *types.TypeName) *Operator {
 	if typeName == nil {
 		return nil
 	}
@@ -55,7 +55,7 @@ func (scanner *OperatorScanner) Operator(ctx context.Context, typeName *types.Ty
 		}
 	}
 
-	if operator, ok := scanner.operators[typeName]; ok {
+	if operator, ok := os.operators[typeName]; ok {
 		return operator
 	}
 
@@ -70,18 +70,18 @@ func (scanner *OperatorScanner) Operator(ctx context.Context, typeName *types.Ty
 	if typeStruct, ok := typeName.Type().Underlying().(*types.Struct); ok {
 		operator := &Operator{}
 
-		operator.Tag = scanner.tagFrom(typeName.Pkg().Path())
+		operator.Tag = os.tagFrom(typeName.Pkg().Path())
 
-		scanner.scanRouteMeta(operator, typeName)
-		scanner.scanParameterOrRequestBody(ctx, operator, typeStruct)
-		scanner.scanReturns(ctx, operator, typeName)
+		os.scanRouteMeta(operator, typeName)
+		os.scanParameterOrRequestBody(ctx, operator, typeStruct)
+		os.scanReturns(ctx, operator, typeName)
 
 		// cached scanned
-		if scanner.operators == nil {
-			scanner.operators = map[*types.TypeName]*Operator{}
+		if os.operators == nil {
+			os.operators = map[*types.TypeName]*Operator{}
 		}
 
-		scanner.operators[typeName] = operator
+		os.operators[typeName] = operator
 
 		return operator
 	}
@@ -89,7 +89,7 @@ func (scanner *OperatorScanner) Operator(ctx context.Context, typeName *types.Ty
 	return nil
 }
 
-func (scanner *OperatorScanner) singleReturnOf(typeName *types.TypeName, name string) (string, bool) {
+func (os *OperatorScanner) singleReturnOf(typeName *types.TypeName, name string) (string, bool) {
 	if typeName == nil {
 		return "", false
 	}
@@ -100,7 +100,7 @@ func (scanner *OperatorScanner) singleReturnOf(typeName *types.TypeName, name st
 	} {
 		method, ok := typesx.FromGoType(typ).MethodByName(name)
 		if ok {
-			results, n := scanner.pkg.FuncResultsOf(method.(*typesx.GoMethod).Func)
+			results, n := os.pkg.FuncResultsOf(method.(*typesx.GoMethod).Func)
 			if n == 1 {
 				for _, v := range results[0] {
 					if v.Value != nil {
@@ -118,12 +118,12 @@ func (scanner *OperatorScanner) singleReturnOf(typeName *types.TypeName, name st
 	return "", false
 }
 
-func (scanner *OperatorScanner) tagFrom(pkgPath string) string {
-	tag := strings.TrimPrefix(pkgPath, scanner.pkg.PkgPath)
+func (os *OperatorScanner) tagFrom(pkgPath string) string {
+	tag := strings.TrimPrefix(pkgPath, os.pkg.PkgPath)
 	return strings.TrimPrefix(tag, "/")
 }
 
-func (scanner *OperatorScanner) scanRouteMeta(op *Operator, typeName *types.TypeName) {
+func (os *OperatorScanner) scanRouteMeta(op *Operator, typeName *types.TypeName) {
 	typeStruct := typeName.Type().Underlying().(*types.Struct)
 
 	op.ID = typeName.Name()
@@ -159,7 +159,7 @@ func (scanner *OperatorScanner) scanRouteMeta(op *Operator, typeName *types.Type
 		}
 	}
 
-	lines := scanner.pkg.CommentsOf(scanner.pkg.IdentOf(typeName))
+	lines := os.pkg.CommentsOf(os.pkg.IdentOf(typeName))
 	comments := strings.Split(lines, "\n")
 
 	for i := range comments {
@@ -179,27 +179,27 @@ func (scanner *OperatorScanner) scanRouteMeta(op *Operator, typeName *types.Type
 		}
 	}
 
-	if method, ok := scanner.singleReturnOf(typeName, "Method"); ok {
+	if method, ok := os.singleReturnOf(typeName, "Method"); ok {
 		op.Method = method
 	}
 
-	if path, ok := scanner.singleReturnOf(typeName, "Path"); ok {
+	if path, ok := os.singleReturnOf(typeName, "Path"); ok {
 		op.Path = path
 	}
 
-	if bathPath, ok := scanner.singleReturnOf(typeName, "BasePath"); ok {
+	if bathPath, ok := os.singleReturnOf(typeName, "BasePath"); ok {
 		op.BasePath = bathPath
 	}
 }
 
-func (scanner *OperatorScanner) scanReturns(ctx context.Context, op *Operator, typeName *types.TypeName) {
+func (os *OperatorScanner) scanReturns(ctx context.Context, op *Operator, typeName *types.TypeName) {
 	for _, typ := range []types.Type{
 		typeName.Type(),
 		types.NewPointer(typeName.Type()),
 	} {
 		method, ok := typesx.FromGoType(typ).MethodByName("Output")
 		if ok {
-			results, n := scanner.pkg.FuncResultsOf(method.(*typesx.GoMethod).Func)
+			results, n := os.pkg.FuncResultsOf(method.(*typesx.GoMethod).Func)
 			if n == 2 {
 				for _, v := range results[0] {
 					if v.Type != nil {
@@ -208,24 +208,24 @@ func (scanner *OperatorScanner) scanReturns(ctx context.Context, op *Operator, t
 								log.FromContext(ctx).Warn(errors.Errorf("%s success result must be same struct, but got %v, already set %v", op.ID, v.Type, op.SuccessType))
 							}
 							op.SuccessType = v.Type
-							op.SuccessStatus, op.SuccessResponse = scanner.getResponse(ctx, v.Type, v.Expr)
+							op.SuccessStatus, op.SuccessResponse = os.getResponse(ctx, v.Type, v.Expr)
 						}
 					}
 				}
 			}
 
-			if scanner.StatusErrScanner.StatusErrType != nil {
-				op.StatusErrors = scanner.StatusErrScanner.StatusErrorsInFunc(method.(*typesx.GoMethod).Func)
-				op.StatusErrorSchema = scanner.DefinitionScanner.GetSchemaByType(ctx, scanner.StatusErrScanner.StatusErrType)
+			if os.StatusErrScanner.StatusErrType != nil {
+				op.StatusErrors = os.StatusErrScanner.StatusErrorsInFunc(method.(*typesx.GoMethod).Func)
+				op.StatusErrorSchema = os.DefinitionScanner.GetSchemaByType(ctx, os.StatusErrScanner.StatusErrType)
 			}
 		}
 	}
 }
 
-func (scanner *OperatorScanner) firstValueOfFunc(named *types.Named, name string) (interface{}, bool) {
+func (os *OperatorScanner) firstValueOfFunc(named *types.Named, name string) (interface{}, bool) {
 	method, ok := typesx.FromGoType(types.NewPointer(named)).MethodByName(name)
 	if ok {
-		results, n := scanner.pkg.FuncResultsOf(method.(*typesx.GoMethod).Func)
+		results, n := os.pkg.FuncResultsOf(method.(*typesx.GoMethod).Func)
 		if n == 1 {
 			for _, r := range results[0] {
 				if r.IsValue() {
@@ -240,7 +240,7 @@ func (scanner *OperatorScanner) firstValueOfFunc(named *types.Named, name string
 	return nil, false
 }
 
-func (scanner *OperatorScanner) getResponse(ctx context.Context, tpe types.Type, expr ast.Expr) (statusCode int, response *oas.Response) {
+func (os *OperatorScanner) getResponse(ctx context.Context, tpe types.Type, expr ast.Expr) (statusCode int, response *oas.Response) {
 	response = &oas.Response{}
 
 	if tpe.String() == "error" {
@@ -259,23 +259,23 @@ func (scanner *OperatorScanner) getResponse(ctx context.Context, tpe types.Type,
 				case *ast.CallExpr:
 					if firstCallExpr {
 						firstCallExpr = false
-						v, _ := scanner.pkg.Eval(callExpr.Args[0])
+						v, _ := os.pkg.Eval(callExpr.Args[0])
 						tpe = v.Type
 					}
 					switch e := callExpr.Fun.(type) {
 					case *ast.SelectorExpr:
 						switch e.Sel.Name {
 						case "WithSchema":
-							v, _ := scanner.pkg.Eval(callExpr.Args[0])
+							v, _ := os.pkg.Eval(callExpr.Args[0])
 							tpe = v.Type
 						case "WithStatusCode":
-							v, _ := scanner.pkg.Eval(callExpr.Args[0])
+							v, _ := os.pkg.Eval(callExpr.Args[0])
 							if code, ok := valueOf(v.Value).(int); ok {
 								statusCode = code
 							}
 							return false
 						case "WithContentType":
-							v, _ := scanner.pkg.Eval(callExpr.Args[0])
+							v, _ := os.pkg.Eval(callExpr.Args[0])
 							if code, ok := valueOf(v.Value).(string); ok {
 								contentType = code
 							}
@@ -303,7 +303,7 @@ func (scanner *OperatorScanner) getResponse(ctx context.Context, tpe types.Type,
 	}
 
 	if named, ok := tpe.(*types.Named); ok {
-		if v, ok := scanner.firstValueOfFunc(named, "ContentType"); ok {
+		if v, ok := os.firstValueOfFunc(named, "ContentType"); ok {
 			if s, ok := v.(string); ok {
 				contentType = s
 			}
@@ -311,7 +311,7 @@ func (scanner *OperatorScanner) getResponse(ctx context.Context, tpe types.Type,
 				contentType = "*"
 			}
 		}
-		if v, ok := scanner.firstValueOfFunc(named, "StatusCode"); ok {
+		if v, ok := os.firstValueOfFunc(named, "StatusCode"); ok {
 			if i, ok := v.(int64); ok {
 				statusCode = int(i)
 			}
@@ -322,29 +322,29 @@ func (scanner *OperatorScanner) getResponse(ctx context.Context, tpe types.Type,
 		contentType = httpx.MIME_JSON
 	}
 
-	response.AddContent(contentType, oas.NewMediaTypeWithSchema(scanner.DefinitionScanner.GetSchemaByType(ctx, tpe)))
+	response.AddContent(contentType, oas.NewMediaTypeWithSchema(os.DefinitionScanner.GetSchemaByType(ctx, tpe)))
 
 	return
 }
 
-func (scanner *OperatorScanner) scanParameterOrRequestBody(ctx context.Context, op *Operator, typeStruct *types.Struct) {
+func (os *OperatorScanner) scanParameterOrRequestBody(ctx context.Context, op *Operator, typeStruct *types.Struct) {
 	typesx.EachField(typesx.FromGoType(typeStruct), "name", func(field typesx.StructField, fieldDisplayName string, omitempty bool) bool {
 		location, _ := tagValueAndFlagsByTagString(field.Tag().Get("in"))
 
-		// if location == "" {
-		// 	panic(errors.Errorf("missing tag `in` for %s of %s", field.Name(), op.ID))
-		// }
+		if location == "" {
+			panic(errors.Errorf("missing tag `in` for %s of %s", field.Name(), op.ID))
+		}
 
 		name, flags := tagValueAndFlagsByTagString(field.Tag().Get("name"))
 
-		schema := scanner.DefinitionScanner.propSchemaByField(
+		schema := os.DefinitionScanner.propSchemaByField(
 			ctx,
 			field.Name(),
 			field.Type().(*typesx.GoType).Type,
 			field.Tag(),
 			name,
 			flags,
-			scanner.pkg.CommentsOf(scanner.pkg.IdentOf(field.(*typesx.GoStructField).Var)),
+			os.pkg.CommentsOf(os.pkg.IdentOf(field.(*typesx.GoStructField).Var)),
 		)
 
 		transformer, err := tsfm.DefaultFactory.NewTransformer(context.Background(), field.Type(), tsfm.Option{

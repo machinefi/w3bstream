@@ -3,7 +3,6 @@ package httpswaggergen_test
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -327,9 +326,8 @@ func TestDefinitionScanner(t *testing.T) {
 		openAPI := oas.NewOpenAPI()
 		openAPI.AddOperation(oas.GET, "/", oas.NewOperation("test"))
 		scanner.BindSchemas(openAPI)
-
-		data, _ := json.MarshalIndent(openAPI, "", "  ")
-		fmt.Println(string(data))
+		// data, _ := json.MarshalIndent(openAPI, "", "  ")
+		// fmt.Println(string(data))
 	})
 
 	t.Run("invalid", func(t *testing.T) {

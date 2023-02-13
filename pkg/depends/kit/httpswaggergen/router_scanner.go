@@ -32,78 +32,151 @@ type RouterScanner struct {
 	operatorScanner *OperatorScanner
 }
 
-func (scanner *RouterScanner) init() {
-	for _, pkg := range scanner.pkg.Imports() {
+func (rs *RouterScanner) init() {
+	// for _, pkg := range rs.pkg.Imports() {
+	// 	for ident, obj := range pkg.TypesInfo.Defs {
+	// 		if typeVar, ok := obj.(*types.Var); ok {
+	// 			if typeVar != nil && !strings.HasSuffix(typeVar.Pkg().Path(), pkgImportPathKit) {
+	// 				if isRouterType(typeVar.Type()) {
+	// 					router := NewRouter(typeVar)
+
+	// 					ast.Inspect(ident.Obj.Decl.(ast.Node), func(node ast.Node) bool {
+	// 						switch callExpr := node.(type) {
+	// 						case *ast.CallExpr:
+	// 							router.AppendOperators(rs.OperatorTypeNamesFromArgs(pkgx.New(pkg), callExpr.Args...)...)
+	// 							return false
+	// 						}
+	// 						return true
+	// 					})
+
+	// 					rs.routers[typeVar] = router
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
+
+	imports := rs.pkg.Imports()
+	for _, pkg := range imports {
 		for ident, obj := range pkg.TypesInfo.Defs {
-			if typeVar, ok := obj.(*types.Var); ok {
-				if typeVar != nil && !strings.HasSuffix(typeVar.Pkg().Path(), pkgImportPathKit) {
-					if isRouterType(typeVar.Type()) {
-						router := NewRouter(typeVar)
-
-						ast.Inspect(ident.Obj.Decl.(ast.Node), func(node ast.Node) bool {
-							switch callExpr := node.(type) {
-							case *ast.CallExpr:
-								router.AppendOperators(scanner.OperatorTypeNamesFromArgs(pkgx.New(pkg), callExpr.Args...)...)
-								return false
-							}
-							return true
-						})
-
-						scanner.routers[typeVar] = router
-					}
-				}
+			typesVar, ok := obj.(*types.Var)
+			if !ok || typesVar == nil {
+				continue
 			}
+			if strings.HasPrefix(typesVar.Pkg().Path(), pkgImportPathKit) {
+				continue
+			}
+			if !isRouterType(typesVar.Type()) {
+				continue
+			}
+			router := NewRouter(typesVar)
+			ast.Inspect(ident.Obj.Decl.(ast.Node), func(node ast.Node) bool {
+				if expr, ok := node.(*ast.CallExpr); ok {
+					router.AppendOperators(rs.OperatorTypeNamesFromArgs(pkgx.New(pkg), expr.Args...)...)
+					return false
+				}
+				return true
+			})
+			rs.routers[typesVar] = router
 		}
 	}
-
-	for _, pkg := range scanner.pkg.Imports() {
+	for _, pkg := range imports {
 		for selectExpr, selection := range pkg.TypesInfo.Selections {
-			if selection.Obj() != nil {
-				if typeFunc, ok := selection.Obj().(*types.Func); ok {
-					recv := typeFunc.Type().(*types.Signature).Recv()
-					if recv != nil && isRouterType(recv.Type()) {
-						for typeVar, router := range scanner.routers {
-							switch selectExpr.Sel.Name {
-							case "Register":
-								if typeVar == pkg.TypesInfo.ObjectOf(pkgx.GetIdentChainOfCallFunc(selectExpr)[0]) {
-									file := scanner.pkg.FileOf(selectExpr)
-									ast.Inspect(file, func(node ast.Node) bool {
-										switch node.(type) {
-										case *ast.CallExpr:
-											callExpr := node.(*ast.CallExpr)
-											if callExpr.Fun == selectExpr {
-												routerIdent := callExpr.Args[0]
-												switch v := routerIdent.(type) {
-												case *ast.Ident:
-													argTypeVar := pkg.TypesInfo.ObjectOf(v).(*types.Var)
-													if r, ok := scanner.routers[argTypeVar]; ok {
-														router.Register(r)
-													}
-												case *ast.SelectorExpr:
-													argTypeVar := pkg.TypesInfo.ObjectOf(v.Sel).(*types.Var)
-													if r, ok := scanner.routers[argTypeVar]; ok {
-														router.Register(r)
-													}
-												case *ast.CallExpr:
-													router.With(scanner.OperatorTypeNamesFromArgs(pkgx.New(pkg), v.Args...)...)
-												}
-												return false
-											}
-										}
-										return true
-									})
+			obj := selection.Obj()
+			if obj == nil {
+				continue
+			}
+			typesFn, ok := selection.Obj().(*types.Func)
+			if !ok {
+				continue
+			}
+			recv := typesFn.Type().(*types.Signature).Recv()
+			if recv == nil || !isRouterType(recv.Type()) {
+				continue
+			}
+			for typesVar, router := range rs.routers {
+				if selectExpr.Sel.Name != "Register" {
+					continue
+				}
+				if typesVar != pkg.TypesInfo.ObjectOf(pkgx.GetIdentChainOfCallFunc(selectExpr)[0]) {
+					continue
+				}
+				file := rs.pkg.FileOf(selectExpr)
+				ast.Inspect(file, func(node ast.Node) bool {
+					if callExpr, ok := node.(*ast.CallExpr); ok {
+						if callExpr.Fun == selectExpr {
+							routerIdent := callExpr.Args[0]
+							switch v := routerIdent.(type) {
+							case *ast.Ident:
+								argTypesVar := pkg.TypesInfo.ObjectOf(v).(*types.Var)
+								if r, ok := rs.routers[argTypesVar]; ok {
+									router.Register(r)
 								}
+							case *ast.SelectorExpr:
+								argTypesVar := pkg.TypesInfo.ObjectOf(v.Sel).(*types.Var)
+								if r, ok := rs.routers[argTypesVar]; ok {
+									router.Register(r)
+								}
+							case *ast.CallExpr:
+								router.With(rs.OperatorTypeNamesFromArgs(pkgx.New(pkg), v.Args...)...)
 							}
+							return false
 						}
 					}
-				}
+					return true
+				})
 			}
 		}
 	}
+
+	// for _, pkg := range rs.pkg.Imports() {
+	// 	for selectExpr, selection := range pkg.TypesInfo.Selections {
+	// 		if selection.Obj() != nil {
+	// 			if typeFunc, ok := selection.Obj().(*types.Func); ok {
+	// 				recv := typeFunc.Type().(*types.Signature).Recv()
+	// 				if recv != nil && isRouterType(recv.Type()) {
+	// 					for typeVar, router := range rs.routers {
+	// 						switch selectExpr.Sel.Name {
+	// 						case "Register":
+	// 							if typeVar == pkg.TypesInfo.ObjectOf(pkgx.GetIdentChainOfCallFunc(selectExpr)[0]) {
+	// 								file := rs.pkg.FileOf(selectExpr)
+	// 								ast.Inspect(file, func(node ast.Node) bool {
+	// 									switch node.(type) {
+	// 									case *ast.CallExpr:
+	// 										callExpr := node.(*ast.CallExpr)
+	// 										if callExpr.Fun == selectExpr {
+	// 											routerIdent := callExpr.Args[0]
+	// 											switch v := routerIdent.(type) {
+	// 											case *ast.Ident:
+	// 												argTypeVar := pkg.TypesInfo.ObjectOf(v).(*types.Var)
+	// 												if r, ok := rs.routers[argTypeVar]; ok {
+	// 													router.Register(r)
+	// 												}
+	// 											case *ast.SelectorExpr:
+	// 												argTypeVar := pkg.TypesInfo.ObjectOf(v.Sel).(*types.Var)
+	// 												if r, ok := rs.routers[argTypeVar]; ok {
+	// 													router.Register(r)
+	// 												}
+	// 											case *ast.CallExpr:
+	// 												router.With(rs.OperatorTypeNamesFromArgs(pkgx.New(pkg), v.Args...)...)
+	// 											}
+	// 											return false
+	// 										}
+	// 									}
+	// 									return true
+	// 								})
+	// 							}
+	// 						}
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
 }
 
-func (scanner *RouterScanner) Router(typeName *types.Var) *Router {
-	return scanner.routers[typeName]
+func (rs *RouterScanner) Router(typeName *types.Var) *Router {
+	return rs.routers[typeName]
 }
 
 type OperatorWithTypeName struct {
@@ -115,11 +188,11 @@ func (operator *OperatorWithTypeName) String() string {
 	return operator.TypeName.Pkg().Name() + "." + operator.TypeName.Name()
 }
 
-func (scanner *RouterScanner) OperatorTypeNamesFromArgs(pkg *pkgx.Pkg, args ...ast.Expr) []*OperatorWithTypeName {
+func (rs *RouterScanner) OperatorTypeNamesFromArgs(pkg *pkgx.Pkg, args ...ast.Expr) []*OperatorWithTypeName {
 	opTypeNames := make([]*OperatorWithTypeName, 0)
 
 	for _, arg := range args {
-		opTypeName := scanner.OperatorTypeNameFromType(pkg.TypesInfo.TypeOf(arg))
+		opTypeName := rs.OperatorTypeNameFromType(pkg.TypesInfo.TypeOf(arg))
 
 		if opTypeName == nil {
 			continue
@@ -149,11 +222,11 @@ func (scanner *RouterScanner) OperatorTypeNamesFromArgs(pkg *pkgx.Pkg, args ...a
 			// handle interface WithMiddleOperators
 			method, ok := typesx.FromGoType(opTypeName.TypeName.Type()).MethodByName("MiddleOperators")
 			if ok {
-				results, n := scanner.pkg.FuncResultsOf(method.(*typesx.GoMethod).Func)
+				results, n := rs.pkg.FuncResultsOf(method.(*typesx.GoMethod).Func)
 				if n == 1 {
 					for _, v := range results[0] {
 						if compositeLit, ok := v.Expr.(*ast.CompositeLit); ok {
-							ops := scanner.OperatorTypeNamesFromArgs(pkg, compositeLit.Elts...)
+							ops := rs.OperatorTypeNamesFromArgs(pkg, compositeLit.Elts...)
 							opTypeNames = append(opTypeNames, ops...)
 						}
 
@@ -168,14 +241,14 @@ func (scanner *RouterScanner) OperatorTypeNamesFromArgs(pkg *pkgx.Pkg, args ...a
 	return opTypeNames
 }
 
-func (scanner *RouterScanner) OperatorTypeNameFromType(typ types.Type) *OperatorWithTypeName {
+func (rs *RouterScanner) OperatorTypeNameFromType(typ types.Type) *OperatorWithTypeName {
 	switch t := typ.(type) {
 	case *types.Pointer:
-		return scanner.OperatorTypeNameFromType(t.Elem())
+		return rs.OperatorTypeNameFromType(t.Elem())
 	case *types.Named:
 		typeName := t.Obj()
 
-		if operator := scanner.operatorScanner.Operator(context.Background(), typeName); operator != nil {
+		if operator := rs.operatorScanner.Operator(context.Background(), typeName); operator != nil {
 			return &OperatorWithTypeName{
 				Operator: operator,
 				TypeName: typeName,

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"go/ast"
 	"go/types"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -137,6 +136,6 @@ func (g *OpenAPIGenerator) Output(cwd string) {
 	if err != nil {
 		return
 	}
-	_ = ioutil.WriteFile(file, data, os.ModePerm)
+	_ = os.WriteFile(file, data, os.ModePerm)
 	log.Printf("generated openapi spec into %s", color.MagentaString(file))
 }

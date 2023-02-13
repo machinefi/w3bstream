@@ -33,6 +33,8 @@ var (
 	pkgImportPathHttpTransport = pkgx.Import(reflect.TypeOf(httptransport.HttpRouteMeta{}).PkgPath())
 	pkgImportPathHttpx         = pkgx.Import(reflect.TypeOf(httpx.Response{}).PkgPath())
 	pkgImportPathKit           = pkgx.Import(reflect.TypeOf(kit.Router{}).PkgPath())
+
+	pkgPathStatusx = "github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 )
 
 func isRouterType(typ types.Type) bool {
