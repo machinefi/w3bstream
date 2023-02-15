@@ -14,8 +14,8 @@ func Col(name string) *Column {
 }
 
 type Column struct {
-	Name       string      `json:"name"`
-	Constrains *ColumnType `json:"constrains"`
+	Name       string      `json:"name"`       // Name column name
+	Constrains *ColumnType `json:"constrains"` // Constrains column constrains
 	exactly    bool
 
 	WithTableDefinition `json:"-"`

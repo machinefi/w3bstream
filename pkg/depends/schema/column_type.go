@@ -15,8 +15,8 @@ type ColumnType struct {
 	Datatype      Datatype `json:"datatype"`
 	Length        uint64   `json:"length,omitempty"`
 	Decimal       uint64   `json:"decimal,omitempty"`
-	Default       *string  `json:"default,omitempty"`
-	Null          bool     `json:"null,omitempty"`
+	Default       *string  `json:"default,omitempty"` // Default column default value
+	Null          bool     `json:"null,omitempty"`    // Null if allow
 	AutoIncrement bool     `json:"autoincrement,omitempty"`
 	Desc          string   `json:"desc,omitempty"`
 }

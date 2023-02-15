@@ -34,12 +34,12 @@ func T(name string, defs ...TableDefinition) *Table {
 }
 
 type Table struct {
-	Name             string    `json:"name"`
-	Desc             string    `json:"desc,omitempty"`
-	Cols             []*Column `json:"cols"`
-	Keys             []*Key    `json:"keys"`
-	WithSoftDeletion bool      `json:"withSoftDeletion,omitempty"`
-	WithPrimaryKey   bool      `json:"withPrimaryKey,omitempty"`
+	Name             string    `json:"name"`                       // Name table name
+	Desc             string    `json:"desc,omitempty"`             // Desc table description
+	Cols             []*Column `json:"cols"`                       // Cols columns define
+	Keys             []*Key    `json:"keys"`                       // Keys primary and index define
+	WithSoftDeletion bool      `json:"withSoftDeletion,omitempty"` // WithSoftDeletion if use predefined soft deletion
+	WithPrimaryKey   bool      `json:"withPrimaryKey,omitempty"`   // WithPrimaryKey if use predefined primary key
 
 	schema string
 	cols   Columns

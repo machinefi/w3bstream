@@ -41,9 +41,9 @@ func (ks *Keys) Reset() {
 }
 
 type Key struct {
-	Name     string `json:"name,omitempty"`
-	Method   string `json:"method,omitempty"`
-	IsUnique bool   `json:"isUnique,omitempty"`
+	Name     string `json:"name,omitempty"`     // Name index name
+	Method   string `json:"method,omitempty"`   // Method index method `btree` or `hash`
+	IsUnique bool   `json:"isUnique,omitempty"` // IsUnique is unique index
 	IndexDef
 	WithTableDefinition `json:"-"`
 }
@@ -53,6 +53,6 @@ func (k *Key) IsPrimary() bool {
 }
 
 type IndexDef struct {
-	ColumnNames []string `json:"columnNames"`
-	Expr        string   `json:"expr,omitempty"`
+	ColumnNames []string `json:"columnNames"`    // ColumnNames index related column names
+	Expr        string   `json:"expr,omitempty"` // Expr index extension for sql dialect
 }
