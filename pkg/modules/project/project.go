@@ -228,44 +228,6 @@ func ListProject(ctx context.Context, r *ListProjectReq) (*ListProjectRsp, error
 	return ret, nil
 }
 
-func GetProjectByProjectID(ctx context.Context, prjID types.SFID) (*Detail, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-	ca := middleware.CurrentAccountFromContext(ctx)
-
-	_, l = l.Start(ctx, "GetProjectByProjectID")
-	defer l.End()
-
-	_, err := ca.ValidateProjectPerm(ctx, prjID)
-	if err != nil {
-		l.Error(err)
-		return nil, err
-	}
-	m := &models.Project{RelProject: models.RelProject{ProjectID: prjID}}
-
-	if err = m.FetchByProjectID(d); err != nil {
-		l.Error(err)
-		return nil, status.CheckDatabaseError(err, "GetProjectByProjectID")
-	}
-
-	ret, err := ListProject(ctx, &ListProjectReq{
-		accountID:  ca.AccountID,
-		ProjectIDs: []types.SFID{prjID},
-	})
-
-	if err != nil {
-		l.Error(err)
-		return nil, err
-	}
-
-	if len(ret.Data) == 0 {
-		l.Warn(errors.New("project not found"))
-		return nil, status.NotFound
-	}
-
-	return &ret.Data[0], nil
-}
-
 func GetProjectByProjectName(ctx context.Context, prjName string) (*models.Project, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
@@ -322,6 +284,7 @@ func RemoveProjectByProjectID(ctx context.Context, prjID types.SFID) error {
 		applets    []models.Applet
 		mInstance  = &models.Instance{}
 		instances  []models.Instance
+		mConfig    = &models.Config{}
 		err        error
 	)
 
@@ -423,6 +386,19 @@ func RemoveProjectByProjectID(ctx context.Context, prjID types.SFID) error {
 				}
 			}
 			return nil
+		},
+		func(db sqlx.DBExecutor) error {
+			tbl := db.T(mConfig)
+			_, err := db.Exec(
+				builder.Delete().
+					From(
+						tbl,
+						builder.Where(mConfig.ColRelID().Eq(prjID)),
+						builder.Comment("Config.DeleteByRelID"),
+					),
+			)
+			// TODO should remove project schema
+			return err
 		},
 		func(db sqlx.DBExecutor) error {
 			err = mProject.DeleteByProjectID(d)

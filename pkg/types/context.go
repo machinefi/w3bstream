@@ -3,8 +3,9 @@ package types
 import (
 	"context"
 
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
-	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
+	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
@@ -16,11 +17,13 @@ import (
 
 type (
 	CtxMgrDBExecutor     struct{} // CtxMgrDBExecutor sqlx.DBExecutor
-	CtxMonitorDBExecutor struct{} // CtxMonitorDBExecutor sqlx.DBExecutor
-	CtxWasmDBExecutor    struct{} // CtxWasmDBExecutor sqlx.DBExecutor
-	CtxPgEndpoint        struct{} // CtxPgEndpoint postgres.Endpoint
+	CtxMgrPgEndpoint     struct{} // CtxMgrPgEndpoint postgres.Endpoint
+	CtxMonitorDBExecutor struct{} // CtxMonitorDBExecutor sqlx.DBExecutor for monitor
+	CtxWasmDBExecutor    struct{} // CtxWasmDBExecutor sqlx.DBExecutor for wasm
+	CtxWasmPgEndpoint    struct{} // CtxWasmPgEndpoint postgres.Endpoint for wasm
 	CtxLogger            struct{} // CtxLogger log.Logger
-	CtxMqttBroker        struct{} // CtxMqttBroker mqtt.Broker
+	CtxMqttBroker        struct{} // CtxMqttBroker confmqtt.Broker
+	CtxMqttMsgHandler    struct{} // CtxMqttMsgHandler mqtt.MessageHandler
 	CtxRedisEndpoint     struct{} // CtxRedisEndpoint redis.Redis
 	CtxUploadConfig      struct{} // CtxUploadConfig UploadConfig
 	CtxTaskWorker        struct{}
@@ -74,44 +77,65 @@ func MustMonitorDBExecutorFromContext(ctx context.Context) sqlx.DBExecutor {
 	return v
 }
 
-func WithWasmDBExecutor(ctx context.Context, v postgres.Endpoint) context.Context {
+func WithWasmDBExecutor(ctx context.Context, v sqlx.DBExecutor) context.Context {
 	return contextx.WithValue(ctx, CtxWasmDBExecutor{}, v)
 }
 
-func WithWasmDBExecutorContext(v *postgres.Endpoint) contextx.WithContext {
+func WithWasmDBExecutorContext(v sqlx.DBExecutor) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
 		return contextx.WithValue(ctx, CtxWasmDBExecutor{}, v)
 	}
 }
 
-func WasmDBExecutorFromContext(ctx context.Context) (*postgres.Endpoint, bool) {
-	v, ok := ctx.Value(CtxWasmDBExecutor{}).(*postgres.Endpoint)
+func WasmDBExecutorFromContext(ctx context.Context) (sqlx.DBExecutor, bool) {
+	v, ok := ctx.Value(CtxWasmDBExecutor{}).(sqlx.DBExecutor)
 	return v, ok
 }
 
-func MustWasmDBExecutorFromContext(ctx context.Context) *postgres.Endpoint {
+func MustWasmDBExecutorFromContext(ctx context.Context) sqlx.DBExecutor {
 	v, ok := WasmDBExecutorFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
 
-func WithPgEndpoint(ctx context.Context, v postgres.Endpoint) context.Context {
-	return contextx.WithValue(ctx, CtxPgEndpoint{}, v)
+func WithWasmPgEndpoint(ctx context.Context, v postgres.Endpoint) context.Context {
+	return contextx.WithValue(ctx, CtxWasmPgEndpoint{}, v)
 }
 
-func WithPgEndpointContext(v *postgres.Endpoint) contextx.WithContext {
+func WithWasmPgEndpointContext(v *postgres.Endpoint) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, CtxPgEndpoint{}, v)
+		return contextx.WithValue(ctx, CtxWasmPgEndpoint{}, v)
 	}
 }
 
-func PgEndpointFromContext(ctx context.Context) (*postgres.Endpoint, bool) {
-	v, ok := ctx.Value(CtxPgEndpoint{}).(*postgres.Endpoint)
+func WasmPgEndpointFromContext(ctx context.Context) (*postgres.Endpoint, bool) {
+	v, ok := ctx.Value(CtxWasmPgEndpoint{}).(*postgres.Endpoint)
+	return v, ok
+}
+
+func MustWasmPgEndpointFromContext(ctx context.Context) *postgres.Endpoint {
+	v, ok := WasmPgEndpointFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithMgrPgEndpoint(ctx context.Context, v postgres.Endpoint) context.Context {
+	return contextx.WithValue(ctx, CtxMgrPgEndpoint{}, v)
+}
+
+func WithMgrPgEndpointContext(v *postgres.Endpoint) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxMgrPgEndpoint{}, v)
+	}
+}
+
+func MgrPgEndpointFromContext(ctx context.Context) (*postgres.Endpoint, bool) {
+	v, ok := ctx.Value(CtxMgrPgEndpoint{}).(*postgres.Endpoint)
 	return v, ok
 }
 
 func MustPgEndpointFromContext(ctx context.Context) *postgres.Endpoint {
-	v, ok := PgEndpointFromContext(ctx)
+	v, ok := MgrPgEndpointFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
@@ -154,23 +178,44 @@ func MustLoggerFromContext(ctx context.Context) log.Logger {
 	return v
 }
 
-func WithMqttBroker(ctx context.Context, v *mqtt.Broker) context.Context {
+func WithMqttBroker(ctx context.Context, v *confmqtt.Broker) context.Context {
 	return contextx.WithValue(ctx, CtxMqttBroker{}, v)
 }
 
-func WithMqttBrokerContext(v *mqtt.Broker) contextx.WithContext {
+func WithMqttBrokerContext(v *confmqtt.Broker) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
 		return contextx.WithValue(ctx, CtxMqttBroker{}, v)
 	}
 }
 
-func MqttBrokerFromContext(ctx context.Context) (*mqtt.Broker, bool) {
-	v, ok := ctx.Value(CtxMqttBroker{}).(*mqtt.Broker)
+func MqttBrokerFromContext(ctx context.Context) (*confmqtt.Broker, bool) {
+	v, ok := ctx.Value(CtxMqttBroker{}).(*confmqtt.Broker)
 	return v, ok
 }
 
-func MustMqttBrokerFromContext(ctx context.Context) *mqtt.Broker {
+func MustMqttBrokerFromContext(ctx context.Context) *confmqtt.Broker {
 	v, ok := MqttBrokerFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithMqttMsgHandler(ctx context.Context, v mqtt.MessageHandler) context.Context {
+	return contextx.WithValue(ctx, CtxMqttMsgHandler{}, v)
+}
+
+func WithMqttMsgHandlerContext(v mqtt.MessageHandler) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxMqttMsgHandler{}, v)
+	}
+}
+
+func MqttMsgHandlerFromContext(ctx context.Context) (mqtt.MessageHandler, bool) {
+	v, ok := ctx.Value(CtxMqttMsgHandler{}).(mqtt.MessageHandler)
+	return v, ok
+}
+
+func MustMqttMsgHandlerFromContext(ctx context.Context) mqtt.MessageHandler {
+	v, ok := MqttMsgHandlerFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

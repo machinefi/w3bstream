@@ -19,8 +19,10 @@ func (c *UploadConfig) SetDefault() {
 }
 
 type (
-	SFID  = types.SFID
-	SFIDs = types.SFIDs
+	SFID     = types.SFID
+	SFIDs    = types.SFIDs
+	Password = types.Password
+	Endpoint = types.Endpoint
 )
 
 type ETHClientConfig struct {

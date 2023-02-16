@@ -33,7 +33,6 @@ func (v Error) Code() int {
 		return with.ServiceCode() + int(v)
 	}
 	return int(v)
-
 }
 
 func (v Error) Key() string {
@@ -44,6 +43,8 @@ func (v Error) Key() string {
 		return "MD5ChecksumFailed"
 	case InvalidChainClient:
 		return "InvalidChainClient"
+	case InvalidConfig:
+		return "InvalidConfig"
 	case Unauthorized:
 		return "Unauthorized"
 	case InvalidAuthValue:
@@ -68,6 +69,8 @@ func (v Error) Key() string {
 		return "ExtractFileFailed"
 	case LoadVMFailed:
 		return "LoadVMFailed"
+	case ConfigInitFailed:
+		return "ConfigInitFailed"
 	}
 	return "UNKNOWN"
 }
@@ -79,6 +82,8 @@ func (v Error) Msg() string {
 	case MD5ChecksumFailed:
 		return ""
 	case InvalidChainClient:
+		return ""
+	case InvalidConfig:
 		return ""
 	case Unauthorized:
 		return "Unauthorized unauthorized"
@@ -104,6 +109,8 @@ func (v Error) Msg() string {
 		return ""
 	case LoadVMFailed:
 		return ""
+	case ConfigInitFailed:
+		return ""
 	}
 	return "-"
 }
@@ -115,6 +122,8 @@ func (v Error) CanBeTalk() bool {
 	case MD5ChecksumFailed:
 		return false
 	case InvalidChainClient:
+		return false
+	case InvalidConfig:
 		return false
 	case Unauthorized:
 		return true
@@ -139,6 +148,8 @@ func (v Error) CanBeTalk() bool {
 	case ExtractFileFailed:
 		return false
 	case LoadVMFailed:
+		return false
+	case ConfigInitFailed:
 		return false
 	}
 	return false

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-
 	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
@@ -47,6 +46,7 @@ func (cc *ChannelContext) Run(ctx context.Context) {
 		}
 		l.WithValues("payload", ev).Info("sub handled")
 	}
+	l.WithValues("cid", cc.cli.Cid(), "topic", cc.Name).Info("start subscribing")
 	if err := cc.cli.Subscribe(mqHandler); err != nil {
 		return
 	}

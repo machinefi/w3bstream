@@ -5,6 +5,7 @@ import (
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/google/uuid"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
@@ -12,21 +13,18 @@ import (
 )
 
 type Broker struct {
-	Server        types.Endpoint
-	Retry         retry.Retry
-	Timeout       types.Duration
-	Keepalive     types.Duration
-	RetainPublish bool
-	QoS           QOS
+	Server        types.Endpoint `json:"broker,string"`
+	Retry         retry.Retry    `json:"-"`
+	Timeout       types.Duration `json:"-"`
+	Keepalive     types.Duration `json:"-"`
+	RetainPublish bool           `json:"retain"`
+	QoS           QOS            `json:"-"`
 
 	agents *mapx.Map[string, *Client]
 }
 
 func (b *Broker) SetDefault() {
 	b.Retry.SetDefault()
-	if b.Timeout == 0 {
-		b.Timeout = types.Duration(3 * time.Second)
-	}
 	if b.Keepalive == 0 {
 		b.Keepalive = types.Duration(3 * time.Hour)
 	}
@@ -39,17 +37,16 @@ func (b *Broker) SetDefault() {
 	}
 }
 
-func (b *Broker) Init() {
-	err := b.Retry.Do(func() error {
-		_, err := b.Client("")
+func (b *Broker) Init() error {
+	return b.Retry.Do(func() error {
+		cid := uuid.New().String()
+		_, err := b.Client(cid)
 		if err != nil {
 			return err
 		}
+		b.Close(cid)
 		return nil
 	})
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (b *Broker) options() *mqtt.ClientOptions {
@@ -75,12 +72,17 @@ func (b *Broker) Client(cid string) (*Client, error) {
 	if cid != "" {
 		opt.SetClientID(cid)
 	}
+	// TODO support TLS
 	if b.Server.IsTLS() {
 		opt.SetTLSConfig(&tls.Config{
 			ClientAuth:         tls.NoClientCert,
 			ClientCAs:          nil,
 			InsecureSkipVerify: true,
 		})
+	}
+	if b.Server.Username != "" {
+		opt.SetUsername(b.Server.Username)
+		opt.SetPassword(b.Server.Password.String())
 	}
 	return b.ClientWithOptions(cid, opt)
 }
@@ -89,12 +91,17 @@ func (b *Broker) ClientWithOptions(cid string, opt *mqtt.ClientOptions) (*Client
 	client, err := b.agents.LoadOrStore(
 		cid,
 		func() (*Client, error) {
+			if opt.WriteTimeout == 0 {
+				opt.WriteTimeout = 10 * time.Second
+			}
+			if opt.ConnectTimeout == 0 {
+				opt.ConnectTimeout = 10 * time.Second
+			}
 			c := &Client{
-				cid:     cid,
-				qos:     b.QoS,
-				timeout: b.Timeout.Duration(),
-				retain:  b.RetainPublish,
-				cli:     mqtt.NewClient(opt),
+				cid:    cid,
+				qos:    b.QoS,
+				retain: b.RetainPublish,
+				cli:    mqtt.NewClient(opt),
 			}
 			if err := c.connect(); err != nil {
 				return nil, err
@@ -116,4 +123,11 @@ func (b *Broker) Close(cid string) {
 	if c, ok := b.agents.LoadAndRemove(cid); ok && c != nil {
 		c.cli.Disconnect(500)
 	}
+}
+
+func init() {
+	// mqtt.ERROR = log.New(os.Stderr, "******************mqtt**[ERR]", 0)
+	// mqtt.CRITICAL = log.New(os.Stderr, "******************mqtt**[CRI]", 0)
+	// mqtt.WARN = log.New(os.Stderr, "******************mqtt**[WAR]", 0)
+	// mqtt.DEBUG = log.New(os.Stderr, "******************mqtt**", 0)
 }

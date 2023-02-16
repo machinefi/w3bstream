@@ -55,7 +55,8 @@ func CreateInstance(ctx context.Context, r *CreateInstanceReq) (*CreateInstanceR
 			if r.Cache == nil {
 				r.Cache = wasm.DefaultCache()
 			}
-			return config.CreateConfig(ctx, ins.InstanceID, r.Cache)
+			_, err := config.CreateConfig(ctx, ins.InstanceID, r.Cache)
+			return err
 		},
 		func(db sqlx.DBExecutor) error {
 			var _err error

@@ -75,7 +75,7 @@ func (t *Table) Init() error {
 		t.cols.Add(c)
 	}
 	for _, c := range t.Cols {
-		if c.Constrains.Default != nil {
+		if v := c.Constrains.Default; v != nil && (*v)[0] != '\'' {
 			c.Constrains.Default = ptrx.Ptr("'" + *c.Constrains.Default + "'")
 		}
 	}
@@ -206,7 +206,7 @@ func (t *Table) AddIndex(k *Key) builder.SqlExpr {
 	if k.IsUnique {
 		e.WriteQuery("UNIQUE ")
 	}
-	e.WriteQuery("INDEX ")
+	e.WriteQuery("INDEX IF NOT EXISTS ")
 
 	e.WriteQuery(k.t.Name)
 	e.WriteQuery("_")

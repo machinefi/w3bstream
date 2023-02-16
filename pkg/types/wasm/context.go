@@ -3,7 +3,9 @@ package wasm
 import (
 	"context"
 
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
@@ -18,6 +20,8 @@ type (
 	CtxRedisPrefix     struct{}
 	CtxChainClient     struct{}
 	CtxRuntimeResource struct{}
+	CtxMqttBroker      struct{}
+	CtxMqttMessage     struct{}
 )
 
 func WithSQLStore(ctx context.Context, v SQLStore) context.Context {
@@ -184,6 +188,48 @@ func RuntimeResourceFromContext(ctx context.Context) (*mapx.Map[uint32, []byte],
 
 func MustRuntimeResourceFromContext(ctx context.Context) *mapx.Map[uint32, []byte] {
 	v, ok := RuntimeResourceFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithMqttBroker(ctx context.Context, v *confmqtt.Broker) context.Context {
+	return contextx.WithValue(ctx, CtxMqttBroker{}, v)
+}
+
+func WithMqttBrokerContext(v *confmqtt.Broker) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxMqttBroker{}, v)
+	}
+}
+
+func MqttBrokerFromContext(ctx context.Context) (*confmqtt.Broker, bool) {
+	v, ok := ctx.Value(CtxMqttBroker{}).(*confmqtt.Broker)
+	return v, ok
+}
+
+func MustMqttBrokerFromContext(ctx context.Context) *confmqtt.Broker {
+	v, ok := MqttBrokerFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithMqttMessage(ctx context.Context, v mqtt.Message) context.Context {
+	return contextx.WithValue(ctx, CtxMqttMessage{}, v)
+}
+
+func WithMqttMessageContext(v mqtt.Message) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxMqttMessage{}, v)
+	}
+}
+
+func MqttMessageFromContext(ctx context.Context) (mqtt.Message, bool) {
+	v, ok := ctx.Value(CtxMqttMessage{}).(mqtt.Message)
+	return v, ok
+}
+
+func MustMqttMessageFromContext(ctx context.Context) mqtt.Message {
+	v, ok := MqttMessageFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

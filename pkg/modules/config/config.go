@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/enums"
@@ -90,18 +91,22 @@ func GetConfigByRelIdAndType(ctx context.Context, rel types.SFID, typ enums.Conf
 	return cfg, nil
 }
 
-func CreateConfig(ctx context.Context, rel types.SFID, cfg wasm.Configuration) error {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-	idg := confid.MustSFIDGeneratorFromContext(ctx)
-
-	_, l = l.Start(ctx, "CreateConfig")
+func CreateConfig(ctx context.Context, rel types.SFID, cfg wasm.Configuration) (*models.Config, error) {
+	_, l := conflog.FromContext(ctx).Start(ctx, "CreateConfig")
 	defer l.End()
+
+	if err := wasm.Init(ctx, cfg); err != nil {
+		l.Error(err)
+		return nil, status.ConfigInitFailed.StatusErr().WithDesc(err.Error())
+	}
+
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	idg := confid.MustSFIDGeneratorFromContext(ctx)
 
 	raw, err := json.Marshal(cfg)
 	if err != nil {
 		l.Error(err)
-		return err
+		return nil, status.InvalidConfig.StatusErr().WithDesc(err.Error())
 	}
 
 	m := &models.Config{
@@ -113,23 +118,33 @@ func CreateConfig(ctx context.Context, rel types.SFID, cfg wasm.Configuration) e
 		},
 	}
 	if err = m.Create(d); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return m, nil
 }
 
-func CreateOrUpdateConfig(ctx context.Context, rel types.SFID, typ enums.ConfigType, raw []byte) (cfg *models.Config, err error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-	idg := confid.MustSFIDGeneratorFromContext(ctx)
-
-	_, l = l.Start(ctx, "CreateOrUpdateConfig")
+func CreateOrUpdateConfig(ctx context.Context, rel types.SFID, cfg wasm.Configuration) (*models.Config, error) {
+	_, l := conflog.FromContext(ctx).Start(ctx, "CreateOrUpdateConfig")
 	defer l.End()
 
-	cfg = &models.Config{
+	if err := wasm.Init(ctx, cfg); err != nil {
+		l.Error(err)
+		return nil, status.ConfigInitFailed.StatusErr().WithDesc(err.Error())
+	}
+
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	idg := confid.MustSFIDGeneratorFromContext(ctx)
+
+	raw, err := json.Marshal(cfg)
+	if err != nil {
+		l.Error(err)
+		return nil, status.InvalidConfig.StatusErr().WithDesc(err.Error())
+	}
+
+	m := &models.Config{
 		ConfigBase: models.ConfigBase{
 			RelID: rel,
-			Type:  typ,
+			Type:  cfg.ConfigType(),
 		},
 	}
 
@@ -137,10 +152,10 @@ func CreateOrUpdateConfig(ctx context.Context, rel types.SFID, typ enums.ConfigT
 
 	err = sqlx.NewTasks(d).With(
 		func(db sqlx.DBExecutor) error {
-			err = cfg.FetchByRelIDAndType(db)
+			err = m.FetchByRelIDAndType(db)
 			if err == nil {
 				found = true
-				return err // do update
+				return err
 			}
 			if err != nil && sqlx.DBErr(err).IsNotFound() {
 				found = false
@@ -152,19 +167,19 @@ func CreateOrUpdateConfig(ctx context.Context, rel types.SFID, typ enums.ConfigT
 			if !found {
 				return nil
 			}
-			cfg.Value = raw
-			return cfg.UpdateByRelIDAndType(db)
+			m.Value = raw
+			return m.UpdateByRelIDAndType(db)
 		},
 		func(db sqlx.DBExecutor) error {
 			if found {
 				return nil
 			}
-			cfg.ConfigID, cfg.Value = idg.MustGenSFID(), raw
-			return cfg.Create(db)
+			m.ConfigID, m.Value = idg.MustGenSFID(), raw
+			return m.Create(db)
 		},
 	).Do()
 	if err != nil {
 		return nil, status.CheckDatabaseError(err)
 	}
-	return
+	return m, nil
 }

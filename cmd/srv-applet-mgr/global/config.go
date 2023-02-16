@@ -91,11 +91,13 @@ func init() {
 
 	WithContext = contextx.WithContextCompose(
 		types.WithMgrDBExecutorContext(config.Postgres),
+		types.WithMgrPgEndpointContext(config.Postgres),
 		types.WithMonitorDBExecutorContext(config.MonitorDB),
 		types.WithWasmDBExecutorContext(config.WasmDB),
-		types.WithPgEndpointContext(config.Postgres),
+		types.WithWasmPgEndpointContext(config.WasmDB),
 		types.WithRedisEndpointContext(config.Redis),
-		types.WithLoggerContext(conflog.Std()),
+		types.WithLoggerContext(config.StdLogger),
+		conflog.WithLoggerContext(config.StdLogger),
 		types.WithMqttBrokerContext(config.MqttBroker),
 		types.WithUploadConfigContext(config.UploadConf),
 		confid.WithSFIDGeneratorContext(confid.MustNewSFIDGenerator()),

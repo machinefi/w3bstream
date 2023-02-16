@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	mqtt "github.com/eclipse/paho.mqtt.golang"
+	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -110,4 +112,42 @@ func HandleEvents(ctx context.Context, projectName string, r *HandleEventReq) []
 		results = append(results, ret)
 	}
 	return results
+}
+
+func OnEventReceivedFromMqtt(ctx context.Context, msg mqtt.Message) {
+	_, l := conflog.FromContext(ctx).Start(ctx, "OnEventReceivedFromMqtt")
+	defer l.End()
+
+	strategies, err := strategy.FindStrategyInstances(
+		ctx,
+		types.MustProjectFromContext(ctx).Name,
+		enums.EVENTTYPEDEFAULT,
+	)
+	if err != nil {
+		l.Error(err)
+		return
+	}
+
+	res := make(chan *wasm.EventHandleResult, len(strategies))
+	wg := &sync.WaitGroup{}
+
+	for _, v := range strategies {
+		i := vm.GetConsumer(v.InstanceID)
+		if i == nil {
+			res <- &wasm.EventHandleResult{
+				InstanceID: v.InstanceID.String(),
+				Code:       -1,
+				ErrMsg:     "instance not found",
+			}
+		}
+
+		wg.Add(1)
+		go func(v *strategy.InstanceHandler) {
+			res <- i.HandleEvent(wasm.WithMqttMessage(ctx, msg), v.Handler, nil)
+			wg.Done()
+		}(v)
+	}
+
+	wg.Wait()
+	close(res)
 }

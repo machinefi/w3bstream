@@ -19,6 +19,7 @@ const (
 	UploadFileFailed
 	ExtractFileFailed
 	LoadVMFailed
+	ConfigInitFailed
 )
 
 const (
@@ -45,6 +46,7 @@ const (
 	BadRequest Error = http.StatusBadRequest*1e6 + iota + 1
 	MD5ChecksumFailed
 	InvalidChainClient
+	InvalidConfig
 )
 
 const (
