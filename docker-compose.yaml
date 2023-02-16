@@ -75,6 +75,18 @@ services:
     ports:
       - "5432:5432"
 
+  redis:
+    image: 'redis:6.2'
+    restart: always
+    volumes:
+      - ${WS_WORKING_DIR:-.}/redisdb:/data
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-w3bredispasS}
+    command:
+      redis-server --requirepass ${REDIS_PASSWORD:-w3bredispasS}
+    ports:
+      - '6379:6379'
+
   graphql-engine:
     image: hasura/graphql-engine:v2.15.2
     depends_on:
