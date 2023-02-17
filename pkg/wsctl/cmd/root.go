@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"github.com/machinefi/w3bstream/pkg/wsctl/cmd/instance"
 	"github.com/spf13/cobra"
 
 	"github.com/machinefi/w3bstream/pkg/wsctl/client"
 	cfgcmd "github.com/machinefi/w3bstream/pkg/wsctl/cmd/config"
+	"github.com/machinefi/w3bstream/pkg/wsctl/cmd/instance"
 	"github.com/machinefi/w3bstream/pkg/wsctl/cmd/project"
 	"github.com/machinefi/w3bstream/pkg/wsctl/config"
 )

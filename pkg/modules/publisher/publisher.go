@@ -3,6 +3,8 @@ package publisher
 import (
 	"context"
 
+	"github.com/pkg/errors"
+
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
@@ -12,7 +14,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/types"
-	"github.com/pkg/errors"
 )
 
 type CreatePublisherReq struct {

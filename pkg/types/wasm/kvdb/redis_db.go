@@ -2,6 +2,7 @@ package kvdb
 
 import (
 	"github.com/gomodule/redigo/redis"
+
 	confredis "github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 )
 

@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/enums"

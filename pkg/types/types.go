@@ -1,8 +1,6 @@
 package types
 
-import (
-	"github.com/machinefi/w3bstream/pkg/depends/base/types"
-)
+import "github.com/machinefi/w3bstream/pkg/depends/base/types"
 
 type UploadConfig struct {
 	Root          string `env:""`

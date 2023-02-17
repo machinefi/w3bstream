@@ -8,6 +8,7 @@ import (
 
 	"github.com/bytecodealliance/wasmtime-go"
 	"github.com/google/uuid"
+
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/enums"

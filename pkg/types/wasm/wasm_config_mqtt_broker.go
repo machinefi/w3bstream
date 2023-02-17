@@ -5,6 +5,8 @@ import (
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/pkg/errors"
+
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/enums"
@@ -49,7 +51,10 @@ func (b *MqttBroker) Init(ctx context.Context) error {
 		Username: b.Username,
 		Password: types.Password(b.Password),
 	}).String()
+
+	l = l.WithValues("broker", b.server)
 	if _, ok := brokers.Load(b.server); ok {
+		l.Warn(errors.New("broker already subscribing"))
 		return nil
 	}
 	brokers.Store(b.server, true)
