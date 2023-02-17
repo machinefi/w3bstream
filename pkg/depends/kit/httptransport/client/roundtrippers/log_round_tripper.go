@@ -25,7 +25,7 @@ func NewLogRoundTripper() func(rt http.RoundTripper) http.RoundTripper {
 
 func (rt *LogRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	cost := timer.Start()
-	ctx, logger := log.Start(req.Context(), "Request")
+	ctx, logger := log.FromContext(req.Context()).Start(req.Context(), "Request")
 	defer logger.End()
 
 	resp, err := rt.next.RoundTrip(req.WithContext(ctx))

@@ -3,6 +3,7 @@ package wasmtime
 import (
 	"context"
 
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/sql_util"
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
@@ -29,7 +30,7 @@ type (
 
 	ExportFuncs struct {
 		rt  *Runtime
-		res *mapx.Map[uint32, []byte]
+		res *mapx.Map[uint32, interface{}]
 		env *wasm.Env
 		kvs wasm.KVStore
 		db  wasm.SQLStore
@@ -59,6 +60,7 @@ func (ef *ExportFuncs) LinkABI(impt Import) error {
 		"ws_log":           ef.Log,
 		"ws_get_data":      ef.GetData,
 		"ws_set_data":      ef.SetData,
+		"ws_get_mqtt_msg":  ef.GetMqttMsg,
 		"ws_get_db":        ef.GetDB,
 		"ws_set_db":        ef.SetDB,
 		"ws_send_tx":       ef.SendTX,
@@ -99,9 +101,14 @@ func (ef *ExportFuncs) Log(logLevel, ptr, size int32) int32 {
 }
 
 func (ef *ExportFuncs) GetData(rid, vmAddrPtr, vmSizePtr int32) int32 {
-	data, ok := ef.res.Load(uint32(rid))
+	res, ok := ef.res.Load(uint32(rid))
 	if !ok {
 		return int32(wasm.ResultStatusCode_ResourceNotFound)
+	}
+	data, ok := res.([]byte)
+	if !ok {
+		ef.log.Error(errors.New("not stream data"))
+		return int32(wasm.ResultStatusCode_ResourceTypeError)
 	}
 
 	if err := ef.rt.Copy(data, vmAddrPtr, vmSizePtr); err != nil {
@@ -109,6 +116,29 @@ func (ef *ExportFuncs) GetData(rid, vmAddrPtr, vmSizePtr int32) int32 {
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
 
+	return int32(wasm.ResultStatusCode_OK)
+}
+
+func (ef *ExportFuncs) GetMqttMsg(rid, topicAddr, topicSize, plAddr, plSize int32) int32 {
+	res, ok := ef.res.Load(uint32(rid))
+	if !ok {
+		return int32(wasm.ResultStatusCode_ResourceNotFound)
+	}
+	msg, ok := res.(mqtt.Message)
+	if !ok {
+		ef.log.Error(errors.New("not mqtt message"))
+		return int32(wasm.ResultStatusCode_ResourceTypeError)
+	}
+
+	if err := ef.rt.Copy([]byte(msg.Topic()), topicAddr, topicSize); err != nil {
+		ef.log.Error(err)
+		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
+	}
+
+	if err := ef.rt.Copy(msg.Payload(), plAddr, plSize); err != nil {
+		ef.log.Error(err)
+		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
+	}
 	return int32(wasm.ResultStatusCode_OK)
 }
 

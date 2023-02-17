@@ -56,3 +56,26 @@ func (r *GetProjectEnv) Output(ctx context.Context) (interface{}, error) {
 	}
 	return env, nil
 }
+
+type GetProjectMattBroker struct {
+	httpx.MethodGet
+	ProjectName string `name:"projectName" in:"path"`
+}
+
+func (r *GetProjectMattBroker) Path() string {
+	return "/:projectName/" + enums.CONFIG_TYPE__PROJECT_MQTT_BROKER.String()
+}
+
+func (r *GetProjectMattBroker) Output(ctx context.Context) (interface{}, error) {
+	ca := middleware.CurrentAccountFromContext(ctx)
+	ctx, err := ca.WithProjectContextByName(ctx, r.ProjectName)
+	if err != nil {
+		return nil, err
+	}
+	prj := types.MustProjectFromContext(ctx)
+	broker := &wasm.MqttBroker{}
+	if err = config.GetConfigValue(ctx, prj.ProjectID, broker); err != nil {
+		return nil, err
+	}
+	return broker, nil
+}

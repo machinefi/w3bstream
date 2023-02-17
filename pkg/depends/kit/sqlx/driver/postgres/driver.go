@@ -47,7 +47,7 @@ var _ interface {
 } = (*LoggingConn)(nil)
 
 func (c *LoggingConn) BeginTx(ctx context.Context, opts driver.TxOptions) (driver.Tx, error) {
-	l := log.FromContext(ctx)
+	_, l := log.FromContext(ctx).Start(ctx)
 	l.Debug("=========== Beginning Transaction ===========")
 	tx, err := c.Conn.(driver.ConnBeginTx).BeginTx(ctx, opts)
 	if err != nil {
@@ -61,7 +61,7 @@ func (c *LoggingConn) Prepare(string) (driver.Stmt, error) { panic("dont use Pre
 
 func (c *LoggingConn) QueryContext(ctx context.Context, query string, args []driver.NamedValue) (rows driver.Rows, err error) {
 	cost := timer.Start()
-	_ctx, l := log.Start(ctx, "Query")
+	_ctx, l := log.FromContext(ctx).Start(ctx)
 
 	defer func() {
 		qs := interpolate(query, args)
@@ -85,7 +85,7 @@ func (c *LoggingConn) QueryContext(ctx context.Context, query string, args []dri
 
 func (c *LoggingConn) ExecContext(ctx context.Context, query string, args []driver.NamedValue) (res driver.Result, err error) {
 	cost := timer.Start()
-	_ctx, l := log.Start(ctx, "Exec")
+	_ctx, l := log.FromContext(ctx).Start(ctx)
 
 	defer func() {
 		qs := interpolate(query, args)

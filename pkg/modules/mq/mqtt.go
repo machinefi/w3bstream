@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
@@ -24,10 +25,8 @@ type ChannelContext struct {
 }
 
 func (cc *ChannelContext) Run(ctx context.Context) {
-	l := types.MustLoggerFromContext(ctx)
-
-	_, _l := l.Start(ctx, "ChannelContext.Run")
-	defer _l.End()
+	_, l := conflog.FromContext(ctx).Start(ctx)
+	defer l.End()
 
 	mqHandler := func(cli mqtt.Client, msg mqtt.Message) {
 		_, l := l.Start(cc.ctx, "OnMessage:"+cc.Name)
@@ -46,15 +45,18 @@ func (cc *ChannelContext) Run(ctx context.Context) {
 		}
 		l.WithValues("payload", ev).Info("sub handled")
 	}
-	l.WithValues("cid", cc.cli.Cid(), "topic", cc.Name).Info("start subscribing")
+	l = l.WithValues("cid", cc.cli.Cid(), "topic", cc.Name)
 	if err := cc.cli.Subscribe(mqHandler); err != nil {
+		l.Error(err)
 		return
 	}
+	l.Info("start subscribing")
 	defer func() {
-		_l.Info("channel closed")
+		l.Info("stop subscribing and mq client closed")
 		if err := cc.cli.Unsubscribe(); err != nil {
 			l.Error(err)
 		}
+		cc.cli.Disconnect()
 	}()
 
 	<-cc.ctx.Done()
@@ -66,7 +68,7 @@ func CreateChannel(ctx context.Context, prjName string, hdl OnMessage) error {
 	l := types.MustLoggerFromContext(ctx)
 	defer l.End()
 
-	_, l = l.Start(ctx, "CreateChannel")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	l = l.WithValues("project_name", prjName)
@@ -89,12 +91,11 @@ func CreateChannel(ctx context.Context, prjName string, hdl OnMessage) error {
 
 	go cctx.Run(ctx)
 
-	l.Info("channel started")
 	return nil
 }
 
-func StopChannel(prjName string) {
-	c, ok := channels.LoadAndRemove(prjName)
+func StopChannel(channel string) {
+	c, ok := channels.LoadAndRemove(channel)
 	if !ok {
 		return
 	}

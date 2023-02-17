@@ -22,7 +22,7 @@ func AddInstance(ctx context.Context, i wasm.Instance) types.SFID {
 	l := types.MustLoggerFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 
-	_, l = l.Start(ctx, "AddInstance")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	id := idg.MustGenSFID()
@@ -34,17 +34,16 @@ func AddInstance(ctx context.Context, i wasm.Instance) types.SFID {
 func AddInstanceByID(ctx context.Context, id types.SFID, i wasm.Instance) {
 	l := types.MustLoggerFromContext(ctx)
 
-	_, l = l.Start(ctx, "AddInstanceByID")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	instances.Store(id, i)
-	l.WithValues("instance", id).Info("created")
 }
 
 func DelInstance(ctx context.Context, id types.SFID) error {
 	l := types.MustLoggerFromContext(ctx)
 
-	_, l = l.Start(ctx, "DelInstance")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	i, _ := instances.LoadAndRemove(id)
@@ -57,7 +56,7 @@ func DelInstance(ctx context.Context, id types.SFID) error {
 func StartInstance(ctx context.Context, id types.SFID) error {
 	l := types.MustLoggerFromContext(ctx)
 
-	_, l = l.Start(ctx, "StartInstance")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	l = l.WithValues("instance", id)
@@ -83,7 +82,7 @@ func StartInstance(ctx context.Context, id types.SFID) error {
 func StopInstance(ctx context.Context, id types.SFID) error {
 	l := types.MustLoggerFromContext(ctx)
 
-	_, l = l.Start(ctx, "StopInstance")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	l = l.WithValues("instance", id)

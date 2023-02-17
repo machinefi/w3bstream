@@ -24,9 +24,9 @@ type Instance interface {
 	Start(context.Context) error
 	Stop(context.Context) error
 	State() enums.InstanceState
-	AddResource(context.Context, []byte) uint32
-	RmvResource(context.Context, uint32)
-	GetResource(uint32) ([]byte, bool)
+	AddResource(interface{}) uint32
+	RmvResource(uint32)
+	GetResource(uint32) (interface{}, bool)
 	Get(k string) int32
 
 	EventConsumer
@@ -40,7 +40,7 @@ type EventHandleResult struct {
 }
 
 type EventConsumer interface {
-	HandleEvent(ctx context.Context, handler string, payload []byte) *EventHandleResult
+	HandleEvent(ctx context.Context, handler string, payload interface{}) *EventHandleResult
 }
 
 type KVStore interface {
@@ -65,6 +65,7 @@ type ABI interface {
 	Log(loglevel, ptr, size int32) int32
 	GetData(rid, vmAddrPtr, vmSizePtr int32) int32
 	SetData(rid, addr, size int32) int32
+	GetMqttMsg(rid, topicAddr, topicSize, plAddr, plSize int32) int32
 	GetDB(kAddr, kSize, vmAddrPtr, vmSizePtr int32) int32
 	SetDB(kAddr, kSize, vAddr, vSize int32) int32
 	SendTX(chainid int32, offset, size, vmAddrPtr, vmSizePtr int32) int32

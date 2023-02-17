@@ -13,10 +13,10 @@ import (
 type Logger interface {
 	// Start to start span for tracing
 	//
-	// 	ctx log = log.Start(ctx, "SpanName")
+	// 	ctx log = log.Start(ctx)
 	// 	defer log.End()
 	//
-	Start(context.Context, string, ...interface{}) (context.Context, Logger)
+	Start(context.Context, ...interface{}) (context.Context, Logger)
 	// End to end span
 	End()
 
@@ -49,10 +49,6 @@ func FromContext(ctx context.Context) Logger {
 		return v
 	}
 	return Discard()
-}
-
-func Start(ctx context.Context, name string, kvs ...interface{}) (context.Context, Logger) {
-	return FromContext(ctx).Start(ctx, name, kvs...)
 }
 
 type LevelSetter interface {

@@ -15,7 +15,7 @@ func Dispatch(ctx context.Context, t mq.Task) {
 	_, l = l.WithValues(
 		"subject", t.Subject(),
 		"task_id", t.ID(),
-	).Start(ctx, "Dispatch")
+	).Start(ctx)
 	l.Info("")
 
 	if err := tb.Dispatch(tw.Channel, t); err != nil {

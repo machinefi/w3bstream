@@ -5,23 +5,22 @@ import (
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
-	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
 )
 
 type (
-	CtxSQLStore        struct{}
-	CtxKVStore         struct{}
-	CtxLogger          struct{}
-	CtxEnv             struct{}
-	CtxEnvPrefix       struct{}
-	CtxRedisPrefix     struct{}
-	CtxChainClient     struct{}
-	CtxRuntimeResource struct{}
-	CtxMqttBroker      struct{}
-	CtxMqttMessage     struct{}
+	CtxSQLStore           struct{}
+	CtxKVStore            struct{}
+	CtxLogger             struct{}
+	CtxEnv                struct{}
+	CtxEnvPrefix          struct{}
+	CtxRedisPrefix        struct{}
+	CtxChainClient        struct{}
+	CtxRuntimeResource    struct{}
+	CtxMqttBroker         struct{}
+	CtxMqttInboundMessage struct{}
 )
 
 func WithSQLStore(ctx context.Context, v SQLStore) context.Context {
@@ -171,65 +170,65 @@ func MustChainClientFromContext(ctx context.Context) *ChainClient {
 	return v
 }
 
-func WithRuntimeResource(ctx context.Context, v *mapx.Map[uint32, []byte]) context.Context {
+func WithRuntimeResource(ctx context.Context, v *mapx.Map[uint32, interface{}]) context.Context {
 	return contextx.WithValue(ctx, CtxRuntimeResource{}, v)
 }
 
-func WithRuntimeResourceContext(v *mapx.Map[uint32, []byte]) contextx.WithContext {
+func WithRuntimeResourceContext(v *mapx.Map[uint32, interface{}]) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
 		return contextx.WithValue(ctx, CtxRuntimeResource{}, v)
 	}
 }
 
-func RuntimeResourceFromContext(ctx context.Context) (*mapx.Map[uint32, []byte], bool) {
-	v, ok := ctx.Value(CtxRuntimeResource{}).(*mapx.Map[uint32, []byte])
+func RuntimeResourceFromContext(ctx context.Context) (*mapx.Map[uint32, interface{}], bool) {
+	v, ok := ctx.Value(CtxRuntimeResource{}).(*mapx.Map[uint32, interface{}])
 	return v, ok
 }
 
-func MustRuntimeResourceFromContext(ctx context.Context) *mapx.Map[uint32, []byte] {
+func MustRuntimeResourceFromContext(ctx context.Context) *mapx.Map[uint32, interface{}] {
 	v, ok := RuntimeResourceFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
 
-func WithMqttBroker(ctx context.Context, v *confmqtt.Broker) context.Context {
+func WithMqttBroker(ctx context.Context, v *MqttBroker) context.Context {
 	return contextx.WithValue(ctx, CtxMqttBroker{}, v)
 }
 
-func WithMqttBrokerContext(v *confmqtt.Broker) contextx.WithContext {
+func WithMqttBrokerContext(v *MqttBroker) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
 		return contextx.WithValue(ctx, CtxMqttBroker{}, v)
 	}
 }
 
-func MqttBrokerFromContext(ctx context.Context) (*confmqtt.Broker, bool) {
-	v, ok := ctx.Value(CtxMqttBroker{}).(*confmqtt.Broker)
+func MqttBrokerFromContext(ctx context.Context) (*MqttBroker, bool) {
+	v, ok := ctx.Value(CtxMqttBroker{}).(*MqttBroker)
 	return v, ok
 }
 
-func MustMqttBrokerFromContext(ctx context.Context) *confmqtt.Broker {
+func MustMqttBrokerFromContext(ctx context.Context) *MqttBroker {
 	v, ok := MqttBrokerFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
 
-func WithMqttMessage(ctx context.Context, v mqtt.Message) context.Context {
-	return contextx.WithValue(ctx, CtxMqttMessage{}, v)
+func WithMqttInboundMessage(ctx context.Context, v mqtt.Message) context.Context {
+	return contextx.WithValue(ctx, CtxMqttInboundMessage{}, v)
 }
 
-func WithMqttMessageContext(v mqtt.Message) contextx.WithContext {
+func WithMqttInboundMessageContext(v mqtt.Message) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, CtxMqttMessage{}, v)
+		return contextx.WithValue(ctx, CtxMqttInboundMessage{}, v)
 	}
 }
 
-func MqttMessageFromContext(ctx context.Context) (mqtt.Message, bool) {
-	v, ok := ctx.Value(CtxMqttMessage{}).(mqtt.Message)
+func MqttInboundMessageFromContext(ctx context.Context) (mqtt.Message, bool) {
+	v, ok := ctx.Value(CtxMqttInboundMessage{}).(mqtt.Message)
 	return v, ok
 }
 
-func MustMqttMessageFromContext(ctx context.Context) mqtt.Message {
-	v, ok := MqttMessageFromContext(ctx)
+func MustInboundMqttMessageFromContext(ctx context.Context) mqtt.Message {
+	v, ok := MqttInboundMessageFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

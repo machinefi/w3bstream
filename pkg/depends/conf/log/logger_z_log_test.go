@@ -19,16 +19,16 @@ func ExampleLogger() {
 
 	l := FromContext(ctx).WithValues("k", "k")
 
-	l.Debug("test %d", 1)
 	l.Trace("test %d", 1)
 	l.Info("test %d", 1)
+
 	// Output:
 }
 
 func ExampleLogger_Start() {
 	ctx := WithLogger(context.Background(), Std())
 
-	_, l := Start(ctx, "span", "k", "k")
+	_, l := Start(ctx, "k", "k")
 	defer l.End()
 
 	l.Debug("test %d", 1)
@@ -120,7 +120,7 @@ func doLog(ctx context.Context) {
 }
 
 func someActionWithSpan(ctx context.Context) {
-	_, log := Start(ctx, "SomeActionWithSpan")
+	_, log := Start(ctx)
 	defer log.End()
 
 	log.Info("info xxx")

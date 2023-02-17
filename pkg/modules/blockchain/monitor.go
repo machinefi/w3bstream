@@ -73,7 +73,7 @@ type monitor struct{}
 func (l *monitor) sendEvent(ctx context.Context, data []byte, projectName string, eventType string) error {
 	logger := types.MustLoggerFromContext(ctx)
 
-	_, logger = logger.Start(ctx, "monitor.sendEvent")
+	_, logger = logger.Start(ctx)
 	defer logger.End()
 
 	e := &eventpb.Event{

@@ -11,7 +11,7 @@ import (
 func NewInstance(ctx context.Context, path string, id types.SFID) error {
 	l := types.MustLoggerFromContext(ctx)
 
-	_, l = l.Start(ctx, "NewInstanceWithID")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	code, err := os.ReadFile(path)

@@ -26,25 +26,40 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		conflog.WithLoggerContext(l),
 	)(context.Background())
 
-	app := &models.Applet{RelApplet: models.RelApplet{AppletID: ins.AppletID}}
-	if err := app.FetchByAppletID(d); err != nil {
-		return nil, err
+	app, ok := types.AppletFromContext(parent)
+	if !ok {
+		app = &models.Applet{RelApplet: models.RelApplet{AppletID: ins.AppletID}}
+		if err := app.FetchByAppletID(d); err != nil {
+			return nil, err
+		}
+		parent = types.WithApplet(parent, app)
 	}
 	ctx = types.WithApplet(ctx, app)
-	prj := &models.Project{RelProject: models.RelProject{ProjectID: app.ProjectID}}
-	if err := prj.FetchByProjectID(d); err != nil {
-		return nil, err
+
+	prj, ok := types.ProjectFromContext(parent)
+	if !ok {
+		prj = &models.Project{RelProject: models.RelProject{ProjectID: app.ProjectID}}
+		if err := prj.FetchByProjectID(d); err != nil {
+			return nil, err
+		}
+		parent = types.WithProject(parent, prj)
 	}
 	ctx = types.WithProject(ctx, prj)
-	ctx = wasm.WithEnvPrefix(ctx, prj.Name)
-	ctx = wasm.WithRedisPrefix(ctx, prj.Name)
-	res := &models.Resource{RelResource: models.RelResource{ResourceID: app.ResourceID}}
-	if err := res.FetchByResourceID(d); err != nil {
-		return nil, err
+
+	res, ok := types.ResourceFromContext(parent)
+	if !ok {
+		res = &models.Resource{RelResource: models.RelResource{ResourceID: app.ResourceID}}
+		if err := res.FetchByResourceID(d); err != nil {
+			return nil, err
+		}
+		parent = types.WithResource(parent, res)
 	}
 	ctx = types.WithResource(ctx, res)
-	ctx = types.WithMqttMsgHandler(ctx, func(_ mqtt.Client, msg mqtt.Message) {
-		event.OnEventReceivedFromMqtt(ctx, msg)
+
+	ctx = wasm.WithEnvPrefix(ctx, prj.Name)
+	ctx = wasm.WithRedisPrefix(ctx, prj.Name)
+	parent = types.WithMqttMsgHandler(parent, func(cli mqtt.Client, msg mqtt.Message) {
+		event.OnEventReceivedFromMqtt(parent, msg)
 	})
 
 	configs, err := config.FetchConfigValuesByRelIDs(parent, prj.ProjectID, app.AppletID, res.ResourceID, ins.InstanceID)
@@ -53,7 +68,7 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 	}
 	for _, c := range configs {
 		ctx = c.WithContext(ctx)
-		if err = wasm.Init(ctx, c); err != nil {
+		if err = wasm.Init(parent, c); err != nil {
 			return nil, err
 		}
 	}

@@ -109,7 +109,7 @@ func RemoveContractLog(ctx context.Context, projectName string, id types.SFID) e
 	d := types.MustMonitorDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 
-	_, l = l.Start(ctx, "RemoveContractLog")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	l = l.WithValues("project", projectName)
@@ -131,7 +131,7 @@ func RemoveChainTx(ctx context.Context, projectName string, id types.SFID) error
 	d := types.MustMonitorDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 
-	_, l = l.Start(ctx, "RemoveChainTx")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	l = l.WithValues("project", projectName)
@@ -153,7 +153,7 @@ func RemoveChainHeight(ctx context.Context, projectName string, id types.SFID) e
 	d := types.MustMonitorDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 
-	_, l = l.Start(ctx, "RemoveChainHeight")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	l = l.WithValues("project", projectName)

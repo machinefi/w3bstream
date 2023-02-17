@@ -32,7 +32,7 @@ type HandleEventReq struct {
 func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) (ret *HandleEventResult, err error) {
 	l := types.MustLoggerFromContext(ctx)
 
-	_, l = l.Start(ctx, "OnEventReceived")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	l = l.WithValues("project_name", projectName)
@@ -115,7 +115,7 @@ func HandleEvents(ctx context.Context, projectName string, r *HandleEventReq) []
 }
 
 func OnEventReceivedFromMqtt(ctx context.Context, msg mqtt.Message) {
-	_, l := conflog.FromContext(ctx).Start(ctx, "OnEventReceivedFromMqtt")
+	_, l := conflog.FromContext(ctx).Start(ctx)
 	defer l.End()
 
 	strategies, err := strategy.FindStrategyInstances(
@@ -143,7 +143,7 @@ func OnEventReceivedFromMqtt(ctx context.Context, msg mqtt.Message) {
 
 		wg.Add(1)
 		go func(v *strategy.InstanceHandler) {
-			res <- i.HandleEvent(wasm.WithMqttMessage(ctx, msg), v.Handler, nil)
+			res <- i.HandleEvent(wasm.WithMqttInboundMessage(ctx, msg), v.Handler, msg)
 			wg.Done()
 		}(v)
 	}

@@ -18,7 +18,7 @@ import (
 func GetConfigValue(ctx context.Context, rel types.SFID, v wasm.Configuration) error {
 	l := types.MustLoggerFromContext(ctx).WithValues("rel", rel)
 
-	_, l = l.Start(ctx, "GetConfigValue")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	typ := v.ConfigType()
@@ -39,7 +39,7 @@ func FetchConfigValuesByRelIDs(ctx context.Context, relIDs ...types.SFID) ([]was
 	l := types.MustLoggerFromContext(ctx)
 	d := types.MustMgrDBExecutorFromContext(ctx)
 
-	_, l = l.Start(ctx, "FetchConfigsByRelIDs")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	ms := make([]models.Config, 0)
@@ -74,7 +74,7 @@ func GetConfigByRelIdAndType(ctx context.Context, rel types.SFID, typ enums.Conf
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 
-	_, l = l.Start(ctx, "GetConfigByRelIdAndType")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	cfg := &models.Config{
@@ -92,7 +92,7 @@ func GetConfigByRelIdAndType(ctx context.Context, rel types.SFID, typ enums.Conf
 }
 
 func CreateConfig(ctx context.Context, rel types.SFID, cfg wasm.Configuration) (*models.Config, error) {
-	_, l := conflog.FromContext(ctx).Start(ctx, "CreateConfig")
+	_, l := conflog.FromContext(ctx).Start(ctx)
 	defer l.End()
 
 	if err := wasm.Init(ctx, cfg); err != nil {
@@ -124,7 +124,7 @@ func CreateConfig(ctx context.Context, rel types.SFID, cfg wasm.Configuration) (
 }
 
 func CreateOrUpdateConfig(ctx context.Context, rel types.SFID, cfg wasm.Configuration) (*models.Config, error) {
-	_, l := conflog.FromContext(ctx).Start(ctx, "CreateOrUpdateConfig")
+	_, l := conflog.FromContext(ctx).Start(ctx)
 	defer l.End()
 
 	if err := wasm.Init(ctx, cfg); err != nil {
@@ -182,4 +182,10 @@ func CreateOrUpdateConfig(ctx context.Context, rel types.SFID, cfg wasm.Configur
 		return nil, status.CheckDatabaseError(err)
 	}
 	return m, nil
+}
+
+func RemoveConfig(ctx context.Context, rel types.SFID) error {
+	// TODO should remove config and do was.Configuration.Uninit()
+	// schema and mqtt client should be clean and close
+	return nil
 }

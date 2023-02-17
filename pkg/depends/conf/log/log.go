@@ -3,6 +3,7 @@ package log
 import (
 	"context"
 	"os"
+	"path"
 	"runtime"
 	"strconv"
 
@@ -20,6 +21,7 @@ type Log struct {
 	Format       LoggerFormatType
 	Exporter     trace.SpanExporter `env:"-"`
 	ReportCaller bool
+	Logger
 }
 
 func (l *Log) SetDefault() {
@@ -39,6 +41,8 @@ func (l *Log) SetDefault() {
 		}
 	}
 }
+
+func (l *Log) SetLevel(lvl Level) { l.Level = lvl }
 
 func (l *Log) InitLogrus() {
 	if l.Format == LOGGER_FORMAT_TYPE__JSON {
@@ -67,6 +71,7 @@ func (l *Log) InitSpanLog() {
 func (l *Log) Init() {
 	l.InitLogrus()
 	l.InitSpanLog()
+	l.Logger = Std()
 }
 
 type ProjectAndMetaHook struct {
@@ -98,7 +103,7 @@ var (
 			logrus.FieldKeyFile:  "@fl",
 		},
 		CallerPrettyfier: func(f *runtime.Frame) (fn string, file string) {
-			return f.Function + " line:" + strconv.FormatInt(int64(f.Line), 10), ""
+			return path.Base(f.Function) + ":" + strconv.FormatInt(int64(f.Line), 10), ""
 		},
 		TimestampFormat: "20060102-150405.000Z07:00",
 	}

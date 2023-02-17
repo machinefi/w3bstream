@@ -9,7 +9,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
-func NewTask(vm *Instance, fn string, pl []byte) *Task {
+func NewTask(vm *Instance, fn string, pl interface{}) *Task {
 	return &Task{
 		vm:      vm,
 		Handler: fn,
@@ -22,7 +22,7 @@ type Task struct {
 	vm      *Instance
 	EventID string
 	Handler string
-	Payload []byte
+	Payload interface{}
 	Res     chan *wasm.EventHandleResult
 	mq.TaskState
 }

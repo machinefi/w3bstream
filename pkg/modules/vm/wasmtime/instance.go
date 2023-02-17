@@ -19,10 +19,10 @@ import (
 func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte) (i *Instance, err error) {
 	l := types.MustLoggerFromContext(ctx)
 
-	_, l = l.Start(ctx, "NewInstanceByCode")
+	_, l = l.Start(ctx)
 	defer l.End()
 
-	res := mapx.New[uint32, []byte]()
+	res := mapx.New[uint32, interface{}]()
 	rt := NewRuntime()
 	lk, err := NewExportFuncs(wasm.WithRuntimeResource(ctx, res), rt)
 	if err != nil {
@@ -46,7 +46,7 @@ type Instance struct {
 	id       types.SFID
 	rt       *Runtime
 	state    wasm.InstanceState
-	res      *mapx.Map[uint32, []byte]
+	res      *mapx.Map[uint32, interface{}]
 	handlers map[string]*wasmtime.Func
 	kvs      wasm.KVStore
 }
@@ -56,7 +56,8 @@ var _ wasm.Instance = (*Instance)(nil)
 func (i *Instance) ID() string { return i.id.String() }
 
 func (i *Instance) Start(ctx context.Context) error {
-	log.FromContext(ctx).WithValues("instance", i.ID()).Info("started")
+	_, l := log.FromContext(ctx).Start(ctx)
+	l.WithValues("instance", i.ID()).Info("started")
 	i.state = enums.INSTANCE_STATE__STARTED
 	return nil
 }
@@ -69,7 +70,7 @@ func (i *Instance) Stop(ctx context.Context) error {
 
 func (i *Instance) State() wasm.InstanceState { return i.state }
 
-func (i *Instance) HandleEvent(ctx context.Context, fn string, data []byte) *wasm.EventHandleResult {
+func (i *Instance) HandleEvent(ctx context.Context, fn string, data interface{}) *wasm.EventHandleResult {
 	if i.state != enums.INSTANCE_STATE__STARTED {
 		return &wasm.EventHandleResult{
 			InstanceID: i.id.String(),
@@ -86,11 +87,11 @@ func (i *Instance) HandleEvent(ctx context.Context, fn string, data []byte) *was
 func (i *Instance) Handle(ctx context.Context, t *Task) *wasm.EventHandleResult {
 	l := types.MustLoggerFromContext(ctx)
 
-	_, l = l.Start(ctx, "instance.Handle")
+	_, l = l.Start(ctx)
 	defer l.End()
 
-	rid := i.AddResource(ctx, t.Payload)
-	defer i.RmvResource(ctx, rid)
+	rid := i.AddResource(t.Payload)
+	defer i.RmvResource(rid)
 
 	result, err := i.rt.Call(t.Handler, int32(rid))
 	if err != nil {
@@ -111,17 +112,17 @@ func (i *Instance) Handle(ctx context.Context, t *Task) *wasm.EventHandleResult 
 const MaxUint = ^uint32(0)
 const MaxInt = int(MaxUint >> 1)
 
-func (i *Instance) AddResource(ctx context.Context, data []byte) uint32 {
+func (i *Instance) AddResource(data interface{}) uint32 {
 	var id = int32(uuid.New().ID() % uint32(MaxInt))
 	i.res.Store(uint32(id), data)
 	return uint32(id)
 }
 
-func (i *Instance) GetResource(id uint32) ([]byte, bool) {
+func (i *Instance) GetResource(id uint32) (interface{}, bool) {
 	return i.res.Load(id)
 }
 
-func (i *Instance) RmvResource(ctx context.Context, id uint32) {
+func (i *Instance) RmvResource(id uint32) {
 	i.res.Remove(id)
 }
 

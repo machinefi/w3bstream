@@ -9,12 +9,9 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/global"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/tasks"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
-	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/modules/account"
 	"github.com/machinefi/w3bstream/pkg/modules/blockchain"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
-	"github.com/machinefi/w3bstream/pkg/modules/event"
-	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -33,14 +30,14 @@ func main() {
 				kit.Run(tasks.Root, global.TaskServer())
 			},
 			func() {
-				if err := project.InitChannels(
-					global.WithContext(context.Background()),
-					func(ctx context.Context, channel string, data *eventpb.Event) (interface{}, error) {
-						return event.OnEventReceived(ctx, channel, data)
-					},
-				); err != nil {
-					panic(err)
-				}
+				// if err := project.InitChannels(
+				// 	global.WithContext(context.Background()),
+				// 	func(ctx context.Context, channel string, data *eventpb.Event) (interface{}, error) {
+				// 		return event.OnEventReceived(ctx, channel, data)
+				// 	},
+				// ); err != nil {
+				// 	panic(err)
+				// }
 			},
 			func() {
 				if err := deploy.StartInstances(
@@ -53,7 +50,7 @@ func main() {
 				ctx := global.WithContext(context.Background())
 				l := types.MustLoggerFromContext(ctx)
 
-				_, l = l.Start(ctx, "init.CreateAdmin")
+				_, l = l.Start(ctx)
 				defer l.End()
 
 				passwd, err := account.CreateAdminIfNotExist(ctx)
@@ -70,7 +67,7 @@ func main() {
 				ctx := global.WithContext(context.Background())
 				l := types.MustLoggerFromContext(ctx)
 
-				_, l = l.Start(ctx, "init.InitChainDB")
+				_, l = l.Start(ctx)
 				defer l.End()
 
 				if err := blockchain.InitChainDB(ctx); err != nil {

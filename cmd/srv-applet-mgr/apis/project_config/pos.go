@@ -9,6 +9,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
+	"github.com/machinefi/w3bstream/pkg/modules/mq"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
@@ -76,10 +77,11 @@ func (r *CreateProjectMqttBroker) Output(ctx context.Context) (interface{}, erro
 		return nil, err
 	}
 	prj := types.MustProjectFromContext(ctx)
+	mq.StopChannel(prj.Name)
 	return config.CreateConfig(
 		types.WithMqttMsgHandler(
 			ctx,
-			func(_ mqtt.Client, msg mqtt.Message) {
+			func(cli mqtt.Client, msg mqtt.Message) {
 				event.OnEventReceivedFromMqtt(ctx, msg)
 			},
 		),

@@ -25,7 +25,7 @@ func FindStrategyInstances(ctx context.Context, prjName string, eventType string
 	l := types.MustLoggerFromContext(ctx)
 	d := types.MustMgrDBExecutorFromContext(ctx)
 
-	_, l = l.Start(ctx, "FindStrategyInstances")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	l = l.WithValues("project", prjName, "event_type", eventType)
@@ -102,7 +102,7 @@ func CreateStrategy(ctx context.Context, projectID types.SFID, r *CreateStrategy
 	l := types.MustLoggerFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 
-	_, l = l.Start(ctx, "CreateStrategy")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	err = sqlx.NewTasks(d).With(
@@ -134,7 +134,7 @@ func UpdateStrategy(ctx context.Context, strategyID types.SFID, r *CreateStrateg
 	l := types.MustLoggerFromContext(ctx)
 	m := models.Strategy{RelStrategy: models.RelStrategy{StrategyID: strategyID}}
 
-	_, l = l.Start(ctx, "UpdateStrategy")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	err = sqlx.NewTasks(d).With(

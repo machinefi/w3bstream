@@ -18,7 +18,7 @@ func FetchOrCreateResource(ctx context.Context, f *multipart.FileHeader) (*model
 	l := types.MustLoggerFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 
-	_, l = l.Start(ctx, "FetchOrCreateResource")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	_, fullName, md5, err := Upload(ctx, f, idg.MustGenSFID().String())
@@ -46,7 +46,7 @@ func FetchOrCreateResource(ctx context.Context, f *multipart.FileHeader) (*model
 func CheckResourceExist(ctx context.Context, path string) bool {
 	l := types.MustLoggerFromContext(ctx)
 
-	_, l = l.Start(ctx, "CheckResourceExist")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	return IsPathExists(path)

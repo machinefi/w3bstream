@@ -8,7 +8,7 @@ type discard struct{}
 
 func (d *discard) WithValues(...interface{}) Logger { return d }
 
-func (d *discard) Start(ctx context.Context, _ string, _ ...interface{}) (context.Context, Logger) {
+func (d *discard) Start(ctx context.Context, _ ...interface{}) (context.Context, Logger) {
 	return ctx, d
 }
 

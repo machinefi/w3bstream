@@ -3,6 +3,9 @@ package log
 import (
 	"context"
 	"fmt"
+	"path"
+	"runtime"
+	"strconv"
 
 	"github.com/sirupsen/logrus"
 
@@ -36,11 +39,15 @@ func (l *std) WithValues(kvs ...interface{}) Logger {
 	}
 }
 
-func (l *std) Start(ctx context.Context, name string, kvs ...interface{}) (context.Context, Logger) {
+func (l *std) Start(ctx context.Context, kvs ...interface{}) (context.Context, Logger) {
+	pc, _, _, _ := runtime.Caller(1)
+	fn := runtime.FuncForPC(pc)
+	_, ln := fn.FileLine(pc)
+	name := path.Base(fn.Name()) + ":" + strconv.Itoa(ln)
 	return ctx, &std{
 		lvl:   l.lvl,
 		spans: append(l.spans, name),
-		kvs:   append(l.kvs, kvs...),
+		kvs:   append(append(l.kvs, "@mod", name), kvs...),
 	}
 }
 

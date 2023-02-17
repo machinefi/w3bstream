@@ -39,7 +39,7 @@ func (rt *LogRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) 
 	b3.New(b3.WithInjectEncoding(b3.B3SingleHeader)).
 		Inject(ctx, propagation.HeaderCarrier(req.Header))
 
-	ctx, logger := log.Start(ctx, "Request")
+	ctx, logger := log.FromContext(ctx).Start(ctx)
 	defer logger.End()
 
 	rsp, err := rt.next.RoundTrip(req.WithContext(ctx))

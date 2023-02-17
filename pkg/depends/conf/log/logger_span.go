@@ -3,6 +3,7 @@ package log
 import (
 	"context"
 	"fmt"
+	"runtime"
 	"time"
 
 	"go.opentelemetry.io/otel"
@@ -38,7 +39,11 @@ func (l *span) SetLevel(lvl Level) Logger {
 	return logger
 }
 
-func (l *span) Start(ctx context.Context, name string, kvs ...interface{}) (context.Context, Logger) {
+func (l *span) Start(ctx context.Context, kvs ...interface{}) (context.Context, Logger) {
+	pc, _, _, _ := runtime.Caller(1)
+	fn := runtime.FuncForPC(pc)
+	name := fn.Name()
+
 	sp := trace.SpanFromContext(ctx)
 	meta := metax.GetMetaFrom(ctx)
 

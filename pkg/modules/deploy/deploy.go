@@ -39,7 +39,7 @@ func CreateInstance(ctx context.Context, r *CreateInstanceReq) (*CreateInstanceR
 		InstanceInfo: models.InstanceInfo{State: enums.INSTANCE_STATE__CREATED},
 	}
 
-	_, l = l.Start(ctx, "CreateInstance")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	_ctx := context.Background()
@@ -87,7 +87,7 @@ func ControlInstance(ctx context.Context, instanceID types.SFID, cmd enums.Deplo
 		m = &models.Instance{RelInstance: models.RelInstance{InstanceID: instanceID}}
 	)
 
-	_, l = l.Start(ctx, "ControlInstance")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	defer func() {
@@ -167,7 +167,7 @@ func GetInstanceByInstanceID(ctx context.Context, instanceID types.SFID) (*model
 	l := types.MustLoggerFromContext(ctx)
 	m := &models.Instance{RelInstance: models.RelInstance{InstanceID: instanceID}}
 
-	_, l = l.Start(ctx, "GetInstanceByInstanceID")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	if err := m.FetchByInstanceID(d); err != nil {
@@ -209,7 +209,7 @@ func StartInstances(ctx context.Context) error {
 	l := types.MustLoggerFromContext(ctx)
 	m := &models.Instance{}
 
-	_, l = l.Start(ctx, "StartInstances")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	list, err := m.List(d, nil)

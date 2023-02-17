@@ -40,7 +40,7 @@ func CreateAccountByUsername(ctx context.Context, r *CreateAccountByUsernameReq)
 		},
 	}
 
-	_, l = l.Start(ctx, "CreateAccountByUsername")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	if err := m.Create(d); err != nil {
@@ -60,7 +60,7 @@ func UpdateAccountPassword(ctx context.Context, accountID types.SFID, password s
 
 	m := &models.Account{RelAccount: models.RelAccount{AccountID: accountID}}
 
-	_, l = l.Start(ctx, "UpdateAccountPassword")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	if err := m.FetchByAccountID(d); err != nil {
@@ -85,7 +85,7 @@ func ValidateAccountByLogin(ctx context.Context, username, password string) (*mo
 	m := &models.Account{}
 	m.Username = username
 
-	_, l = l.Start(ctx, "ValidateAccountByLogin")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	if err := m.FetchByUsername(d); err != nil {
@@ -104,7 +104,7 @@ func GetAccountByAccountID(ctx context.Context, accountID types.SFID) (*models.A
 	l := types.MustLoggerFromContext(ctx)
 
 	m := &models.Account{RelAccount: models.RelAccount{AccountID: accountID}}
-	_, l = l.Start(ctx, "GetAccountByAccountID")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	err := m.FetchByAccountID(d)
@@ -140,7 +140,7 @@ func CreateAdminIfNotExist(ctx context.Context) (string, error) {
 		},
 	}
 
-	_, l = l.Start(ctx, "CreateAdminIfNotExist")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	results := make([]models.Account, 0)

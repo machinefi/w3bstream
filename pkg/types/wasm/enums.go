@@ -11,6 +11,7 @@ const (
 	ResultStatusCode_OK ResultStatusCode = iota
 	ResultStatusCode_UnexportedHandler
 	ResultStatusCode_ResourceNotFound
+	ResultStatusCode_ResourceTypeError
 	ResultStatusCode_ImportNotFound
 	ResultStatusCode_ImportCallFailed
 	ResultStatusCode_TransDataToVMFailed

@@ -26,7 +26,7 @@ func CreatePublisher(ctx context.Context, projectID types.SFID, r *CreatePublish
 	j := jwt.MustConfFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 
-	_, l = l.Start(ctx, "CreatePublisher")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	// TODO generate token, maybe use public key
@@ -57,7 +57,7 @@ func GetPublisherByPublisherKey(ctx context.Context, publisherKey string) (*mode
 		PublisherInfo: models.PublisherInfo{Key: publisherKey},
 	}
 
-	_, l = l.Start(ctx, "GetPublisherByPublisherKey")
+	_, l = l.Start(ctx)
 
 	if err := m.FetchByKey(d); err != nil {
 		l.Error(err)
@@ -104,7 +104,7 @@ func ListPublisher(ctx context.Context, r *ListPublisherReq) (*ListPublisherRsp,
 		mProject   = &models.Project{}
 	)
 
-	_, l = l.Start(ctx, "ListPublisher")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	ret.Total, err = mPublisher.Count(d, cond)
@@ -161,7 +161,7 @@ func RemovePublisher(ctx context.Context, r *RemovePublisherReq) error {
 		err        error
 	)
 
-	_, l = l.Start(ctx, "RemovePublisher")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	return sqlx.NewTasks(d).With(
@@ -184,7 +184,7 @@ func UpdatePublisher(ctx context.Context, publisherID types.SFID, r *CreatePubli
 	j := jwt.MustConfFromContext(ctx)
 	m := models.Publisher{RelPublisher: models.RelPublisher{PublisherID: publisherID}}
 
-	_, l = l.Start(ctx, "UpdatePublisher")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	// TODO generate token, maybe use public key
@@ -218,7 +218,7 @@ func GetPublisherByPubKeyAndProjectName(ctx context.Context, pubKey, prjName str
 	l := types.MustLoggerFromContext(ctx)
 	d := types.MustMgrDBExecutorFromContext(ctx)
 
-	_, l = l.Start(ctx, "GetPublisherByPubKeyAndProjectID")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	pub := &models.Publisher{PublisherInfo: models.PublisherInfo{Key: pubKey}}

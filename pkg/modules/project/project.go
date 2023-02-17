@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
@@ -32,7 +33,7 @@ func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (
 	a := middleware.CurrentAccountFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 
-	_, l = l.Start(ctx, "CreateProject")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	m := &models.Project{
@@ -144,7 +145,7 @@ func ListProject(ctx context.Context, r *ListProjectReq) (*ListProjectRsp, error
 		mInstance = &models.Instance{}
 	)
 
-	_, l = l.Start(ctx, "ListProject")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	ret.Total, err = mProject.Count(d, cond)
@@ -233,7 +234,7 @@ func GetProjectByProjectName(ctx context.Context, prjName string) (*models.Proje
 	l := types.MustLoggerFromContext(ctx)
 	m := &models.Project{ProjectName: models.ProjectName{Name: prjName}}
 
-	_, l = l.Start(ctx, "GetProjectByProjectName")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	if err := m.FetchByName(d); err != nil {
@@ -249,7 +250,7 @@ func InitChannels(ctx context.Context, hdl mq.OnMessage) error {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	m := &models.Project{}
 
-	_, l = l.Start(ctx, "InitChannels")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	lst, err := m.List(d, nil)
@@ -284,11 +285,10 @@ func RemoveProjectByProjectID(ctx context.Context, prjID types.SFID) error {
 		applets    []models.Applet
 		mInstance  = &models.Instance{}
 		instances  []models.Instance
-		mConfig    = &models.Config{}
 		err        error
 	)
 
-	_, l = l.Start(ctx, "RemoveProjectByProjectID")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	return sqlx.NewTasks(d).With(
@@ -388,17 +388,7 @@ func RemoveProjectByProjectID(ctx context.Context, prjID types.SFID) error {
 			return nil
 		},
 		func(db sqlx.DBExecutor) error {
-			tbl := db.T(mConfig)
-			_, err := db.Exec(
-				builder.Delete().
-					From(
-						tbl,
-						builder.Where(mConfig.ColRelID().Eq(prjID)),
-						builder.Comment("Config.DeleteByRelID"),
-					),
-			)
-			// TODO should remove project schema
-			return err
+			return config.RemoveConfig(ctx, prjID)
 		},
 		func(db sqlx.DBExecutor) error {
 			err = mProject.DeleteByProjectID(d)

@@ -36,7 +36,7 @@ func (t *contract) do(ctx context.Context) {
 	l := types.MustLoggerFromContext(ctx)
 	m := &models.ContractLog{}
 
-	_, l = l.Start(ctx, "contract.run")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	cs, err := m.List(d, builder.Or(
@@ -72,7 +72,7 @@ func (t *contract) do(ctx context.Context) {
 func (t *contract) listChainAndSendEvent(ctx context.Context, c *models.ContractLog, address string) (uint64, error) {
 	l := types.MustLoggerFromContext(ctx)
 
-	_, l = l.Start(ctx, "contract.listChainAndSendEvent")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	l = l.WithValues("type", "contract_log", "contract_log_id", c.ContractLogID)
@@ -122,7 +122,7 @@ func (t *contract) listChainAndSendEvent(ctx context.Context, c *models.Contract
 func (t *contract) getBlockRange(ctx context.Context, cli *ethclient.Client, c *models.ContractLog) (uint64, uint64, error) {
 	l := types.MustLoggerFromContext(ctx)
 
-	_, l = l.Start(ctx, "contract.getBlockRange")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	currHeight, err := cli.BlockNumber(context.Background())

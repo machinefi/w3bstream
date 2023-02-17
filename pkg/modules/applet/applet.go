@@ -37,7 +37,7 @@ func CreateApplet(ctx context.Context, projectID types.SFID, r *CreateAppletReq)
 	l := types.MustLoggerFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 
-	_, l = l.Start(ctx, "CreateApplet")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	mResource := &models.Resource{}
@@ -95,7 +95,7 @@ func UpdateApplet(ctx context.Context, appletID types.SFID, r *UpdateAppletReq) 
 	mApplet := &models.Applet{RelApplet: models.RelApplet{AppletID: appletID}}
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 
-	_, l = l.Start(ctx, "UpdateApplet")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	mResource := &models.Resource{}
@@ -207,7 +207,7 @@ func ListApplets(ctx context.Context, r *ListAppletReq) (*ListAppletRsp, error) 
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 
-	_, l = l.Start(ctx, "ListApplets")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	applets, err := applet.List(d, r.Condition(), r.Additions()...)
@@ -223,11 +223,7 @@ func ListApplets(ctx context.Context, r *ListAppletReq) (*ListAppletRsp, error) 
 	return &ListAppletRsp{applets, hints}, nil
 }
 
-type RemoveAppletReq struct {
-	AppletID types.SFID `in:"path"  name:"appletID"`
-}
-
-func RemoveApplet(ctx context.Context, r *RemoveAppletReq) error {
+func RemoveApplet(ctx context.Context, appletID types.SFID) error {
 	var (
 		d         = types.MustMgrDBExecutorFromContext(ctx)
 		l         = types.MustLoggerFromContext(ctx)
@@ -237,12 +233,12 @@ func RemoveApplet(ctx context.Context, r *RemoveAppletReq) error {
 		err       error
 	)
 
-	_, l = l.Start(ctx, "RemoveApplet")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	return sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
-			mApplet.AppletID = r.AppletID
+			mApplet.AppletID = appletID
 			err = mApplet.FetchByAppletID(d)
 			if err != nil {
 				l.Error(err)
@@ -251,8 +247,8 @@ func RemoveApplet(ctx context.Context, r *RemoveAppletReq) error {
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			mInstance.AppletID = r.AppletID
-			instances, err = mInstance.List(d, mInstance.ColAppletID().Eq(r.AppletID))
+			mInstance.AppletID = appletID
+			instances, err = mInstance.List(d, mInstance.ColAppletID().Eq(appletID))
 			if err != nil {
 				l.Error(err)
 				return status.CheckDatabaseError(err, "ListByAppletID")
@@ -303,7 +299,7 @@ func GetAppletByAppletID(ctx context.Context, appletID types.SFID) (*GetAppletRs
 	mApplet := &models.Applet{RelApplet: models.RelApplet{AppletID: appletID}}
 	mResource := &models.Resource{}
 
-	_, l = l.Start(ctx, "GetAppletByAppletID")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	err := sqlx.NewTasks(d).With(

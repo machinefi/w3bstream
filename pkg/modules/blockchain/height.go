@@ -31,7 +31,7 @@ func (h *height) do(ctx context.Context) {
 	l := types.MustLoggerFromContext(ctx)
 	m := &models.ChainHeight{}
 
-	_, l = l.Start(ctx, "height.run")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	cs, err := m.List(d, m.ColFinished().Eq(datatypes.FALSE))
@@ -63,7 +63,7 @@ func (h *height) do(ctx context.Context) {
 func (h *height) checkHeightAndSendEvent(ctx context.Context, c *models.ChainHeight, address string) (bool, error) {
 	l := types.MustLoggerFromContext(ctx)
 
-	_, l = l.Start(ctx, "height.checkHeightAndSendEvent")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	l = l.WithValues("type", "chain_height", "chain_height_id", c.ChainHeightID)

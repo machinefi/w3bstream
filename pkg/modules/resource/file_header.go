@@ -28,7 +28,7 @@ func Upload(ctx context.Context, f *multipart.FileHeader, id string) (root, full
 		filesize = int64(0)
 	)
 
-	_, l = l.Start(ctx, "Upload")
+	_, l = l.Start(ctx)
 	defer l.End()
 
 	root = filepath.Join(conf.Root, id)

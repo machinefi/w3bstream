@@ -50,7 +50,7 @@ func (s *Schema) QueryContext(ctx context.Context, query string, args ...interfa
 }
 
 func (s *Schema) Init(ctx context.Context) error {
-	_, l := conflog.FromContext(ctx).Start(ctx, "wasm.Schema.Init")
+	_, l := conflog.FromContext(ctx).Start(ctx)
 	defer l.End()
 
 	err := s.Schema.Init()

@@ -2,10 +2,11 @@ package wasm
 
 import (
 	"context"
+	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
-	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
+	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -16,6 +17,8 @@ const (
 	MqttBrokerScheme_TCP MqttBrokerScheme = "tcp"
 )
 
+var brokers = mapx.New[string, bool]()
+
 type MqttBroker struct {
 	Scheme   MqttBrokerScheme `json:"scheme,omitempty"` // Scheme support tcp only TODO support other protocol
 	Host     string           `json:"host"`
@@ -23,11 +26,8 @@ type MqttBroker struct {
 	Username string           `json:"username,omitempty"`
 	Password string           `json:"password,omitempty"`
 	Topics   []string         `json:"topics"`
-	broker   *confmqtt.Broker
-}
-
-func (b *MqttBroker) Broker() *confmqtt.Broker {
-	return b.broker
+	server   string
+	cli      mqtt.Client
 }
 
 func (b *MqttBroker) ConfigType() enums.ConfigType {
@@ -35,49 +35,43 @@ func (b *MqttBroker) ConfigType() enums.ConfigType {
 }
 
 func (b *MqttBroker) WithContext(ctx context.Context) context.Context {
-	return WithMqttBroker(ctx, b.broker)
+	return WithMqttBroker(ctx, b)
 }
 
 func (b *MqttBroker) Init(ctx context.Context) error {
-	_, l := conflog.FromContext(ctx).Start(ctx, "wasm.MqttBroker.Init")
+	_, l := conflog.FromContext(ctx).Start(ctx)
 	defer l.End()
 
-	server := types.Endpoint{
+	b.server = (&types.Endpoint{
 		Scheme:   "tcp",
 		Hostname: b.Host,
 		Port:     b.Port,
 		Username: b.Username,
 		Password: types.Password(b.Password),
+	}).String()
+	if _, ok := brokers.Load(b.server); ok {
+		return nil
 	}
-	broker := &confmqtt.Broker{Server: server}
-	broker.SetDefault()
-
-	err := broker.Init()
-	if err != nil {
-		l.Error(err)
-		return err
-	}
-	b.broker = broker
+	brokers.Store(b.server, true)
 
 	prj := types.MustProjectFromContext(ctx)
-
-	cli, err := broker.Client(prj.Name)
-	if err != nil {
-		l.Error(err)
-		return err
-	}
-
 	hdl := types.MustMqttMsgHandlerFromContext(ctx)
-	if hdl == nil {
-		hdl = func(_ mqtt.Client, msg mqtt.Message) {
-			l.WithValues(
-				"cid", cli.Cid(),
-				"msg_id", msg.MessageID(),
-				"topic", msg.Topic(),
-				"payload", msg.Payload(),
-			).Debug("default handler")
-		}
+	l = l.WithValues("project", prj.Name)
+
+	cli := mqtt.NewClient(
+		mqtt.NewClientOptions().
+			AddBroker(b.server).
+			SetClientID(prj.Name).
+			SetKeepAlive(time.Minute).
+			SetDefaultPublishHandler(hdl).
+			SetPingTimeout(time.Second),
+	)
+
+	if tok := cli.Connect(); tok.Wait() && tok.Error() != nil {
+		l.Error(tok.Error())
+		return tok.Error()
 	}
+	b.cli = cli
 
 	topics := map[string]struct{}{}
 	for _, topic := range b.Topics {
@@ -85,17 +79,20 @@ func (b *MqttBroker) Init(ctx context.Context) error {
 	}
 
 	for topic := range topics {
-		go func(topic string) {
-			// 	c := cli.WithTopic(topic)
-			// 	l := l.WithValues("cid", cli.Cid(), "topic", topic)
-			// 	defer c.Disconnect()
-			// 	if err := c.Subscribe(hdl); err != nil {
-			// 		l.Error(err)
-			// 	}
-			// 	l.Info("stop subscribing")
-		}(topic)
-		l.Info("start mqtt subscribing")
+		l := l.WithValues("topic", topic)
+		if tok := cli.Subscribe(topic, 0, nil); tok.Wait() && tok.Error() != nil {
+			l.Error(tok.Error())
+			return tok.Error()
+		}
+		l.WithValues("prj", prj.Name, "topic", topic).Info("start subscribing")
 	}
-
 	return nil
+}
+
+func (b *MqttBroker) Uninit() {
+	for _, topic := range b.Topics {
+		b.cli.Unsubscribe(topic)
+	}
+	b.cli.Disconnect(1)
+	brokers.Remove(b.server)
 }

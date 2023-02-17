@@ -124,10 +124,3 @@ func (b *Broker) Close(cid string) {
 		c.cli.Disconnect(500)
 	}
 }
-
-func init() {
-	// mqtt.ERROR = log.New(os.Stderr, "******************mqtt**[ERR]", 0)
-	// mqtt.CRITICAL = log.New(os.Stderr, "******************mqtt**[CRI]", 0)
-	// mqtt.WARN = log.New(os.Stderr, "******************mqtt**[WAR]", 0)
-	// mqtt.DEBUG = log.New(os.Stderr, "******************mqtt**", 0)
-}

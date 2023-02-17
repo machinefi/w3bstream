@@ -45,7 +45,6 @@ func init() {
 		Server     *confhttp.Server
 		Jwt        *confjwt.Jwt
 		Logger     *conflog.Log
-		StdLogger  conflog.Logger
 		UploadConf *types.UploadConfig
 		EthClient  *types.ETHClientConfig
 	}{
@@ -57,7 +56,6 @@ func init() {
 		Server:     server,
 		Jwt:        &confjwt.Jwt{},
 		Logger:     &conflog.Log{},
-		StdLogger:  conflog.Std(),
 		UploadConf: &types.UploadConfig{},
 		EthClient:  &types.ETHClientConfig{},
 	}
@@ -84,7 +82,6 @@ func init() {
 		config.Redis,
 		config.Server,
 	)
-	config.StdLogger.(conflog.LevelSetter).SetLevel(conflog.InfoLevel)
 
 	tasks = mem_mq.New(0)
 	worker = mq.NewTaskWorker(tasks, mq.WithWorkerCount(3), mq.WithChannel(name))
@@ -96,8 +93,8 @@ func init() {
 		types.WithWasmDBExecutorContext(config.WasmDB),
 		types.WithWasmPgEndpointContext(config.WasmDB),
 		types.WithRedisEndpointContext(config.Redis),
-		types.WithLoggerContext(config.StdLogger),
-		conflog.WithLoggerContext(config.StdLogger),
+		types.WithLoggerContext(config.Logger),
+		conflog.WithLoggerContext(config.Logger),
 		types.WithMqttBrokerContext(config.MqttBroker),
 		types.WithUploadConfigContext(config.UploadConf),
 		confid.WithSFIDGeneratorContext(confid.MustNewSFIDGenerator()),
@@ -115,7 +112,7 @@ func TaskServer() kit.Transport { return worker.WithContextInjector(WithContext)
 func Migrate() {
 	ctx, log := conflog.StdContext(context.Background())
 
-	log.Start(ctx, "Migrate")
+	log.Start(ctx)
 	defer log.End()
 	if err := migration.Migrate(db.WithContext(ctx), nil); err != nil {
 		log.Panic(err)
