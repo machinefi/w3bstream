@@ -1,6 +1,5 @@
 DOCKER_COMPOSE_FILE = ./docker-compose.yaml
 WS_BACKEND_IMAGE = $(USER)/w3bstream:main
-WS_STUDIO_IMAGE = $(USER)/w3bstream-studio:main
 WS_WORKING_DIR=$(shell pwd)/working_dir
 
 .PHONY: update_go_module
@@ -24,23 +23,17 @@ build_server:
 .PHONY: build_pub_client
 build_pub_client: update_go_module
 	@cd cmd/pub_client && go build
-	@rm -rf build/pub_client
 	@mkdir -p build/pub_client build/pub_client/config
-	@mv cmd/pub_client/pub_client build/pub_client
-	@mv cmd/pub_client/config/config.yml build/pub_client/config/config.yml
+	@mv -f cmd/pub_client/pub_client build/pub_client
+	@cp -u cmd/pub_client/config/config.yml build/pub_client/config/config.yml
 	@echo 'succeed! pub_client => build/pub_client/pub_client'
 
 .PHONY: build_docker_images
-build_docker_images: build_backend_image build_studio_image
+build_docker_images: build_backend_image
 
 .PHONY: build_backend_image
 build_backend_image: update_go_module
 	@docker build -f Dockerfile -t ${WS_BACKEND_IMAGE} .
-
-.PHONY: build_studio_image
-build_studio_image:
-	@git submodule update --init
-	@cd studio && docker build -f Dockerfile -t ${WS_STUDIO_IMAGE} .
 
 # run server in docker containers
 .PHONY: run_docker
