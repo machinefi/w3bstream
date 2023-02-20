@@ -116,6 +116,10 @@ func MustPgEndpointFromContext(ctx context.Context) *postgres.Endpoint {
 	return v
 }
 
+func WithRedis(ctx context.Context, v *redis.Redis) context.Context {
+	return contextx.WithValue(ctx, CtxRedisEndpoint{}, v)
+}
+
 func WithRedisEndpointContext(v *redis.Redis) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
 		return contextx.WithValue(ctx, CtxRedisEndpoint{}, v)

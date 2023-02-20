@@ -145,7 +145,9 @@ upload wasm script
 ```sh
 ## set env vars
 export WASMFILE=${wasm_path}
-http --form post :8888/srv-applet-mgr/v0/applet/$PROJECTNAME file@$WASMFILE info='{"appletName":"log","wasmName":"log.wasm","strategies":[{"eventType":"DEFAULT","handler":"start"}]}' -A bearer -a $TOK
+export APPLETNAME=${applet_name}
+export WASMNAME=${wasm_name}
+http --form post :8888/srv-applet-mgr/v0/applet/$PROJECTNAME file@$WASMFILE info='{"appletName":"'$APPLETNAME'","wasmName":"'$WASMNAME'","strategies":[{"eventType":"DEFAULT","handler":"start"}]}' -A bearer -a $TOK
 ```
 
 output like
@@ -180,6 +182,9 @@ deploy applet with cache and chain client config
 
 ```sh
 echo '{"cache":{"mode": "MEMORY"}}' | http post :8888/srv-applet-mgr/v0/deploy/applet/$APPLETID -A bearer -a $TOK
+
+# or use redis cache
+#echo '{"cache":{"mode": "REDIS"}}' | http post :8888/srv-applet-mgr/v0/deploy/applet/$APPLETID -A bearer -a $TOK
 ```
 
 start applet
