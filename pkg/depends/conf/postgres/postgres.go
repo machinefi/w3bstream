@@ -24,6 +24,7 @@ type Endpoint struct {
 
 	*sqlx.DB `env:"-"`
 	slave    *sqlx.DB `env:"-"`
+	readOnly *readOnlyUser
 }
 
 var _ types.DefaultSetter = (*Endpoint)(nil)
@@ -101,6 +102,40 @@ func (e *Endpoint) conn(url string, readonly bool) (*sqlx.DB, error) {
 	return db, nil
 }
 
+func (e *Endpoint) ReadOnlyUser() (string, error) {
+	if e.readOnly == nil {
+		if err := e.createReadOnlyUser(); err != nil {
+			return "", err
+		}
+	}
+	return e.readOnlyURL(), nil
+}
+
+func (e *Endpoint) createReadOnlyUser() error {
+	if _, err := e.DB.ExecContext(context.Background(), "CREATE ROLE IF NOT EXISTS readonly;"); err != nil {
+		return err
+	}
+	if _, err := e.DB.ExecContext(context.Background(), "GRANT USAGE ON SCHEMA public TO readonly;"); err != nil {
+		return err
+	}
+	if _, err := e.DB.ExecContext(context.Background(), "GRANT SELECT ON ALL TABLES IN SCHEMA public TO readonly;"); err != nil {
+		return err
+	}
+	if _, err := e.DB.ExecContext(context.Background(), "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO readonly;"); err != nil {
+		return err
+	}
+
+	newUser := newReadOnlyUser()
+	if _, err := e.DB.ExecContext(context.Background(), fmt.Sprintf("CREATE USER IF NOT EXISTS %s WITH PASSWORD %s;", newUser.name, newUser.passwd)); err != nil {
+		return err
+	}
+	if _, err := e.DB.ExecContext(context.Background(), fmt.Sprintf("GRANT readonly TO %s;", newUser.name)); err != nil {
+		return err
+	}
+	e.readOnly = newUser
+	return nil
+}
+
 func (e *Endpoint) Init() {
 	// cover default database name
 	if len(e.Master.Base) > 0 {
@@ -144,6 +179,10 @@ func (e Endpoint) slaveURL() string {
 	return fmt.Sprintf("postgres://%s%s@%s", e.Master.Username, passwd, e.Slave.Host())
 }
 
+func (e Endpoint) readOnlyURL() string {
+	return fmt.Sprintf("postgres://%s%s@%s", e.readOnly.name, e.readOnly.passwd, e.Master.Host())
+}
+
 func (e Endpoint) Name() string { return "pgcli" }
 
 func SwitchSlave(db sqlx.DBExecutor) sqlx.DBExecutor {
@@ -155,4 +194,12 @@ func SwitchSlave(db sqlx.DBExecutor) sqlx.DBExecutor {
 
 type CanSlave interface {
 	UseSlave() sqlx.DBExecutor
+}
+
+type readOnlyUser struct {
+	name, passwd string
+}
+
+func newReadOnlyUser() *readOnlyUser {
+	return &readOnlyUser{name: "readonly_user", passwd: "readonly_pwd"}
 }
