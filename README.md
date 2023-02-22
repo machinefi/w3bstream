@@ -21,7 +21,7 @@ Interested in contributing to the doc? Please edit on [Github](https://github.co
 ## Run W3bstream with prebuilt docker images
 
 ### Run W3bstream node with W3bstream Studio
-Check it out here [https://github.com/machinefi/w3bstream-studio](https://github.com/machinefi/w3bstream-studio).
+Check it out here [w3bstream-studio](https://github.com/machinefi/w3bstream-studio#run-w3bstream-node-with-prebuilt-docker-images).
 
 
 ### Run W3bstream node without W3bstream Studio
