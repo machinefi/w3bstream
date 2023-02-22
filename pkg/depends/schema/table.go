@@ -75,7 +75,8 @@ func (t *Table) Init() error {
 		t.cols.Add(c)
 	}
 	for _, c := range t.Cols {
-		if v := c.Constrains.Default; v != nil && (*v)[0] != '\'' {
+		dfv := c.Constrains.Default
+		if dfv != nil && len(*dfv) > 0 && (*dfv)[0] != '\'' {
 			c.Constrains.Default = ptrx.Ptr("'" + *c.Constrains.Default + "'")
 		}
 	}

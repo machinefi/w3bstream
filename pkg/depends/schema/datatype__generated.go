@@ -49,6 +49,10 @@ func ParseDatatypeFromString(s string) (Datatype, error) {
 		return DATATYPE__BOOL, nil
 	case "TIMESTAMP":
 		return DATATYPE__TIMESTAMP, nil
+	case "DECIMAL":
+		return DATATYPE__DECIMAL, nil
+	case "NUMERIC":
+		return DATATYPE__NUMERIC, nil
 	}
 }
 
@@ -88,6 +92,10 @@ func ParseDatatypeFromLabel(s string) (Datatype, error) {
 		return DATATYPE__BOOL, nil
 	case "TIMESTAMP":
 		return DATATYPE__TIMESTAMP, nil
+	case "DECIMAL":
+		return DATATYPE__DECIMAL, nil
+	case "NUMERIC":
+		return DATATYPE__NUMERIC, nil
 	}
 }
 
@@ -131,6 +139,10 @@ func (v Datatype) String() string {
 		return "BOOL"
 	case DATATYPE__TIMESTAMP:
 		return "TIMESTAMP"
+	case DATATYPE__DECIMAL:
+		return "DECIMAL"
+	case DATATYPE__NUMERIC:
+		return "NUMERIC"
 	}
 }
 
@@ -170,6 +182,10 @@ func (v Datatype) Label() string {
 		return "BOOL"
 	case DATATYPE__TIMESTAMP:
 		return "TIMESTAMP"
+	case DATATYPE__DECIMAL:
+		return "DECIMAL"
+	case DATATYPE__NUMERIC:
+		return "NUMERIC"
 	}
 }
 
@@ -178,7 +194,7 @@ func (v Datatype) TypeName() string {
 }
 
 func (v Datatype) ConstValues() []enum.IntStringerEnum {
-	return []enum.IntStringerEnum{DATATYPE__INT, DATATYPE__INT8, DATATYPE__INT16, DATATYPE__INT32, DATATYPE__INT64, DATATYPE__UINT, DATATYPE__UINT8, DATATYPE__UINT16, DATATYPE__UINT32, DATATYPE__UINT64, DATATYPE__FLOAT32, DATATYPE__FLOAT64, DATATYPE__TEXT, DATATYPE__BOOL, DATATYPE__TIMESTAMP}
+	return []enum.IntStringerEnum{DATATYPE__INT, DATATYPE__INT8, DATATYPE__INT16, DATATYPE__INT32, DATATYPE__INT64, DATATYPE__UINT, DATATYPE__UINT8, DATATYPE__UINT16, DATATYPE__UINT32, DATATYPE__UINT64, DATATYPE__FLOAT32, DATATYPE__FLOAT64, DATATYPE__TEXT, DATATYPE__BOOL, DATATYPE__TIMESTAMP, DATATYPE__DECIMAL, DATATYPE__NUMERIC}
 }
 
 func (v Datatype) MarshalText() ([]byte, error) {
