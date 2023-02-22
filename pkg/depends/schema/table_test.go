@@ -21,5 +21,5 @@ func ExampleTable_CreateIfNotExists() {
 	// 	f_updated_at bigint NOT NULL DEFAULT '0'::bigint,
 	// 	f_deleted_at bigint NOT NULL DEFAULT '0'::bigint
 	// );
-	// CREATE UNIQUE INDEX tbl_ui_username ON wasm_project__demo.tbl (f_username,f_deleted_at);
+	// CREATE UNIQUE INDEX IF NOT EXISTS tbl_ui_username ON wasm_project__demo.tbl (f_username,f_deleted_at);
 }
