@@ -2,21 +2,18 @@ package wasm
 
 import (
 	"context"
+
 	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
-
-func DefaultMQClient() *MqttClient {
-	return &MqttClient{}
-}
 
 type MqttClient struct {
 	*mqtt.Client
 }
 
 func (m *MqttClient) ConfigType() enums.ConfigType {
-	return enums.CONFIG_TYPE__PROJECT_MQ
+	return enums.CONFIG_TYPE__PROJECT_MQTT
 }
 
 func (m *MqttClient) WithContext(ctx context.Context) context.Context {
@@ -32,5 +29,5 @@ func (m *MqttClient) WithContext(ctx context.Context) context.Context {
 		cli,
 	}
 
-	return WithMQ(ctx, client)
+	return WithMQTTClient(ctx, client)
 }

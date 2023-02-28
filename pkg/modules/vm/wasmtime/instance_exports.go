@@ -48,7 +48,7 @@ func NewExportFuncs(ctx context.Context, rt *Runtime) (*ExportFuncs, error) {
 	ef.cl, _ = wasm.ChainClientFromContext(ctx)
 	ef.db, _ = wasm.SQLStoreFromContext(ctx)
 	ef.env, _ = wasm.EnvFromContext(ctx)
-	ef.mq, _ = wasm.MQFromContext(ctx)
+	ef.mq, _ = wasm.MQTTClientFromContext(ctx)
 	ef.rt = rt
 
 	return ef, nil
@@ -68,7 +68,7 @@ func (ef *ExportFuncs) LinkABI(impt Import) error {
 		"ws_set_sql_db":    ef.SetSQLDB,
 		"ws_get_sql_db":    ef.GetSQLDB,
 		"ws_get_env":       ef.GetEnv,
-		"ws_send_mq":       ef.SendMQ,
+		"ws_send_mqtt":     ef.SendMQTT,
 	} {
 		if err := impt("env", name, ff); err != nil {
 			return err
@@ -254,7 +254,7 @@ func (ef *ExportFuncs) SendTX(chainID int32, offset, size, vmAddrPtr, vmSizePtr 
 	return int32(wasm.ResultStatusCode_OK)
 }
 
-func (ef *ExportFuncs) SendMQ(topicAddr, topicSize, msgAddr, msgSize int32) int32 {
+func (ef *ExportFuncs) SendMQTT(topicAddr, topicSize, msgAddr, msgSize int32) int32 {
 	if ef.mq == nil {
 		ef.log.Error(errors.New("mq client doesn't exist"))
 		return wasm.ResultStatusCode_Failed

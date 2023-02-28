@@ -189,23 +189,23 @@ func MustRuntimeResourceFromContext(ctx context.Context) *mapx.Map[uint32, []byt
 	return v
 }
 
-func WithMQ(ctx context.Context, mq *MqttClient) context.Context {
+func WithMQTTClient(ctx context.Context, mq *MqttClient) context.Context {
 	return contextx.WithValue(ctx, CtxMqttClient{}, mq)
 }
 
-func WithMQContext(mq *MqttClient) contextx.WithContext {
+func WithMQTTClientContext(mq *MqttClient) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
 		return contextx.WithValue(ctx, CtxMqttClient{}, mq)
 	}
 }
 
-func MQFromContext(ctx context.Context) (*MqttClient, bool) {
+func MQTTClientFromContext(ctx context.Context) (*MqttClient, bool) {
 	v, ok := ctx.Value(CtxMqttClient{}).(*MqttClient)
 	return v, ok
 }
 
-func MustMQFromContext(ctx context.Context) *MqttClient {
-	v, ok := MQFromContext(ctx)
+func MustMQTTClientFromContext(ctx context.Context) *MqttClient {
+	v, ok := MQTTClientFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

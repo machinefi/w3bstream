@@ -26,7 +26,7 @@ func ParseConfigTypeFromString(s string) (ConfigType, error) {
 	case "PROJECT_ENV":
 		return CONFIG_TYPE__PROJECT_ENV, nil
 	case "PROJECT_MQ":
-		return CONFIG_TYPE__PROJECT_MQ, nil
+		return CONFIG_TYPE__PROJECT_MQTT, nil
 	}
 }
 
@@ -43,7 +43,7 @@ func ParseConfigTypeFromLabel(s string) (ConfigType, error) {
 	case "PROJECT_ENV":
 		return CONFIG_TYPE__PROJECT_ENV, nil
 	case "PROJECT_MQ":
-		return CONFIG_TYPE__PROJECT_MQ, nil
+		return CONFIG_TYPE__PROJECT_MQTT, nil
 	}
 }
 
@@ -63,7 +63,7 @@ func (v ConfigType) String() string {
 		return "INSTANCE_CACHE"
 	case CONFIG_TYPE__PROJECT_ENV:
 		return "PROJECT_ENV"
-	case CONFIG_TYPE__PROJECT_MQ:
+	case CONFIG_TYPE__PROJECT_MQTT:
 		return "PROJECT_MQ"
 	}
 }
@@ -80,7 +80,7 @@ func (v ConfigType) Label() string {
 		return "INSTANCE_CACHE"
 	case CONFIG_TYPE__PROJECT_ENV:
 		return "PROJECT_ENV"
-	case CONFIG_TYPE__PROJECT_MQ:
+	case CONFIG_TYPE__PROJECT_MQTT:
 		return "PROJECT_MQ"
 	}
 }
@@ -90,7 +90,7 @@ func (v ConfigType) TypeName() string {
 }
 
 func (v ConfigType) ConstValues() []enum.IntStringerEnum {
-	return []enum.IntStringerEnum{CONFIG_TYPE__PROJECT_SCHEMA, CONFIG_TYPE__INSTANCE_CACHE, CONFIG_TYPE__PROJECT_ENV, CONFIG_TYPE__PROJECT_MQ}
+	return []enum.IntStringerEnum{CONFIG_TYPE__PROJECT_SCHEMA, CONFIG_TYPE__INSTANCE_CACHE, CONFIG_TYPE__PROJECT_ENV, CONFIG_TYPE__PROJECT_MQTT}
 }
 
 func (v ConfigType) MarshalText() ([]byte, error) {
