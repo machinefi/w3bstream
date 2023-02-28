@@ -76,6 +76,10 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 	if _, ok := wasm.KVStoreFromContext(ctx); !ok {
 		ctx = wasm.DefaultCache().WithContext(ctx)
 	}
+	//if _, ok := wasm.MqttBrokerFromContext(ctx); !ok {
+	//	ctx = wasm.DefaultMQClient().WithContext(ctx)
+	//}
+
 	ctx = wasm.WithChainClient(ctx, wasm.NewChainClient(parent))
 	ctx = wasm.WithLogger(ctx, types.MustLoggerFromContext(ctx).WithValues(
 		"@src", "wasm",

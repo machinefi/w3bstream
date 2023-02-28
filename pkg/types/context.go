@@ -24,6 +24,7 @@ type (
 	CtxWasmPgEndpoint    struct{} // CtxWasmPgEndpoint postgres.Endpoint for wasm
 	CtxLogger            struct{} // CtxLogger log.Logger
 	CtxMqttBroker        struct{} // CtxMqttBroker confmqtt.Broker
+	CtxMqttClient        struct{} // CtxMqttClient confmqtt.Client
 	CtxMqttMsgHandler    struct{} // CtxMqttMsgHandler mqtt.MessageHandler
 	CtxRedisEndpoint     struct{} // CtxRedisEndpoint redis.Redis
 	CtxUploadConfig      struct{} // CtxUploadConfig UploadConfig
@@ -196,6 +197,27 @@ func MqttBrokerFromContext(ctx context.Context) (*confmqtt.Broker, bool) {
 
 func MustMqttBrokerFromContext(ctx context.Context) *confmqtt.Broker {
 	v, ok := MqttBrokerFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithMqttClient(ctx context.Context, v *confmqtt.Client) context.Context {
+	return contextx.WithValue(ctx, CtxMqttClient{}, v)
+}
+
+func WithMqttClientContext(v *confmqtt.Client) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxMqttClient{}, v)
+	}
+}
+
+func MqttClientFromContext(ctx context.Context) (*confmqtt.Client, bool) {
+	v, ok := ctx.Value(CtxMqttClient{}).(*confmqtt.Client)
+	return v, ok
+}
+
+func MustMqttClientFromContext(ctx context.Context) *confmqtt.Client {
+	v, ok := MqttClientFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

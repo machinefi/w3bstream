@@ -36,6 +36,8 @@ type (
 		db  wasm.SQLStore
 		log conflog.Logger
 		cl  *wasm.ChainClient
+		mq  *wasm.MqttClient
+		ctx context.Context
 	}
 )
 
@@ -48,7 +50,9 @@ func NewExportFuncs(ctx context.Context, rt *Runtime) (*ExportFuncs, error) {
 	ef.cl, _ = wasm.ChainClientFromContext(ctx)
 	ef.db, _ = wasm.SQLStoreFromContext(ctx)
 	ef.env, _ = wasm.EnvFromContext(ctx)
+	ef.mq, _ = wasm.MqttClientFromContext(ctx)
 	ef.rt = rt
+	ef.ctx = ctx
 
 	return ef, nil
 }
@@ -61,6 +65,7 @@ func (ef *ExportFuncs) LinkABI(impt Import) error {
 		"ws_get_data":      ef.GetData,
 		"ws_set_data":      ef.SetData,
 		"ws_get_mqtt_msg":  ef.GetMqttMsg,
+		"ws_send_mqtt_msg": ef.SendMqttMsg,
 		"ws_get_db":        ef.GetDB,
 		"ws_set_db":        ef.SetDB,
 		"ws_send_tx":       ef.SendTX,
@@ -138,6 +143,37 @@ func (ef *ExportFuncs) GetMqttMsg(rid, topicAddr, topicSize, plAddr, plSize int3
 	if err := ef.rt.Copy(msg.Payload(), plAddr, plSize); err != nil {
 		ef.log.Error(err)
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
+	}
+	return int32(wasm.ResultStatusCode_OK)
+}
+
+func (ef *ExportFuncs) SendMqttMsg(topicAddr, topicSize, msgAddr, msgSize int32) int32 {
+	if ef.mq == nil {
+		ef.log.Error(errors.New("mq client doesn't exist"))
+		return wasm.ResultStatusCode_Failed
+	}
+
+	var (
+		topicBuf []byte
+		msgBuf   []byte
+		err      error
+	)
+
+	topicBuf, err = ef.rt.Read(topicAddr, topicSize)
+	if err != nil {
+		ef.log.Error(err)
+		return wasm.ResultStatusCode_Failed
+	}
+	msgBuf, err = ef.rt.Read(msgAddr, msgSize)
+	if err != nil {
+		ef.log.Error(err)
+		return wasm.ResultStatusCode_Failed
+	}
+	//err = ef.mq.WithTopic(string(topicBuf)).Publish(string(msgBuf))
+	err = ef.mq.PublishWithTopic(ef.ctx, string(topicBuf), string(msgBuf))
+	if err != nil {
+		ef.log.Error(err)
+		return wasm.ResultStatusCode_Failed
 	}
 	return int32(wasm.ResultStatusCode_OK)
 }

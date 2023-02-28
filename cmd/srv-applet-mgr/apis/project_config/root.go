@@ -11,7 +11,9 @@ func init() {
 	Root.Register(kit.NewRouter(&GetProjectSchema{}))
 	Root.Register(kit.NewRouter(&GetProjectEnv{}))
 	Root.Register(kit.NewRouter(&GetProjectMattBroker{}))
+	Root.Register(kit.NewRouter(&GetProjectMattClient{}))
 	Root.Register(kit.NewRouter(&CreateProjectSchema{}))
 	Root.Register(kit.NewRouter(&CreateOrUpdateProjectEnv{}))
 	Root.Register(kit.NewRouter(&CreateProjectMqttBroker{}))
+	Root.Register(kit.NewRouter(&CreateProjectMqttClient{}))
 }

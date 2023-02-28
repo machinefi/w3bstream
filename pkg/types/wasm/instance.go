@@ -66,6 +66,7 @@ type ABI interface {
 	GetData(rid, vmAddrPtr, vmSizePtr int32) int32
 	SetData(rid, addr, size int32) int32
 	GetMqttMsg(rid, topicAddr, topicSize, plAddr, plSize int32) int32
+	SendMqttMsg(topicAddr, topicSize, msgAddr, msgSize int32) int32
 	GetDB(kAddr, kSize, vmAddrPtr, vmSizePtr int32) int32
 	SetDB(kAddr, kSize, vAddr, vSize int32) int32
 	SendTX(chainid int32, offset, size, vmAddrPtr, vmSizePtr int32) int32
