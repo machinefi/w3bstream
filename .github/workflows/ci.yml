@@ -36,8 +36,15 @@ jobs:
       - name: Test Go
         run: go test ./...
 
+      # Docker is not installed by default on macos base image for license reason : https://github.com/actions/runner-images/issues/17
+      - name: Setup Docker and Colima
+        if: startsWith(matrix.os, 'macos-latest') == true
+        run: |
+          brew install docker colima
+          colima start
+
       - name: Set up QEMU
-        if: startsWith(matrix.os, 'macos-latest') != true
+        #if: startsWith(matrix.os, 'macos-latest') != true
         uses: docker/setup-qemu-action@v2
 
       - name: Setup Docker buildx
@@ -62,7 +69,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          #platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
