@@ -5,7 +5,7 @@ on:
     branches: ["main", "armv8"]
     tags: ["v*.*.*"]
   pull_request:
-    branches: ["main", "armv8"]
+    branches: ["main"]
 
 env:
   REGISTRY: ghcr.io
