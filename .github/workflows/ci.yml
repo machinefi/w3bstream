@@ -2,7 +2,7 @@ name: ci
 
 on:
   push:
-    branches: ["main", "armv8"]
+    branches: ["main"]
     tags: ["v*.*.*"]
   pull_request:
     branches: ["main"]
