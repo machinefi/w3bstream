@@ -89,23 +89,3 @@ func (r *CreateProjectMqttBroker) Output(ctx context.Context) (interface{}, erro
 		prj.ProjectID, &r.MqttBroker,
 	)
 }
-
-type CreateProjectMqttClient struct {
-	httpx.MethodPost
-	ProjectName     string `name:"projectName" in:"path"`
-	wasm.MqttClient `in:"body"`
-}
-
-func (r *CreateProjectMqttClient) Path() string {
-	return "/:projectName/" + enums.CONFIG_TYPE__PROJECT_MQTT_CLIENT.String()
-}
-
-func (r *CreateProjectMqttClient) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
-	ctx, err := ca.WithProjectContextByName(ctx, r.ProjectName)
-	if err != nil {
-		return nil, err
-	}
-	prj := types.MustProjectFromContext(ctx)
-	return config.CreateConfig(ctx, prj.ProjectID, &r.MqttClient)
-}

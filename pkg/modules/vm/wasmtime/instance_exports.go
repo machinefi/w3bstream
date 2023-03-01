@@ -36,7 +36,7 @@ type (
 		db  wasm.SQLStore
 		log conflog.Logger
 		cl  *wasm.ChainClient
-		mq  *wasm.MqttClient
+		mq  *wasm.MqttBroker
 		ctx context.Context
 	}
 )
@@ -50,7 +50,7 @@ func NewExportFuncs(ctx context.Context, rt *Runtime) (*ExportFuncs, error) {
 	ef.cl, _ = wasm.ChainClientFromContext(ctx)
 	ef.db, _ = wasm.SQLStoreFromContext(ctx)
 	ef.env, _ = wasm.EnvFromContext(ctx)
-	ef.mq, _ = wasm.MqttClientFromContext(ctx)
+	ef.mq, _ = wasm.MqttBrokerFromContext(ctx)
 	ef.rt = rt
 	ef.ctx = ctx
 
@@ -169,7 +169,6 @@ func (ef *ExportFuncs) SendMqttMsg(topicAddr, topicSize, msgAddr, msgSize int32)
 		ef.log.Error(err)
 		return wasm.ResultStatusCode_Failed
 	}
-	//err = ef.mq.WithTopic(string(topicBuf)).Publish(string(msgBuf))
 	err = ef.mq.PublishWithTopic(ef.ctx, string(topicBuf), string(msgBuf))
 	if err != nil {
 		ef.log.Error(err)

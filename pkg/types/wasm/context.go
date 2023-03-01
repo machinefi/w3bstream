@@ -21,7 +21,6 @@ type (
 	CtxChainClient        struct{}
 	CtxRuntimeResource    struct{}
 	CtxMqttBroker         struct{}
-	CtxMqttClient         struct{}
 	CtxMqttInboundMessage struct{}
 )
 
@@ -231,27 +230,6 @@ func MqttInboundMessageFromContext(ctx context.Context) (mqtt.Message, bool) {
 
 func MustInboundMqttMessageFromContext(ctx context.Context) mqtt.Message {
 	v, ok := MqttInboundMessageFromContext(ctx)
-	must.BeTrue(ok)
-	return v
-}
-
-func WithMqttClient(ctx context.Context, mq *MqttClient) context.Context {
-	return contextx.WithValue(ctx, CtxMqttClient{}, mq)
-}
-
-func WithMqttClientContext(mq *MqttClient) contextx.WithContext {
-	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, CtxMqttClient{}, mq)
-	}
-}
-
-func MqttClientFromContext(ctx context.Context) (*MqttClient, bool) {
-	v, ok := ctx.Value(CtxMqttClient{}).(*MqttClient)
-	return v, ok
-}
-
-func MustMQFromContext(ctx context.Context) *MqttClient {
-	v, ok := MqttClientFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

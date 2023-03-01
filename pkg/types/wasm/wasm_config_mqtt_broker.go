@@ -101,3 +101,16 @@ func (b *MqttBroker) Uninit() {
 	b.cli.Disconnect(1)
 	brokers.Remove(b.server)
 }
+
+func (b *MqttBroker) PublishWithTopic(ctx context.Context, topic string, payload interface{}) error {
+	_, l := conflog.FromContext(ctx).Start(ctx)
+	defer l.End()
+
+	l = l.WithValues("broker", b.server, "topic", topic, "payload", payload)
+	l.Info("start sending")
+	if tok := b.cli.Publish(topic, byte(enums.MQTT_QOS__ONCE), false, payload); tok.Wait() && tok.Error() != nil {
+		l.Error(tok.Error())
+		return tok.Error()
+	}
+	return nil
+}
