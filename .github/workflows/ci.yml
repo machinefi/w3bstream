@@ -5,7 +5,7 @@ on:
     branches: ["main", "armv8"]
     tags: ["v*.*.*"]
   pull_request:
-    branches: ["main"]
+    branches: ["main", "armv8"]
 
 env:
   REGISTRY: ghcr.io
@@ -13,7 +13,10 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
     permissions:
       contents: read
       packages: write
@@ -58,7 +61,6 @@ jobs:
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
         with:
           context: .
-          #platforms: linux/amd64,linux/arm64,linux/arm/v8
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
