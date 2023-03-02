@@ -15,6 +15,10 @@ SRV_APPLET_MGR__MonitorDB_PoolSize: "10"
 SRV_APPLET_MGR__MonitorDB_Retry_Interval: 3s
 SRV_APPLET_MGR__MonitorDB_Retry_Repeats: "3"
 SRV_APPLET_MGR__MonitorDB_Slave: ""
+SRV_APPLET_MGR__MqttBroker_Cert_CaPath: ""
+SRV_APPLET_MGR__MqttBroker_Cert_CrtPath: ""
+SRV_APPLET_MGR__MqttBroker_Cert_KeyPath: ""
+SRV_APPLET_MGR__MqttBroker_IsSecurity: "false"
 SRV_APPLET_MGR__MqttBroker_Keepalive: 3h
 SRV_APPLET_MGR__MqttBroker_QoS: ONCE
 SRV_APPLET_MGR__MqttBroker_RetainPublish: "false"

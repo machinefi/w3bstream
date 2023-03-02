@@ -8,6 +8,9 @@ services:
       - ../var/mqtt/data:/mosquitto/data
       - ../var/mqtt/conf:/mosquitto/config
       - ../var/mqtt/log:/mosquitto/log
+      - ../var/mqtt/cert:/mosquitto/cert
     ports:
       - "1883:1883"
       - "9001:9001"
+      - "8883:8883"
+

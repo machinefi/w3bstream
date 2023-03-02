@@ -5,6 +5,7 @@ import (
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/tls"
 	"github.com/pkg/errors"
 
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
@@ -16,18 +17,21 @@ import (
 type MqttBrokerScheme string
 
 const (
-	MqttBrokerScheme_TCP MqttBrokerScheme = "tcp"
+	MqttBrokerScheme_TCP   MqttBrokerScheme = "tcp"
+	MqttBrokerScheme_MQTT  MqttBrokerScheme = "mqtt"
+	MqttBrokerScheme_MQTTs MqttBrokerScheme = "mqtts"
 )
 
 var brokers = mapx.New[string, bool]()
 
 type MqttBroker struct {
-	Scheme   MqttBrokerScheme `json:"scheme,omitempty"` // Scheme support tcp only TODO support other protocol
+	Scheme   MqttBrokerScheme `json:"scheme"` // Scheme support tcp only TODO support other protocol
 	Host     string           `json:"host"`
 	Port     uint16           `json:"port"`
 	Username string           `json:"username,omitempty"`
 	Password string           `json:"password,omitempty"`
 	Topics   []string         `json:"topics"`
+	TLS      *tls.X509KeyPair `json:"tls"`
 	server   string
 	cli      mqtt.Client
 }
@@ -45,12 +49,15 @@ func (b *MqttBroker) Init(ctx context.Context) error {
 	defer l.End()
 
 	b.server = (&types.Endpoint{
-		Scheme:   "tcp",
+		Scheme:   string(b.Scheme),
 		Hostname: b.Host,
 		Port:     b.Port,
 		Username: b.Username,
 		Password: types.Password(b.Password),
 	}).String()
+	if err := b.TLS.Init(); err != nil {
+		return err
+	}
 
 	l = l.WithValues("broker", b.server)
 	if _, ok := brokers.Load(b.server); ok {
@@ -69,7 +76,8 @@ func (b *MqttBroker) Init(ctx context.Context) error {
 			SetClientID(prj.Name).
 			SetKeepAlive(time.Minute).
 			SetDefaultPublishHandler(hdl).
-			SetPingTimeout(time.Second),
+			SetPingTimeout(time.Second).
+			SetTLSConfig(b.TLS.TLSConfig()),
 	)
 
 	if tok := cli.Connect(); tok.Wait() && tok.Error() != nil {

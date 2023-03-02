@@ -1,24 +1,26 @@
 package mqtt
 
 import (
-	"crypto/tls"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/google/uuid"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
+	conftls "github.com/machinefi/w3bstream/pkg/depends/conf/tls"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/retry"
 )
 
 type Broker struct {
-	Server        types.Endpoint `json:"broker,string"`
-	Retry         retry.Retry    `json:"-"`
-	Timeout       types.Duration `json:"-"`
-	Keepalive     types.Duration `json:"-"`
-	RetainPublish bool           `json:"retain"`
-	QoS           QOS            `json:"-"`
+	Server        types.Endpoint       `json:"broker,string"`
+	IsSecurity    bool                 `json:"isSecurity"`
+	Retry         retry.Retry          `json:"-"`
+	Timeout       types.Duration       `json:"-"`
+	Keepalive     types.Duration       `json:"-"`
+	RetainPublish bool                 `json:"retain"`
+	QoS           QOS                  `json:"-"`
+	Cert          *conftls.X509KeyPair `json:"cert,omitempty"`
 
 	agents *mapx.Map[string, *Client]
 }
@@ -38,6 +40,11 @@ func (b *Broker) SetDefault() {
 }
 
 func (b *Broker) Init() error {
+	if b.Cert != nil {
+		if err := b.Cert.Init(); err != nil {
+			return err
+		}
+	}
 	return b.Retry.Do(func() error {
 		cid := uuid.New().String()
 		_, err := b.Client(cid)
@@ -52,7 +59,7 @@ func (b *Broker) Init() error {
 func (b *Broker) options() *mqtt.ClientOptions {
 	opt := mqtt.NewClientOptions()
 	if !b.Server.IsZero() {
-		opt = opt.AddBroker(b.Server.SchemeHost())
+		opt = opt.AddBroker(b.Server.String())
 	}
 	if b.Server.Username != "" {
 		opt.SetUsername(b.Server.Username)
@@ -72,13 +79,8 @@ func (b *Broker) Client(cid string) (*Client, error) {
 	if cid != "" {
 		opt.SetClientID(cid)
 	}
-	// TODO support TLS
 	if b.Server.IsTLS() {
-		opt.SetTLSConfig(&tls.Config{
-			ClientAuth:         tls.NoClientCert,
-			ClientCAs:          nil,
-			InsecureSkipVerify: true,
-		})
+		opt.SetTLSConfig(b.Cert.TLSConfig())
 	}
 	if b.Server.Username != "" {
 		opt.SetUsername(b.Server.Username)

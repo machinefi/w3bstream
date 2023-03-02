@@ -113,7 +113,7 @@ func (c *Ctx) Conf(configs ...interface{}) {
 					conf.Init()
 				case interface{ Init() error }:
 					if err = conf.Init(); err != nil {
-						panic(errors.Errorf("conf init: %v", err))
+						panic(errors.Errorf("conf %s init: %v", reflect.TypeOf(conf).String(), err))
 					}
 				}
 			}

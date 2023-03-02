@@ -62,6 +62,11 @@ run_depends:
 	@docker-compose -f testutil/docker-compose-pg.yaml up -d
 	@docker-compose -f testutil/docker-compose-mqtt.yaml up -d
 
+stop_depends:
+	@docker-compose -f testutil/docker-compose-redis.yaml stop
+	@docker-compose -f testutil/docker-compose-pg.yaml stop
+	@docker-compose -f testutil/docker-compose-mqtt.yaml stop
+
 test:
 	go test ./...
 	@echo "=================TEST FINISHED================="
