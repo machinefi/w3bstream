@@ -25,6 +25,9 @@ type X509KeyPair struct {
 }
 
 func (c *X509KeyPair) Init() error {
+	if c == nil {
+		return nil
+	}
 	if c.KeyPath != "" {
 		content, err := os.ReadFile(c.KeyPath)
 		if err != nil {
