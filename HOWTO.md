@@ -130,11 +130,21 @@ echo '{"env":'$PROJECTENV'}' | http post :8888/srv-applet-mgr/v0/project_config/
 > the database for wasm storage is configured by w3bstream server and the name
 > of schema is name of project.
 
+### Create project mqtt broker
+```sh
+export KEY=`cat $KEYFILE | base64 -w 0`
+export CRT=`cat $CRTFILE | base64 -w 0`
+export CA=`cat $CAILE | base64 -w 0`
+export BROKER='{"scheme":"mqtts","host":"127.0.0.1","port":8883,"username":"applet_management","password":"PaSsW0rD","topics":["/device/#","/backend/#"],"tls":{"key":"'$KEY'","crt":"'$CRT'","ca":"'$CA'"}}'
+echo $BROKER | http post :8888/srv-applet-mgr/v0/project_config/$PROJECTNAME/PROJECT_MQTT_BROKER -A bearer -a $TOK
+```
+
 ### Review your project config
 
 ```shell
 http get :8888/srv-applet-mgr/v0/project_config/$PROJECTNAME/PROJECT_SCHEMA -A bearer -a $TOK
 http get :8888/srv-applet-mgr/v0/project_config/$PROJECTNAME/PROJECT_ENV -A bearer -a $TOK
+http get :8888/srv-applet-mgr/v0/project_config/$PROJECTNAME/PROJECT_MQTT_BROKER -A bearer -a $TOK
 ```
 
 ### Create and deploy applet
