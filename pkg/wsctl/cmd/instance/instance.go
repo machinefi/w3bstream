@@ -2,9 +2,11 @@ package instance
 
 import (
 	"fmt"
+
+	"github.com/spf13/cobra"
+
 	"github.com/machinefi/w3bstream/pkg/wsctl/client"
 	"github.com/machinefi/w3bstream/pkg/wsctl/config"
-	"github.com/spf13/cobra"
 )
 
 // Multi-language support
