@@ -19,6 +19,7 @@ const (
 	ResultStatusCode_HostInternal
 	ResultStatusCode_EnvKeyNotFound
 	ResultStatusCode_NoDBContext
+	ResultStatusCode_EmptyMqttTopic
 
 	// TODO following result status
 	ResultStatusCode_Failed = -1 // reserved for wasm invoke failed

@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/pkg/errors"
 
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
@@ -144,7 +145,20 @@ func OnEventReceivedFromMqtt(ctx context.Context, msg mqtt.Message) {
 
 		wg.Add(1)
 		go func(v *strategy.InstanceHandler) {
-			res <- i.HandleEvent(wasm.WithMqttInboundMessage(ctx, msg), v.Handler, msg)
+			ret := i.HandleEvent(ctx, v.Handler, msg)
+			l := l.WithValues(
+				"handler", v.Handler,
+				"app", v.AppletID,
+				"topic", msg.Topic(),
+				"payload", msg.Payload(),
+				"code", ret.Code,
+			)
+			if ret.Code != 0 {
+				l.Error(errors.New(ret.ErrMsg))
+			} else {
+				l.Info("success")
+			}
+			res <- ret
 			wg.Done()
 		}(v)
 	}

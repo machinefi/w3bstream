@@ -5,13 +5,12 @@ import (
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/machinefi/w3bstream/pkg/depends/conf/tls"
-	"github.com/pkg/errors"
-
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/tls"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/pkg/errors"
 )
 
 type MqttBrokerScheme string
@@ -22,7 +21,7 @@ const (
 	MqttBrokerScheme_MQTTs MqttBrokerScheme = "mqtts"
 )
 
-var brokers = mapx.New[string, bool]()
+var brokers = mapx.New[string, *MqttBroker]()
 
 type MqttBroker struct {
 	Scheme   MqttBrokerScheme `json:"scheme"` // Scheme support tcp only TODO support other protocol
@@ -31,7 +30,7 @@ type MqttBroker struct {
 	Username string           `json:"username,omitempty"`
 	Password string           `json:"password,omitempty"`
 	Topics   []string         `json:"topics"`
-	TLS      *tls.X509KeyPair `json:"tls"`
+	TLS      *tls.X509KeyPair `json:"tls,omitempty"`
 	server   string
 	cli      mqtt.Client
 }
@@ -60,15 +59,16 @@ func (b *MqttBroker) Init(ctx context.Context) error {
 	}
 
 	l = l.WithValues("broker", b.server)
-	if _, ok := brokers.Load(b.server); ok {
+	if _b, ok := brokers.Load(b.server); ok {
 		l.Warn(errors.New("broker already subscribing"))
+		*b = *_b
 		return nil
 	}
-	brokers.Store(b.server, true)
+	brokers.Store(b.server, b)
 
 	prj := types.MustProjectFromContext(ctx)
 	hdl := types.MustMqttMsgHandlerFromContext(ctx)
-	l = l.WithValues("project", prj.Name)
+	l = l.WithValues("prj", prj.Name)
 
 	cli := mqtt.NewClient(
 		mqtt.NewClientOptions().
@@ -77,6 +77,7 @@ func (b *MqttBroker) Init(ctx context.Context) error {
 			SetKeepAlive(time.Minute).
 			SetDefaultPublishHandler(hdl).
 			SetPingTimeout(time.Second).
+			SetWriteTimeout(time.Second).
 			SetTLSConfig(b.TLS.TLSConfig()),
 	)
 
@@ -110,15 +111,20 @@ func (b *MqttBroker) Uninit() {
 	brokers.Remove(b.server)
 }
 
-func (b *MqttBroker) PublishWithTopic(ctx context.Context, topic string, payload interface{}) error {
+func (b *MqttBroker) PublishWithTopic(ctx context.Context, topic string, payload []byte) error {
 	_, l := conflog.FromContext(ctx).Start(ctx)
 	defer l.End()
 
-	l = l.WithValues("broker", b.server, "topic", topic, "payload", payload)
-	l.Info("start sending")
-	if tok := b.cli.Publish(topic, byte(enums.MQTT_QOS__ONCE), false, payload); tok.Wait() && tok.Error() != nil {
+	l = l.WithValues(
+		"broker", b.server,
+		"topic", topic,
+		"payload", string(payload),
+		"app", types.MustAppletFromContext(ctx).Name,
+	)
+	if tok := b.cli.Publish(topic, byte(enums.MQTT_QOS__ONLY_ONCE), false, payload); tok.Wait() && tok.Error() != nil {
 		l.Error(tok.Error())
 		return tok.Error()
 	}
+	l.Info("sent")
 	return nil
 }

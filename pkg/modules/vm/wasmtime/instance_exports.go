@@ -135,12 +135,21 @@ func (ef *ExportFuncs) GetMqttMsg(rid, topicAddr, topicSize, plAddr, plSize int3
 		return int32(wasm.ResultStatusCode_ResourceTypeError)
 	}
 
-	if err := ef.rt.Copy([]byte(msg.Topic()), topicAddr, topicSize); err != nil {
+	topic := msg.Topic()
+	if len(topic) == 0 {
+		return int32(wasm.ResultStatusCode_EmptyMqttTopic)
+	}
+	if err := ef.rt.Copy([]byte(topic), topicAddr, topicSize); err != nil {
 		ef.log.Error(err)
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
 
-	if err := ef.rt.Copy(msg.Payload(), plAddr, plSize); err != nil {
+	payload := msg.Payload()
+	if len(payload) == 0 {
+		plAddr, plSize = 0, 0
+		return int32(wasm.ResultStatusCode_OK)
+	}
+	if err := ef.rt.Copy(payload, plAddr, plSize); err != nil {
 		ef.log.Error(err)
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
@@ -169,7 +178,7 @@ func (ef *ExportFuncs) SendMqttMsg(topicAddr, topicSize, msgAddr, msgSize int32)
 		ef.log.Error(err)
 		return wasm.ResultStatusCode_Failed
 	}
-	err = ef.mq.PublishWithTopic(ef.ctx, string(topicBuf), string(msgBuf))
+	err = ef.mq.PublishWithTopic(ef.ctx, string(topicBuf), msgBuf)
 	if err != nil {
 		ef.log.Error(err)
 		return wasm.ResultStatusCode_Failed
