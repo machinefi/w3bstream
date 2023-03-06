@@ -2,8 +2,6 @@ name: Release
 
 on:
   push:
-    branches:
-      - "pgp_sign"
     tags:
       - "v*"
 
@@ -19,10 +17,10 @@ jobs:
             applet_mgr_name: srv-applet-mgr-linux-amd64
           - os: windows-latest
             artifact_name: pub_client-windows-amd64.exe
-            applet_mgr_name: srv-applet-mgr-linux-amd64
+            applet_mgr_name: srv-applet-mgr-windows-amd64
           - os: macos-latest
             artifact_name: pub_client-darwin-amd64
-            applet_mgr_name: srv-applet-mgr-linux-amd64
+            applet_mgr_name: srv-applet-mgr-darwin-amd64
 
     steps:
       - name: Checkout code
