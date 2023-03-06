@@ -2,12 +2,13 @@ package wasmtime
 
 import (
 	"context"
-	"github.com/machinefi/w3bstream/pkg/modules/job"
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
+	"github.com/machinefi/w3bstream/pkg/modules/job"
+	"github.com/machinefi/w3bstream/pkg/types/task"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/sql_util"
 )
@@ -20,24 +21,26 @@ type (
 	}
 
 	ExportFuncs struct {
-		rt  *Runtime
-		res *mapx.Map[uint32, []byte]
-		env *wasm.Env
-		kvs wasm.KVStore
-		db  wasm.SQLStore
-		log conflog.Logger
-		cl  *wasm.ChainClient
-		ctx context.Context
-		mq  *wasm.MqttClient
+		rt         *Runtime
+		res        *mapx.Map[uint32, []byte]
+		env        *wasm.Env
+		kvs        wasm.KVStore
+		db         wasm.SQLStore
+		log        conflog.Logger
+		cl         *wasm.ChainClient
+		ctx        context.Context
+		mq         *wasm.MqttClient
+		dispatcher job.Dispatcher
 	}
 )
 
 func NewExportFuncs(ctx context.Context, rt *Runtime) (*ExportFuncs, error) {
 	ef := &ExportFuncs{
-		res: wasm.MustRuntimeResourceFromContext(ctx),
-		kvs: wasm.MustKVStoreFromContext(ctx),
-		log: wasm.MustLoggerFromContext(ctx),
-		ctx: ctx,
+		res:        wasm.MustRuntimeResourceFromContext(ctx),
+		kvs:        wasm.MustKVStoreFromContext(ctx),
+		log:        wasm.MustLoggerFromContext(ctx),
+		dispatcher: task.MustDispatcherFromContext(ctx),
+		ctx:        ctx,
 	}
 	ef.cl, _ = wasm.ChainClientFromContext(ctx)
 	ef.db, _ = wasm.SQLStoreFromContext(ctx)
@@ -76,7 +79,7 @@ func (ef *ExportFuncs) Log(logLevel, ptr, size int32) int32 {
 	buf, err := ef.rt.Read(ptr, size)
 	if err != nil {
 		ef.log.Error(err)
-		job.Dispatch(ef.ctx, job.NewWasmLogTask(ef.ctx, conflog.ErrorLevel.String(), err.Error()))
+		ef.dispatcher(job.NewWasmLogTask(ef.ctx, conflog.ErrorLevel.String(), err.Error()))
 		return wasm.ResultStatusCode_Failed
 	}
 	switch conflog.Level(logLevel) {
@@ -91,10 +94,10 @@ func (ef *ExportFuncs) Log(logLevel, ptr, size int32) int32 {
 	case conflog.ErrorLevel:
 		ef.log.Error(errors.New(string(buf)))
 	default:
-		job.Dispatch(ef.ctx, job.NewWasmLogTask(ef.ctx, conflog.TraceLevel.String(), string(buf)))
+		ef.dispatcher(job.NewWasmLogTask(ef.ctx, conflog.TraceLevel.String(), string(buf)))
 		return int32(wasm.ResultStatusCode_OK)
 	}
-	job.Dispatch(ef.ctx, job.NewWasmLogTask(ef.ctx, conflog.Level(logLevel).String(), string(buf)))
+	ef.dispatcher(job.NewWasmLogTask(ef.ctx, conflog.Level(logLevel).String(), string(buf)))
 	return int32(wasm.ResultStatusCode_OK)
 }
 

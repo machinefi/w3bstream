@@ -2,11 +2,14 @@ package deploy
 
 import (
 	"context"
+
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
+	"github.com/machinefi/w3bstream/pkg/modules/job"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/task"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
@@ -19,10 +22,10 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		types.WithLoggerContext(types.MustLoggerFromContext(parent)),
 		types.WithWasmDBExecutorContext(types.MustWasmDBExecutorFromContext(parent)),
 		types.WithRedisEndpointContext(types.MustRedisEndpointFromContext(parent)),
-		types.WithTaskWorkerContext(types.MustTaskWorkerFromContext(parent)),
-		types.WithTaskBoardContext(types.MustTaskBoardFromContext(parent)),
 		types.WithMqttBrokerContext(types.MustMqttBrokerFromContext(parent)),
 	)(context.Background())
+
+	ctx = task.WithDispatcher(parent, job.NewDispatcher(parent))
 
 	app := &models.Applet{RelApplet: models.RelApplet{AppletID: ins.AppletID}}
 	if err := app.FetchByAppletID(d); err != nil {

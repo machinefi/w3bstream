@@ -8,11 +8,13 @@ import (
 
 	"github.com/bytecodealliance/wasmtime-go"
 	"github.com/google/uuid"
+
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/modules/job"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/task"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
@@ -33,22 +35,24 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte) (i *Inst
 	}
 
 	return &Instance{
-		rt:       rt,
-		id:       id,
-		state:    enums.INSTANCE_STATE__CREATED,
-		res:      res,
-		handlers: make(map[string]*wasmtime.Func),
-		kvs:      wasm.MustKVStoreFromContext(ctx),
+		rt:         rt,
+		id:         id,
+		state:      enums.INSTANCE_STATE__CREATED,
+		res:        res,
+		handlers:   make(map[string]*wasmtime.Func),
+		kvs:        wasm.MustKVStoreFromContext(ctx),
+		dispatcher: task.MustDispatcherFromContext(ctx),
 	}, nil
 }
 
 type Instance struct {
-	id       types.SFID
-	rt       *Runtime
-	state    wasm.InstanceState
-	res      *mapx.Map[uint32, []byte]
-	handlers map[string]*wasmtime.Func
-	kvs      wasm.KVStore
+	id         types.SFID
+	rt         *Runtime
+	state      wasm.InstanceState
+	res        *mapx.Map[uint32, []byte]
+	handlers   map[string]*wasmtime.Func
+	kvs        wasm.KVStore
+	dispatcher job.Dispatcher
 }
 
 var _ wasm.Instance = (*Instance)(nil)
@@ -79,7 +83,7 @@ func (i *Instance) HandleEvent(ctx context.Context, fn string, data []byte) *was
 	}
 
 	t := NewTask(i, fn, data)
-	job.Dispatch(ctx, t)
+	i.dispatcher(t)
 	return t.Wait(time.Second * 5)
 }
 
