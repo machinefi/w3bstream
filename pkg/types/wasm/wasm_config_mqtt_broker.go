@@ -122,7 +122,7 @@ func (b *MqttBroker) PublishWithTopic(ctx context.Context, topic string, payload
 		"app", types.MustAppletFromContext(ctx).Name,
 	)
 	l.Info("start send")
-	if tok := b.cli.Publish(topic, byte(enums.MQTT_QOS__ONLY_ONCE), false, payload); tok.Wait() && tok.Error() != nil {
+	if tok := b.cli.Publish(topic, byte(enums.MQTT_QOS__ONCE), false, payload); tok.Wait() && tok.Error() != nil {
 		l.Error(tok.Error())
 		return tok.Error()
 	}
