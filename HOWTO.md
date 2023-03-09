@@ -82,42 +82,104 @@ output like
 export PROJECTSCHEMA='{
   "tables": [
     {
-      "name": "tbl",
-      "desc": "test table",
+      "name": "t_demo_table",
+      "desc": "demo",
       "cols": [
         {
-          "name": "f_username",
+          "name": "f_autoinc_id",
           "constrains": {
-            "datatype": "TEXT",
-            "length": 255,
-            "desc": "user name"
+            "datatype": "INT64",
+            "length": 40,
+            "autoincrement": true,
+            "null": true,
+            "desc": "datatype: bigserial"
           }
         },
         {
-          "name": "f_gender",
+          "name": "f_text",
           "constrains": {
-            "datatype": "UINT8",
-            "length": 255,
-            "default": "0",
-            "desc": "user name"
+            "datatype": "TEXT",
+            "default": "",
+            "length": 128,
+            "desc": "datatype: varchar(128)"
+          }
+        },
+        {
+          "name": "f_double_precious",
+          "constrains": {
+            "datatype": "FLOAT64",
+            "default": "0"
+          }
+        },
+        {
+          "name": "f_decimal_with_precision_and_scale",
+          "constrains": {
+            "datatype": "DECIMAL",
+            "length": 128,
+            "decimal": 512,
+            "default": "0"
+          }
+        },
+        {
+          "name": "f_numeric_with_precision_and_scale",
+          "constrains": {
+            "datatype": "NUMERIC",
+            "length": 512,
+            "decimal": 128,
+            "default": "0"
+          }
+        },
+        {
+          "name": "f_decimal_default",
+          "constrains": {
+            "datatype": "DECIMAL"
+          }
+        },
+        {
+          "name": "f_numeric_default",
+          "constrains": {
+            "datatype": "NUMERIC"
+          }
+        },
+        {
+          "name": "f_timestamp",
+          "constrains": {
+            "datatype": "TIMESTAMP",
+            "default": ""
           }
         }
       ],
       "keys": [
         {
-          "name": "ui_username",
+          "name": "primary",
           "isUnique": true,
           "columnNames": [
-            "f_username"
+            "f_autoinc_id"
           ]
         }
-      ],
-      "withSoftDeletion": true,
-      "withPrimaryKey": true
+      ]
     }
   ]
 }'
 echo $PROJECTSCHEMA | http post :8888/srv-applet-mgr/v0/project_config/$PROJECTNAME/PROJECT_SCHEMA -A bearer -a $TOK
+```
+
+the exactly sql of creating is 
+
+```sql
+CREATE TABLE IF NOT EXISTS t_demo_table (
+    f_autoinc_id bigserial,
+    f_text character varying(128) NOT NULL,
+    f_double_precious double precision NOT NULL DEFAULT '0'::double precision,
+    f_decimal_with_precision_and_scale decimal(128,512) NOT NULL DEFAULT '0'::decimal,
+    f_numeric_with_precision_and_scale numeric(512,128) NOT NULL DEFAULT '0'::numeric,
+    f_decimal_default decimal NOT NULL,
+    f_numeric_default numeric NOT NULL,
+    f_timestamp bigint NOT NULL,
+    f_created_at bigint NOT NULL DEFAULT '0'::bigint,
+    f_updated_at bigint NOT NULL DEFAULT '0'::bigint,
+    PRIMARY KEY (f_autoinc_id)
+);
 ```
 
 ### Create or update project env vars

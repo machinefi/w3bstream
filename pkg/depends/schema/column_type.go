@@ -66,6 +66,10 @@ func (t *ColumnType) DatabaseDatatype() string {
 	case DATATYPE__TIMESTAMP:
 		// TODO should use "timestamp without time zone"
 		datatype = "bigint"
+	case DATATYPE__DECIMAL:
+		datatype = "decimal"
+	case DATATYPE__NUMERIC:
+		datatype = "numeric"
 	default:
 		panic(fmt.Errorf("unsupport type: %v", dt))
 	}
@@ -73,10 +77,11 @@ func (t *ColumnType) DatabaseDatatype() string {
 }
 
 func (t *ColumnType) AutoCompleteLengthDatatype() string {
-	datatype := t.DatabaseDatatype()
-	if datatype == "character varying" || datatype == "real" || datatype == "double precision" {
+	dt := t.DatabaseDatatype()
+	if dt == "character varying" || dt == "real" ||
+		dt == "double precision" || dt == "decimal" || dt == "numeric" {
 		size := t.Length
-		if datatype == "character varying" {
+		if dt == "character varying" {
 			if size == 0 {
 				size = 255
 			}
@@ -84,13 +89,13 @@ func (t *ColumnType) AutoCompleteLengthDatatype() string {
 		if size > 0 {
 			sizestr := strconv.FormatUint(size, 10)
 			if t.Decimal > 0 {
-				datatype += "(" + sizestr + "," + strconv.FormatUint(t.Decimal, 10) + ")"
+				dt += "(" + sizestr + "," + strconv.FormatUint(t.Decimal, 10) + ")"
 			} else {
-				datatype += "(" + sizestr + ")"
+				dt += "(" + sizestr + ")"
 			}
 		}
 	}
-	return datatype
+	return dt
 }
 
 func (t *ColumnType) TypeModify() string {
@@ -99,7 +104,7 @@ func (t *ColumnType) TypeModify() string {
 	if !t.Null {
 		b.WriteString(" NOT NULL")
 	}
-	if t.Default != nil {
+	if t.Default != nil && len(*t.Default) > 0 {
 		b.WriteString(" DEFAULT ")
 		b.WriteString(t.NormalizeDefaultValue())
 	}
@@ -107,7 +112,7 @@ func (t *ColumnType) TypeModify() string {
 }
 
 func (t *ColumnType) NormalizeDefaultValue() string {
-	if t.Default == nil {
+	if t.Default == nil || len(*t.Default) == 0 {
 		return ""
 	}
 	dv := *t.Default
