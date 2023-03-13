@@ -3,8 +3,9 @@ package wasm
 import (
 	"context"
 
-	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/pkg/errors"
+
+	"github.com/machinefi/w3bstream/pkg/enums"
 )
 
 func NewConfigurationByType(t enums.ConfigType) (Configuration, error) {

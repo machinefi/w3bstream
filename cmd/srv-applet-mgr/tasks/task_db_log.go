@@ -2,8 +2,9 @@ package tasks
 
 import (
 	"context"
-	"github.com/pkg/errors"
 	"reflect"
+
+	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/types"
