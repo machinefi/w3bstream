@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/machinefi/w3bstream/pkg/types/wasm/sql_util"
 	"github.com/machinefi/w3bstream/pkg/modules/job"
+	"github.com/machinefi/w3bstream/pkg/types/wasm/sql_util"
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 	"golang.org/x/text/encoding/unicode"
@@ -17,7 +17,6 @@ import (
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
-	"github.com/machinefi/w3bstream/pkg/types/wasm/sql_util"
 )
 
 type (
