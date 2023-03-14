@@ -18,6 +18,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/transformer"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/validator"
+	_ "github.com/machinefi/w3bstream/pkg/depends/kit/validator/strfmt"
 )
 
 func MiddlewareChain(mw ...HttpMiddleware) HttpMiddleware {

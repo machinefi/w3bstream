@@ -27,12 +27,16 @@ func main() {
 	snippets := make([]g.Snippet, 0)
 	for _, key := range regexps {
 		var (
-			name          = strings.Replace(key, "regexpString", "", 1)
-			validatorName = strings.Replace(stringsx.LowerSnakeCase(name), "_", "-", -1)
-			args          = []g.Snippet{g.Ident(key), g.Valuer(validatorName)}
-			prefix        = stringsx.UpperCamelCase(name)
-			snippet       g.Snippet
+			name           = strings.Replace(key, "regexpString", "", 1)
+			validatorName  = strings.Replace(stringsx.LowerSnakeCase(name), "_", "-", -1)
+			validatorAlias = stringsx.LowerCamelCase(name)
+			args           = []g.Snippet{g.Ident(key), g.Valuer(validatorName)}
+			prefix         = stringsx.UpperCamelCase(name)
+			snippet        g.Snippet
 		)
+		if validatorName != validatorAlias {
+			args = append(args, g.Valuer(validatorAlias))
+		}
 		snippet = g.Func().Named("init").Do(
 			g.Ref(
 				g.Ident(file.Use(pkg, "DefaultFactory")),
