@@ -1,6 +1,7 @@
 package types_test
 
 import (
+	"bytes"
 	"net/url"
 	"testing"
 	"time"
@@ -238,4 +239,15 @@ func TestEndpoint(t *testing.T) {
 }
 
 func TestSignal(t *testing.T) {
+}
+
+func TestEthAddress(t *testing.T) {
+	ori := []byte("0x3110752149AF23Ee65968C2019b7c86D12B32229")
+	addr := EthAddress("")
+
+	err := addr.UnmarshalText(ori)
+	NewWithT(t).Expect(err).To(BeNil())
+
+	cmp, err := addr.MarshalText()
+	NewWithT(t).Expect(cmp).To(Equal(bytes.ToLower(ori)))
 }
