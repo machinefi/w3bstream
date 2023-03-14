@@ -60,13 +60,21 @@ func (s *Server) SetDefault() {
 	if s.HealthCheck == "" {
 		s.HealthCheck = "http://:" + strconv.FormatInt(int64(s.Port), 10) + "/"
 	}
+
+	if s.ht == nil {
+		s.ht = httptransport.NewHttpTransport()
+		s.ht.SetDefault()
+	}
 }
 
 func (s *Server) Serve(router *kit.Router) error {
-	ht := httptransport.NewHttpTransport()
-	ht.Port = s.Port
+	if s.ht == nil {
+		s.ht = httptransport.NewHttpTransport()
+		s.ht.SetDefault()
+	}
 
-	ht.SetDefault()
+	ht := s.ht
+	ht.Port = s.Port
 
 	ht.Middlewares = []httptransport.HttpMiddleware{mws.DefaultCompress}
 	ht.Middlewares = append(ht.Middlewares, middlewares...)
@@ -80,6 +88,5 @@ func (s *Server) Serve(router *kit.Router) error {
 	if s.Debug != nil && *s.Debug {
 		ht.Middlewares = append(ht.Middlewares, mws.PProfHandler(*s.Debug))
 	}
-	s.ht = ht
-	return ht.Serve(router)
+	return s.ht.Serve(router)
 }

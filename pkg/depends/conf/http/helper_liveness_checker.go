@@ -4,6 +4,7 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 	"github.com/machinefi/w3bstream/pkg/depends/x/reflectx"
@@ -22,8 +23,7 @@ func RegisterCheckerBy(vs ...interface{}) {
 		rv := reflectx.Indirect(reflect.ValueOf(v))
 		rt := rv.Type()
 
-		if chk, ok := v.(LivenessChecker); ok {
-			RegisterChecker(rt.Name(), chk)
+		if register(v) {
 			continue
 		}
 
@@ -38,14 +38,22 @@ func RegisterCheckerBy(vs ...interface{}) {
 			if !ft.IsExported() {
 				continue
 			}
-			if chk, ok := fv.Interface().(LivenessChecker); ok {
-				RegisterChecker(ft.Name, chk)
-			}
+			register(fv.Interface())
 		}
 	}
 }
 
-func RegisterChecker(k string, chk LivenessChecker) { checkers[k] = chk }
+func register(v interface{}) bool {
+	if chk, ok := v.(LivenessChecker); ok {
+		if named, ok := v.(types.Named); ok {
+			checkers[named.Name()] = chk
+		} else {
+			checkers[reflect.Indirect(reflect.ValueOf(v)).Type().Name()] = chk
+		}
+		return true
+	}
+	return false
+}
 
 func ResetRegistered() { checkers = LivenessCheckers{} }
 
@@ -81,5 +89,3 @@ func (Liveness) Path() string { return "/liveness" }
 func (Liveness) Output(ctx context.Context) (interface{}, error) {
 	return checkers.Statuses(), nil
 }
-
-// type LivenessStatuses map[string]string

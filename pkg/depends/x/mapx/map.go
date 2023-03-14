@@ -78,3 +78,13 @@ func (m *Map[K, V]) Len() int {
 	defer m.mtx.Unlock()
 	return len(m.val)
 }
+
+func (m *Map[K, V]) Range(f func(k K, v V) bool) {
+	m.mtx.Lock()
+	defer m.mtx.Unlock()
+	for k, v := range m.val {
+		if !f(k, v) {
+			break
+		}
+	}
+}

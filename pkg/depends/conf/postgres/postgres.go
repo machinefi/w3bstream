@@ -144,7 +144,7 @@ func (e Endpoint) slaveURL() string {
 	return fmt.Sprintf("postgres://%s%s@%s", e.Master.Username, passwd, e.Slave.Host())
 }
 
-func (e Endpoint) Name() string { return "pgcli" }
+func (e Endpoint) Name() string { return "postgres-cli" }
 
 func SwitchSlave(db sqlx.DBExecutor) sqlx.DBExecutor {
 	if slave, ok := db.(CanSlave); ok {
