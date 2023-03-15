@@ -216,6 +216,12 @@ func init() {
 var SsnValidator = validator.NewRegexpStrfmtValidator(regexpStringSSN, "ssn")
 
 func init() {
+	validator.DefaultFactory.Register(URLValidator)
+}
+
+var URLValidator = validator.NewRegexpStrfmtValidator(regexpStringURL, "url")
+
+func init() {
 	validator.DefaultFactory.Register(URLEncodedValidator)
 }
 

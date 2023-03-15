@@ -46,6 +46,7 @@ const (
 	regexpStringEthAddressUpper       = `^0x[0-9A-F]{40}$`
 	regexpStringEthAddressLower       = `^0x[0-9a-f]{40}$`
 	regexpStringURLEncoded            = `(%[A-Fa-f0-9]{2})`
+	regexpStringURL                   = `(https?|ftp|file)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]`
 	regexpStringHTMLEncoded           = `&#[x]?([0-9a-fA-F]{2})|(&gt)|(&lt)|(&quot)|(&amp)+[;]?`
 	regexpStringHTML                  = `<[/]?([a-zA-Z]+).*?>`
 )
