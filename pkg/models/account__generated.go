@@ -145,6 +145,14 @@ func (*Account) FieldMeta() string {
 	return "Meta"
 }
 
+func (m *Account) ColPrivateKey() *builder.Column {
+	return AccountTable.ColByFieldName(m.FieldPrivateKey())
+}
+
+func (*Account) FieldPrivateKey() string {
+	return "PrivateKey"
+}
+
 func (m *Account) ColCreatedAt() *builder.Column {
 	return AccountTable.ColByFieldName(m.FieldCreatedAt())
 }

@@ -22,6 +22,5 @@ type (
 )
 
 type ETHClientConfig struct {
-	PrivateKey string `env:""`
-	Endpoints  string `env:""`
+	Endpoints string `env:""`
 }

@@ -18,7 +18,6 @@ services:
       SRV_APPLET_MGR__PGCLI__Master: postgresql://${POSTGRES_USER:-w3badmin}:${POSTGRES_PASSWORD:-PaSsW0Rd}@postgres:5432/${POSTGRES_DB:-w3bstream}?sslmode=disable
       SRV_APPLET_MGR__SERVER__Port: "8888"
       SRV_APPLET_MGR__BROKER__Server: mqtt://mqtt_server:1883
-      SRV_APPLET_MGR__EthClient_PrivateKey: ${PRIVATE_KEY:-}
       SRV_APPLET_MGR__EthClient_Endpoints: '{"4689": "https://babel-api.mainnet.iotex.io", "4690": "https://babel-api.testnet.iotex.io"}'
       SRV_APPLET_MGR__Jwt_ExpIn: 1h
       SRV_APPLET_MGR__Jwt_Issuer: ${JWT_ISSUER:-w3bstream}
@@ -64,8 +63,7 @@ services:
       - ${WS_WORKING_DIR:-.}/redisdb:/data
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD:-w3bredispasS}
-    command:
-      redis-server --requirepass ${REDIS_PASSWORD:-w3bredispasS}
+    command: redis-server --requirepass ${REDIS_PASSWORD:-w3bredispasS}
     ports:
       - '6379:6379'
 

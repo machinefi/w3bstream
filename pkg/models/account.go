@@ -31,6 +31,7 @@ type AccountInfo struct {
 	Password     AccountPassword           `db:"f_password"                  json:"-"`
 	Vendor       AccountVendor             `db:"f_vendor,default=''"         json:"-"`
 	Meta         Meta                      `db:"f_meta,default=''"           json:"meta"`
+	PrivateKey   string                    `db:"f_prvkey"                    json:"prvkey"`
 }
 
 type AccountPassword struct {
