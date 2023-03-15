@@ -32,7 +32,7 @@ type LoginByEthAddress struct {
 	account.LoginByEthAddressReq `in:"body"`
 }
 
-func (r *LoginByEthAddress) Path() string { return "/eth/" }
+func (r *LoginByEthAddress) Path() string { return "/eth" }
 
 func (r *LoginByEthAddress) Output(ctx context.Context) (interface{}, error) {
 	ac, err := account.ValidateLoginByEthAddress(ctx, &r.LoginByEthAddressReq)
