@@ -99,7 +99,7 @@ func (cs *Columns) Add(cols ...*Column) {
 				cs.autoInc = c
 			}
 			if !cs.StoreNX(strings.ToLower(c.Name), c) {
-				panic(errors.Errorf("duplicated column: %s", c.Name))
+				// panic(errors.Errorf("duplicated column: %s", c.Name))
 			}
 		}
 	}
