@@ -5,10 +5,11 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 )
 
-var Root = kit.NewRouter(httptransport.Group("/"))
+var LoginRoot = kit.NewRouter(httptransport.Group("/login"))
+var NonceRoot = kit.NewRouter(httptransport.Group("/nonce"))
 
 func init() {
-	Root.Register(kit.NewRouter(&LoginByUsername{}))
-	Root.Register(kit.NewRouter(&LoginByEthAddress{}))
-	Root.Register(kit.NewRouter(&GetNonceByEthAddress{}))
+	LoginRoot.Register(kit.NewRouter(&LoginByUsername{}))
+	LoginRoot.Register(kit.NewRouter(&LoginByEthAddress{}))
+	NonceRoot.Register(kit.NewRouter(&GetNonceByEthAddress{}))
 }

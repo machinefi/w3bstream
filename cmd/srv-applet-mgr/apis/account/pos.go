@@ -15,6 +15,8 @@ type CreateAccountByUsernameAndPassword struct {
 	account.CreateAccountByUsernameReq `in:"body"`
 }
 
+func (r *CreateAccountByUsernameAndPassword) Path() string { return "/admin" }
+
 func (r *CreateAccountByUsernameAndPassword) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.CurrentAccountFromContext(ctx)
 	if ca.Role != enums.ACCOUNT_ROLE__ADMIN {
@@ -27,6 +29,8 @@ type CreateAccountByEthAddress struct {
 	httpx.MethodPost
 	account.CreateAccountByEthAddressReq `in:"body"`
 }
+
+func (r *CreateAccountByEthAddress) Path() string { return "/eth" }
 
 func (r *CreateAccountByEthAddress) Output(ctx context.Context) (interface{}, error) {
 	return account.CreateAccountByEthAddress(ctx, &r.CreateAccountByEthAddressReq)

@@ -14,7 +14,7 @@ type GetNonceByEthAddress struct {
 }
 
 func (r *GetNonceByEthAddress) Path() string {
-	return "/nonce/:ethAddress"
+	return "/:address"
 }
 
 func (r *GetNonceByEthAddress) Output(ctx context.Context) (interface{}, error) {

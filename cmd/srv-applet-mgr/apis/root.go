@@ -34,7 +34,8 @@ func init() {
 	RouterServer.Register(RouterV0)
 	confhttp.RegisterEnvRouters(RouterDebug)
 
-	RouterV0.Register(login.Root)
+	RouterV0.Register(login.LoginRoot)
+	RouterV0.Register(login.NonceRoot)
 	RouterV0.Register(event.Root)
 	RouterV0.Register(RouterAuth)
 	RouterV0.Register(account.RegisterRoot)

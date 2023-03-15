@@ -15,4 +15,5 @@ func init() {
 	Root.Register(kit.NewRouter(&UpdatePasswordByAccountID{}))
 
 	RegisterRoot.Register(kit.NewRouter(&CreateAccountByEthAddress{}))
+	RegisterRoot.Register(kit.NewRouter(&CreateAccountByUsernameAndPassword{}))
 }

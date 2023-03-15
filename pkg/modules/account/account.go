@@ -183,10 +183,11 @@ type LoginByUsernameReq struct {
 }
 
 type LoginRsp struct {
-	AccountID types.SFID     `json:"accountID"`
-	Token     string         `json:"token"`
-	ExpireAt  base.Timestamp `json:"expireAt"`
-	Issuer    string         `json:"issuer"`
+	AccountID   types.SFID        `json:"accountID"`
+	AccountRole enums.AccountRole `json:"accountRole"`
+	Token       string            `json:"token"`
+	ExpireAt    base.Timestamp    `json:"expireAt"`
+	Issuer      string            `json:"issuer"`
 }
 
 func ValidateLoginByUsername(ctx context.Context, r *LoginByUsernameReq) (*models.Account, error) {
