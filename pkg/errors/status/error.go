@@ -19,6 +19,7 @@ const (
 	UploadFileFailed
 	ExtractFileFailed
 	LoadVMFailed
+	GenNonceFailed
 )
 
 const (
@@ -27,12 +28,21 @@ const (
 	InvalidAuthValue
 	InvalidAuthAccountID
 	NoProjectPermission
+	NoAdminPermission
+	InvalidOldPassword
+	InvalidNewPassword
+	InvalidPassword
+	InvalidNonce
+	InvalidSignature
+	InvalidNonceOrSignature
+	InvalidEthAddress
 )
 
 const (
 	Forbidden Error = http.StatusForbidden*1e6 + iota + 1
 	// @errTalk deployed instance limit
 	InstanceLimit
+	DisabledAccount
 )
 
 const (

@@ -5,9 +5,14 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 )
 
-var Root = kit.NewRouter(httptransport.Group("/account"))
+var (
+	Root         = kit.NewRouter(httptransport.Group("/account"))
+	RegisterRoot = kit.NewRouter(httptransport.Group("/register"))
+)
 
 func init() {
-	Root.Register(kit.NewRouter(&CreateAccount{}))
+	Root.Register(kit.NewRouter(&CreateAccountByUsernameAndPassword{}))
 	Root.Register(kit.NewRouter(&UpdatePasswordByAccountID{}))
+
+	RegisterRoot.Register(kit.NewRouter(&CreateAccountByEthAddress{}))
 }

@@ -16,12 +16,14 @@ func (c *UploadConfig) SetDefault() {
 	}
 }
 
-type (
-	SFID  = types.SFID
-	SFIDs = types.SFIDs
-)
-
 type ETHClientConfig struct {
 	PrivateKey string `env:""`
 	Endpoints  string `env:""`
 }
+
+// aliases from base/types
+type (
+	SFID       = types.SFID
+	SFIDs      = types.SFIDs
+	EthAddress = types.EthAddress
+)

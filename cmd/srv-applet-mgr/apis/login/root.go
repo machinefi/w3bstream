@@ -8,5 +8,7 @@ import (
 var Root = kit.NewRouter(httptransport.Group("/"))
 
 func init() {
-	Root.Register(kit.NewRouter(&Login{}))
+	Root.Register(kit.NewRouter(&LoginByUsername{}))
+	Root.Register(kit.NewRouter(&LoginByEthAddress{}))
+	Root.Register(kit.NewRouter(&GetNonceByEthAddress{}))
 }

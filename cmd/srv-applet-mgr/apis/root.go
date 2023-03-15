@@ -37,6 +37,7 @@ func init() {
 	RouterV0.Register(login.Root)
 	RouterV0.Register(event.Root)
 	RouterV0.Register(RouterAuth)
+	RouterV0.Register(account.RegisterRoot)
 	{
 		RouterAuth.Register(account.Root)
 		RouterAuth.Register(project.Root)

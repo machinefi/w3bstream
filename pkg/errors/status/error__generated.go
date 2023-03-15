@@ -33,7 +33,6 @@ func (v Error) Code() int {
 		return with.ServiceCode() + int(v)
 	}
 	return int(v)
-
 }
 
 func (v Error) Key() string {
@@ -52,10 +51,28 @@ func (v Error) Key() string {
 		return "InvalidAuthAccountID"
 	case NoProjectPermission:
 		return "NoProjectPermission"
+	case NoAdminPermission:
+		return "NoAdminPermission"
+	case InvalidOldPassword:
+		return "InvalidOldPassword"
+	case InvalidNewPassword:
+		return "InvalidNewPassword"
+	case InvalidPassword:
+		return "InvalidPassword"
+	case InvalidNonce:
+		return "InvalidNonce"
+	case InvalidSignature:
+		return "InvalidSignature"
+	case InvalidNonceOrSignature:
+		return "InvalidNonceOrSignature"
+	case InvalidEthAddress:
+		return "InvalidEthAddress"
 	case Forbidden:
 		return "Forbidden"
 	case InstanceLimit:
 		return "InstanceLimit"
+	case DisabledAccount:
+		return "DisabledAccount"
 	case NotFound:
 		return "NotFound"
 	case Conflict:
@@ -68,6 +85,8 @@ func (v Error) Key() string {
 		return "ExtractFileFailed"
 	case LoadVMFailed:
 		return "LoadVMFailed"
+	case GenNonceFailed:
+		return "GenNonceFailed"
 	}
 	return "UNKNOWN"
 }
@@ -88,10 +107,28 @@ func (v Error) Msg() string {
 		return ""
 	case NoProjectPermission:
 		return ""
+	case NoAdminPermission:
+		return ""
+	case InvalidOldPassword:
+		return ""
+	case InvalidNewPassword:
+		return ""
+	case InvalidPassword:
+		return ""
+	case InvalidNonce:
+		return ""
+	case InvalidSignature:
+		return ""
+	case InvalidNonceOrSignature:
+		return ""
+	case InvalidEthAddress:
+		return ""
 	case Forbidden:
 		return ""
 	case InstanceLimit:
 		return "deployed instance limit"
+	case DisabledAccount:
+		return ""
 	case NotFound:
 		return "NotFound"
 	case Conflict:
@@ -103,6 +140,8 @@ func (v Error) Msg() string {
 	case ExtractFileFailed:
 		return ""
 	case LoadVMFailed:
+		return ""
+	case GenNonceFailed:
 		return ""
 	}
 	return "-"
@@ -124,10 +163,28 @@ func (v Error) CanBeTalk() bool {
 		return false
 	case NoProjectPermission:
 		return false
+	case NoAdminPermission:
+		return false
+	case InvalidOldPassword:
+		return false
+	case InvalidNewPassword:
+		return false
+	case InvalidPassword:
+		return false
+	case InvalidNonce:
+		return false
+	case InvalidSignature:
+		return false
+	case InvalidNonceOrSignature:
+		return false
+	case InvalidEthAddress:
+		return false
 	case Forbidden:
 		return false
 	case InstanceLimit:
 		return true
+	case DisabledAccount:
+		return false
 	case NotFound:
 		return false
 	case Conflict:
@@ -139,6 +196,8 @@ func (v Error) CanBeTalk() bool {
 	case ExtractFileFailed:
 		return false
 	case LoadVMFailed:
+		return false
+	case GenNonceFailed:
 		return false
 	}
 	return false
