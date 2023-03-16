@@ -3,6 +3,7 @@ package mq
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 
@@ -62,7 +63,7 @@ func (cc *ChannelContext) Run(ctx context.Context) {
 
 func (cc *ChannelContext) Stop() { cc.cancel() }
 
-func CreateChannel(ctx context.Context, prjName string, hdl OnMessage) error {
+func CreateChannel(ctx context.Context, ownerAddr string, prjName string, hdl OnMessage) error {
 	l := types.MustLoggerFromContext(ctx)
 	defer l.End()
 
@@ -71,21 +72,22 @@ func CreateChannel(ctx context.Context, prjName string, hdl OnMessage) error {
 
 	l = l.WithValues("project_name", prjName)
 
+	topic := projectTopic(ownerAddr, prjName)
 	broker := types.MustMqttBrokerFromContext(ctx)
 
-	cli, err := broker.Client(prjName)
+	cli, err := broker.Client(topic)
 	if err != nil {
 		l.Error(err)
 		return err
 	}
 
 	cctx := &ChannelContext{
-		Name: prjName,
-		cli:  cli.WithTopic(prjName),
+		Name: topic,
+		cli:  cli.WithTopic(topic),
 		hdl:  hdl,
 	}
 	cctx.ctx, cctx.cancel = context.WithCancel(context.Background())
-	channels.Store(prjName, cctx)
+	channels.Store(topic, cctx)
 
 	go cctx.Run(ctx)
 
@@ -93,10 +95,14 @@ func CreateChannel(ctx context.Context, prjName string, hdl OnMessage) error {
 	return nil
 }
 
-func StopChannel(prjName string) {
-	c, ok := channels.LoadAndRemove(prjName)
+func StopChannel(ownerAddr string, prjName string) {
+	c, ok := channels.LoadAndRemove(projectTopic(ownerAddr, prjName))
 	if !ok {
 		return
 	}
 	c.Stop()
+}
+
+func projectTopic(ownerAddr string, prjName string) string {
+	return fmt.Sprintf("%s/%s", ownerAddr, prjName)
 }

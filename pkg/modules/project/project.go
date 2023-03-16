@@ -42,7 +42,7 @@ func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (
 		ProjectBase: r.ProjectBase,
 	}
 
-	if err := mq.CreateChannel(ctx, m.Name, hdl); err != nil {
+	if err := mq.CreateChannel(ctx, "", m.Name, hdl); err != nil {
 		l.Error(err)
 		return nil, status.InternalServerError.StatusErr().
 			WithDesc(fmt.Sprintf("create channel: [project:%s] [err:%v]", m.Name, err))
@@ -298,7 +298,7 @@ func InitChannels(ctx context.Context, hdl mq.OnMessage) error {
 
 	for i := range lst {
 		v := &lst[i]
-		err = mq.CreateChannel(ctx, v.Name, hdl)
+		err = mq.CreateChannel(ctx, "", v.Name, hdl)
 		if err != nil {
 			err = errors.Errorf("create channel: [project:%s] [err:%v]", v.Name, err)
 			l.Error(err)
