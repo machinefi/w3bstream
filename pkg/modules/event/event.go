@@ -141,6 +141,7 @@ func OnEventReceivedFromMqtt(ctx context.Context, msg mqtt.Message) {
 				Code:       -1,
 				ErrMsg:     "instance not found",
 			}
+			continue
 		}
 
 		wg.Add(1)
