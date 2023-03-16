@@ -24,14 +24,3 @@ func (r *CreateAccountByUsernameAndPassword) Output(ctx context.Context) (interf
 	}
 	return account.CreateAccountByUsername(ctx, &r.CreateAccountByUsernameReq)
 }
-
-type CreateAccountByEthAddress struct {
-	httpx.MethodPost
-	account.CreateAccountByEthAddressReq `in:"body"`
-}
-
-func (r *CreateAccountByEthAddress) Path() string { return "/eth" }
-
-func (r *CreateAccountByEthAddress) Output(ctx context.Context) (interface{}, error) {
-	return account.CreateAccountByEthAddress(ctx, &r.CreateAccountByEthAddressReq)
-}

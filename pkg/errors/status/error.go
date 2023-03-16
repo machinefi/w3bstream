@@ -17,9 +17,6 @@ const (
 	// InternalServerError internal error
 	InternalServerError Error = http.StatusInternalServerError*1e6 + iota + 1
 	UploadFileFailed
-	ExtractFileFailed
-	LoadVMFailed
-	GenNonceFailed
 )
 
 const (
@@ -32,10 +29,8 @@ const (
 	InvalidOldPassword
 	InvalidNewPassword
 	InvalidPassword
-	InvalidNonce
-	InvalidSignature
-	InvalidNonceOrSignature
-	InvalidEthAddress
+	InvalidEthLoginSignature
+	InvalidEthLoginMessage
 )
 
 const (

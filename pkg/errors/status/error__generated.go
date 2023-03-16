@@ -59,14 +59,10 @@ func (v Error) Key() string {
 		return "InvalidNewPassword"
 	case InvalidPassword:
 		return "InvalidPassword"
-	case InvalidNonce:
-		return "InvalidNonce"
-	case InvalidSignature:
-		return "InvalidSignature"
-	case InvalidNonceOrSignature:
-		return "InvalidNonceOrSignature"
-	case InvalidEthAddress:
-		return "InvalidEthAddress"
+	case InvalidEthLoginSignature:
+		return "InvalidEthLoginSignature"
+	case InvalidEthLoginMessage:
+		return "InvalidEthLoginMessage"
 	case Forbidden:
 		return "Forbidden"
 	case InstanceLimit:
@@ -81,12 +77,6 @@ func (v Error) Key() string {
 		return "InternalServerError"
 	case UploadFileFailed:
 		return "UploadFileFailed"
-	case ExtractFileFailed:
-		return "ExtractFileFailed"
-	case LoadVMFailed:
-		return "LoadVMFailed"
-	case GenNonceFailed:
-		return "GenNonceFailed"
 	}
 	return "UNKNOWN"
 }
@@ -115,13 +105,9 @@ func (v Error) Msg() string {
 		return ""
 	case InvalidPassword:
 		return ""
-	case InvalidNonce:
+	case InvalidEthLoginSignature:
 		return ""
-	case InvalidSignature:
-		return ""
-	case InvalidNonceOrSignature:
-		return ""
-	case InvalidEthAddress:
+	case InvalidEthLoginMessage:
 		return ""
 	case Forbidden:
 		return ""
@@ -136,12 +122,6 @@ func (v Error) Msg() string {
 	case InternalServerError:
 		return "InternalServerError internal error"
 	case UploadFileFailed:
-		return ""
-	case ExtractFileFailed:
-		return ""
-	case LoadVMFailed:
-		return ""
-	case GenNonceFailed:
 		return ""
 	}
 	return "-"
@@ -171,13 +151,9 @@ func (v Error) CanBeTalk() bool {
 		return false
 	case InvalidPassword:
 		return false
-	case InvalidNonce:
+	case InvalidEthLoginSignature:
 		return false
-	case InvalidSignature:
-		return false
-	case InvalidNonceOrSignature:
-		return false
-	case InvalidEthAddress:
+	case InvalidEthLoginMessage:
 		return false
 	case Forbidden:
 		return false
@@ -192,12 +168,6 @@ func (v Error) CanBeTalk() bool {
 	case InternalServerError:
 		return false
 	case UploadFileFailed:
-		return false
-	case ExtractFileFailed:
-		return false
-	case LoadVMFailed:
-		return false
-	case GenNonceFailed:
 		return false
 	}
 	return false
