@@ -409,52 +409,11 @@ http delete :8888/srv-applet-mgr/v0/project/$PROJECTNAME -A bearer -a $TOK
 
 ### eth sigin/signup
 
-1. register by eth address
-
 ```shell
-export ETHADDRESS=0x...
-echo '{"address":"'$ETHADDRESS'"}' | http post :8888/srv-applet-mgr/v0/register/eth
+export MESSAGE=...   # siwe serailized message
+export SIGNATURE=... # message signature
+echo '{"message":"'$MESSAGE'","signature":"'$SIGNATURE'"}' | http put :8888/srv-applet-mgr/v0/login/eth
 ```
-
-output like:
-```json
-{
-    "accountID": "186912908949435396",
-    "createdAt": "2023-03-15T18:54:19.132593+08:00",
-    "nonce": "1352677571120657649187369785949072390891",
-    "role": "DEVELOPER",
-    "state": "ENABLED",
-    "updatedAt": "2023-03-15T18:54:19.132594+08:00"
-}
-```
-
-2. get nonce by eth address
-
-```shell
-http get :8888/srv-applet-mgr/v0/nonce/$ETHADDRESS
-```
-
-output like:
-```json
-{
-    "accountID": "186912908949435396",
-    "createdAt": "2023-03-15T18:54:19+08:00",
-    "nonce": "1352677571120657649187369785949072390891",
-    "role": "DEVELOPER",
-    "state": "ENABLED",
-    "updatedAt": "2023-03-15T18:54:19+08:00"
-}
-```
-
-3. signin by address, nonce and signature
-
-```shell
-export NONCE=
-export SIGNATURE=
-export ETHADDRESS=0x...
-echo '{"address":"'$ETHADDRESS'","nonce":"'$NONCE'","signature":"'$SIGNATURE'"}' | http put :8888/srv-applet-mgr/v0/login/eth/
-```
-
 output like:
 ```json
 {
