@@ -75,6 +75,7 @@ func FetchOrCreateAccountByEthAddress(ctx context.Context, address types.EthAddr
 			if exists {
 				return nil
 			}
+			aci.RelAccount = rel
 			aci.Source = enums.ACCOUNT_SOURCE__SUBMIT
 			if err := aci.Create(db); err != nil {
 				return status.CheckDatabaseError(err, "CreateAccountIdentity")
