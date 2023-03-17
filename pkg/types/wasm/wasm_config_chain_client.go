@@ -36,8 +36,8 @@ func NewChainClient(ctx context.Context) *ChainClient {
 		return c
 	}
 	acc := middleware.CurrentAccountFromContext(ctx)
-	if len(acc.PrivateKey) > 0 {
-		c.pvk = crypto.ToECDSAUnsafe(common.FromHex(acc.PrivateKey))
+	if len(acc.OperatorPrivateKey) > 0 {
+		c.pvk = crypto.ToECDSAUnsafe(common.FromHex(acc.OperatorPrivateKey))
 	}
 	if len(ethcli.Endpoints) > 0 {
 		c.endpoints = decodeEndpoints(ethcli.Endpoints)

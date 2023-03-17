@@ -39,7 +39,7 @@ func CreateAccountByUsername(ctx context.Context, r *CreateAccountByUsernameReq)
 					string(util.GenRandomPassword(8, 3)),
 				),
 			},
-			PrivateKey: generateRandomPrivateKey(),
+			OperatorPrivateKey: generateRandomPrivateKey(),
 		},
 	}
 
@@ -140,7 +140,7 @@ func CreateAdminIfNotExist(ctx context.Context) (string, error) {
 				Scope: "admin",
 				Desc:  "builtin password",
 			},
-			PrivateKey: generateRandomPrivateKey(),
+			OperatorPrivateKey: generateRandomPrivateKey(),
 		},
 	}
 
