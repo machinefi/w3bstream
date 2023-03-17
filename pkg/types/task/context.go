@@ -8,21 +8,21 @@ import (
 )
 
 type (
-	CtxDispatcher struct{}
+	ctxDispatcher struct{}
 )
 
 func WithDispatcher(ctx context.Context, v job.Dispatcher) context.Context {
-	return contextx.WithValue(ctx, CtxDispatcher{}, v)
+	return contextx.WithValue(ctx, ctxDispatcher{}, v)
 }
 
 func WithDispatcherContext(v job.Dispatcher) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, CtxDispatcher{}, v)
+		return contextx.WithValue(ctx, ctxDispatcher{}, v)
 	}
 }
 
 func DispatcherFromContext(ctx context.Context) (job.Dispatcher, bool) {
-	v, ok := ctx.Value(CtxDispatcher{}).(job.Dispatcher)
+	v, ok := ctx.Value(ctxDispatcher{}).(job.Dispatcher)
 	return v, ok
 }
 

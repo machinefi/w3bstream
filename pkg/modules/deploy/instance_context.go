@@ -23,10 +23,9 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		types.WithWasmDBExecutorContext(types.MustWasmDBExecutorFromContext(parent)),
 		types.WithRedisEndpointContext(types.MustRedisEndpointFromContext(parent)),
 		types.WithMqttBrokerContext(types.MustMqttBrokerFromContext(parent)),
+		task.WithDispatcherContext(job.NewDispatcher(parent)),
 	)(context.Background())
-
-	ctx = task.WithDispatcher(parent, job.NewDispatcher(parent))
-
+	
 	app := &models.Applet{RelApplet: models.RelApplet{AppletID: ins.AppletID}}
 	if err := app.FetchByAppletID(d); err != nil {
 		return nil, err
