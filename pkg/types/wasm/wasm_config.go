@@ -3,8 +3,9 @@ package wasm
 import (
 	"context"
 
-	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/pkg/errors"
+
+	"github.com/machinefi/w3bstream/pkg/enums"
 )
 
 func NewConfigurationByType(t enums.ConfigType) (Configuration, error) {
@@ -15,6 +16,8 @@ func NewConfigurationByType(t enums.ConfigType) (Configuration, error) {
 		return &Cache{}, nil
 	case enums.CONFIG_TYPE__PROJECT_ENV:
 		return &Env{}, nil
+	case enums.CONFIG_TYPE__PROJECT_MQTT:
+		return &MqttClient{}, nil
 	default:
 		return nil, errors.Errorf("invalid config type: %d", t)
 	}

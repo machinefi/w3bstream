@@ -79,7 +79,9 @@ func (h *ProjectAndMetaHook) Fire(entry *logrus.Entry) error {
 		ctx = context.Background()
 	}
 	meta := metax.GetMetaFrom(ctx)
-	entry.Data["@prj"] = h.Name
+	if entry.Data["@prj"] == nil {
+		entry.Data["@prj"] = h.Name
+	}
 	for k, v := range meta {
 		entry.Data["meta."+k] = v
 	}

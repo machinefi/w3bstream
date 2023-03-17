@@ -68,26 +68,20 @@ func init() {
 	}
 	os.Setenv(consts.EnvProjectName, name)
 	config.Logger.Name = name
+
+	tasks = mem_mq.New(0)
+	worker = mq.NewTaskWorker(tasks, mq.WithWorkerCount(3), mq.WithChannel(name))
+
 	App = confapp.New(
 		confapp.WithName(name),
 		confapp.WithRoot(".."),
 		confapp.WithVersion("0.0.1"),
 		confapp.WithLogger(conflog.Std()),
 	)
-	App.Conf(config)
+	App.Conf(config, worker)
 
-	confhttp.RegisterCheckerBy(
-		config.Postgres,
-		config.MonitorDB,
-		config.WasmDB,
-		config.MqttBroker,
-		config.Redis,
-		config.Server,
-	)
+	confhttp.RegisterCheckerBy(config, worker)
 	config.StdLogger.(conflog.LevelSetter).SetLevel(conflog.InfoLevel)
-
-	tasks = mem_mq.New(0)
-	worker = mq.NewTaskWorker(tasks, mq.WithWorkerCount(3), mq.WithChannel(name))
 
 	WithContext = contextx.WithContextCompose(
 		types.WithMgrDBExecutorContext(config.Postgres),

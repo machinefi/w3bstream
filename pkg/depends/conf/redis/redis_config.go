@@ -3,6 +3,7 @@ package redis
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -89,6 +90,8 @@ func (r *Redis) Key(key string) string {
 	return fmt.Sprintf("%s:%s", r.Prefix, key)
 }
 
+func (r *Redis) Name() string { return "redis-cli" }
+
 func (r *Redis) LivenessCheck() map[string]string {
 	m := map[string]string{}
 
@@ -96,10 +99,14 @@ func (r *Redis) LivenessCheck() map[string]string {
 	defer conn.Close()
 
 	_, err := conn.Do("PING")
+	key := r.Host
+	if r.Port != 0 {
+		key += ":" + strconv.Itoa(r.Port)
+	}
 	if err != nil {
-		m[r.Host] = err.Error()
+		m[key] = err.Error()
 	} else {
-		m[r.Host] = "ok"
+		m[key] = "ok"
 	}
 
 	return m
