@@ -2,8 +2,10 @@ package account
 
 import (
 	"context"
+	"encoding/hex"
 
-	base "github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/ethereum/go-ethereum/crypto"
+
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
@@ -45,9 +47,10 @@ func CreateAccountByUsername(ctx context.Context, r *CreateAccountByUsernameReq)
 			acc = &models.Account{
 				RelAccount: *rel,
 				AccountInfo: models.AccountInfo{
-					State:  enums.ACCOUNT_STATE__ENABLED,
-					Role:   r.Role,
-					Avatar: r.AvatarURL,
+					State:              enums.ACCOUNT_STATE__ENABLED,
+					Role:               r.Role,
+					Avatar:             r.AvatarURL,
+					OperatorPrivateKey: generateRandomPrivateKey(),
 				},
 			}
 			if err := acc.Create(db); err != nil {
@@ -186,7 +189,7 @@ type LoginRsp struct {
 	AccountID   types.SFID        `json:"accountID"`
 	AccountRole enums.AccountRole `json:"accountRole"`
 	Token       string            `json:"token"`
-	ExpireAt    base.Timestamp    `json:"expireAt"`
+	ExpireAt    types.Timestamp   `json:"expireAt"`
 	Issuer      string            `json:"issuer"`
 }
 
@@ -291,4 +294,12 @@ func CreateAdminIfNotExist(ctx context.Context) (string, error) {
 		}
 	}
 	return ret.Password, nil
+}
+
+func generateRandomPrivateKey() string {
+	priKey, err := crypto.GenerateKey()
+	if err != nil {
+		return ""
+	}
+	return hex.EncodeToString(crypto.FromECDSA(priKey))
 }
