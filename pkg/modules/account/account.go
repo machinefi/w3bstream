@@ -2,7 +2,9 @@ package account
 
 import (
 	"context"
+	"encoding/hex"
 
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/pkg/errors"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
@@ -37,6 +39,7 @@ func CreateAccountByUsername(ctx context.Context, r *CreateAccountByUsernameReq)
 					string(util.GenRandomPassword(8, 3)),
 				),
 			},
+			OperatorPrivateKey: generateRandomPrivateKey(),
 		},
 	}
 
@@ -137,6 +140,7 @@ func CreateAdminIfNotExist(ctx context.Context) (string, error) {
 				Scope: "admin",
 				Desc:  "builtin password",
 			},
+			OperatorPrivateKey: generateRandomPrivateKey(),
 		},
 	}
 
@@ -168,4 +172,12 @@ func CreateAdminIfNotExist(ctx context.Context) (string, error) {
 	}
 	l.Info("admin created")
 	return password, nil
+}
+
+func generateRandomPrivateKey() string {
+	priKey, err := crypto.GenerateKey()
+	if err != nil {
+		return ""
+	}
+	return hex.EncodeToString(crypto.FromECDSA(priKey))
 }

@@ -25,12 +25,13 @@ type RelAccount struct {
 }
 
 type AccountInfo struct {
-	Username     string                    `db:"f_username"                  json:"username"`
-	IdentityType enums.AccountIdentityType `db:"f_identity_type,default='0'" json:"identityType"`
-	State        enums.AccountState        `db:"f_state,default='0'"         json:"-"`
-	Password     AccountPassword           `db:"f_password"                  json:"-"`
-	Vendor       AccountVendor             `db:"f_vendor,default=''"         json:"-"`
-	Meta         Meta                      `db:"f_meta,default=''"           json:"meta"`
+	Username           string                    `db:"f_username"                  json:"username"`
+	IdentityType       enums.AccountIdentityType `db:"f_identity_type,default='0'" json:"identityType"`
+	State              enums.AccountState        `db:"f_state,default='0'"         json:"-"`
+	Password           AccountPassword           `db:"f_password"                  json:"-"`
+	Vendor             AccountVendor             `db:"f_vendor,default=''"         json:"-"`
+	Meta               Meta                      `db:"f_meta,default=''"           json:"meta"`
+	OperatorPrivateKey string                    `db:"f_prvkey"                    json:"prvkey"`
 }
 
 type AccountPassword struct {

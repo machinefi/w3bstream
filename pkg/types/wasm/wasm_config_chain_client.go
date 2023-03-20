@@ -16,6 +16,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	wsTypes "github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -34,8 +35,9 @@ func NewChainClient(ctx context.Context) *ChainClient {
 	if !ok || ethcli == nil {
 		return c
 	}
-	if len(ethcli.PrivateKey) > 0 {
-		c.pvk = crypto.ToECDSAUnsafe(common.FromHex(ethcli.PrivateKey))
+	acc := middleware.CurrentAccountFromContext(ctx)
+	if len(acc.OperatorPrivateKey) > 0 {
+		c.pvk = crypto.ToECDSAUnsafe(common.FromHex(acc.OperatorPrivateKey))
 	}
 	if len(ethcli.Endpoints) > 0 {
 		c.endpoints = decodeEndpoints(ethcli.Endpoints)
