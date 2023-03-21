@@ -12,6 +12,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/event"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -76,11 +77,13 @@ func (l *monitor) sendEvent(ctx context.Context, data []byte, projectName string
 	_, logger = logger.Start(ctx, "monitor.sendEvent")
 	defer logger.End()
 
-	e := &eventpb.Event{
-		Header: &eventpb.Header{
-			EventType: eventType,
-		},
-		Payload: data,
+	e := event.HandleEventReq{
+		Events: []eventpb.Event{{
+			Header: &eventpb.Header{
+				EventType: eventType,
+			},
+			Payload: data,
+		}},
 	}
 	body, err := json.Marshal(e)
 	if err != nil {
