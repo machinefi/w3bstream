@@ -26,5 +26,5 @@ type AccountInfo struct {
 	State              enums.AccountState `db:"f_state,default='1'" json:"state"`
 	Avatar             string             `db:"f_avatar,default=''" json:"avatar,omitempty"`
 	Meta               Meta               `db:"f_meta,default='{}'" json:"meta,omitempty"`
-	OperatorPrivateKey string             `db:"f_prvkey"            json:"prvkey"`
+	OperatorPrivateKey string             `db:"f_prvkey"            json:"-"`
 }
