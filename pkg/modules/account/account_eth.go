@@ -64,6 +64,7 @@ func FetchOrCreateAccountByEthAddress(ctx context.Context, address types.EthAddr
 			} else {
 				acc.Role = enums.ACCOUNT_ROLE__DEVELOPER
 				acc.State = enums.ACCOUNT_STATE__ENABLED
+				acc.OperatorPrivateKey = generateRandomPrivateKey()
 				if err := acc.Create(db); err != nil {
 					return status.CheckDatabaseError(err, "CreateAccount")
 				}
