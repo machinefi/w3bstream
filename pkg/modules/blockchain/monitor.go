@@ -106,6 +106,11 @@ func (l *monitor) sendEvent(ctx context.Context, data []byte, projectName string
 	}
 	defer resp.Body.Close()
 
-	// TODO http code judge
+	if resp.StatusCode != http.StatusCreated {
+		err := fmt.Errorf("unexpected http code %v", resp.StatusCode)
+		logger.Error(err)
+		return err
+	}
+
 	return nil
 }
