@@ -31,7 +31,13 @@ type CreateProjectReq struct {
 	// TODO if each project has its own mqtt broker should add *wasm.MqttClient
 }
 
-func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (*models.Project, error) {
+type CreateProjectRsp struct {
+	*models.Project `json:"project"`
+	*wasm.Env       `json:"env,omitempty"`
+	*wasm.Schema    `json:"schema,omitempty"`
+}
+
+func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (*CreateProjectRsp, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	a := middleware.CurrentAccountFromContext(ctx)
@@ -90,7 +96,11 @@ func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (
 	if err != nil {
 		return nil, err
 	}
-	return m, nil
+	return &CreateProjectRsp{
+		Project: m,
+		Env:     r.Env,
+		Schema:  r.Schema,
+	}, nil
 }
 
 type ListProjectReq struct {
