@@ -38,6 +38,7 @@ const (
 	// @errTalk deployed instance limit
 	InstanceLimit
 	DisabledAccount
+	WhiteListForbidden
 )
 
 const (

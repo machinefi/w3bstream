@@ -70,6 +70,8 @@ func (v Error) Key() string {
 		return "InstanceLimit"
 	case DisabledAccount:
 		return "DisabledAccount"
+	case WhiteListForbidden:
+		return "WhiteListForbidden"
 	case NotFound:
 		return "NotFound"
 	case Conflict:
@@ -116,6 +118,8 @@ func (v Error) Msg() string {
 		return "deployed instance limit"
 	case DisabledAccount:
 		return ""
+	case WhiteListForbidden:
+		return ""
 	case NotFound:
 		return "NotFound"
 	case Conflict:
@@ -161,6 +165,8 @@ func (v Error) CanBeTalk() bool {
 	case InstanceLimit:
 		return true
 	case DisabledAccount:
+		return false
+	case WhiteListForbidden:
 		return false
 	case NotFound:
 		return false

@@ -48,6 +48,7 @@ func init() {
 		StdLogger  conflog.Logger
 		UploadConf *types.UploadConfig
 		EthClient  *types.ETHClientConfig
+		WhiteList  *types.WhiteList
 	}{
 		Postgres:   db,
 		MonitorDB:  monitordb,
@@ -60,6 +61,7 @@ func init() {
 		StdLogger:  conflog.Std(),
 		UploadConf: &types.UploadConfig{},
 		EthClient:  &types.ETHClientConfig{},
+		WhiteList:  &types.WhiteList{"1"},
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
@@ -98,6 +100,7 @@ func init() {
 		types.WithTaskWorkerContext(worker),
 		types.WithTaskBoardContext(mq.NewTaskBoard(tasks)),
 		types.WithETHClientConfigContext(config.EthClient),
+		types.WithWhiteListContext(config.WhiteList),
 	)
 }
 

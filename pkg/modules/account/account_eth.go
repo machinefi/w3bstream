@@ -116,6 +116,13 @@ func ValidateLoginByEthAddress(ctx context.Context, r *LoginByEthAddressReq) (*m
 	}
 
 	address := strings.ToLower(msg.GetAddress().String())
+
+	if lst, ok := types.WhiteListFromContext(ctx); ok {
+		if !lst.Validate(address) {
+			return nil, status.WhiteListForbidden
+		}
+	}
+
 	acc, _, err := FetchOrCreateAccountByEthAddress(ctx, types.EthAddress(address))
 
 	if err != nil {

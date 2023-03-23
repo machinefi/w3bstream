@@ -30,6 +30,7 @@ type (
 	CtxResource          struct{}
 	CtxInstance          struct{}
 	CtxEthClient         struct{} // CtxEthClient ETHClientConfig
+	CtxWhiteList         struct{}
 )
 
 func WithMgrDBExecutor(ctx context.Context, v sqlx.DBExecutor) context.Context {
@@ -347,6 +348,27 @@ func ETHClientConfigFromContext(ctx context.Context) (*ETHClientConfig, bool) {
 
 func MustETHClientConfigFromContext(ctx context.Context) *ETHClientConfig {
 	v, ok := ETHClientConfigFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithWhiteList(ctx context.Context, v *WhiteList) context.Context {
+	return contextx.WithValue(ctx, CtxWhiteList{}, v)
+}
+
+func WithWhiteListContext(v *WhiteList) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxWhiteList{}, v)
+	}
+}
+
+func WhiteListFromContext(ctx context.Context) (*WhiteList, bool) {
+	v, ok := ctx.Value(CtxWhiteList{}).(*WhiteList)
+	return v, ok
+}
+
+func MustWhiteListFromContext(ctx context.Context) *WhiteList {
+	v, ok := WhiteListFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

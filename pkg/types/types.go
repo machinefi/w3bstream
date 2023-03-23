@@ -1,6 +1,11 @@
 package types
 
-import "github.com/machinefi/w3bstream/pkg/depends/base/types"
+import (
+	"strings"
+
+	"github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/validator/strfmt"
+)
 
 type UploadConfig struct {
 	Root          string `env:""`
@@ -27,3 +32,27 @@ type (
 	EthAddress = types.EthAddress
 	Timestamp  = types.Timestamp
 )
+
+type WhiteList []string
+
+func (v *WhiteList) Init() {
+	lst := WhiteList{}
+	for _, addr := range *v {
+		if err := strfmt.EthAddressValidator.Validate(addr); err == nil {
+			lst = append(lst, strings.ToLower(addr))
+		}
+	}
+	*v = lst
+}
+
+func (v *WhiteList) Validate(address string) bool {
+	if v == nil || len(*v) == 0 {
+		return true
+	}
+	for _, addr := range *v {
+		if addr == strings.ToLower(address) {
+			return true
+		}
+	}
+	return false
+}
