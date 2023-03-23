@@ -13,7 +13,10 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
     permissions:
       contents: read
       packages: write
@@ -33,12 +36,23 @@ jobs:
       - name: Test Go
         run: go test ./...
 
+      # Docker is not installed by default on macos base image for license reason : https://github.com/actions/runner-images/issues/17
+      - name: Setup Docker and Colima
+        if: startsWith(matrix.os, 'macos-latest') == true
+        run: |
+          brew install docker colima
+          colima start
+
+      - name: Set up QEMU
+        #if: startsWith(matrix.os, 'macos-latest') != true
+        uses: docker/setup-qemu-action@v2
+
       - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
+        uses: docker/setup-buildx-action@v2
 
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -46,15 +60,16 @@ jobs:
 
       - name: Extract Docker metadata
         id: meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
         id: build-and-push
-        uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
+        uses: docker/build-push-action@v4
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

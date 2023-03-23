@@ -3,6 +3,7 @@ package deploy
 import (
 	"context"
 
+	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
@@ -14,10 +15,14 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 	d := types.MustMgrDBExecutorFromContext(parent)
 	ins := types.MustInstanceFromContext(parent)
 	ctx := contextx.WithContextCompose(
+		confid.WithSFIDGeneratorContext(confid.MustSFIDGeneratorFromContext(parent)),
 		types.WithInstanceContext(ins),
 		types.WithLoggerContext(types.MustLoggerFromContext(parent)),
 		types.WithWasmDBExecutorContext(types.MustWasmDBExecutorFromContext(parent)),
 		types.WithRedisEndpointContext(types.MustRedisEndpointFromContext(parent)),
+		types.WithTaskWorkerContext(types.MustTaskWorkerFromContext(parent)),
+		types.WithTaskBoardContext(types.MustTaskBoardFromContext(parent)),
+		types.WithMqttBrokerContext(types.MustMqttBrokerFromContext(parent)),
 	)(context.Background())
 
 	app := &models.Applet{RelApplet: models.RelApplet{AppletID: ins.AppletID}}
@@ -48,11 +53,17 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 	if _, ok := wasm.KVStoreFromContext(ctx); !ok {
 		ctx = wasm.DefaultCache().WithContext(ctx)
 	}
-	ctx = wasm.WithChainClient(ctx, wasm.NewChainClient(parent))
+	acc := &models.Account{RelAccount: prj.RelAccount}
+	if err := acc.FetchByAccountID(d); err != nil {
+		return nil, err
+	}
+	ctx = wasm.WithChainClient(ctx, wasm.NewChainClient(parent, &acc.OperatorPrivateKey))
+
 	ctx = wasm.WithLogger(ctx, types.MustLoggerFromContext(ctx).WithValues(
 		"@src", "wasm",
 		"@prj", prj.Name,
 		"@app", app.Name,
 	))
+
 	return ctx, nil
 }

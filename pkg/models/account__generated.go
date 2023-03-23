@@ -72,21 +72,7 @@ func (*Account) PrimaryKey() []string {
 func (m *Account) IndexFieldNames() []string {
 	return []string{
 		"AccountID",
-		"Username",
 	}
-}
-
-func (*Account) UniqueIndexes() builder.Indexes {
-	return builder.Indexes{
-		"ui_username": []string{
-			"Username",
-			"DeletedAt",
-		},
-	}
-}
-
-func (*Account) UniqueIndexUIUsername() string {
-	return "ui_username"
 }
 
 func (m *Account) ColAccountID() *builder.Column {
@@ -97,20 +83,12 @@ func (*Account) FieldAccountID() string {
 	return "AccountID"
 }
 
-func (m *Account) ColUsername() *builder.Column {
-	return AccountTable.ColByFieldName(m.FieldUsername())
+func (m *Account) ColRole() *builder.Column {
+	return AccountTable.ColByFieldName(m.FieldRole())
 }
 
-func (*Account) FieldUsername() string {
-	return "Username"
-}
-
-func (m *Account) ColIdentityType() *builder.Column {
-	return AccountTable.ColByFieldName(m.FieldIdentityType())
-}
-
-func (*Account) FieldIdentityType() string {
-	return "IdentityType"
+func (*Account) FieldRole() string {
+	return "Role"
 }
 
 func (m *Account) ColState() *builder.Column {
@@ -121,20 +99,12 @@ func (*Account) FieldState() string {
 	return "State"
 }
 
-func (m *Account) ColPassword() *builder.Column {
-	return AccountTable.ColByFieldName(m.FieldPassword())
+func (m *Account) ColAvatar() *builder.Column {
+	return AccountTable.ColByFieldName(m.FieldAvatar())
 }
 
-func (*Account) FieldPassword() string {
-	return "Password"
-}
-
-func (m *Account) ColVendor() *builder.Column {
-	return AccountTable.ColByFieldName(m.FieldVendor())
-}
-
-func (*Account) FieldVendor() string {
-	return "Vendor"
+func (*Account) FieldAvatar() string {
+	return "Avatar"
 }
 
 func (m *Account) ColMeta() *builder.Column {
@@ -143,6 +113,14 @@ func (m *Account) ColMeta() *builder.Column {
 
 func (*Account) FieldMeta() string {
 	return "Meta"
+}
+
+func (m *Account) ColOperatorPrivateKey() *builder.Column {
+	return AccountTable.ColByFieldName(m.FieldOperatorPrivateKey())
+}
+
+func (*Account) FieldOperatorPrivateKey() string {
+	return "OperatorPrivateKey"
 }
 
 func (m *Account) ColCreatedAt() *builder.Column {
@@ -244,25 +222,6 @@ func (m *Account) FetchByAccountID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *Account) FetchByUsername(db sqlx.DBExecutor) error {
-	tbl := db.T(m)
-	err := db.QueryAndScan(
-		builder.Select(nil).
-			From(
-				tbl,
-				builder.Where(
-					builder.And(
-						tbl.ColByFieldName("Username").Eq(m.Username),
-						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
-					),
-				),
-				builder.Comment("Account.FetchByUsername"),
-			),
-		m,
-	)
-	return err
-}
-
 func (m *Account) UpdateByAccountIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
@@ -293,37 +252,6 @@ func (m *Account) UpdateByAccountIDWithFVs(db sqlx.DBExecutor, fvs builder.Field
 func (m *Account) UpdateByAccountID(db sqlx.DBExecutor, zeros ...string) error {
 	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
 	return m.UpdateByAccountIDWithFVs(db, fvs)
-}
-
-func (m *Account) UpdateByUsernameWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
-
-	if _, ok := fvs["UpdatedAt"]; !ok {
-		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
-	}
-	tbl := db.T(m)
-	res, err := db.Exec(
-		builder.Update(tbl).
-			Where(
-				builder.And(
-					tbl.ColByFieldName("Username").Eq(m.Username),
-					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
-				),
-				builder.Comment("Account.UpdateByUsernameWithFVs"),
-			).
-			Set(tbl.AssignmentsByFieldValues(fvs)...),
-	)
-	if err != nil {
-		return err
-	}
-	if affected, _ := res.RowsAffected(); affected == 0 {
-		return m.FetchByUsername(db)
-	}
-	return nil
-}
-
-func (m *Account) UpdateByUsername(db sqlx.DBExecutor, zeros ...string) error {
-	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
-	return m.UpdateByUsernameWithFVs(db, fvs)
 }
 
 func (m *Account) Delete(db sqlx.DBExecutor) error {
@@ -377,49 +305,6 @@ func (m *Account) SoftDeleteByAccountID(db sqlx.DBExecutor) error {
 					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
 				builder.Comment("Account.SoftDeleteByAccountID"),
-			).
-			Set(tbl.AssignmentsByFieldValues(fvs)...),
-	)
-	return err
-}
-
-func (m *Account) DeleteByUsername(db sqlx.DBExecutor) error {
-	tbl := db.T(m)
-	_, err := db.Exec(
-		builder.Delete().
-			From(
-				tbl,
-				builder.Where(
-					builder.And(
-						tbl.ColByFieldName("Username").Eq(m.Username),
-						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
-					),
-				),
-				builder.Comment("Account.DeleteByUsername"),
-			),
-	)
-	return err
-}
-
-func (m *Account) SoftDeleteByUsername(db sqlx.DBExecutor) error {
-	tbl := db.T(m)
-	fvs := builder.FieldValues{}
-
-	if _, ok := fvs["DeletedAt"]; !ok {
-		fvs["DeletedAt"] = types.Timestamp{Time: time.Now()}
-	}
-
-	if _, ok := fvs["UpdatedAt"]; !ok {
-		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
-	}
-	_, err := db.Exec(
-		builder.Update(db.T(m)).
-			Where(
-				builder.And(
-					tbl.ColByFieldName("Username").Eq(m.Username),
-					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
-				),
-				builder.Comment("Account.SoftDeleteByUsername"),
 			).
 			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)

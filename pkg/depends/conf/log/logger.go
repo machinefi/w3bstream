@@ -38,6 +38,12 @@ func WithLogger(ctx context.Context, l Logger) context.Context {
 	return contextx.WithValue(ctx, keyLogger{}, l)
 }
 
+func WithLoggerContext(l Logger) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return WithLogger(ctx, l)
+	}
+}
+
 func FromContext(ctx context.Context) Logger {
 	if v, ok := ctx.Value(keyLogger{}).(Logger); ok {
 		return v

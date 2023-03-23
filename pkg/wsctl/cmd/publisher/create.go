@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/machinefi/w3bstream/pkg/wsctl/client"
-	"github.com/machinefi/w3bstream/pkg/wsctl/cmd/utils"
-	"github.com/machinefi/w3bstream/pkg/wsctl/config"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
+
+	"github.com/machinefi/w3bstream/pkg/wsctl/client"
+	"github.com/machinefi/w3bstream/pkg/wsctl/cmd/utils"
+	"github.com/machinefi/w3bstream/pkg/wsctl/config"
 )
 
 var (

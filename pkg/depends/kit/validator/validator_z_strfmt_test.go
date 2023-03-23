@@ -28,6 +28,7 @@ func TestStrfmtValidator_Validate(t *testing.T) {
 	}{
 		{"abc", "@alpha", AlphaValidator},
 		{"a.b.c+123@xxx.com", "@email", EmailValidator},
+		{"0x3110752149AF23Ee65968C2019b7c86D12B32229", "@ethAddress", EthAddressValidator},
 	}
 
 	for _, c := range cases {
@@ -55,6 +56,7 @@ func TestStrfmtValidator_ValidateFailed(t *testing.T) {
 		{".", "@number", NumberValidator},
 		{"x#abc.com", "@email", EmailValidator},
 		{"123", "@alpha", AlphaValidator},
+		{"0x3110752149AF23Ee", "@ethAddress", EthAddressValidator},
 	}
 
 	for _, c := range cases {

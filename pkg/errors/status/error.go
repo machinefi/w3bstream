@@ -17,8 +17,6 @@ const (
 	// InternalServerError internal error
 	InternalServerError Error = http.StatusInternalServerError*1e6 + iota + 1
 	UploadFileFailed
-	ExtractFileFailed
-	LoadVMFailed
 )
 
 const (
@@ -27,12 +25,20 @@ const (
 	InvalidAuthValue
 	InvalidAuthAccountID
 	NoProjectPermission
+	NoAdminPermission
+	InvalidOldPassword
+	InvalidNewPassword
+	InvalidPassword
+	InvalidEthLoginSignature
+	InvalidEthLoginMessage
 )
 
 const (
 	Forbidden Error = http.StatusForbidden*1e6 + iota + 1
 	// @errTalk deployed instance limit
 	InstanceLimit
+	DisabledAccount
+	WhiteListForbidden
 )
 
 const (

@@ -25,8 +25,8 @@ func ParseAccountIdentityTypeFromString(s string) (AccountIdentityType, error) {
 		return ACCOUNT_IDENTITY_TYPE__EMAIL, nil
 	case "USERNAME":
 		return ACCOUNT_IDENTITY_TYPE__USERNAME, nil
-	case "BUILTIN":
-		return ACCOUNT_IDENTITY_TYPE__BUILTIN, nil
+	case "ETHADDRESS":
+		return ACCOUNT_IDENTITY_TYPE__ETHADDRESS, nil
 	}
 }
 
@@ -42,8 +42,8 @@ func ParseAccountIdentityTypeFromLabel(s string) (AccountIdentityType, error) {
 		return ACCOUNT_IDENTITY_TYPE__EMAIL, nil
 	case "USERNAME":
 		return ACCOUNT_IDENTITY_TYPE__USERNAME, nil
-	case "BUILTIN":
-		return ACCOUNT_IDENTITY_TYPE__BUILTIN, nil
+	case "ETHADDRESS":
+		return ACCOUNT_IDENTITY_TYPE__ETHADDRESS, nil
 	}
 }
 
@@ -63,8 +63,8 @@ func (v AccountIdentityType) String() string {
 		return "EMAIL"
 	case ACCOUNT_IDENTITY_TYPE__USERNAME:
 		return "USERNAME"
-	case ACCOUNT_IDENTITY_TYPE__BUILTIN:
-		return "BUILTIN"
+	case ACCOUNT_IDENTITY_TYPE__ETHADDRESS:
+		return "ETHADDRESS"
 	}
 }
 
@@ -80,8 +80,8 @@ func (v AccountIdentityType) Label() string {
 		return "EMAIL"
 	case ACCOUNT_IDENTITY_TYPE__USERNAME:
 		return "USERNAME"
-	case ACCOUNT_IDENTITY_TYPE__BUILTIN:
-		return "BUILTIN"
+	case ACCOUNT_IDENTITY_TYPE__ETHADDRESS:
+		return "ETHADDRESS"
 	}
 }
 
@@ -90,7 +90,7 @@ func (v AccountIdentityType) TypeName() string {
 }
 
 func (v AccountIdentityType) ConstValues() []enum.IntStringerEnum {
-	return []enum.IntStringerEnum{ACCOUNT_IDENTITY_TYPE__MOBILE, ACCOUNT_IDENTITY_TYPE__EMAIL, ACCOUNT_IDENTITY_TYPE__USERNAME, ACCOUNT_IDENTITY_TYPE__BUILTIN}
+	return []enum.IntStringerEnum{ACCOUNT_IDENTITY_TYPE__MOBILE, ACCOUNT_IDENTITY_TYPE__EMAIL, ACCOUNT_IDENTITY_TYPE__USERNAME, ACCOUNT_IDENTITY_TYPE__ETHADDRESS}
 }
 
 func (v AccountIdentityType) MarshalText() ([]byte, error) {

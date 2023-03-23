@@ -51,10 +51,26 @@ func (v Error) Key() string {
 		return "InvalidAuthAccountID"
 	case NoProjectPermission:
 		return "NoProjectPermission"
+	case NoAdminPermission:
+		return "NoAdminPermission"
+	case InvalidOldPassword:
+		return "InvalidOldPassword"
+	case InvalidNewPassword:
+		return "InvalidNewPassword"
+	case InvalidPassword:
+		return "InvalidPassword"
+	case InvalidEthLoginSignature:
+		return "InvalidEthLoginSignature"
+	case InvalidEthLoginMessage:
+		return "InvalidEthLoginMessage"
 	case Forbidden:
 		return "Forbidden"
 	case InstanceLimit:
 		return "InstanceLimit"
+	case DisabledAccount:
+		return "DisabledAccount"
+	case WhiteListForbidden:
+		return "WhiteListForbidden"
 	case NotFound:
 		return "NotFound"
 	case Conflict:
@@ -63,10 +79,6 @@ func (v Error) Key() string {
 		return "InternalServerError"
 	case UploadFileFailed:
 		return "UploadFileFailed"
-	case ExtractFileFailed:
-		return "ExtractFileFailed"
-	case LoadVMFailed:
-		return "LoadVMFailed"
 	}
 	return "UNKNOWN"
 }
@@ -87,10 +99,26 @@ func (v Error) Msg() string {
 		return ""
 	case NoProjectPermission:
 		return ""
+	case NoAdminPermission:
+		return ""
+	case InvalidOldPassword:
+		return ""
+	case InvalidNewPassword:
+		return ""
+	case InvalidPassword:
+		return ""
+	case InvalidEthLoginSignature:
+		return ""
+	case InvalidEthLoginMessage:
+		return ""
 	case Forbidden:
 		return ""
 	case InstanceLimit:
 		return "deployed instance limit"
+	case DisabledAccount:
+		return ""
+	case WhiteListForbidden:
+		return ""
 	case NotFound:
 		return "NotFound"
 	case Conflict:
@@ -98,10 +126,6 @@ func (v Error) Msg() string {
 	case InternalServerError:
 		return "InternalServerError internal error"
 	case UploadFileFailed:
-		return ""
-	case ExtractFileFailed:
-		return ""
-	case LoadVMFailed:
 		return ""
 	}
 	return "-"
@@ -123,10 +147,26 @@ func (v Error) CanBeTalk() bool {
 		return false
 	case NoProjectPermission:
 		return false
+	case NoAdminPermission:
+		return false
+	case InvalidOldPassword:
+		return false
+	case InvalidNewPassword:
+		return false
+	case InvalidPassword:
+		return false
+	case InvalidEthLoginSignature:
+		return false
+	case InvalidEthLoginMessage:
+		return false
 	case Forbidden:
 		return false
 	case InstanceLimit:
 		return true
+	case DisabledAccount:
+		return false
+	case WhiteListForbidden:
+		return false
 	case NotFound:
 		return false
 	case Conflict:
@@ -134,10 +174,6 @@ func (v Error) CanBeTalk() bool {
 	case InternalServerError:
 		return false
 	case UploadFileFailed:
-		return false
-	case ExtractFileFailed:
-		return false
-	case LoadVMFailed:
 		return false
 	}
 	return false

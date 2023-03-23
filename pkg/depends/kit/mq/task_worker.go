@@ -2,12 +2,15 @@ package mq
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/fatih/color"
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/metax"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq/worker"
@@ -51,6 +54,21 @@ type TaskWorker struct {
 	with   contextx.WithContext
 }
 
+func (w *TaskWorker) SetDefault() {
+	if w.Channel == "" {
+		w.Channel = "unknown"
+		if name := os.Getenv(consts.EnvProjectName); name != "" {
+			w.Channel = name
+		}
+	}
+	if w.WorkerCount == 0 {
+		w.WorkerCount = 5
+	}
+	if w.ops == nil {
+		w.ops = mapx.New[string, any]()
+	}
+}
+
 func (w *TaskWorker) Context() context.Context {
 	if w.with != nil {
 		return w.with(context.Background())
@@ -58,24 +76,22 @@ func (w *TaskWorker) Context() context.Context {
 	return context.Background()
 }
 
-func (w *TaskWorker) WithContextInjector(with contextx.WithContext) *TaskWorker {
-	return &TaskWorker{
-		taskWorkerOption: w.taskWorkerOption,
-		mgr:              w.mgr,
-		ops:              mapx.New[string, any](),
-		worker:           w.worker,
-		with:             with,
-	}
+func (w TaskWorker) WithContextInjector(with contextx.WithContext) *TaskWorker {
+	w.with = with
+	return &w
 }
 
 func (w *TaskWorker) Register(router *kit.Router) {
-	for _, route := range router.Routes() {
-		factories := route.OperatorFactories()
+	fmt.Printf("[Kit] TASK\n")
+	routes := router.Routes()
+	for i := range routes {
+		factories := routes[i].OperatorFactories()
 		if len(factories) != 1 {
 			continue
 		}
 		f := factories[0]
 		w.ops.Store(f.Type.Name(), f)
+		fmt.Println("[Kit]\t" + color.GreenString(f.String()))
 	}
 }
 
@@ -92,6 +108,15 @@ func (w *TaskWorker) Serve(router *kit.Router) error {
 
 	<-stopCh
 	return errors.New("TaskWorker server closed")
+}
+
+func (w *TaskWorker) LivenessCheck() map[string]string {
+	m := map[string]string{}
+	w.ops.Range(func(k string, _ any) bool {
+		m[k] = "ok"
+		return true
+	})
+	return m
 }
 
 func (w *TaskWorker) operatorFactory(ch string) (*kit.OperatorFactory, error) {

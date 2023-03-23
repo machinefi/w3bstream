@@ -48,6 +48,7 @@ func init() {
 		StdLogger  conflog.Logger
 		UploadConf *types.UploadConfig
 		EthClient  *types.ETHClientConfig
+		WhiteList  *types.WhiteList
 	}{
 		Postgres:   db,
 		MonitorDB:  monitordb,
@@ -60,6 +61,7 @@ func init() {
 		StdLogger:  conflog.Std(),
 		UploadConf: &types.UploadConfig{},
 		EthClient:  &types.ETHClientConfig{},
+		WhiteList:  &types.WhiteList{"1"},
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
@@ -68,26 +70,20 @@ func init() {
 	}
 	os.Setenv(consts.EnvProjectName, name)
 	config.Logger.Name = name
+
+	tasks = mem_mq.New(0)
+	worker = mq.NewTaskWorker(tasks, mq.WithWorkerCount(3), mq.WithChannel(name))
+
 	App = confapp.New(
 		confapp.WithName(name),
 		confapp.WithRoot(".."),
 		confapp.WithVersion("0.0.1"),
 		confapp.WithLogger(conflog.Std()),
 	)
-	App.Conf(config)
+	App.Conf(config, worker)
 
-	confhttp.RegisterCheckerBy(
-		config.Postgres,
-		config.MonitorDB,
-		config.WasmDB,
-		config.MqttBroker,
-		config.Redis,
-		config.Server,
-	)
+	confhttp.RegisterCheckerBy(config, worker)
 	config.StdLogger.(conflog.LevelSetter).SetLevel(conflog.InfoLevel)
-
-	tasks = mem_mq.New(0)
-	worker = mq.NewTaskWorker(tasks, mq.WithWorkerCount(3), mq.WithChannel(name))
 
 	WithContext = contextx.WithContextCompose(
 		types.WithMgrDBExecutorContext(config.Postgres),
@@ -95,7 +91,8 @@ func init() {
 		types.WithWasmDBExecutorContext(config.WasmDB),
 		types.WithPgEndpointContext(config.Postgres),
 		types.WithRedisEndpointContext(config.Redis),
-		types.WithLoggerContext(conflog.Std()),
+		types.WithLoggerContext(config.StdLogger),
+		conflog.WithLoggerContext(config.StdLogger),
 		types.WithMqttBrokerContext(config.MqttBroker),
 		types.WithUploadConfigContext(config.UploadConf),
 		confid.WithSFIDGeneratorContext(confid.MustNewSFIDGenerator()),
@@ -103,6 +100,7 @@ func init() {
 		types.WithTaskWorkerContext(worker),
 		types.WithTaskBoardContext(mq.NewTaskBoard(tasks)),
 		types.WithETHClientConfigContext(config.EthClient),
+		types.WithWhiteListContext(config.WhiteList),
 	)
 }
 

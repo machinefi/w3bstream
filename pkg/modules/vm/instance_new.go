@@ -22,7 +22,6 @@ func NewInstance(ctx context.Context, path string, id types.SFID) error {
 
 	i, err := wasmtime.NewInstanceByCode(ctx, id, code)
 	if err != nil {
-		panic(err)
 		l.Error(err)
 		return err
 	}

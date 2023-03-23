@@ -93,3 +93,13 @@ func (c *Client) Subscribe(cb mqtt.MessageHandler) error {
 		"sub",
 	)
 }
+
+func (c *Client) Unsubscribe() error {
+	if c.topic == "" {
+		return errors.New("topic is empty")
+	}
+	return c.wait(
+		c.cli.Unsubscribe(c.topic),
+		"Unsub",
+	)
+}

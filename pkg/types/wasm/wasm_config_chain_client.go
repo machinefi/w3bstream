@@ -25,7 +25,7 @@ type ChainClient struct {
 	clientMap map[uint32]*ethclient.Client
 }
 
-func NewChainClient(ctx context.Context) *ChainClient {
+func NewChainClient(ctx context.Context, pvk *string) *ChainClient {
 	c := &ChainClient{
 		clientMap: make(map[uint32]*ethclient.Client, 0),
 		endpoints: make(map[uint32]string),
@@ -34,8 +34,8 @@ func NewChainClient(ctx context.Context) *ChainClient {
 	if !ok || ethcli == nil {
 		return c
 	}
-	if len(ethcli.PrivateKey) > 0 {
-		c.pvk = crypto.ToECDSAUnsafe(common.FromHex(ethcli.PrivateKey))
+	if pvk != nil && len(*pvk) > 0 {
+		c.pvk = crypto.ToECDSAUnsafe(common.FromHex(*pvk))
 	}
 	if len(ethcli.Endpoints) > 0 {
 		c.endpoints = decodeEndpoints(ethcli.Endpoints)
