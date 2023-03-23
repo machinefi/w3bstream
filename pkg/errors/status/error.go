@@ -81,6 +81,7 @@ const (
 	ProjectNotFound
 )
 
+// Deprecated: pls check database error and return defined status error
 func CheckDatabaseError(err error, msg ...string) error {
 	desc := ""
 	if len(msg) > 0 {
