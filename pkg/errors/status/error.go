@@ -14,48 +14,71 @@ func (Error) ServiceCode() int {
 }
 
 const (
-	// InternalServerError internal error
+	// @errTalk InternalServerError internal error
 	InternalServerError Error = http.StatusInternalServerError*1e6 + iota + 1
+	// @errTalk Database Error
+	DatabaseError
+	// @errTalk Upload File Failed
 	UploadFileFailed
+	// @errTalk Create Message Channel Failed
+	CreateChannelFailed
 )
 
 const (
 	// @errTalk Unauthorized unauthorized
 	Unauthorized Error = http.StatusUnauthorized*1e6 + iota + 1
+	// @errTalk Invalid Auth Value
 	InvalidAuthValue
+	// @errTalk Invalid Auth Account ID
 	InvalidAuthAccountID
+	// @errTalk No Project Permission
 	NoProjectPermission
+	// @errTalk No Admin Permission
 	NoAdminPermission
+	// @errTalk Invalid Old Password
 	InvalidOldPassword
+	// @errTalk Invalid New Password
 	InvalidNewPassword
+	// @errTalk Invalid Password
 	InvalidPassword
+	// @errTalk Invalid Siwe Signature
 	InvalidEthLoginSignature
+	// @errTalk Invalid Siwe Message
 	InvalidEthLoginMessage
 )
 
 const (
+	// @errTalk Forbidden
 	Forbidden Error = http.StatusForbidden*1e6 + iota + 1
 	// @errTalk deployed instance limit
 	InstanceLimit
+	// @errTalk Disabled Account
 	DisabledAccount
+	// @errTalk White List Forbidden
 	WhiteListForbidden
 )
 
 const (
-	// Conflict conflict error
+	// @errTalk Conflict conflict error
 	Conflict Error = http.StatusConflict*1e6 + iota + 1
+	// @errTalk Project Name Conflict
+	ProjectNameConflict
 )
 
 const (
-	// BadRequest
+	// @errTalk BadRequest
 	BadRequest Error = http.StatusBadRequest*1e6 + iota + 1
+	// @errTalk Md5 Checksum Failed
 	MD5ChecksumFailed
+	// @errTalk Invalid Chain Client
 	InvalidChainClient
 )
 
 const (
-	// NotFound
+	// @errTalk NotFound
 	NotFound Error = http.StatusNotFound*1e6 + iota + 1
+	// @errTalk Project Not Found
+	ProjectNotFound
 )
 
 func CheckDatabaseError(err error, msg ...string) error {

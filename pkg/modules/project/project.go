@@ -44,13 +44,16 @@ func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (
 
 	if err := mq.CreateChannel(ctx, m.Name, hdl); err != nil {
 		l.Error(err)
-		return nil, status.InternalServerError.StatusErr().
+		return nil, status.CreateChannelFailed.StatusErr().
 			WithDesc(fmt.Sprintf("create channel: [project:%s] [err:%v]", m.Name, err))
 	}
 
 	if err := m.Create(d); err != nil {
 		l.Error(err)
-		return nil, err
+		if sqlx.DBErr(err).IsConflict() {
+			return nil, status.ProjectNameConflict
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
 
 	return m, nil
@@ -149,7 +152,8 @@ func ListProject(ctx context.Context, r *ListProjectReq) (*ListProjectRsp, error
 
 	ret.Total, err = mProject.Count(d, cond)
 	if err != nil {
-		return nil, status.CheckDatabaseError(err, "CountProject")
+		return nil, status.DatabaseError.StatusErr().
+			WithDesc(errors.Wrap(err, "CountProject").Error())
 	}
 
 	details := make([]detail, 0)
@@ -184,7 +188,8 @@ func ListProject(ctx context.Context, r *ListProjectReq) (*ListProjectRsp, error
 	)
 	if err != nil {
 		l.Error(err)
-		return nil, status.CheckDatabaseError(err, "ListProject")
+		return nil, status.DatabaseError.StatusErr().
+			WithDesc(errors.Wrap(err, "ListProject").Error())
 	}
 
 	detailsMap := make(map[types.SFID][]*detail)

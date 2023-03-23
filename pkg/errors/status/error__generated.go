@@ -74,12 +74,20 @@ func (v Error) Key() string {
 		return "WhiteListForbidden"
 	case NotFound:
 		return "NotFound"
+	case ProjectNotFound:
+		return "ProjectNotFound"
 	case Conflict:
 		return "Conflict"
+	case ProjectNameConflict:
+		return "ProjectNameConflict"
 	case InternalServerError:
 		return "InternalServerError"
+	case DatabaseError:
+		return "DatabaseError"
 	case UploadFileFailed:
 		return "UploadFileFailed"
+	case CreateChannelFailed:
+		return "CreateChannelFailed"
 	}
 	return "UNKNOWN"
 }
@@ -89,45 +97,53 @@ func (v Error) Msg() string {
 	case BadRequest:
 		return "BadRequest"
 	case MD5ChecksumFailed:
-		return ""
+		return "Md5 Checksum Failed"
 	case InvalidChainClient:
-		return ""
+		return "Invalid Chain Client"
 	case Unauthorized:
 		return "Unauthorized unauthorized"
 	case InvalidAuthValue:
-		return ""
+		return "Invalid Auth Value"
 	case InvalidAuthAccountID:
-		return ""
+		return "Invalid Auth Account ID"
 	case NoProjectPermission:
-		return ""
+		return "No Project Permission"
 	case NoAdminPermission:
-		return ""
+		return "No Admin Permission"
 	case InvalidOldPassword:
-		return ""
+		return "Invalid Old Password"
 	case InvalidNewPassword:
-		return ""
+		return "Invalid New Password"
 	case InvalidPassword:
-		return ""
+		return "Invalid Password"
 	case InvalidEthLoginSignature:
-		return ""
+		return "Invalid Siwe Signature"
 	case InvalidEthLoginMessage:
-		return ""
+		return "Invalid Siwe Message"
 	case Forbidden:
-		return ""
+		return "Forbidden"
 	case InstanceLimit:
 		return "deployed instance limit"
 	case DisabledAccount:
-		return ""
+		return "Disabled Account"
 	case WhiteListForbidden:
-		return ""
+		return "White List Forbidden"
 	case NotFound:
 		return "NotFound"
+	case ProjectNotFound:
+		return "Project Not Found"
 	case Conflict:
 		return "Conflict conflict error"
+	case ProjectNameConflict:
+		return "Project Name Conflict"
 	case InternalServerError:
 		return "InternalServerError internal error"
+	case DatabaseError:
+		return "Database Error"
 	case UploadFileFailed:
-		return ""
+		return "Upload File Failed"
+	case CreateChannelFailed:
+		return "Create Message Channel Failed"
 	}
 	return "-"
 }
@@ -135,47 +151,55 @@ func (v Error) Msg() string {
 func (v Error) CanBeTalk() bool {
 	switch v {
 	case BadRequest:
-		return false
+		return true
 	case MD5ChecksumFailed:
-		return false
+		return true
 	case InvalidChainClient:
-		return false
+		return true
 	case Unauthorized:
 		return true
 	case InvalidAuthValue:
-		return false
+		return true
 	case InvalidAuthAccountID:
-		return false
+		return true
 	case NoProjectPermission:
-		return false
+		return true
 	case NoAdminPermission:
-		return false
+		return true
 	case InvalidOldPassword:
-		return false
+		return true
 	case InvalidNewPassword:
-		return false
+		return true
 	case InvalidPassword:
-		return false
+		return true
 	case InvalidEthLoginSignature:
-		return false
+		return true
 	case InvalidEthLoginMessage:
-		return false
+		return true
 	case Forbidden:
-		return false
+		return true
 	case InstanceLimit:
 		return true
 	case DisabledAccount:
-		return false
+		return true
 	case WhiteListForbidden:
-		return false
+		return true
 	case NotFound:
-		return false
+		return true
+	case ProjectNotFound:
+		return true
 	case Conflict:
-		return false
+		return true
+	case ProjectNameConflict:
+		return true
 	case InternalServerError:
-		return false
+		return true
+	case DatabaseError:
+		return true
 	case UploadFileFailed:
-		return false
+		return true
+	case CreateChannelFailed:
+		return true
 	}
 	return false
 }
