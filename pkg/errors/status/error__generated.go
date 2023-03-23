@@ -76,10 +76,16 @@ func (v Error) Key() string {
 		return "NotFound"
 	case Conflict:
 		return "Conflict"
+	case ProjectConfigConflict:
+		return "ProjectConfigConflict"
+	case ProjectNameConflict:
+		return "ProjectNameConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case UploadFileFailed:
 		return "UploadFileFailed"
+	case DatabaseError:
+		return "DatabaseError"
 	}
 	return "UNKNOWN"
 }
@@ -124,10 +130,16 @@ func (v Error) Msg() string {
 		return "NotFound"
 	case Conflict:
 		return "Conflict conflict error"
+	case ProjectConfigConflict:
+		return "Project Config Conflict"
+	case ProjectNameConflict:
+		return "Project Name Conflict"
 	case InternalServerError:
 		return "InternalServerError internal error"
 	case UploadFileFailed:
 		return ""
+	case DatabaseError:
+		return "Database Error"
 	}
 	return "-"
 }
@@ -172,10 +184,16 @@ func (v Error) CanBeTalk() bool {
 		return false
 	case Conflict:
 		return false
+	case ProjectConfigConflict:
+		return true
+	case ProjectNameConflict:
+		return true
 	case InternalServerError:
 		return false
 	case UploadFileFailed:
 		return false
+	case DatabaseError:
+		return true
 	}
 	return false
 }

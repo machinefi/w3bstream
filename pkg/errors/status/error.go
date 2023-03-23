@@ -17,6 +17,8 @@ const (
 	// InternalServerError internal error
 	InternalServerError Error = http.StatusInternalServerError*1e6 + iota + 1
 	UploadFileFailed
+	// @errTalk Database Error
+	DatabaseError
 )
 
 const (
@@ -44,6 +46,10 @@ const (
 const (
 	// Conflict conflict error
 	Conflict Error = http.StatusConflict*1e6 + iota + 1
+	// @errTalk Project Config Conflict
+	ProjectConfigConflict
+	// @errTalk Project Name Conflict
+	ProjectNameConflict
 )
 
 const (
