@@ -75,6 +75,7 @@ func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (
 			if r.Env == nil {
 				r.Env = wasm.NewEvn(r.Name)
 			}
+			ctx = types.WithProject(ctx, m)
 			if err := CreateOrUpdateProjectEnv(ctx, r.Env); err != nil {
 				return err
 			}
