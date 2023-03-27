@@ -42,11 +42,13 @@ require (
 require (
 	github.com/ethereum/go-ethereum v1.10.15
 	github.com/spruceid/siwe-go v0.2.0
+	github.com/stretchr/testify v1.8.0
 )
 
 require (
 	github.com/StackExchange/wmi v0.0.0-20180116203802-5d049714c4a6 // indirect
 	github.com/btcsuite/btcd v0.20.1-beta // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dchest/uniuri v0.0.0-20200228104902-7aecb25e1fe5 // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
@@ -60,6 +62,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/openzipkin/zipkin-go v0.4.0 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/relvacode/iso8601 v1.1.0 // indirect
 	github.com/rjeczalik/notify v0.9.2 // indirect
