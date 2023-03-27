@@ -6,6 +6,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/machinefi/w3bstream/pkg/depends/schema"
+	"github.com/machinefi/w3bstream/pkg/types/wasm"
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
@@ -24,9 +26,18 @@ import (
 type CreateProjectReq struct {
 	models.ProjectName
 	models.ProjectBase
+	Envs   [][2]string  `json:"envs,omitempty"`
+	Schema *wasm.Schema `json:"schema,omitempty"`
+	// TODO if each project has its own mqtt broker should add *wasm.MqttClient
 }
 
-func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (*models.Project, error) {
+type CreateProjectRsp struct {
+	*models.Project `json:"project"`
+	Envs            [][2]string  `json:"envs,omitempty"`
+	Schema          *wasm.Schema `json:"schema,omitempty"`
+}
+
+func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (*CreateProjectRsp, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	a := middleware.CurrentAccountFromContext(ctx)
@@ -44,16 +55,50 @@ func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (
 
 	if err := mq.CreateChannel(ctx, m.Name, hdl); err != nil {
 		l.Error(err)
-		return nil, status.InternalServerError.StatusErr().
+		return nil, status.CreateChannelFailed.StatusErr().
 			WithDesc(fmt.Sprintf("create channel: [project:%s] [err:%v]", m.Name, err))
 	}
 
-	if err := m.Create(d); err != nil {
-		l.Error(err)
+	err := sqlx.NewTasks(d).With(
+		func(d sqlx.DBExecutor) error {
+			if err := m.Create(d); err != nil {
+				l.WithValues("stg", "CreateProject").Error(err)
+				if sqlx.DBErr(err).IsConflict() {
+					return status.ProjectNameConflict
+				}
+				return status.DatabaseError.StatusErr().
+					WithDesc(errors.Wrap(err, "CreateProject").Error())
+			}
+			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			env := wasm.NewEvn(r.Name, r.Envs...)
+			ctx = types.WithProject(ctx, m)
+			if err := CreateOrUpdateProjectEnv(ctx, env); err != nil {
+				return err
+			}
+			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			if r.Schema == nil {
+				sch := schema.NewSchema(r.Name)
+				r.Schema = &wasm.Schema{Schema: *sch}
+			}
+			if err := CreateProjectSchema(ctx, r.Schema); err != nil {
+				return err
+			}
+			return nil
+		},
+	).Do()
+
+	if err != nil {
 		return nil, err
 	}
-
-	return m, nil
+	return &CreateProjectRsp{
+		Project: m,
+		Envs:    r.Envs,
+		Schema:  r.Schema,
+	}, nil
 }
 
 type ListProjectReq struct {
@@ -149,7 +194,8 @@ func ListProject(ctx context.Context, r *ListProjectReq) (*ListProjectRsp, error
 
 	ret.Total, err = mProject.Count(d, cond)
 	if err != nil {
-		return nil, status.CheckDatabaseError(err, "CountProject")
+		return nil, status.DatabaseError.StatusErr().
+			WithDesc(errors.Wrap(err, "CountProject").Error())
 	}
 
 	details := make([]detail, 0)
@@ -184,7 +230,8 @@ func ListProject(ctx context.Context, r *ListProjectReq) (*ListProjectRsp, error
 	)
 	if err != nil {
 		l.Error(err)
-		return nil, status.CheckDatabaseError(err, "ListProject")
+		return nil, status.DatabaseError.StatusErr().
+			WithDesc(errors.Wrap(err, "ListProject").Error())
 	}
 
 	detailsMap := make(map[types.SFID][]*detail)

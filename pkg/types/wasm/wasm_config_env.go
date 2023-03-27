@@ -7,7 +7,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/enums"
 )
 
-func NewEvn(prefix string) *Env {
+func NewEvn(prefix string, kvs ...[2]string) *Env {
 	return &Env{
 		prefix: prefix,
 		values: mapx.New[string, string](),
