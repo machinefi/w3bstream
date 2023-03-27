@@ -26,15 +26,15 @@ import (
 type CreateProjectReq struct {
 	models.ProjectName
 	models.ProjectBase
-	*wasm.Env    `json:"env,omitempty"`
-	*wasm.Schema `json:"schema,omitempty"`
+	Envs   [][2]string  `json:"envs,omitempty"`
+	Schema *wasm.Schema `json:"schema,omitempty"`
 	// TODO if each project has its own mqtt broker should add *wasm.MqttClient
 }
 
 type CreateProjectRsp struct {
 	*models.Project `json:"project"`
-	*wasm.Env       `json:"env,omitempty"`
-	*wasm.Schema    `json:"schema,omitempty"`
+	Envs            [][2]string  `json:"envs,omitempty"`
+	Schema          *wasm.Schema `json:"schema,omitempty"`
 }
 
 func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (*CreateProjectRsp, error) {
@@ -72,20 +72,17 @@ func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			if r.Env == nil {
-				r.Env = wasm.NewEvn(r.Name)
-			}
+			env := wasm.NewEvn(r.Name, r.Envs...)
 			ctx = types.WithProject(ctx, m)
-			if err := CreateOrUpdateProjectEnv(ctx, r.Env); err != nil {
+			if err := CreateOrUpdateProjectEnv(ctx, env); err != nil {
 				return err
 			}
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
 			if r.Schema == nil {
-				sch := schema.NewSchema("")
+				sch := schema.NewSchema(r.Name)
 				r.Schema = &wasm.Schema{Schema: *sch}
-				r.Schema.WithName(r.Name)
 			}
 			if err := CreateProjectSchema(ctx, r.Schema); err != nil {
 				return err
@@ -99,7 +96,7 @@ func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (
 	}
 	return &CreateProjectRsp{
 		Project: m,
-		Env:     r.Env,
+		Envs:    r.Envs,
 		Schema:  r.Schema,
 	}, nil
 }

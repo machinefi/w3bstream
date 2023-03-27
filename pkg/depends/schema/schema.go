@@ -21,7 +21,7 @@ func NewSchema(name string) *Schema {
 
 type Schema struct {
 	Name   string   `json:"name,omitempty"`
-	Tables []*Table `json:"tables"`
+	Tables []*Table `json:"tables,omitempty"`
 
 	*mapx.Map[string, *Table] `json:"-"`
 }

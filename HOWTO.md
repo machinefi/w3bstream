@@ -76,7 +76,7 @@ output like
 }
 ```
 
-### Create project with database schema for wasm db storage
+### Create project database schema for wasm db storage
 
 ```sh
 export PROJECTSCHEMA='{
@@ -129,6 +129,42 @@ echo '{"env":'$PROJECTENV'}' | http post :8888/srv-applet-mgr/v0/project_config/
 
 > the database for wasm storage is configured by w3bstream server and the name
 > of schema is name of project.
+
+### Create project with project env vars and schema
+
+```sh
+echo '{"name":"'$PROJECTNAME'","envs":'$PROJECTENV',"schema":'$PROJECTSCHEMA'}' | http post :8888/srv-applet-mgr/v0/project -A bearer -a $TOK
+```
+
+output like 
+```json
+{
+    "envs": [
+        [
+            "key1",
+            "value1"
+        ],
+        [
+            "key2",
+            "value2"
+        ],
+        [
+            "key3",
+            "value3"
+        ]
+    ],
+    "project": {
+        "accountID": "186913331796320263",
+        "createdAt": "2023-03-27T14:52:20.037217+08:00",
+        "name": "demo2",
+        "projectID": "186913955765090305",
+        "updatedAt": "2023-03-27T14:52:20.037217+08:00"
+    },
+    "schema": {
+        "name": "wasm_project__demo2"
+    }
+}
+```
 
 ### Review your project config
 
