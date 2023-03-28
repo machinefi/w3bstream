@@ -33,6 +33,7 @@ func (v Error) Code() int {
 		return with.ServiceCode() + int(v)
 	}
 	return int(v)
+
 }
 
 func (v Error) Key() string {
