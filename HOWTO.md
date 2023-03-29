@@ -37,7 +37,8 @@ docker-compose restart
 command
 
 ```sh
-echo '{"username":"admin","password":"${password}"}' | http put :8888/srv-applet-mgr/v0/login
+# the default password is "iotex.W3B.admin"
+echo '{"username":"admin","password":"iotex.W3B.admin"}' | http put :8888/srv-applet-mgr/v0/login 
 ```
 
 output like
@@ -181,7 +182,9 @@ upload wasm script
 ```sh
 ## set env vars
 export WASMFILE=${wasm_path}
-http --form post :8888/srv-applet-mgr/v0/applet/$PROJECTNAME file@$WASMFILE info='{"appletName":"log","wasmName":"log.wasm","strategies":[{"eventType":"DEFAULT","handler":"start"}]}' -A bearer -a $TOK
+export APPLETNAME=${applet_name}
+export WASMNAME=${wasm_name}
+http --form post :8888/srv-applet-mgr/v0/applet/$PROJECTNAME file@$WASMFILE info='{"appletName":"'$APPLETNAME'","wasmName":"'$WASMNAME'","strategies":[{"eventType":"DEFAULT","handler":"start"}]}' -A bearer -a $TOK
 ```
 
 output like
@@ -201,6 +204,9 @@ deploy applet
 ```sh
 export APPLETID=${applet_id}
 http post :8888/srv-applet-mgr/v0/deploy/applet/$APPLETID -A bearer -a $TOK
+
+# in-memory cache is used in default, to use redis cache:
+# echo '{"cache":{"mode": "REDIS"}}' | http post :8888/srv-applet-mgr/v0/deploy/applet/$APPLETID -A bearer -a $TOK
 ```
 
 output like
@@ -210,12 +216,6 @@ output like
   "instanceID": "${instance_id}",
   "instanceState": "CREATED"
 }
-```
-
-deploy applet with cache and chain client config
-
-```sh
-echo '{"cache":{"mode": "MEMORY"}}' | http post :8888/srv-applet-mgr/v0/deploy/applet/$APPLETID -A bearer -a $TOK
 ```
 
 start applet

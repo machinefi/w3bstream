@@ -18,7 +18,13 @@ Interested in contributing to the doc? Please edit on [Github](https://github.co
 
 ![w3bstream](__doc__/modules_and_dataflow.png)
 
-## Run W3bstream node with prebuilt docker images
+## Run W3bstream with prebuilt docker images
+
+### Run W3bstream node with W3bstream Studio
+Check it out here [w3bstream-studio](https://github.com/machinefi/w3bstream-studio#run-w3bstream-node-with-prebuilt-docker-images).
+
+
+### Run W3bstream node without W3bstream Studio
 
 Make a path for w3bstream node. In the path, run the following command
 
@@ -36,23 +42,14 @@ Your node should be up and running.
 
 Please note: the docker images are hosted at [GitHub Docker Registry](https://github.com/machinefi/w3bstream/pkgs/container/w3bstream)
 
-
-## Access W3bstream Studio
-
-W3bstream Studio is a web tool that allows W3bstream node operators to administrate their node, deploy and run applets, and explore data.
-
-Visit http://localhost:3000 to get started. The default admin password is `iotex.W3B.admin`. Learn more from [documentation](https://docs.w3bstream.com/get-started/w3bstream-studio).
-
-Interested in W3bstream Studio source code? Check it out here [https://github.com/machinefi/w3bstream-studio](https://github.com/machinefi/w3bstream-studio).
-
-## Build docker image from code
+## Run W3bstream node from code
 
 If you are interested in diving into the code and run the node using a locally built docker, here is the steps of building the docker image from code.
 
-### Build docker images
+### Build docker image from code
 
 ```bash
-make build_docker_images
+make build_backend_image
 ```
 
 ### Run server in docker containers
