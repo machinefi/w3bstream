@@ -12,6 +12,7 @@ import (
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	confpostgres "github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
+	confrate "github.com/machinefi/w3bstream/pkg/depends/conf/rate_limit"
 	confredis "github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
@@ -49,6 +50,7 @@ func init() {
 		UploadConf *types.UploadConfig
 		EthClient  *types.ETHClientConfig
 		WhiteList  *types.WhiteList
+		RateLimit  *confrate.RateLimit
 	}{
 		Postgres:   db,
 		MonitorDB:  monitordb,
@@ -62,6 +64,7 @@ func init() {
 		UploadConf: &types.UploadConfig{},
 		EthClient:  &types.ETHClientConfig{},
 		WhiteList:  &types.WhiteList{"1"},
+		RateLimit:  &confrate.RateLimit{},
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
@@ -101,6 +104,7 @@ func init() {
 		types.WithTaskBoardContext(mq.NewTaskBoard(tasks)),
 		types.WithETHClientConfigContext(config.EthClient),
 		types.WithWhiteListContext(config.WhiteList),
+		confrate.WithRateLimitKeyContext(config.RateLimit),
 	)
 }
 
