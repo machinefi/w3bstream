@@ -3,9 +3,9 @@ package wasm
 import (
 	"context"
 
-	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/enums"
 )
 
