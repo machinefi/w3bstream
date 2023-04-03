@@ -6,6 +6,7 @@ import (
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 	confapp "github.com/machinefi/w3bstream/pkg/depends/conf/app"
+	confdid "github.com/machinefi/w3bstream/pkg/depends/conf/did"
 	confhttp "github.com/machinefi/w3bstream/pkg/depends/conf/http"
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	confjwt "github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
@@ -47,6 +48,7 @@ func init() {
 		PublisherJwt *confjwt.PublisherJwt
 		Logger       *conflog.Log
 		StdLogger    conflog.Logger
+		DID          *confdid.DID
 		UploadConf   *types.UploadConfig
 		EthClient    *types.ETHClientConfig
 		WhiteList    *types.WhiteList
@@ -61,6 +63,7 @@ func init() {
 		PublisherJwt: &confjwt.PublisherJwt{},
 		Logger:       &conflog.Log{},
 		StdLogger:    conflog.Std(),
+		DID:          &confdid.DID{},
 		UploadConf:   &types.UploadConfig{},
 		EthClient:    &types.ETHClientConfig{},
 		WhiteList:    &types.WhiteList{"1"},
@@ -100,6 +103,7 @@ func init() {
 		confid.WithSFIDGeneratorContext(confid.MustNewSFIDGenerator()),
 		confjwt.WithConfContext(config.Jwt),
 		confjwt.WithPublisherAuthContext(config.PublisherJwt),
+		confdid.WithDIDContext(config.DID),
 		types.WithTaskWorkerContext(worker),
 		types.WithTaskBoardContext(mq.NewTaskBoard(tasks)),
 		types.WithETHClientConfigContext(config.EthClient),

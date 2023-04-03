@@ -13,6 +13,7 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/publisher"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/resource"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/strategy"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/did"
 	confhttp "github.com/machinefi/w3bstream/pkg/depends/conf/http"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
@@ -36,6 +37,7 @@ func init() {
 
 	RouterV0.Register(login.Root)
 	RouterV0.Register(event.Root)
+	RouterV0.Register(did.Root)
 	RouterV0.Register(RouterAuth)
 	RouterV0.Register(account.RegisterRoot)
 	{
