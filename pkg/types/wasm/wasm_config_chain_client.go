@@ -25,6 +25,8 @@ type ChainClient struct {
 	clientMap map[uint32]*ethclient.Client
 }
 
+// TODO impl ChainClient.Init
+
 func NewChainClient(ctx context.Context, pvk *string) *ChainClient {
 	c := &ChainClient{
 		clientMap: make(map[uint32]*ethclient.Client, 0),

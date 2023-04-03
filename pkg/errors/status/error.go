@@ -22,6 +22,8 @@ const (
 	UploadFileFailed
 	// @errTalk Create Message Channel Failed
 	CreateChannelFailed
+	// @errTalk Config Initialization Failed
+	ConfigInitializationFailed
 )
 
 const (
@@ -81,6 +83,8 @@ const (
 	NotFound Error = http.StatusNotFound*1e6 + iota + 1
 	// @errTalk Project Not Found
 	ProjectNotFound
+	// @errTalk Config Not Found
+	ConfigNotFound
 )
 
 // Deprecated: pls check database error and return defined status error

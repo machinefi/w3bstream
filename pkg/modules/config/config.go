@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
@@ -25,7 +26,7 @@ func GetConfigValue(ctx context.Context, rel types.SFID, v wasm.Configuration) e
 	m, err := GetConfigByRelIdAndType(ctx, rel, typ)
 	if err != nil {
 		l.Error(err)
-		return status.CheckDatabaseError(err)
+		return err
 	}
 	if err = json.Unmarshal(m.Value, v); err != nil {
 		l.Error(err)
@@ -83,8 +84,14 @@ func GetConfigByRelIdAndType(ctx context.Context, rel types.SFID, typ enums.Conf
 		},
 	}
 
-	if err := cfg.FetchByRelIDAndType(d); err != nil {
-		return nil, err
+	err := cfg.FetchByRelIDAndType(d)
+	if err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.ConfigNotFound.StatusErr().
+				WithDesc(fmt.Sprintf("rel:%v type: %v", rel, typ))
+		} else {
+			return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+		}
 	}
 
 	return cfg, nil

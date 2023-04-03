@@ -2,21 +2,14 @@ package wasm
 
 import (
 	"context"
+	"os"
 
-	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/enums"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
-
-func NewEvn(prefix string, kvs ...[2]string) *Env {
-	return &Env{
-		prefix: prefix,
-		values: mapx.New[string, string](),
-	}
-}
 
 type Env struct {
 	prefix string
-	values *mapx.Map[string, string]
 	Env    [][2]string `json:"env"`
 }
 
@@ -25,29 +18,38 @@ func (env *Env) ConfigType() enums.ConfigType {
 }
 
 func (env *Env) WithContext(ctx context.Context) context.Context {
-	prefix, _ := EnvPrefixFromContext(ctx)
-	if prefix != "" {
-		prefix = prefix + "__"
-	}
-	env.prefix = prefix
-
-	if env.values == nil {
-		env.values = mapx.New[string, string]()
-	}
-	for _, pair := range env.Env {
-		if pair[0] != "" {
-			env.Set(pair[0], pair[1])
-		}
-	}
 	return WithEnv(ctx, env)
 }
 
-func (env *Env) Prefix() string { return env.prefix }
+func (env *Env) Key(k string) string { return env.prefix + "__" + k }
 
 func (env *Env) Get(k string) (v string, exists bool) {
-	return env.values.Load(env.prefix + k)
+	return os.LookupEnv(env.Key(k))
 }
 
-func (env *Env) Set(k, v string) {
-	env.values.Store(env.prefix+k, v)
+func (env *Env) Init(ctx context.Context) (err error) {
+	env.prefix = types.MustProjectFromContext(ctx).Name + "__"
+
+	defer func() {
+		if err != nil {
+			_ = env.Uninit(nil)
+		}
+	}()
+
+	for _, pair := range env.Env {
+		if pair[0] == "" {
+			continue
+		}
+		if err = os.Setenv(env.prefix+pair[0], pair[1]); err != nil {
+			return
+		}
+	}
+	return nil
+}
+
+func (env *Env) Uninit(_ context.Context) error {
+	for _, pair := range env.Env {
+		_ = os.Unsetenv(env.prefix + pair[0])
+	}
+	return nil
 }

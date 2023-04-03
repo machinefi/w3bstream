@@ -33,7 +33,6 @@ func (v Error) Code() int {
 		return with.ServiceCode() + int(v)
 	}
 	return int(v)
-
 }
 
 func (v Error) Key() string {
@@ -76,6 +75,8 @@ func (v Error) Key() string {
 		return "NotFound"
 	case ProjectNotFound:
 		return "ProjectNotFound"
+	case ConfigNotFound:
+		return "ConfigNotFound"
 	case Conflict:
 		return "Conflict"
 	case ProjectConfigConflict:
@@ -90,6 +91,8 @@ func (v Error) Key() string {
 		return "UploadFileFailed"
 	case CreateChannelFailed:
 		return "CreateChannelFailed"
+	case ConfigInitializationFailed:
+		return "ConfigInitializationFailed"
 	}
 	return "UNKNOWN"
 }
@@ -134,6 +137,8 @@ func (v Error) Msg() string {
 		return "NotFound"
 	case ProjectNotFound:
 		return "Project Not Found"
+	case ConfigNotFound:
+		return "Config Not Found"
 	case Conflict:
 		return "Conflict conflict error"
 	case ProjectConfigConflict:
@@ -148,6 +153,8 @@ func (v Error) Msg() string {
 		return "Upload File Failed"
 	case CreateChannelFailed:
 		return "Create Message Channel Failed"
+	case ConfigInitializationFailed:
+		return "Config Initialization Failed"
 	}
 	return "-"
 }
@@ -192,6 +199,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case ProjectNotFound:
 		return true
+	case ConfigNotFound:
+		return true
 	case Conflict:
 		return true
 	case ProjectConfigConflict:
@@ -205,6 +214,8 @@ func (v Error) CanBeTalk() bool {
 	case UploadFileFailed:
 		return true
 	case CreateChannelFailed:
+		return true
+	case ConfigInitializationFailed:
 		return true
 	}
 	return false

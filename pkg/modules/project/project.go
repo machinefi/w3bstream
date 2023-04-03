@@ -72,9 +72,8 @@ func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			env := wasm.NewEvn(r.Name, r.Envs...)
 			ctx = types.WithProject(ctx, m)
-			if err := CreateOrUpdateProjectEnv(ctx, env); err != nil {
+			if err := CreateOrUpdateProjectEnv(ctx, &wasm.Env{Env: r.Envs}); err != nil {
 				return err
 			}
 			return nil

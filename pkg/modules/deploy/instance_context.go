@@ -5,6 +5,7 @@ import (
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
+	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -35,7 +36,6 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		return nil, err
 	}
 	ctx = types.WithProject(ctx, prj)
-	ctx = wasm.WithEnvPrefix(ctx, prj.Name)
 	ctx = wasm.WithRedisPrefix(ctx, prj.Name)
 	res := &models.Resource{RelResource: models.RelResource{ResourceID: app.ResourceID}}
 	if err := res.FetchByResourceID(d); err != nil {
@@ -48,6 +48,12 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		return nil, err
 	}
 	for _, c := range configs {
+		if canBeInit, ok := c.(wasm.ConfigurationWithInit); ok {
+			err = canBeInit.Init(ctx)
+		}
+		if err != nil {
+			return nil, status.ConfigInitializationFailed.StatusErr().WithDesc(err.Error())
+		}
 		ctx = c.WithContext(ctx)
 	}
 	if _, ok := wasm.KVStoreFromContext(ctx); !ok {
