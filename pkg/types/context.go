@@ -2,7 +2,6 @@ package types
 
 import (
 	"context"
-
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
@@ -31,6 +30,7 @@ type (
 	CtxInstance          struct{}
 	CtxEthClient         struct{} // CtxEthClient ETHClientConfig
 	CtxWhiteList         struct{}
+	CtxSchedulerJobs     struct{}
 )
 
 func WithMgrDBExecutor(ctx context.Context, v sqlx.DBExecutor) context.Context {
@@ -369,6 +369,27 @@ func WhiteListFromContext(ctx context.Context) (*WhiteList, bool) {
 
 func MustWhiteListFromContext(ctx context.Context) *WhiteList {
 	v, ok := WhiteListFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithSchedulerJobs(ctx context.Context, v *Schedulers) context.Context {
+	return contextx.WithValue(ctx, CtxSchedulerJobs{}, v)
+}
+
+func WithSchedulerJobsContext(v *Schedulers) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxSchedulerJobs{}, v)
+	}
+}
+
+func SchedulerJobsFromContext(ctx context.Context) (*Schedulers, bool) {
+	v, ok := ctx.Value(CtxSchedulerJobs{}).(*Schedulers)
+	return v, ok
+}
+
+func MustSchedulerJobsFromContext(ctx context.Context) *Schedulers {
+	v, ok := SchedulerJobsFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

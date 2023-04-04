@@ -105,6 +105,7 @@ func init() {
 		types.WithETHClientConfigContext(config.EthClient),
 		types.WithWhiteListContext(config.WhiteList),
 		confrate.WithRateLimitKeyContext(config.RateLimit),
+		types.WithSchedulerJobsContext(&types.SchedulerJobs),
 	)
 }
 
