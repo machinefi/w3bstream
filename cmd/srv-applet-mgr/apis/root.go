@@ -11,6 +11,7 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/project"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/project_config"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/publisher"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/ratelimit"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/resource"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/strategy"
 	confhttp "github.com/machinefi/w3bstream/pkg/depends/conf/http"
@@ -48,6 +49,7 @@ func init() {
 		RouterAuth.Register(strategy.Root)
 		RouterAuth.Register(monitor.Root)
 		RouterAuth.Register(resource.Root)
+		RouterAuth.Register(ratelimit.Root)
 		RouterAuth.Register(RouterDebug)
 	}
 }
