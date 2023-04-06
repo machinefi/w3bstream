@@ -13,7 +13,7 @@ type GetOperatorAddr struct {
 	httpx.MethodGet
 }
 
-func (r *GetOperatorAddr) Path() string { return "/ethaddr" }
+func (r *GetOperatorAddr) Path() string { return "/operatoraddr" }
 
 func (r *GetOperatorAddr) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.CurrentAccountFromContext(ctx)
