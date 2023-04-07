@@ -138,7 +138,7 @@ func (c *ChainClient) SendTX(chainID uint32, toStr, valueStr, dataStr string) (s
 		return "", err
 	}
 
-	_blockChainTxMtc.WithLabelValues(c.projectName, string(chainID)).Inc()
+	_blockChainTxMtc.WithLabelValues(c.projectName, strconv.Itoa(int(chainID))).Inc()
 
 	err = cli.SendTransaction(context.Background(), signedTx)
 	if err != nil {
@@ -182,7 +182,7 @@ func (c *ChainClient) CallContract(chainID uint32, toStr, dataStr string) ([]byt
 		Data: data,
 	}
 
-	_blockChainTxMtc.WithLabelValues(c.projectName, string(chainID)).Inc()
+	_blockChainTxMtc.WithLabelValues(c.projectName, strconv.Itoa(int(chainID))).Inc()
 
 	return cli.CallContract(context.Background(), msg, nil)
 }

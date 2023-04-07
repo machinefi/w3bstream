@@ -12,6 +12,7 @@ var (
 
 func init() {
 	Root.Register(kit.NewRouter(&UpdatePasswordByAccountID{}))
+	Root.Register(kit.NewRouter(&GetOperatorAddr{}))
 
 	RegisterRoot.Register(kit.NewRouter(&CreateAccountByUsernameAndPassword{}))
 }
