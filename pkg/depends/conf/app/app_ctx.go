@@ -71,7 +71,7 @@ func (c *Ctx) Conf(configs ...interface{}) {
 	}
 
 	if key := os.Getenv(consts.GoRuntimeEnv); key == "" {
-		_ = os.Setenv(consts.GoRuntimeEnv, consts.DevelopEnv)
+		_ = os.Setenv(consts.GoRuntimeEnv, consts.ProduceEnv)
 	}
 
 	for _, v := range configs {
