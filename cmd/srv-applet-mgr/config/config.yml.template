@@ -2,7 +2,6 @@ GO_RUNTIME_ENV: DEV
 SRV_APPLET_MGR__EthClient_Endpoints: ""
 SRV_APPLET_MGR__Jwt_ExpIn: 0s
 SRV_APPLET_MGR__Jwt_Issuer: ""
-SRV_APPLET_MGR__Jwt_SignKey: ""
 SRV_APPLET_MGR__Logger_Format: JSON
 SRV_APPLET_MGR__Logger_Level: debug
 SRV_APPLET_MGR__Logger_Name: srv-applet-mgr
@@ -52,3 +51,4 @@ SRV_APPLET_MGR__WasmDB_PoolSize: "10"
 SRV_APPLET_MGR__WasmDB_Retry_Interval: 3s
 SRV_APPLET_MGR__WasmDB_Retry_Repeats: "3"
 SRV_APPLET_MGR__WasmDB_Slave: ""
+SRV_APPLET_MGR__WhiteList_0: "1"
