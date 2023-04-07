@@ -4,20 +4,25 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/machinefi/w3bstream/pkg/depends/x/stringsx"
 )
 
 type Jwt struct {
 	Issuer  string         `env:""`
 	ExpIn   types.Duration `env:""`
-	SignKey string         `env:""`
+	SignKey string         `env:"-"`
 	// Method  SigningMethod  `env:""`
 }
 
 func (c *Jwt) SetDefault() {}
 
-func (c *Jwt) Init() {}
+func (c *Jwt) Init() {
+	if c.ExpIn == 0 {
+		c.ExpIn = types.Duration(time.Hour)
+	}
+	c.SignKey = stringsx.GenRandomVisibleString(16)
+}
 
 func (c *Jwt) GenerateTokenByPayload(payload interface{}) (string, error) {
 	claim := &Claims{
