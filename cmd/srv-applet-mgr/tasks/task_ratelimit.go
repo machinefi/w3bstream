@@ -2,11 +2,11 @@ package tasks
 
 import (
 	"context"
-	"fmt"
-	"github.com/machinefi/w3bstream/pkg/modules/job"
 	"reflect"
 
 	"github.com/pkg/errors"
+
+	"github.com/machinefi/w3bstream/pkg/modules/job"
 )
 
 type RateLimitTask struct {
@@ -22,7 +22,6 @@ func (s *RateLimitTask) SetArg(v interface{}) error {
 }
 
 func (s *RateLimitTask) Output(ctx context.Context) (interface{}, error) {
-	fmt.Println("tttt")
 	s.SchedulerJob.Scheduler(ctx)
 	return nil, nil
 }

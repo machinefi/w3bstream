@@ -2,7 +2,11 @@ package event
 
 import (
 	"context"
+	"fmt"
+	"strconv"
 	"sync"
+
+	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/enums"
@@ -12,6 +16,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
+	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
 
 type HandleEventResult struct {
@@ -29,6 +34,7 @@ type HandleEventReq struct {
 
 func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) (ret *HandleEventResult, err error) {
 	l := types.MustLoggerFromContext(ctx)
+	rDB := kvdb.MustRedisDBKeyFromContext(ctx)
 
 	_, l = l.Start(ctx, "OnEventReceived")
 	defer l.End()
@@ -64,6 +70,18 @@ func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) 
 		}
 		ret.PubID, ret.PubName = pub.PublisherID, pub.Name
 		l.WithValues("pub_id", pub.PublisherID)
+	}
+
+	var valByte []byte
+	if valByte, err = rDB.IncrBy(projectName, []byte(strconv.Itoa(-1))); err != nil {
+		l.Error(err)
+		return
+	}
+	val, _ := strconv.Atoi(string(valByte))
+	if val < 0 {
+		err = errors.New(fmt.Sprintf("Traffic of %s ran out.", projectName))
+		l.Warn(err)
+		return
 	}
 
 	handlers, err = strategy.FindStrategyInstances(ctx, projectName, eventType)

@@ -2,6 +2,7 @@ package deploy
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/pkg/errors"
 
@@ -15,6 +16,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
+	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
 
 type CreateInstanceReq struct {
@@ -203,15 +205,68 @@ func GetInstanceByAppletID(ctx context.Context, appletID types.SFID) (ret []mode
 	return
 }
 
+type ProjectTrafficInfo struct {
+	ProjectName string `db:"f_project_name"`
+	models.TrafficRateLimit
+}
+
 func StartInstances(ctx context.Context) error {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
+	rDB := kvdb.MustRedisDBKeyFromContext(ctx)
 	m := &models.Instance{}
 
 	_, l = l.Start(ctx, "StartInstances")
 	defer l.End()
 
-	list, err := m.List(d, nil)
+	// TODO use job.Dispatch(ctx, t)
+	mTraffic := &models.TrafficRateLimit{}
+	mProject := &models.Project{}
+	details := make([]ProjectTrafficInfo, 0)
+	err := d.QueryAndScan(
+		builder.Select(
+			builder.MultiWith(
+				",",
+				builder.Alias(mTraffic.ColID(), "f_id"),
+				builder.Alias(mTraffic.ColRateLimitID(), "f_ratelimit_id"),
+				builder.Alias(mTraffic.ColProjectID(), "f_project_id"),
+				builder.Alias(mProject.ColName(), "f_project_name"),
+				builder.Alias(mTraffic.ColThreshold(), "f_threshold"),
+				builder.Alias(mTraffic.ColCycleNum(), "f_cycle_num"),
+				builder.Alias(mTraffic.ColCycleUnit(), "f_cycle_unit"),
+				builder.Alias(mTraffic.ColApiType(), "f_api_type"),
+				builder.Alias(mTraffic.ColCreatedAt(), "f_created_at"),
+				builder.Alias(mTraffic.ColUpdatedAt(), "f_updated_at"),
+			),
+		).From(
+			d.T(mTraffic),
+			builder.LeftJoin(d.T(mProject)).
+				On(mTraffic.ColProjectID().Eq(mProject.ColProjectID())),
+		),
+		&details,
+	)
+	if err != nil {
+		l.Error(err)
+		return err
+	}
+	for i := range details {
+		traffic := &details[i]
+		valByte, err := rDB.GetKey(traffic.ProjectName)
+		if err != nil {
+			l.Error(err)
+			return err
+		}
+		if valByte == nil {
+			err = rDB.SetKeyWithEX(traffic.ProjectName,
+				[]byte(strconv.Itoa(traffic.TrafficRateLimit.RateLimitInfo.Threshold)), 31622400)
+		}
+		//job.TrafficTask.Scheduler(ctx, project)
+		//t := job.NewTrafficTask(*m)
+		//job.Dispatch(ctx, t)
+	}
+
+	var list []models.Instance
+	list, err = m.List(d, nil)
 	if err != nil {
 		l.Error(err)
 		return err

@@ -21,6 +21,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
 
 var (
@@ -105,6 +106,7 @@ func init() {
 		types.WithETHClientConfigContext(config.EthClient),
 		types.WithWhiteListContext(config.WhiteList),
 		confrate.WithRateLimitKeyContext(config.RateLimit),
+		kvdb.WithRedisDBKeyContext(kvdb.NewRedisDB(config.Redis)),
 		types.WithSchedulerJobsContext(&types.SchedulerJobs),
 	)
 }

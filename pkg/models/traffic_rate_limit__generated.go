@@ -112,20 +112,28 @@ func (*TrafficRateLimit) FieldProjectID() string {
 	return "ProjectID"
 }
 
-func (m *TrafficRateLimit) ColCount() *builder.Column {
-	return TrafficRateLimitTable.ColByFieldName(m.FieldCount())
+func (m *TrafficRateLimit) ColThreshold() *builder.Column {
+	return TrafficRateLimitTable.ColByFieldName(m.FieldThreshold())
 }
 
-func (*TrafficRateLimit) FieldCount() string {
-	return "Count"
+func (*TrafficRateLimit) FieldThreshold() string {
+	return "Threshold"
 }
 
-func (m *TrafficRateLimit) ColDuration() *builder.Column {
-	return TrafficRateLimitTable.ColByFieldName(m.FieldDuration())
+func (m *TrafficRateLimit) ColCycleNum() *builder.Column {
+	return TrafficRateLimitTable.ColByFieldName(m.FieldCycleNum())
 }
 
-func (*TrafficRateLimit) FieldDuration() string {
-	return "Duration"
+func (*TrafficRateLimit) FieldCycleNum() string {
+	return "CycleNum"
+}
+
+func (m *TrafficRateLimit) ColCycleUnit() *builder.Column {
+	return TrafficRateLimitTable.ColByFieldName(m.FieldCycleUnit())
+}
+
+func (*TrafficRateLimit) FieldCycleUnit() string {
+	return "CycleUnit"
 }
 
 func (m *TrafficRateLimit) ColApiType() *builder.Column {
