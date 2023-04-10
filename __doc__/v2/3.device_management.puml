@@ -1,13 +1,13 @@
 @startuml
 
-hide footbox
 title: Project/Applet/Instance Management
 
 actor       "user"          as cli
 participant "bff"           as bff
-participant "gateway"       as gw
-participant "mqtt"          as mqtt
 participant "core"          as core
+participant "gateway"       as gw
+participant "transporter"   as trsp
+actor       "device"        as dev
 
 ref over gw
 gateway is unified device gateway, which
@@ -21,30 +21,34 @@ cli  -> bff:  POST /device\n{token + project name + device info}
 bff  -> gw:   POST /device\n{account id + project name + device info}
 
 group MQTT entrance Authorization (optional)
-gw   -> mqtt: /v2/project/{project_id}/mqttuser {Creating MQTT user}
-mqtt -> gw:   MQTT user info{transporter certification}
+gw   -> trsp: /v2/project/{project_id}/mqttuser {Creating MQTT user}
+trsp -> gw:   MQTT user info{transporter certification}
 end
 
 group HTTP project validation (required)
 gw   -> core: GET /project\n{account id + project name}
-core -> core: validate project permission
-core -> gw:   {account info + project info}
+core -> core: validate account and project permission
+core -> gw:   device owner{project id}
 end
 
 gw   -> gw:   create device
 gw   -> bff:  device info + pub token + transporter certification(optional)
 bff  -> cli:  device info + pub token + transporter certification(optional)
 
-== Event Receiving ==
+== Event Receiving HTTP API==
 
 ref over cli
-event body: {event_id, device_id, pub_time, event_type, pub_token}
+event body: {event_id, pub_time, event_type, device_mn, pub_token, payload}
 end ref
-cli  -> bff:  POST /event\n{pub token + event body}
-bff  -> gw:   POST /event\n{pub id + event body}
-gw   -> core: POST /event\n{pub id + project id + event body}
-core -> core: event routing by strategy
+dev  -> trsp: POST /event\n{pub token + event body}
+trsp -> gw:   {pub id + event body}
+gw   -> core: POST /compute\n{owner id + event type + payload}
+core -> core: event routing by strategy + stream computing
 core -> gw:   event response
+group ResponseThroughTransporter
+gw -> trsp:  event response
+trsp -> dev: event response
+end
 
 == Device Self Register through DID @TODO @Zhiran ==
 
