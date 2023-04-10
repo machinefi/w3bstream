@@ -73,7 +73,7 @@ func TestBroker(t *testing.T) {
 	for i := 0; i < num; i++ {
 		err = cpub.WithRetain(false).Publish(UnsafeJsonMarshal(NewPayloadBody("payload")))
 		NewWithT(t).Expect(err).To(BeNil())
-		time.Sleep(time.Second)
+		time.Sleep(100 * time.Millisecond)
 	}
 
 	err = cpub.Unsubscribe()
