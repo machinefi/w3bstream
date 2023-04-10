@@ -2,7 +2,7 @@ package enums
 
 //go:generate toolkit gen enum Protocol
 
-// Protocol
+// Deprecated: Protocol
 type Protocol int8
 
 const (
