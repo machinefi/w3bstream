@@ -1,39 +1,88 @@
 package mqtt_test
 
 import (
+	"encoding/json"
+	"fmt"
 	"testing"
+	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/google/uuid"
 	. "github.com/onsi/gomega"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	. "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 )
 
-func TestBroker(t *testing.T) {
-	topic := "test_demo"
+type PayloadBody struct {
+	EventID      string
+	PubTimestamp int64
+	Message      string
+}
+
+func NewPayloadBody(msg string) *PayloadBody {
+	return &PayloadBody{
+		EventID:      uuid.New().String(),
+		PubTimestamp: time.Now().UnixMilli(),
+		Message:      msg,
+	}
+}
+
+func UnsafeJsonMarshal(v interface{}) []byte {
+	data, _ := json.Marshal(v)
+	return data
+}
+
+var (
+	topic  = "test_demo"
+	broker = &Broker{}
+)
+
+func init() {
 	server := types.Endpoint{}
 
 	err := server.UnmarshalText([]byte("mqtt://broker.emqx.io:1883"))
-	NewWithT(t).Expect(err).To(BeNil())
+	if err != nil {
+		panic(err)
+	}
 
-	broker := &Broker{Server: server}
 	broker.SetDefault()
-	broker.Init()
+	err = broker.Init()
+	if err != nil {
+		panic(err)
+	}
+}
 
-	c1, err := broker.Client("c1")
+func TestBroker(t *testing.T) {
+	cpub, err := broker.Client("pub")
 	NewWithT(t).Expect(err).To(BeNil())
-	NewWithT(t).Expect(c1).NotTo(BeNil())
+	cpub.WithTopic(topic)
 
-	c2, err := broker.Client("c2")
-	NewWithT(t).Expect(err).To(BeNil())
-	NewWithT(t).Expect(c2).NotTo(BeNil())
-
-	err = c1.WithTopic(topic).WithQoS(QOS__AT_LEAST_ONCE).WithRetain(false).
-		Publish("testpublish")
+	csub, err := broker.Client("sub")
 	NewWithT(t).Expect(err).To(BeNil())
 
-	c2.WithTopic(topic).Subscribe(func(c mqtt.Client, msg mqtt.Message) {
-		NewWithT(t).Expect(string(msg.Payload())).To(Equal("testpublish"))
-	})
+	go func() {
+		err = csub.WithTopic(topic).Subscribe(func(cli mqtt.Client, msg mqtt.Message) {
+			pl := &PayloadBody{}
+			ts := time.Now()
+			NewWithT(t).Expect(json.Unmarshal(msg.Payload(), pl)).To(BeNil())
+			fmt.Printf("topic: %s cst: %dms\n", msg.Topic(), ts.UnixMilli()-pl.PubTimestamp)
+		})
+		NewWithT(t).Expect(err).To(BeNil())
+	}()
+
+	num := 100
+	for i := 0; i < num; i++ {
+		err = cpub.WithTopic(topic).WithQoS(QOS__AT_LEAST_ONCE).WithRetain(false).
+			Publish(UnsafeJsonMarshal(NewPayloadBody("payload")))
+		NewWithT(t).Expect(err).To(BeNil())
+		time.Sleep(time.Second)
+	}
+
+	err = cpub.Unsubscribe()
+	NewWithT(t).Expect(err).To(BeNil())
+	err = csub.Unsubscribe()
+	NewWithT(t).Expect(err).To(BeNil())
+	cpub.Disconnect()
+	csub.Disconnect()
 }

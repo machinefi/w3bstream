@@ -1,66 +1,64 @@
 package mqtt
 
 import (
-	"crypto/tls"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/google/uuid"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
+	conftls "github.com/machinefi/w3bstream/pkg/depends/conf/tls"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/retry"
 )
 
 type Broker struct {
-	Server        types.Endpoint
-	Retry         retry.Retry
-	Timeout       types.Duration
-	Keepalive     types.Duration
-	RetainPublish bool
-	QoS           QOS
+	Server        types.Endpoint       `json:"broker,string"`
+	Retry         retry.Retry          `json:"-"`
+	Timeout       types.Duration       `json:"-"`
+	Keepalive     types.Duration       `json:"-"`
+	RetainPublish bool                 `json:"retain"`
+	QoS           QOS                  `json:"-"`
+	Cert          *conftls.X509KeyPair `json:"cert,omitempty"`
 
 	agents *mapx.Map[string, *Client]
 }
 
 func (b *Broker) SetDefault() {
 	b.Retry.SetDefault()
-	if b.Timeout == 0 {
-		b.Timeout = types.Duration(3 * time.Second)
-	}
 	if b.Keepalive == 0 {
 		b.Keepalive = types.Duration(3 * time.Hour)
 	}
 	if b.Server.IsZero() {
 		b.Server.Hostname, b.Server.Port = "127.0.0.1", 1883
 	}
-	if b.Server.Scheme == "" {
-		b.Server.Scheme = "mqtt"
-	}
+	b.Server.Scheme = "mqtt"
 	if b.agents == nil {
 		b.agents = mapx.New[string, *Client]()
 	}
 }
 
-func (b *Broker) Init() {
-	err := b.Retry.Do(func() error {
+func (b *Broker) Init() error {
+	if b.Cert != nil {
+		if err := b.Cert.Init(); err != nil {
+			return err
+		}
+	}
+	return b.Retry.Do(func() error {
 		cid := uuid.New().String()
 		_, err := b.Client(cid)
-		defer b.Close(cid)
 		if err != nil {
 			return err
 		}
+		b.Close(cid)
 		return nil
 	})
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (b *Broker) options() *mqtt.ClientOptions {
 	opt := mqtt.NewClientOptions()
 	if !b.Server.IsZero() {
-		opt = opt.AddBroker(b.Server.SchemeHost())
+		opt = opt.AddBroker(b.Server.String())
 	}
 	if b.Server.Username != "" {
 		opt.SetUsername(b.Server.Username)
@@ -95,11 +93,11 @@ func (b *Broker) Client(cid string) (*Client, error) {
 		opt.SetClientID(cid)
 	}
 	if b.Server.IsTLS() {
-		opt.SetTLSConfig(&tls.Config{
-			ClientAuth:         tls.NoClientCert,
-			ClientCAs:          nil,
-			InsecureSkipVerify: true,
-		})
+		opt.SetTLSConfig(b.Cert.TLSConfig())
+	}
+	if b.Server.Username != "" {
+		opt.SetUsername(b.Server.Username)
+		opt.SetPassword(b.Server.Password.String())
 	}
 	return b.ClientWithOptions(cid, opt)
 }
@@ -108,12 +106,17 @@ func (b *Broker) ClientWithOptions(cid string, opt *mqtt.ClientOptions) (*Client
 	client, err := b.agents.LoadOrStore(
 		cid,
 		func() (*Client, error) {
+			if opt.WriteTimeout == 0 {
+				opt.WriteTimeout = 10 * time.Second
+			}
+			if opt.ConnectTimeout == 0 {
+				opt.ConnectTimeout = 10 * time.Second
+			}
 			c := &Client{
-				cid:     cid,
-				qos:     b.QoS,
-				timeout: b.Timeout.Duration(),
-				retain:  b.RetainPublish,
-				cli:     mqtt.NewClient(opt),
+				cid:    cid,
+				qos:    b.QoS,
+				retain: b.RetainPublish,
+				cli:    mqtt.NewClient(opt),
 			}
 			if err := c.connect(); err != nil {
 				return nil, err
