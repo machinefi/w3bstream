@@ -8,13 +8,14 @@ import (
 // Device database model for device mangement
 // @def primary                      ID
 // @def unique_index UI_device_id    DeviceID
-// @def unique_index UI_device_owner ProjectID DeviceMN
+// @def unique_index UI_device_owner ProjectID SerialNumber Manufacturer
 //
 //go:generate toolkit gen model Device --database GwDB
 type Device struct {
 	datatypes.PrimaryID
 	RelDevice
 	DeviceInfo
+	datatypes.OperationTimesWithDeleted
 }
 
 type RelDevice struct {
@@ -23,6 +24,6 @@ type RelDevice struct {
 
 type DeviceInfo struct {
 	ProjectID    types.SFID `db:"f_project_id"              json:"projectID"`
-	DeviceMN     string     `db:"f_device_mn"               json:"deviceMN"`
+	SerialNumber string     `db:"f_serial_number"           json:"serialNumber"`
 	Manufacturer string     `db:"f_manufacturer,default=''" json:"manufacturer"`
 }
