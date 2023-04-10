@@ -7,12 +7,17 @@ participant "bff"           as bff
 participant "core"          as core
 participant "gateway"       as gw
 participant "transporter"   as trsp
+participant "srv-identity"  as idsrv
 actor       "device"        as dev
 
 ref over gw
 gateway is unified device gateway, which
 supports device management and multi transporter
 for event entrance
+end ref
+
+ref over idsrv
+idsrv provide did authorization TODO @Zhiran
 end ref
 
 == Register Device API ==
