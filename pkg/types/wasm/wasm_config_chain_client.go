@@ -14,21 +14,35 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/tidwall/gjson"
 
 	wsTypes "github.com/machinefi/w3bstream/pkg/types"
 )
 
-type ChainClient struct {
-	pvk       *ecdsa.PrivateKey
-	endpoints map[uint32]string
-	clientMap map[uint32]*ethclient.Client
+var _blockChainTxMtc = prometheus.NewCounterVec(prometheus.CounterOpts{
+	Name: "w3b_blockchain_tx_metrics",
+	Help: "blockchain transaction counter metrics.",
+}, []string{"project", "chainID"})
+
+func init() {
+	prometheus.MustRegister(_blockChainTxMtc)
 }
+
+type ChainClient struct {
+	projectName string
+	pvk         *ecdsa.PrivateKey
+	endpoints   map[uint32]string
+	clientMap   map[uint32]*ethclient.Client
+}
+
+// TODO impl ChainClient.Init
 
 func NewChainClient(ctx context.Context, pvk *string) *ChainClient {
 	c := &ChainClient{
-		clientMap: make(map[uint32]*ethclient.Client, 0),
-		endpoints: make(map[uint32]string),
+		projectName: wsTypes.MustProjectFromContext(ctx).Name,
+		clientMap:   make(map[uint32]*ethclient.Client, 0),
+		endpoints:   make(map[uint32]string),
 	}
 	ethcli, ok := wsTypes.ETHClientConfigFromContext(ctx)
 	if !ok || ethcli == nil {
@@ -123,6 +137,9 @@ func (c *ChainClient) SendTX(chainID uint32, toStr, valueStr, dataStr string) (s
 	if err != nil {
 		return "", err
 	}
+
+	_blockChainTxMtc.WithLabelValues(c.projectName, strconv.Itoa(int(chainID))).Inc()
+
 	err = cli.SendTransaction(context.Background(), signedTx)
 	if err != nil {
 		return "", err
@@ -164,5 +181,8 @@ func (c *ChainClient) CallContract(chainID uint32, toStr, dataStr string) ([]byt
 		To:   &to,
 		Data: data,
 	}
+
+	_blockChainTxMtc.WithLabelValues(c.projectName, strconv.Itoa(int(chainID))).Inc()
+
 	return cli.CallContract(context.Background(), msg, nil)
 }

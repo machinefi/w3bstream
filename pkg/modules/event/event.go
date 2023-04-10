@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -13,6 +15,15 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
+
+var _receiveEventMtc = prometheus.NewCounterVec(prometheus.CounterOpts{
+	Name: "w3b_receive_event_metrics",
+	Help: "receive event counter metrics.",
+}, []string{"project", "publisher"})
+
+func init() {
+	prometheus.MustRegister(_receiveEventMtc)
+}
 
 type HandleEventResult struct {
 	ProjectName string                   `json:"projectName"`
@@ -57,7 +68,9 @@ func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) 
 		handlers []*strategy.InstanceHandler
 	)
 
+	pulisherMtc := projectName
 	if r.Header != nil && len(r.Header.PubId) > 0 {
+		pulisherMtc = r.Header.PubId
 		pub, err = publisher.GetPublisherByPubKeyAndProjectName(ctx, r.Header.PubId, projectName)
 		if err != nil {
 			return
@@ -65,6 +78,7 @@ func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) 
 		ret.PubID, ret.PubName = pub.PublisherID, pub.Name
 		l.WithValues("pub_id", pub.PublisherID)
 	}
+	_receiveEventMtc.WithLabelValues(projectName, pulisherMtc).Inc()
 
 	handlers, err = strategy.FindStrategyInstances(ctx, projectName, eventType)
 	if err != nil {

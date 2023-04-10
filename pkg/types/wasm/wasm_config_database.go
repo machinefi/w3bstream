@@ -16,6 +16,8 @@ type Schema struct {
 	db sqlx.DBExecutor
 }
 
+// TODO impl Schema.Init
+
 func (s *Schema) ConfigType() enums.ConfigType {
 	return enums.CONFIG_TYPE__PROJECT_SCHEMA
 }

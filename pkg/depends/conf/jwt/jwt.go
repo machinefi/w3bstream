@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 )
 
@@ -17,7 +16,14 @@ type Jwt struct {
 
 func (c *Jwt) SetDefault() {}
 
-func (c *Jwt) Init() {}
+func (c *Jwt) Init() {
+	if c.ExpIn == 0 {
+		c.ExpIn = types.Duration(time.Hour)
+	}
+	if c.SignKey == "" {
+		c.SignKey = "xxxx" // stringsx.GenRandomVisibleString(16)
+	}
+}
 
 func (c *Jwt) GenerateTokenByPayload(payload interface{}) (string, error) {
 	claim := &Claims{

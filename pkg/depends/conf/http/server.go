@@ -76,11 +76,12 @@ func (s *Server) Serve(router *kit.Router) error {
 	ht := s.ht
 	ht.Port = s.Port
 
-	ht.Middlewares = []httptransport.HttpMiddleware{mws.DefaultCompress}
+	ht.Middlewares = []httptransport.HttpMiddleware{}
 	ht.Middlewares = append(ht.Middlewares, middlewares...)
 	ht.Middlewares = append(ht.Middlewares,
 		mws.DefaultCORS(),
 		mws.HealthCheckHandler(),
+		mws.MetricsHandler(),
 		// TraceLogHandler("Server"),
 		TraceLogHandlerWithLogger(logrus.WithContext(context.Background()), "Server"),
 		NewContextInjectorMw(s.injector),

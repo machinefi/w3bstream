@@ -460,3 +460,8 @@ output like:
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJQYXlsb2FkIjoiMTg2OTEyOTAwMjUzMzYzMjA2IiwiaXNzIjoiaW90ZXgtdzNic3RyZWFtIiwiZXhwIjoxNjc4OTY0ODc3fQ.u7wLOBUeehHTURNY2L2d_F4u-dZ5sHnBBHZKujnpMRw"
 }
 ```
+
+### Account's Operator Address
+```shell
+http get :8888/srv-applet-mgr/v0/account/ethaddr PROJECT_ENV -A bearer -a $TOK
+```

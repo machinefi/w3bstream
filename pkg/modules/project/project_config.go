@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
@@ -16,6 +18,7 @@ import (
 func CreateOrUpdateProjectEnv(ctx context.Context, env *wasm.Env) error {
 	prj := types.MustProjectFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
+	d := types.MustMgrDBExecutorFromContext(ctx)
 
 	_, l = l.Start(ctx, "CreateOrUpdateProjectEnv")
 
@@ -25,8 +28,26 @@ func CreateOrUpdateProjectEnv(ctx context.Context, env *wasm.Env) error {
 		return status.InternalServerError.StatusErr().WithDesc(err.Error())
 	}
 
-	_, err = config.CreateOrUpdateConfig(ctx, prj.ProjectID, enums.CONFIG_TYPE__PROJECT_ENV, val)
-	return err
+	return sqlx.NewTasks(d).With(
+		func(db sqlx.DBExecutor) error {
+			old := &wasm.Env{}
+			err := config.GetConfigValue(ctx, prj.ProjectID, old)
+			if err != nil {
+				if se, ok := statusx.IsStatusErr(err); ok && se.Code == status.ConfigNotFound.Code() {
+					return nil
+				}
+				return err
+			}
+			return old.Uninit(ctx)
+		},
+		func(db sqlx.DBExecutor) error {
+			_, err = config.CreateOrUpdateConfig(ctx, prj.ProjectID, enums.CONFIG_TYPE__PROJECT_ENV, val)
+			if err != nil {
+				return err
+			}
+			return env.Init(ctx)
+		},
+	).Do()
 }
 
 func CreateProjectSchema(ctx context.Context, schema *wasm.Schema) error {

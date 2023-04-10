@@ -14,7 +14,6 @@ type (
 	CtxKVStore         struct{}
 	CtxLogger          struct{}
 	CtxEnv             struct{}
-	CtxEnvPrefix       struct{}
 	CtxRedisPrefix     struct{}
 	CtxChainClient     struct{}
 	CtxRuntimeResource struct{}
@@ -101,27 +100,6 @@ func EnvFromContext(ctx context.Context) (*Env, bool) {
 
 func MustEnvFromContext(ctx context.Context) *Env {
 	v, ok := EnvFromContext(ctx)
-	must.BeTrue(ok)
-	return v
-}
-
-func WithEnvPrefix(ctx context.Context, v string) context.Context {
-	return contextx.WithValue(ctx, CtxEnvPrefix{}, v)
-}
-
-func WithEnvPrefixContext(v string) contextx.WithContext {
-	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, CtxEnvPrefix{}, v)
-	}
-}
-
-func EnvPrefixFromContext(ctx context.Context) (string, bool) {
-	v, ok := ctx.Value(CtxEnvPrefix{}).(string)
-	return v, ok
-}
-
-func MustEnvPrefixFromContext(ctx context.Context) string {
-	v, ok := EnvPrefixFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

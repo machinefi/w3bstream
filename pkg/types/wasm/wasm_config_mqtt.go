@@ -16,6 +16,8 @@ func (m *MqttClient) ConfigType() enums.ConfigType {
 	return enums.CONFIG_TYPE__PROJECT_MQTT
 }
 
+// TODO impl MqttClient.Init
+
 func (m *MqttClient) WithContext(ctx context.Context) context.Context {
 	mq := types.MustMqttBrokerFromContext(ctx)
 	log := types.MustLoggerFromContext(ctx)

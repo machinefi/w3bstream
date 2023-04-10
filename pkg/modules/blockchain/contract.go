@@ -88,7 +88,7 @@ func (t *contract) listChainAndSendEvent(ctx context.Context, c *models.Contract
 		l.Error(err)
 		return 0, err
 	}
-	if from >= to {
+	if from > to {
 		l.WithValues("from block", from, "to block", to).Debug("no new block")
 		return to, nil
 	}

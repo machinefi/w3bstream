@@ -32,7 +32,6 @@ func init() {
 	Root.Register(RouterServer)
 	Root.Register(confhttp.LivenessRouter)
 	RouterServer.Register(RouterV0)
-	confhttp.RegisterEnvRouters(RouterDebug)
 
 	RouterV0.Register(login.Root)
 	RouterV0.Register(event.Root)

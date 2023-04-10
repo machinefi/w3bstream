@@ -27,10 +27,14 @@ type ETHClientConfig struct {
 
 // aliases from base/types
 type (
-	SFID       = types.SFID
-	SFIDs      = types.SFIDs
-	EthAddress = types.EthAddress
-	Timestamp  = types.Timestamp
+	SFID                     = types.SFID
+	SFIDs                    = types.SFIDs
+	EthAddress               = types.EthAddress
+	Timestamp                = types.Timestamp
+	Initializer              = types.Initializer
+	ValidatedInitializer     = types.ValidatedInitializer
+	InitializerWith          = types.InitializerWith
+	ValidatedInitializerWith = types.ValidatedInitializerWith
 )
 
 type WhiteList []string

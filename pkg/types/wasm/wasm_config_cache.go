@@ -25,6 +25,7 @@ func (c *Cache) WithContext(ctx context.Context) context.Context {
 	return WithKVStore(ctx, c.NewKVStore(ctx))
 }
 
+// TODO use KVStore as a member and impl Cache.Init
 func (c *Cache) NewKVStore(ctx context.Context) KVStore {
 	switch c.Mode {
 	case enums.CACHE_MODE__REDIS:
