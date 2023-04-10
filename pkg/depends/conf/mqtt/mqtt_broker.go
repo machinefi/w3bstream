@@ -13,13 +13,13 @@ import (
 )
 
 type Broker struct {
-	Server        types.Endpoint       `json:"broker,string"`
-	Retry         retry.Retry          `json:"-"`
-	Timeout       types.Duration       `json:"-"`
-	Keepalive     types.Duration       `json:"-"`
-	RetainPublish bool                 `json:"retain"`
-	QoS           QOS                  `json:"-"`
-	Cert          *conftls.X509KeyPair `json:"cert,omitempty"`
+	Server        types.Endpoint
+	Retry         retry.Retry
+	Timeout       types.Duration
+	Keepalive     types.Duration
+	RetainPublish bool
+	QoS           QOS
+	Cert          *conftls.X509KeyPair
 
 	agents *mapx.Map[string, *Client]
 }
