@@ -29,12 +29,20 @@ func (b *Broker) SetDefault() {
 	if b.Keepalive == 0 {
 		b.Keepalive = types.Duration(3 * time.Hour)
 	}
+	if b.Timeout == 0 {
+		b.Timeout = types.Duration(10 * time.Second)
+	}
 	if b.Server.IsZero() {
 		b.Server.Hostname, b.Server.Port = "127.0.0.1", 1883
 	}
-	b.Server.Scheme = "mqtt"
+	if b.Server.Scheme == "" {
+		b.Server.Scheme = "mqtt"
+	}
 	if b.agents == nil {
 		b.agents = mapx.New[string, *Client]()
+	}
+	if b.QoS > QOS__ONLY_ONCE || b.QoS < 0 {
+		b.QoS = QOS__ONCE
 	}
 }
 
@@ -45,18 +53,22 @@ func (b *Broker) Init() error {
 		}
 	}
 	return b.Retry.Do(func() error {
-		cid := uuid.New().String()
+		cid := uuid.NewString()
+		defer b.CloseByCid(cid)
 		_, err := b.Client(cid)
 		if err != nil {
 			return err
 		}
-		b.Close(cid)
 		return nil
 	})
 }
 
-func (b *Broker) options() *mqtt.ClientOptions {
+func (b *Broker) options(cid string) *mqtt.ClientOptions {
 	opt := mqtt.NewClientOptions()
+	if cid == "" {
+		cid = uuid.NewString()
+	}
+	opt.SetClientID(cid)
 	if !b.Server.IsZero() {
 		opt = opt.AddBroker(b.Server.String())
 	}
@@ -65,6 +77,9 @@ func (b *Broker) options() *mqtt.ClientOptions {
 		if b.Server.Password != "" {
 			opt.SetPassword(b.Server.Password.String())
 		}
+	}
+	if b.Server.IsTLS() {
+		opt.SetTLSConfig(b.Cert.TLSConfig())
 	}
 
 	opt.SetKeepAlive(b.Keepalive.Duration())
@@ -77,43 +92,26 @@ func (b *Broker) Name() string { return "mqtt-broker-cli" }
 
 func (b *Broker) LivenessCheck() map[string]string {
 	m := map[string]string{}
-	cid := uuid.New().String()
+	cid := uuid.NewString()
+	defer b.CloseByCid(cid)
 	if _, err := b.Client(cid); err != nil {
 		m[b.Server.Host()] = err.Error()
 		return m
 	}
-	defer b.Close(cid)
 	m[b.Server.Host()] = "ok"
 	return m
 }
 
 func (b *Broker) Client(cid string) (*Client, error) {
-	opt := b.options()
-	if cid != "" {
-		opt.SetClientID(cid)
-	}
-	if b.Server.IsTLS() {
-		opt.SetTLSConfig(b.Cert.TLSConfig())
-	}
-	if b.Server.Username != "" {
-		opt.SetUsername(b.Server.Username)
-		opt.SetPassword(b.Server.Password.String())
-	}
-	return b.ClientWithOptions(cid, opt)
+	return b.ClientWithOptions(b.options(cid))
 }
 
-func (b *Broker) ClientWithOptions(cid string, opt *mqtt.ClientOptions) (*Client, error) {
-	client, err := b.agents.LoadOrStore(
-		cid,
+func (b *Broker) ClientWithOptions(opt *mqtt.ClientOptions) (*Client, error) {
+	return b.agents.LoadOrStore(
+		opt.ClientID,
 		func() (*Client, error) {
-			if opt.WriteTimeout == 0 {
-				opt.WriteTimeout = 10 * time.Second
-			}
-			if opt.ConnectTimeout == 0 {
-				opt.ConnectTimeout = 10 * time.Second
-			}
 			c := &Client{
-				cid:    cid,
+				cid:    opt.ClientID,
 				qos:    b.QoS,
 				retain: b.RetainPublish,
 				cli:    mqtt.NewClient(opt),
@@ -124,17 +122,13 @@ func (b *Broker) ClientWithOptions(cid string, opt *mqtt.ClientOptions) (*Client
 			return c, nil
 		},
 	)
-	if err != nil {
-		return nil, err
-	}
-	if !client.cli.IsConnectionOpen() && !client.cli.IsConnected() {
-		b.agents.Remove(cid)
-		return b.Client(cid)
-	}
-	return client, nil
 }
 
-func (b *Broker) Close(cid string) {
+func (b *Broker) Close(c *Client) {
+	b.CloseByCid(c.cid)
+}
+
+func (b *Broker) CloseByCid(cid string) {
 	if c, ok := b.agents.LoadAndRemove(cid); ok && c != nil {
 		c.cli.Disconnect(500)
 	}

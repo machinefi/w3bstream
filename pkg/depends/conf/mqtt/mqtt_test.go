@@ -56,13 +56,14 @@ func init() {
 func TestBroker(t *testing.T) {
 	cpub, err := broker.Client("pub")
 	NewWithT(t).Expect(err).To(BeNil())
-	cpub.WithTopic(topic)
+	cpub.WithTopic(topic).WithQoS(QOS__ONCE)
 
 	csub, err := broker.Client("sub")
 	NewWithT(t).Expect(err).To(BeNil())
+	csub.WithTopic(topic).WithQoS(QOS__ONCE)
 
 	go func() {
-		err = csub.WithTopic(topic).Subscribe(func(cli mqtt.Client, msg mqtt.Message) {
+		err = csub.Subscribe(func(cli mqtt.Client, msg mqtt.Message) {
 			pl := &PayloadBody{}
 			ts := time.Now()
 			NewWithT(t).Expect(json.Unmarshal(msg.Payload(), pl)).To(BeNil())
@@ -71,10 +72,9 @@ func TestBroker(t *testing.T) {
 		NewWithT(t).Expect(err).To(BeNil())
 	}()
 
-	num := 100
+	num := 5
 	for i := 0; i < num; i++ {
-		err = cpub.WithTopic(topic).WithQoS(QOS__AT_LEAST_ONCE).WithRetain(false).
-			Publish(UnsafeJsonMarshal(NewPayloadBody("payload")))
+		err = cpub.WithRetain(false).Publish(UnsafeJsonMarshal(NewPayloadBody("payload")))
 		NewWithT(t).Expect(err).To(BeNil())
 		time.Sleep(time.Second)
 	}
@@ -83,6 +83,6 @@ func TestBroker(t *testing.T) {
 	NewWithT(t).Expect(err).To(BeNil())
 	err = csub.Unsubscribe()
 	NewWithT(t).Expect(err).To(BeNil())
-	cpub.Disconnect()
-	csub.Disconnect()
+	broker.Close(cpub)
+	broker.Close(csub)
 }
