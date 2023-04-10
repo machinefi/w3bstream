@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 	. "github.com/onsi/gomega"
 
-	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	. "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 )
 
@@ -39,9 +38,7 @@ var (
 )
 
 func init() {
-	server := types.Endpoint{}
-
-	err := server.UnmarshalText([]byte("mqtt://broker.emqx.io:1883"))
+	err := broker.Server.UnmarshalText([]byte("mqtt://broker.emqx.io:1883"))
 	if err != nil {
 		panic(err)
 	}
