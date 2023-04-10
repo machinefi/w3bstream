@@ -1,0 +1,54 @@
+@startuml
+
+title: Project/Applet/Instance Management
+
+actor       "user"              as cli
+participant "bff"               as bff
+participant "core"              as core
+
+== Login ==
+
+cli  -> bff:  POST /auth\n{login data}
+bff  -> core: POST /auth\n{login data}
+core -> bff:  {account info + token}
+bff  -> cli:  {account info + token}
+
+== Create Project ==
+
+cli  -> bff:  POST /project\n{token + project info}
+bff  -> core: POST /project\n{account id + project info}
+core -> core: create project
+core -> bff:  project info
+bff  -> cli:  project info
+
+== Create Project Properties ==
+
+cli  -> bff:  POST /project_config\nsupport schema, env, cache\n{token + project name + config data}
+bff  -> core: POST /project_config\n{account id + project name + config data}
+core -> core: create project config
+core -> bff:  project config info
+bff  -> cli:  project config info
+
+== Create Applet ==
+
+cli  -> bff:  POST /projectName/applet\n{token + applet assert + applet info}
+bff  -> core: POST /projectName/applet\n{account id + project name + applet assert + applet info}
+core -> core: create applet
+core -> bff:  applet info
+bff  -> cli:  applet info
+
+== Deploy Instance ==
+
+cli  -> bff:  POST|PUT /applet_id\n{token + applet id + deploy command}\ninstance property
+bff  -> core: POST|PUT /applet_id\n{account id + applet id + deploy command}
+core -> core: instance deployment
+core -> bff:  instance info
+bff  -> cli:  instance info
+
+== Stream Computing Strategy ==
+
+== Event Handling ==
+
+
+
+@enduml

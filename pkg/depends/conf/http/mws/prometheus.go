@@ -1,9 +1,10 @@
 package mws
 
 import (
+	"net/http"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"net/http"
 )
 
 func MetricsHandler() func(http.Handler) http.Handler {

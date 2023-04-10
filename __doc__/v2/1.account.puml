@@ -1,0 +1,45 @@
+@startuml
+
+title: Create Account and Login
+
+actor       "user"              as cli
+participant "srv-bff-w3bstream" as bff
+participant "srv-core"          as core
+
+ref over bff
+bff is
+backend for frontend
+end ref
+
+ref over core
+core is a backend a management for
+account, project, applet and instance
+end ref
+
+== Register Account by Username and Password ==
+
+cli  -> bff:  POST /Account\n{username,password}
+bff  -> core: POST /Account\n{username,password}
+core -> core: create account
+core -> bff:  {account info}
+bff  -> cli:  {account info}
+
+
+== Login By username and password ==
+
+cli  -> bff:  PUT /login\n{username,password}
+bff  -> core: PUT /exchange\n{username,password}
+core -> core: validate
+core -> bff:  {account info + jwt token}
+bff  -> cli:  {account info + jwt token}
+
+
+== Register or Create Account By Metamask Wallet Address ==
+
+cli  -> bff:  POST /LoginByEthAddress\n{address + signature}
+bff  -> core: POST /LoginByEthAddress\n{address + signature}
+core -> core: check existence or create account\nsupport white list
+core -> bff:  {account info + jwt token}
+bff  -> cli:  {account info + jwt token}
+
+@enduml
