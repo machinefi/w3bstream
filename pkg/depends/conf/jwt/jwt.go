@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 )
 
