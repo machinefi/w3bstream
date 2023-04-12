@@ -463,5 +463,5 @@ output like:
 
 ### Account's Operator Address
 ```shell
-http get :8888/srv-applet-mgr/v0/account/ethaddr PROJECT_ENV -A bearer -a $TOK
+http get :8888/srv-applet-mgr/v0/account/operatoraddr -A bearer -a $TOK
 ```

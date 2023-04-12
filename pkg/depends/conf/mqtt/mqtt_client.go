@@ -8,62 +8,53 @@ import (
 )
 
 type Client struct {
-	cid     string // cid client id
-	topic   string // topic registered topic
-	qos     QOS    // qos should be 0, 1 or 2
-	retain  bool
-	timeout time.Duration //
-	cli     mqtt.Client
+	cid         string // cid client id
+	topic       string // topic registered topic
+	qos         QOS    // qos should be 0, 1 or 2
+	retain      bool
+	pubTimeout  time.Duration
+	subTimeout  time.Duration
+	connTimeout time.Duration
+	cli         mqtt.Client
 }
 
 func (c *Client) Cid() string { return c.cid }
 
 func (c *Client) WithTopic(topic string) *Client {
-	if c.topic == topic {
-		return c
-	}
-	c2 := *c
-	c2.topic = topic
-	return &c2
+	c.topic = topic
+	return c
 }
 
 func (c *Client) WithQoS(qos QOS) *Client {
-	if c.qos == qos {
-		return c
-	}
-	c2 := *c
-	c2.qos = qos
-	return &c2
+	c.qos = qos
+	return c
 }
 
-func (c *Client) WithTimeout(timeout time.Duration) *Client {
-	if c.timeout == timeout {
-		return c
-	}
-	c2 := *c
-	c2.timeout = timeout
-	return &c2
+func (c *Client) WithSubTimeout(timeout time.Duration) *Client {
+	c.subTimeout = timeout
+	return c
+}
+
+func (c *Client) WithConnTimeout(timeout time.Duration) *Client {
+	c.connTimeout = timeout
+	return c
 }
 
 func (c *Client) WithRetain(retain bool) *Client {
-	if retain == c.retain {
-		return c
-	}
-	c2 := *c
-	c2.retain = retain
-	return &c2
+	c.retain = retain
+	return c
 }
 
 func (c *Client) connect() error {
-	return c.wait(c.cli.Connect(), "connect")
+	return c.wait(c.cli.Connect(), "connect", c.connTimeout)
 }
 
-func (c *Client) wait(tok mqtt.Token, act string) error {
+func (c *Client) wait(tok mqtt.Token, act string, timeout time.Duration) error {
 	waited := false
-	if c.timeout == 0 {
+	if timeout == 0 {
 		waited = tok.Wait()
 	} else {
-		waited = tok.WaitTimeout(c.timeout)
+		waited = tok.WaitTimeout(timeout)
 	}
 	if !waited {
 		return errors.New(act + " timeout")
@@ -81,16 +72,18 @@ func (c *Client) Publish(payload interface{}) error {
 	return c.wait(
 		c.cli.Publish(c.topic, byte(c.qos), c.retain, payload),
 		"pub",
+		c.pubTimeout,
 	)
 }
 
-func (c *Client) Subscribe(cb mqtt.MessageHandler) error {
+func (c *Client) Subscribe(handler mqtt.MessageHandler) error {
 	if c.topic == "" {
 		return errors.New("topic is empty")
 	}
 	return c.wait(
-		c.cli.Subscribe(c.topic, byte(c.qos), cb),
+		c.cli.Subscribe(c.topic, byte(c.qos), handler),
 		"sub",
+		c.subTimeout,
 	)
 }
 
@@ -101,5 +94,6 @@ func (c *Client) Unsubscribe() error {
 	return c.wait(
 		c.cli.Unsubscribe(c.topic),
 		"Unsub",
+		c.subTimeout,
 	)
 }

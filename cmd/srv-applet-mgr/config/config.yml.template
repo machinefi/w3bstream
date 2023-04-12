@@ -2,6 +2,7 @@ GO_RUNTIME_ENV: DEV
 SRV_APPLET_MGR__EthClient_Endpoints: ""
 SRV_APPLET_MGR__Jwt_ExpIn: 0s
 SRV_APPLET_MGR__Jwt_Issuer: ""
+SRV_APPLET_MGR__Jwt_SignKey: ""
 SRV_APPLET_MGR__Logger_Format: JSON
 SRV_APPLET_MGR__Logger_Level: debug
 SRV_APPLET_MGR__Logger_Name: srv-applet-mgr
@@ -13,13 +14,16 @@ SRV_APPLET_MGR__MonitorDB_PoolSize: "10"
 SRV_APPLET_MGR__MonitorDB_Retry_Interval: 3s
 SRV_APPLET_MGR__MonitorDB_Retry_Repeats: "3"
 SRV_APPLET_MGR__MonitorDB_Slave: ""
+SRV_APPLET_MGR__MqttBroker_Cert_CaPath: ""
+SRV_APPLET_MGR__MqttBroker_Cert_CrtPath: ""
+SRV_APPLET_MGR__MqttBroker_Cert_KeyPath: ""
 SRV_APPLET_MGR__MqttBroker_Keepalive: 3h
 SRV_APPLET_MGR__MqttBroker_QoS: ONCE
 SRV_APPLET_MGR__MqttBroker_RetainPublish: "false"
 SRV_APPLET_MGR__MqttBroker_Retry_Interval: 3s
 SRV_APPLET_MGR__MqttBroker_Retry_Repeats: "3"
 SRV_APPLET_MGR__MqttBroker_Server: mqtt://127.0.0.1:1883
-SRV_APPLET_MGR__MqttBroker_Timeout: 3s
+SRV_APPLET_MGR__MqttBroker_Timeout: 0s
 SRV_APPLET_MGR__Postgres_ConnMaxLifetime: 1h
 SRV_APPLET_MGR__Postgres_Master: postgres://127.0.0.1:5432
 SRV_APPLET_MGR__Postgres_PoolSize: "10"

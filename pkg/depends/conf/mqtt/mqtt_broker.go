@@ -1,13 +1,13 @@
 package mqtt
 
 import (
-	"crypto/tls"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/google/uuid"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
+	conftls "github.com/machinefi/w3bstream/pkg/depends/conf/tls"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/retry"
 )
@@ -19,17 +19,18 @@ type Broker struct {
 	Keepalive     types.Duration
 	RetainPublish bool
 	QoS           QOS
+	Cert          *conftls.X509KeyPair
 
 	agents *mapx.Map[string, *Client]
 }
 
 func (b *Broker) SetDefault() {
 	b.Retry.SetDefault()
-	if b.Timeout == 0 {
-		b.Timeout = types.Duration(3 * time.Second)
-	}
 	if b.Keepalive == 0 {
 		b.Keepalive = types.Duration(3 * time.Hour)
+	}
+	if b.Timeout == 0 {
+		b.Timeout = types.Duration(10 * time.Second)
 	}
 	if b.Server.IsZero() {
 		b.Server.Hostname, b.Server.Port = "127.0.0.1", 1883
@@ -40,33 +41,45 @@ func (b *Broker) SetDefault() {
 	if b.agents == nil {
 		b.agents = mapx.New[string, *Client]()
 	}
+	if b.QoS > QOS__ONLY_ONCE || b.QoS < 0 {
+		b.QoS = QOS__ONCE
+	}
 }
 
-func (b *Broker) Init() {
-	err := b.Retry.Do(func() error {
-		cid := uuid.New().String()
+func (b *Broker) Init() error {
+	if b.Cert != nil {
+		if err := b.Cert.Init(); err != nil {
+			return err
+		}
+	}
+	return b.Retry.Do(func() error {
+		cid := uuid.NewString()
+		defer b.CloseByCid(cid)
 		_, err := b.Client(cid)
-		defer b.Close(cid)
 		if err != nil {
 			return err
 		}
 		return nil
 	})
-	if err != nil {
-		panic(err)
-	}
 }
 
-func (b *Broker) options() *mqtt.ClientOptions {
+func (b *Broker) options(cid string) *mqtt.ClientOptions {
 	opt := mqtt.NewClientOptions()
+	if cid == "" {
+		cid = uuid.NewString()
+	}
+	opt.SetClientID(cid)
 	if !b.Server.IsZero() {
-		opt = opt.AddBroker(b.Server.SchemeHost())
+		opt = opt.AddBroker(b.Server.String())
 	}
 	if b.Server.Username != "" {
 		opt.SetUsername(b.Server.Username)
 		if b.Server.Password != "" {
 			opt.SetPassword(b.Server.Password.String())
 		}
+	}
+	if b.Server.IsTLS() {
+		opt.SetTLSConfig(b.Cert.TLSConfig())
 	}
 
 	opt.SetKeepAlive(b.Keepalive.Duration())
@@ -79,41 +92,29 @@ func (b *Broker) Name() string { return "mqtt-broker-cli" }
 
 func (b *Broker) LivenessCheck() map[string]string {
 	m := map[string]string{}
-	cid := uuid.New().String()
+	cid := uuid.NewString()
+	defer b.CloseByCid(cid)
 	if _, err := b.Client(cid); err != nil {
 		m[b.Server.Host()] = err.Error()
 		return m
 	}
-	defer b.Close(cid)
 	m[b.Server.Host()] = "ok"
 	return m
 }
 
 func (b *Broker) Client(cid string) (*Client, error) {
-	opt := b.options()
-	if cid != "" {
-		opt.SetClientID(cid)
-	}
-	if b.Server.IsTLS() {
-		opt.SetTLSConfig(&tls.Config{
-			ClientAuth:         tls.NoClientCert,
-			ClientCAs:          nil,
-			InsecureSkipVerify: true,
-		})
-	}
-	return b.ClientWithOptions(cid, opt)
+	return b.ClientWithOptions(b.options(cid))
 }
 
-func (b *Broker) ClientWithOptions(cid string, opt *mqtt.ClientOptions) (*Client, error) {
-	client, err := b.agents.LoadOrStore(
-		cid,
+func (b *Broker) ClientWithOptions(opt *mqtt.ClientOptions) (*Client, error) {
+	return b.agents.LoadOrStore(
+		opt.ClientID,
 		func() (*Client, error) {
 			c := &Client{
-				cid:     cid,
-				qos:     b.QoS,
-				timeout: b.Timeout.Duration(),
-				retain:  b.RetainPublish,
-				cli:     mqtt.NewClient(opt),
+				cid:    opt.ClientID,
+				qos:    b.QoS,
+				retain: b.RetainPublish,
+				cli:    mqtt.NewClient(opt),
 			}
 			if err := c.connect(); err != nil {
 				return nil, err
@@ -121,17 +122,13 @@ func (b *Broker) ClientWithOptions(cid string, opt *mqtt.ClientOptions) (*Client
 			return c, nil
 		},
 	)
-	if err != nil {
-		return nil, err
-	}
-	if !client.cli.IsConnectionOpen() && !client.cli.IsConnected() {
-		b.agents.Remove(cid)
-		return b.Client(cid)
-	}
-	return client, nil
 }
 
-func (b *Broker) Close(cid string) {
+func (b *Broker) Close(c *Client) {
+	b.CloseByCid(c.cid)
+}
+
+func (b *Broker) CloseByCid(cid string) {
 	if c, ok := b.agents.LoadAndRemove(cid); ok && c != nil {
 		c.cli.Disconnect(500)
 	}
