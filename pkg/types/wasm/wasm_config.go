@@ -2,6 +2,7 @@ package wasm
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/pkg/errors"
 
@@ -22,6 +23,18 @@ func NewConfigurationByType(t enums.ConfigType) (Configuration, error) {
 	default:
 		return nil, errors.Errorf("invalid config type: %d", t)
 	}
+}
+
+func NewConfigurationByTypeAndValue(t enums.ConfigType, v []byte) (Configuration, error) {
+	c, err := NewConfigurationByType(t)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(v, c)
+	if err != nil {
+		return nil, err
+	}
+	return c, nil
 }
 
 type Configuration interface {

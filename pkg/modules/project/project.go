@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
@@ -69,21 +70,24 @@ func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (
 				return status.DatabaseError.StatusErr().
 					WithDesc(errors.Wrap(err, "CreateProject").Error())
 			}
+			ctx = types.WithProject(ctx, m)
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			ctx = types.WithProject(ctx, m)
-			if err := CreateOrUpdateProjectEnv(ctx, &wasm.Env{Env: r.Envs}); err != nil {
+			if len(r.Envs) == 0 {
+				return nil
+			}
+			if err := config.CreateConfig(ctx, m.ProjectID, &wasm.Env{Env: r.Envs}); err != nil {
 				return err
 			}
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
 			if r.Schema == nil {
-				sch := schema.NewSchema(r.Name)
+				sch := schema.NewSchema("")
 				r.Schema = &wasm.Schema{Schema: *sch}
 			}
-			if err := CreateProjectSchema(ctx, r.Schema); err != nil {
+			if err := config.CreateConfig(ctx, m.ProjectID, r.Schema); err != nil {
 				return err
 			}
 			return nil

@@ -75,7 +75,8 @@ func (t *Table) Init() error {
 		t.cols.Add(c)
 	}
 	for _, c := range t.Cols {
-		if c.Constrains.Default != nil {
+		dfv := c.Constrains.Default
+		if dfv != nil && len(*dfv) > 0 && (*dfv)[0] != '\'' {
 			c.Constrains.Default = ptrx.Ptr("'" + *c.Constrains.Default + "'")
 		}
 	}
@@ -190,6 +191,20 @@ func (t *Table) CreateIfNotExists() []builder.SqlExpr {
 	return es
 }
 
+func (t *Table) DropIfExists() []builder.SqlExpr {
+	exprs := make([]builder.SqlExpr, 0)
+	for _, k := range t.Keys {
+		exprs = append(exprs, t.DropIndex(k))
+	}
+
+	e := builder.Expr("DROP TABLE IF EXISTS ")
+	e.WriteExpr(t)
+	e.WriteEnd()
+
+	exprs = append(exprs, e)
+	return exprs
+}
+
 func (t *Table) AddIndex(k *Key) builder.SqlExpr {
 	if k.IsPrimary() {
 		e := builder.Expr("ALTER TABLE ")
@@ -206,7 +221,7 @@ func (t *Table) AddIndex(k *Key) builder.SqlExpr {
 	if k.IsUnique {
 		e.WriteQuery("UNIQUE ")
 	}
-	e.WriteQuery("INDEX ")
+	e.WriteQuery("INDEX IF NOT EXISTS ")
 
 	e.WriteQuery(k.t.Name)
 	e.WriteQuery("_")
@@ -222,5 +237,26 @@ func (t *Table) AddIndex(k *Key) builder.SqlExpr {
 		e.WriteExpr(Cols(k.IndexDef.ColumnNames...))
 	})
 	e.WriteEnd()
+	return e
+}
+
+func (t *Table) DropIndex(k *Key) builder.SqlExpr {
+	if k.IsPrimary() {
+		e := builder.Expr("ALTER TABLE ")
+		e.WriteExpr(t)
+		e.WriteQuery(" DROP CONSTRAINT ")
+		e.WriteExpr(t)
+		e.WriteQuery("_pkey")
+		e.WriteEnd()
+		return e
+	}
+	e := builder.Expr("DROP ")
+
+	e.WriteQuery("INDEX IF EXISTS ")
+	e.WriteExpr(t)
+	e.WriteQueryByte('_')
+	e.WriteQuery(k.Name)
+	e.WriteEnd()
+
 	return e
 }

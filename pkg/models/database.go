@@ -10,7 +10,6 @@ import (
 var (
 	DB        = sqlx.NewDatabase("demo").WithSchema("applet_management")
 	MonitorDB = sqlx.NewDatabase("demo").WithSchema("monitor")
-	WasmDB    = sqlx.NewDatabase("wasm_storage")
 )
 
 type Meta map[string]string

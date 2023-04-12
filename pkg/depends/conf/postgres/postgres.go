@@ -8,7 +8,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/driver/postgres"
-	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/retry"
 )
 
@@ -61,7 +60,7 @@ func (e *Endpoint) SetDefault() {
 		e.Master.Hostname, e.Master.Port = "127.0.0.1", 5432
 	}
 	e.Master.Scheme = "postgres"
-	if e.Database.Name == "" && len(e.Master.Base) > 0 {
+	if e.Database != nil && e.Database.Name == "" && len(e.Master.Base) > 0 {
 		e.Database.Name = e.Master.Base
 	}
 	if e.Retry == nil {
@@ -99,31 +98,39 @@ func (e *Endpoint) conn(url string, readonly bool) (*sqlx.DB, error) {
 	return db, nil
 }
 
-func (e *Endpoint) Init() {
+func (e *Endpoint) Init() error {
+	if e.Database == nil {
+		return nil
+	}
 	// cover default database name
 	if len(e.Master.Base) > 0 {
 		e.Database.Name = e.Master.Base
 	}
 	// must try master
-	must.NoError(e.Retry.Do(func() error {
+	err := e.Retry.Do(func() error {
 		db, err := e.conn(e.masterURL(), false)
 		if err != nil {
 			return err
 		}
 		e.DB = db
 		return nil
-	}))
+	})
+	if err != nil {
+		return err
+	}
 	// try slave if config
 	if !e.Slave.IsZero() {
-		must.NoError(e.Retry.Do(func() error {
+		err = e.Retry.Do(func() error {
 			db, err := e.conn(e.slaveURL(), false)
 			if err != nil {
 				return err
 			}
 			e.slave = db
 			return nil
-		}))
+		})
+		return err
 	}
+	return nil
 }
 
 func (e Endpoint) masterURL() string {

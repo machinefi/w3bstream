@@ -79,8 +79,8 @@ func (v Error) Key() string {
 		return "ConfigNotFound"
 	case Conflict:
 		return "Conflict"
-	case ProjectConfigConflict:
-		return "ProjectConfigConflict"
+	case ConfigConflict:
+		return "ConfigConflict"
 	case ProjectNameConflict:
 		return "ProjectNameConflict"
 	case InternalServerError:
@@ -141,8 +141,8 @@ func (v Error) Msg() string {
 		return "Config Not Found"
 	case Conflict:
 		return "Conflict conflict error"
-	case ProjectConfigConflict:
-		return "Project Config Conflict"
+	case ConfigConflict:
+		return "Config Conflict"
 	case ProjectNameConflict:
 		return "Project Name Conflict"
 	case InternalServerError:
@@ -203,7 +203,7 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case Conflict:
 		return true
-	case ProjectConfigConflict:
+	case ConfigConflict:
 		return true
 	case ProjectNameConflict:
 		return true

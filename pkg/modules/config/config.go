@@ -125,7 +125,7 @@ func CreateConfig(ctx context.Context, rel types.SFID, cfg wasm.Configuration) e
 	return nil
 }
 
-func CreateOrUpdateConfig(ctx context.Context, rel types.SFID, typ enums.ConfigType, raw []byte) (cfg *models.Config, err error) {
+func CreateOrUpdateConfig(ctx context.Context, rel types.SFID, v wasm.Configuration) error {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
@@ -133,45 +133,83 @@ func CreateOrUpdateConfig(ctx context.Context, rel types.SFID, typ enums.ConfigT
 	_, l = l.Start(ctx, "CreateOrUpdateConfig")
 	defer l.End()
 
-	cfg = &models.Config{
+	raw, err := json.Marshal(v)
+	if err != nil {
+		return status.ConfigInitializationFailed.StatusErr().WithDesc(err.Error())
+	}
+
+	cfg := &models.Config{
 		ConfigBase: models.ConfigBase{
 			RelID: rel,
-			Type:  typ,
+			Type:  v.ConfigType(),
 		},
 	}
 
 	found := false
 
 	err = sqlx.NewTasks(d).With(
+		// do fetch config
 		func(db sqlx.DBExecutor) error {
-			err = cfg.FetchByRelIDAndType(db)
+			l = l.WithValues("stage", "fetch")
+			err := cfg.FetchByRelIDAndType(db)
 			if err == nil {
 				found = true
-				return err // do update
+				return nil
 			}
 			if err != nil && sqlx.DBErr(err).IsNotFound() {
 				found = false
 				return nil
+			} else {
+				l.Error(err)
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
-			return err
 		},
+		// do old config uninit and drop
 		func(db sqlx.DBExecutor) error {
+			l = l.WithValues("stage", "drop")
 			if !found {
 				return nil
 			}
-			cfg.Value = raw
-			return cfg.UpdateByRelIDAndType(db)
-		},
-		func(db sqlx.DBExecutor) error {
-			if found {
+			old, err := wasm.NewConfigurationByTypeAndValue(v.ConfigType(), cfg.Value)
+			if err != nil {
+				l.Error(err)
+			} else {
+				err = wasm.UninitConfiguration(ctx, old)
+				if err != nil {
+					l.Error(err)
+				}
+			}
+			err = cfg.DeleteByRelIDAndType(db)
+			if err == nil {
 				return nil
 			}
-			cfg.ConfigID, cfg.Value = idg.MustGenSFID(), raw
-			return cfg.Create(db)
+			if err != nil && sqlx.DBErr(err).IsNotFound() {
+				return nil
+			} else {
+				l.Error(err)
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+		},
+		// do create
+		func(db sqlx.DBExecutor) error {
+			cfg.Value = raw
+			err := wasm.InitConfiguration(ctx, v)
+			if err != nil {
+				return status.ConfigInitializationFailed.StatusErr().WithDesc(err.Error())
+			}
+			cfg.ConfigID = idg.MustGenSFID()
+			err = cfg.Create(db)
+			if err == nil {
+				return nil
+			} else {
+				l.Error(err)
+				if sqlx.DBErr(err).IsConflict() {
+					return status.ConfigConflict
+				} else {
+					return status.DatabaseError.StatusErr().WithDesc(err.Error())
+				}
+			}
 		},
 	).Do()
-	if err != nil {
-		return nil, status.CheckDatabaseError(err)
-	}
-	return
+	return err
 }

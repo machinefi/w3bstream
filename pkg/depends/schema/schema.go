@@ -26,7 +26,7 @@ type Schema struct {
 	*mapx.Map[string, *Table] `json:"-"`
 }
 
-func (s *Schema) WithName(name string) { s.Name = "wasm_project__" + name }
+func (s *Schema) WithName(name string) { s.Name = name }
 
 func (s *Schema) DBExecutor(d sqlx.DBExecutor) sqlx.DBExecutor {
 	return d.WithSchema(s.Name)
@@ -70,6 +70,13 @@ func FromConfig(data []byte) (*Schema, error) {
 
 func (s *Schema) CreateSchema() builder.SqlExpr {
 	e := builder.Expr("CREATE SCHEMA IF NOT EXISTS ")
+	e.WriteQuery(s.Name)
+	e.WriteEnd()
+	return e
+}
+
+func (s *Schema) DropSchema() builder.SqlExpr {
+	e := builder.Expr("DROP SCHEMA IF EXISTS ")
 	e.WriteQuery(s.Name)
 	e.WriteEnd()
 	return e

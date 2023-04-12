@@ -518,7 +518,7 @@ func (c *Connector) dataTypeModify(columnType *builder.ColumnType, dataType stri
 		buf.WriteString(" NOT NULL")
 	}
 
-	if columnType.Default != nil {
+	if columnType.Default != nil && *columnType.Default != "" {
 		buf.WriteString(" DEFAULT ")
 		buf.WriteString(normalizeDefaultValue(columnType.Default, dataType))
 	}
@@ -527,7 +527,7 @@ func (c *Connector) dataTypeModify(columnType *builder.ColumnType, dataType stri
 }
 
 func normalizeDefaultValue(defaultValue *string, dataType string) string {
-	if defaultValue == nil {
+	if defaultValue == nil || *defaultValue == "" {
 		return ""
 	}
 

@@ -63,8 +63,8 @@ const (
 const (
 	// @errTalk Conflict conflict error
 	Conflict Error = http.StatusConflict*1e6 + iota + 1
-	// @errTalk Project Config Conflict
-	ProjectConfigConflict
+	// @errTalk Config Conflict
+	ConfigConflict
 	// @errTalk Project Name Conflict
 	ProjectNameConflict
 )

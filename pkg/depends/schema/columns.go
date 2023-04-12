@@ -98,9 +98,7 @@ func (cs *Columns) Add(cols ...*Column) {
 			if c.Constrains != nil && c.Constrains.AutoIncrement {
 				cs.autoInc = c
 			}
-			if !cs.StoreNX(strings.ToLower(c.Name), c) {
-				panic(errors.Errorf("duplicated column: %s", c.Name))
-			}
+			cs.Store(strings.ToLower(c.Name), c)
 		}
 	}
 }

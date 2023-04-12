@@ -31,7 +31,7 @@ var (
 
 	db        = &confpostgres.Endpoint{Database: models.DB}
 	monitordb = &confpostgres.Endpoint{Database: models.MonitorDB}
-	wasmdb    = &confpostgres.Endpoint{Database: models.WasmDB}
+	wasmdbep  = &confpostgres.Endpoint{}
 	server    = &confhttp.Server{}
 )
 
@@ -52,7 +52,7 @@ func init() {
 	}{
 		Postgres:   db,
 		MonitorDB:  monitordb,
-		WasmDB:     wasmdb,
+		WasmDB:     wasmdbep,
 		MqttBroker: &confmqtt.Broker{},
 		Redis:      &confredis.Redis{},
 		Server:     server,
@@ -88,7 +88,7 @@ func init() {
 	WithContext = contextx.WithContextCompose(
 		types.WithMgrDBExecutorContext(config.Postgres),
 		types.WithMonitorDBExecutorContext(config.MonitorDB),
-		types.WithWasmDBExecutorContext(config.WasmDB),
+		types.WithWasmDBEndpointContext(config.WasmDB),
 		types.WithPgEndpointContext(config.Postgres),
 		types.WithRedisEndpointContext(config.Redis),
 		types.WithLoggerContext(config.StdLogger),
