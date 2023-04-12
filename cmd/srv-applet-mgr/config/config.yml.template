@@ -23,7 +23,7 @@ SRV_APPLET_MGR__MqttBroker_RetainPublish: "false"
 SRV_APPLET_MGR__MqttBroker_Retry_Interval: 3s
 SRV_APPLET_MGR__MqttBroker_Retry_Repeats: "3"
 SRV_APPLET_MGR__MqttBroker_Server: mqtt://127.0.0.1:1883
-SRV_APPLET_MGR__MqttBroker_Timeout: 0s
+SRV_APPLET_MGR__MqttBroker_Timeout: 10s
 SRV_APPLET_MGR__Postgres_ConnMaxLifetime: 1h
 SRV_APPLET_MGR__Postgres_Master: postgres://127.0.0.1:5432
 SRV_APPLET_MGR__Postgres_PoolSize: "10"

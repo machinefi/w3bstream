@@ -26,6 +26,7 @@ var _ interface {
 type Connector struct {
 	Host       string
 	DBName     string
+	MustSchema string
 	Extra      string
 	Extensions []string
 }
@@ -60,6 +61,17 @@ func (c *Connector) Connect(ctx context.Context) (driver.Conn, error) {
 		_, err = conn.(driver.ExecerContext).ExecContext(
 			context.Background(),
 			"CREATE EXTENSION IF NOT EXISTS "+ex+";",
+			nil,
+		)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if c.MustSchema != "" {
+		_, err = conn.(driver.ExecerContext).ExecContext(
+			context.Background(),
+			"SET SEARCH_PATH TO "+c.MustSchema+";",
 			nil,
 		)
 		if err != nil {
