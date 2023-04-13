@@ -378,6 +378,13 @@ output like
 }
 ```
 
+delete it
+
+```sh
+export ContractlogID=${contractlogID}
+http delete :8888/srv-applet-mgr/v0/monitor/contract_log/$PROJECTNAME/$ContractlogID -A bearer -a $TOK
+```
+
 ### Post blockchain transaction monitor
 
 ```sh
@@ -396,6 +403,13 @@ output like
   "txAddress": "${txAddress}",
   "updatedAt": "2022-10-21T10:35:06.498594+08:00"
 }
+```
+
+delete it
+
+```sh
+export ChaintxID=${chaintxID}
+http delete :8888/srv-applet-mgr/v0/monitor/chain_tx/$PROJECTNAME/$ChaintxID -A bearer -a $TOK
 ```
 
 ### Post blockchain height monitor
@@ -417,6 +431,15 @@ output like
   "updatedAt": "2022-10-21T10:47:23.815553+08:00"
 }
 ```
+
+
+delete it
+
+```sh
+export ChainHeightID=${chainHeightID}
+http delete :8888/srv-applet-mgr/v0/monitor/chain_height/$PROJECTNAME/$ChainHeightID -A bearer -a $TOK
+```
+
 
 ### remove instance
 
