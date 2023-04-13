@@ -4,7 +4,7 @@ import (
 	"mime/multipart"
 	"time"
 
-	time2 "github.com/machinefi/w3bstream/pkg/depends/kit/httpswaggergen/testdata/definition_scanner/time"
+	time2 "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/definition_scanner/time"
 )
 
 type Interface interface{}

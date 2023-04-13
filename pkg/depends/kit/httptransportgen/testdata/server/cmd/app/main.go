@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/machinefi/w3bstream/pkg/depends/kit/httpswaggergen/testdata/server/cmd/app/routes"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app/routes"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 )
 

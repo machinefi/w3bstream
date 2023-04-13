@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 
-	"github.com/machinefi/w3bstream/pkg/depends/kit/httpswaggergen/testdata/router_scanner/auth"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/httpswaggergen/testdata/router_scanner/group"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/router_scanner/auth"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/router_scanner/group"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 )
 

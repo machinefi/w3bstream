@@ -8,7 +8,7 @@
     "/demo": {
       "get": {
         "tags": [
-          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/swagger"
+          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
         ],
         "operationId": "OpenAPI",
         "responses": {
@@ -54,7 +54,7 @@
     "/demo/binary/files": {
       "get": {
         "tags": [
-          "routes"
+          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
         ],
         "summary": "download file",
         "operationId": "DownloadFile",
@@ -75,7 +75,7 @@
     "/demo/binary/images": {
       "get": {
         "tags": [
-          "routes"
+          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
         ],
         "summary": "show image",
         "operationId": "ShowImage",
@@ -96,7 +96,7 @@
     "/demo/cookie": {
       "post": {
         "tags": [
-          "routes"
+          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
         ],
         "operationId": "Cookie",
         "parameters": [
@@ -153,7 +153,7 @@
     "/demo/forms/multipart": {
       "post": {
         "tags": [
-          "routes"
+          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
         ],
         "summary": "Form Multipart",
         "operationId": "FormMultipartWithFile",
@@ -189,7 +189,7 @@
                       "format": "int32"
                     },
                     "propertyNames": {
-                      "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitHttpswaggergenTestdataServerPkgTypesProtocol"
+                      "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitHttptransportgenTestdataServerPkgTypesProtocol"
                     },
                     "x-go-field-name": "Map",
                     "x-tag-name": "map,omitempty"
@@ -228,7 +228,7 @@
     "/demo/forms/multipart-with-files": {
       "post": {
         "tags": [
-          "routes"
+          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
         ],
         "summary": "Form Multipart With Files",
         "operationId": "FormMultipartWithFiles",
@@ -269,7 +269,7 @@
     "/demo/forms/urlencoded": {
       "post": {
         "tags": [
-          "routes"
+          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
         ],
         "summary": "Form URL Encoded",
         "operationId": "FormURLEncoded",
@@ -326,16 +326,16 @@
     "/demo/proxy": {
       "get": {
         "tags": [
-          "routes"
+          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
         ],
-        "operationId": "Proxy",
+        "operationId": "ProxyV2",
         "responses": {
           "200": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IpInfo"
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitKitResult"
                 }
               }
             }
@@ -363,7 +363,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ClientClosedRequest][499000000][ClientClosedRequest]"
+              "@StatusErr[ClientClosedRequest][499000000][ClientClosedRequest]",
+              "@StatusErr[ContextCanceled][499000000][ContextCanceled]"
             ]
           },
           "500": {
@@ -376,7 +377,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[RequestFailed][500000000][RequestFailed]"
+              "@StatusErr[RequestFailed][500000000][RequestFailed]",
+              "@StatusErr[UnknownError][500000000][UnknownError]"
             ]
           }
         }
@@ -385,7 +387,7 @@
     "/demo/redirect": {
       "get": {
         "tags": [
-          "routes"
+          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
         ],
         "operationId": "Redirect",
         "responses": {
@@ -396,7 +398,7 @@
       },
       "post": {
         "tags": [
-          "routes"
+          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
         ],
         "operationId": "RedirectWhenError",
         "responses": {
@@ -409,7 +411,7 @@
     "/demo/restful": {
       "head": {
         "tags": [
-          "routes"
+          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
         ],
         "operationId": "HealthCheck",
         "parameters": [
@@ -419,7 +421,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitHttpswaggergenTestdataServerPkgTypesPullPolicy"
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitHttptransportgenTestdataServerPkgTypesPullPolicy"
                 },
                 {
                   "x-go-field-name": "PullPolicy",
@@ -437,7 +439,7 @@
       },
       "post": {
         "tags": [
-          "routes"
+          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
         ],
         "summary": "Create",
         "operationId": "Create",
@@ -475,7 +477,7 @@
     "/demo/restful/{id}": {
       "delete": {
         "tags": [
-          "routes"
+          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
         ],
         "summary": "remove by id",
         "operationId": "RemoveByID",
@@ -542,7 +544,7 @@
       },
       "get": {
         "tags": [
-          "routes"
+          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
         ],
         "summary": "get by id",
         "operationId": "GetByID",
@@ -586,7 +588,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitHttpswaggergenTestdataServerPkgTypesProtocol"
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitHttptransportgenTestdataServerPkgTypesProtocol"
                 },
                 {
                   "x-go-field-name": "Protocol",
@@ -611,7 +613,7 @@
       },
       "put": {
         "tags": [
-          "routes"
+          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
         ],
         "summary": "update by id",
         "operationId": "UpdateByID",
@@ -652,67 +654,6 @@
           }
         }
       }
-    },
-    "/demo/v2/proxy": {
-      "get": {
-        "tags": [
-          "routes"
-        ],
-        "operationId": "ProxyV2",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitKitResult"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[RequestTransformFailed][400000000][RequestTransformFailed]"
-            ]
-          },
-          "499": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[ClientClosedRequest][499000000][ClientClosedRequest]",
-              "@StatusErr[ContextCanceled][499000000][ContextCanceled]"
-            ]
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[RequestFailed][500000000][RequestFailed]",
-              "@StatusErr[UnknownError][500000000][UnknownError]"
-            ]
-          }
-        }
-      }
     }
   },
   "components": {
@@ -739,7 +680,7 @@
           "protocol": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitHttpswaggergenTestdataServerPkgTypesProtocol"
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitHttptransportgenTestdataServerPkgTypesProtocol"
               },
               {
                 "x-go-field-name": "Protocol",
@@ -771,36 +712,6 @@
           "label"
         ],
         "x-id": "Data"
-      },
-      "GithubComMachinefiW3BstreamPkgDependsKitHttpswaggergenTestdataServerPkgTypesProtocol": {
-        "type": "string",
-        "enum": [
-          "HTTP",
-          "HTTPS",
-          "TCP"
-        ],
-        "x-enum-labels": [
-          "http",
-          "https",
-          "TCP"
-        ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/httpswaggergen/testdata/server/pkg/types.Protocol",
-        "x-id": "GithubComMachinefiW3BstreamPkgDependsKitHttpswaggergenTestdataServerPkgTypesProtocol"
-      },
-      "GithubComMachinefiW3BstreamPkgDependsKitHttpswaggergenTestdataServerPkgTypesPullPolicy": {
-        "type": "string",
-        "enum": [
-          "Always",
-          "IfNotPresent",
-          "Never"
-        ],
-        "x-enum-labels": [
-          "Always",
-          "IfNotPresent",
-          "Never"
-        ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/httpswaggergen/testdata/server/pkg/types.PullPolicy",
-        "x-id": "GithubComMachinefiW3BstreamPkgDependsKitHttpswaggergenTestdataServerPkgTypesPullPolicy"
       },
       "GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxAttachment": {
         "type": "string",
@@ -881,6 +792,36 @@
             "x-id": "GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxStatusFound"
           }
         ]
+      },
+      "GithubComMachinefiW3BstreamPkgDependsKitHttptransportgenTestdataServerPkgTypesProtocol": {
+        "type": "string",
+        "enum": [
+          "HTTP",
+          "HTTPS",
+          "TCP"
+        ],
+        "x-enum-labels": [
+          "http",
+          "https",
+          "TCP"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/pkg/types.Protocol",
+        "x-id": "GithubComMachinefiW3BstreamPkgDependsKitHttptransportgenTestdataServerPkgTypesProtocol"
+      },
+      "GithubComMachinefiW3BstreamPkgDependsKitHttptransportgenTestdataServerPkgTypesPullPolicy": {
+        "type": "string",
+        "enum": [
+          "Always",
+          "IfNotPresent",
+          "Never"
+        ],
+        "x-enum-labels": [
+          "Always",
+          "IfNotPresent",
+          "Never"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/pkg/types.PullPolicy",
+        "x-id": "GithubComMachinefiW3BstreamPkgDependsKitHttptransportgenTestdataServerPkgTypesPullPolicy"
       },
       "GithubComMachinefiW3BstreamPkgDependsKitKitMetadata": {
         "type": "object",

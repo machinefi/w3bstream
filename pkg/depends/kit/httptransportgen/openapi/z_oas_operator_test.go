@@ -1,4 +1,4 @@
-package httpswaggergen_test
+package openapi_test
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/machinefi/w3bstream/pkg/depends/kit/httpswaggergen"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/openapi"
 	"github.com/machinefi/w3bstream/pkg/depends/oas"
 	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"
 	. "github.com/onsi/gomega"
@@ -15,9 +15,9 @@ import (
 
 func TestOperatorScanner(t *testing.T) {
 	cwd, _ := os.Getwd()
-	pkg, _ := pkgx.LoadFrom(filepath.Join(cwd, "./testdata/router_scanner/auth"))
+	pkg, _ := pkgx.LoadFrom(filepath.Join(cwd, "../testdata/router_scanner/auth"))
 
-	scanner := httpswaggergen.NewOperatorScanner(pkg)
+	scanner := openapi.NewOperatorScanner(pkg)
 
 	cases := map[string]string{
 		"RespWithDescribers": /* language=json*/ `{
@@ -225,7 +225,7 @@ func TestOperatorScanner(t *testing.T) {
 			op := scanner.Operator(context.Background(), pkg.TypeName(n))
 			op.BindOperation("", operation, true)
 			data, _ := json.MarshalIndent(operation, "", "  ")
-			//fmt.Println(string(data))
+			t.Log(string(data))
 			NewWithT(t).Expect(string(data)).To(Equal(result))
 		})
 	}

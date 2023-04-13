@@ -1,4 +1,4 @@
-package httpswaggergen
+package openapi
 
 import (
 	"context"
@@ -10,18 +10,21 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/typesx"
 )
 
-func BindSchemaValidationByValidateBytes(s *oas.Schema, typ types.Type, validateBytes []byte) error {
-	ttype := typesx.FromGoType(typ)
+func BindSchemaValidationByValidateBytes(s *oas.Schema, typ types.Type, raw []byte) error {
+	t := typesx.FromGoType(typ)
 
-	fieldValidator, err := validator.DefaultFactory.Compile(context.Background(), validateBytes, ttype, func(rule validator.Modifier) {
-		rule.SetDefaultValue(nil)
-	})
+	fvldt, err := validator.DefaultFactory.Compile(
+		context.Background(), raw, t,
+		func(rule validator.Modifier) {
+			rule.SetDefaultValue(nil)
+		},
+	)
 	if err != nil {
 		return err
 	}
 
-	if fieldValidator != nil {
-		BindSchemaValidationByValidator(s, fieldValidator)
+	if fvldt != nil {
+		BindSchemaValidationByValidator(s, fvldt)
 	}
 
 	return nil

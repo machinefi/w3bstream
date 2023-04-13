@@ -1,4 +1,4 @@
-package httpswaggergen_test
+package openapi_test
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/machinefi/w3bstream/pkg/depends/kit/httpswaggergen"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/openapi"
 	"github.com/machinefi/w3bstream/pkg/depends/oas"
 	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"
 	. "github.com/onsi/gomega"
@@ -18,10 +18,10 @@ import (
 func TestDefinitionScanner(t *testing.T) {
 	cwd, _ := os.Getwd()
 
-	pkg, err := pkgx.LoadFrom(filepath.Join(cwd, "./testdata/definition_scanner"))
+	pkg, err := pkgx.LoadFrom(filepath.Join(cwd, "../testdata/definition_scanner"))
 	NewWithT(t).Expect(err).To(BeNil())
 
-	scanner := httpswaggergen.NewDefinitionScanner(pkg)
+	scanner := openapi.NewDefScanner(pkg)
 
 	cases := [][2]string{
 		{
@@ -326,8 +326,9 @@ func TestDefinitionScanner(t *testing.T) {
 		openAPI := oas.NewOpenAPI()
 		openAPI.AddOperation(oas.GET, "/", oas.NewOperation("test"))
 		scanner.BindSchemas(openAPI)
-		// data, _ := json.MarshalIndent(openAPI, "", "  ")
-		// fmt.Println(string(data))
+
+		data, _ := json.MarshalIndent(openAPI, "", "  ")
+		t.Log(string(data))
 	})
 
 	t.Run("invalid", func(t *testing.T) {

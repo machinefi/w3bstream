@@ -4,9 +4,9 @@ import (
 	"context"
 	"mime/multipart"
 
-	"github.com/machinefi/w3bstream/pkg/depends/kit/httpswaggergen/testdata/server/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 )
 

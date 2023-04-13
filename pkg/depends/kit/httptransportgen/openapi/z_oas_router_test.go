@@ -1,21 +1,21 @@
-package httpswaggergen_test
+package openapi_test
 
 import (
 	"fmt"
 	"os"
 	"path/filepath"
 
-	"github.com/machinefi/w3bstream/pkg/depends/kit/httpswaggergen"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/openapi"
 	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"
 )
 
 func ExampleNewRouterScanner() {
 	cwd, _ := os.Getwd()
-	pkg, _ := pkgx.LoadFrom(filepath.Join(cwd, "./testdata/router_scanner"))
+	pkg, _ := pkgx.LoadFrom(filepath.Join(cwd, "../testdata/router_scanner"))
 
 	router := pkg.Var("Router")
 
-	scanner := httpswaggergen.NewRouterScanner(pkg)
+	scanner := openapi.NewRouterScanner(pkg)
 	routes := scanner.Router(router).Routes()
 
 	for _, r := range routes {

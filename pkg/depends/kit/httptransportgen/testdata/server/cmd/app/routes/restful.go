@@ -3,10 +3,10 @@ package routes
 import (
 	"context"
 
-	"github.com/machinefi/w3bstream/pkg/depends/kit/httpswaggergen/testdata/server/pkg/errors"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/httpswaggergen/testdata/server/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/pkg/errors"
+	types2 "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 	pkgerrors "github.com/pkg/errors"
 )
@@ -25,7 +25,7 @@ func init() {
 
 type HealthCheck struct {
 	httpx.MethodHead
-	PullPolicy types.PullPolicy `name:"pullPolicy,omitempty" in:"query"`
+	PullPolicy types2.PullPolicy `name:"pullPolicy,omitempty" in:"query"`
 }
 
 func (HealthCheck) Output(ctx context.Context) (interface{}, error) {
@@ -43,11 +43,11 @@ func (req Create) Output(ctx context.Context) (interface{}, error) {
 }
 
 type Data struct {
-	ID        string         `json:"id"`
-	Label     string         `json:"label"`
-	PtrString *string        `json:"ptrString,omitempty"`
-	SubData   *SubData       `json:"subData,omitempty"`
-	Protocol  types.Protocol `json:"protocol,omitempty"`
+	ID        string          `json:"id"`
+	Label     string          `json:"label"`
+	PtrString *string         `json:"ptrString,omitempty"`
+	SubData   *SubData        `json:"subData,omitempty"`
+	Protocol  types2.Protocol `json:"protocol,omitempty"`
 }
 
 type SubData struct {
@@ -57,9 +57,9 @@ type SubData struct {
 // get by id
 type GetByID struct {
 	httpx.MethodGet
-	Protocol types.Protocol `name:"protocol,omitempty" in:"query"`
-	Name     string         `name:"name,omitempty" in:"query"`
-	Label    []string       `name:"label,omitempty" in:"query"`
+	Protocol types2.Protocol `name:"protocol,omitempty" in:"query"`
+	Name     string          `name:"name,omitempty" in:"query"`
+	Label    []string        `name:"label,omitempty" in:"query"`
 }
 
 func (req GetByID) Output(ctx context.Context) (interface{}, error) {
