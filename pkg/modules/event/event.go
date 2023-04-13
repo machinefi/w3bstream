@@ -38,6 +38,20 @@ type HandleEventReq struct {
 	Events []eventpb.Event `json:"events"`
 }
 
+type EventCore struct {
+	ProjectID types.SFID `json:"projectID"`
+	EventID   string     `json:"eventID,omitempty"`
+	EventType string     `json:"eventType"`
+	Payload   []byte     `json:"payload,omitempty"`
+}
+
+type EventGateway struct {
+	DeviceID  types.SFID `json:"deviceID"`
+	EventID   string     `json:"eventID,omitempty"`
+	EventType string     `json:"eventType"`
+	Payload   []byte     `json:"payload,omitempty"`
+}
+
 func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) (ret *HandleEventResult, err error) {
 	l := types.MustLoggerFromContext(ctx)
 
