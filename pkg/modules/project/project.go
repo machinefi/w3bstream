@@ -312,6 +312,22 @@ func GetProjectByProjectID(ctx context.Context, prjID types.SFID) (*Detail, erro
 	return &ret.Data[0], nil
 }
 
+func GetProjectInfoByProjectID(ctx context.Context, pid types.SFID) (*models.Project, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	l := types.MustLoggerFromContext(ctx)
+	m := &models.Project{RelProject: models.RelProject{ProjectID: pid}}
+
+	_, l = l.Start(ctx, "GetProjectInfoByProjectID")
+	defer l.End()
+
+	if err := m.FetchByProjectID(d); err != nil {
+		l.Error(err)
+		return nil, status.CheckDatabaseError(err, "GetProjectInfoByProjectID")
+	}
+
+	return m, nil
+}
+
 func GetProjectByProjectName(ctx context.Context, prjName string) (*models.Project, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)

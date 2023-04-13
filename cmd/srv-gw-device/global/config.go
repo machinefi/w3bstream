@@ -22,6 +22,7 @@ type config struct {
 	Server      *confhttp.Server
 	Transporter *types.Transporter
 	Logger      *conflog.Log
+	Core        *types.Core
 }
 
 var (
@@ -38,6 +39,7 @@ func init() {
 		Server:      server,
 		Transporter: &types.Transporter{},
 		Logger:      &conflog.Log{},
+		Core:        &types.Core{},
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
@@ -57,6 +59,7 @@ func init() {
 	WithAppContext = contextx.WithContextCompose(
 		types.WithDBExecutorContext(cfg.Postgres),
 		types.WithLoggerContext(conflog.Std()), // TODO impl conflog.Log as Logger and inject cfg.Logger
+		types.WithCoreContext(cfg.Core),
 	)
 }
 
