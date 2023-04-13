@@ -3,13 +3,13 @@ package job
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 	base "github.com/machinefi/w3bstream/pkg/depends/base/types"
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
+	"github.com/machinefi/w3bstream/pkg/depends/x/stringsx"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -24,7 +24,7 @@ func NewWasmLogTask(ctx context.Context, logLevel, msg string) *WasmLogTask {
 				InstanceID:  types.MustInstanceFromContext(ctx).InstanceID,
 				Level:       logLevel,
 				LogTime:     base.AsTimestamp(time.Now()),
-				Msg:         strings.TrimSpace(msg)[0:consts.WasmLogMaxLength],
+				Msg:         stringsx.SubStringWithLength(msg, 0, consts.WasmLogMaxLength),
 			},
 		},
 	}

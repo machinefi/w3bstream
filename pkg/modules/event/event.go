@@ -46,15 +46,8 @@ func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) 
 
 	l = l.WithValues("project_name", projectName)
 
-	eventType := enums.EVENTTYPEDEFAULT
-	if r.Header != nil && len(r.Header.EventType) > 0 {
-		eventType = r.Header.EventType
-	}
-	l = l.WithValues("event_type", eventType)
-
 	ret = &HandleEventResult{
 		ProjectName: projectName,
-		EventID:     r.Header.EventId,
 	}
 
 	defer func() {
@@ -68,18 +61,28 @@ func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) 
 		handlers []*strategy.InstanceHandler
 	)
 
-	pulisherMtc := projectName
-	if r.Header != nil && len(r.Header.PubId) > 0 {
-		pulisherMtc = r.Header.PubId
-		pub, err = publisher.GetPublisherByPubKeyAndProjectName(ctx, r.Header.PubId, projectName)
-		if err != nil {
-			return
+	eventType := enums.EVENTTYPEDEFAULT
+	publisherMtc := projectName
+	if r.Header != nil {
+		if len(r.Header.EventId) > 0 {
+			ret.EventID = r.Header.EventId
 		}
-		ret.PubID, ret.PubName = pub.PublisherID, pub.Name
-		l.WithValues("pub_id", pub.PublisherID)
+		if len(r.Header.PubId) > 0 {
+			publisherMtc = r.Header.PubId
+			pub, err = publisher.GetPublisherByPubKeyAndProjectName(ctx, r.Header.PubId, projectName)
+			if err != nil {
+				return
+			}
+			ret.PubID, ret.PubName = pub.PublisherID, pub.Name
+			l.WithValues("pub_id", pub.PublisherID)
+		}
+		if len(r.Header.EventType) > 0 {
+			eventType = r.Header.EventType
+		}
 	}
-	_receiveEventMtc.WithLabelValues(projectName, pulisherMtc).Inc()
+	_receiveEventMtc.WithLabelValues(projectName, publisherMtc).Inc()
 
+	l = l.WithValues("event_type", eventType)
 	handlers, err = strategy.FindStrategyInstances(ctx, projectName, eventType)
 	if err != nil {
 		l.Error(err)
