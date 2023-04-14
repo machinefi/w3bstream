@@ -3,6 +3,7 @@ package codegen
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -18,8 +19,8 @@ import (
 type File struct {
 	Pkg         string
 	Name        string
-	Imps        map[string]string
-	Pkgs        map[string][]string
+	Imps        map[string]string   // key: package path ; val: package name
+	Pkgs        map[string][]string // key: package name ; val: package paths
 	OrderedImps [][2]string
 	opts        WriteOption
 	bytes.Buffer
@@ -98,7 +99,7 @@ func (f File) Raw() []byte { return f.bytes() }
 // Formatted test only
 func (f File) Formatted() []byte { return f.bytes() }
 
-func (f *File) _import(pkg string) string {
+func (f *File) Import(pkg string) string {
 	if f.Imps == nil {
 		f.Imps = make(map[string]string)
 		f.Pkgs = make(map[string][]string)
@@ -113,16 +114,19 @@ func (f *File) _import(pkg string) string {
 			panic(pkg + " not found")
 		}
 		pkg = pkgs[0].PkgPath
-		min := path.Base(pkg)
+		name := pkgs[0].Name
 
-		if len(f.Pkgs[min]) == 0 {
-			f.Imps[pkg] = min
-		} else {
-			f.Imps[pkg] = stringsx.LowerSnakeCase(
-				fmt.Sprintf("gen %s %d", min, len(f.Pkgs[min])),
-			)
+		if name == "" {
+			name = filepath.Base(pkgs[0].PkgPath)
+			// panic("cannot load package name: " + pkg)
 		}
-		f.Pkgs[min] = append(f.Pkgs[min], pkg)
+
+		if len(f.Pkgs[name]) == 0 {
+			f.Imps[pkg] = name
+		} else {
+			f.Imps[pkg] = fmt.Sprintf("%s%d", name, len(f.Pkgs[name])+1)
+		}
+		f.Pkgs[name] = append(f.Pkgs[name], pkg)
 		f.OrderedImps = append(f.OrderedImps, [2]string{f.Imps[pkg], pkg})
 	}
 	return f.Imps[pkg]
@@ -135,18 +139,18 @@ func (f *File) Use(pkg, name string) string {
 	if pkg == "" {
 		return name
 	}
-	return f._import(pkg) + "." + name
+	return f.Import(pkg) + "." + name
 }
 
 func (f *File) Expr(format string, args ...interface{}) SnippetExpr {
-	return ExprWithAlias(f._import)(format, args...)
+	return ExprWithAlias(f.Import)(format, args...)
 }
 
 func (f *File) Type(t reflect.Type) SnippetType {
-	return TypeWithAlias(f._import)(t)
+	return TypeWithAlias(f.Import)(t)
 }
 
-func (f *File) Value(v interface{}) Snippet { return ValueWithAlias(f._import)(v) }
+func (f *File) Value(v interface{}) Snippet { return ValueWithAlias(f.Import)(v) }
 
 func (f *File) WriteSnippet(ss ...Snippet) {
 	for _, s := range ss {
@@ -157,32 +161,44 @@ func (f *File) WriteSnippet(ss ...Snippet) {
 	}
 }
 
-func (f *File) Write(opts ...WriterOptionSetter) (int, error) {
+func (f *File) Write(opts ...WriteOptionSetter) (size int, err error) {
 	for _, setter := range opts {
 		setter(&f.opts)
 	}
 
 	if dir := filepath.Dir(f.Name); dir != "" {
-		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+		if err = os.MkdirAll(dir, os.ModePerm); err != nil {
 			return -1, err
 		}
 	}
 
-	fl, err := os.Create(f.Name)
-	if err != nil {
-		return -1, err
-	}
-	defer fl.Close()
+	var wr io.Writer
 
-	size, err := fl.Write(f.Bytes())
-	if err != nil {
-		return -1, err
+	defer func() {
+		if closer, ok := wr.(io.Closer); ok {
+			closer.Close()
+		}
+	}()
+
+	if f.opts.Output != nil {
+		wr = f.opts.Output
+	} else {
+		var file *os.File
+		file, err = os.Create(f.Name)
+		if err != nil {
+			return -1, err
+		}
+		wr = file
+		defer func() {
+			if err = file.Sync(); err != nil {
+				size = -1
+			}
+
+		}()
 	}
 
-	if err := fl.Sync(); err != nil {
-		return -1, err
-	}
-	return size, nil
+	size, err = wr.Write(f.Bytes())
+	return
 }
 
 type WriteOption struct {
@@ -190,11 +206,26 @@ type WriteOption struct {
 	WithTimestamp   bool
 	WithToolVersion bool
 	MustFormat      bool
+	Output          io.Writer
 }
 
-func WriteOptionWithCommit(v *WriteOption)      { v.WithCommit = true }
-func WriteOptionWithTimestamp(v *WriteOption)   { v.WithCommit, v.WithTimestamp = true, true }
-func WriteOptionWithToolVersion(v *WriteOption) { v.WithCommit, v.WithToolVersion = true, true }
-func WriteOptionMustFormat(v *WriteOption)      { v.MustFormat = true }
+type WriteOptionSetter func(v *WriteOption)
 
-type WriterOptionSetter func(v *WriteOption)
+func WriteOptionWithCommit(v bool) WriteOptionSetter {
+	return func(o *WriteOption) { o.WithCommit = v }
+}
+
+func WriteOptionWithTimestamp(v bool) WriteOptionSetter {
+	return func(o *WriteOption) { o.WithTimestamp = v }
+}
+
+func WriteOptionWithToolVersion(v bool) WriteOptionSetter {
+	return func(o *WriteOption) { o.WithToolVersion = v }
+}
+
+func WriteOptionMustFormat(v bool) WriteOptionSetter {
+	return func(o *WriteOption) { o.MustFormat = v }
+}
+func WriteOptionWithOutput(v io.Writer) WriteOptionSetter {
+	return func(o *WriteOption) { o.Output = v }
+}
