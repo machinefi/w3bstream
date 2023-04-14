@@ -1,10 +1,13 @@
 package codegen_test
 
 import (
+	"bytes"
 	"fmt"
 	"os"
+	"testing"
 
 	. "github.com/machinefi/w3bstream/pkg/depends/gen/codegen"
+	. "github.com/onsi/gomega"
 )
 
 func CreateDemoFile() *File {
@@ -33,7 +36,7 @@ func ExampleNewFileFullFormat() {
 	if raw, err := os.ReadFile(f.Name); err != nil {
 		panic(err)
 	} else {
-		// NOTE: this test should always FAILED because the generated file
+		// NOTE: this test should always FAILED if the generated file
 		// contains `time` and `version` information
 		fmt.Println(string(raw))
 	}
@@ -47,16 +50,47 @@ func ExampleNewFileFullFormat() {
 	// 	"bytes"
 	// 	"fmt"
 	//
-	// 	gen_pkg_1 "github.com/another/pkg"
-	// 	gen_pkg_2 "github.com/one_more/pkg"
+	// 	pkg2 "github.com/another/pkg"
+	// 	pkg3 "github.com/one_more/pkg"
 	// 	"github.com/some/pkg"
 	// )
 	//
 	// func main() {
 	// 	fmt.Println("Hello, 世界")
 	// 	pkg.Println("Hello World!")
-	// 	gen_pkg_1.Println("Hello World!")
-	// 	gen_pkg_2.Println("Hello World!")
+	// 	pkg2.Println("Hello World!")
+	// 	pkg3.Println("Hello World!")
 	// 	_ = bytes.NewBuffer(nil)
 	// }
+}
+
+func TestFile_Import(t *testing.T) {
+	f := NewFile("fake", "fake")
+
+	// remote
+	path := "github.com/golang-jwt/jwt/v4"
+	f.Import(path)
+	NewWithT(t).Expect(f.Imps[path]).To(Equal("jwt"))
+
+	// renamed
+	path = "github.com/golang-jwt/jwt/v5"
+	f.Import(path)
+	NewWithT(t).Expect(f.Imps[path]).To(Equal("jwt2"))
+
+	buf := bytes.NewBuffer(nil)
+	_, err := f.Write(
+		WriteOptionWithOutput(buf),
+		WriteOptionMustFormat(false),
+		WriteOptionWithCommit(false),
+	)
+	fmt.Println(string(buf.Bytes()))
+	NewWithT(t).Expect(err).To(BeNil())
+	NewWithT(t).Expect(buf.Bytes()).To(Equal(
+		[]byte(`
+package fake
+import (
+jwt "github.com/golang-jwt/jwt/v4"
+jwt2 "github.com/golang-jwt/jwt/v5"
+)
+`)))
 }
