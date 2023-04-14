@@ -128,7 +128,15 @@ func (f *File) _import(pkg string) string {
 	return f.Imps[pkg]
 }
 
-func (f *File) Use(pkg, name string) string { return f._import(pkg) + "." + name }
+func (f *File) Use(pkg, name string) string {
+	if name == "" {
+		panic("should give using name")
+	}
+	if pkg == "" {
+		return name
+	}
+	return f._import(pkg) + "." + name
+}
 
 func (f *File) Expr(format string, args ...interface{}) SnippetExpr {
 	return ExprWithAlias(f._import)(format, args...)
