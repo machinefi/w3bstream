@@ -66,7 +66,7 @@ type TypeGen struct {
 	ServiceName string
 	f           *g.File
 	enums       map[string]enumgen.Options
-	aliases     map[string]string // key:schema id; val: typename
+	aliases     map[string]string // key:schema id; val: typename // TODO optimize type alias
 }
 
 func (tg *TypeGen) Gen(ctx context.Context, spec *oas.OpenAPI) error {
