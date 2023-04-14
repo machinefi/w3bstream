@@ -54,7 +54,6 @@ func (rs *RouterScanner) init() {
 					return true
 				},
 			)
-
 			rs.routers[v] = r
 		}
 	}

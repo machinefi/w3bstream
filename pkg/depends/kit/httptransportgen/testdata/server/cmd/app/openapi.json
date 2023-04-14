@@ -8,7 +8,7 @@
     "/demo": {
       "get": {
         "tags": [
-          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
+          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/openapi"
         ],
         "operationId": "OpenAPI",
         "responses": {
@@ -54,7 +54,7 @@
     "/demo/binary/files": {
       "get": {
         "tags": [
-          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
+          "routes"
         ],
         "summary": "download file",
         "operationId": "DownloadFile",
@@ -75,7 +75,7 @@
     "/demo/binary/images": {
       "get": {
         "tags": [
-          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
+          "routes"
         ],
         "summary": "show image",
         "operationId": "ShowImage",
@@ -96,7 +96,7 @@
     "/demo/cookie": {
       "post": {
         "tags": [
-          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
+          "routes"
         ],
         "operationId": "Cookie",
         "parameters": [
@@ -153,7 +153,7 @@
     "/demo/forms/multipart": {
       "post": {
         "tags": [
-          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
+          "routes"
         ],
         "summary": "Form Multipart",
         "operationId": "FormMultipartWithFile",
@@ -228,7 +228,7 @@
     "/demo/forms/multipart-with-files": {
       "post": {
         "tags": [
-          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
+          "routes"
         ],
         "summary": "Form Multipart With Files",
         "operationId": "FormMultipartWithFiles",
@@ -269,7 +269,7 @@
     "/demo/forms/urlencoded": {
       "post": {
         "tags": [
-          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
+          "routes"
         ],
         "summary": "Form URL Encoded",
         "operationId": "FormURLEncoded",
@@ -326,16 +326,16 @@
     "/demo/proxy": {
       "get": {
         "tags": [
-          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
+          "routes"
         ],
-        "operationId": "ProxyV2",
+        "operationId": "Proxy",
         "responses": {
           "200": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitKitResult"
+                  "$ref": "#/components/schemas/IpInfo"
                 }
               }
             }
@@ -363,8 +363,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ClientClosedRequest][499000000][ClientClosedRequest]",
-              "@StatusErr[ContextCanceled][499000000][ContextCanceled]"
+              "@StatusErr[ClientClosedRequest][499000000][ClientClosedRequest]"
             ]
           },
           "500": {
@@ -377,8 +376,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[RequestFailed][500000000][RequestFailed]",
-              "@StatusErr[UnknownError][500000000][UnknownError]"
+              "@StatusErr[RequestFailed][500000000][RequestFailed]"
             ]
           }
         }
@@ -387,7 +385,7 @@
     "/demo/redirect": {
       "get": {
         "tags": [
-          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
+          "routes"
         ],
         "operationId": "Redirect",
         "responses": {
@@ -398,7 +396,7 @@
       },
       "post": {
         "tags": [
-          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
+          "routes"
         ],
         "operationId": "RedirectWhenError",
         "responses": {
@@ -411,7 +409,7 @@
     "/demo/restful": {
       "head": {
         "tags": [
-          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
+          "routes"
         ],
         "operationId": "HealthCheck",
         "parameters": [
@@ -439,7 +437,7 @@
       },
       "post": {
         "tags": [
-          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
+          "routes"
         ],
         "summary": "Create",
         "operationId": "Create",
@@ -477,7 +475,7 @@
     "/demo/restful/{id}": {
       "delete": {
         "tags": [
-          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
+          "routes"
         ],
         "summary": "remove by id",
         "operationId": "RemoveByID",
@@ -544,7 +542,7 @@
       },
       "get": {
         "tags": [
-          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
+          "routes"
         ],
         "summary": "get by id",
         "operationId": "GetByID",
@@ -613,7 +611,7 @@
       },
       "put": {
         "tags": [
-          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/cmd/app"
+          "routes"
         ],
         "summary": "update by id",
         "operationId": "UpdateByID",
@@ -651,6 +649,67 @@
         "responses": {
           "204": {
             "description": ""
+          }
+        }
+      }
+    },
+    "/demo/v2/proxy": {
+      "get": {
+        "tags": [
+          "routes"
+        ],
+        "operationId": "ProxyV2",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpInfo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[RequestTransformFailed][400000000][RequestTransformFailed]"
+            ]
+          },
+          "499": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[ClientClosedRequest][499000000][ClientClosedRequest]",
+              "@StatusErr[ContextCanceled][499000000][ContextCanceled]"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[RequestFailed][500000000][RequestFailed]",
+              "@StatusErr[UnknownError][500000000][UnknownError]"
+            ]
           }
         }
       }
@@ -727,57 +786,6 @@
       },
       "GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxResponse": {
         "type": "object",
-        "properties": {
-          "ContentType": {
-            "type": "string",
-            "x-go-field-name": "ContentType"
-          },
-          "Cookies": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NetHTTPCookie"
-            },
-            "x-go-field-name": "Cookies"
-          },
-          "Location": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/NetURLURL"
-              },
-              {
-                "x-go-field-name": "Location",
-                "x-go-star-level": 1
-              }
-            ]
-          },
-          "Meta": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitKitMetadata"
-              },
-              {
-                "x-go-field-name": "Meta"
-              }
-            ]
-          },
-          "StatusCode": {
-            "type": "integer",
-            "format": "int32",
-            "x-go-field-name": "StatusCode"
-          },
-          "Value": {
-            "description": "Value of body",
-            "x-go-field-name": "Value"
-          }
-        },
-        "required": [
-          "Value",
-          "Meta",
-          "Cookies",
-          "Location",
-          "ContentType",
-          "StatusCode"
-        ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx.Response",
         "x-id": "GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxResponse"
       },
@@ -822,24 +830,6 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/pkg/types.PullPolicy",
         "x-id": "GithubComMachinefiW3BstreamPkgDependsKitHttptransportgenTestdataServerPkgTypesPullPolicy"
-      },
-      "GithubComMachinefiW3BstreamPkgDependsKitKitMetadata": {
-        "type": "object",
-        "additionalProperties": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "propertyNames": {
-          "type": "string"
-        },
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/kit.Metadata",
-        "x-id": "GithubComMachinefiW3BstreamPkgDependsKitKitMetadata"
-      },
-      "GithubComMachinefiW3BstreamPkgDependsKitKitResult": {
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/kit.Result",
-        "x-id": "GithubComMachinefiW3BstreamPkgDependsKitKitResult"
       },
       "GithubComMachinefiW3BstreamPkgDependsKitStatusxErrorField": {
         "type": "object",
@@ -987,204 +977,6 @@
         ],
         "x-id": "IpInfo"
       },
-      "NetHTTPCookie": {
-        "type": "object",
-        "properties": {
-          "Domain": {
-            "type": "string",
-            "description": "optional",
-            "x-go-field-name": "Domain"
-          },
-          "Expires": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TimeTime"
-              },
-              {
-                "description": "optional",
-                "x-go-field-name": "Expires"
-              }
-            ]
-          },
-          "HttpOnly": {
-            "type": "boolean",
-            "x-go-field-name": "HttpOnly"
-          },
-          "MaxAge": {
-            "type": "integer",
-            "format": "int32",
-            "description": "MaxAge=0 means no 'Max-Age' attribute specified.\nMaxAge\u003c0 means delete cookie now, equivalently 'Max-Age: 0'\nMaxAge\u003e0 means Max-Age attribute present and given in seconds",
-            "x-go-field-name": "MaxAge"
-          },
-          "Name": {
-            "type": "string",
-            "x-go-field-name": "Name"
-          },
-          "Path": {
-            "type": "string",
-            "description": "optional",
-            "x-go-field-name": "Path"
-          },
-          "Raw": {
-            "type": "string",
-            "x-go-field-name": "Raw"
-          },
-          "RawExpires": {
-            "type": "string",
-            "description": "for reading cookies only",
-            "x-go-field-name": "RawExpires"
-          },
-          "SameSite": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/NetHTTPSameSite"
-              },
-              {
-                "x-go-field-name": "SameSite"
-              }
-            ]
-          },
-          "Secure": {
-            "type": "boolean",
-            "x-go-field-name": "Secure"
-          },
-          "Unparsed": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "Raw text of unparsed attribute-value pairs",
-            "x-go-field-name": "Unparsed"
-          },
-          "Value": {
-            "type": "string",
-            "x-go-field-name": "Value"
-          }
-        },
-        "required": [
-          "Name",
-          "Value",
-          "Path",
-          "Domain",
-          "Expires",
-          "RawExpires",
-          "MaxAge",
-          "Secure",
-          "HttpOnly",
-          "SameSite",
-          "Raw",
-          "Unparsed"
-        ],
-        "description": "A Cookie represents an HTTP cookie as sent in the Set-Cookie header of an\nHTTP response or the Cookie header of an HTTP request.\n\nSee https://tools.ietf.org/html/rfc6265 for details.",
-        "x-go-vendor-type": "net/http.Cookie",
-        "x-id": "NetHTTPCookie"
-      },
-      "NetHTTPSameSite": {
-        "type": "integer",
-        "format": "int32",
-        "enum": [
-          1,
-          2,
-          3,
-          4
-        ],
-        "x-enum-labels": [
-          "1",
-          "2",
-          "3",
-          "4"
-        ],
-        "x-go-vendor-type": "net/http.SameSite",
-        "x-id": "NetHTTPSameSite"
-      },
-      "NetURLURL": {
-        "type": "object",
-        "properties": {
-          "ForceQuery": {
-            "type": "boolean",
-            "description": "append a query ('?') even if RawQuery is empty",
-            "x-go-field-name": "ForceQuery"
-          },
-          "Fragment": {
-            "type": "string",
-            "description": "fragment for references, without '#'",
-            "x-go-field-name": "Fragment"
-          },
-          "Host": {
-            "type": "string",
-            "description": "host or host:port",
-            "x-go-field-name": "Host"
-          },
-          "OmitHost": {
-            "type": "boolean",
-            "description": "do not emit empty host (authority)",
-            "x-go-field-name": "OmitHost"
-          },
-          "Opaque": {
-            "type": "string",
-            "description": "encoded opaque data",
-            "x-go-field-name": "Opaque"
-          },
-          "Path": {
-            "type": "string",
-            "description": "path (relative paths may omit leading slash)",
-            "x-go-field-name": "Path"
-          },
-          "RawFragment": {
-            "type": "string",
-            "description": "encoded fragment hint (see EscapedFragment method)",
-            "x-go-field-name": "RawFragment"
-          },
-          "RawPath": {
-            "type": "string",
-            "description": "encoded path hint (see EscapedPath method)",
-            "x-go-field-name": "RawPath"
-          },
-          "RawQuery": {
-            "type": "string",
-            "description": "encoded query values, without '?'",
-            "x-go-field-name": "RawQuery"
-          },
-          "Scheme": {
-            "type": "string",
-            "x-go-field-name": "Scheme"
-          },
-          "User": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/NetURLUserinfo"
-              },
-              {
-                "description": "username and password information",
-                "x-go-field-name": "User",
-                "x-go-star-level": 1
-              }
-            ]
-          }
-        },
-        "required": [
-          "Scheme",
-          "Opaque",
-          "User",
-          "Host",
-          "Path",
-          "RawPath",
-          "OmitHost",
-          "ForceQuery",
-          "RawQuery",
-          "Fragment",
-          "RawFragment"
-        ],
-        "description": "A URL represents a parsed URL (technically, a URI reference).\n\nThe general form represented is:\n\n\t[scheme:][//[userinfo@]host][/]path[?query][#fragment]\n\nURLs that do not start with a slash after the scheme are interpreted as:\n\n\tscheme:opaque[?query][#fragment]\n\nNote that the Path field is stored in decoded form: /%47%6f%2f becomes /Go/.\nA consequence is that it is impossible to tell which slashes in the Path were\nslashes in the raw URL and which were %2f. This distinction is rarely important,\nbut when it is, the code should use RawPath, an optional field which only gets\nset if the default encoding is different from Path.\n\nURL's String method uses the EscapedPath method to obtain the path. See the\nEscapedPath method for more details.",
-        "x-go-vendor-type": "net/url.URL",
-        "x-id": "NetURLURL"
-      },
-      "NetURLUserinfo": {
-        "type": "object",
-        "description": "The Userinfo type is an immutable encapsulation of username and\npassword details for a URL. An existing Userinfo value is guaranteed\nto have a username set (potentially empty, as allowed by RFC 2396),\nand optionally a password.",
-        "x-go-vendor-type": "net/url.Userinfo",
-        "x-id": "NetURLUserinfo"
-      },
       "SubData": {
         "type": "object",
         "properties": {
@@ -1198,12 +990,6 @@
           "name"
         ],
         "x-id": "SubData"
-      },
-      "TimeTime": {
-        "type": "string",
-        "format": "date-time",
-        "x-go-vendor-type": "time.Time",
-        "x-id": "TimeTime"
       }
     }
   }

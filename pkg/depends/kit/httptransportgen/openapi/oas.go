@@ -5,11 +5,9 @@ import (
 	"encoding/json"
 	"go/ast"
 	"go/types"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/fatih/color"
@@ -32,7 +30,7 @@ type OpenAPIGenerator struct {
 	rs  *RouterScanner
 }
 
-func rootRouter(pkg *pkgx.Pkg, call *ast.CallExpr) *types.Var {
+func root(pkg *pkgx.Pkg, call *ast.CallExpr) *types.Var {
 	if len(call.Args) == 0 {
 		return nil
 	}
@@ -75,67 +73,43 @@ func (g *OpenAPIGenerator) Scan(ctx context.Context) {
 		ast.Inspect(ident.Obj.Decl.(*ast.FuncDecl), func(node ast.Node) bool {
 			switch n := node.(type) {
 			case *ast.CallExpr:
-				if rootRouterVar := rootRouter(g.pkg, n); rootRouterVar != nil {
-					router := g.rs.Router(rootRouterVar)
-
+				if rv := root(g.pkg, n); rv != nil {
+					router := g.rs.Router(rv)
 					routes := router.Routes()
-
-					operationIDs := map[string]*Route{}
+					ops := map[string]*Route{}
 
 					for _, route := range routes {
-						method := route.Method()
+						mtd := route.Method()
+						op := g.OperationByOperatorTypes(mtd, route.Operators...)
 
-						operation := g.OperationByOperatorTypes(method, route.Operators...)
-
-						if _, exists := operationIDs[operation.OperationId]; exists {
-							panic(errors.Errorf("operationID %s should be unique", operation.OperationId))
+						if _, exists := ops[op.OperationId]; exists {
+							panic(errors.Errorf("operationID %s should be unique", op.OperationId))
 						}
 
-						operationIDs[operation.OperationId] = route
-
-						g.oas.AddOperation(oas.HttpMethod(strings.ToLower(method)), g.patchPath(route.Path(), operation), operation)
+						ops[op.OperationId] = route
+						g.oas.AddOperation(
+							oas.HttpMethod(strings.ToLower(mtd)),
+							PatchRouterPath(route.Path(), op), op,
+						)
 					}
 				}
 			}
 			return true
 		})
 		return
-
 	}
 }
 
-var reHttpRouterPath = regexp.MustCompile("/:([^/]+)")
+func (g *OpenAPIGenerator) OperationByOperatorTypes(mtd string, ops ...*OperatorWithTypeName) *oas.Operation {
+	op := &oas.Operation{}
 
-func (g *OpenAPIGenerator) patchPath(openapiPath string, operation *oas.Operation) string {
-	return reHttpRouterPath.ReplaceAllStringFunc(openapiPath, func(str string) string {
-		name := reHttpRouterPath.FindAllStringSubmatch(str, -1)[0][1]
+	length := len(ops)
 
-		var isParameterDefined = false
-
-		for _, parameter := range operation.Parameters {
-			if parameter.In == "path" && parameter.Name == name {
-				isParameterDefined = true
-			}
-		}
-
-		if isParameterDefined {
-			return "/{" + name + "}"
-		}
-
-		return "/0"
-	})
-}
-
-func (g *OpenAPIGenerator) OperationByOperatorTypes(method string, operatorTypes ...*OperatorWithTypeName) *oas.Operation {
-	operation := &oas.Operation{}
-
-	length := len(operatorTypes)
-
-	for idx := range operatorTypes {
-		operatorTypes[idx].BindOperation(method, operation, idx == length-1)
+	for idx := range ops {
+		ops[idx].BindOperation(mtd, op, idx == length-1)
 	}
 
-	return operation
+	return op
 }
 
 func (g *OpenAPIGenerator) Output(cwd string) {
@@ -144,6 +118,6 @@ func (g *OpenAPIGenerator) Output(cwd string) {
 	if err != nil {
 		return
 	}
-	_ = ioutil.WriteFile(file, data, os.ModePerm)
+	_ = os.WriteFile(file, data, os.ModePerm)
 	log.Printf("generated oas spec into %s", color.MagentaString(file))
 }

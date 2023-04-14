@@ -69,7 +69,7 @@ func (os *OperatorScanner) Operator(ctx context.Context, tn *types.TypeName) *Op
 
 	if t, ok := tn.Type().Underlying().(*types.Struct); ok {
 		op := &Operator{
-			Tag: RelativeTypeName(os.pkg.PkgPath, tn),
+			Tag: TagFromRelativePath(os.pkg.PkgPath, tn),
 		}
 
 		os.ScanRouteMeta(op, tn)
@@ -299,16 +299,16 @@ func (os *OperatorScanner) GetResponse(ctx context.Context, t types.Type, expr a
 					return true
 				}
 				switch sel.Sel.Name {
-				case "WithSchema":
+				case "WrapSchema":
 					v, _ := os.pkg.Eval(call.Args[0])
 					t = v.Type
-				case "WithStatusCode":
+				case "WrapStatusCode":
 					v, _ := os.pkg.Eval(call.Args[0])
 					if code, ok := ConstantValueOf(v.Value).(int); ok {
 						c = code
 					}
 					return false
-				case "WithContentType":
+				case "WrapContentType":
 					v, _ := os.pkg.Eval(call.Args[0])
 					if code, ok := ConstantValueOf(v.Value).(string); ok {
 						ct = code

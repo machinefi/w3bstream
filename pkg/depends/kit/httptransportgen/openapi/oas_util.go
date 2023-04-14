@@ -119,8 +119,9 @@ func FullTypeName(tn *types.TypeName) string {
 	return tn.Name()
 }
 
-func RelativeTypeName(pkg string, tn *types.TypeName) string {
-	return strings.TrimPrefix(strings.TrimPrefix(pkg, tn.Pkg().Path()), "/")
+func TagFromRelativePath(pkg string, tn *types.TypeName) string {
+	tag := strings.TrimPrefix(tn.Pkg().Path(), pkg)
+	return strings.TrimPrefix(tag, "/")
 }
 
 func UniqueTypeName(pkg string, tn *types.TypeName, exists func(string) bool) (string, bool) {
@@ -233,6 +234,21 @@ func PickStatusErrorsFromDoc(doc string) []*statusx.StatusErr {
 		}
 	}
 	return errs
+}
+
+var regxHttpRouterPath = regexp.MustCompile("/:([^/]+)")
+
+func PatchRouterPath(openapiPath string, operation *oas.Operation) string {
+	return regxHttpRouterPath.ReplaceAllStringFunc(openapiPath, func(str string) string {
+		name := regxHttpRouterPath.FindAllStringSubmatch(str, -1)[0][1]
+
+		for _, para := range operation.Parameters {
+			if para.In == "path" && para.Name == name {
+				return "/{" + name + "}"
+			}
+		}
+		return "/0"
+	})
 }
 
 var (
