@@ -1063,11 +1063,21 @@ func (f *FuncType) Bytes() []byte {
 		buf.Write(f.Args[i].WithoutTag().Bytes())
 	}
 	buf.WriteByte(')')
-	buf.WriteRune(' ')
 
-	quoteRet := len(f.Rets) > 0 && len(f.Rets[0].Names) > 0 || len(f.Rets) > 1
+	rets := make([]*SnippetField, 0, len(f.Rets))
+	for _, r := range f.Rets {
+		if r != nil {
+			rets = append(rets, r)
+		}
+	}
 
-	if quoteRet {
+	if len(rets) > 0 {
+		buf.WriteRune(' ')
+	}
+
+	bracketRets := len(f.Rets) > 0 && len(f.Rets[0].Names) > 0 || len(f.Rets) > 1
+
+	if bracketRets {
 		buf.WriteRune('(')
 	}
 
@@ -1079,16 +1089,14 @@ func (f *FuncType) Bytes() []byte {
 		buf.Write(f.Rets[i].WithoutTag().Bytes())
 	}
 
-	if quoteRet {
+	if bracketRets {
 		buf.WriteRune(')')
-		buf.WriteRune(' ')
-	} else {
-		if len(f.Rets) > 0 {
-			buf.WriteRune(' ')
-		}
 	}
 
 	if f.Blk != nil {
+		if len(f.Rets) > 0 {
+			buf.WriteRune(' ')
+		}
 		buf.Write(f.Blk.Bytes())
 	}
 	return buf.Bytes()
