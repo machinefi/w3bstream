@@ -178,10 +178,7 @@ func RemoveMonitor(ctx context.Context, projectName string) error {
 	if err := removeChainTxByProject(ctx, projectName); err != nil {
 		return err
 	}
-	if err := removeChainHeightByProject(ctx, projectName); err != nil {
-		return err
-	}
-	return nil
+	return removeChainHeightByProject(ctx, projectName)
 }
 
 func removeContractLogByProject(ctx context.Context, projectName string) error {
