@@ -29,39 +29,42 @@ var (
 	tasks  mq.TaskManager
 	worker *mq.TaskWorker
 
-	db        = &confpostgres.Endpoint{Database: models.DB}
-	monitordb = &confpostgres.Endpoint{Database: models.MonitorDB}
-	wasmdb    = &confpostgres.Endpoint{Database: models.WasmDB}
-	server    = &confhttp.Server{}
+	db          = &confpostgres.Endpoint{Database: models.DB}
+	monitordb   = &confpostgres.Endpoint{Database: models.MonitorDB}
+	wasmdb      = &confpostgres.Endpoint{Database: models.WasmDB}
+	server      = &confhttp.Server{}
+	serverEvent = &confhttp.Server{} // serverEvent support event http transport
 )
 
 func init() {
 	config := &struct {
-		Postgres   *confpostgres.Endpoint
-		MonitorDB  *confpostgres.Endpoint
-		WasmDB     *confpostgres.Endpoint
-		MqttBroker *confmqtt.Broker
-		Redis      *confredis.Redis
-		Server     *confhttp.Server
-		Jwt        *confjwt.Jwt
-		Logger     *conflog.Log
-		StdLogger  conflog.Logger
-		UploadConf *types.UploadConfig
-		EthClient  *types.ETHClientConfig
-		WhiteList  *types.WhiteList
+		Postgres    *confpostgres.Endpoint
+		MonitorDB   *confpostgres.Endpoint
+		WasmDB      *confpostgres.Endpoint
+		MqttBroker  *confmqtt.Broker
+		Redis       *confredis.Redis
+		Server      *confhttp.Server
+		Jwt         *confjwt.Jwt
+		Logger      *conflog.Log
+		StdLogger   conflog.Logger
+		UploadConf  *types.UploadConfig
+		EthClient   *types.ETHClientConfig
+		WhiteList   *types.WhiteList
+		ServerEvent *confhttp.Server
 	}{
-		Postgres:   db,
-		MonitorDB:  monitordb,
-		WasmDB:     wasmdb,
-		MqttBroker: &confmqtt.Broker{},
-		Redis:      &confredis.Redis{},
-		Server:     server,
-		Jwt:        &confjwt.Jwt{},
-		Logger:     &conflog.Log{},
-		StdLogger:  conflog.Std(),
-		UploadConf: &types.UploadConfig{},
-		EthClient:  &types.ETHClientConfig{},
-		WhiteList:  &types.WhiteList{"1"},
+		Postgres:    db,
+		MonitorDB:   monitordb,
+		WasmDB:      wasmdb,
+		MqttBroker:  &confmqtt.Broker{},
+		Redis:       &confredis.Redis{},
+		Server:      server,
+		Jwt:         &confjwt.Jwt{},
+		Logger:      &conflog.Log{},
+		StdLogger:   conflog.Std(),
+		UploadConf:  &types.UploadConfig{},
+		EthClient:   &types.ETHClientConfig{},
+		WhiteList:   &types.WhiteList{},
+		ServerEvent: serverEvent,
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
@@ -107,6 +110,8 @@ func init() {
 func Server() kit.Transport { return server.WithContextInjector(WithContext) }
 
 func TaskServer() kit.Transport { return worker.WithContextInjector(WithContext) }
+
+func EventServer() kit.Transport { return serverEvent.WithContextInjector(WithContext) }
 
 func Migrate() {
 	ctx, log := conflog.StdContext(context.Background())
