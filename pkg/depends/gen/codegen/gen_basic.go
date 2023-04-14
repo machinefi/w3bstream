@@ -1104,6 +1104,10 @@ func (f *FuncType) Bytes() []byte {
 
 func (f FuncType) WithoutToken() *FuncType { f.noToken = true; return &f }
 
+func (f FuncType) WithoutBlock() *FuncType { f.Blk = nil; return &f }
+
+func (f FuncType) WithoutReceiver() *FuncType { f.Recv = nil; return &f }
+
 func (f FuncType) Named(name string) *FuncType { f.Name = Ident(name); return &f }
 
 func (f FuncType) MethodOf(rcv *SnippetField) *FuncType { f.Recv = rcv; return &f }
