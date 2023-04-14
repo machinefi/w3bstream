@@ -11,7 +11,7 @@ import (
 
 type RemoveProject struct {
 	httpx.MethodDelete
-	ProjectName string `in:"path" name:"projectName"`
+	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
 }
 
 func (r *RemoveProject) Path() string { return "/:projectName" }

@@ -10,7 +10,7 @@ import (
 
 type GetProject struct {
 	httpx.MethodGet
-	ProjectName string `in:"path" name:"projectName"`
+	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
 }
 
 func (r *GetProject) Path() string { return "/:projectName" }
