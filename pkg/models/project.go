@@ -9,7 +9,7 @@ import (
 // Project schema for project information
 // @def primary                    ID
 // @def unique_index UI_project_id ProjectID
-// @def unique_index UI_name       Name
+// @def unique_index UI_acc_prj    AccountID Name
 //
 //go:generate toolkit gen model Project --database DB
 type Project struct {
@@ -30,10 +30,10 @@ type ProjectName struct {
 }
 
 type ProjectBase struct {
-	Version string         `db:"f_version,default=''" json:"version,omitempty"`  // Version project version
-	Proto   enums.Protocol `db:"f_proto,default='0'"  json:"protocol,omitempty"` // Proto project protocol for event publisher
+	Version     string         `db:"f_version,default=''" json:"version,omitempty"`  // Version project version
+	Proto       enums.Protocol `db:"f_proto,default='0'"  json:"protocol,omitempty"` // Proto project protocol for event publisher
 	Description string         `db:"f_description,default=''"    json:"description,omitempty"`
-	Issuer  string         `db:"f_issuer,default='web3stream'" json:"issuer,omitempty"`
-	ExpIn   types.Duration `db:"f_exp_in,default='0'" json:"expIn,omitempty"`
-	SignKey string         `db:"f_sign_key,default='web3stream'" json:"signKey,omitempty"`
+	Issuer      string         `db:"f_issuer,default='web3stream'" json:"issuer,omitempty"`
+	ExpIn       types.Duration `db:"f_exp_in,default='0'" json:"expIn,omitempty"`
+	SignKey     string         `db:"f_sign_key,default='web3stream'" json:"signKey,omitempty"`
 }

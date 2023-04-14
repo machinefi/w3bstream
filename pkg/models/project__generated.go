@@ -82,6 +82,7 @@ func (*Project) PrimaryKey() []string {
 
 func (m *Project) IndexFieldNames() []string {
 	return []string{
+		"AccountID",
 		"ID",
 		"Name",
 		"ProjectID",
@@ -90,7 +91,8 @@ func (m *Project) IndexFieldNames() []string {
 
 func (*Project) UniqueIndexes() builder.Indexes {
 	return builder.Indexes{
-		"ui_name": []string{
+		"ui_acc_prj": []string{
+			"AccountID",
 			"Name",
 			"DeletedAt",
 		},
@@ -101,8 +103,8 @@ func (*Project) UniqueIndexes() builder.Indexes {
 	}
 }
 
-func (*Project) UniqueIndexUIName() string {
-	return "ui_name"
+func (*Project) UniqueIndexUIAccPrj() string {
+	return "ui_acc_prj"
 }
 
 func (*Project) UniqueIndexUIProjectID() string {
@@ -287,7 +289,7 @@ func (m *Project) FetchByID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *Project) FetchByName(db sqlx.DBExecutor) error {
+func (m *Project) FetchByAccountIDAndName(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	err := db.QueryAndScan(
 		builder.Select(nil).
@@ -295,11 +297,12 @@ func (m *Project) FetchByName(db sqlx.DBExecutor) error {
 				tbl,
 				builder.Where(
 					builder.And(
+						tbl.ColByFieldName("AccountID").Eq(m.AccountID),
 						tbl.ColByFieldName("Name").Eq(m.Name),
 						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
-				builder.Comment("Project.FetchByName"),
+				builder.Comment("Project.FetchByAccountIDAndName"),
 			),
 		m,
 	)
@@ -356,7 +359,7 @@ func (m *Project) UpdateByID(db sqlx.DBExecutor, zeros ...string) error {
 	return m.UpdateByIDWithFVs(db, fvs)
 }
 
-func (m *Project) UpdateByNameWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+func (m *Project) UpdateByAccountIDAndNameWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
 		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
@@ -366,10 +369,11 @@ func (m *Project) UpdateByNameWithFVs(db sqlx.DBExecutor, fvs builder.FieldValue
 		builder.Update(tbl).
 			Where(
 				builder.And(
+					tbl.ColByFieldName("AccountID").Eq(m.AccountID),
 					tbl.ColByFieldName("Name").Eq(m.Name),
 					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
-				builder.Comment("Project.UpdateByNameWithFVs"),
+				builder.Comment("Project.UpdateByAccountIDAndNameWithFVs"),
 			).
 			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
@@ -377,14 +381,14 @@ func (m *Project) UpdateByNameWithFVs(db sqlx.DBExecutor, fvs builder.FieldValue
 		return err
 	}
 	if affected, _ := res.RowsAffected(); affected == 0 {
-		return m.FetchByName(db)
+		return m.FetchByAccountIDAndName(db)
 	}
 	return nil
 }
 
-func (m *Project) UpdateByName(db sqlx.DBExecutor, zeros ...string) error {
+func (m *Project) UpdateByAccountIDAndName(db sqlx.DBExecutor, zeros ...string) error {
 	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
-	return m.UpdateByNameWithFVs(db, fvs)
+	return m.UpdateByAccountIDAndNameWithFVs(db, fvs)
 }
 
 func (m *Project) UpdateByProjectIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
@@ -473,7 +477,7 @@ func (m *Project) SoftDeleteByID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *Project) DeleteByName(db sqlx.DBExecutor) error {
+func (m *Project) DeleteByAccountIDAndName(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	_, err := db.Exec(
 		builder.Delete().
@@ -481,17 +485,18 @@ func (m *Project) DeleteByName(db sqlx.DBExecutor) error {
 				tbl,
 				builder.Where(
 					builder.And(
+						tbl.ColByFieldName("AccountID").Eq(m.AccountID),
 						tbl.ColByFieldName("Name").Eq(m.Name),
 						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
-				builder.Comment("Project.DeleteByName"),
+				builder.Comment("Project.DeleteByAccountIDAndName"),
 			),
 	)
 	return err
 }
 
-func (m *Project) SoftDeleteByName(db sqlx.DBExecutor) error {
+func (m *Project) SoftDeleteByAccountIDAndName(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	fvs := builder.FieldValues{}
 
@@ -506,10 +511,11 @@ func (m *Project) SoftDeleteByName(db sqlx.DBExecutor) error {
 		builder.Update(db.T(m)).
 			Where(
 				builder.And(
+					tbl.ColByFieldName("AccountID").Eq(m.AccountID),
 					tbl.ColByFieldName("Name").Eq(m.Name),
 					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
-				builder.Comment("Project.SoftDeleteByName"),
+				builder.Comment("Project.SoftDeleteByAccountIDAndName"),
 			).
 			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
