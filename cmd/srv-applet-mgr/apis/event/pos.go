@@ -3,9 +3,9 @@ package event
 import (
 	"context"
 
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
-	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -18,11 +18,13 @@ type HandleEvent struct {
 func (r *HandleEvent) Path() string { return "/:projectName" }
 
 func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
-	prj, err := project.GetProjectByProjectName(ctx, r.ProjectName)
+	var (
+		err error
+		ca  = middleware.CurrentAccountFromContext(ctx)
+	)
+	ctx, err = ca.WithProjectContextByName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err
 	}
-	ctx = types.WithProject(ctx, prj)
-
-	return event.HandleEvents(ctx, r.ProjectName, &r.HandleEventReq), nil
+	return types.MustProjectFromContext(ctx), nil
 }

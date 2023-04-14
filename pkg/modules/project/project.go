@@ -5,11 +5,11 @@ package project
 import (
 	"context"
 	"fmt"
+
 	"github.com/machinefi/w3bstream/pkg/depends/x/stringsx"
 
 	"github.com/pkg/errors"
 
-	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
@@ -27,8 +27,9 @@ import (
 type CreateProjectReq struct {
 	models.ProjectName
 	models.ProjectBase
-	Envs   [][2]string  `json:"envs,omitempty"`
-	Schema *wasm.Schema `json:"schema,omitempty"`
+	AccountID types.SFID   `json:"-"`
+	Envs      [][2]string  `json:"envs,omitempty"`
+	Schema    *wasm.Schema `json:"schema,omitempty"`
 	// TODO if each project has its own mqtt broker should add *wasm.MqttClient
 }
 
@@ -41,7 +42,6 @@ type CreateProjectRsp struct {
 func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (*CreateProjectRsp, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
-	a := middleware.CurrentAccountFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 
 	_, l = l.Start(ctx, "CreateProject")
@@ -55,7 +55,7 @@ func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (
 	}
 	m := &models.Project{
 		RelProject:  models.RelProject{ProjectID: idg.MustGenSFID()},
-		RelAccount:  models.RelAccount{AccountID: a.AccountID},
+		RelAccount:  models.RelAccount{AccountID: r.AccountID},
 		ProjectName: r.ProjectName,
 		ProjectBase: r.ProjectBase,
 	}
@@ -281,57 +281,42 @@ func ListProject(ctx context.Context, r *ListProjectReq) (*ListProjectRsp, error
 	return ret, nil
 }
 
-func GetProjectByProjectID(ctx context.Context, prjID types.SFID) (*Detail, error) {
+func GetBySFID(ctx context.Context, prj types.SFID) (*models.Project, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
-	ca := middleware.CurrentAccountFromContext(ctx)
 
 	_, l = l.Start(ctx, "GetProjectByProjectID")
 	defer l.End()
 
-	_, err := ca.ValidateProjectPerm(ctx, prjID)
-	if err != nil {
-		l.Error(err)
-		return nil, err
+	m := &models.Project{
+		RelProject: models.RelProject{ProjectID: prj},
 	}
-	m := &models.Project{RelProject: models.RelProject{ProjectID: prjID}}
-
-	if err = m.FetchByProjectID(d); err != nil {
-		l.Error(err)
-		return nil, status.CheckDatabaseError(err, "GetProjectByProjectID")
+	if err := m.FetchByProjectID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.ProjectNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
-
-	ret, err := ListProject(ctx, &ListProjectReq{
-		accountID:  ca.AccountID,
-		ProjectIDs: []types.SFID{prjID},
-	})
-
-	if err != nil {
-		l.Error(err)
-		return nil, err
-	}
-
-	if len(ret.Data) == 0 {
-		l.Warn(errors.New("project not found"))
-		return nil, status.NotFound
-	}
-
-	return &ret.Data[0], nil
+	return m, nil
 }
 
-func GetProjectByProjectName(ctx context.Context, prjName string) (*models.Project, error) {
+func GetByAccountAndName(ctx context.Context, acc types.SFID, name string) (*models.Project, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
-	m := &models.Project{ProjectName: models.ProjectName{Name: prjName}}
 
-	_, l = l.Start(ctx, "GetProjectByProjectName")
+	_, l = l.Start(ctx, "GetProjectByProjectID")
 	defer l.End()
 
-	if err := m.FetchByName(d); err != nil {
-		l.Error(err)
-		return nil, status.CheckDatabaseError(err, "GetProjectByProjectName")
+	m := &models.Project{
+		RelAccount:  models.RelAccount{AccountID: acc},
+		ProjectName: models.ProjectName{Name: name},
 	}
-
+	if err := m.FetchByAccountIDAndName(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.ProjectNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
 	return m, nil
 }
 

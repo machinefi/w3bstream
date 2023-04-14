@@ -6,9 +6,11 @@ import (
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/account"
+	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -44,32 +46,25 @@ type CurrentAccount struct {
 	models.Account
 }
 
-func (v *CurrentAccount) WithProjectContextByName(ctx context.Context, prjName string) (context.Context, error) {
+func (v *CurrentAccount) WithProjectContextByName(ctx context.Context, name string) (context.Context, error) {
 	a := CurrentAccountFromContext(ctx)
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	m := &models.Project{ProjectName: models.ProjectName{Name: prjName}}
-	if err := m.FetchByName(d); err != nil {
-		return ctx, status.CheckDatabaseError(err, "GetProjectByName")
+	prj, err := project.GetByAccountAndName(ctx, a.AccountID, name)
+	if err != nil {
+		return nil, err
 	}
-	if a.AccountID != m.AccountID {
-		return ctx, status.NoProjectPermission
-	}
-	ctx = types.WithProject(ctx, m)
-	return ctx, nil
+	return types.WithProject(ctx, prj), nil
 }
 
-func (v *CurrentAccount) WithProjectContextByID(ctx context.Context, prjID types.SFID) (context.Context, error) {
+func (v *CurrentAccount) WithProjectContextByID(ctx context.Context, id types.SFID) (context.Context, error) {
 	a := CurrentAccountFromContext(ctx)
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	m := &models.Project{RelProject: models.RelProject{ProjectID: prjID}}
-	if err := m.FetchByProjectID(d); err != nil {
-		return ctx, status.CheckDatabaseError(err, "GetProjectByProjectID")
+	prj, err := project.GetBySFID(ctx, id)
+	if err != nil {
+		return nil, err
 	}
-	if a.AccountID != m.AccountID {
-		return ctx, status.NoProjectPermission
+	if a.AccountID != prj.AccountID {
+		return nil, status.NoProjectPermission
 	}
-	ctx = types.WithProject(ctx, m)
-	return ctx, nil
+	return types.WithProject(ctx, prj), nil
 }
 
 func (v *CurrentAccount) WithAppletContext(ctx context.Context, appletID types.SFID) (context.Context, error) {
@@ -139,13 +134,20 @@ func (v *CurrentAccount) ValidateProjectPerm(ctx context.Context, prjID types.SF
 
 // ValidateProjectPermByPrjName
 // Deprecated: Use WithProjectContextByName instead
-func (v *CurrentAccount) ValidateProjectPermByPrjName(ctx context.Context, projectName string) (*models.Project, error) {
+func (v *CurrentAccount) ValidateProjectPermByPrjName(ctx context.Context, name string) (*models.Project, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	a := CurrentAccountFromContext(ctx)
-	m := &models.Project{ProjectName: models.ProjectName{Name: projectName}}
+	m := &models.Project{
+		RelAccount:  models.RelAccount{AccountID: a.AccountID},
+		ProjectName: models.ProjectName{Name: name},
+	}
 
-	if err := m.FetchByName(d); err != nil {
-		return nil, status.CheckDatabaseError(err, "GetProjectByProjectID")
+	if err := m.FetchByAccountIDAndName(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.ProjectNotFound
+		} else {
+			return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+		}
 	}
 	if a.AccountID != m.AccountID {
 		return nil, status.NoProjectPermission
