@@ -171,6 +171,88 @@ func RemoveChainHeight(ctx context.Context, projectName string, id types.SFID) e
 	return nil
 }
 
+func RemoveMonitor(ctx context.Context, projectName string) error {
+	if err := removeContractLogByProject(ctx, projectName); err != nil {
+		return err
+	}
+	if err := removeChainTxByProject(ctx, projectName); err != nil {
+		return err
+	}
+	return removeChainHeightByProject(ctx, projectName)
+}
+
+func removeContractLogByProject(ctx context.Context, projectName string) error {
+	d := types.MustMonitorDBExecutorFromContext(ctx)
+	l := types.MustLoggerFromContext(ctx)
+
+	_, l = l.Start(ctx, "removeContractLogByProject")
+	defer l.End()
+
+	l = l.WithValues("project", projectName)
+
+	m := &models.ContractLog{}
+	exists, err := m.List(d, m.ColProjectName().Eq(projectName))
+	if err != nil {
+		l.Error(err)
+		return err
+	}
+	for _, e := range exists {
+		if err := e.DeleteByContractLogID(d); err != nil {
+			l.Error(err)
+			return status.CheckDatabaseError(err, "DeleteByContractLogID")
+		}
+	}
+	return nil
+}
+
+func removeChainTxByProject(ctx context.Context, projectName string) error {
+	d := types.MustMonitorDBExecutorFromContext(ctx)
+	l := types.MustLoggerFromContext(ctx)
+
+	_, l = l.Start(ctx, "removeChainTxByProject")
+	defer l.End()
+
+	l = l.WithValues("project", projectName)
+
+	m := &models.ChainTx{}
+	exists, err := m.List(d, m.ColProjectName().Eq(projectName))
+	if err != nil {
+		l.Error(err)
+		return err
+	}
+	for _, e := range exists {
+		if err := e.DeleteByChainTxID(d); err != nil {
+			l.Error(err)
+			return status.CheckDatabaseError(err, "DeleteByChainTxID")
+		}
+	}
+	return nil
+}
+
+func removeChainHeightByProject(ctx context.Context, projectName string) error {
+	d := types.MustMonitorDBExecutorFromContext(ctx)
+	l := types.MustLoggerFromContext(ctx)
+
+	_, l = l.Start(ctx, "removeChainHeightByProject")
+	defer l.End()
+
+	l = l.WithValues("project", projectName)
+
+	m := &models.ChainHeight{}
+	exists, err := m.List(d, m.ColProjectName().Eq(projectName))
+	if err != nil {
+		l.Error(err)
+		return err
+	}
+	for _, e := range exists {
+		if err := e.DeleteByChainHeightID(d); err != nil {
+			l.Error(err)
+			return status.CheckDatabaseError(err, "DeleteByChainHeightID")
+		}
+	}
+	return nil
+}
+
 func checkProjectName(want, curr string, l log.Logger) error {
 	if want != curr {
 		l.Error(errors.New("monitor project mismatch"))

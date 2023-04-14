@@ -47,6 +47,8 @@ const (
 	InvalidEthLoginSignature
 	// @errTalk Invalid Siwe Message
 	InvalidEthLoginMessage
+	// @errTalk Invalid Auth Publisher ID
+	InvalidAuthPublisherID
 )
 
 const (
