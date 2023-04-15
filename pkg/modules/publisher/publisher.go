@@ -34,15 +34,19 @@ type CreatePublisherReq struct {
 func CreatePublisher(ctx context.Context, project *models.Project, r *CreatePublisherReq) (*models.Publisher, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
-	j := jwt.MustConfFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 
 	_, l = l.Start(ctx, "CreatePublisher")
 	defer l.End()
 
-	// TODO generate token, maybe use public key
+	publisherJwt := &jwt.Jwt{
+		Issuer:  project.ProjectBase.Issuer,
+		ExpIn:   project.ProjectBase.ExpIn,
+		SignKey: project.ProjectBase.SignKey,
+	}
+
 	publisherID := idg.MustGenSFID()
-	token, err := j.GenerateTokenByPayload(publisherID)
+	token, err := publisherJwt.GenerateTokenByPayload(publisherID)
 	if err != nil {
 		l.Error(err)
 		return nil, status.InternalServerError.StatusErr().WithDesc(err.Error())
@@ -191,17 +195,20 @@ func RemovePublisher(ctx context.Context, r *RemovePublisherReq) error {
 	).Do()
 }
 
-func UpdatePublisher(ctx context.Context, publisherID types.SFID, r *CreatePublisherReq) (err error) {
+func UpdatePublisher(ctx context.Context, project *models.Project, publisherID types.SFID, r *CreatePublisherReq) (err error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
-	j := jwt.MustConfFromContext(ctx)
 	m := models.Publisher{RelPublisher: models.RelPublisher{PublisherID: publisherID}}
 
 	_, l = l.Start(ctx, "UpdatePublisher")
 	defer l.End()
 
-	// TODO generate token, maybe use public key
-	token, err := j.GenerateTokenByPayload(publisherID)
+	publisherJwt := &jwt.Jwt{
+		Issuer:  project.ProjectBase.Issuer,
+		ExpIn:   project.ProjectBase.ExpIn,
+		SignKey: project.ProjectBase.SignKey,
+	}
+	token, err := publisherJwt.GenerateTokenByPayload(publisherID)
 	if err != nil {
 		l.Error(err)
 		return status.InternalServerError.StatusErr().WithDesc(err.Error())
@@ -235,6 +242,7 @@ func GetPublisherByPubKeyAndProjectName(ctx context.Context, pubKey, prjName str
 	defer l.End()
 
 	pub := &models.Publisher{PublisherInfo: models.PublisherInfo{Key: pubKey}}
+	// TODO change prjName to projectID, then use FetchByProjectIDAndKey
 	if err := pub.FetchByKey(d); err != nil {
 		l.Error(err)
 		return nil, status.CheckDatabaseError(err, "GetPublisherByKey")

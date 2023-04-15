@@ -15,7 +15,7 @@ type RemoveContractLog struct {
 	ContractLogID types.SFID `in:"path" name:"contractLogID"`
 }
 
-func (r *RemoveContractLog) Path() string { return "/contract_log/:projectName" }
+func (r *RemoveContractLog) Path() string { return "/contract_log/:projectName/:contractLogID" }
 
 func (r *RemoveContractLog) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.CurrentAccountFromContext(ctx)
@@ -32,7 +32,7 @@ type RemoveChainTx struct {
 	ChainTxID   types.SFID `in:"path" name:"chainTxID"`
 }
 
-func (r *RemoveChainTx) Path() string { return "/chain_tx/:projectName" }
+func (r *RemoveChainTx) Path() string { return "/chain_tx/:projectName/:chainTxID" }
 
 func (r *RemoveChainTx) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.CurrentAccountFromContext(ctx)
@@ -49,7 +49,7 @@ type RemoveChainHeight struct {
 	ChainHeightID types.SFID `in:"path" name:"chainHeightID"`
 }
 
-func (r *RemoveChainHeight) Path() string { return "/chain_height/:projectName" }
+func (r *RemoveChainHeight) Path() string { return "/chain_height/:projectName/:chainHeightID" }
 
 func (r *RemoveChainHeight) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.CurrentAccountFromContext(ctx)

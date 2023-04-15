@@ -2,12 +2,16 @@ package event
 
 import (
 	"context"
+	"errors"
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/enums"
+	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/publisher"
 	"github.com/machinefi/w3bstream/pkg/modules/strategy"
@@ -46,15 +50,8 @@ func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) 
 
 	l = l.WithValues("project_name", projectName)
 
-	eventType := enums.EVENTTYPEDEFAULT
-	if r.Header != nil && len(r.Header.EventType) > 0 {
-		eventType = r.Header.EventType
-	}
-	l = l.WithValues("event_type", eventType)
-
 	ret = &HandleEventResult{
 		ProjectName: projectName,
-		EventID:     r.Header.EventId,
 	}
 
 	defer func() {
@@ -63,23 +60,37 @@ func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) 
 		}
 	}()
 
-	var (
-		pub      *models.Publisher
-		handlers []*strategy.InstanceHandler
-	)
-
-	pulisherMtc := projectName
-	if r.Header != nil && len(r.Header.PubId) > 0 {
-		pulisherMtc = r.Header.PubId
-		pub, err = publisher.GetPublisherByPubKeyAndProjectName(ctx, r.Header.PubId, projectName)
-		if err != nil {
-			return
+	eventType := enums.EVENTTYPEDEFAULT
+	publisherMtc := projectName
+	if r.Header != nil {
+		if len(r.Header.EventId) > 0 {
+			ret.EventID = r.Header.EventId
 		}
-		ret.PubID, ret.PubName = pub.PublisherID, pub.Name
-		l.WithValues("pub_id", pub.PublisherID)
+		if len(r.Header.PubId) > 0 {
+			publisherMtc = r.Header.PubId
+			var pub *models.Publisher
+			pub, err = publisher.GetPublisherByPubKeyAndProjectName(ctx, r.Header.PubId, projectName)
+			if err != nil {
+				return
+			}
+			ret.PubID, ret.PubName = pub.PublisherID, pub.Name
+			l.WithValues("pub_id", pub.PublisherID)
+		}
+		if len(r.Header.EventType) > 0 {
+			eventType = r.Header.EventType
+		}
+		if len(r.Header.Token) > 0 {
+			if err = publisherVerification(ctx, r, l); err != nil {
+				l.Error(err)
+				return
+			}
+		}
 	}
-	_receiveEventMtc.WithLabelValues(projectName, pulisherMtc).Inc()
+	_receiveEventMtc.WithLabelValues(projectName, publisherMtc).Inc()
 
+	l = l.WithValues("event_type", eventType)
+	var handlers []*strategy.InstanceHandler
+	l = l.WithValues("event_type", eventType)
 	handlers, err = strategy.FindStrategyInstances(ctx, projectName, eventType)
 	if err != nil {
 		l.Error(err)
@@ -104,17 +115,63 @@ func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) 
 
 		wg.Add(1)
 		go func(v *strategy.InstanceHandler) {
+			defer wg.Done()
 			res <- i.HandleEvent(ctx, v.Handler, []byte(r.Payload))
-			wg.Done()
 		}(v)
 	}
 	wg.Wait()
 	close(res)
 
 	for v := range res {
+		if v == nil {
+			continue
+		}
 		ret.WasmResults = append(ret.WasmResults, *v)
 	}
 	return ret, nil
+}
+
+func publisherVerification(ctx context.Context, r *eventpb.Event, l log.Logger) error {
+	if r.Header == nil || len(r.Header.Token) == 0 {
+		return errors.New("message token is invalid")
+	}
+
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	p := types.MustProjectFromContext(ctx)
+
+	publisherJwt := &jwt.Jwt{
+		Issuer:  p.ProjectBase.Issuer,
+		ExpIn:   p.ProjectBase.ExpIn,
+		SignKey: p.ProjectBase.SignKey,
+	}
+	claim, err := publisherJwt.ParseToken(r.Header.Token)
+	if err != nil {
+		l.Error(err)
+		return err
+	}
+
+	v, ok := claim.Payload.(string)
+	if !ok {
+		l.Error(errors.New("claim of publisher convert string error"))
+		return status.InvalidAuthValue
+	}
+	publisherID := types.SFID(0)
+	if err := publisherID.UnmarshalText([]byte(v)); err != nil {
+		return status.InvalidAuthPublisherID
+	}
+
+	m := &models.Publisher{RelPublisher: models.RelPublisher{PublisherID: publisherID}}
+	err = m.FetchByPublisherID(d)
+	if err != nil {
+		l.Error(err)
+		return status.CheckDatabaseError(err, "FetchByPublisherID")
+	}
+
+	if m.ProjectID == p.ProjectID {
+		return nil
+	} else {
+		return status.NoProjectPermission
+	}
 }
 
 func HandleEvents(ctx context.Context, projectName string, r *HandleEventReq) []*HandleEventResult {

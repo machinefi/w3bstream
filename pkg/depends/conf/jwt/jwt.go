@@ -29,7 +29,7 @@ func (c *Jwt) GenerateTokenByPayload(payload interface{}) (string, error) {
 	claim := &Claims{
 		Payload: payload,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: &jwt.NumericDate{Time: time.Now().Add(c.ExpIn.Duration())},
+			ExpiresAt: c.getNumericDate(),
 			Issuer:    c.Issuer,
 		},
 	}
@@ -56,6 +56,15 @@ func (c *Jwt) ParseToken(v string) (*Claims, error) {
 		return nil, InvalidClaim
 	}
 	return claim, nil
+}
+
+func (c *Jwt) getNumericDate() (numericDate *jwt.NumericDate) {
+	if c.ExpIn == 0 {
+		numericDate = nil
+	} else {
+		numericDate = &jwt.NumericDate{Time: time.Now().Add(c.ExpIn.Duration())}
+	}
+	return
 }
 
 type Claims struct {

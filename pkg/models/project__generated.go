@@ -157,6 +157,38 @@ func (*Project) FieldProto() string {
 	return "Proto"
 }
 
+func (m *Project) ColDescription() *builder.Column {
+	return ProjectTable.ColByFieldName(m.FieldDescription())
+}
+
+func (*Project) FieldDescription() string {
+	return "Description"
+}
+
+func (m *Project) ColIssuer() *builder.Column {
+	return ProjectTable.ColByFieldName(m.FieldIssuer())
+}
+
+func (*Project) FieldIssuer() string {
+	return "Issuer"
+}
+
+func (m *Project) ColExpIn() *builder.Column {
+	return ProjectTable.ColByFieldName(m.FieldExpIn())
+}
+
+func (*Project) FieldExpIn() string {
+	return "ExpIn"
+}
+
+func (m *Project) ColSignKey() *builder.Column {
+	return ProjectTable.ColByFieldName(m.FieldSignKey())
+}
+
+func (*Project) FieldSignKey() string {
+	return "SignKey"
+}
+
 func (m *Project) ColCreatedAt() *builder.Column {
 	return ProjectTable.ColByFieldName(m.FieldCreatedAt())
 }

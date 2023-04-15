@@ -63,6 +63,8 @@ func (v Error) Key() string {
 		return "InvalidEthLoginSignature"
 	case InvalidEthLoginMessage:
 		return "InvalidEthLoginMessage"
+	case InvalidAuthPublisherID:
+		return "InvalidAuthPublisherID"
 	case Forbidden:
 		return "Forbidden"
 	case InstanceLimit:
@@ -125,6 +127,8 @@ func (v Error) Msg() string {
 		return "Invalid Siwe Signature"
 	case InvalidEthLoginMessage:
 		return "Invalid Siwe Message"
+	case InvalidAuthPublisherID:
+		return "Invalid Auth Publisher ID"
 	case Forbidden:
 		return "Forbidden"
 	case InstanceLimit:
@@ -186,6 +190,8 @@ func (v Error) CanBeTalk() bool {
 	case InvalidEthLoginSignature:
 		return true
 	case InvalidEthLoginMessage:
+		return true
+	case InvalidAuthPublisherID:
 		return true
 	case Forbidden:
 		return true
