@@ -255,20 +255,20 @@ func ValidateLoginByUsername(ctx context.Context, r *LoginByUsernameReq) (*model
 	return acc, nil
 }
 
-func GetAccountByAccountID(ctx context.Context, accountID types.SFID) (*models.Account, error) {
+func GetBySFID(ctx context.Context, id types.SFID) (*models.Account, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
+	m := &models.Account{RelAccount: models.RelAccount{AccountID: id}}
 
-	m := &models.Account{RelAccount: models.RelAccount{AccountID: accountID}}
-	_, l = l.Start(ctx, "GetAccountByAccountID")
-	defer l.End()
-
-	err := m.FetchByAccountID(d)
-	if err != nil {
-		l.Error(err)
-		return nil, status.CheckDatabaseError(err, "FetchByAccountID")
+	if err := m.FetchByAccountID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.InvalidAuthAccountID
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
-	return m, err
+	if m.State != enums.ACCOUNT_STATE__ENABLED {
+		return nil, status.DisabledAccount
+	}
+	return m, nil
 }
 
 func CreateAdminIfNotExist(ctx context.Context) (string, error) {

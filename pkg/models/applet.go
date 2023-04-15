@@ -17,7 +17,7 @@ type Applet struct {
 	RelApplet
 	RelResource
 	AppletInfo
-	datatypes.OperationTimes
+	datatypes.OperationTimesWithDeleted
 }
 
 type RelApplet struct {

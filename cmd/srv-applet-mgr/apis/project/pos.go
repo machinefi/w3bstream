@@ -21,7 +21,7 @@ func (r *CreateProject) Output(ctx context.Context) (interface{}, error) {
 	return project.CreateProject(
 		ctx, &r.CreateProjectReq,
 		func(ctx context.Context, channel string, data *eventpb.Event) (interface{}, error) {
-			return event.OnEventReceived(ctx, channel, data)
+			return event.OnEventReceived(ctx, data.Payload), nil
 		},
 	)
 }

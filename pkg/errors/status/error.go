@@ -24,6 +24,8 @@ const (
 	CreateChannelFailed
 	// @errTalk Config Initialization Failed
 	ConfigInitializationFailed
+	// @errTalk Event Forward Failed
+	EventForwardFailed
 )
 
 const (
@@ -78,6 +80,8 @@ const (
 	MD5ChecksumFailed
 	// @errTalk Invalid Chain Client
 	InvalidChainClient
+	// @errTalk Event Routing Failed
+	InvalidEventChannel
 )
 
 const (
@@ -87,6 +91,10 @@ const (
 	ProjectNotFound
 	// @errTalk Config Not Found
 	ConfigNotFound
+	// @errTalk Publisher Not Found
+	PublisherNotFound
+	// @errTalk Strategy Not Found
+	StrategyNotFound
 )
 
 // Deprecated: pls check database error and return defined status error

@@ -3,8 +3,6 @@ package strategy
 import (
 	"context"
 
-	"github.com/pkg/errors"
-
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
@@ -15,77 +13,44 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-type InstanceHandler struct {
-	AppletID   types.SFID
-	InstanceID types.SFID
-	Handler    string
-}
-
-func FindStrategyInstances(ctx context.Context, prjName string, eventType string) ([]*InstanceHandler, error) {
-	l := types.MustLoggerFromContext(ctx)
+func ListResultsByProjectAndEventType(ctx context.Context, id types.SFID, et string) (ret []*types.StrategyResult, err error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
+	sty := &models.Strategy{}
+	prj := &models.Project{}
+	app := &models.Applet{}
+	ins := &models.Instance{}
 
-	_, l = l.Start(ctx, "FindStrategyInstances")
-	defer l.End()
-
-	l = l.WithValues("project", prjName, "event_type", eventType)
-
-	mProject := &models.Project{ProjectName: models.ProjectName{Name: prjName}}
-
-	if err := mProject.FetchByName(d); err != nil {
-		l.Error(err)
-		return nil, status.CheckDatabaseError(err, "FetchProjectByName")
-	}
-
-	mStrategy := &models.Strategy{}
-
-	strategies, err := mStrategy.List(d,
-		builder.And(
-			mStrategy.ColProjectID().Eq(mProject.ProjectID),
-			builder.Or(
-				mStrategy.ColEventType().Eq(eventType),
-				mStrategy.ColEventType().Eq(enums.EVENTTYPEDEFAULT),
-			),
-		),
+	exp := builder.Select(builder.Multi(
+		builder.Alias(prj.ColAccountID(), "f_acc_id"),
+		builder.Alias(sty.ColProjectID(), "f_prj_id"),
+		builder.Alias(prj.ColName(), "f_prj_name"),
+		builder.Alias(app.ColAppletID(), "f_app_id"),
+		builder.Alias(app.ColName(), "f_app_name"),
+		builder.Alias(ins.ColInstanceID(), "f_ins_id"),
+		builder.Alias(sty.ColHandler(), "f_hdl"),
+		builder.Alias(sty.ColEventType(), "f_evt"),
+	)).From(
+		d.T(sty),
+		builder.LeftJoin(d.T(prj)).On(sty.ColProjectID().Eq(prj.ColProjectID())),
+		builder.LeftJoin(d.T(app)).On(app.ColProjectID().Eq(prj.ColProjectID())),
+		builder.LeftJoin(d.T(ins)).On(ins.ColAppletID().Eq(app.ColAppletID())),
+		builder.Where(builder.And(
+			sty.ColDeletedAt().Eq(0), prj.ColDeletedAt().Eq(0),
+			ins.ColDeletedAt().Eq(0), app.ColDeletedAt().Eq(0),
+			builder.Or(sty.ColEventType().Eq(et), sty.ColEventType().Eq(enums.EVENTTYPEDEFAULT)),
+			ins.ColState().Eq(enums.INSTANCE_STATE__STARTED),
+			prj.ColProjectID().Eq(id),
+		)),
 	)
-	if err != nil {
-		l.Error(err)
-		return nil, status.CheckDatabaseError(err, "ListStrategy")
+
+	ret = make([]*types.StrategyResult, 0)
+	if err = d.QueryAndScan(exp, &ret); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.StrategyNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
-
-	if len(strategies) == 0 {
-		l.Warn(errors.New("strategy not found"))
-		return nil, status.NotFound.StatusErr().WithDesc("not found strategy")
-	}
-	strategiesMap := make(map[types.SFID]*models.Strategy)
-	for i := range strategies {
-		strategiesMap[strategies[i].AppletID] = &strategies[i]
-	}
-
-	appletIDs := make(types.SFIDs, 0, len(strategies))
-
-	for i := range strategies {
-		appletIDs = append(appletIDs, strategies[i].AppletID)
-	}
-
-	mInstance := &models.Instance{}
-
-	instances, err := mInstance.List(d, mInstance.ColAppletID().In(appletIDs))
-	if err != nil {
-		l.Error(err)
-		return nil, status.CheckDatabaseError(err, "ListInstances")
-	}
-
-	handlers := make([]*InstanceHandler, 0)
-
-	for _, instance := range instances {
-		handlers = append(handlers, &InstanceHandler{
-			AppletID:   instance.AppletID,
-			InstanceID: instance.InstanceID,
-			Handler:    strategiesMap[instance.AppletID].Handler,
-		})
-	}
-	return handlers, nil
+	return
 }
 
 type CreateStrategyBatchReq struct {

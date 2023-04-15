@@ -2,9 +2,8 @@ package publisher
 
 import (
 	"context"
-	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
@@ -13,7 +12,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
-	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -62,6 +60,20 @@ func CreatePublisher(ctx context.Context, project *models.Project, r *CreatePubl
 	if err = m.Create(d); err != nil {
 		l.Error(err)
 		return nil, err
+	}
+
+	return m, nil
+}
+
+func GetBySFID(ctx context.Context, id types.SFID) (*models.Publisher, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Publisher{RelPublisher: models.RelPublisher{PublisherID: id}}
+
+	if err := m.FetchByPublisherID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.PublisherNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
 
 	return m, nil
@@ -232,33 +244,4 @@ func UpdatePublisher(ctx context.Context, project *models.Project, publisherID t
 	}
 
 	return
-}
-
-func GetPublisherByPubKeyAndProjectName(ctx context.Context, pubKey, prjName string) (*models.Publisher, error) {
-	l := types.MustLoggerFromContext(ctx)
-	d := types.MustMgrDBExecutorFromContext(ctx)
-
-	_, l = l.Start(ctx, "GetPublisherByPubKeyAndProjectID")
-	defer l.End()
-
-	pub := &models.Publisher{PublisherInfo: models.PublisherInfo{Key: pubKey}}
-	// TODO change prjName to projectID, then use FetchByProjectIDAndKey
-	if err := pub.FetchByKey(d); err != nil {
-		l.Error(err)
-		return nil, status.CheckDatabaseError(err, "GetPublisherByKey")
-	}
-
-	l = l.WithValues("pub_id", pub.PublisherID)
-	prj, err := project.GetProjectByProjectName(ctx, prjName)
-	if err != nil {
-		l.Error(err)
-		return nil, err
-	}
-	l = l.WithValues("project_id", prj.ProjectID)
-
-	if pub.ProjectID != prj.ProjectID {
-		l.Error(errors.New("no project permission"))
-		return nil, status.NoProjectPermission
-	}
-	return pub, nil
 }

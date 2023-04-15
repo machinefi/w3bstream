@@ -70,10 +70,12 @@ func (*Applet) UniqueIndexes() builder.Indexes {
 	return builder.Indexes{
 		"ui_applet_id": []string{
 			"AppletID",
+			"DeletedAt",
 		},
 		"ui_project_name": []string{
 			"ProjectID",
 			"Name",
+			"DeletedAt",
 		},
 	}
 }
@@ -150,11 +152,19 @@ func (*Applet) FieldUpdatedAt() string {
 	return "UpdatedAt"
 }
 
+func (m *Applet) ColDeletedAt() *builder.Column {
+	return AppletTable.ColByFieldName(m.FieldDeletedAt())
+}
+
+func (*Applet) FieldDeletedAt() string {
+	return "DeletedAt"
+}
+
 func (m *Applet) CondByValue(db sqlx.DBExecutor) builder.SqlCondition {
 	var (
 		tbl  = db.T(m)
 		fvs  = builder.FieldValueFromStructByNoneZero(m)
-		cond = make([]builder.SqlCondition, 0)
+		cond = []builder.SqlCondition{tbl.ColByFieldName("DeletedAt").Eq(0)}
 	)
 
 	for _, fn := range m.IndexFieldNames() {
@@ -191,6 +201,7 @@ func (m *Applet) List(db sqlx.DBExecutor, cond builder.SqlCondition, adds ...bui
 		tbl = db.T(m)
 		lst = make([]Applet, 0)
 	)
+	cond = builder.And(tbl.ColByFieldName("DeletedAt").Eq(0), cond)
 	adds = append([]builder.Addition{builder.Where(cond), builder.Comment("Applet.List")}, adds...)
 	err := db.QueryAndScan(builder.Select(nil).From(tbl, adds...), &lst)
 	return lst, err
@@ -198,6 +209,7 @@ func (m *Applet) List(db sqlx.DBExecutor, cond builder.SqlCondition, adds ...bui
 
 func (m *Applet) Count(db sqlx.DBExecutor, cond builder.SqlCondition, adds ...builder.Addition) (cnt int64, err error) {
 	tbl := db.T(m)
+	cond = builder.And(tbl.ColByFieldName("DeletedAt").Eq(0), cond)
 	adds = append([]builder.Addition{builder.Where(cond), builder.Comment("Applet.List")}, adds...)
 	err = db.QueryAndScan(builder.Select(builder.Count()).From(tbl, adds...), &cnt)
 	return
@@ -212,6 +224,7 @@ func (m *Applet) FetchByID(db sqlx.DBExecutor) error {
 				builder.Where(
 					builder.And(
 						tbl.ColByFieldName("ID").Eq(m.ID),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
 				builder.Comment("Applet.FetchByID"),
@@ -230,6 +243,7 @@ func (m *Applet) FetchByAppletID(db sqlx.DBExecutor) error {
 				builder.Where(
 					builder.And(
 						tbl.ColByFieldName("AppletID").Eq(m.AppletID),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
 				builder.Comment("Applet.FetchByAppletID"),
@@ -249,6 +263,7 @@ func (m *Applet) FetchByProjectIDAndName(db sqlx.DBExecutor) error {
 					builder.And(
 						tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
 						tbl.ColByFieldName("Name").Eq(m.Name),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
 				builder.Comment("Applet.FetchByProjectIDAndName"),
@@ -269,6 +284,7 @@ func (m *Applet) UpdateByIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) 
 			Where(
 				builder.And(
 					tbl.ColByFieldName("ID").Eq(m.ID),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
 				builder.Comment("Applet.UpdateByIDWithFVs"),
 			).
@@ -299,6 +315,7 @@ func (m *Applet) UpdateByAppletIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldVa
 			Where(
 				builder.And(
 					tbl.ColByFieldName("AppletID").Eq(m.AppletID),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
 				builder.Comment("Applet.UpdateByAppletIDWithFVs"),
 			).
@@ -330,6 +347,7 @@ func (m *Applet) UpdateByProjectIDAndNameWithFVs(db sqlx.DBExecutor, fvs builder
 				builder.And(
 					tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
 					tbl.ColByFieldName("Name").Eq(m.Name),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
 				builder.Comment("Applet.UpdateByProjectIDAndNameWithFVs"),
 			).
@@ -370,10 +388,36 @@ func (m *Applet) DeleteByID(db sqlx.DBExecutor) error {
 				builder.Where(
 					builder.And(
 						tbl.ColByFieldName("ID").Eq(m.ID),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
 				builder.Comment("Applet.DeleteByID"),
 			),
+	)
+	return err
+}
+
+func (m *Applet) SoftDeleteByID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	fvs := builder.FieldValues{}
+
+	if _, ok := fvs["DeletedAt"]; !ok {
+		fvs["DeletedAt"] = types.Timestamp{Time: time.Now()}
+	}
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	_, err := db.Exec(
+		builder.Update(db.T(m)).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("ID").Eq(m.ID),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
+				),
+				builder.Comment("Applet.SoftDeleteByID"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
 	return err
 }
@@ -387,10 +431,36 @@ func (m *Applet) DeleteByAppletID(db sqlx.DBExecutor) error {
 				builder.Where(
 					builder.And(
 						tbl.ColByFieldName("AppletID").Eq(m.AppletID),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
 				builder.Comment("Applet.DeleteByAppletID"),
 			),
+	)
+	return err
+}
+
+func (m *Applet) SoftDeleteByAppletID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	fvs := builder.FieldValues{}
+
+	if _, ok := fvs["DeletedAt"]; !ok {
+		fvs["DeletedAt"] = types.Timestamp{Time: time.Now()}
+	}
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	_, err := db.Exec(
+		builder.Update(db.T(m)).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("AppletID").Eq(m.AppletID),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
+				),
+				builder.Comment("Applet.SoftDeleteByAppletID"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
 	return err
 }
@@ -405,10 +475,37 @@ func (m *Applet) DeleteByProjectIDAndName(db sqlx.DBExecutor) error {
 					builder.And(
 						tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
 						tbl.ColByFieldName("Name").Eq(m.Name),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
 				builder.Comment("Applet.DeleteByProjectIDAndName"),
 			),
+	)
+	return err
+}
+
+func (m *Applet) SoftDeleteByProjectIDAndName(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	fvs := builder.FieldValues{}
+
+	if _, ok := fvs["DeletedAt"]; !ok {
+		fvs["DeletedAt"] = types.Timestamp{Time: time.Now()}
+	}
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	_, err := db.Exec(
+		builder.Update(db.T(m)).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
+					tbl.ColByFieldName("Name").Eq(m.Name),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
+				),
+				builder.Comment("Applet.SoftDeleteByProjectIDAndName"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
 	return err
 }

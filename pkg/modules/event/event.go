@@ -2,20 +2,19 @@ package event
 
 import (
 	"context"
-	"errors"
 	"sync"
+	"time"
 
+	"github.com/machinefi/w3bstream/pkg/depends/x/misc/timer"
+	"github.com/machinefi/w3bstream/pkg/modules/vm"
+	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
-	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
-	"github.com/machinefi/w3bstream/pkg/modules/publisher"
-	"github.com/machinefi/w3bstream/pkg/modules/strategy"
-	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
@@ -42,70 +41,26 @@ type HandleEventReq struct {
 	Events []eventpb.Event `json:"events"`
 }
 
-func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) (ret *HandleEventResult, err error) {
+func OnEventReceived(ctx context.Context, pl []byte) (ret []*wasm.EventHandleResult) {
 	l := types.MustLoggerFromContext(ctx)
+	r := types.MustStrategyResultsFromContext(ctx)
 
-	_, l = l.Start(ctx, "OnEventReceived")
-	defer l.End()
-
-	l = l.WithValues("project_name", projectName)
-
-	ret = &HandleEventResult{
-		ProjectName: projectName,
-	}
-
-	defer func() {
-		if err != nil {
-			ret.ErrMsg = err.Error()
-		}
-	}()
-
-	eventType := enums.EVENTTYPEDEFAULT
-	publisherMtc := projectName
-	if r.Header != nil {
-		if len(r.Header.EventId) > 0 {
-			ret.EventID = r.Header.EventId
-		}
-		if len(r.Header.PubId) > 0 {
-			publisherMtc = r.Header.PubId
-			var pub *models.Publisher
-			pub, err = publisher.GetPublisherByPubKeyAndProjectName(ctx, r.Header.PubId, projectName)
-			if err != nil {
-				return
-			}
-			ret.PubID, ret.PubName = pub.PublisherID, pub.Name
-			l.WithValues("pub_id", pub.PublisherID)
-		}
-		if len(r.Header.EventType) > 0 {
-			eventType = r.Header.EventType
-		}
-		if len(r.Header.Token) > 0 {
-			if err = publisherVerification(ctx, r, l); err != nil {
-				l.Error(err)
-				return
-			}
-		}
-	}
-	_receiveEventMtc.WithLabelValues(projectName, publisherMtc).Inc()
-
-	l = l.WithValues("event_type", eventType)
-	var handlers []*strategy.InstanceHandler
-	l = l.WithValues("event_type", eventType)
-	handlers, err = strategy.FindStrategyInstances(ctx, projectName, eventType)
-	if err != nil {
-		l.Error(err)
-		return
-	}
-
-	l.Info("matched strategies: %d", len(handlers))
-
-	res := make(chan *wasm.EventHandleResult, len(handlers))
+	results := make(chan *wasm.EventHandleResult, len(r))
 
 	wg := &sync.WaitGroup{}
-	for _, v := range handlers {
-		i := vm.GetConsumer(v.InstanceID)
-		if i == nil {
-			res <- &wasm.EventHandleResult{
+	for _, v := range r {
+		l = l.WithValues(
+			"acc_id", v.AccountID,
+			"prj_name", v.ProjectName,
+			"app_name", v.AppletName,
+			"ins_id", v.InstanceID,
+			"handler", v.Handler,
+			"event_type", v.EventType,
+		)
+		ins := vm.GetConsumer(v.InstanceID)
+		if ins == nil {
+			l.Warn(errors.New("instance not running"))
+			results <- &wasm.EventHandleResult{
 				InstanceID: v.InstanceID.String(),
 				Code:       -1,
 				ErrMsg:     "instance not found",
@@ -114,21 +69,114 @@ func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) 
 		}
 
 		wg.Add(1)
-		go func(v *strategy.InstanceHandler) {
+		go func(v *types.StrategyResult) {
 			defer wg.Done()
-			res <- i.HandleEvent(ctx, v.Handler, []byte(r.Payload))
+
+			cost := timer.Start()
+			select {
+			case <-time.After(time.Second * 5):
+			default:
+				rv := ins.HandleEvent(ctx, v.Handler, pl)
+				results <- rv
+				l.WithValues("cost_ms", cost().Milliseconds()).Info("")
+			}
 		}(v)
 	}
 	wg.Wait()
-	close(res)
+	close(results)
 
-	for v := range res {
+	for v := range results {
 		if v == nil {
 			continue
 		}
-		ret.WasmResults = append(ret.WasmResults, *v)
+		ret = append(ret, v)
 	}
-	return ret, nil
+	return ret
+
+	// _, l = l.Start(ctx, "OnEventReceived")
+	// defer l.End()
+
+	// l = l.WithValues("project_name", projectName)
+
+	// ret = &HandleEventResult{
+	// 	ProjectName: projectName,
+	// }
+
+	// defer func() {
+	// 	if err != nil {
+	// 		ret.ErrMsg = err.Error()
+	// 	}
+	// }()
+
+	// eventType := enums.EVENTTYPEDEFAULT
+	// publisherMtc := projectName
+	// if r.Header != nil {
+	// 	if len(r.Header.EventId) > 0 {
+	// 		ret.EventID = r.Header.EventId
+	// 	}
+	// 	if len(r.Header.PubId) > 0 {
+	// 		publisherMtc = r.Header.PubId
+	// 		var pub *models.Publisher
+	// 		pub, err = publisher.GetPublisherByPubKeyAndProjectName(ctx, r.Header.PubId, projectName)
+	// 		if err != nil {
+	// 			return
+	// 		}
+	// 		ret.PubID, ret.PubName = pub.PublisherID, pub.Name
+	// 		l.WithValues("pub_id", pub.PublisherID)
+	// 	}
+	// 	if len(r.Header.EventType) > 0 {
+	// 		eventType = r.Header.EventType
+	// 	}
+	// 	if len(r.Header.Token) > 0 {
+	// 		if err = publisherVerification(ctx, r, l); err != nil {
+	// 			l.Error(err)
+	// 			return
+	// 		}
+	// 	}
+	// }
+	// _receiveEventMtc.WithLabelValues(projectName, publisherMtc).Inc()
+
+	// l = l.WithValues("event_type", eventType)
+	// var handlers []*strategy.InstanceHandler
+	// l = l.WithValues("event_type", eventType)
+	// handlers, err = strategy.FindStrategyInstances(ctx, projectName, eventType)
+	// if err != nil {
+	// 	l.Error(err)
+	// 	return
+	// }
+
+	// l.Info("matched strategies: %d", len(handlers))
+
+	// res := make(chan *wasm.EventHandleResult, len(handlers))
+
+	// wg := &sync.WaitGroup{}
+	// for _, v := range handlers {
+	// 	i := vm.GetConsumer(v.InstanceID)
+	// 	if i == nil {
+	// 		res <- &wasm.EventHandleResult{
+	// 			InstanceID: v.InstanceID.String(),
+	// 			Code:       -1,
+	// 			ErrMsg:     "instance not found",
+	// 		}
+	// 		continue
+	// 	}
+
+	// 	wg.Add(1)
+	// 	go func(v *strategy.InstanceHandler) {
+	// 		defer wg.Done()
+	// 		res <- i.HandleEvent(ctx, v.Handler, []byte(r.Payload))
+	// 	}(v)
+	// }
+	// wg.Wait()
+	// close(res)
+
+	// for v := range res {
+	// 	if v == nil {
+	// 		continue
+	// 	}
+	// 	ret.WasmResults = append(ret.WasmResults, *v)
+	// }
+	// return ret, nil
 }
 
 func publisherVerification(ctx context.Context, r *eventpb.Event, l log.Logger) error {
@@ -172,13 +220,4 @@ func publisherVerification(ctx context.Context, r *eventpb.Event, l log.Logger) 
 	} else {
 		return status.NoProjectPermission
 	}
-}
-
-func HandleEvents(ctx context.Context, projectName string, r *HandleEventReq) []*HandleEventResult {
-	results := make([]*HandleEventResult, 0, len(r.Events))
-	for i := range r.Events {
-		ret, _ := OnEventReceived(ctx, projectName, &r.Events[i])
-		results = append(results, ret)
-	}
-	return results
 }

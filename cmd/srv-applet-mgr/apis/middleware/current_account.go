@@ -31,7 +31,7 @@ func (r *ContextAccountAuth) Output(ctx context.Context) (interface{}, error) {
 	if err := accountID.UnmarshalText([]byte(v)); err != nil {
 		return nil, status.InvalidAuthAccountID
 	}
-	ca, err := account.GetAccountByAccountID(ctx, accountID)
+	ca, err := account.GetBySFID(ctx, accountID)
 	if err != nil {
 		return nil, err
 	}

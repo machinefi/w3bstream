@@ -26,12 +26,35 @@ type (
 	CtxTaskWorker        struct{}
 	CtxTaskBoard         struct{}
 	CtxProject           struct{}
+	CtxAccount           struct{}
 	CtxApplet            struct{}
 	CtxResource          struct{}
 	CtxInstance          struct{}
 	CtxEthClient         struct{} // CtxEthClient ETHClientConfig
 	CtxWhiteList         struct{}
+	CtxStrategyResults   struct{}
 )
+
+func WithStrategyResults(ctx context.Context, v []*StrategyResult) context.Context {
+	return contextx.WithValue(ctx, CtxStrategyResults{}, v)
+}
+
+func WithStrategyResultsContext(v []*StrategyResult) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxStrategyResults{}, v)
+	}
+}
+
+func StrategyResultsFromContext(ctx context.Context) ([]*StrategyResult, bool) {
+	v, ok := ctx.Value(CtxStrategyResults{}).([]*StrategyResult)
+	return v, ok
+}
+
+func MustStrategyResultsFromContext(ctx context.Context) []*StrategyResult {
+	v, ok := StrategyResultsFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
 
 func WithMgrDBExecutor(ctx context.Context, v sqlx.DBExecutor) context.Context {
 	return contextx.WithValue(ctx, CtxMgrDBExecutor{}, v)
@@ -239,6 +262,28 @@ func TaskWorkerFromContext(ctx context.Context) (*mq.TaskWorker, bool) {
 
 func MustTaskWorkerFromContext(ctx context.Context) *mq.TaskWorker {
 	v, ok := TaskWorkerFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithAccount(ctx context.Context, p *models.Account) context.Context {
+	_p := *p
+	return contextx.WithValue(ctx, CtxAccount{}, &_p)
+}
+
+func WithAccountContext(p *models.Account) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return WithAccount(ctx, p)
+	}
+}
+
+func AccountFromContext(ctx context.Context) (*models.Account, bool) {
+	v, ok := ctx.Value(CtxAccount{}).(*models.Account)
+	return v, ok
+}
+
+func MustAccountFromContext(ctx context.Context) *models.Account {
+	v, ok := AccountFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

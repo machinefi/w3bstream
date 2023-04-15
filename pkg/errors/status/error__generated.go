@@ -43,6 +43,8 @@ func (v Error) Key() string {
 		return "MD5ChecksumFailed"
 	case InvalidChainClient:
 		return "InvalidChainClient"
+	case InvalidEventChannel:
+		return "InvalidEventChannel"
 	case Unauthorized:
 		return "Unauthorized"
 	case InvalidAuthValue:
@@ -79,6 +81,10 @@ func (v Error) Key() string {
 		return "ProjectNotFound"
 	case ConfigNotFound:
 		return "ConfigNotFound"
+	case PublisherNotFound:
+		return "PublisherNotFound"
+	case StrategyNotFound:
+		return "StrategyNotFound"
 	case Conflict:
 		return "Conflict"
 	case ProjectConfigConflict:
@@ -95,6 +101,8 @@ func (v Error) Key() string {
 		return "CreateChannelFailed"
 	case ConfigInitializationFailed:
 		return "ConfigInitializationFailed"
+	case EventForwardFailed:
+		return "EventForwardFailed"
 	}
 	return "UNKNOWN"
 }
@@ -107,6 +115,8 @@ func (v Error) Msg() string {
 		return "Md5 Checksum Failed"
 	case InvalidChainClient:
 		return "Invalid Chain Client"
+	case InvalidEventChannel:
+		return "Event Routing Failed"
 	case Unauthorized:
 		return "Unauthorized unauthorized"
 	case InvalidAuthValue:
@@ -143,6 +153,10 @@ func (v Error) Msg() string {
 		return "Project Not Found"
 	case ConfigNotFound:
 		return "Config Not Found"
+	case PublisherNotFound:
+		return "Publisher Not Found"
+	case StrategyNotFound:
+		return "Strategy Not Found"
 	case Conflict:
 		return "Conflict conflict error"
 	case ProjectConfigConflict:
@@ -159,6 +173,8 @@ func (v Error) Msg() string {
 		return "Create Message Channel Failed"
 	case ConfigInitializationFailed:
 		return "Config Initialization Failed"
+	case EventForwardFailed:
+		return "Event Forward Failed"
 	}
 	return "-"
 }
@@ -170,6 +186,8 @@ func (v Error) CanBeTalk() bool {
 	case MD5ChecksumFailed:
 		return true
 	case InvalidChainClient:
+		return true
+	case InvalidEventChannel:
 		return true
 	case Unauthorized:
 		return true
@@ -207,6 +225,10 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case ConfigNotFound:
 		return true
+	case PublisherNotFound:
+		return true
+	case StrategyNotFound:
+		return true
 	case Conflict:
 		return true
 	case ProjectConfigConflict:
@@ -222,6 +244,8 @@ func (v Error) CanBeTalk() bool {
 	case CreateChannelFailed:
 		return true
 	case ConfigInitializationFailed:
+		return true
+	case EventForwardFailed:
 		return true
 	}
 	return false

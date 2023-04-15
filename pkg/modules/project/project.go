@@ -283,10 +283,6 @@ func ListProject(ctx context.Context, r *ListProjectReq) (*ListProjectRsp, error
 
 func GetBySFID(ctx context.Context, prj types.SFID) (*models.Project, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-
-	_, l = l.Start(ctx, "GetProjectByProjectID")
-	defer l.End()
 
 	m := &models.Project{
 		RelProject: models.RelProject{ProjectID: prj},
@@ -302,11 +298,6 @@ func GetBySFID(ctx context.Context, prj types.SFID) (*models.Project, error) {
 
 func GetByAccountAndName(ctx context.Context, acc types.SFID, name string) (*models.Project, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-
-	_, l = l.Start(ctx, "GetProjectByProjectID")
-	defer l.End()
-
 	m := &models.Project{
 		RelAccount:  models.RelAccount{AccountID: acc},
 		ProjectName: models.ProjectName{Name: name},

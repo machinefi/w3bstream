@@ -36,7 +36,7 @@ func main() {
 				if err := project.InitChannels(
 					global.WithContext(context.Background()),
 					func(ctx context.Context, channel string, data *eventpb.Event) (interface{}, error) {
-						return event.OnEventReceived(ctx, channel, data)
+						return event.OnEventReceived(ctx, data.Payload), nil
 					},
 				); err != nil {
 					panic(err)
