@@ -58,6 +58,7 @@ func ExampleModel_SnippetTableInstanceAndInit() {
 	// func init() {
 	// UserTable=DB.Register(&User{})
 	// }
+	//
 }
 
 func ExampleModel_SnippetTableIteratorAndMethods() {

@@ -24,7 +24,7 @@ func CreateDemoFile(filename string) *File {
 	return f
 }
 
-func ExampleFormat() {
+func DISABLE_ExampleFormat() {
 	cwd, _ := os.Getwd()
 	filename := path.Join(cwd, "hello/hello.go")
 

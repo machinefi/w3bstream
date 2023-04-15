@@ -1094,9 +1094,7 @@ func (f *FuncType) Bytes() []byte {
 	}
 
 	if f.Blk != nil {
-		if len(f.Rets) > 0 {
-			buf.WriteRune(' ')
-		}
+		buf.WriteRune(' ')
 		buf.Write(f.Blk.Bytes())
 	}
 	return buf.Bytes()

@@ -93,3 +93,12 @@ migrate: install_toolkit
 .PHONY: openapi
 openapi: install_toolkit
 	@cd cmd/srv-applet-mgr && toolkit gen openapi
+
+.PHONY: test
+test:
+	@go test ./...
+
+.PHONY: format code
+fmt: install_toolkit
+	@toolkit fmt
+
