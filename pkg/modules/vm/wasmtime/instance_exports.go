@@ -56,7 +56,7 @@ func NewExportFuncs(ctx context.Context, rt *Runtime) (*ExportFuncs, error) {
 	ef.env, _ = wasm.EnvFromContext(ctx)
 	ef.mq, _ = wasm.MQTTClientFromContext(ctx)
 	ef.rt = rt
-	ef.metrics = nil // TODO
+	ef.metrics, _ = wasm.CustomMetricsFromContext(ctx)
 
 	return ef, nil
 }

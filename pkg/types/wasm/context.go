@@ -7,6 +7,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
+	custommetrics "github.com/machinefi/w3bstream/pkg/types/wasm/metrics"
 )
 
 type (
@@ -19,6 +20,7 @@ type (
 	CtxRuntimeResource   struct{}
 	CtxRuntimeEventTypes struct{}
 	CtxMqttClient        struct{}
+	CtxCustomMetrics     struct{}
 )
 
 func WithSQLStore(ctx context.Context, v *Database) context.Context {
@@ -206,6 +208,27 @@ func MQTTClientFromContext(ctx context.Context) (*MqttClient, bool) {
 
 func MustMQTTClientFromContext(ctx context.Context) *MqttClient {
 	v, ok := MQTTClientFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithCustomMetrics(ctx context.Context, mt custommetrics.Metrics) context.Context {
+	return contextx.WithValue(ctx, CtxCustomMetrics{}, mt)
+}
+
+func WithCustomMetricsContext(mt custommetrics.Metrics) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxCustomMetrics{}, mt)
+	}
+}
+
+func CustomMetricsFromContext(ctx context.Context) (custommetrics.Metrics, bool) {
+	v, ok := ctx.Value(CtxCustomMetrics{}).(custommetrics.Metrics)
+	return v, ok
+}
+
+func MustCustomMetricsFromContext(ctx context.Context) custommetrics.Metrics {
+	v, ok := CustomMetricsFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

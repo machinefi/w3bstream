@@ -6,9 +6,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-// metric.Counter("request").Inc()
-// metric.Gauge("request").Inc()
-
 type (
 	Metrics interface {
 		Counter(string) Counter
@@ -28,19 +25,20 @@ type (
 )
 
 var (
+	_labels               = []string{"node", "account", "project", "customlabel"}
 	_customMetricsCounter = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "ws_wasm_custom_counter_metrics",
 			Help: "custom counter metrics emitted from wasm vm",
 		},
-		[]string{"node", "account", "project", "customlabel"},
+		_labels,
 	)
 	_customMetricsGauge = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "ws_wasm_custom_gague_metrics",
 			Help: "custom gague metrics emitted from wasm vm",
 		},
-		[]string{"node", "account", "project", "customlabel"},
+		_labels,
 	)
 )
 

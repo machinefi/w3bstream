@@ -2,6 +2,7 @@ package deploy
 
 import (
 	"context"
+	"strconv"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
@@ -11,6 +12,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
+	custommetrics "github.com/machinefi/w3bstream/pkg/types/wasm/metrics"
 )
 
 func WithInstanceRuntimeContext(parent context.Context) (context.Context, error) {
@@ -77,6 +79,9 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		"@prj", prj.Name,
 		"@app", app.Name,
 	))
+
+	// TODO: the node's address
+	ctx = wasm.WithCustomMetrics(ctx, custommetrics.NewCustomMetric("test", strconv.FormatUint(uint64(acc.AccountID), 10), prj.ProjectName.Name))
 
 	return ctx, nil
 }
