@@ -7,10 +7,11 @@ import (
 	"sort"
 	"strconv"
 
+	"github.com/pkg/errors"
+
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusxgen"
 	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"
-	"github.com/pkg/errors"
 )
 
 func NewStatusErrScanner(pkg *pkgx.Pkg) *StatusErrScanner {

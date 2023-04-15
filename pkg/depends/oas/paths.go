@@ -1,8 +1,6 @@
 package oas
 
-import (
-	"encoding/json"
-)
+import "encoding/json"
 
 type Paths struct {
 	Paths map[string]*PathItem

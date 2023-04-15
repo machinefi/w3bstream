@@ -3,8 +3,9 @@ package oas_test
 import (
 	"testing"
 
-	. "github.com/machinefi/w3bstream/pkg/depends/oas"
 	"github.com/stretchr/testify/assert"
+
+	. "github.com/machinefi/w3bstream/pkg/depends/oas"
 )
 
 func TestComponents(t *testing.T) {

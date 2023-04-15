@@ -7,10 +7,11 @@ import (
 	"path/filepath"
 	"testing"
 
+	. "github.com/onsi/gomega"
+
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/openapi"
 	"github.com/machinefi/w3bstream/pkg/depends/oas"
 	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"
-	. "github.com/onsi/gomega"
 )
 
 func TestOperatorScanner(t *testing.T) {

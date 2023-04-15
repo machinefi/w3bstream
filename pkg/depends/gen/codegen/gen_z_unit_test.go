@@ -6,8 +6,9 @@ import (
 	"os"
 	"testing"
 
-	. "github.com/machinefi/w3bstream/pkg/depends/gen/codegen"
 	. "github.com/onsi/gomega"
+
+	. "github.com/machinefi/w3bstream/pkg/depends/gen/codegen"
 )
 
 func CreateDemoFile() *File {

@@ -8,11 +8,12 @@ import (
 	"strings"
 	"testing"
 
+	. "github.com/onsi/gomega"
+	"github.com/pkg/errors"
+
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/openapi"
 	"github.com/machinefi/w3bstream/pkg/depends/oas"
 	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"
-	. "github.com/onsi/gomega"
-	"github.com/pkg/errors"
 )
 
 func TestDefinitionScanner(t *testing.T) {

@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/transformer"
@@ -18,7 +20,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/reflectx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/typesx"
-	"github.com/pkg/errors"
 )
 
 func NewOperatorScanner(pkg *pkgx.Pkg) *OperatorScanner {

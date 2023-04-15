@@ -1,8 +1,6 @@
 package time
 
-import (
-	"time"
-)
+import "time"
 
-//open-api:strfmt date-time
+// open-api:strfmt date-time
 type Time time.Time

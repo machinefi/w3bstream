@@ -2,9 +2,9 @@ package publisher
 
 import (
 	"context"
-	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"

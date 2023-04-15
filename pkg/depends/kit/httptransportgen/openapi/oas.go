@@ -11,9 +11,10 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/pkg/errors"
+
 	"github.com/machinefi/w3bstream/pkg/depends/oas"
 	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"
-	"github.com/pkg/errors"
 )
 
 func NewOpenAPIGenerator(pkg *pkgx.Pkg) *OpenAPIGenerator {

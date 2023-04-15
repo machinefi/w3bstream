@@ -1,8 +1,6 @@
 package openapi
 
-import (
-	"github.com/machinefi/w3bstream/pkg/depends/oas"
-)
+import "github.com/machinefi/w3bstream/pkg/depends/oas"
 
 func NewSchemaRefer(s *oas.Schema) *SchemaRefer {
 	return &SchemaRefer{

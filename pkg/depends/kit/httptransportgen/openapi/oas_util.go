@@ -8,6 +8,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/pkg/errors"
+	"golang.org/x/tools/go/packages"
+
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
@@ -16,8 +19,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/stringsx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/typesx"
-	"github.com/pkg/errors"
-	"golang.org/x/tools/go/packages"
 )
 
 const (

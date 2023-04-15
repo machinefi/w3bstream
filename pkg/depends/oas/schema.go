@@ -1,8 +1,6 @@
 package oas
 
-import (
-	"encoding/json"
-)
+import "encoding/json"
 
 func NewSchema(tpe Type, fmt string) *Schema {
 	return &Schema{

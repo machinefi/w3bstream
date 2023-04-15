@@ -11,12 +11,13 @@ import (
 	"path/filepath"
 
 	"github.com/fatih/color"
-	"github.com/machinefi/w3bstream/pkg/depends/gen/codegen"
-	"github.com/machinefi/w3bstream/pkg/depends/oas"
-	"github.com/machinefi/w3bstream/pkg/depends/x/stringsx"
 	"github.com/pkg/errors"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/tools/go/packages"
+
+	"github.com/machinefi/w3bstream/pkg/depends/gen/codegen"
+	"github.com/machinefi/w3bstream/pkg/depends/oas"
+	"github.com/machinefi/w3bstream/pkg/depends/x/stringsx"
 )
 
 type OasGenerator interface {

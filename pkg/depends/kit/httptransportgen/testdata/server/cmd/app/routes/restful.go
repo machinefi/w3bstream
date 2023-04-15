@@ -3,12 +3,13 @@ package routes
 import (
 	"context"
 
+	pkgerrors "github.com/pkg/errors"
+
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/pkg/errors"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
-	pkgerrors "github.com/pkg/errors"
 )
 
 var RestfulRouter = kit.NewRouter(httptransport.Group("/restful"))

@@ -8,13 +8,14 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/enumgen"
 	"github.com/machinefi/w3bstream/pkg/depends/oas"
 	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/reflectx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/typesx"
-	"github.com/pkg/errors"
 )
 
 func NewDefScanner(pkg *pkgx.Pkg) *DefScanner {

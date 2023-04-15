@@ -8,8 +8,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/client"
 	. "github.com/onsi/gomega"
+
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/client"
 )
 
 func TestOpenAPIGenerator(t *testing.T) {

@@ -1,9 +1,10 @@
 package cmd
 
 import (
+	"github.com/spf13/cobra"
+
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/openapi"
 	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"
-	"github.com/spf13/cobra"
 )
 
 func init() {
