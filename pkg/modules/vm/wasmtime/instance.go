@@ -17,7 +17,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
-func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte) (i *Instance, err error) {
+func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte, st enums.InstanceState) (i *Instance, err error) {
 	l := types.MustLoggerFromContext(ctx)
 
 	_, l = l.Start(ctx, "NewInstanceByCode")
@@ -36,7 +36,7 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte) (i *Inst
 	return &Instance{
 		rt:       rt,
 		id:       id,
-		state:    enums.INSTANCE_STATE__CREATED,
+		state:    st,
 		res:      res,
 		handlers: make(map[string]*wasmtime.Func),
 		kvs:      wasm.MustKVStoreFromContext(ctx),

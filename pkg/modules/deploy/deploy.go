@@ -2,6 +2,7 @@ package deploy
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/pkg/errors"
 
@@ -17,16 +18,16 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
-type CreateInstanceReq struct {
+type CreateOrReDeployInstanceReq struct {
 	Cache *wasm.Cache `json:"cache,omitempty"`
 }
 
-type CreateInstanceRsp struct {
+type CreateOrReDeployInstanceRsp struct {
 	InstanceID    types.SFID          `json:"instanceID"`
 	InstanceState enums.InstanceState `json:"instanceState"`
 }
 
-func CreateInstance(ctx context.Context, r *CreateInstanceReq) (*CreateInstanceRsp, error) {
+func CreateInstance(ctx context.Context, r *CreateOrReDeployInstanceReq) (*CreateOrReDeployInstanceRsp, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
@@ -73,7 +74,7 @@ func CreateInstance(ctx context.Context, r *CreateInstanceReq) (*CreateInstanceR
 	}
 
 	l.WithValues("instance", ins.InstanceID).Info("created")
-	return &CreateInstanceRsp{
+	return &CreateOrReDeployInstanceRsp{
 		InstanceID:    ins.InstanceID,
 		InstanceState: ins.State,
 	}, nil
@@ -252,4 +253,54 @@ func StartInstances(ctx context.Context) error {
 		}
 	}
 	return nil
+}
+
+func ReDeployInstance(ctx context.Context, r *CreateOrReDeployInstanceReq) (*CreateOrReDeployInstanceRsp, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	l := types.MustLoggerFromContext(ctx)
+	ins := types.MustInstanceFromContext(ctx)
+	res := types.MustResourceFromContext(ctx)
+
+	_, l = l.Start(ctx, "ReDeployInstance")
+	defer l.End()
+
+	_ctx := context.Background()
+	err := sqlx.NewTasks(d).With(
+		func(db sqlx.DBExecutor) error {
+			if r.Cache == nil {
+				r.Cache = wasm.DefaultCache()
+			}
+			val, err := json.Marshal(r.Cache)
+			if err != nil {
+				l.Error(err)
+				return status.InternalServerError.StatusErr().WithDesc(err.Error())
+			}
+
+			_, err = config.CreateOrUpdateConfig(ctx, ins.InstanceID, r.Cache.ConfigType(), val)
+			return err
+		},
+		func(db sqlx.DBExecutor) error {
+			var _err error
+			_ctx, _err = WithInstanceRuntimeContext(ctx)
+			return _err
+		},
+		func(db sqlx.DBExecutor) error {
+			state, ok := vm.GetInstanceState(ins.InstanceID)
+			if !ok {
+				return status.NotFound.StatusErr().WithDesc("instance not found in mgr")
+			}
+			return vm.NewInstanceWithState(_ctx, res.Path, ins.InstanceID, state)
+		},
+	).Do()
+
+	if err != nil {
+		l.Error(err)
+		return nil, status.CheckDatabaseError(err)
+	}
+
+	l.WithValues("instance", ins.InstanceID).Info("redeploy")
+	return &CreateOrReDeployInstanceRsp{
+		InstanceID:    ins.InstanceID,
+		InstanceState: ins.State,
+	}, nil
 }
