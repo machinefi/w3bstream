@@ -5,12 +5,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/machinefi/w3bstream/pkg/depends/x/misc/timer"
-	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
+	"github.com/machinefi/w3bstream/pkg/depends/x/misc/timer"
+	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
