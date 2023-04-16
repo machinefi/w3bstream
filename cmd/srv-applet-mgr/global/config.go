@@ -13,6 +13,7 @@ import (
 	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	confpostgres "github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
 	confredis "github.com/machinefi/w3bstream/pkg/depends/conf/redis"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/client"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq/mem_mq"
@@ -33,6 +34,7 @@ var (
 	monitordb = &confpostgres.Endpoint{Database: models.MonitorDB}
 	wasmdb    = &confpostgres.Endpoint{Database: models.WasmDB}
 	server    = &confhttp.Server{}
+	proxy     = &client.Client{}
 )
 
 func init() {
@@ -49,6 +51,7 @@ func init() {
 		UploadConf *types.UploadConfig
 		EthClient  *types.ETHClientConfig
 		WhiteList  *types.WhiteList
+		Proxy      *client.Client
 	}{
 		Postgres:   db,
 		MonitorDB:  monitordb,
@@ -62,6 +65,7 @@ func init() {
 		UploadConf: &types.UploadConfig{},
 		EthClient:  &types.ETHClientConfig{},
 		WhiteList:  &types.WhiteList{"1"},
+		Proxy:      proxy,
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
@@ -101,6 +105,7 @@ func init() {
 		types.WithTaskBoardContext(mq.NewTaskBoard(tasks)),
 		types.WithETHClientConfigContext(config.EthClient),
 		types.WithWhiteListContext(config.WhiteList),
+		types.WithEventProxyClientContext(config.Proxy),
 	)
 }
 

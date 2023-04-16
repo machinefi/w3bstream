@@ -7,6 +7,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/redis"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/client"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
@@ -33,7 +34,29 @@ type (
 	CtxEthClient         struct{} // CtxEthClient ETHClientConfig
 	CtxWhiteList         struct{}
 	CtxStrategyResults   struct{}
+	CtxEventProxyClient  struct{}
 )
+
+func WithEventProxyClient(ctx context.Context, v *client.Client) context.Context {
+	return contextx.WithValue(ctx, CtxEventProxyClient{}, v)
+}
+
+func WithEventProxyClientContext(v *client.Client) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxEventProxyClient{}, v)
+	}
+}
+
+func EventProxyClientFromContext(ctx context.Context) (*client.Client, bool) {
+	v, ok := ctx.Value(CtxEventProxyClient{}).(*client.Client)
+	return v, ok
+}
+
+func MustEventProxyClientFromContext(ctx context.Context) *client.Client {
+	v, ok := EventProxyClientFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
 
 func WithStrategyResults(ctx context.Context, v []*StrategyResult) context.Context {
 	return contextx.WithValue(ctx, CtxStrategyResults{}, v)

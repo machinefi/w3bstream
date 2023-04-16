@@ -10,11 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
-	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
-	"github.com/machinefi/w3bstream/pkg/errors/status"
-	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
@@ -29,12 +25,12 @@ func init() {
 }
 
 type HandleEventResult struct {
-	ProjectName string                   `json:"projectName"`
-	PubID       types.SFID               `json:"pubID,omitempty"`
-	PubName     string                   `json:"pubName,omitempty"`
-	EventID     string                   `json:"eventID"`
-	ErrMsg      string                   `json:"errMsg,omitempty"`
-	WasmResults []wasm.EventHandleResult `json:"wasmResults"`
+	ProjectName string                    `json:"projectName"`
+	PubID       types.SFID                `json:"pubID,omitempty"`
+	PubName     string                    `json:"pubName,omitempty"`
+	EventID     string                    `json:"eventID"`
+	ErrMsg      string                    `json:"errMsg,omitempty"`
+	WasmResults []*wasm.EventHandleResult `json:"wasmResults"`
 }
 
 type HandleEventReq struct {
@@ -177,47 +173,4 @@ func OnEventReceived(ctx context.Context, pl []byte) (ret []*wasm.EventHandleRes
 	// 	ret.WasmResults = append(ret.WasmResults, *v)
 	// }
 	// return ret, nil
-}
-
-func publisherVerification(ctx context.Context, r *eventpb.Event, l log.Logger) error {
-	if r.Header == nil || len(r.Header.Token) == 0 {
-		return errors.New("message token is invalid")
-	}
-
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	p := types.MustProjectFromContext(ctx)
-
-	publisherJwt := &jwt.Jwt{
-		Issuer:  p.ProjectBase.Issuer,
-		ExpIn:   p.ProjectBase.ExpIn,
-		SignKey: p.ProjectBase.SignKey,
-	}
-	claim, err := publisherJwt.ParseToken(r.Header.Token)
-	if err != nil {
-		l.Error(err)
-		return err
-	}
-
-	v, ok := claim.Payload.(string)
-	if !ok {
-		l.Error(errors.New("claim of publisher convert string error"))
-		return status.InvalidAuthValue
-	}
-	publisherID := types.SFID(0)
-	if err := publisherID.UnmarshalText([]byte(v)); err != nil {
-		return status.InvalidAuthPublisherID
-	}
-
-	m := &models.Publisher{RelPublisher: models.RelPublisher{PublisherID: publisherID}}
-	err = m.FetchByPublisherID(d)
-	if err != nil {
-		l.Error(err)
-		return status.CheckDatabaseError(err, "FetchByPublisherID")
-	}
-
-	if m.ProjectID == p.ProjectID {
-		return nil
-	} else {
-		return status.NoProjectPermission
-	}
 }

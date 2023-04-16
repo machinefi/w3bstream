@@ -1,53 +1,64 @@
 package event
 
 import (
-	"bytes"
 	"context"
-	"net/http"
-	"time"
+	"strings"
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
-	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/client"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
-	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-type HandleEvent struct {
+type BatchEventHandleProxy struct {
 	httpx.MethodPost
 	Channel              string `in:"path" name:"channel"`
 	event.HandleEventReq `in:"body"`
 }
 
-func (r *HandleEvent) Path() string { return "/proxy/:channel" }
+func (r *BatchEventHandleProxy) Path() string { return "/proxy/:channel" }
 
-func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
-	ev := &eventpb.Event{}
-	req, err := http.NewRequest(http.MethodPost, "localhost:8888", bytes.NewBuffer(nil))
-	if err != nil {
-		return nil, status.EventForwardFailed.StatusErr().WithDesc(err.Error())
+func (r *BatchEventHandleProxy) Output(ctx context.Context) (interface{}, error) {
+	results := make([]*event.HandleEventResult, len(r.Events))
+	for i := range r.Events {
+		evt := &r.Events[i]
+		res, err := ProxyForward(ctx, r.Channel, evt)
+		if err != nil {
+			res = &event.HandleEventResult{
+				ProjectName: r.Channel,
+				EventID:     evt.Header.GetEventId(),
+				ErrMsg:      err.Error(),
+			}
+		}
+		results = append(results, res)
 	}
-	req.Header.Set("Authorization", ev.Header.Token)
-
-	rsp := interface{}(nil)
-	if _, err = cli.Do(ctx, req).Into(rsp); err != nil {
-		return nil, status.EventForwardFailed.StatusErr().WithDesc(err.Error())
-	}
-	return rsp, nil
+	return results, nil
 }
 
-var (
-	cli = &client.Client{
-		Host:    "localhost",
-		Port:    8888, // TODO event server
-		Timeout: 10 * time.Second,
+func ProxyForward(ctx context.Context, channel string, ev *eventpb.Event) (*event.HandleEventResult, error) {
+	cli := types.MustEventProxyClientFromContext(ctx)
+	req := &EventHandle{
+		Channel:   channel,
+		EventType: ev.Header.GetEventType(),
+		EventID:   ev.Header.EventId,
+		Payload:   ev.Payload,
 	}
-)
+	meta := kit.Metadata{}
+	tok := ev.Header.GetToken()
+	if tok != "" {
+		if !strings.HasPrefix(tok, "Bearer") {
+			tok = "Bearer " + tok
+		}
+		meta.Add("Authorization", tok)
+	}
 
-type PublisherTokenAuthProvider struct {
-	jwt.Auth
+	rsp := &event.HandleEventResult{}
+	if _, err := cli.Do(ctx, req, meta).Into(rsp); err != nil {
+		return nil, err
+	}
+	return rsp, nil
 }
 
 type EventHandle struct {
@@ -63,13 +74,22 @@ func (r *EventHandle) Path() string {
 }
 
 func (r *EventHandle) Output(ctx context.Context) (interface{}, error) {
-	var err error
+	var (
+		err error
+		pub = middleware.MustPublisher(ctx)
+		rsp = &event.HandleEventResult{
+			ProjectName: r.Channel,
+			PubID:       pub.PublisherID,
+			PubName:     pub.Name,
+			EventID:     r.EventID,
+		}
+	)
 
-	p := middleware.MustPublisher(ctx)
-	ctx, err = p.WithStrategiesContextByChannelAndType(ctx, r.Channel, r.EventType)
+	ctx, err = pub.WithStrategiesContextByChannelAndType(ctx, r.Channel, r.EventType)
 	if err != nil {
-		return nil, err
+		rsp.ErrMsg = err.Error()
+		return rsp, nil
 	}
-
-	return event.OnEventReceived(ctx, r.Payload), nil
+	rsp.WasmResults = event.OnEventReceived(ctx, r.Payload)
+	return rsp, nil
 }
