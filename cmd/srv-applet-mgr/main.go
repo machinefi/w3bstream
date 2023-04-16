@@ -31,6 +31,9 @@ func main() {
 				kit.Run(apis.Root, global.Server())
 			},
 			func() {
+				kit.Run(apis.RootEvent, global.EventServer())
+			},
+			func() {
 				kit.Run(tasks.Root, global.TaskServer())
 			},
 			func() {

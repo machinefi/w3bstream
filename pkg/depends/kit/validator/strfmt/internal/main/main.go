@@ -4,10 +4,13 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"reflect"
 	"sort"
 	"strings"
 
 	g "github.com/machinefi/w3bstream/pkg/depends/gen/codegen"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/validator"
+	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/stringsx"
 )
 
@@ -58,4 +61,4 @@ func main() {
 	_, _ = file.Write()
 }
 
-var pkg = "github.com/machinefi/w3bstream/pkg/depends/kit/validator"
+var pkg = pkgx.Import(reflect.TypeOf(validator.Rule{}).PkgPath())

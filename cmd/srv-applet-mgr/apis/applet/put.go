@@ -11,8 +11,8 @@ import (
 
 type UpdateApplet struct {
 	httpx.MethodPut
-	AppletID types.SFID `in:"path" name:"appletID"`
-	applet.UpdateAppletReq
+	AppletID               types.SFID `in:"path" name:"appletID"`
+	applet.UpdateAppletReq `in:"body" mime:"multipart"`
 }
 
 func (r *UpdateApplet) Path() string { return "/:appletID" }
@@ -20,11 +20,8 @@ func (r *UpdateApplet) Path() string { return "/:appletID" }
 func (r *UpdateApplet) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.CurrentAccountFromContext(ctx)
 
-	app, err := applet.GetAppletByAppletID(ctx, r.AppletID)
+	ctx, err := ca.WithAppletContext(ctx, r.AppletID)
 	if err != nil {
-		return nil, err
-	}
-	if _, err = ca.ValidateProjectPerm(ctx, app.ProjectID); err != nil {
 		return nil, err
 	}
 

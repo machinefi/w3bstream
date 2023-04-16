@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/modules/job"
@@ -17,15 +18,19 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
-func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte) (i *Instance, err error) {
+func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte, st enums.InstanceState) (i *Instance, err error) {
 	l := types.MustLoggerFromContext(ctx)
 
 	_, l = l.Start(ctx, "NewInstanceByCode")
 	defer l.End()
 
 	res := mapx.New[uint32, []byte]()
+	evs := mapx.New[uint32, []byte]()
 	rt := NewRuntime()
-	lk, err := NewExportFuncs(wasm.WithRuntimeResource(ctx, res), rt)
+	lk, err := NewExportFuncs(contextx.WithContextCompose(
+		wasm.WithRuntimeResourceContext(res),
+		wasm.WithRuntimeEventTypesContext(evs),
+	)(ctx), rt)
 	if err != nil {
 		return nil, err
 	}
@@ -36,8 +41,9 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte) (i *Inst
 	return &Instance{
 		rt:       rt,
 		id:       id,
-		state:    enums.INSTANCE_STATE__CREATED,
+		state:    st,
 		res:      res,
+		evs:      evs,
 		handlers: make(map[string]*wasmtime.Func),
 		kvs:      wasm.MustKVStoreFromContext(ctx),
 	}, nil
@@ -48,6 +54,7 @@ type Instance struct {
 	rt       *Runtime
 	state    wasm.InstanceState
 	res      *mapx.Map[uint32, []byte]
+	evs      *mapx.Map[uint32, []byte]
 	handlers map[string]*wasmtime.Func
 	kvs      wasm.KVStore
 }
@@ -70,7 +77,7 @@ func (i *Instance) Stop(ctx context.Context) error {
 
 func (i *Instance) State() wasm.InstanceState { return i.state }
 
-func (i *Instance) HandleEvent(ctx context.Context, fn string, data []byte) *wasm.EventHandleResult {
+func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data []byte) *wasm.EventHandleResult {
 	if i.state != enums.INSTANCE_STATE__STARTED {
 		return &wasm.EventHandleResult{
 			InstanceID: i.id.String(),
@@ -79,7 +86,7 @@ func (i *Instance) HandleEvent(ctx context.Context, fn string, data []byte) *was
 		}
 	}
 
-	t := NewTask(i, fn, data)
+	t := NewTask(i, fn, eventType, data)
 	job.Dispatch(ctx, t)
 	return t.Wait(time.Second * 5)
 }
@@ -90,7 +97,7 @@ func (i *Instance) Handle(ctx context.Context, t *Task) *wasm.EventHandleResult 
 	_, l = l.Start(ctx, "instance.Handle")
 	defer l.End()
 
-	rid := i.AddResource(ctx, t.Payload)
+	rid := i.AddResource(ctx, []byte(t.EventType), t.Payload)
 	defer i.RmvResource(ctx, rid)
 
 	result, err := i.rt.Call(t.Handler, int32(rid))
@@ -112,9 +119,10 @@ func (i *Instance) Handle(ctx context.Context, t *Task) *wasm.EventHandleResult 
 const MaxUint = ^uint32(0)
 const MaxInt = int(MaxUint >> 1)
 
-func (i *Instance) AddResource(ctx context.Context, data []byte) uint32 {
+func (i *Instance) AddResource(ctx context.Context, eventType, data []byte) uint32 {
 	var id = int32(uuid.New().ID() % uint32(MaxInt))
 	i.res.Store(uint32(id), data)
+	i.evs.Store(uint32(id), eventType)
 	return uint32(id)
 }
 
@@ -124,6 +132,7 @@ func (i *Instance) GetResource(id uint32) ([]byte, bool) {
 
 func (i *Instance) RmvResource(ctx context.Context, id uint32) {
 	i.res.Remove(id)
+	i.evs.Remove(id)
 }
 
 func (i *Instance) Get(k string) int32 {

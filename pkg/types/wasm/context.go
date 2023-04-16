@@ -10,14 +10,15 @@ import (
 )
 
 type (
-	CtxSQLStore        struct{}
-	CtxKVStore         struct{}
-	CtxLogger          struct{}
-	CtxEnv             struct{}
-	CtxRedisPrefix     struct{}
-	CtxChainClient     struct{}
-	CtxRuntimeResource struct{}
-	CtxMqttClient      struct{}
+	CtxSQLStore          struct{}
+	CtxKVStore           struct{}
+	CtxLogger            struct{}
+	CtxEnv               struct{}
+	CtxRedisPrefix       struct{}
+	CtxChainClient       struct{}
+	CtxRuntimeResource   struct{}
+	CtxRuntimeEventTypes struct{}
+	CtxMqttClient        struct{}
 )
 
 func WithSQLStore(ctx context.Context, v SQLStore) context.Context {
@@ -162,6 +163,27 @@ func RuntimeResourceFromContext(ctx context.Context) (*mapx.Map[uint32, []byte],
 }
 
 func MustRuntimeResourceFromContext(ctx context.Context) *mapx.Map[uint32, []byte] {
+	v, ok := RuntimeResourceFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithRuntimeEventTypes(ctx context.Context, v *mapx.Map[uint32, []byte]) context.Context {
+	return contextx.WithValue(ctx, CtxRuntimeEventTypes{}, v)
+}
+
+func WithRuntimeEventTypesContext(v *mapx.Map[uint32, []byte]) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxRuntimeEventTypes{}, v)
+	}
+}
+
+func RuntimeEventTypesFromContext(ctx context.Context) (*mapx.Map[uint32, []byte], bool) {
+	v, ok := ctx.Value(CtxRuntimeEventTypes{}).(*mapx.Map[uint32, []byte])
+	return v, ok
+}
+
+func MustRuntimeEventTypesFromContext(ctx context.Context) *mapx.Map[uint32, []byte] {
 	v, ok := RuntimeResourceFromContext(ctx)
 	must.BeTrue(ok)
 	return v
