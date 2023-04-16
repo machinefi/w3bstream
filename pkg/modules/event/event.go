@@ -72,7 +72,7 @@ func OnEventReceived(ctx context.Context, pl []byte) (ret []*wasm.EventHandleRes
 			select {
 			case <-time.After(time.Second * 5):
 			default:
-				rv := ins.HandleEvent(ctx, v.Handler, pl)
+				rv := ins.HandleEvent(ctx, v.Handler, v.EventType, pl)
 				results <- rv
 				l.WithValues("cost_ms", cost().Milliseconds()).Info("")
 			}
