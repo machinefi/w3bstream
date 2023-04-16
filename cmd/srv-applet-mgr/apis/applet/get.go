@@ -5,7 +5,6 @@ import (
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
-	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -25,12 +24,6 @@ func (r *ListApplet) Output(ctx context.Context) (interface{}, error) {
 	return applet.ListApplets(ctx, &r.ListAppletReq)
 }
 
-type AppletDetail struct {
-	models.Applet
-	models.ResourceInfo
-	*models.InstanceInfo
-}
-
 type GetApplet struct {
 	httpx.MethodGet
 	AppletID types.SFID `in:"path" name:"appletID"`
@@ -45,17 +38,5 @@ func (r *GetApplet) Output(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	app := types.MustAppletFromContext(ctx)
-	res := types.MustResourceFromContext(ctx)
-	ins, _ := types.InstanceFromContext(ctx)
-
-	ret := &AppletDetail{
-		Applet:       *app,
-		ResourceInfo: res.ResourceInfo,
-	}
-	if ins != nil {
-		ret.InstanceInfo = &ins.InstanceInfo
-	}
-
-	return ret, nil
+	return applet.GetDetail(ctx), nil
 }
