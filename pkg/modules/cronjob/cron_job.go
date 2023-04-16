@@ -2,6 +2,7 @@ package cronjob
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -29,7 +30,7 @@ func (t *cronJob) run(ctx context.Context) {
 	s := gocron.NewScheduler(time.UTC)
 	s.TagsUnique()
 
-	if _, err := s.Every(t.listIntervalSecond).Seconds().Tag("main loop").Do(t.do, ctx, s); err != nil {
+	if _, err := s.Every(t.listIntervalSecond).Seconds().Do(t.do, ctx, s); err != nil {
 		l.Fatal(errors.Wrap(err, "create cronjob main loop failed"))
 	}
 	s.StartAsync()
@@ -74,6 +75,8 @@ func (t *cronJob) tidyCronJobs(ctx context.Context, s *gocron.Scheduler, cs []mo
 		if !cronJobIDs[types.SFID(id)] {
 			if err := s.RemoveByTag(tag); err != nil {
 				l.WithValues("tag", tag).Error(errors.Wrap(err, "remove cron job failed"))
+			} else {
+				l.WithValues("tag", tag).Info("remove cron job success")
 			}
 		}
 	}
@@ -97,6 +100,7 @@ func (t *cronJob) sendEvent(ctx context.Context, c models.CronJob) {
 		Header: &eventpb.Header{
 			EventType: c.EventType,
 		},
+		Payload: []byte(fmt.Sprintf("cronJobID:%d", c.CronJobID)),
 	}
 	if _, err := event.OnEventReceived(ctx, m.ProjectName.Name, &e); err != nil {
 		l.Error(errors.Wrap(err, "send event failed"))
