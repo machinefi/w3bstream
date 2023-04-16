@@ -11,6 +11,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/deploy"
 	"github.com/machinefi/w3bstream/pkg/modules/resource"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -161,10 +162,11 @@ func UpdateApplet(ctx context.Context, appletID types.SFID, r *UpdateAppletReq) 
 }
 
 type ListAppletReq struct {
-	IDs       []uint64     `in:"query" name:"id,omitempty"`
-	AppletIDs []types.SFID `in:"query" name:"appletID,omitempty"`
-	Names     []string     `in:"query" name:"names,omitempty"`
-	NameLike  string       `in:"query" name:"name,omitempty"`
+	ProjectName string       `in:"query" name:"projectName"`
+	IDs         []uint64     `in:"query" name:"id,omitempty"`
+	AppletIDs   []types.SFID `in:"query" name:"appletID,omitempty"`
+	Names       []string     `in:"query" name:"names,omitempty"`
+	NameLike    string       `in:"query" name:"name,omitempty"`
 	datatypes.Pager
 }
 
@@ -287,11 +289,6 @@ func RemoveApplet(ctx context.Context, r *RemoveAppletReq) error {
 	).Do()
 }
 
-type GetAppletReq struct {
-	ProjectName string     `in:"path" name:"projectName"`
-	AppletID    types.SFID `in:"path" name:"appletID"`
-}
-
 type GetAppletRsp struct {
 	InfoApplet
 	Instances []models.Instance `json:"instances"`
@@ -336,4 +333,55 @@ func GetAppletByAppletID(ctx context.Context, appletID types.SFID) (*GetAppletRs
 			Path: mResource.ResourceInfo.Path,
 		},
 	}, err
+}
+
+func GetBySFID(ctx context.Context, id types.SFID) (*models.Applet, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Applet{RelApplet: models.RelApplet{AppletID: id}}
+
+	if err := m.FetchByAppletID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.AppletNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return m, nil
+}
+
+func RemoveBySFID(ctx context.Context, id types.SFID) error {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Applet{RelApplet: models.RelApplet{AppletID: id}}
+
+	if err := m.DeleteByAppletID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return status.AppletNotFound
+		}
+		return status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return nil
+}
+
+func RemoveAppletAndInstanceBySFID(ctx context.Context, app *models.Applet, ins *models.Instance) error {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+
+	if ins != nil {
+		if err := vm.StopInstance(ctx, ins.InstanceID); err != nil {
+			return status.StopInstanceFailed.StatusErr().WithDesc(err.Error())
+		}
+		if err := vm.DelInstance(ctx, ins.InstanceID); err != nil {
+			return status.DeleteInstanceFailed.StatusErr().WithDesc(err.Error())
+		}
+	}
+
+	return sqlx.NewTasks(d).With(
+		func(_ sqlx.DBExecutor) error {
+			return RemoveBySFID(ctx, app.AppletID)
+		},
+		func(_ sqlx.DBExecutor) error {
+			if ins != nil {
+				return deploy.RemoveBySFID(ctx, ins.InstanceID)
+			}
+			return nil
+		},
+	).Do()
 }

@@ -24,6 +24,10 @@ const (
 	CreateChannelFailed
 	// @errTalk Config Initialization Failed
 	ConfigInitializationFailed
+	// @errTalk Stop Instance Failed
+	StopInstanceFailed
+	// @errTalk Delete Instance Failed
+	DeleteInstanceFailed
 )
 
 const (
@@ -87,6 +91,12 @@ const (
 	ProjectNotFound
 	// @errTalk Config Not Found
 	ConfigNotFound
+	// @errTalk Applet Not Found
+	AppletNotFound
+	// @errTalk Instance Not Found
+	InstanceNotFound
+	// @errTalk Resource Not Found
+	ResourceNotFound
 )
 
 // Deprecated: pls check database error and return defined status error

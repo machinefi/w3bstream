@@ -79,6 +79,12 @@ func (v Error) Key() string {
 		return "ProjectNotFound"
 	case ConfigNotFound:
 		return "ConfigNotFound"
+	case AppletNotFound:
+		return "AppletNotFound"
+	case InstanceNotFound:
+		return "InstanceNotFound"
+	case ResourceNotFound:
+		return "ResourceNotFound"
 	case Conflict:
 		return "Conflict"
 	case ProjectConfigConflict:
@@ -143,6 +149,12 @@ func (v Error) Msg() string {
 		return "Project Not Found"
 	case ConfigNotFound:
 		return "Config Not Found"
+	case AppletNotFound:
+		return "Applet Not Found"
+	case InstanceNotFound:
+		return "Instance Not Found"
+	case ResourceNotFound:
+		return "Resource Not Found"
 	case Conflict:
 		return "Conflict conflict error"
 	case ProjectConfigConflict:
@@ -206,6 +218,12 @@ func (v Error) CanBeTalk() bool {
 	case ProjectNotFound:
 		return true
 	case ConfigNotFound:
+		return true
+	case AppletNotFound:
+		return true
+	case InstanceNotFound:
+		return true
+	case ResourceNotFound:
 		return true
 	case Conflict:
 		return true

@@ -304,3 +304,50 @@ func ReDeployInstance(ctx context.Context, r *CreateOrReDeployInstanceReq) (*Cre
 		InstanceState: ins.State,
 	}, nil
 }
+
+func GetBySFID(ctx context.Context, id types.SFID) (*models.Instance, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Instance{RelInstance: models.RelInstance{InstanceID: id}}
+
+	if err := m.FetchByInstanceID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.InstanceNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	exists := false
+	if m.State, exists = vm.GetInstanceState(m.InstanceID); !exists {
+		m.State = enums.INSTANCE_STATE_UNKNOWN
+	}
+	return m, nil
+}
+
+func GetByAppletSFID(ctx context.Context, id types.SFID) (*models.Instance, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Instance{RelApplet: models.RelApplet{AppletID: id}}
+
+	if err := m.FetchByAppletID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.InstanceNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	exists := false
+	if m.State, exists = vm.GetInstanceState(m.InstanceID); !exists {
+		m.State = enums.INSTANCE_STATE_UNKNOWN
+	}
+	return m, nil
+}
+
+func RemoveBySFID(ctx context.Context, id types.SFID) error {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Instance{RelInstance: models.RelInstance{InstanceID: id}}
+
+	if err := m.DeleteByInstanceID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return status.InstanceNotFound
+		}
+		return status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return nil
+}

@@ -4,13 +4,12 @@ import (
 	"context"
 	"mime/multipart"
 
-	"github.com/pkg/errors"
-
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/pkg/errors"
 )
 
 func FetchOrCreateResource(ctx context.Context, f *multipart.FileHeader) (*models.Resource, error) {
@@ -64,4 +63,17 @@ func DeleteResource(ctx context.Context, resID types.SFID) error {
 	return status.CheckDatabaseError((&models.Resource{
 		RelResource: models.RelResource{ResourceID: resID},
 	}).DeleteByResourceID(types.MustMgrDBExecutorFromContext(ctx)))
+}
+
+func GetBySFID(ctx context.Context, id types.SFID) (*models.Resource, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Resource{RelResource: models.RelResource{ResourceID: id}}
+
+	if err := m.FetchByResourceID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.ResourceNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return m, nil
 }

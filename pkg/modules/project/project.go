@@ -508,3 +508,32 @@ func RemoveProjectByProjectID(ctx context.Context, prjID types.SFID) error {
 		},
 	).Do()
 }
+
+func GetBySFID(ctx context.Context, prj types.SFID) (*models.Project, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+
+	m := &models.Project{
+		RelProject: models.RelProject{ProjectID: prj},
+	}
+	if err := m.FetchByProjectID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.ProjectNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return m, nil
+}
+
+func GetByName(ctx context.Context, name string) (*models.Project, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Project{
+		ProjectName: models.ProjectName{Name: name},
+	}
+	if err := m.FetchByName(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.ProjectNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return m, nil
+}
