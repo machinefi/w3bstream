@@ -24,8 +24,7 @@ func CreateCronJob(ctx context.Context, projectID types.SFID, r *CreateCronJobRe
 	_, l = l.Start(ctx, "CreateCronJob")
 	defer l.End()
 
-	p := cron.NewParser(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
-	if _, err := p.Parse(r.CronExpressions); err != nil {
+	if _, err := cron.ParseStandard(r.CronExpressions); err != nil {
 		l.WithValues("cronExpressions", r.CronExpressions).Error(errors.Wrap(err, "cron expressions illegal"))
 		return nil, status.BadRequest.StatusErr().WithDesc("cron expressions illegal")
 	}

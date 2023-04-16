@@ -53,7 +53,7 @@ func (t *cronJob) do(ctx context.Context, s *gocron.Scheduler) {
 	t.tidyCronJobs(ctx, s, cs, l)
 
 	for _, c := range cs {
-		if _, err := s.CronWithSeconds(c.CronExpressions).Tag(c.CronJobID.String()).Do(t.sendEvent, ctx, c); err != nil {
+		if _, err := s.Cron(c.CronExpressions).Tag(c.CronJobID.String()).Do(t.sendEvent, ctx, c); err != nil {
 			if !strings.Contains(err.Error(), "non-unique tag") {
 				l.WithValues("cronJobID", c.CronJobID).Error(errors.Wrap(err, "create new cron job failed"))
 			}
