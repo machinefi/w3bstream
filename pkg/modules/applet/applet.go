@@ -348,6 +348,29 @@ func GetBySFID(ctx context.Context, id types.SFID) (*models.Applet, error) {
 	return m, nil
 }
 
+type Detail struct {
+	models.Applet
+	models.ResourceInfo
+	*models.InstanceInfo
+}
+
+func GetDetail(ctx context.Context) *Detail {
+	app := types.MustAppletFromContext(ctx)
+	res := types.MustResourceFromContext(ctx)
+	ins, _ := types.InstanceFromContext(ctx)
+
+	ret := &Detail{
+		Applet:       *app,
+		ResourceInfo: res.ResourceInfo,
+	}
+
+	if ins != nil {
+		ret.InstanceInfo = &ins.InstanceInfo
+	}
+
+	return ret
+}
+
 func RemoveBySFID(ctx context.Context, id types.SFID) error {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	m := &models.Applet{RelApplet: models.RelApplet{AppletID: id}}
