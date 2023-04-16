@@ -29,6 +29,7 @@ type (
 	ExportFuncs struct {
 		rt  *Runtime
 		res *mapx.Map[uint32, []byte]
+		evs *mapx.Map[uint32, []byte]
 		env *wasm.Env
 		kvs wasm.KVStore
 		db  wasm.SQLStore
@@ -42,6 +43,7 @@ type (
 func NewExportFuncs(ctx context.Context, rt *Runtime) (*ExportFuncs, error) {
 	ef := &ExportFuncs{
 		res: wasm.MustRuntimeResourceFromContext(ctx),
+		evs: wasm.MustRuntimeEventTypesFromContext(ctx),
 		kvs: wasm.MustKVStoreFromContext(ctx),
 		log: wasm.MustLoggerFromContext(ctx),
 		ctx: ctx,
@@ -393,5 +395,19 @@ func (ef *ExportFuncs) GetEnv(kAddr, kSize int32, vmAddrPtr, vmSizePtr int32) in
 		ef.log.Error(err)
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
+	return int32(wasm.ResultStatusCode_OK)
+}
+
+func (ef *ExportFuncs) GetEventType(rid, vmAddrPtr, vmSizePtr int32) int32 {
+	data, ok := ef.res.Load(uint32(rid))
+	if !ok {
+		return int32(wasm.ResultStatusCode_ResourceNotFound)
+	}
+
+	if err := ef.rt.Copy(data, vmAddrPtr, vmSizePtr); err != nil {
+		ef.log.Error(err)
+		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
+	}
+
 	return int32(wasm.ResultStatusCode_OK)
 }

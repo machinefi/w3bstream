@@ -24,10 +24,10 @@ type Instance interface {
 	Start(context.Context) error
 	Stop(context.Context) error
 	State() enums.InstanceState
-	AddResource(context.Context, []byte) uint32
-	RmvResource(context.Context, uint32)
-	GetResource(uint32) ([]byte, bool)
-	Get(k string) int32
+	// AddResource(context.Context, []byte) uint32
+	// RmvResource(context.Context, uint32)
+	// GetResource(uint32) ([]byte, bool)
+	// Get(k string) int32
 
 	EventConsumer
 }
@@ -40,7 +40,7 @@ type EventHandleResult struct {
 }
 
 type EventConsumer interface {
-	HandleEvent(ctx context.Context, handler string, payload []byte) *EventHandleResult
+	HandleEvent(ctx context.Context, handler, eventType string, payload []byte) *EventHandleResult
 }
 
 type KVStore interface {

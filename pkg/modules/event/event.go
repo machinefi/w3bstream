@@ -116,7 +116,7 @@ func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) 
 		wg.Add(1)
 		go func(v *strategy.InstanceHandler) {
 			defer wg.Done()
-			res <- i.HandleEvent(ctx, v.Handler, []byte(r.Payload))
+			res <- i.HandleEvent(ctx, v.Handler, eventType, []byte(r.Payload))
 		}(v)
 	}
 	wg.Wait()

@@ -6,8 +6,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/machinefi/w3bstream/pkg/depends/x/stringsx"
-
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
@@ -16,6 +14,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/depends/schema"
+	"github.com/machinefi/w3bstream/pkg/depends/x/stringsx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
