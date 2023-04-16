@@ -20,6 +20,7 @@ func init() {
 	Root.Register(kit.NewRouter(&GetInstanceByInstanceID{}))
 	Root.Register(kit.NewRouter(&GetInstanceByAppletID{}))
 	Root.Register(kit.NewRouter(&ControlInstance{}))
+	Root.Register(kit.NewRouter(&ReDeployInstance{}))
 }
 
 func validateByInstance(ctx context.Context, instanceID types.SFID) (*models.Instance, error) {

@@ -3,6 +3,7 @@ package models
 import (
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
+	_ "github.com/machinefi/w3bstream/pkg/depends/util/strfmt"
 	"github.com/machinefi/w3bstream/pkg/enums"
 )
 
@@ -26,7 +27,7 @@ type RelProject struct {
 }
 
 type ProjectName struct {
-	Name string `db:"f_name" json:"name"` // Name project name
+	Name string `db:"f_name" json:"name" validate:"@projectName"` // Name project name
 }
 
 type ProjectBase struct {

@@ -56,7 +56,7 @@ func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (
 	m := &models.Project{
 		RelProject:  models.RelProject{ProjectID: idg.MustGenSFID()},
 		RelAccount:  models.RelAccount{AccountID: a.AccountID},
-		ProjectName: r.ProjectName,
+		ProjectName: models.ProjectName{Name: r.Name},
 		ProjectBase: r.ProjectBase,
 	}
 
