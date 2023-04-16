@@ -11,15 +11,12 @@ import (
 
 type CreateApplet struct {
 	httpx.MethodPost
-	ProjectName            string `in:"path" name:"projectName"`
 	applet.CreateAppletReq `in:"body" mime:"multipart"`
 }
 
-func (r *CreateApplet) Path() string { return "/:projectName" }
-
 func (r *CreateApplet) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
-	ctx, err := ca.WithProjectContextByName(ctx, r.ProjectName)
+	ctx, err := middleware.CurrentAccountFromContext(ctx).
+		WithProjectContextByName(ctx, middleware.ProjectProviderFromContext(ctx))
 	if err != nil {
 		return nil, err
 	}

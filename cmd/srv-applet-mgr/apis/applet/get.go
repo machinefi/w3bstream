@@ -5,20 +5,19 @@ import (
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 type ListApplet struct {
 	httpx.MethodGet
-	ProjectName string `in:"path" name:"projectName"`
 	applet.ListAppletReq
 }
 
-func (r *ListApplet) Path() string { return "/:projectName" }
-
 func (r *ListApplet) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
-	ctx, err := ca.WithProjectContextByName(ctx, r.ProjectName)
+	ctx, err := middleware.CurrentAccountFromContext(ctx).
+		WithProjectContextByName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err
 	}
@@ -26,19 +25,37 @@ func (r *ListApplet) Output(ctx context.Context) (interface{}, error) {
 	return applet.ListApplets(ctx, &r.ListAppletReq)
 }
 
-type GetApplet struct {
-	httpx.MethodGet
-	applet.GetAppletReq
+type AppletDetail struct {
+	models.Applet
+	models.ResourceInfo
+	*models.InstanceInfo
 }
 
-func (r *GetApplet) Path() string { return "/:projectName/:appletID" }
+type GetApplet struct {
+	httpx.MethodGet
+	AppletID types.SFID `in:"path" name:"appletID"`
+}
+
+func (r *GetApplet) Path() string { return "/:appletID" }
 
 func (r *GetApplet) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
-	ctx, err := ca.WithProjectContextByName(ctx, r.ProjectName)
+	ctx, err := middleware.CurrentAccountFromContext(ctx).
+		WithAppletContextBySFID(ctx, r.AppletID)
 	if err != nil {
 		return nil, err
 	}
 
-	return applet.GetAppletByAppletID(ctx, r.AppletID)
+	app := types.MustAppletFromContext(ctx)
+	res := types.MustResourceFromContext(ctx)
+	ins, _ := types.InstanceFromContext(ctx)
+
+	ret := &AppletDetail{
+		Applet:       *app,
+		ResourceInfo: res.ResourceInfo,
+	}
+	if ins != nil {
+		ret.InstanceInfo = &ins.InstanceInfo
+	}
+
+	return ret, nil
 }

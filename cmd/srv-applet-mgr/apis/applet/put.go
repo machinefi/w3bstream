@@ -18,9 +18,8 @@ type UpdateApplet struct {
 func (r *UpdateApplet) Path() string { return "/:appletID" }
 
 func (r *UpdateApplet) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
-
-	ctx, err := ca.WithAppletContext(ctx, r.AppletID)
+	ctx, err := middleware.CurrentAccountFromContext(ctx).
+		WithAppletContextBySFID(ctx, r.AppletID)
 	if err != nil {
 		return nil, err
 	}
