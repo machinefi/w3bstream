@@ -12,6 +12,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/modules/account"
 	"github.com/machinefi/w3bstream/pkg/modules/blockchain"
+	"github.com/machinefi/w3bstream/pkg/modules/cronjob"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
@@ -83,6 +84,9 @@ func main() {
 			},
 			func() {
 				blockchain.Monitor(global.WithContext(context.Background()))
+			},
+			func() {
+				cronjob.Run(global.WithContext(context.Background()))
 			},
 		)
 	})

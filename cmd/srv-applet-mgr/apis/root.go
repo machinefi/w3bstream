@@ -3,6 +3,7 @@ package apis
 import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/account"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/applet"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/cronjob"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/deploy"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/event"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/login"
@@ -52,6 +53,7 @@ func init() {
 			RouterAuth.Register(publisher.Root)
 			RouterAuth.Register(strategy.Root)
 			RouterAuth.Register(monitor.Root)
+			RouterAuth.Register(cronjob.Root)
 			RouterAuth.Register(resource.Root)
 			RouterAuth.Register(RouterDebug)
 		}

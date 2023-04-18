@@ -23,11 +23,7 @@ func (s *Schema) ConfigType() enums.ConfigType {
 }
 
 func (s *Schema) WithContext(ctx context.Context) context.Context {
-	db, err := types.MustWasmDBExecutorFromContext(ctx).NewConnection()
-	if err != nil {
-		panic(err)
-	}
-
+	db := types.MustWasmDBExecutorFromContext(ctx)
 	if s.Name == "" {
 		prj := types.MustProjectFromContext(ctx)
 		s.WithName(prj.Name)

@@ -76,15 +76,13 @@ func (e Endpoint) UseSlave() sqlx.DBExecutor {
 	return e.slave
 }
 
-// Establish a new connection in master mode with pg
-func (e Endpoint) NewConnection() (sqlx.DBExecutor, error) {
-	return e.conn(e.masterURL(), false)
-}
-
 func (e *Endpoint) conn(url string, readonly bool) (*sqlx.DB, error) {
 	connector := &postgres.Connector{
 		Host:  url,
 		Extra: e.Master.Param.Encode(),
+	}
+	if e.Database != nil {
+		connector.MustSchema = e.Database.Schema
 	}
 	if !readonly {
 		connector.Extensions = e.Extensions

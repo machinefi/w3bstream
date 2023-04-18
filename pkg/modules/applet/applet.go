@@ -2,6 +2,7 @@ package applet
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"mime/multipart"
 
@@ -9,11 +10,15 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
+	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/config"
+	"github.com/machinefi/w3bstream/pkg/modules/deploy"
 	"github.com/machinefi/w3bstream/pkg/modules/resource"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
 type CreateAppletReq struct {
@@ -104,6 +109,7 @@ func UpdateApplet(ctx context.Context, appletID types.SFID, r *UpdateAppletReq) 
 		return err
 	}
 
+	needUpdateAppletName := r.Info != nil && len(r.Info.AppletName) > 0
 	needUpdateStrategies := r.Info != nil && len(r.Strategies) > 0
 
 	err = sqlx.NewTasks(d).With(
@@ -113,7 +119,7 @@ func UpdateApplet(ctx context.Context, appletID types.SFID, r *UpdateAppletReq) 
 		func(db sqlx.DBExecutor) error {
 			mApplet.RelResource = mResource.RelResource
 			mApplet.WasmName = r.WasmName
-			if r.Info != nil {
+			if needUpdateAppletName {
 				mApplet.Name = r.AppletName
 			}
 			return mApplet.UpdateByAppletID(db)
@@ -157,6 +163,104 @@ func UpdateApplet(ctx context.Context, appletID types.SFID, r *UpdateAppletReq) 
 	}
 
 	l.WithValues("applet", appletID, "path", mResource.ResourceInfo.Path).Info("applet uploaded")
+	return nil
+}
+
+type UpdateAndDeployReq struct {
+	File  *multipart.FileHeader `name:"file"`
+	*Info `name:"info"`
+	Cache *wasm.Cache `name:"cache,omitempty"`
+}
+
+func UpdateAndDeploy(ctx context.Context, r *UpdateAndDeployReq) error {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	l := types.MustLoggerFromContext(ctx)
+	idg := confid.MustSFIDGeneratorFromContext(ctx)
+	app := types.MustAppletFromContext(ctx)
+	ins := types.MustInstanceFromContext(ctx)
+
+	_, l = l.Start(ctx, "UpdateAndDeploy")
+	defer l.End()
+
+	mResource, err := resource.FetchOrCreateResource(ctx, r.File)
+	if err != nil {
+		l.Error(err)
+		return err
+	}
+
+	needUpdateAppletName := r.Info != nil && len(r.Info.AppletName) > 0
+	needUpdateStrategies := r.Info != nil && len(r.Info.Strategies) > 0
+
+	_ctx := context.Background()
+	err = sqlx.NewTasks(d).With(
+		func(db sqlx.DBExecutor) error {
+			app.RelResource = mResource.RelResource
+			app.WasmName = r.WasmName
+			if needUpdateAppletName {
+				app.Name = r.AppletName
+			}
+			return app.UpdateByAppletID(db)
+		},
+		func(db sqlx.DBExecutor) error {
+			if !needUpdateStrategies {
+				return nil
+			}
+			s := &models.Strategy{}
+			_, err := db.Exec(
+				builder.Delete().From(
+					db.T(s),
+					builder.Where(
+						builder.And(
+							s.ColProjectID().Eq(app.ProjectID),
+							s.ColAppletID().Eq(app.AppletID),
+						),
+					),
+				),
+			)
+			return err
+		},
+		func(db sqlx.DBExecutor) error {
+			for i := range r.Info.Strategies {
+				if err := (&models.Strategy{
+					RelStrategy:  models.RelStrategy{StrategyID: idg.MustGenSFID()},
+					RelProject:   models.RelProject{ProjectID: app.ProjectID},
+					RelApplet:    models.RelApplet{AppletID: app.AppletID},
+					StrategyInfo: r.Info.Strategies[i],
+				}).Create(db); err != nil {
+					return err
+				}
+			}
+			return nil
+		},
+		func(db sqlx.DBExecutor) error {
+			if r.Cache == nil {
+				r.Cache = wasm.DefaultCache()
+			}
+			val, err := json.Marshal(r.Cache)
+			if err != nil {
+				l.Error(err)
+				return status.InternalServerError.StatusErr().WithDesc(err.Error())
+			}
+
+			_, err = config.CreateOrUpdateConfig(ctx, ins.InstanceID, r.Cache.ConfigType(), val)
+			return err
+		},
+		func(db sqlx.DBExecutor) error {
+			var _err error
+			_ctx, _err = deploy.WithInstanceRuntimeContext(ctx)
+			return _err
+		},
+		func(db sqlx.DBExecutor) error {
+			return vm.NewInstanceWithState(_ctx, mResource.Path, ins.InstanceID, enums.INSTANCE_STATE__STARTED)
+		},
+	).Do()
+
+	if err != nil {
+		l.Error(err)
+		return status.CheckDatabaseError(err, "UpdateApplet")
+	}
+
+	l.WithValues("applet", app.AppletID, "path", mResource.ResourceInfo.Path).Info("applet uploaded and redeploy")
 	return nil
 }
 
