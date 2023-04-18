@@ -8,7 +8,6 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
@@ -37,10 +36,9 @@ type CreateProjectRsp struct {
 	Schema          *wasm.Schema `json:"schema,omitempty"`
 }
 
-func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (*CreateProjectRsp, error) {
+func CreateProject(ctx context.Context, acc types.SFID, r *CreateProjectReq, hdl mq.OnMessage) (*CreateProjectRsp, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
-	a := middleware.MustCurrentAccountFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 
 	_, l = l.Start(ctx, "CreateProject")
@@ -48,7 +46,7 @@ func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (
 
 	m := &models.Project{
 		RelProject:  models.RelProject{ProjectID: idg.MustGenSFID()},
-		RelAccount:  models.RelAccount{AccountID: a.AccountID},
+		RelAccount:  models.RelAccount{AccountID: acc},
 		ProjectName: models.ProjectName{Name: r.Name},
 		ProjectBase: r.ProjectBase,
 	}
@@ -272,44 +270,6 @@ func ListProject(ctx context.Context, r *ListProjectReq) (*ListProjectRsp, error
 	}
 
 	return ret, nil
-}
-
-func GetProjectByProjectID(ctx context.Context, prjID types.SFID) (*Detail, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-	ca := middleware.MustCurrentAccountFromContext(ctx)
-
-	_, l = l.Start(ctx, "GetProjectByProjectID")
-	defer l.End()
-
-	_, err := ca.ValidateProjectPerm(ctx, prjID)
-	if err != nil {
-		l.Error(err)
-		return nil, err
-	}
-	m := &models.Project{RelProject: models.RelProject{ProjectID: prjID}}
-
-	if err = m.FetchByProjectID(d); err != nil {
-		l.Error(err)
-		return nil, status.CheckDatabaseError(err, "GetProjectByProjectID")
-	}
-
-	ret, err := ListProject(ctx, &ListProjectReq{
-		accountID:  ca.AccountID,
-		ProjectIDs: []types.SFID{prjID},
-	})
-
-	if err != nil {
-		l.Error(err)
-		return nil, err
-	}
-
-	if len(ret.Data) == 0 {
-		l.Warn(errors.New("project not found"))
-		return nil, status.NotFound
-	}
-
-	return &ret.Data[0], nil
 }
 
 func GetProjectByProjectName(ctx context.Context, prjName string) (*models.Project, error) {

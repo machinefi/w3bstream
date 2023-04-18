@@ -3,6 +3,7 @@ package project
 import (
 	"context"
 
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
@@ -15,8 +16,9 @@ type CreateProject struct {
 }
 
 func (r *CreateProject) Output(ctx context.Context) (interface{}, error) {
+	ca := middleware.MustCurrentAccountFromContext(ctx)
 	return project.CreateProject(
-		ctx, &r.CreateProjectReq,
+		ctx, ca.AccountID, &r.CreateProjectReq,
 		func(ctx context.Context, channel string, data *eventpb.Event) (interface{}, error) {
 			return event.OnEventReceived(ctx, channel, data)
 		},
