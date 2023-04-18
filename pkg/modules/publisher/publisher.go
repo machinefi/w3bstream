@@ -35,18 +35,13 @@ func CreatePublisher(ctx context.Context, project *models.Project, r *CreatePubl
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
+	publisherJwt := jwt.MustConfFromContext(ctx)
 
 	_, l = l.Start(ctx, "CreatePublisher")
 	defer l.End()
 
-	publisherJwt := &jwt.Jwt{
-		Issuer:  project.ProjectBase.Issuer,
-		ExpIn:   project.ProjectBase.ExpIn,
-		SignKey: project.ProjectBase.SignKey,
-	}
-
 	publisherID := idg.MustGenSFID()
-	token, err := publisherJwt.GenerateTokenByPayload(publisherID)
+	token, err := publisherJwt.GenerateTokenWithoutExpByPayload(publisherID)
 	if err != nil {
 		l.Error(err)
 		return nil, status.InternalServerError.StatusErr().WithDesc(err.Error())
@@ -203,17 +198,6 @@ func UpdatePublisher(ctx context.Context, project *models.Project, publisherID t
 	_, l = l.Start(ctx, "UpdatePublisher")
 	defer l.End()
 
-	publisherJwt := &jwt.Jwt{
-		Issuer:  project.ProjectBase.Issuer,
-		ExpIn:   project.ProjectBase.ExpIn,
-		SignKey: project.ProjectBase.SignKey,
-	}
-	token, err := publisherJwt.GenerateTokenByPayload(publisherID)
-	if err != nil {
-		l.Error(err)
-		return status.InternalServerError.StatusErr().WithDesc(err.Error())
-	}
-
 	err = sqlx.NewTasks(d).With(
 		func(db sqlx.DBExecutor) error {
 			return m.FetchByPublisherID(d)
@@ -221,7 +205,6 @@ func UpdatePublisher(ctx context.Context, project *models.Project, publisherID t
 		func(db sqlx.DBExecutor) error {
 			m.PublisherInfo.Name = r.Name
 			m.PublisherInfo.Key = r.Key
-			m.PublisherInfo.Token = token
 			return m.UpdateByPublisherID(d)
 		},
 	).Do()

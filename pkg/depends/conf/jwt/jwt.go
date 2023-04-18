@@ -38,6 +38,18 @@ func (c *Jwt) GenerateTokenByPayload(payload interface{}) (string, error) {
 	return token.SignedString([]byte(c.SignKey))
 }
 
+func (c *Jwt) GenerateTokenWithoutExpByPayload(payload interface{}) (string, error) {
+	claim := &Claims{
+		Payload: payload,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: nil,
+			Issuer:    c.Issuer,
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
+	return token.SignedString([]byte(c.SignKey))
+}
+
 func (c *Jwt) ParseToken(v string) (*Claims, error) {
 	t, err := jwt.ParseWithClaims(
 		v,
