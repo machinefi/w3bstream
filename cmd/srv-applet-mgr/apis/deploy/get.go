@@ -20,7 +20,8 @@ func (r *GetInstanceByInstanceID) Path() string {
 }
 
 func (r *GetInstanceByInstanceID) Output(ctx context.Context) (interface{}, error) {
-	_, err := validateByInstance(ctx, r.InstanceID)
+	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
+		WithInstanceContextBySFID(ctx, r.InstanceID)
 	if err != nil {
 		return nil, err
 	}
