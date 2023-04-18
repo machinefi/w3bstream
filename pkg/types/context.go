@@ -31,7 +31,51 @@ type (
 	CtxInstance          struct{}
 	CtxEthClient         struct{} // CtxEthClient ETHClientConfig
 	CtxWhiteList         struct{}
+	CtxStrategy          struct{}
+	CtxPublisher         struct{}
 )
+
+func WithPublisher(ctx context.Context, v *models.Publisher) context.Context {
+	return contextx.WithValue(ctx, CtxPublisher{}, v)
+}
+
+func WithPublisherContext(v *models.Publisher) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxPublisher{}, v)
+	}
+}
+
+func PublisherFromContext(ctx context.Context) (*models.Publisher, bool) {
+	v, ok := ctx.Value(CtxPublisher{}).(*models.Publisher)
+	return v, ok
+}
+
+func MustPublisherFromContext(ctx context.Context) *models.Publisher {
+	v, ok := PublisherFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithStrategy(ctx context.Context, v *models.Strategy) context.Context {
+	return contextx.WithValue(ctx, CtxStrategy{}, v)
+}
+
+func WithStrategyContext(v *models.Strategy) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxStrategy{}, v)
+	}
+}
+
+func StrategyFromContext(ctx context.Context) (*models.Strategy, bool) {
+	v, ok := ctx.Value(CtxStrategy{}).(*models.Strategy)
+	return v, ok
+}
+
+func MustStrategyFromContext(ctx context.Context) *models.Strategy {
+	v, ok := StrategyFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
 
 func WithMgrDBExecutor(ctx context.Context, v sqlx.DBExecutor) context.Context {
 	return contextx.WithValue(ctx, CtxMgrDBExecutor{}, v)

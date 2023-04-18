@@ -19,7 +19,7 @@ func (r *RemoveCronJob) Path() string { return "/:projectID/:cronJobID" }
 
 func (r *RemoveCronJob) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.MustCurrentAccountFromContext(ctx)
-	_, err := ca.WithProjectContextByID(ctx, r.ProjectID)
+	_, err := ca.WithProjectContextBySFID(ctx, r.ProjectID)
 	if err != nil {
 		return nil, err
 	}

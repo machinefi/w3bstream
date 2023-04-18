@@ -87,6 +87,16 @@ const (
 	ProjectNotFound
 	// @errTalk Config Not Found
 	ConfigNotFound
+	// @errTalk Applet Not Found
+	AppletNotFound
+	// @errTalk Instance Not Found
+	InstanceNotFound
+	// @errTalk Resource Not Found
+	ResourceNotFound
+	// @errTalk Strategy Not Found
+	StrategyNotFound
+	// @errTalk Publisher Not Found
+	PublisherNotFound
 )
 
 // Deprecated: pls check database error and return defined status error

@@ -347,3 +347,16 @@ func RemoveStrategy(ctx context.Context, r *RemoveStrategyReq) error {
 		},
 	).Do()
 }
+
+func GetBySFID(ctx context.Context, id types.SFID) (*models.Strategy, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Strategy{RelStrategy: models.RelStrategy{StrategyID: id}}
+
+	if err := m.FetchByStrategyID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.StrategyNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return m, nil
+}

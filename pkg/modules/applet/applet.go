@@ -441,3 +441,16 @@ func GetAppletByAppletID(ctx context.Context, appletID types.SFID) (*GetAppletRs
 		},
 	}, err
 }
+
+func GetBySFID(ctx context.Context, id types.SFID) (*models.Applet, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Applet{RelApplet: models.RelApplet{AppletID: id}}
+
+	if err := m.FetchByAppletID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.AppletNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return m, nil
+}
