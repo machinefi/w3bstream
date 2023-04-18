@@ -490,3 +490,31 @@ func GetByName(ctx context.Context, name string) (*models.Project, error) {
 	}
 	return m, nil
 }
+
+func List(ctx context.Context, r *ListReq) (ret *ListRsp, err error) {
+	var (
+		d = types.MustMgrDBExecutorFromContext(ctx)
+		m = &models.Project{}
+
+		cond = r.Condition(types.MustAccountFromContext(ctx).AccountID)
+		adds = builder.Additions{
+			r.Pager.Addition(),
+			builder.OrderBy(
+				builder.DescOrder(m.ColUpdatedAt()),
+				builder.DescOrder(m.ColCreatedAt()),
+			),
+		}
+	)
+	ret = &ListRsp{}
+	ret.Data, err = m.List(d, cond, adds...)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+
+	ret.Total, err = m.Count(d, cond)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+
+	return ret, nil
+}

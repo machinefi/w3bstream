@@ -33,7 +33,29 @@ type (
 	CtxWhiteList         struct{}
 	CtxStrategy          struct{}
 	CtxPublisher         struct{}
+	CtxAccount           struct{}
 )
+
+func WithAccount(ctx context.Context, v *models.Account) context.Context {
+	return contextx.WithValue(ctx, CtxAccount{}, v)
+}
+
+func WithAccountContext(v *models.Account) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxAccount{}, v)
+	}
+}
+
+func AccountFromContext(ctx context.Context) (*models.Account, bool) {
+	v, ok := ctx.Value(CtxAccount{}).(*models.Account)
+	return v, ok
+}
+
+func MustAccountFromContext(ctx context.Context) *models.Account {
+	v, ok := AccountFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
 
 func WithPublisher(ctx context.Context, v *models.Publisher) context.Context {
 	return contextx.WithValue(ctx, CtxPublisher{}, v)

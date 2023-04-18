@@ -59,6 +59,10 @@ type CurrentAccount struct {
 	models.Account
 }
 
+func (v *CurrentAccount) WithAccount(ctx context.Context) context.Context {
+	return types.WithAccount(ctx, &v.Account)
+}
+
 // WithProjectContextByName With project context by project name(in database)
 func (v *CurrentAccount) WithProjectContextByName(ctx context.Context, name string) (context.Context, error) {
 	prj, err := project.GetByName(ctx, name)

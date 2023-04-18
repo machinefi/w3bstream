@@ -17,6 +17,13 @@ type CreateProject struct {
 
 func (r *CreateProject) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.MustCurrentAccountFromContext(ctx)
+
+	prefix, err := middleware.ProjectNameModifier(ctx)
+	if err != nil {
+		return nil, err
+	}
+	r.Name = prefix + r.Name
+
 	return project.CreateProject(
 		ctx, ca.AccountID, &r.CreateProjectReq,
 		func(ctx context.Context, channel string, data *eventpb.Event) (interface{}, error) {
