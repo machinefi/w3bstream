@@ -6,6 +6,7 @@ import (
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/account"
@@ -36,8 +37,15 @@ func (r *ContextAccountAuth) Output(ctx context.Context) (interface{}, error) {
 	return &CurrentAccount{*ca}, nil
 }
 
-func CurrentAccountFromContext(ctx context.Context) *CurrentAccount {
-	return ctx.Value(contextAccountAuthKey).(*CurrentAccount)
+func MustCurrentAccountFromContext(ctx context.Context) *CurrentAccount {
+	ca, ok := ctx.Value(contextAccountAuthKey).(*CurrentAccount)
+	must.BeTrue(ok)
+	return ca
+}
+
+func CurrentAccountFromContext(ctx context.Context) (*CurrentAccount, bool) {
+	ca, ok := ctx.Value(contextAccountAuthKey).(*CurrentAccount)
+	return ca, ok
 }
 
 type CurrentAccount struct {
@@ -45,7 +53,7 @@ type CurrentAccount struct {
 }
 
 func (v *CurrentAccount) WithProjectContextByName(ctx context.Context, prjName string) (context.Context, error) {
-	a := CurrentAccountFromContext(ctx)
+	a := MustCurrentAccountFromContext(ctx)
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	m := &models.Project{ProjectName: models.ProjectName{Name: prjName}}
 	if err := m.FetchByName(d); err != nil {
@@ -59,7 +67,7 @@ func (v *CurrentAccount) WithProjectContextByName(ctx context.Context, prjName s
 }
 
 func (v *CurrentAccount) WithProjectContextByID(ctx context.Context, prjID types.SFID) (context.Context, error) {
-	a := CurrentAccountFromContext(ctx)
+	a := MustCurrentAccountFromContext(ctx)
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	m := &models.Project{RelProject: models.RelProject{ProjectID: prjID}}
 	if err := m.FetchByProjectID(d); err != nil {
@@ -125,7 +133,7 @@ func (v *CurrentAccount) WithInstanceContext(ctx context.Context, instanceID typ
 // Deprecated: Use WithProjectContextByID instead
 func (v *CurrentAccount) ValidateProjectPerm(ctx context.Context, prjID types.SFID) (*models.Project, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
-	a := CurrentAccountFromContext(ctx)
+	a := MustCurrentAccountFromContext(ctx)
 	m := &models.Project{RelProject: models.RelProject{ProjectID: prjID}}
 
 	if err := m.FetchByProjectID(d); err != nil {
@@ -141,7 +149,7 @@ func (v *CurrentAccount) ValidateProjectPerm(ctx context.Context, prjID types.SF
 // Deprecated: Use WithProjectContextByName instead
 func (v *CurrentAccount) ValidateProjectPermByPrjName(ctx context.Context, projectName string) (*models.Project, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
-	a := CurrentAccountFromContext(ctx)
+	a := MustCurrentAccountFromContext(ctx)
 	m := &models.Project{ProjectName: models.ProjectName{Name: projectName}}
 
 	if err := m.FetchByName(d); err != nil {

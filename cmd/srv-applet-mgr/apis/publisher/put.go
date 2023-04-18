@@ -21,7 +21,7 @@ func (r *UpdatePublisher) Path() string {
 }
 
 func (r *UpdatePublisher) Output(ctx context.Context) (interface{}, error) {
-	a := middleware.CurrentAccountFromContext(ctx)
+	a := middleware.MustCurrentAccountFromContext(ctx)
 	ctx, err := a.WithProjectContextByName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err

@@ -38,7 +38,7 @@ func (r *GetInstanceByAppletID) Path() string {
 }
 
 func (r *GetInstanceByAppletID) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
 
 	app, err := applet.GetAppletByAppletID(ctx, r.AppletID)
 	if err != nil {

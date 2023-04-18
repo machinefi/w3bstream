@@ -17,7 +17,7 @@ type ListApplet struct {
 func (r *ListApplet) Path() string { return "/:projectName" }
 
 func (r *ListApplet) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
 	ctx, err := ca.WithProjectContextByName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ type GetApplet struct {
 func (r *GetApplet) Path() string { return "/:projectName/:appletID" }
 
 func (r *GetApplet) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
 	ctx, err := ca.WithProjectContextByName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err

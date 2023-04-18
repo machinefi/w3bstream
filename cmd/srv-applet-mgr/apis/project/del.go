@@ -17,7 +17,7 @@ type RemoveProject struct {
 func (r *RemoveProject) Path() string { return "/:projectName" }
 
 func (r *RemoveProject) Output(ctx context.Context) (interface{}, error) {
-	a := middleware.CurrentAccountFromContext(ctx)
+	a := middleware.MustCurrentAccountFromContext(ctx)
 	m, err := a.ValidateProjectPermByPrjName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err

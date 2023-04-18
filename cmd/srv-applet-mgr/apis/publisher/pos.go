@@ -20,7 +20,7 @@ func (r *CreatePublisher) Path() string {
 }
 
 func (r *CreatePublisher) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
 	ctx, err := ca.WithProjectContextByName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err

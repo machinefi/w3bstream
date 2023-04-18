@@ -18,7 +18,7 @@ type RemoveContractLog struct {
 func (r *RemoveContractLog) Path() string { return "/contract_log/:projectName/:contractLogID" }
 
 func (r *RemoveContractLog) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
 	_, err := ca.ValidateProjectPermByPrjName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ type RemoveChainTx struct {
 func (r *RemoveChainTx) Path() string { return "/chain_tx/:projectName/:chainTxID" }
 
 func (r *RemoveChainTx) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
 	_, err := ca.ValidateProjectPermByPrjName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ type RemoveChainHeight struct {
 func (r *RemoveChainHeight) Path() string { return "/chain_height/:projectName/:chainHeightID" }
 
 func (r *RemoveChainHeight) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
 	_, err := ca.ValidateProjectPermByPrjName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err

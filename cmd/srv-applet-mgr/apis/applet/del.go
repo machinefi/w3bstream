@@ -16,7 +16,7 @@ type RemoveApplet struct {
 func (r *RemoveApplet) Path() string { return "/:appletID" }
 
 func (r *RemoveApplet) Output(ctx context.Context) (interface{}, error) {
-	a := middleware.CurrentAccountFromContext(ctx)
+	a := middleware.MustCurrentAccountFromContext(ctx)
 	app, err := applet.GetAppletByAppletID(ctx, r.AppletID)
 	if err != nil {
 		return nil, err

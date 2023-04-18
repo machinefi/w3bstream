@@ -25,7 +25,7 @@ type ListProject struct {
 }
 
 func (r *ListProject) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
 	r.ListProjectReq.SetCurrentAccount(ca.AccountID)
 	return project.ListProject(ctx, &r.ListProjectReq)
 }

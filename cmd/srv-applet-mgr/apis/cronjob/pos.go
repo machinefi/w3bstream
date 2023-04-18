@@ -18,7 +18,7 @@ type CreateCronJob struct {
 func (r *CreateCronJob) Path() string { return "/:projectID" }
 
 func (r *CreateCronJob) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
 	_, err := ca.WithProjectContextByID(ctx, r.ProjectID)
 	if err != nil {
 		return nil, err

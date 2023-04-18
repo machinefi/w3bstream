@@ -21,7 +21,7 @@ func (r *CreateProjectSchema) Path() string {
 }
 
 func (r *CreateProjectSchema) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
 	ctx, err := ca.WithProjectContextByName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func (r *CreateOrUpdateProjectEnv) Path() string {
 }
 
 func (r *CreateOrUpdateProjectEnv) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
 	ctx, err := ca.WithProjectContextByName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err

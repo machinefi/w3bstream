@@ -17,7 +17,7 @@ type CreateContractLog struct {
 func (r *CreateContractLog) Path() string { return "/contract_log/:projectName" }
 
 func (r *CreateContractLog) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
 	_, err := ca.ValidateProjectPermByPrjName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ type CreateChainTx struct {
 func (r *CreateChainTx) Path() string { return "/chain_tx/:projectName" }
 
 func (r *CreateChainTx) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
 	_, err := ca.ValidateProjectPermByPrjName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ type CreateChainHeight struct {
 func (r *CreateChainHeight) Path() string { return "/chain_height/:projectName" }
 
 func (r *CreateChainHeight) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
 	_, err := ca.ValidateProjectPermByPrjName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err

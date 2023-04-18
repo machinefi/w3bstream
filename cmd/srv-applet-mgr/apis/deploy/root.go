@@ -25,7 +25,7 @@ func init() {
 
 func validateByInstance(ctx context.Context, instanceID types.SFID) (*models.Instance, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
-	ca := middleware.CurrentAccountFromContext(ctx)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
 
 	mInstance := &models.Instance{RelInstance: models.RelInstance{InstanceID: instanceID}}
 	err := mInstance.FetchByInstanceID(d)

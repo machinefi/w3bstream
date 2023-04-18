@@ -40,7 +40,7 @@ type CreateProjectRsp struct {
 func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (*CreateProjectRsp, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
-	a := middleware.CurrentAccountFromContext(ctx)
+	a := middleware.MustCurrentAccountFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 
 	_, l = l.Start(ctx, "CreateProject")
@@ -277,7 +277,7 @@ func ListProject(ctx context.Context, r *ListProjectReq) (*ListProjectRsp, error
 func GetProjectByProjectID(ctx context.Context, prjID types.SFID) (*Detail, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
-	ca := middleware.CurrentAccountFromContext(ctx)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
 
 	_, l = l.Start(ctx, "GetProjectByProjectID")
 	defer l.End()

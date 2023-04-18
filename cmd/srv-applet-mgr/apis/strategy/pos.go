@@ -19,7 +19,7 @@ func (r *CreateStrategy) Path() string {
 }
 
 func (r *CreateStrategy) Output(ctx context.Context) (interface{}, error) {
-	a := middleware.CurrentAccountFromContext(ctx)
+	a := middleware.MustCurrentAccountFromContext(ctx)
 	if m, err := a.ValidateProjectPermByPrjName(ctx, r.ProjectName); err != nil {
 		return nil, err
 	} else {

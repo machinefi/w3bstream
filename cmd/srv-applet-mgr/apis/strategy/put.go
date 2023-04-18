@@ -21,7 +21,7 @@ func (r *UpdateStrategy) Path() string {
 }
 
 func (r *UpdateStrategy) Output(ctx context.Context) (interface{}, error) {
-	a := middleware.CurrentAccountFromContext(ctx)
+	a := middleware.MustCurrentAccountFromContext(ctx)
 	if _, err := a.ValidateProjectPermByPrjName(ctx, r.ProjectName); err != nil {
 		return nil, err
 	}

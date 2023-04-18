@@ -16,7 +16,7 @@ type RemovePublisher struct {
 func (r *RemovePublisher) Path() string { return "/:projectName" }
 
 func (r *RemovePublisher) Output(ctx context.Context) (interface{}, error) {
-	a := middleware.CurrentAccountFromContext(ctx)
+	a := middleware.MustCurrentAccountFromContext(ctx)
 	if _, err := a.ValidateProjectPermByPrjName(ctx, r.ProjectName); err != nil {
 		return nil, err
 	}

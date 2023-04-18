@@ -20,7 +20,7 @@ func (r *CreateInstance) Path() string {
 }
 
 func (r *CreateInstance) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
 	ctx, err := ca.WithAppletContext(ctx, r.AppletID)
 	if err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func (r *ReDeployInstance) Path() string {
 }
 
 func (r *ReDeployInstance) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
 	ctx, err := ca.WithAppletContext(ctx, r.AppletID)
 	if err != nil {
 		return nil, err
