@@ -327,11 +327,7 @@ func ListApplets(ctx context.Context, r *ListAppletReq) (*ListAppletRsp, error) 
 	return &ListAppletRsp{applets, hints}, nil
 }
 
-type RemoveAppletReq struct {
-	AppletID types.SFID `in:"path"  name:"appletID"`
-}
-
-func RemoveApplet(ctx context.Context, r *RemoveAppletReq) error {
+func RemoveApplet(ctx context.Context, id types.SFID) error {
 	var (
 		d         = types.MustMgrDBExecutorFromContext(ctx)
 		l         = types.MustLoggerFromContext(ctx)
@@ -346,7 +342,7 @@ func RemoveApplet(ctx context.Context, r *RemoveAppletReq) error {
 
 	return sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
-			mApplet.AppletID = r.AppletID
+			mApplet.AppletID = id
 			err = mApplet.FetchByAppletID(d)
 			if err != nil {
 				l.Error(err)
@@ -355,8 +351,8 @@ func RemoveApplet(ctx context.Context, r *RemoveAppletReq) error {
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			mInstance.AppletID = r.AppletID
-			instances, err = mInstance.List(d, mInstance.ColAppletID().Eq(r.AppletID))
+			mInstance.AppletID = id
+			instances, err = mInstance.List(d, mInstance.ColAppletID().Eq(id))
 			if err != nil {
 				l.Error(err)
 				return status.CheckDatabaseError(err, "ListByAppletID")

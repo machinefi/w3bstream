@@ -49,6 +49,8 @@ const (
 	InvalidEthLoginMessage
 	// @errTalk Invalid Auth Publisher ID
 	InvalidAuthPublisherID
+	// @errTalk Current Account Absence
+	CurrentAccountAbsence
 )
 
 const (
@@ -97,6 +99,8 @@ const (
 	StrategyNotFound
 	// @errTalk Publisher Not Found
 	PublisherNotFound
+	// @errTalk Account Identity Not Found
+	AccountIdentityNotFound
 )
 
 // Deprecated: pls check database error and return defined status error

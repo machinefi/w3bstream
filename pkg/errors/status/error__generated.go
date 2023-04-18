@@ -89,6 +89,8 @@ func (v Error) Key() string {
 		return "StrategyNotFound"
 	case PublisherNotFound:
 		return "PublisherNotFound"
+	case AccountIdentityNotFound:
+		return "AccountIdentityNotFound"
 	case Conflict:
 		return "Conflict"
 	case ProjectConfigConflict:
@@ -163,6 +165,8 @@ func (v Error) Msg() string {
 		return "Strategy Not Found"
 	case PublisherNotFound:
 		return "Publisher Not Found"
+	case AccountIdentityNotFound:
+		return "Account Identity Not Found"
 	case Conflict:
 		return "Conflict conflict error"
 	case ProjectConfigConflict:
@@ -236,6 +240,8 @@ func (v Error) CanBeTalk() bool {
 	case StrategyNotFound:
 		return true
 	case PublisherNotFound:
+		return true
+	case AccountIdentityNotFound:
 		return true
 	case Conflict:
 		return true
