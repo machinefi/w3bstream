@@ -71,6 +71,8 @@ const (
 	ProjectConfigConflict
 	// @errTalk Project Name Conflict
 	ProjectNameConflict
+	// @errTalk Strategy Conflict
+	StrategyConflict
 )
 
 const (

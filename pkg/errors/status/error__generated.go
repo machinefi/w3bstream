@@ -65,6 +65,8 @@ func (v Error) Key() string {
 		return "InvalidEthLoginMessage"
 	case InvalidAuthPublisherID:
 		return "InvalidAuthPublisherID"
+	case CurrentAccountAbsence:
+		return "CurrentAccountAbsence"
 	case Forbidden:
 		return "Forbidden"
 	case InstanceLimit:
@@ -97,6 +99,8 @@ func (v Error) Key() string {
 		return "ProjectConfigConflict"
 	case ProjectNameConflict:
 		return "ProjectNameConflict"
+	case StrategyConflict:
+		return "StrategyConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -141,6 +145,8 @@ func (v Error) Msg() string {
 		return "Invalid Siwe Message"
 	case InvalidAuthPublisherID:
 		return "Invalid Auth Publisher ID"
+	case CurrentAccountAbsence:
+		return "Current Account Absence"
 	case Forbidden:
 		return "Forbidden"
 	case InstanceLimit:
@@ -173,6 +179,8 @@ func (v Error) Msg() string {
 		return "Project Config Conflict"
 	case ProjectNameConflict:
 		return "Project Name Conflict"
+	case StrategyConflict:
+		return "Strategy Conflict"
 	case InternalServerError:
 		return "InternalServerError internal error"
 	case DatabaseError:
@@ -217,6 +225,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case InvalidAuthPublisherID:
 		return true
+	case CurrentAccountAbsence:
+		return true
 	case Forbidden:
 		return true
 	case InstanceLimit:
@@ -248,6 +258,8 @@ func (v Error) CanBeTalk() bool {
 	case ProjectConfigConflict:
 		return true
 	case ProjectNameConflict:
+		return true
+	case StrategyConflict:
 		return true
 	case InternalServerError:
 		return true
