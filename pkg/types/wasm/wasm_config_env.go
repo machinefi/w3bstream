@@ -8,6 +8,10 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
+func NewEnv(prefix string) *Env {
+	return &Env{prefix: prefix}
+}
+
 type Env struct {
 	prefix string
 	Env    [][2]string `json:"env"`

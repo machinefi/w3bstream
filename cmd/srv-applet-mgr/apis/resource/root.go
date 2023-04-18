@@ -8,6 +8,6 @@ import (
 var Root = kit.NewRouter(httptransport.Group("/resource"))
 
 func init() {
-	Root.Register(kit.NewRouter(&ListResources{}))
+	Root.Register(kit.NewRouter(&GetResource{}))
 	Root.Register(kit.NewRouter(&RemoveResource{}))
 }

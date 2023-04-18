@@ -27,11 +27,14 @@ func (r *GetProjectSchema) Output(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 	prj := types.MustProjectFromContext(ctx)
-	scm := &wasm.Schema{}
-	if err = config.GetConfigValue(ctx, prj.ProjectID, scm); err != nil {
+	cfg, err := config.GetValue(
+		ctx, prj.ProjectID,
+		enums.CONFIG_TYPE__PROJECT_SCHEMA,
+	)
+	if err != nil {
 		return nil, err
 	}
-	return scm, nil
+	return cfg.(*wasm.Schema), nil
 }
 
 type GetProjectEnv struct {
@@ -50,9 +53,12 @@ func (r *GetProjectEnv) Output(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 	prj := types.MustProjectFromContext(ctx)
-	env := &wasm.Env{}
-	if err = config.GetConfigValue(ctx, prj.ProjectID, env); err != nil {
+	cfg, err := config.GetValue(
+		ctx, prj.ProjectID,
+		enums.CONFIG_TYPE__PROJECT_ENV,
+	)
+	if err != nil {
 		return nil, err
 	}
-	return env, nil
+	return cfg.(*wasm.Env), nil
 }

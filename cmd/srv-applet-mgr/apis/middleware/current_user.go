@@ -6,6 +6,7 @@ import (
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -13,7 +14,9 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
+	"github.com/machinefi/w3bstream/pkg/modules/publisher"
 	"github.com/machinefi/w3bstream/pkg/modules/resource"
+	"github.com/machinefi/w3bstream/pkg/modules/strategy"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -133,4 +136,61 @@ func (v *CurrentAccount) WithInstanceContextBySFID(ctx context.Context, id types
 		return nil, err
 	}
 	return types.WithInstance(ctx, ins), nil
+}
+
+func (v *CurrentAccount) WithStrategyBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	sty, err := strategy.GetBySFID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	ctx = types.WithStrategy(ctx, sty)
+	return v.WithProjectContextBySFID(ctx, sty.ProjectID)
+}
+
+func (v *CurrentAccount) WithPublisherBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	pub, err := publisher.GetBySFID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	ctx = types.WithPublisher(ctx, pub)
+	return v.WithProjectContextBySFID(ctx, pub.ProjectID)
+}
+
+// ValidateProjectPerm
+// Deprecated: Use WithProjectContextByID instead
+func (v *CurrentAccount) ValidateProjectPerm(ctx context.Context, prjID types.SFID) (*models.Project, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	a := CurrentAccountFromContext(ctx)
+	m := &models.Project{RelProject: models.RelProject{ProjectID: prjID}}
+
+	if err := m.FetchByProjectID(d); err != nil {
+		return nil, status.CheckDatabaseError(err, "GetProjectByProjectID")
+	}
+	if a.AccountID != m.AccountID {
+		return nil, status.NoProjectPermission
+	}
+	return m, nil
+}
+
+// ValidateProjectPermByPrjName
+// Deprecated: Use WithProjectContextByName instead
+func (v *CurrentAccount) ValidateProjectPermByPrjName(ctx context.Context, name string) (*models.Project, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	a := CurrentAccountFromContext(ctx)
+	m := &models.Project{
+		RelAccount:  models.RelAccount{AccountID: a.AccountID},
+		ProjectName: models.ProjectName{Name: name},
+	}
+
+	if err := m.FetchByName(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.ProjectNotFound
+		} else {
+			return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+		}
+	}
+	if a.AccountID != m.AccountID {
+		return nil, status.NoProjectPermission
+	}
+	return m, nil
 }

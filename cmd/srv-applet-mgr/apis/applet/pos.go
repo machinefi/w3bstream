@@ -6,22 +6,18 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
-	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 type CreateApplet struct {
 	httpx.MethodPost
-	applet.CreateAppletReq `in:"body" mime:"multipart"`
+	applet.CreateReq `in:"body" mime:"multipart"`
 }
 
 func (r *CreateApplet) Output(ctx context.Context) (interface{}, error) {
-	ctx, err := middleware.CurrentAccountFromContext(ctx).
-		WithProjectContextByName(ctx, middleware.ProjectProviderFromContext(ctx))
+	ca := middleware.CurrentAccountFromContext(ctx)
+	ctx, err := ca.WithProjectContextByName(ctx, middleware.ProjectProviderFromContext(ctx))
 	if err != nil {
 		return nil, err
 	}
-	prj := types.MustProjectFromContext(ctx)
-	return applet.CreateApplet(ctx, prj.ProjectID, &r.CreateAppletReq)
+	return applet.Create(ctx, ca.AccountID, &r.CreateReq)
 }
-
-type CreateAppletAndDeploy struct{}

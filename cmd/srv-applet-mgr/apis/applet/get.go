@@ -11,17 +11,38 @@ import (
 
 type ListApplet struct {
 	httpx.MethodGet
-	applet.ListAppletReq
+	applet.ListReq
 }
+
+func (r *ListApplet) Path() string { return "/data_list" }
 
 func (r *ListApplet) Output(ctx context.Context) (interface{}, error) {
 	ctx, err := middleware.CurrentAccountFromContext(ctx).
-		WithProjectContextByName(ctx, r.ProjectName)
+		WithProjectContextByName(ctx, middleware.ProjectProviderFromContext(ctx))
 	if err != nil {
 		return nil, err
 	}
+	prj := types.MustProjectFromContext(ctx)
 
-	return applet.ListApplets(ctx, &r.ListAppletReq)
+	return applet.List(ctx, prj.ProjectID, &r.ListReq)
+}
+
+type ListAppletDetail struct {
+	httpx.MethodGet
+	applet.ListReq
+}
+
+func (r *ListAppletDetail) Path() string { return "/detail_list" }
+
+func (r *ListAppletDetail) Output(ctx context.Context) (interface{}, error) {
+	ctx, err := middleware.CurrentAccountFromContext(ctx).
+		WithProjectContextByName(ctx, middleware.ProjectProviderFromContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+	prj := types.MustProjectFromContext(ctx)
+
+	return applet.ListDetail(ctx, prj.ProjectID, &r.ListReq)
 }
 
 type GetApplet struct {
@@ -29,7 +50,7 @@ type GetApplet struct {
 	AppletID types.SFID `in:"path" name:"appletID"`
 }
 
-func (r *GetApplet) Path() string { return "/:appletID" }
+func (r *GetApplet) Path() string { return "/data/:appletID" }
 
 func (r *GetApplet) Output(ctx context.Context) (interface{}, error) {
 	ctx, err := middleware.CurrentAccountFromContext(ctx).
@@ -37,6 +58,29 @@ func (r *GetApplet) Output(ctx context.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	app := types.MustAppletFromContext(ctx)
+	ins, _ := types.InstanceFromContext(ctx)
+	res := types.MustResourceFromContext(ctx)
 
-	return applet.GetDetail(ctx), nil
+	return applet.GetDetail(ctx, app, ins, res), nil
+}
+
+type GetAppletDetail struct {
+	httpx.MethodGet
+	AppletID types.SFID `in:"path" name:"appletID"`
+}
+
+func (r *GetAppletDetail) Path() string { return "/detail/:appletID" }
+
+func (r *GetAppletDetail) Output(ctx context.Context) (interface{}, error) {
+	ctx, err := middleware.CurrentAccountFromContext(ctx).
+		WithAppletContextBySFID(ctx, r.AppletID)
+	if err != nil {
+		return nil, err
+	}
+	app := types.MustAppletFromContext(ctx)
+	ins, _ := types.InstanceFromContext(ctx)
+	res := types.MustResourceFromContext(ctx)
+
+	return applet.GetDetail(ctx, app, ins, res), nil
 }

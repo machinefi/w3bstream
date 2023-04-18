@@ -42,6 +42,9 @@ type ConfigurationWithUninit interface {
 }
 
 func InitConfiguration(ctx context.Context, c Configuration) error {
+	if c == nil {
+		return nil
+	}
 	if canBeInit, ok := c.(ConfigurationWithInit); ok {
 		return canBeInit.Init(ctx)
 	}
@@ -49,6 +52,9 @@ func InitConfiguration(ctx context.Context, c Configuration) error {
 }
 
 func UninitConfiguration(ctx context.Context, c Configuration) error {
+	if c == nil {
+		return nil
+	}
 	if canBeUninit, ok := c.(ConfigurationWithUninit); ok {
 		return canBeUninit.Uninit(ctx)
 	}

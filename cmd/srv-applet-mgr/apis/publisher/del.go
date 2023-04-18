@@ -6,20 +6,35 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/modules/publisher"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 type RemovePublisher struct {
 	httpx.MethodDelete
-	publisher.RemovePublisherReq
+	PublisherID types.SFID `in:"path" name:"publisherID"`
 }
 
-func (r *RemovePublisher) Path() string { return "/:projectName" }
+func (r *RemovePublisher) Path() string { return "/data/:publisherID" }
 
 func (r *RemovePublisher) Output(ctx context.Context) (interface{}, error) {
-	a := middleware.CurrentAccountFromContext(ctx)
-	if _, err := a.ValidateProjectPermByPrjName(ctx, r.ProjectName); err != nil {
+	ca := middleware.CurrentAccountFromContext(ctx)
+	ctx, err := ca.WithPublisherBySFID(ctx, r.PublisherID)
+	if err != nil {
 		return nil, err
 	}
+	return nil, publisher.Remove(ctx)
+}
 
-	return nil, publisher.RemovePublisher(ctx, &r.RemovePublisherReq)
+type BatchRemoveByPublisherIDs struct {
+	httpx.MethodDelete
+	PublisherIDs []types.SFID `in:"query" name:"publisherID"`
+}
+
+func (r *BatchRemoveByPublisherIDs) Output(ctx context.Context) (interface{}, error) {
+	ca := middleware.CurrentAccountFromContext(ctx)
+	ctx, err := ca.WithProjectContextByName(ctx, middleware.ProjectProviderFromContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+	return nil, publisher.BatchRemoveBySFIDs(ctx, r.PublisherIDs)
 }

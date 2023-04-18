@@ -11,18 +11,18 @@ import (
 
 type UpdateApplet struct {
 	httpx.MethodPut
-	AppletID               types.SFID `in:"path" name:"appletID"`
-	applet.UpdateAppletReq `in:"body" mime:"multipart"`
+	AppletID         types.SFID `in:"path" name:"appletID"`
+	applet.UpdateReq `in:"body" mime:"multipart"`
 }
 
 func (r *UpdateApplet) Path() string { return "/:appletID" }
 
 func (r *UpdateApplet) Output(ctx context.Context) (interface{}, error) {
-	ctx, err := middleware.CurrentAccountFromContext(ctx).
-		WithAppletContextBySFID(ctx, r.AppletID)
+	ca := middleware.CurrentAccountFromContext(ctx)
+	ctx, err := ca.WithAppletContextBySFID(ctx, r.AppletID)
 	if err != nil {
 		return nil, err
 	}
 
-	return nil, applet.UpdateApplet(ctx, r.AppletID, &r.UpdateAppletReq)
+	return applet.Update(ctx, ca.AccountID, &r.UpdateReq)
 }

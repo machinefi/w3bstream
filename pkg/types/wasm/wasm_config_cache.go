@@ -15,6 +15,7 @@ func DefaultCache() *Cache {
 type Cache struct {
 	Mode   enums.CacheMode `json:"mode"`
 	Prefix string          `json:"prefix,omitempty"`
+	KVStore
 }
 
 func (c *Cache) ConfigType() enums.ConfigType {
@@ -22,16 +23,15 @@ func (c *Cache) ConfigType() enums.ConfigType {
 }
 
 func (c *Cache) WithContext(ctx context.Context) context.Context {
-	return WithKVStore(ctx, c.NewKVStore(ctx))
+	return WithKVStore(ctx, c)
 }
 
-// TODO use KVStore as a member and impl Cache.Init
-func (c *Cache) NewKVStore(ctx context.Context) KVStore {
+func (c *Cache) Init(ctx context.Context) error {
 	switch c.Mode {
 	case enums.CACHE_MODE__REDIS:
-		return kvdb.NewRedisDB(types.MustRedisEndpointFromContext(ctx))
-	case enums.CACHE_MODE__MEMORY:
-		return kvdb.NewMemDB()
+		c.KVStore = kvdb.NewRedisDB(types.MustRedisEndpointFromContext(ctx))
+	default:
+		c.KVStore = kvdb.NewMemDB()
 	}
 	return nil
 }

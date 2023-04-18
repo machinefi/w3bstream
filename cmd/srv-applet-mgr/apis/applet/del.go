@@ -22,8 +22,5 @@ func (r *RemoveApplet) Output(ctx context.Context) (interface{}, error) {
 		WithAppletContextBySFID(ctx, r.AppletID); err != nil {
 		return nil, err
 	}
-	app := types.MustAppletFromContext(ctx)
-	ins, _ := types.InstanceFromContext(ctx) // if not deployed
-
-	return nil, applet.RemoveAppletAndInstanceBySFID(ctx, app, ins)
+	return nil, applet.Remove(ctx)
 }

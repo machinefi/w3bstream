@@ -43,6 +43,10 @@ func (v Error) Key() string {
 		return "MD5ChecksumFailed"
 	case InvalidChainClient:
 		return "InvalidChainClient"
+	case InvalidDeployCommand:
+		return "InvalidDeployCommand"
+	case InvalidConfigType:
+		return "InvalidConfigType"
 	case Unauthorized:
 		return "Unauthorized"
 	case InvalidAuthValue:
@@ -85,12 +89,26 @@ func (v Error) Key() string {
 		return "InstanceNotFound"
 	case ResourceNotFound:
 		return "ResourceNotFound"
+	case StrategyNotFound:
+		return "StrategyNotFound"
+	case PublisherNotFound:
+		return "PublisherNotFound"
 	case Conflict:
 		return "Conflict"
 	case ProjectConfigConflict:
 		return "ProjectConfigConflict"
 	case ProjectNameConflict:
 		return "ProjectNameConflict"
+	case AppletNameConflict:
+		return "AppletNameConflict"
+	case MultiInstanceRunning:
+		return "MultiInstanceRunning"
+	case ConfigConflict:
+		return "ConfigConflict"
+	case StrategyIsExists:
+		return "StrategyIsExists"
+	case PublisherKeyConflict:
+		return "PublisherKeyConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -99,8 +117,20 @@ func (v Error) Key() string {
 		return "UploadFileFailed"
 	case CreateChannelFailed:
 		return "CreateChannelFailed"
-	case ConfigInitializationFailed:
-		return "ConfigInitializationFailed"
+	case ConfigInitFailed:
+		return "ConfigInitFailed"
+	case ConfigUninitFailed:
+		return "ConfigUninitFailed"
+	case ConfigParsingFailed:
+		return "ConfigParsingFailed"
+	case StopInstanceFailed:
+		return "StopInstanceFailed"
+	case StartInstanceFailed:
+		return "StartInstanceFailed"
+	case DeleteInstanceFailed:
+		return "DeleteInstanceFailed"
+	case LoadLocalWasmFailed:
+		return "LoadLocalWasmFailed"
 	}
 	return "UNKNOWN"
 }
@@ -113,6 +143,10 @@ func (v Error) Msg() string {
 		return "Md5 Checksum Failed"
 	case InvalidChainClient:
 		return "Invalid Chain Client"
+	case InvalidDeployCommand:
+		return "Invalid Deploy Command"
+	case InvalidConfigType:
+		return "Invalid Config Type"
 	case Unauthorized:
 		return "Unauthorized unauthorized"
 	case InvalidAuthValue:
@@ -155,12 +189,26 @@ func (v Error) Msg() string {
 		return "Instance Not Found"
 	case ResourceNotFound:
 		return "Resource Not Found"
+	case StrategyNotFound:
+		return "Strategy Not Found"
+	case PublisherNotFound:
+		return "Publisher Not Found"
 	case Conflict:
 		return "Conflict conflict error"
 	case ProjectConfigConflict:
 		return "Project Config Conflict"
 	case ProjectNameConflict:
 		return "Project Name Conflict"
+	case AppletNameConflict:
+		return "Applet Name Conflict"
+	case MultiInstanceRunning:
+		return "Multi Instance Running"
+	case ConfigConflict:
+		return "Config Is Exists"
+	case StrategyIsExists:
+		return "Strategy Is Exists"
+	case PublisherKeyConflict:
+		return "Publisher Key Conflict"
 	case InternalServerError:
 		return "InternalServerError internal error"
 	case DatabaseError:
@@ -169,8 +217,20 @@ func (v Error) Msg() string {
 		return "Upload File Failed"
 	case CreateChannelFailed:
 		return "Create Message Channel Failed"
-	case ConfigInitializationFailed:
-		return "Config Initialization Failed"
+	case ConfigInitFailed:
+		return "Config Init Failed"
+	case ConfigUninitFailed:
+		return "Config Uninit Failed"
+	case ConfigParsingFailed:
+		return "Config Parsing Failed"
+	case StopInstanceFailed:
+		return "Stop Instance Failed"
+	case StartInstanceFailed:
+		return "Stop Instance Failed"
+	case DeleteInstanceFailed:
+		return "Delete Instance Failed"
+	case LoadLocalWasmFailed:
+		return "Load Local Wasm Failed"
 	}
 	return "-"
 }
@@ -182,6 +242,10 @@ func (v Error) CanBeTalk() bool {
 	case MD5ChecksumFailed:
 		return true
 	case InvalidChainClient:
+		return true
+	case InvalidDeployCommand:
+		return true
+	case InvalidConfigType:
 		return true
 	case Unauthorized:
 		return true
@@ -225,11 +289,25 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case ResourceNotFound:
 		return true
+	case StrategyNotFound:
+		return true
+	case PublisherNotFound:
+		return true
 	case Conflict:
 		return true
 	case ProjectConfigConflict:
 		return true
 	case ProjectNameConflict:
+		return true
+	case AppletNameConflict:
+		return true
+	case MultiInstanceRunning:
+		return true
+	case ConfigConflict:
+		return true
+	case StrategyIsExists:
+		return true
+	case PublisherKeyConflict:
 		return true
 	case InternalServerError:
 		return true
@@ -239,7 +317,19 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case CreateChannelFailed:
 		return true
-	case ConfigInitializationFailed:
+	case ConfigInitFailed:
+		return true
+	case ConfigUninitFailed:
+		return true
+	case ConfigParsingFailed:
+		return true
+	case StopInstanceFailed:
+		return true
+	case StartInstanceFailed:
+		return true
+	case DeleteInstanceFailed:
+		return true
+	case LoadLocalWasmFailed:
 		return true
 	}
 	return false

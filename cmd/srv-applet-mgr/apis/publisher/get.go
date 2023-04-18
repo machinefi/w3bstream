@@ -6,25 +6,36 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/modules/publisher"
-	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 type ListPublisher struct {
 	httpx.MethodGet
-	ProjectName string `in:"path" name:"projectName"`
-	publisher.ListPublisherReq
+	publisher.ListReq
 }
 
-func (r *ListPublisher) Path() string { return "/:projectName" }
+func (r *ListPublisher) Path() string { return "/data_list" }
 
 func (r *ListPublisher) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.CurrentAccountFromContext(ctx)
-	ctx, err := ca.WithProjectContextByName(ctx, r.ProjectName)
+	ctx, err := ca.WithProjectContextByName(ctx, middleware.ProjectProviderFromContext(ctx))
 	if err != nil {
 		return nil, err
 	}
-	prj := types.MustProjectFromContext(ctx)
+	return publisher.List(ctx, &r.ListReq)
+}
 
-	r.SetCurrentProject(prj.ProjectID)
-	return publisher.ListPublisher(ctx, &r.ListPublisherReq)
+type ListPublisherDetail struct {
+	httpx.MethodGet
+	publisher.ListReq
+}
+
+func (r *ListPublisherDetail) Path() string { return "/detail_list" }
+
+func (r *ListPublisherDetail) Output(ctx context.Context) (interface{}, error) {
+	ca := middleware.CurrentAccountFromContext(ctx)
+	ctx, err := ca.WithProjectContextByName(ctx, middleware.ProjectProviderFromContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+	return publisher.ListDetail(ctx, &r.ListReq)
 }

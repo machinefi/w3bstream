@@ -1,5 +1,7 @@
 package enums
 
+import "context"
+
 //go:generate toolkit gen enum ConfigType
 type ConfigType uint8
 
@@ -11,3 +13,7 @@ const (
 	_ // deprecated CONFIG_TYPE__CHAIN_CLIENT
 	CONFIG_TYPE__PROJECT_MQTT
 )
+
+func (v ConfigType) ConfigType() ConfigType { return v }
+
+func (v ConfigType) WithContext(context.Context) context.Context { return nil }

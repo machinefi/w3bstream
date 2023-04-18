@@ -12,6 +12,6 @@ func NoError(err error) {
 
 func BeTrue(ok bool) {
 	if !ok {
-		log.Panic("not ok")
+		panic("not ok")
 	}
 }

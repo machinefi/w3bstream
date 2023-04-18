@@ -9,7 +9,6 @@ import (
 	"github.com/bytecodealliance/wasmtime-go"
 	"github.com/google/uuid"
 
-	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/enums"
@@ -64,13 +63,11 @@ var _ wasm.Instance = (*Instance)(nil)
 func (i *Instance) ID() string { return i.id.String() }
 
 func (i *Instance) Start(ctx context.Context) error {
-	log.FromContext(ctx).WithValues("instance", i.ID()).Info("started")
 	i.state = enums.INSTANCE_STATE__STARTED
 	return nil
 }
 
 func (i *Instance) Stop(ctx context.Context) error {
-	log.FromContext(ctx).WithValues("instance", i.ID()).Info("stopped")
 	i.state = enums.INSTANCE_STATE__STOPPED
 	return nil
 }
@@ -92,17 +89,11 @@ func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data [
 }
 
 func (i *Instance) Handle(ctx context.Context, t *Task) *wasm.EventHandleResult {
-	l := types.MustLoggerFromContext(ctx)
-
-	_, l = l.Start(ctx, "instance.Handle")
-	defer l.End()
-
 	rid := i.AddResource(ctx, []byte(t.EventType), t.Payload)
 	defer i.RmvResource(ctx, rid)
 
 	result, err := i.rt.Call(t.Handler, int32(rid))
 	if err != nil {
-		l.Error(err)
 		return &wasm.EventHandleResult{
 			InstanceID: i.id.String(),
 			ErrMsg:     err.Error(),

@@ -3,8 +3,9 @@ package strfmt_test
 import (
 	"testing"
 
-	"github.com/machinefi/w3bstream/pkg/depends/util/strfmt"
 	. "github.com/onsi/gomega"
+
+	"github.com/machinefi/w3bstream/pkg/depends/util/strfmt"
 )
 
 func TestProjectNameValidator(t *testing.T) {

@@ -22,12 +22,20 @@ const (
 	UploadFileFailed
 	// @errTalk Create Message Channel Failed
 	CreateChannelFailed
-	// @errTalk Config Initialization Failed
-	ConfigInitializationFailed
+	// @errTalk Config Init Failed
+	ConfigInitFailed
+	// @errTalk Config Uninit Failed
+	ConfigUninitFailed
+	// @errTalk Config Parsing Failed
+	ConfigParsingFailed
 	// @errTalk Stop Instance Failed
 	StopInstanceFailed
+	// @errTalk Stop Instance Failed
+	StartInstanceFailed
 	// @errTalk Delete Instance Failed
 	DeleteInstanceFailed
+	// @errTalk Load Local Wasm Failed
+	LoadLocalWasmFailed
 )
 
 const (
@@ -73,6 +81,16 @@ const (
 	ProjectConfigConflict
 	// @errTalk Project Name Conflict
 	ProjectNameConflict
+	// @errTalk Applet Name Conflict
+	AppletNameConflict
+	// @errTalk Multi Instance Running
+	MultiInstanceRunning
+	// @errTalk Config Is Exists
+	ConfigConflict
+	// @errTalk Strategy Is Exists
+	StrategyIsExists
+	// @errTalk Publisher Key Conflict
+	PublisherKeyConflict
 )
 
 const (
@@ -82,6 +100,10 @@ const (
 	MD5ChecksumFailed
 	// @errTalk Invalid Chain Client
 	InvalidChainClient
+	// @errTalk Invalid Deploy Command
+	InvalidDeployCommand
+	// @errTalk Invalid Config Type
+	InvalidConfigType
 )
 
 const (
@@ -97,6 +119,10 @@ const (
 	InstanceNotFound
 	// @errTalk Resource Not Found
 	ResourceNotFound
+	// @errTalk Strategy Not Found
+	StrategyNotFound
+	// @errTalk Publisher Not Found
+	PublisherNotFound
 )
 
 // Deprecated: pls check database error and return defined status error

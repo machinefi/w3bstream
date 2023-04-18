@@ -16,5 +16,5 @@ type RemoveResource struct {
 func (r *RemoveResource) Path() string { return "/:resourceID" }
 
 func (r *RemoveResource) Output(ctx context.Context) (interface{}, error) {
-	return nil, resource.DeleteResource(ctx, r.ResourceID)
+	return nil, resource.RemoveBySFID(ctx, r.ResourceID)
 }

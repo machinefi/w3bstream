@@ -4,10 +4,9 @@ import (
 	"context"
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
-	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
-	"github.com/machinefi/w3bstream/pkg/modules/applet"
-	"github.com/machinefi/w3bstream/pkg/modules/deploy"
+	"github.com/machinefi/w3bstream/pkg/errors/status"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 type GetInstanceByInstanceID struct {
@@ -15,39 +14,32 @@ type GetInstanceByInstanceID struct {
 	InstanceID types.SFID `in:"path" name:"instanceID"`
 }
 
-func (r *GetInstanceByInstanceID) Path() string {
-	return "/instance/:instanceID"
-}
+func (r *GetInstanceByInstanceID) Path() string { return "/:instanceID" }
 
 func (r *GetInstanceByInstanceID) Output(ctx context.Context) (interface{}, error) {
-	_, err := validateByInstance(ctx, r.InstanceID)
+	ca := middleware.CurrentAccountFromContext(ctx)
+	ctx, err := ca.WithInstanceContextBySFID(ctx, r.InstanceID)
 	if err != nil {
 		return nil, err
 	}
 
-	return deploy.GetInstanceByInstanceID(ctx, r.InstanceID)
+	return types.MustInstanceFromContext(ctx), nil
 }
 
 type GetInstanceByAppletID struct {
 	httpx.MethodGet
-	AppletID types.SFID `in:"path" name:"appletID"`
-}
-
-func (r *GetInstanceByAppletID) Path() string {
-	return "/applet/:appletID"
+	AppletID types.SFID `in:"query" name:"appletID"`
 }
 
 func (r *GetInstanceByAppletID) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.CurrentAccountFromContext(ctx)
-
-	app, err := applet.GetAppletByAppletID(ctx, r.AppletID)
+	ctx, err := ca.WithAppletContextBySFID(ctx, r.AppletID)
 	if err != nil {
 		return nil, err
 	}
-
-	if _, err = ca.ValidateProjectPerm(ctx, app.ProjectID); err != nil {
-		return nil, err
+	ins, _ := types.InstanceFromContext(ctx)
+	if ins == nil {
+		return nil, status.InstanceNotFound
 	}
-
-	return deploy.GetInstanceByAppletID(ctx, r.AppletID)
+	return ins, nil
 }

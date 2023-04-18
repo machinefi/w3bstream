@@ -3,10 +3,11 @@ package deploy
 import (
 	"context"
 
-	"github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 type ControlInstance struct {
@@ -18,9 +19,17 @@ type ControlInstance struct {
 func (r *ControlInstance) Path() string { return "/:instanceID/:cmd" }
 
 func (r *ControlInstance) Output(ctx context.Context) (interface{}, error) {
-	if _, err := validateByInstance(ctx, r.InstanceID); err != nil {
+	ca := middleware.CurrentAccountFromContext(ctx)
+
+	ctx, err := ca.WithInstanceContextBySFID(ctx, r.InstanceID)
+	if err != nil {
 		return nil, err
 	}
-
-	return nil, deploy.ControlInstance(ctx, r.InstanceID, r.Cmd)
+	state, err := deploy.Deploy(ctx, r.Cmd)
+	if err != nil {
+		return nil, err
+	}
+	ins := types.MustInstanceFromContext(ctx)
+	ins.State = state
+	return ins, nil
 }

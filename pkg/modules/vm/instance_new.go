@@ -34,3 +34,12 @@ func NewInstanceWithState(ctx context.Context, path string, id types.SFID, state
 	AddInstanceByID(ctx, id, i)
 	return nil
 }
+
+func NewInstanceByCode(ctx context.Context, code []byte, id types.SFID) error {
+	i, err := wasmtime.NewInstanceByCode(ctx, id, code, enums.INSTANCE_STATE__CREATED)
+	if err != nil {
+		return err
+	}
+	AddInstanceByID(ctx, id, i)
+	return nil
+}

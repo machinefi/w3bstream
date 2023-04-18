@@ -9,7 +9,9 @@ var Root = kit.NewRouter(httptransport.Group("/project"))
 
 func init() {
 	Root.Register(kit.NewRouter(&CreateProject{}))
-	Root.Register(kit.NewRouter(&GetProject{}))
-	Root.Register(kit.NewRouter(&ListProject{}))
-	Root.Register(kit.NewRouter(&RemoveProject{}))
+	// Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &GetProject{}))
+	// Root.Register(kit.NewRouter(&ListProject{}))
+	// Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &GetProjectDetail{}))
+	// Root.Register(kit.NewRouter(&ListProjectDetail{}))
+	// Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &RemoveProject{}))
 }

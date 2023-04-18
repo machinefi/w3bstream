@@ -1,8 +1,6 @@
 package middleware
 
-import (
-	"context"
-)
+import "context"
 
 func ProjectProviderFromContext(ctx context.Context) string {
 	return ctx.Value("ProjectProvider").(*ProjectProvider).ProjectName
@@ -15,7 +13,7 @@ type ProjectProvider struct {
 
 func (ProjectProvider) ContextKey() string { return "ProjectProvider" }
 
-func (ProjectProvider) Path() string { return "/:id" }
+func (ProjectProvider) Path() string { return "/:projectName" }
 
 func (r *ProjectProvider) Output(ctx context.Context) (interface{}, error) {
 	a := CurrentAccountFromContext(ctx)

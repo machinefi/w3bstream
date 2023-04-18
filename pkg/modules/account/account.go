@@ -95,7 +95,6 @@ func CreateAccountByUsername(ctx context.Context, r *CreateAccountByUsernameReq)
 	defer l.End()
 
 	if err != nil {
-		l.Error(err)
 		return nil, err
 	}
 	return &CreateAccountByUsernameRsp{
@@ -289,7 +288,6 @@ func CreateAdminIfNotExist(ctx context.Context) (string, error) {
 			l.Info("admin already exists, default password: `%s`", "iotex.W3B.admin")
 			return "", nil
 		} else {
-			l.Error(err)
 			return "", err
 		}
 	}
