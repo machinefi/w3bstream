@@ -62,8 +62,6 @@ func (g *Generator) Load() {
 		err    error
 	)
 	switch sch := g.URL.Scheme; sch {
-	case "file":
-		reader, err = os.Open(g.URL.Path)
 	case "http", "https":
 		var (
 			cli = &http.Client{}
@@ -74,7 +72,7 @@ func (g *Generator) Load() {
 			reader = rsp.Body
 		}
 	default:
-		panic(errors.Errorf("unsupported schema: %s", sch))
+		reader, err = os.Open(g.URL.Path)
 	}
 
 	if err != nil {

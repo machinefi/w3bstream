@@ -5,7 +5,7 @@ import (
 	"go/ast"
 	"go/format"
 	"go/token"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -122,7 +122,7 @@ func (g *GroupSet) AppendGroup(pkg string, spec *ast.ImportSpec)  { g.append(3, 
 type StdLibSet map[string]bool
 
 func (s StdLibSet) WalkInit(root, prefix string) {
-	ds, _ := ioutil.ReadDir(root)
+	ds, _ := os.ReadDir(root)
 	for _, d := range ds {
 		if !d.IsDir() {
 			continue
