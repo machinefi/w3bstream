@@ -3,9 +3,10 @@ package cmd
 import (
 	neturl "net/url"
 
+	"github.com/spf13/cobra"
+
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/client"
 	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"
-	"github.com/spf13/cobra"
 )
 
 var (
