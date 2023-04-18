@@ -30,7 +30,7 @@ func (arg *CondArgs) Condition(prj types.SFID) builder.SqlCondition {
 	}
 
 	m := &models.Strategy{}
-	c := make([]builder.SqlCondition, 0, 5)
+	c := make([]builder.SqlCondition, 0)
 
 	if prj != 0 {
 		c = append(c, m.ColProjectID().Eq(prj))
@@ -47,7 +47,7 @@ func (arg *CondArgs) Condition(prj types.SFID) builder.SqlCondition {
 	if len(arg.Handlers) > 0 {
 		c = append(c, m.ColHandler().In(arg.Handlers))
 	}
-	c = append(c, m.ColDeletedAt().Neq(0))
+	c = append(c, m.ColDeletedAt().Eq(0))
 	return builder.And(c...)
 }
 
