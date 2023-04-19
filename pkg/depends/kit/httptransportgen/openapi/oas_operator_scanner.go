@@ -72,7 +72,6 @@ func (os *OperatorScanner) Operator(ctx context.Context, tn *types.TypeName) *Op
 		op := &Operator{
 			Tag: TagFromRelativePath(os.pkg.PkgPath, tn),
 		}
-
 		os.ScanRouteMeta(op, tn)
 		os.ScanRequest(ctx, op, t)
 		os.ScanResults(ctx, op, tn)

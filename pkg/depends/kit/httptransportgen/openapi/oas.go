@@ -17,15 +17,15 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"
 )
 
-func NewOpenAPIGenerator(pkg *pkgx.Pkg) *OpenAPIGenerator {
-	return &OpenAPIGenerator{
+func NewGenerator(pkg *pkgx.Pkg) *Generator {
+	return &Generator{
 		pkg: pkg,
 		oas: oas.NewOpenAPI(),
 		rs:  NewRouterScanner(pkg),
 	}
 }
 
-type OpenAPIGenerator struct {
+type Generator struct {
 	pkg *pkgx.Pkg
 	oas *oas.OpenAPI
 	rs  *RouterScanner
@@ -61,7 +61,7 @@ func root(pkg *pkgx.Pkg, call *ast.CallExpr) *types.Var {
 	return nil
 }
 
-func (g *OpenAPIGenerator) Scan(ctx context.Context) {
+func (g *Generator) Scan(ctx context.Context) {
 	defer func() {
 		g.rs.os.BindSchemas(g.oas)
 	}()
@@ -101,7 +101,7 @@ func (g *OpenAPIGenerator) Scan(ctx context.Context) {
 	}
 }
 
-func (g *OpenAPIGenerator) OperationByOperatorTypes(mtd string, ops ...*OperatorWithTypeName) *oas.Operation {
+func (g *Generator) OperationByOperatorTypes(mtd string, ops ...*OperatorWithTypeName) *oas.Operation {
 	op := &oas.Operation{}
 
 	length := len(ops)
@@ -113,7 +113,7 @@ func (g *OpenAPIGenerator) OperationByOperatorTypes(mtd string, ops ...*Operator
 	return op
 }
 
-func (g *OpenAPIGenerator) Output(cwd string) {
+func (g *Generator) Output(cwd string) {
 	file := filepath.Join(cwd, "openapi.json")
 	data, err := json.MarshalIndent(g.oas, "", "  ")
 	if err != nil {

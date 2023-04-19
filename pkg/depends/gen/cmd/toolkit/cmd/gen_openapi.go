@@ -10,10 +10,10 @@ import (
 func init() {
 	cmd := &cobra.Command{
 		Use:   "openapi",
-		Short: "scan current project and generate openapi.json",
+		Short: "generate openapi spec for current project",
 		Run: func(cmd *cobra.Command, args []string) {
 			run("openapi", func(pkg *pkgx.Pkg) Generator {
-				g := openapi.NewOpenAPIGenerator(pkg)
+				g := openapi.NewGenerator(pkg)
 				g.Scan(nil)
 				return g
 			})

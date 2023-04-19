@@ -22,7 +22,7 @@ func TestOpenAPIGenerator(t *testing.T) {
 	pkg, err := pkgx.LoadFrom(dir)
 	NewWithT(t).Expect(err).To(BeNil())
 
-	g := openapi.NewOpenAPIGenerator(pkg)
+	g := openapi.NewGenerator(pkg)
 
 	g.Scan(ctx)
 	g.Output(dir)
