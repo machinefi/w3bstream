@@ -1,6 +1,10 @@
 package mq
 
-import "github.com/google/uuid"
+import (
+	"context"
+
+	"github.com/google/uuid"
+)
 
 type Task interface {
 	Subject() string
@@ -51,4 +55,9 @@ func (b *TaskBoard) Dispatch(ch string, t Task) error {
 		return nil
 	}
 	return b.tm.Push(ch, t)
+}
+
+type TaskOperator interface {
+	Output(ctx context.Context) (interface{}, error)
+	SetArg
 }
