@@ -16,8 +16,10 @@ func init() {
 		Run: func(cmd *cobra.Command, args []string) {
 			run("openapi", func(pkg *pkgx.Pkg) Generator {
 				nameRulePairs := make([]string, 0)
-				if err := json.Unmarshal([]byte(validators), &nameRulePairs); err != nil {
-					panic("should pass validators by name rule pairs with a json array format")
+				if len(validators) > 0 {
+					if err := json.Unmarshal([]byte(validators), &nameRulePairs); err != nil {
+						panic("should pass validators by name rule pairs with a json array format")
+					}
 				}
 				g := openapi.NewGenerator(pkg, nameRulePairs...)
 				g.Scan(nil)
