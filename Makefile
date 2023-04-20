@@ -13,9 +13,11 @@ build: build_server build_pub_client
 build_server:
 	@mkdir -p build
 	@cd cmd/srv-applet-mgr && go build
-	@rm -rf build/{config,srv-applet-mgr}
+	@cd cmd/srv-applet-mgr && go generate .
+	@rm -rf build/{config,srv-applet-mgr,openapi.json}
 	@mv cmd/srv-applet-mgr/srv-applet-mgr build/
 	@cp -r cmd/srv-applet-mgr/config build/config
+	@cp -r cmd/srv-applet-mgr/openapi.json build/openapi.json
 	@echo 'succeed! srv-applet-mgr =>cmd/srv-applet-mgr/srv-applet-mgr'
 	@echo 'succeed! config =>cmd/srv-applet-mgr/config'
 	@echo 'modify cmd/srv-applet-mgr/config/local.yaml to use your server config'
@@ -67,13 +69,16 @@ clean:
 install_toolkit:
 	@if [ ! -f "$$GOBIN/toolkit" ] ; \
 	then \
-		go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/... ; \
+		go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/...@toolkit ; \
 		echo "toolkit installed" ; \
 	fi
 	@echo `which toolkit`
 
+update_toolkit:
+	@go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/...@toolkit
+
 .PHONY: generate
-generate: install_toolkit 
+generate: install_toolkit
 	@go generate ./...
 
 ## to migrate database models, if model defines changed, make this entry
