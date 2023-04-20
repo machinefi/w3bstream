@@ -14,7 +14,7 @@ build_server:
 	@mkdir -p build
 	@cd cmd/srv-applet-mgr && go build
 	@cd cmd/srv-applet-mgr && go generate .
-	@rm -rf build/{config,srv-applet-mgr,openapi.json}
+	@rm -rf build/config build/srv-applet-mgr build/openapi.json
 	@mv cmd/srv-applet-mgr/srv-applet-mgr build/
 	@cp -r cmd/srv-applet-mgr/config build/config
 	@cp -r cmd/srv-applet-mgr/openapi.json build/openapi.json
