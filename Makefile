@@ -10,7 +10,7 @@ update_go_module:
 build: build_server build_pub_client
 
 .PHONY: build_server
-build_server:
+build_server: install_toolkit
 	@mkdir -p build
 	@cd cmd/srv-applet-mgr && go build
 	@cd cmd/srv-applet-mgr && go generate .
@@ -67,12 +67,8 @@ clean:
 
 .PHONY: install_toolkit
 install_toolkit:
-	@if [ ! -f "$$GOBIN/toolkit" ] ; \
-	then \
-		go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/...@toolkit ; \
-		echo "toolkit installed" ; \
-	fi
-	@echo `which toolkit`
+	@go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/...@toolkit
+	@echo "toolkit installed"
 
 update_toolkit:
 	@go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/...@toolkit
@@ -83,5 +79,5 @@ generate: install_toolkit
 
 ## to migrate database models, if model defines changed, make this entry
 .PHONY: migrate
-migrate: install_toolkit 
+migrate: install_toolkit
 	go run cmd/srv-applet-mgr/main.go migrate
