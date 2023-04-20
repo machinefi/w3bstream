@@ -1,6 +1,7 @@
 package monitor
 
 import (
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 )
@@ -8,10 +9,10 @@ import (
 var Root = kit.NewRouter(httptransport.Group("/monitor"))
 
 func init() {
-	Root.Register(kit.NewRouter(&CreateContractLog{}))
-	Root.Register(kit.NewRouter(&CreateChainTx{}))
-	Root.Register(kit.NewRouter(&CreateChainHeight{}))
-	Root.Register(kit.NewRouter(&RemoveContractLog{}))
-	Root.Register(kit.NewRouter(&RemoveChainTx{}))
-	Root.Register(kit.NewRouter(&RemoveChainHeight{}))
+	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &CreateContractLog{}))
+	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &CreateChainTx{}))
+	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &CreateChainHeight{}))
+	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &RemoveContractLog{}))
+	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &RemoveChainTx{}))
+	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &RemoveChainHeight{}))
 }

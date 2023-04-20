@@ -11,15 +11,12 @@ import (
 
 type ListPublisher struct {
 	httpx.MethodGet
-	ProjectName string `in:"path" name:"projectName"`
 	publisher.ListPublisherReq
 }
 
-func (r *ListPublisher) Path() string { return "/:projectName" }
-
 func (r *ListPublisher) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
-	ctx, err := ca.WithProjectContextByName(ctx, r.ProjectName)
+	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
+		WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
 	if err != nil {
 		return nil, err
 	}

@@ -65,3 +65,16 @@ func DeleteResource(ctx context.Context, resID types.SFID) error {
 		RelResource: models.RelResource{ResourceID: resID},
 	}).DeleteByResourceID(types.MustMgrDBExecutorFromContext(ctx)))
 }
+
+func GetBySFID(ctx context.Context, id types.SFID) (*models.Resource, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Resource{RelResource: models.RelResource{ResourceID: id}}
+
+	if err := m.FetchByResourceID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.ResourceNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return m, nil
+}

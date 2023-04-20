@@ -77,7 +77,7 @@ func (ef *ExportFuncs) LinkABI(impt Import) error {
 		"ws_set_sql_db":    ef.SetSQLDB,
 		"ws_get_sql_db":    ef.GetSQLDB,
 		"ws_get_env":       ef.GetEnv,
-		"ws_send_mqtt":     ef.SendMQTT,
+		"ws_send_mqtt_msg": ef.SendMqttMsg,
 	} {
 		if err := impt("env", name, ff); err != nil {
 			return err
@@ -324,8 +324,8 @@ func (ef *ExportFuncs) SendTX(chainID int32, offset, size, vmAddrPtr, vmSizePtr 
 	return int32(wasm.ResultStatusCode_OK)
 }
 
-func (ef *ExportFuncs) SendMQTT(topicAddr, topicSize, msgAddr, msgSize int32) int32 {
-	if ef.mq == nil {
+func (ef *ExportFuncs) SendMqttMsg(topicAddr, topicSize, msgAddr, msgSize int32) int32 {
+	if ef.mq == nil || ef.mq.Client == nil {
 		ef.log.Error(errors.New("mq client doesn't exist"))
 		return wasm.ResultStatusCode_Failed
 	}

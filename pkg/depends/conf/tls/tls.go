@@ -18,48 +18,51 @@ type X509KeyPair struct {
 	KeyPath string `json:"-"`
 	CrtPath string `json:"-"`
 	CaPath  string `json:"-"`
-	Key     []byte `env:"-" json:"key"`
-	Crt     []byte `env:"-" json:"crt"`
-	Ca      []byte `env:"-" json:"ca"`
+	Key     string `json:"key"`
+	Crt     string `json:"crt"`
+	Ca      string `json:"ca"`
 	conf    *tls.Config
+}
+
+func (c *X509KeyPair) read() (key, crt, ca []byte, err error) {
+	if c.Key+c.Ca+c.Crt != "" {
+		return []byte(c.Key), []byte(c.Crt), []byte(c.Ca), nil
+	}
+
+	var content []byte
+	content, err = os.ReadFile(c.KeyPath)
+	if err != nil {
+		return
+	}
+	key = content
+	content, err = os.ReadFile(c.CrtPath)
+	if err != nil {
+		return
+	}
+	crt = content
+	content, err = os.ReadFile(c.CaPath)
+	if err != nil {
+		return
+	}
+	ca = content
+	return
 }
 
 func (c *X509KeyPair) Init() error {
 	if c == nil {
 		return nil
 	}
-	if c.KeyPath != "" {
-		content, err := os.ReadFile(c.KeyPath)
-		if err != nil {
-			return err
-		}
-		c.Key = content
-	}
-	if c.CrtPath != "" {
-		content, err := os.ReadFile(c.CrtPath)
-		if err != nil {
-			return err
-		}
-		c.Crt = content
-	}
-	if c.CaPath != "" {
-		content, err := os.ReadFile(c.CaPath)
-		if err != nil {
-			return err
-		}
-		c.Ca = content
-	}
 
-	if len(c.Crt) == 0 || len(c.Key) == 0 || len(c.Ca) == 0 {
-		c.conf = gDefaultTlsConfig
-		return nil
+	key, crt, ca, err := c.read()
+	if err != nil {
+		return err
 	}
-	cert, err := tls.X509KeyPair(c.Crt, c.Key)
+	cert, err := tls.X509KeyPair(crt, key)
 	if err != nil {
 		return err
 	}
 	pool := x509.NewCertPool()
-	ok := pool.AppendCertsFromPEM(c.Ca)
+	ok := pool.AppendCertsFromPEM(ca)
 	if !ok {
 		return errors.Wrap(err, "failed to append cert")
 	}

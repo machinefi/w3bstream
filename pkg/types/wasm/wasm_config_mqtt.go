@@ -8,6 +8,10 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
+func DefaultMQClient() *MqttClient {
+	return &MqttClient{}
+}
+
 type MqttClient struct {
 	*mqtt.Client
 }

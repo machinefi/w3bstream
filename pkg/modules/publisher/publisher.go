@@ -245,3 +245,16 @@ func GetPublisherByPubKeyAndProjectName(ctx context.Context, pubKey, prjName str
 	}
 	return pub, nil
 }
+
+func GetBySFID(ctx context.Context, id types.SFID) (*models.Publisher, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Publisher{RelPublisher: models.RelPublisher{PublisherID: id}}
+
+	if err := m.FetchByPublisherID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.PublisherNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return m, nil
+}

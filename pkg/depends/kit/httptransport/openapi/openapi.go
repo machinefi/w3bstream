@@ -1,9 +1,9 @@
-package openapi
+package swagger
 
 import (
 	"bytes"
 	"context"
-	"os"
+	"io/ioutil"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
@@ -12,7 +12,7 @@ import (
 var raw = bytes.NewBuffer(nil)
 
 func init() {
-	data, err := os.ReadFile("./openapi.json")
+	data, err := ioutil.ReadFile("./openapi.json")
 	if err == nil {
 		raw.Write(data)
 	} else {

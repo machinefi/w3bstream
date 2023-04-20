@@ -5,6 +5,52 @@
     "version": ""
   },
   "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/swagger"
+        ],
+        "operationId": "OpenAPI",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BytesBuffer"
+                }
+              }
+            }
+          },
+          "499": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[ContextCanceled][499000000][ContextCanceled]"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[UnknownError][500000000][UnknownError]"
+            ]
+          }
+        }
+      }
+    },
     "/liveness": {
       "get": {
         "tags": [
@@ -257,12 +303,12 @@
         }
       }
     },
-    "/v0/applet/{appletID}": {
-      "delete": {
+    "/v0/applet/data/{appletID}": {
+      "get": {
         "tags": [
           "apis/applet"
         ],
-        "operationId": "RemoveApplet",
+        "operationId": "GetApplet",
         "parameters": [
           {
             "name": "appletID",
@@ -304,8 +350,15 @@
           }
         ],
         "responses": {
-          "204": {
-            "description": ""
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsApplet"
+                }
+              }
+            }
           },
           "401": {
             "description": "",
@@ -334,8 +387,11 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
+              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
             ]
           },
           "409": {
@@ -348,7 +404,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
@@ -362,32 +417,30 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
           }
         }
-      },
-      "put": {
+      }
+    },
+    "/v0/applet/x/{projectName}": {
+      "post": {
         "tags": [
           "apis/applet"
         ],
-        "operationId": "UpdateApplet",
+        "operationId": "CreateApplet",
         "parameters": [
           {
-            "name": "appletID",
+            "name": "projectName",
             "in": "path",
             "required": true,
             "schema": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-                },
-                {
-                  "x-go-field-name": "AppletID",
-                  "x-tag-name": "appletID"
-                }
-              ]
+              "type": "string",
+              "format": "projectName",
+              "x-go-field-name": "ProjectName",
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
             }
           },
           {
@@ -420,10 +473,10 @@
               "schema": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAppletUpdateAppletReq"
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAppletCreateAppletReq"
                   },
                   {
-                    "x-go-field-name": "UpdateAppletReq",
+                    "x-go-field-name": "CreateAppletReq",
                     "x-tag-mime": "multipart"
                   }
                 ]
@@ -432,8 +485,15 @@
           }
         },
         "responses": {
-          "204": {
-            "description": ""
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsApplet"
+                }
+              }
+            }
           },
           "401": {
             "description": "",
@@ -445,6 +505,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -462,8 +523,10 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "409": {
@@ -490,6 +553,8 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
@@ -498,155 +563,7 @@
         }
       }
     },
-    "/v0/applet/{appletID}/{instanceID}": {
-      "put": {
-        "tags": [
-          "apis/applet"
-        ],
-        "operationId": "UpdateAndDeploy",
-        "parameters": [
-          {
-            "name": "appletID",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-                },
-                {
-                  "x-go-field-name": "AppletID",
-                  "x-tag-name": "appletID"
-                }
-              ]
-            }
-          },
-          {
-            "name": "instanceID",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-                },
-                {
-                  "x-go-field-name": "InstanceID",
-                  "x-tag-name": "instanceID"
-                }
-              ]
-            }
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInHeader",
-              "x-tag-name": "Authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInQuery",
-              "x-tag-name": "authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAppletUpdateAndDeployReq"
-                  },
-                  {
-                    "x-go-field-name": "UpdateAndDeployReq",
-                    "x-tag-mime": "multipart"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": ""
-          },
-          "401": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
-              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
-              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
-              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
-              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
-            ]
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
-            ]
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[ConfigInitializationFailed][500999005][Config Initialization Failed]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
-            ]
-          }
-        }
-      }
-    },
-    "/v0/applet/{projectName}": {
+    "/v0/applet/x/{projectName}/datalist": {
       "get": {
         "tags": [
           "apis/applet"
@@ -659,8 +576,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "format": "projectName",
               "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
             }
           },
           {
@@ -781,6 +700,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -798,8 +718,125 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+            ]
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+            ]
+          }
+        }
+      }
+    },
+    "/v0/applet/{appletID}": {
+      "delete": {
+        "tags": [
+          "apis/applet"
+        ],
+        "operationId": "RemoveApplet",
+        "parameters": [
+          {
+            "name": "appletID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                },
+                {
+                  "x-go-field-name": "AppletID",
+                  "x-tag-name": "appletID"
+                }
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
+              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
             ]
           },
           "409": {
@@ -826,26 +863,33 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
           }
         }
       },
-      "post": {
+      "put": {
         "tags": [
           "apis/applet"
         ],
-        "operationId": "CreateApplet",
+        "operationId": "UpdateApplet",
         "parameters": [
           {
-            "name": "projectName",
+            "name": "appletID",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                },
+                {
+                  "x-go-field-name": "AppletID",
+                  "x-tag-name": "appletID"
+                }
+              ]
             }
           },
           {
@@ -878,10 +922,10 @@
               "schema": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAppletCreateAppletReq"
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAppletUpdateAppletReq"
                   },
                   {
-                    "x-go-field-name": "CreateAppletReq",
+                    "x-go-field-name": "UpdateAppletReq",
                     "x-tag-mime": "multipart"
                   }
                 ]
@@ -890,15 +934,8 @@
           }
         },
         "responses": {
-          "201": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsApplet"
-                }
-              }
-            }
+          "204": {
+            "description": ""
           },
           "401": {
             "description": "",
@@ -927,8 +964,12 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
+              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
             ]
           },
           "409": {
@@ -955,6 +996,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
@@ -963,12 +1005,12 @@
         }
       }
     },
-    "/v0/applet/{projectName}/{appletID}": {
-      "get": {
+    "/v0/applet/{appletID}/{instanceID}": {
+      "put": {
         "tags": [
           "apis/applet"
         ],
-        "operationId": "GetApplet",
+        "operationId": "UpdateAndDeploy",
         "parameters": [
           {
             "name": "appletID",
@@ -987,13 +1029,19 @@
             }
           },
           {
-            "name": "projectName",
+            "name": "instanceID",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                },
+                {
+                  "x-go-field-name": "InstanceID",
+                  "x-tag-name": "instanceID"
+                }
+              ]
             }
           },
           {
@@ -1019,16 +1067,27 @@
             }
           }
         ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAppletGetAppletRsp"
-                }
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAppletUpdateAndDeployReq"
+                  },
+                  {
+                    "x-go-field-name": "UpdateAndDeployReq",
+                    "x-tag-mime": "multipart"
+                  }
+                ]
               }
             }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
           },
           "401": {
             "description": "",
@@ -1057,8 +1116,12 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
+              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
             ]
           },
           "409": {
@@ -1085,8 +1148,11 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[ConfigInitializationFailed][500999005][Config Initialization Failed]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
+              "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
             ]
           }
         }
@@ -1207,7 +1273,8 @@
             },
             "x-status-errors": [
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "409": {
@@ -1234,6 +1301,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
@@ -1348,7 +1416,8 @@
             },
             "x-status-errors": [
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "409": {
@@ -1375,6 +1444,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
@@ -1692,8 +1762,12 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
+              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
             ]
           },
           "409": {
@@ -1721,6 +1795,7 @@
             },
             "x-status-errors": [
               "@StatusErr[ConfigInitializationFailed][500999005][Config Initialization Failed]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
@@ -1845,8 +1920,12 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
+              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
             ]
           },
           "409": {
@@ -1874,6 +1953,7 @@
             },
             "x-status-errors": [
               "@StatusErr[ConfigInitializationFailed][500999005][Config Initialization Failed]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
@@ -1965,8 +2045,12 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
+              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
             ]
           },
           "409": {
@@ -1993,6 +2077,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
@@ -2106,8 +2191,12 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
+              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
             ]
           },
           "409": {
@@ -2134,6 +2223,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
@@ -2217,7 +2307,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "409": {
@@ -2243,6 +2334,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
           }
@@ -2455,7 +2547,7 @@
         }
       }
     },
-    "/v0/monitor/chain_height/{projectName}": {
+    "/v0/monitor/x/{projectName}/chain_height": {
       "post": {
         "tags": [
           "apis/monitor"
@@ -2468,8 +2560,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "format": "projectName",
               "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
             }
           },
           {
@@ -2533,6 +2627,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -2550,8 +2645,10 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "409": {
@@ -2578,6 +2675,8 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
@@ -2585,7 +2684,7 @@
         }
       }
     },
-    "/v0/monitor/chain_height/{projectName}/{chainHeightID}": {
+    "/v0/monitor/x/{projectName}/chain_height/{chainHeightID}": {
       "delete": {
         "tags": [
           "apis/monitor"
@@ -2614,8 +2713,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "format": "projectName",
               "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
             }
           },
           {
@@ -2668,6 +2769,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -2685,8 +2787,10 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "409": {
@@ -2713,6 +2817,8 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
@@ -2720,7 +2826,7 @@
         }
       }
     },
-    "/v0/monitor/chain_tx/{projectName}": {
+    "/v0/monitor/x/{projectName}/chain_tx": {
       "post": {
         "tags": [
           "apis/monitor"
@@ -2733,8 +2839,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "format": "projectName",
               "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
             }
           },
           {
@@ -2798,6 +2906,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -2815,8 +2924,10 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "409": {
@@ -2843,6 +2954,8 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
@@ -2850,7 +2963,7 @@
         }
       }
     },
-    "/v0/monitor/chain_tx/{projectName}/{chainTxID}": {
+    "/v0/monitor/x/{projectName}/chain_tx/{chainTxID}": {
       "delete": {
         "tags": [
           "apis/monitor"
@@ -2879,8 +2992,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "format": "projectName",
               "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
             }
           },
           {
@@ -2933,6 +3048,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -2950,8 +3066,10 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "409": {
@@ -2978,6 +3096,8 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
@@ -2985,7 +3105,7 @@
         }
       }
     },
-    "/v0/monitor/contract_log/{projectName}": {
+    "/v0/monitor/x/{projectName}/contract_log": {
       "post": {
         "tags": [
           "apis/monitor"
@@ -2998,8 +3118,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "format": "projectName",
               "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
             }
           },
           {
@@ -3063,6 +3185,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -3080,8 +3203,10 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "409": {
@@ -3108,6 +3233,8 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
@@ -3115,7 +3242,7 @@
         }
       }
     },
-    "/v0/monitor/contract_log/{projectName}/{contractLogID}": {
+    "/v0/monitor/x/{projectName}/contract_log/{contractLogID}": {
       "delete": {
         "tags": [
           "apis/monitor"
@@ -3144,8 +3271,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "format": "projectName",
               "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
             }
           },
           {
@@ -3198,6 +3327,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -3215,8 +3345,10 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "409": {
@@ -3243,6 +3375,8 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
@@ -3251,178 +3385,6 @@
       }
     },
     "/v0/project": {
-      "get": {
-        "tags": [
-          "apis/project"
-        ],
-        "operationId": "ListProject",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInHeader",
-              "x-tag-name": "Authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInQuery",
-              "x-tag-name": "authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          },
-          {
-            "name": "ids",
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "integer",
-                "format": "uint64"
-              },
-              "x-go-field-name": "IDs",
-              "x-tag-name": "ids,omitempty"
-            }
-          },
-          {
-            "name": "name",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "x-go-field-name": "NameLike",
-              "x-tag-name": "name,omitempty"
-            }
-          },
-          {
-            "name": "names",
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "x-go-field-name": "Names",
-              "x-tag-name": "names,omitempty"
-            }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "maximum": 9223372036854776000,
-              "minimum": 0,
-              "default": "0",
-              "x-go-field-name": "Offset",
-              "x-tag-name": "offset,omitempty",
-              "x-tag-validate": "@int64[0,]"
-            }
-          },
-          {
-            "name": "projectIDs",
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-              },
-              "x-go-field-name": "ProjectIDs",
-              "x-tag-name": "projectIDs,omitempty"
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "maximum": 9223372036854776000,
-              "minimum": -1,
-              "default": "10",
-              "x-go-field-name": "Size",
-              "x-tag-name": "size,omitempty",
-              "x-tag-validate": "@int64[-1,]"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesProjectListProjectRsp"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
-              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
-              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
-              "@StatusErr[InvalidToken][401999002][Invalid Token]!"
-            ]
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
-            ]
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
-            ]
-          }
-        }
-      },
       "post": {
         "tags": [
           "apis/project"
@@ -3490,6 +3452,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthPublisherID][401999011][Invalid Auth Publisher ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
@@ -3511,6 +3474,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[ConfigNotFound][404999003][Config Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[NotFound][404999001][NotFound]!"
@@ -3550,7 +3514,171 @@
         }
       }
     },
-    "/v0/project/{projectName}": {
+    "/v0/project/datalist": {
+      "get": {
+        "tags": [
+          "apis/project"
+        ],
+        "operationId": "ListProject",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "x-go-field-name": "Names",
+              "x-tag-name": "name,omitempty"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 9223372036854776000,
+              "minimum": 0,
+              "default": "0",
+              "x-go-field-name": "Offset",
+              "x-tag-name": "offset,omitempty",
+              "x-tag-validate": "@int64[0,]"
+            }
+          },
+          {
+            "name": "projectID",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+              },
+              "x-go-field-name": "ProjectIDs",
+              "x-tag-name": "projectID,omitempty"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 9223372036854776000,
+              "minimum": -1,
+              "default": "10",
+              "x-go-field-name": "Size",
+              "x-tag-name": "size,omitempty",
+              "x-tag-validate": "@int64[-1,]"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "x-go-field-name": "Versions",
+              "x-tag-name": "version,omitempty"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesProjectListRsp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[NotFound][404999001][NotFound]!"
+            ]
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+            ]
+          }
+        }
+      }
+    },
+    "/v0/project/x/{projectName}": {
       "delete": {
         "tags": [
           "apis/project"
@@ -3606,6 +3734,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -3623,8 +3752,10 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "409": {
@@ -3651,12 +3782,16 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
           }
         }
-      },
+      }
+    },
+    "/v0/project/x/{projectName}/data": {
       "get": {
         "tags": [
           "apis/project"
@@ -3719,10 +3854,12 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
-              "@StatusErr[InvalidToken][401999002][Invalid Token]!"
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
             ]
           },
           "404": {
@@ -3735,8 +3872,9 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "409": {
@@ -3749,7 +3887,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
@@ -3763,14 +3900,15 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
           }
         }
       }
     },
-    "/v0/project_config": {
+    "/v0/project_config/x/{projectName}": {
       "get": {
         "tags": [
           "apis/project_config"
@@ -3783,8 +3921,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "format": "projectName",
               "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
             }
           },
           {
@@ -3831,6 +3971,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -3848,9 +3989,10 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[ConfigNotFound][404999003][Config Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "409": {
@@ -3863,7 +4005,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
@@ -3877,6 +4018,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
@@ -3896,8 +4038,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "format": "projectName",
               "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
             }
           },
           {
@@ -3954,6 +4098,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -3971,8 +4116,9 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "409": {
@@ -3985,7 +4131,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
@@ -3999,6 +4144,8 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
@@ -4006,7 +4153,7 @@
         }
       }
     },
-    "/v0/publisher/{projectName}": {
+    "/v0/publisher": {
       "delete": {
         "tags": [
           "apis/publisher"
@@ -4091,7 +4238,8 @@
             },
             "x-status-errors": [
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "409": {
@@ -4118,12 +4266,15 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
           }
         }
-      },
+      }
+    },
+    "/v0/publisher/x/{projectName}": {
       "get": {
         "tags": [
           "apis/publisher"
@@ -4136,8 +4287,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "format": "projectName",
               "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
             }
           },
           {
@@ -4212,6 +4365,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -4229,8 +4383,10 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "409": {
@@ -4257,6 +4413,8 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
@@ -4275,8 +4433,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "format": "projectName",
               "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
             }
           },
           {
@@ -4340,6 +4500,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -4357,8 +4518,9 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "409": {
@@ -4371,7 +4533,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
@@ -4385,6 +4546,8 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
@@ -4392,7 +4555,7 @@
         }
       }
     },
-    "/v0/publisher/{projectName}/{publisherID}": {
+    "/v0/publisher/x/{projectName}/{publisherID}": {
       "put": {
         "tags": [
           "apis/publisher"
@@ -4405,8 +4568,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "format": "projectName",
               "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
             }
           },
           {
@@ -4479,6 +4644,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -4496,8 +4662,11 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!"
             ]
           },
           "409": {
@@ -4524,6 +4693,8 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
@@ -4836,451 +5007,13 @@
         }
       }
     },
-    "/v0/strategy/{projectName}": {
-      "delete": {
-        "tags": [
-          "apis/strategy"
-        ],
-        "operationId": "RemoveStrategy",
-        "parameters": [
-          {
-            "name": "projectName",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
-            }
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInHeader",
-              "x-tag-name": "Authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInQuery",
-              "x-tag-name": "authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          },
-          {
-            "name": "strategyID",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-              },
-              "x-go-field-name": "StrategyIDs",
-              "x-tag-name": "strategyID"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": ""
-          },
-          "401": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
-              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
-              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
-              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
-              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
-            ]
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
-            ]
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
-            ]
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "apis/strategy"
-        ],
-        "operationId": "ListStrategy",
-        "parameters": [
-          {
-            "name": "projectName",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
-            }
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInHeader",
-              "x-tag-name": "Authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          },
-          {
-            "name": "appletID",
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-              },
-              "x-go-field-name": "AppletIDs",
-              "x-tag-name": "appletID,omitempty"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInQuery",
-              "x-tag-name": "authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          },
-          {
-            "name": "eventType",
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "x-go-field-name": "EventTypes",
-              "x-tag-name": "eventType,omitempty"
-            }
-          },
-          {
-            "name": "id",
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "integer",
-                "format": "uint64"
-              },
-              "x-go-field-name": "IDs",
-              "x-tag-name": "id,omitempty"
-            }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "maximum": 9223372036854776000,
-              "minimum": 0,
-              "default": "0",
-              "x-go-field-name": "Offset",
-              "x-tag-name": "offset,omitempty",
-              "x-tag-validate": "@int64[0,]"
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "maximum": 9223372036854776000,
-              "minimum": -1,
-              "default": "10",
-              "x-go-field-name": "Size",
-              "x-tag-name": "size,omitempty",
-              "x-tag-validate": "@int64[-1,]"
-            }
-          },
-          {
-            "name": "strategyID",
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-              },
-              "x-go-field-name": "StrategyIDs",
-              "x-tag-name": "strategyID,omitempty"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesStrategyListStrategyRsp"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
-              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
-              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
-              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
-              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
-            ]
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
-            ]
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
-            ]
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "apis/strategy"
-        ],
-        "operationId": "CreateStrategy",
-        "parameters": [
-          {
-            "name": "projectName",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
-            }
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInHeader",
-              "x-tag-name": "Authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInQuery",
-              "x-tag-name": "authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesStrategyCreateStrategyBatchReq"
-                  },
-                  {
-                    "x-go-field-name": "CreateStrategyBatchReq"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": ""
-          },
-          "401": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
-              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
-              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
-              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
-              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
-            ]
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
-            ]
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
-            ]
-          }
-        }
-      }
-    },
-    "/v0/strategy/{projectName}/{strategyID}": {
+    "/v0/strategy/data/{strategyID}": {
       "get": {
         "tags": [
           "apis/strategy"
         ],
         "operationId": "GetStrategy",
         "parameters": [
-          {
-            "name": "projectName",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
-            }
-          },
           {
             "name": "strategyID",
             "in": "path",
@@ -5359,7 +5092,8 @@
             },
             "x-status-errors": [
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[StrategyNotFound][404999007][Strategy Not Found]!"
             ]
           },
           "409": {
@@ -5372,7 +5106,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
@@ -5386,17 +5119,19 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
           }
         }
-      },
-      "put": {
+      }
+    },
+    "/v0/strategy/x/{projectName}": {
+      "delete": {
         "tags": [
           "apis/strategy"
         ],
-        "operationId": "UpdateStrategy",
+        "operationId": "RemoveStrategy",
         "parameters": [
           {
             "name": "projectName",
@@ -5404,10 +5139,490 @@
             "required": true,
             "schema": {
               "type": "string",
+              "format": "projectName",
               "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
             }
           },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "appletID",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+              },
+              "x-go-field-name": "AppletIDs",
+              "x-tag-name": "appletID"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "eventType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "x-go-field-name": "EventTypes",
+              "x-tag-name": "eventType"
+            }
+          },
+          {
+            "name": "handler",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "x-go-field-name": "Handlers",
+              "x-tag-name": "handler"
+            }
+          },
+          {
+            "name": "strategyID",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+              },
+              "x-go-field-name": "StrategyIDs",
+              "x-tag-name": "strategyID"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+            ]
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+            ]
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "apis/strategy"
+        ],
+        "operationId": "ListStrategy",
+        "parameters": [
+          {
+            "name": "projectName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "projectName",
+              "x-go-field-name": "ProjectName",
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "appletID",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+              },
+              "x-go-field-name": "AppletIDs",
+              "x-tag-name": "appletID"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "eventType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "x-go-field-name": "EventTypes",
+              "x-tag-name": "eventType"
+            }
+          },
+          {
+            "name": "handler",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "x-go-field-name": "Handlers",
+              "x-tag-name": "handler"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 9223372036854776000,
+              "minimum": 0,
+              "default": "0",
+              "x-go-field-name": "Offset",
+              "x-tag-name": "offset,omitempty",
+              "x-tag-validate": "@int64[0,]"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 9223372036854776000,
+              "minimum": -1,
+              "default": "10",
+              "x-go-field-name": "Size",
+              "x-tag-name": "size,omitempty",
+              "x-tag-validate": "@int64[-1,]"
+            }
+          },
+          {
+            "name": "strategyID",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+              },
+              "x-go-field-name": "StrategyIDs",
+              "x-tag-name": "strategyID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesStrategyListRsp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+            ]
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+            ]
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "apis/strategy"
+        ],
+        "operationId": "CreateStrategy",
+        "parameters": [
+          {
+            "name": "projectName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "projectName",
+              "x-go-field-name": "ProjectName",
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesStrategyCreateReq"
+                  },
+                  {
+                    "x-go-field-name": "CreateReq"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesStrategyCreateRsp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+            ]
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
+              "@StatusErr[StrategyConflict][409999004][Strategy Conflict]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+            ]
+          }
+        }
+      }
+    },
+    "/v0/strategy/{strategyID}": {
+      "put": {
+        "tags": [
+          "apis/strategy"
+        ],
+        "operationId": "UpdateStrategy",
+        "parameters": [
           {
             "name": "strategyID",
             "in": "path",
@@ -5454,10 +5669,10 @@
               "schema": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesStrategyCreateStrategyReq"
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesStrategyCreateData"
                   },
                   {
-                    "x-go-field-name": "CreateStrategyReq"
+                    "x-go-field-name": "UpdateReq"
                   }
                 ]
               }
@@ -5496,7 +5711,8 @@
             },
             "x-status-errors": [
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[StrategyNotFound][404999007][Strategy Not Found]!"
             ]
           },
           "409": {
@@ -5510,7 +5726,7 @@
             },
             "x-status-errors": [
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[StrategyConflict][409999004][Strategy Conflict]!"
             ]
           },
           "500": {
@@ -5523,7 +5739,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
           }
@@ -5533,6 +5749,12 @@
   },
   "components": {
     "schemas": {
+      "BytesBuffer": {
+        "type": "string",
+        "format": "binary",
+        "x-go-vendor-type": "bytes.Buffer",
+        "x-id": "BytesBuffer"
+      },
       "CurrentAccount": {
         "allOf": [
           {
@@ -5547,7 +5769,7 @@
       "GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID": {
         "type": "integer",
         "format": "uint64",
-        "description": "Number.MAX_SAFE_INTEGER https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER",
+        "description": "Number.MAX_SAFE_INTEGER JavaScript (2^53 – 1)",
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/base/types.SFID",
         "x-id": "GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
       },
@@ -5806,7 +6028,6 @@
                 "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsSchemaColumnType"
               },
               {
-                "description": "Constrains column constrains",
                 "x-go-field-name": "Constrains",
                 "x-go-star-level": 1,
                 "x-tag-json": "constrains"
@@ -5815,7 +6036,6 @@
           },
           "name": {
             "type": "string",
-            "description": "Name column name",
             "x-go-field-name": "Name",
             "x-tag-json": "name"
           }
@@ -5854,7 +6074,6 @@
           },
           "default": {
             "type": "string",
-            "description": "Default column default value",
             "x-go-field-name": "Default",
             "x-go-star-level": 1,
             "x-tag-json": "default,omitempty"
@@ -5872,7 +6091,6 @@
           },
           "null": {
             "type": "boolean",
-            "description": "Null if allow",
             "x-go-field-name": "Null",
             "x-tag-json": "null,omitempty"
           }
@@ -5931,13 +6149,11 @@
             "items": {
               "type": "string"
             },
-            "description": "ColumnNames index related column names",
             "x-go-field-name": "ColumnNames",
             "x-tag-json": "columnNames"
           },
           "expr": {
             "type": "string",
-            "description": "Expr index extension for sql dialect",
             "x-go-field-name": "Expr",
             "x-tag-json": "expr,omitempty"
           }
@@ -5958,19 +6174,16 @@
             "properties": {
               "isUnique": {
                 "type": "boolean",
-                "description": "IsUnique is unique index",
                 "x-go-field-name": "IsUnique",
                 "x-tag-json": "isUnique,omitempty"
               },
               "method": {
                 "type": "string",
-                "description": "Method index method `btree` or `hash`",
                 "x-go-field-name": "Method",
                 "x-tag-json": "method,omitempty"
               },
               "name": {
                 "type": "string",
-                "description": "Name index name",
                 "x-go-field-name": "Name",
                 "x-tag-json": "name,omitempty"
               }
@@ -5985,7 +6198,6 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "Name schema name",
             "x-go-field-name": "Name",
             "x-tag-json": "name,omitempty"
           },
@@ -5994,7 +6206,6 @@
             "items": {
               "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsSchemaTable"
             },
-            "description": "Tables tables define",
             "x-go-field-name": "Tables",
             "x-tag-json": "tables,omitempty"
           }
@@ -6010,13 +6221,11 @@
             "items": {
               "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsSchemaColumn"
             },
-            "description": "Cols columns define",
             "x-go-field-name": "Cols",
             "x-tag-json": "cols"
           },
           "desc": {
             "type": "string",
-            "description": "Desc table description",
             "x-go-field-name": "Desc",
             "x-tag-json": "desc,omitempty"
           },
@@ -6025,25 +6234,21 @@
             "items": {
               "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsSchemaKey"
             },
-            "description": "Keys primary and index define",
             "x-go-field-name": "Keys",
             "x-tag-json": "keys"
           },
           "name": {
             "type": "string",
-            "description": "Name table name",
             "x-go-field-name": "Name",
             "x-tag-json": "name"
           },
           "withPrimaryKey": {
             "type": "boolean",
-            "description": "WithPrimaryKey if use predefined primary key",
             "x-go-field-name": "WithPrimaryKey",
             "x-tag-json": "withPrimaryKey,omitempty"
           },
           "withSoftDeletion": {
             "type": "boolean",
-            "description": "WithSoftDeletion if use predefined soft deletion",
             "x-go-field-name": "WithSoftDeletion",
             "x-tag-json": "withSoftDeletion,omitempty"
           }
@@ -7282,31 +7487,6 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.CreateAppletReq",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesAppletCreateAppletReq"
       },
-      "GithubComMachinefiW3BstreamPkgModulesAppletGetAppletRsp": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAppletInfoApplet"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "instances": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsInstance"
-                },
-                "x-go-field-name": "Instances",
-                "x-tag-json": "instances"
-              }
-            },
-            "required": [
-              "instances"
-            ],
-            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.GetAppletRsp",
-            "x-id": "GithubComMachinefiW3BstreamPkgModulesAppletGetAppletRsp"
-          }
-        ]
-      },
       "GithubComMachinefiW3BstreamPkgModulesAppletInfo": {
         "type": "object",
         "properties": {
@@ -7335,18 +7515,6 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.Info",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesAppletInfo"
-      },
-      "GithubComMachinefiW3BstreamPkgModulesAppletInfoApplet": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsApplet"
-          },
-          {
-            "type": "object",
-            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.InfoApplet",
-            "x-id": "GithubComMachinefiW3BstreamPkgModulesAppletInfoApplet"
-          }
-        ]
       },
       "GithubComMachinefiW3BstreamPkgModulesAppletListAppletRsp": {
         "type": "object",
@@ -7566,66 +7734,6 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/event.HandleEventResult",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesEventHandleEventResult"
       },
-      "GithubComMachinefiW3BstreamPkgModulesProjectAppletDetail": {
-        "type": "object",
-        "properties": {
-          "appletID": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-              },
-              {
-                "x-go-field-name": "AppletID",
-                "x-tag-json": "appletID"
-              }
-            ]
-          },
-          "appletName": {
-            "type": "string",
-            "x-go-field-name": "AppletName",
-            "x-tag-json": "appletName"
-          },
-          "instanceID": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-              },
-              {
-                "x-go-field-name": "InstanceID",
-                "x-tag-json": "instanceID,omitempty"
-              }
-            ]
-          },
-          "instanceState": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsInstanceState"
-              },
-              {
-                "x-go-field-name": "InstanceState",
-                "x-tag-json": "instanceState,omitempty"
-              }
-            ]
-          },
-          "instanceStateVM": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsInstanceState"
-              },
-              {
-                "x-go-field-name": "InstanceVMState",
-                "x-tag-json": "instanceStateVM,omitempty"
-              }
-            ]
-          }
-        },
-        "required": [
-          "appletID",
-          "appletName"
-        ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/project.AppletDetail",
-        "x-id": "GithubComMachinefiW3BstreamPkgModulesProjectAppletDetail"
-      },
       "GithubComMachinefiW3BstreamPkgModulesProjectCreateProjectReq": {
         "allOf": [
           {
@@ -7716,64 +7824,20 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/project.CreateProjectRsp",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesProjectCreateProjectRsp"
       },
-      "GithubComMachinefiW3BstreamPkgModulesProjectDetail": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimes"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "applets": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesProjectAppletDetail"
-                },
-                "x-go-field-name": "Applets",
-                "x-tag-json": "applets,omitempty"
-              },
-              "projectID": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-                  },
-                  {
-                    "x-go-field-name": "ProjectID",
-                    "x-tag-json": "projectID"
-                  }
-                ]
-              },
-              "projectName": {
-                "type": "string",
-                "x-go-field-name": "ProjectName",
-                "x-tag-json": "projectName"
-              }
-            },
-            "required": [
-              "projectID",
-              "projectName"
-            ],
-            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/project.Detail",
-            "x-id": "GithubComMachinefiW3BstreamPkgModulesProjectDetail"
-          }
-        ]
-      },
-      "GithubComMachinefiW3BstreamPkgModulesProjectListProjectRsp": {
+      "GithubComMachinefiW3BstreamPkgModulesProjectListRsp": {
         "type": "object",
         "properties": {
           "data": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesProjectDetail"
+              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsProject"
             },
-            "description": "Data project data list",
             "x-go-field-name": "Data",
             "x-tag-json": "data"
           },
           "total": {
             "type": "integer",
             "format": "int64",
-            "description": "Total project count under current user",
             "x-go-field-name": "Total",
             "x-tag-json": "total"
           }
@@ -7782,8 +7846,8 @@
           "data",
           "total"
         ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/project.ListProjectRsp",
-        "x-id": "GithubComMachinefiW3BstreamPkgModulesProjectListProjectRsp"
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/project.ListRsp",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesProjectListRsp"
       },
       "GithubComMachinefiW3BstreamPkgModulesPublisherCreatePublisherReq": {
         "type": "object",
@@ -7855,25 +7919,7 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/publisher.ListPublisherRsp",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesPublisherListPublisherRsp"
       },
-      "GithubComMachinefiW3BstreamPkgModulesStrategyCreateStrategyBatchReq": {
-        "type": "object",
-        "properties": {
-          "strategies": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesStrategyCreateStrategyReq"
-            },
-            "x-go-field-name": "Strategies",
-            "x-tag-json": "strategies"
-          }
-        },
-        "required": [
-          "strategies"
-        ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/strategy.CreateStrategyBatchReq",
-        "x-id": "GithubComMachinefiW3BstreamPkgModulesStrategyCreateStrategyBatchReq"
-      },
-      "GithubComMachinefiW3BstreamPkgModulesStrategyCreateStrategyReq": {
+      "GithubComMachinefiW3BstreamPkgModulesStrategyCreateData": {
         "allOf": [
           {
             "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsRelApplet"
@@ -7883,114 +7929,61 @@
           },
           {
             "type": "object",
-            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/strategy.CreateStrategyReq",
-            "x-id": "GithubComMachinefiW3BstreamPkgModulesStrategyCreateStrategyReq"
+            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/strategy.CreateData",
+            "x-id": "GithubComMachinefiW3BstreamPkgModulesStrategyCreateData"
           }
         ]
       },
-      "GithubComMachinefiW3BstreamPkgModulesStrategyDetail": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimes"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "projectID": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-                  },
-                  {
-                    "x-go-field-name": "ProjectID",
-                    "x-tag-json": "projectID"
-                  }
-                ]
-              },
-              "strategies": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesStrategyInfoDetail"
-                },
-                "x-go-field-name": "Strategies",
-                "x-tag-json": "strategies,omitempty"
-              }
-            },
-            "required": [
-              "projectID"
-            ],
-            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/strategy.Detail",
-            "x-id": "GithubComMachinefiW3BstreamPkgModulesStrategyDetail"
-          }
-        ]
-      },
-      "GithubComMachinefiW3BstreamPkgModulesStrategyInfoDetail": {
-        "type": "object",
-        "properties": {
-          "appletID": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-              },
-              {
-                "x-go-field-name": "AppletID",
-                "x-tag-json": "appletID"
-              }
-            ]
-          },
-          "appletName": {
-            "type": "string",
-            "x-go-field-name": "AppletName",
-            "x-tag-json": "appletName"
-          },
-          "eventType": {
-            "type": "string",
-            "x-go-field-name": "EventType",
-            "x-tag-json": "eventType"
-          },
-          "handler": {
-            "type": "string",
-            "x-go-field-name": "Handler",
-            "x-tag-json": "handler"
-          },
-          "strategyID": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-              },
-              {
-                "x-go-field-name": "StrategyID",
-                "x-tag-json": "strategyID"
-              }
-            ]
-          }
-        },
-        "required": [
-          "strategyID",
-          "appletID",
-          "appletName",
-          "eventType",
-          "handler"
-        ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/strategy.InfoDetail",
-        "x-id": "GithubComMachinefiW3BstreamPkgModulesStrategyInfoDetail"
-      },
-      "GithubComMachinefiW3BstreamPkgModulesStrategyListStrategyRsp": {
+      "GithubComMachinefiW3BstreamPkgModulesStrategyCreateReq": {
         "type": "object",
         "properties": {
           "data": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesStrategyDetail"
+              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesStrategyCreateData"
             },
-            "description": "Data strategy data list",
+            "x-go-field-name": "Data",
+            "x-tag-json": "data"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/strategy.CreateReq",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesStrategyCreateReq"
+      },
+      "GithubComMachinefiW3BstreamPkgModulesStrategyCreateRsp": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsStrategy"
+            },
+            "x-go-field-name": "Data",
+            "x-tag-json": "data"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/strategy.CreateRsp",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesStrategyCreateRsp"
+      },
+      "GithubComMachinefiW3BstreamPkgModulesStrategyListRsp": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsStrategy"
+            },
             "x-go-field-name": "Data",
             "x-tag-json": "data"
           },
           "total": {
             "type": "integer",
             "format": "int64",
-            "description": "Total strategy count under current projectID",
             "x-go-field-name": "Total",
             "x-tag-json": "total"
           }
@@ -7999,8 +7992,8 @@
           "data",
           "total"
         ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/strategy.ListStrategyRsp",
-        "x-id": "GithubComMachinefiW3BstreamPkgModulesStrategyListStrategyRsp"
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/strategy.ListRsp",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesStrategyListRsp"
       },
       "GithubComMachinefiW3BstreamPkgTypesWasmCache": {
         "type": "object",
@@ -8125,6 +8118,23 @@
             "x-id": "GithubComMachinefiW3BstreamPkgTypesWasmSchema"
           }
         ]
+      },
+      "ProjectProvider": {
+        "type": "object",
+        "properties": {
+          "projectName": {
+            "type": "string",
+            "format": "projectName",
+            "x-go-field-name": "ProjectName",
+            "x-tag-name": "projectName",
+            "x-tag-validate": "@projectName"
+          }
+        },
+        "required": [
+          "projectName"
+        ],
+        "description": "ProjectProvider with account id prefix",
+        "x-id": "ProjectProvider"
       }
     }
   }

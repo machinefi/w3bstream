@@ -18,9 +18,9 @@ type UpdateApplet struct {
 func (r *UpdateApplet) Path() string { return "/:appletID" }
 
 func (r *UpdateApplet) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
 
-	ctx, err := ca.WithAppletContext(ctx, r.AppletID)
+	ctx, err := ca.WithAppletContextBySFID(ctx, r.AppletID)
 	if err != nil {
 		return nil, err
 	}
@@ -40,12 +40,12 @@ func (r *UpdateAndDeploy) Path() string {
 }
 
 func (r *UpdateAndDeploy) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
-	ctx, err := ca.WithAppletContext(ctx, r.AppletID)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
+	ctx, err := ca.WithAppletContextBySFID(ctx, r.AppletID)
 	if err != nil {
 		return nil, err
 	}
-	ctx, err = ca.WithInstanceContext(ctx, r.InstanceID)
+	ctx, err = ca.WithInstanceContextBySFID(ctx, r.InstanceID)
 	if err != nil {
 		return nil, err
 	}

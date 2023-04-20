@@ -6,9 +6,17 @@ import (
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
+	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/account"
+	"github.com/machinefi/w3bstream/pkg/modules/applet"
+	"github.com/machinefi/w3bstream/pkg/modules/deploy"
+	"github.com/machinefi/w3bstream/pkg/modules/project"
+	"github.com/machinefi/w3bstream/pkg/modules/publisher"
+	"github.com/machinefi/w3bstream/pkg/modules/resource"
+	"github.com/machinefi/w3bstream/pkg/modules/strategy"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -36,96 +44,131 @@ func (r *ContextAccountAuth) Output(ctx context.Context) (interface{}, error) {
 	return &CurrentAccount{*ca}, nil
 }
 
-func CurrentAccountFromContext(ctx context.Context) *CurrentAccount {
-	return ctx.Value(contextAccountAuthKey).(*CurrentAccount)
+func MustCurrentAccountFromContext(ctx context.Context) *CurrentAccount {
+	ca, ok := ctx.Value(contextAccountAuthKey).(*CurrentAccount)
+	must.BeTrue(ok)
+	return ca
+}
+
+func CurrentAccountFromContext(ctx context.Context) (*CurrentAccount, bool) {
+	ca, ok := ctx.Value(contextAccountAuthKey).(*CurrentAccount)
+	return ca, ok
 }
 
 type CurrentAccount struct {
 	models.Account
 }
 
-func (v *CurrentAccount) WithProjectContextByName(ctx context.Context, prjName string) (context.Context, error) {
-	a := CurrentAccountFromContext(ctx)
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	m := &models.Project{ProjectName: models.ProjectName{Name: prjName}}
-	if err := m.FetchByName(d); err != nil {
-		return ctx, status.CheckDatabaseError(err, "GetProjectByName")
-	}
-	if a.AccountID != m.AccountID {
-		return ctx, status.NoProjectPermission
-	}
-	ctx = types.WithProject(ctx, m)
-	return ctx, nil
+func (v *CurrentAccount) WithAccount(ctx context.Context) context.Context {
+	return types.WithAccount(ctx, &v.Account)
 }
 
-func (v *CurrentAccount) WithProjectContextByID(ctx context.Context, prjID types.SFID) (context.Context, error) {
-	a := CurrentAccountFromContext(ctx)
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	m := &models.Project{RelProject: models.RelProject{ProjectID: prjID}}
-	if err := m.FetchByProjectID(d); err != nil {
-		return ctx, status.CheckDatabaseError(err, "GetProjectByProjectID")
-	}
-	if a.AccountID != m.AccountID {
-		return ctx, status.NoProjectPermission
-	}
-	ctx = types.WithProject(ctx, m)
-	return ctx, nil
-}
-
-func (v *CurrentAccount) WithAppletContext(ctx context.Context, appletID types.SFID) (context.Context, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-
-	app := &models.Applet{RelApplet: models.RelApplet{AppletID: appletID}}
-	if err := app.FetchByAppletID(d); err != nil {
-		return ctx, status.CheckDatabaseError(err, "GetAppletByAppletID")
-	}
-
-	_ctx, err := v.WithProjectContextByID(ctx, app.ProjectID)
+// WithProjectContextByName With project context by project name(in database)
+func (v *CurrentAccount) WithProjectContextByName(ctx context.Context, name string) (context.Context, error) {
+	prj, err := project.GetByName(ctx, name)
 	if err != nil {
-		return ctx, err
+		return nil, err
 	}
-
-	_ctx, err = v.WithResourceContext(ctx, app.ResourceID)
-	if err != nil {
-		return ctx, err
+	if v.AccountID != prj.AccountID {
+		return nil, status.NoProjectPermission
 	}
-
-	ctx = types.WithApplet(_ctx, app)
-	return ctx, nil
+	return types.WithProject(ctx, prj), nil
 }
 
-func (v *CurrentAccount) WithResourceContext(ctx context.Context, resID types.SFID) (context.Context, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-
-	res := &models.Resource{RelResource: models.RelResource{ResourceID: resID}}
-	if err := res.FetchByResourceID(d); err != nil {
-		return ctx, status.CheckDatabaseError(err, "GetResourceByResourceID")
+// WithProjectContextBySFID With project context by project SFID
+func (v *CurrentAccount) WithProjectContextBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	prj, err := project.GetBySFID(ctx, id)
+	if err != nil {
+		return nil, err
 	}
-
-	ctx = types.WithResource(ctx, res)
-	return ctx, nil
+	if v.AccountID != prj.AccountID {
+		return nil, status.NoProjectPermission
+	}
+	return types.WithProject(ctx, prj), nil
 }
 
-func (v *CurrentAccount) WithInstanceContext(ctx context.Context, instanceID types.SFID) (context.Context, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-
-	ins := &models.Instance{RelInstance: models.RelInstance{InstanceID: instanceID}}
-	if err := ins.FetchByInstanceID(d); err != nil {
-		return ctx, status.CheckDatabaseError(err, "GetInstanceByInstanceID")
-	}
-	_ctx, err := v.WithAppletContext(ctx, ins.AppletID)
+// WithAppletContextBySFID With full contexts by applet SFID
+func (v *CurrentAccount) WithAppletContextBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	app, err := applet.GetBySFID(ctx, id)
 	if err != nil {
-		return ctx, err
+		return nil, err
 	}
-	ctx = types.WithInstance(_ctx, ins)
-	return ctx, nil
+	ctx = types.WithApplet(ctx, app)
+
+	ctx, err = v.WithProjectContextBySFID(ctx, app.ProjectID)
+	if err != nil {
+		return nil, err
+	}
+
+	ins, err := deploy.GetByAppletSFID(ctx, app.AppletID)
+	if err != nil {
+		se, ok := statusx.IsStatusErr(err)
+		if !ok || !se.Is(status.InstanceNotFound) {
+			return nil, err
+		}
+	} else {
+		ctx = types.WithInstance(ctx, ins)
+	}
+
+	res, err := resource.GetBySFID(ctx, app.ResourceID)
+	if err != nil {
+		return nil, err
+	}
+
+	return types.WithResource(ctx, res), nil
+}
+
+// WithInstanceContextBySFID With full contexts by instance SFID
+func (v *CurrentAccount) WithInstanceContextBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	var (
+		ins *models.Instance
+		app *models.Applet
+		res *models.Resource
+		err error
+	)
+	if ins, err = deploy.GetBySFID(ctx, id); err != nil {
+		return nil, err
+	}
+	ctx = types.WithInstance(ctx, ins)
+
+	if ctx, err = v.WithProjectContextBySFID(ctx, app.ProjectID); err != nil {
+		return nil, err
+	}
+
+	if app, err = applet.GetBySFID(ctx, ins.AppletID); err != nil {
+		return nil, err
+	}
+	ctx = types.WithApplet(ctx, app)
+
+	if res, err = resource.GetBySFID(ctx, app.ResourceID); err != nil {
+		return nil, err
+	}
+	return types.WithResource(ctx, res), nil
+}
+
+func (v *CurrentAccount) WithStrategyBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	sty, err := strategy.GetBySFID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	ctx = types.WithStrategy(ctx, sty)
+	return v.WithProjectContextBySFID(ctx, sty.ProjectID)
+}
+
+func (v *CurrentAccount) WithPublisherBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	pub, err := publisher.GetBySFID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	ctx = types.WithPublisher(ctx, pub)
+	return v.WithProjectContextBySFID(ctx, pub.ProjectID)
 }
 
 // ValidateProjectPerm
 // Deprecated: Use WithProjectContextByID instead
 func (v *CurrentAccount) ValidateProjectPerm(ctx context.Context, prjID types.SFID) (*models.Project, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
-	a := CurrentAccountFromContext(ctx)
+	a := MustCurrentAccountFromContext(ctx)
 	m := &models.Project{RelProject: models.RelProject{ProjectID: prjID}}
 
 	if err := m.FetchByProjectID(d); err != nil {
@@ -141,7 +184,7 @@ func (v *CurrentAccount) ValidateProjectPerm(ctx context.Context, prjID types.SF
 // Deprecated: Use WithProjectContextByName instead
 func (v *CurrentAccount) ValidateProjectPermByPrjName(ctx context.Context, projectName string) (*models.Project, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
-	a := CurrentAccountFromContext(ctx)
+	a := MustCurrentAccountFromContext(ctx)
 	m := &models.Project{ProjectName: models.ProjectName{Name: projectName}}
 
 	if err := m.FetchByName(d); err != nil {

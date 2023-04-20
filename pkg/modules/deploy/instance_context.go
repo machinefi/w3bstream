@@ -60,6 +60,9 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 	if _, ok := wasm.KVStoreFromContext(ctx); !ok {
 		ctx = wasm.DefaultCache().WithContext(ctx)
 	}
+	if _, ok := wasm.MQTTClientFromContext(ctx); !ok {
+		ctx = wasm.DefaultMQClient().WithContext(ctx)
+	}
 
 	acc := &models.Account{RelAccount: prj.RelAccount}
 	if err := acc.FetchByAccountID(d); err != nil {
