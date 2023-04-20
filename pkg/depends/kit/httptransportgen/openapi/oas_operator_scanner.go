@@ -27,18 +27,25 @@ func NewOperatorScanner(pkg *pkgx.Pkg) *OperatorScanner {
 		pkg:              pkg,
 		DefScanner:       NewDefScanner(pkg),
 		StatusErrScanner: NewStatusErrScanner(pkg),
+		typeTaskOperator: pkgx.New(pkg.PkgByPath(PkgPathTaskOperator)).
+			TypeName("TaskOperator").Type().Underlying().(*types.Interface),
 	}
 }
 
 type OperatorScanner struct {
 	*DefScanner
 	*StatusErrScanner
-	pkg *pkgx.Pkg
-	ops map[*types.TypeName]*Operator
+	pkg              *pkgx.Pkg
+	ops              map[*types.TypeName]*Operator
+	typeTaskOperator *types.Interface
 }
 
 func (os *OperatorScanner) Operator(ctx context.Context, tn *types.TypeName) *Operator {
 	if tn == nil {
+		return nil
+	}
+
+	if typesx.FromGoType(types.NewPointer(tn.Type())).Implements(typesx.FromGoType(os.typeTaskOperator)) {
 		return nil
 	}
 

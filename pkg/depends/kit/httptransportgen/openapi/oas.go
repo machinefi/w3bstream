@@ -3,6 +3,7 @@ package openapi
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"go/ast"
 	"go/types"
 	"log"
@@ -11,13 +12,23 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/validator"
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/depends/oas"
 	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"
 )
 
-func NewGenerator(pkg *pkgx.Pkg) *Generator {
+func NewGenerator(pkg *pkgx.Pkg, validators ...string) *Generator {
+	if len(validators)%2 != 0 {
+		panic("should pass validators by name rule pairs")
+	}
+	for i := 0; i < len(validators); i += 2 {
+		name := validators[i]
+		rule := validators[i+1]
+		fmt.Printf("user defined validator: `%s: %s`", name, rule)
+		validator.DefaultFactory.Register(validator.NewRegexpStrfmtValidator(rule, name))
+	}
 	return &Generator{
 		pkg: pkg,
 		oas: oas.NewOpenAPI(),
@@ -81,6 +92,9 @@ func (g *Generator) Scan(ctx context.Context) {
 
 					for _, route := range routes {
 						mtd := route.Method()
+						if len(route.Operators) == 0 || mtd == "" {
+							continue
+						}
 						op := g.OperationByOperatorTypes(mtd, route.Operators...)
 
 						if _, exists := ops[op.OperationId]; exists {

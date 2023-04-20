@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
 
@@ -36,10 +37,11 @@ const (
 )
 
 var (
-	PkgPathHttpTspt  = pkgx.Import(reflect.TypeOf(httptransport.HttpRouteMeta{}).PkgPath())
-	PkgPathHttpx     = pkgx.Import(reflect.TypeOf(httpx.Response{}).PkgPath())
-	PkgPathKit       = pkgx.Import(reflect.TypeOf(kit.Router{}).PkgPath())
-	PkgPathStatusErr = reflect.TypeOf(statusx.StatusErr{}).PkgPath()
+	PkgPathHttpTspt     = pkgx.Import(reflect.TypeOf(httptransport.HttpRouteMeta{}).PkgPath())
+	PkgPathHttpx        = pkgx.Import(reflect.TypeOf(httpx.Response{}).PkgPath())
+	PkgPathKit          = pkgx.Import(reflect.TypeOf(kit.Router{}).PkgPath())
+	PkgPathStatusErr    = reflect.TypeOf(statusx.StatusErr{}).PkgPath()
+	PkgPathTaskOperator = pkgx.Import(reflect.TypeOf((*mq.TaskOperator)(nil)).Elem().PkgPath())
 )
 
 var TagKeysMapping = map[string]string{
