@@ -37,7 +37,7 @@ type InfoApplet struct {
 	Path string `db:"f_wasm_path" json:"-"`
 }
 
-func CreateApplet(ctx context.Context, projectID types.SFID, r *CreateAppletReq) (mApplet *models.Applet, err error) {
+func CreateApplet(ctx context.Context, projectID, accountID types.SFID, r *CreateAppletReq) (mApplet *models.Applet, err error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
@@ -46,7 +46,7 @@ func CreateApplet(ctx context.Context, projectID types.SFID, r *CreateAppletReq)
 	defer l.End()
 
 	mResource := &models.Resource{}
-	if mResource, err = resource.FetchOrCreateResource(ctx, r.File); err != nil {
+	if mResource, err = resource.FetchOrCreateResource(ctx, accountID.String(), r.File); err != nil {
 		l.Error(err)
 		return nil, err
 	}
@@ -94,7 +94,7 @@ type UpdateAppletReq struct {
 	*Info `name:"info"`
 }
 
-func UpdateApplet(ctx context.Context, appletID types.SFID, r *UpdateAppletReq) (err error) {
+func UpdateApplet(ctx context.Context, appletID, accountID types.SFID, r *UpdateAppletReq) (err error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	mApplet := &models.Applet{RelApplet: models.RelApplet{AppletID: appletID}}
@@ -104,7 +104,7 @@ func UpdateApplet(ctx context.Context, appletID types.SFID, r *UpdateAppletReq) 
 	defer l.End()
 
 	mResource := &models.Resource{}
-	if mResource, err = resource.FetchOrCreateResource(ctx, r.File); err != nil {
+	if mResource, err = resource.FetchOrCreateResource(ctx, accountID.String(), r.File); err != nil {
 		l.Error(err)
 		return err
 	}
@@ -172,7 +172,7 @@ type UpdateAndDeployReq struct {
 	Cache *wasm.Cache `name:"cache,omitempty"`
 }
 
-func UpdateAndDeploy(ctx context.Context, r *UpdateAndDeployReq) error {
+func UpdateAndDeploy(ctx context.Context, accountID types.SFID, r *UpdateAndDeployReq) error {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
@@ -182,7 +182,7 @@ func UpdateAndDeploy(ctx context.Context, r *UpdateAndDeployReq) error {
 	_, l = l.Start(ctx, "UpdateAndDeploy")
 	defer l.End()
 
-	mResource, err := resource.FetchOrCreateResource(ctx, r.File)
+	mResource, err := resource.FetchOrCreateResource(ctx, accountID.String(), r.File)
 	if err != nil {
 		l.Error(err)
 		return err

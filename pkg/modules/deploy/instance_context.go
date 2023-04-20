@@ -25,6 +25,7 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		types.WithTaskBoardContext(types.MustTaskBoardFromContext(parent)),
 		types.WithMqttBrokerContext(types.MustMqttBrokerFromContext(parent)),
 		types.WithETHClientConfigContext(types.MustETHClientConfigFromContext(parent)),
+		types.WithS3Context(types.MustS3FromContext(parent)),
 	)(context.Background())
 
 	app := &models.Applet{RelApplet: models.RelApplet{AppletID: ins.AppletID}}

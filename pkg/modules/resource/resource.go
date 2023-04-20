@@ -4,8 +4,6 @@ import (
 	"context"
 	"mime/multipart"
 
-	"github.com/pkg/errors"
-
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
@@ -13,7 +11,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-func FetchOrCreateResource(ctx context.Context, f *multipart.FileHeader) (*models.Resource, error) {
+func FetchOrCreateResource(ctx context.Context, owner string, f *multipart.FileHeader) (*models.Resource, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
@@ -21,24 +19,51 @@ func FetchOrCreateResource(ctx context.Context, f *multipart.FileHeader) (*model
 	_, l = l.Start(ctx, "FetchOrCreateResource")
 	defer l.End()
 
-	_, fullName, md5, err := Upload(ctx, f, idg.MustGenSFID().String())
+	fullName, err := UploadWithS3(ctx, f, owner)
 	if err != nil {
 		l.Error(err)
 		return nil, status.UploadFileFailed.StatusErr().WithDesc(err.Error())
 	}
 
-	m := &models.Resource{ResourceInfo: models.ResourceInfo{Md5: md5}}
+	m := &models.Resource{ResourceInfo: models.ResourceInfo{Path: fullName}}
 
-	if err = m.FetchByMd5(d); err != nil && sqlx.DBErr(err).IsNotFound() {
-		m.ResourceID = idg.MustGenSFID()
-		m.ResourceInfo.Path = fullName
-		m.ResourceInfo.Md5 = md5
-		if err = m.Create(d); err != nil {
-			l.Error(errors.Wrap(err, "create wasm resource db failed"))
-			return nil, status.CheckDatabaseError(err, "CreateResource")
-		}
-		l.Info("wasm resource created")
-	}
+	var exists bool
+	err = sqlx.NewTasks(d).With(
+		// fetch Resource
+		func(db sqlx.DBExecutor) error {
+			err := m.FetchByPath(d)
+			if err != nil {
+				if sqlx.DBErr(err).IsNotFound() {
+					exists = false
+					return nil
+				} else {
+					return status.CheckDatabaseError(err, "FetchResource")
+				}
+			} else {
+				exists = true
+				return nil
+			}
+		},
+		// create or update Resource
+		func(db sqlx.DBExecutor) error {
+			if exists {
+				m.ResourceInfo.RefCnt += 1
+				if err := m.UpdateByPath(d); err != nil {
+					return status.CheckDatabaseError(err, "UpdateResource")
+				}
+				return nil
+			} else {
+				m.ResourceID = idg.MustGenSFID()
+				m.ResourceInfo.Path = fullName
+				m.ResourceInfo.RefCnt = 1
+				if err := m.Create(db); err != nil {
+					return status.CheckDatabaseError(err, "CreateResource")
+				}
+				return nil
+			}
+		},
+	).Do()
+
 	l.Info("get wasm resource from db")
 	return m, err
 }

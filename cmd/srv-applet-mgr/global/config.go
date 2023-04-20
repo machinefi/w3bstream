@@ -6,6 +6,7 @@ import (
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 	confapp "github.com/machinefi/w3bstream/pkg/depends/conf/app"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/s3"
 	confhttp "github.com/machinefi/w3bstream/pkg/depends/conf/http"
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	confjwt "github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
@@ -51,6 +52,7 @@ func init() {
 		EthClient   *types.ETHClientConfig
 		WhiteList   *types.WhiteList
 		ServerEvent *confhttp.Server
+		S3          *s3.S3
 	}{
 		Postgres:    db,
 		MonitorDB:   monitordb,
@@ -65,6 +67,7 @@ func init() {
 		EthClient:   &types.ETHClientConfig{},
 		WhiteList:   &types.WhiteList{},
 		ServerEvent: serverEvent,
+		S3:          &s3.S3{},
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
@@ -104,6 +107,7 @@ func init() {
 		types.WithTaskBoardContext(mq.NewTaskBoard(tasks)),
 		types.WithETHClientConfigContext(config.EthClient),
 		types.WithWhiteListContext(config.WhiteList),
+		types.WithS3Context(config.S3),
 	)
 }
 

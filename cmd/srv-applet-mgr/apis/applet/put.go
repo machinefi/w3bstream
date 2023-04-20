@@ -25,7 +25,7 @@ func (r *UpdateApplet) Output(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	return nil, applet.UpdateApplet(ctx, r.AppletID, &r.UpdateAppletReq)
+	return nil, applet.UpdateApplet(ctx, r.AppletID, ca.AccountID, &r.UpdateAppletReq)
 }
 
 type UpdateAndDeploy struct {
@@ -49,5 +49,5 @@ func (r *UpdateAndDeploy) Output(ctx context.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return nil, applet.UpdateAndDeploy(ctx, &r.UpdateAndDeployReq)
+	return nil, applet.UpdateAndDeploy(ctx, ca.AccountID, &r.UpdateAndDeployReq)
 }

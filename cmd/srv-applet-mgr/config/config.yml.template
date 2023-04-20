@@ -43,6 +43,11 @@ SRV_APPLET_MGR__Redis_Protocol: tcp
 SRV_APPLET_MGR__Redis_ReadTimeout: 10s
 SRV_APPLET_MGR__Redis_Wait: "true"
 SRV_APPLET_MGR__Redis_WriteTimeout: 10s
+SRV_APPLET_MGR__S3_AccessKeyID: ""
+SRV_APPLET_MGR__S3_BucketName: ""
+SRV_APPLET_MGR__S3_Region: us-west-1
+SRV_APPLET_MGR__S3_SecretAccessKey: ""
+SRV_APPLET_MGR__S3_SessionToken: ""
 SRV_APPLET_MGR__Server_Debug: "true"
 SRV_APPLET_MGR__Server_HealthCheck: http://:80/
 SRV_APPLET_MGR__Server_Port: "80"

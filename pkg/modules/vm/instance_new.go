@@ -2,7 +2,6 @@ package vm
 
 import (
 	"context"
-	"os"
 
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/modules/vm/wasmtime"
@@ -15,11 +14,12 @@ func NewInstance(ctx context.Context, path string, id types.SFID) error {
 
 func NewInstanceWithState(ctx context.Context, path string, id types.SFID, state enums.InstanceState) error {
 	l := types.MustLoggerFromContext(ctx)
+	s3Cli := types.MustS3FromContext(ctx)
 
 	_, l = l.Start(ctx, "NewInstanceWithState")
 	defer l.End()
 
-	code, err := os.ReadFile(path)
+	code, err := s3Cli.Read(path)
 	if err != nil {
 		l.Error(err)
 		return err

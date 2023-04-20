@@ -3,6 +3,7 @@ package types
 import (
 	"context"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/s3"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
@@ -31,6 +32,7 @@ type (
 	CtxInstance          struct{}
 	CtxEthClient         struct{} // CtxEthClient ETHClientConfig
 	CtxWhiteList         struct{}
+	CtxS3                struct{}
 )
 
 func WithMgrDBExecutor(ctx context.Context, v sqlx.DBExecutor) context.Context {
@@ -369,6 +371,27 @@ func WhiteListFromContext(ctx context.Context) (*WhiteList, bool) {
 
 func MustWhiteListFromContext(ctx context.Context) *WhiteList {
 	v, ok := WhiteListFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithS3(ctx context.Context, v *s3.S3) context.Context {
+	return contextx.WithValue(ctx, CtxS3{}, v)
+}
+
+func WithS3Context(v *s3.S3) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxS3{}, v)
+	}
+}
+
+func S3FromContext(ctx context.Context) (*s3.S3, bool) {
+	v, ok := ctx.Value(CtxS3{}).(*s3.S3)
+	return v, ok
+}
+
+func MustS3FromContext(ctx context.Context) *s3.S3 {
+	v, ok := S3FromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

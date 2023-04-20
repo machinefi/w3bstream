@@ -40,11 +40,17 @@ func (*Resource) TableDesc() []string {
 }
 
 func (*Resource) Comments() map[string]string {
-	return map[string]string{}
+	return map[string]string{
+		"Path": "Path accountID/md5",
+	}
 }
 
 func (*Resource) ColDesc() map[string][]string {
-	return map[string][]string{}
+	return map[string][]string{
+		"Path": []string{
+			"Path accountID/md5",
+		},
+	}
 }
 
 func (*Resource) ColRel() map[string][]string {
@@ -60,15 +66,15 @@ func (*Resource) PrimaryKey() []string {
 func (m *Resource) IndexFieldNames() []string {
 	return []string{
 		"ID",
-		"Md5",
+		"Path",
 		"ResourceID",
 	}
 }
 
 func (*Resource) UniqueIndexes() builder.Indexes {
 	return builder.Indexes{
-		"ui_md5": []string{
-			"Md5",
+		"ui_path": []string{
+			"Path",
 		},
 		"ui_resource_id": []string{
 			"ResourceID",
@@ -76,8 +82,8 @@ func (*Resource) UniqueIndexes() builder.Indexes {
 	}
 }
 
-func (*Resource) UniqueIndexUIMd5() string {
-	return "ui_md5"
+func (*Resource) UniqueIndexUIPath() string {
+	return "ui_path"
 }
 
 func (*Resource) UniqueIndexUIResourceID() string {
@@ -108,12 +114,12 @@ func (*Resource) FieldPath() string {
 	return "Path"
 }
 
-func (m *Resource) ColMd5() *builder.Column {
-	return ResourceTable.ColByFieldName(m.FieldMd5())
+func (m *Resource) ColRefCnt() *builder.Column {
+	return ResourceTable.ColByFieldName(m.FieldRefCnt())
 }
 
-func (*Resource) FieldMd5() string {
-	return "Md5"
+func (*Resource) FieldRefCnt() string {
+	return "RefCnt"
 }
 
 func (m *Resource) ColCreatedAt() *builder.Column {
@@ -203,7 +209,7 @@ func (m *Resource) FetchByID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *Resource) FetchByMd5(db sqlx.DBExecutor) error {
+func (m *Resource) FetchByPath(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	err := db.QueryAndScan(
 		builder.Select(nil).
@@ -211,10 +217,10 @@ func (m *Resource) FetchByMd5(db sqlx.DBExecutor) error {
 				tbl,
 				builder.Where(
 					builder.And(
-						tbl.ColByFieldName("Md5").Eq(m.Md5),
+						tbl.ColByFieldName("Path").Eq(m.Path),
 					),
 				),
-				builder.Comment("Resource.FetchByMd5"),
+				builder.Comment("Resource.FetchByPath"),
 			),
 		m,
 	)
@@ -269,7 +275,7 @@ func (m *Resource) UpdateByID(db sqlx.DBExecutor, zeros ...string) error {
 	return m.UpdateByIDWithFVs(db, fvs)
 }
 
-func (m *Resource) UpdateByMd5WithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+func (m *Resource) UpdateByPathWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
 		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
@@ -279,9 +285,9 @@ func (m *Resource) UpdateByMd5WithFVs(db sqlx.DBExecutor, fvs builder.FieldValue
 		builder.Update(tbl).
 			Where(
 				builder.And(
-					tbl.ColByFieldName("Md5").Eq(m.Md5),
+					tbl.ColByFieldName("Path").Eq(m.Path),
 				),
-				builder.Comment("Resource.UpdateByMd5WithFVs"),
+				builder.Comment("Resource.UpdateByPathWithFVs"),
 			).
 			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
@@ -289,14 +295,14 @@ func (m *Resource) UpdateByMd5WithFVs(db sqlx.DBExecutor, fvs builder.FieldValue
 		return err
 	}
 	if affected, _ := res.RowsAffected(); affected == 0 {
-		return m.FetchByMd5(db)
+		return m.FetchByPath(db)
 	}
 	return nil
 }
 
-func (m *Resource) UpdateByMd5(db sqlx.DBExecutor, zeros ...string) error {
+func (m *Resource) UpdateByPath(db sqlx.DBExecutor, zeros ...string) error {
 	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
-	return m.UpdateByMd5WithFVs(db, fvs)
+	return m.UpdateByPathWithFVs(db, fvs)
 }
 
 func (m *Resource) UpdateByResourceIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
@@ -358,7 +364,7 @@ func (m *Resource) DeleteByID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *Resource) DeleteByMd5(db sqlx.DBExecutor) error {
+func (m *Resource) DeleteByPath(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	_, err := db.Exec(
 		builder.Delete().
@@ -366,10 +372,10 @@ func (m *Resource) DeleteByMd5(db sqlx.DBExecutor) error {
 				tbl,
 				builder.Where(
 					builder.And(
-						tbl.ColByFieldName("Md5").Eq(m.Md5),
+						tbl.ColByFieldName("Path").Eq(m.Path),
 					),
 				),
-				builder.Comment("Resource.DeleteByMd5"),
+				builder.Comment("Resource.DeleteByPath"),
 			),
 	)
 	return err
