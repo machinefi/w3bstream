@@ -26,7 +26,7 @@ func NewGenerator(pkg *pkgx.Pkg, validators ...string) *Generator {
 	for i := 0; i < len(validators); i += 2 {
 		name := validators[i]
 		rule := validators[i+1]
-		fmt.Printf("user defined validator: `%s: %s`", name, rule)
+		fmt.Printf("user defined validator: %s: `%s`\n", name, rule)
 		validator.DefaultFactory.Register(validator.NewRegexpStrfmtValidator(rule, name))
 	}
 	return &Generator{

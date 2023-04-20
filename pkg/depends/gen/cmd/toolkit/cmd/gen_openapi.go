@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"fmt"
+	"encoding/json"
 
 	"github.com/spf13/cobra"
 
@@ -15,17 +15,20 @@ func init() {
 		Short: "generate openapi spec for current project",
 		Run: func(cmd *cobra.Command, args []string) {
 			run("openapi", func(pkg *pkgx.Pkg) Generator {
-				fmt.Println(validators)
-				g := openapi.NewGenerator(pkg, "projectName", "^[a-z0-9_]{6,32}$")
+				nameRulePairs := make([]string, 0)
+				if err := json.Unmarshal([]byte(validators), &nameRulePairs); err != nil {
+					panic("should pass validators by name rule pairs with a json array format")
+				}
+				g := openapi.NewGenerator(pkg, nameRulePairs...)
 				g.Scan(nil)
 				return g
 			})
 		},
 	}
 
-	cmd.Flags().StringSliceVarP(&validators, "validators", "", nil, "import user defined validators")
+	cmd.Flags().StringVarP(&validators, "validators", "", "", "import user defined validators")
 
 	Gen.AddCommand(cmd)
 }
 
-var validators []string
+var validators string
