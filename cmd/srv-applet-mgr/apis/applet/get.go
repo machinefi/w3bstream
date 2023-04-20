@@ -28,7 +28,7 @@ func (r *ListApplet) Output(ctx context.Context) (interface{}, error) {
 
 type GetApplet struct {
 	httpx.MethodGet
-	AppletID types.SFID
+	AppletID types.SFID `in:"path" name:"appletID"`
 }
 
 func (r *GetApplet) Path() string { return "/data/:appletID" }
