@@ -18,7 +18,8 @@ func init() {
 				nameRulePairs := make([]string, 0)
 				if len(validators) > 0 {
 					if err := json.Unmarshal([]byte(validators), &nameRulePairs); err != nil {
-						panic("should pass validators by name rule pairs with a json array format")
+						panic("should pass validators by name rule pairs with a json array format\n" +
+							validators)
 					}
 				}
 				g := openapi.NewGenerator(pkg, nameRulePairs...)
