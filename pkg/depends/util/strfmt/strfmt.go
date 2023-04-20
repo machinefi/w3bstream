@@ -1,6 +1,6 @@
 package strfmt
 
-//go:generate go run ../../kit/validator/strfmt/internal/main/main.go
+//go:generate toolkit gen strfmt -f strfmt.go
 const (
 	regexpStringProjectName = "^[a-z0-9_]{6,32}$"
 )
