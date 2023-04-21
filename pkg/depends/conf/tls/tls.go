@@ -15,20 +15,24 @@ var gDefaultTlsConfig = &tls.Config{
 }
 
 type X509KeyPair struct {
-	KeyPath string `json:"-"`
-	CrtPath string `json:"-"`
-	CaPath  string `json:"-"`
+	KeyPath string `json:""`
+	CrtPath string `json:""`
+	CaPath  string `json:""`
 	Key     string `json:"key"`
 	Crt     string `json:"crt"`
 	Ca      string `json:"ca"`
 	conf    *tls.Config
 }
 
-func (c *X509KeyPair) read() (key, crt, ca []byte, err error) {
+func (c *X509KeyPair) read() (key, crt, ca []byte, err error, empty bool) {
 	if c.Key+c.Ca+c.Crt != "" {
-		return []byte(c.Key), []byte(c.Crt), []byte(c.Ca), nil
+		return []byte(c.Key), []byte(c.Crt), []byte(c.Ca), nil, false
 	}
-
+	if len(c.KeyPath+c.CrtPath+c.CaPath) == 0 {
+		empty = true
+		return
+	}
+	empty = false
 	var content []byte
 	content, err = os.ReadFile(c.KeyPath)
 	if err != nil {
@@ -53,10 +57,15 @@ func (c *X509KeyPair) Init() error {
 		return nil
 	}
 
-	key, crt, ca, err := c.read()
+	key, crt, ca, err, empty := c.read()
 	if err != nil {
 		return err
 	}
+
+	if empty {
+		return nil
+	}
+
 	cert, err := tls.X509KeyPair(crt, key)
 	if err != nil {
 		return err

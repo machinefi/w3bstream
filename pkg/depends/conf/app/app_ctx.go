@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -113,7 +114,11 @@ func (c *Ctx) Conf(configs ...interface{}) {
 					conf.Init()
 				case interface{ Init() error }:
 					if err = conf.Init(); err != nil {
-						panic(errors.Errorf("conf init: %v", err))
+						t := reflect.Indirect(reflect.ValueOf(conf)).Type()
+						panic(errors.Errorf("init failed %s %s",
+							color.CyanString("[%s.%s]:", filepath.Base(t.PkgPath()), t.Name()),
+							color.RedString("[%v]", err),
+						))
 					}
 				}
 			}
