@@ -8,7 +8,6 @@ import (
 // Publisher database model demo
 // @def primary                        ID
 // @def unique_index UI_publisher_id   PublisherID
-// @def unique_index UI_publisher_key  Key
 //
 //go:generate toolkit gen model Publisher --database DB
 type Publisher struct {
