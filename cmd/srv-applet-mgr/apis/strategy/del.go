@@ -10,14 +10,16 @@ import (
 
 type RemoveStrategy struct {
 	httpx.MethodDelete
-	strategy.CondArgs
+	strategy.RemoveStrategyReq
 }
 
+func (r *RemoveStrategy) Path() string { return "/:projectName" }
+
 func (r *RemoveStrategy) Output(ctx context.Context) (interface{}, error) {
-	ctx, err := middleware.MustCurrentAccountFromContext(ctx).WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
-	if err != nil {
+	a := middleware.CurrentAccountFromContext(ctx)
+	if _, err := a.ValidateProjectPermByPrjName(ctx, r.ProjectName); err != nil {
 		return nil, err
 	}
 
-	return nil, strategy.Remove(ctx, &r.CondArgs)
+	return nil, strategy.RemoveStrategy(ctx, &r.RemoveStrategyReq)
 }

@@ -49,8 +49,6 @@ const (
 	InvalidEthLoginMessage
 	// @errTalk Invalid Auth Publisher ID
 	InvalidAuthPublisherID
-	// @errTalk Current Account Absence
-	CurrentAccountAbsence
 )
 
 const (
@@ -71,8 +69,6 @@ const (
 	ProjectConfigConflict
 	// @errTalk Project Name Conflict
 	ProjectNameConflict
-	// @errTalk Strategy Conflict
-	StrategyConflict
 )
 
 const (
@@ -91,18 +87,6 @@ const (
 	ProjectNotFound
 	// @errTalk Config Not Found
 	ConfigNotFound
-	// @errTalk Applet Not Found
-	AppletNotFound
-	// @errTalk Instance Not Found
-	InstanceNotFound
-	// @errTalk Resource Not Found
-	ResourceNotFound
-	// @errTalk Strategy Not Found
-	StrategyNotFound
-	// @errTalk Publisher Not Found
-	PublisherNotFound
-	// @errTalk Account Identity Not Found
-	AccountIdentityNotFound
 )
 
 // Deprecated: pls check database error and return defined status error

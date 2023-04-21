@@ -11,12 +11,17 @@ import (
 
 type CreatePublisher struct {
 	httpx.MethodPost
+	ProjectName                  string `in:"path" name:"projectName"`
 	publisher.CreatePublisherReq `in:"body"`
 }
 
+func (r *CreatePublisher) Path() string {
+	return "/:projectName"
+}
+
 func (r *CreatePublisher) Output(ctx context.Context) (interface{}, error) {
-	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
-		WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
+	ca := middleware.CurrentAccountFromContext(ctx)
+	ctx, err := ca.WithProjectContextByName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err
 	}

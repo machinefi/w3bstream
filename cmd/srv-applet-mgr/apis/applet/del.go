@@ -6,22 +6,24 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
-	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 type RemoveApplet struct {
 	httpx.MethodDelete
-	AppletID types.SFID `in:"path" name:"appletID"`
+	applet.RemoveAppletReq
 }
 
 func (r *RemoveApplet) Path() string { return "/:appletID" }
 
 func (r *RemoveApplet) Output(ctx context.Context) (interface{}, error) {
-	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
-		WithAppletContextBySFID(ctx, r.AppletID)
+	a := middleware.CurrentAccountFromContext(ctx)
+	app, err := applet.GetAppletByAppletID(ctx, r.AppletID)
 	if err != nil {
 		return nil, err
 	}
+	if _, err := a.ValidateProjectPerm(ctx, app.ProjectID); err != nil {
+		return nil, err
+	}
 
-	return nil, applet.RemoveApplet(ctx, r.AppletID)
+	return nil, applet.RemoveApplet(ctx, &r.RemoveAppletReq)
 }

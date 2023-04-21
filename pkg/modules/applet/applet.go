@@ -327,7 +327,11 @@ func ListApplets(ctx context.Context, r *ListAppletReq) (*ListAppletRsp, error) 
 	return &ListAppletRsp{applets, hints}, nil
 }
 
-func RemoveApplet(ctx context.Context, id types.SFID) error {
+type RemoveAppletReq struct {
+	AppletID types.SFID `in:"path"  name:"appletID"`
+}
+
+func RemoveApplet(ctx context.Context, r *RemoveAppletReq) error {
 	var (
 		d         = types.MustMgrDBExecutorFromContext(ctx)
 		l         = types.MustLoggerFromContext(ctx)
@@ -342,7 +346,7 @@ func RemoveApplet(ctx context.Context, id types.SFID) error {
 
 	return sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
-			mApplet.AppletID = id
+			mApplet.AppletID = r.AppletID
 			err = mApplet.FetchByAppletID(d)
 			if err != nil {
 				l.Error(err)
@@ -351,8 +355,8 @@ func RemoveApplet(ctx context.Context, id types.SFID) error {
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			mInstance.AppletID = id
-			instances, err = mInstance.List(d, mInstance.ColAppletID().Eq(id))
+			mInstance.AppletID = r.AppletID
+			instances, err = mInstance.List(d, mInstance.ColAppletID().Eq(r.AppletID))
 			if err != nil {
 				l.Error(err)
 				return status.CheckDatabaseError(err, "ListByAppletID")
@@ -436,17 +440,4 @@ func GetAppletByAppletID(ctx context.Context, appletID types.SFID) (*GetAppletRs
 			Path: mResource.ResourceInfo.Path,
 		},
 	}, err
-}
-
-func GetBySFID(ctx context.Context, id types.SFID) (*models.Applet, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	m := &models.Applet{RelApplet: models.RelApplet{AppletID: id}}
-
-	if err := m.FetchByAppletID(d); err != nil {
-		if sqlx.DBErr(err).IsNotFound() {
-			return nil, status.AppletNotFound
-		}
-		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
-	}
-	return m, nil
 }

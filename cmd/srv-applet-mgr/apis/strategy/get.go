@@ -11,34 +11,39 @@ import (
 
 type GetStrategy struct {
 	httpx.MethodGet
-	StrategyID types.SFID `in:"path" name:"strategyID"`
+	ProjectName string     `in:"path" name:"projectName"`
+	StrategyID  types.SFID `in:"path" name:"strategyID"`
 }
 
 func (r *GetStrategy) Path() string {
-	return "/data/:strategyID"
+	return "/:projectName/:strategyID"
 }
 
 func (r *GetStrategy) Output(ctx context.Context) (interface{}, error) {
-	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
-		WithStrategyBySFID(ctx, r.StrategyID)
-	if err != nil {
+	a := middleware.CurrentAccountFromContext(ctx)
+	if _, err := a.ValidateProjectPermByPrjName(ctx, r.ProjectName); err != nil {
 		return nil, err
 	}
 
-	return types.MustStrategyFromContext(ctx), nil
+	return strategy.GetStrategyByStrategyID(ctx, r.StrategyID)
 }
 
 type ListStrategy struct {
 	httpx.MethodGet
-	strategy.ListReq
+	ProjectName string `in:"path" name:"projectName"`
+	strategy.ListStrategyReq
+}
+
+func (r *ListStrategy) Path() string {
+	return "/:projectName"
 }
 
 func (r *ListStrategy) Output(ctx context.Context) (interface{}, error) {
-	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
-		WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
-	if err != nil {
+	a := middleware.CurrentAccountFromContext(ctx)
+	if m, err := a.ValidateProjectPermByPrjName(ctx, r.ProjectName); err != nil {
 		return nil, err
+	} else {
+		r.SetCurrentProjectID(m.ProjectID)
+		return strategy.ListStrategy(ctx, &r.ListStrategyReq)
 	}
-
-	return strategy.List(ctx, &r.ListReq)
 }

@@ -17,7 +17,6 @@ import (
 	confhttp "github.com/machinefi/w3bstream/pkg/depends/conf/http"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/swagger"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 )
 
@@ -41,7 +40,6 @@ func init() {
 		Root.Register(RouterServer)
 		Root.Register(kit.NewRouter(&confhttp.Liveness{}))
 		RouterServer.Register(RouterV0)
-		RouterServer.Register(kit.NewRouter(&swagger.OpenAPI{}))
 
 		RouterV0.Register(login.Root)
 		RouterV0.Register(RouterAuth)

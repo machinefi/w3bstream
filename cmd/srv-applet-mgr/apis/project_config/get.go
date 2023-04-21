@@ -13,15 +13,16 @@ import (
 
 type GetProjectSchema struct {
 	httpx.MethodGet
+	ProjectName string `name:"projectName" in:"path"`
 }
 
 func (r *GetProjectSchema) Path() string {
-	return "/" + enums.CONFIG_TYPE__PROJECT_SCHEMA.String()
+	return "/:projectName/" + enums.CONFIG_TYPE__PROJECT_SCHEMA.String()
 }
 
 func (r *GetProjectSchema) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.MustCurrentAccountFromContext(ctx)
-	ctx, err := ca.WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
+	ca := middleware.CurrentAccountFromContext(ctx)
+	ctx, err := ca.WithProjectContextByName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err
 	}
@@ -35,15 +36,16 @@ func (r *GetProjectSchema) Output(ctx context.Context) (interface{}, error) {
 
 type GetProjectEnv struct {
 	httpx.MethodGet
+	ProjectName string `name:"projectName" in:"path"`
 }
 
 func (r *GetProjectEnv) Path() string {
-	return "/" + enums.CONFIG_TYPE__PROJECT_ENV.String()
+	return "/:projectName/" + enums.CONFIG_TYPE__PROJECT_ENV.String()
 }
 
 func (r *GetProjectEnv) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.MustCurrentAccountFromContext(ctx)
-	ctx, err := ca.WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
+	ca := middleware.CurrentAccountFromContext(ctx)
+	ctx, err := ca.WithProjectContextByName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err
 	}

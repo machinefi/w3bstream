@@ -20,8 +20,7 @@ func (r *GetInstanceByInstanceID) Path() string {
 }
 
 func (r *GetInstanceByInstanceID) Output(ctx context.Context) (interface{}, error) {
-	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
-		WithInstanceContextBySFID(ctx, r.InstanceID)
+	_, err := validateByInstance(ctx, r.InstanceID)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +38,7 @@ func (r *GetInstanceByAppletID) Path() string {
 }
 
 func (r *GetInstanceByAppletID) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.MustCurrentAccountFromContext(ctx)
+	ca := middleware.CurrentAccountFromContext(ctx)
 
 	app, err := applet.GetAppletByAppletID(ctx, r.AppletID)
 	if err != nil {

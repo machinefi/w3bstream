@@ -2,7 +2,7 @@ package types
 
 import "strconv"
 
-// Number.MAX_SAFE_INTEGER JavaScript (2^53 – 1)
+// Number.MAX_SAFE_INTEGER https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
 
 type SFID uint64
 

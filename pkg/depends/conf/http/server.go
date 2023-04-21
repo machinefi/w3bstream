@@ -50,7 +50,7 @@ func (s *Server) SetDefault() {
 	}
 
 	if s.Spec == "" {
-		s.Spec = "./openapi.json"
+		s.Spec = "./swagger.json"
 	}
 
 	if s.Debug == nil {

@@ -11,18 +11,20 @@ import (
 
 type UpdateStrategy struct {
 	httpx.MethodPut
-	StrategyID         types.SFID `in:"path" name:"strategyID"`
-	strategy.UpdateReq `in:"body"`
+	ProjectName                string     `in:"path" name:"projectName"`
+	StrategyID                 types.SFID `in:"path" name:"strategyID"`
+	strategy.CreateStrategyReq `in:"body"`
 }
 
 func (r *UpdateStrategy) Path() string {
-	return "/:strategyID"
+	return "/:projectName/:strategyID"
 }
 
 func (r *UpdateStrategy) Output(ctx context.Context) (interface{}, error) {
-	ctx, err := middleware.MustCurrentAccountFromContext(ctx).WithStrategyBySFID(ctx, r.StrategyID)
-	if err != nil {
+	a := middleware.CurrentAccountFromContext(ctx)
+	if _, err := a.ValidateProjectPermByPrjName(ctx, r.ProjectName); err != nil {
 		return nil, err
 	}
-	return nil, strategy.Update(ctx, r.StrategyID, &r.UpdateReq)
+
+	return nil, strategy.UpdateStrategy(ctx, r.StrategyID, &r.CreateStrategyReq)
 }

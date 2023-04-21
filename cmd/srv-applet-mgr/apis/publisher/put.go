@@ -11,14 +11,18 @@ import (
 
 type UpdatePublisher struct {
 	httpx.MethodPut
+	ProjectName                  string     `in:"path" name:"projectName"`
 	PublisherID                  types.SFID `in:"path" name:"publisherID"`
 	publisher.CreatePublisherReq `in:"body"`
 }
 
-func (r *UpdatePublisher) Path() string { return "/:publisherID" }
+func (r *UpdatePublisher) Path() string {
+	return "/:projectName/:publisherID"
+}
 
 func (r *UpdatePublisher) Output(ctx context.Context) (interface{}, error) {
-	ctx, err := middleware.MustCurrentAccountFromContext(ctx).WithPublisherBySFID(ctx, r.PublisherID)
+	a := middleware.CurrentAccountFromContext(ctx)
+	ctx, err := a.WithProjectContextByName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err
 	}

@@ -16,7 +16,7 @@ type GetOperatorAddr struct {
 func (r *GetOperatorAddr) Path() string { return "/operatoraddr" }
 
 func (r *GetOperatorAddr) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.MustCurrentAccountFromContext(ctx)
+	ca := middleware.CurrentAccountFromContext(ctx)
 	prvkey, err := crypto.HexToECDSA(ca.OperatorPrivateKey)
 	if err != nil {
 		return nil, err

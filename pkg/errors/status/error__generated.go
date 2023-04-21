@@ -65,8 +65,6 @@ func (v Error) Key() string {
 		return "InvalidEthLoginMessage"
 	case InvalidAuthPublisherID:
 		return "InvalidAuthPublisherID"
-	case CurrentAccountAbsence:
-		return "CurrentAccountAbsence"
 	case Forbidden:
 		return "Forbidden"
 	case InstanceLimit:
@@ -81,26 +79,12 @@ func (v Error) Key() string {
 		return "ProjectNotFound"
 	case ConfigNotFound:
 		return "ConfigNotFound"
-	case AppletNotFound:
-		return "AppletNotFound"
-	case InstanceNotFound:
-		return "InstanceNotFound"
-	case ResourceNotFound:
-		return "ResourceNotFound"
-	case StrategyNotFound:
-		return "StrategyNotFound"
-	case PublisherNotFound:
-		return "PublisherNotFound"
-	case AccountIdentityNotFound:
-		return "AccountIdentityNotFound"
 	case Conflict:
 		return "Conflict"
 	case ProjectConfigConflict:
 		return "ProjectConfigConflict"
 	case ProjectNameConflict:
 		return "ProjectNameConflict"
-	case StrategyConflict:
-		return "StrategyConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -145,8 +129,6 @@ func (v Error) Msg() string {
 		return "Invalid Siwe Message"
 	case InvalidAuthPublisherID:
 		return "Invalid Auth Publisher ID"
-	case CurrentAccountAbsence:
-		return "Current Account Absence"
 	case Forbidden:
 		return "Forbidden"
 	case InstanceLimit:
@@ -161,26 +143,12 @@ func (v Error) Msg() string {
 		return "Project Not Found"
 	case ConfigNotFound:
 		return "Config Not Found"
-	case AppletNotFound:
-		return "Applet Not Found"
-	case InstanceNotFound:
-		return "Instance Not Found"
-	case ResourceNotFound:
-		return "Resource Not Found"
-	case StrategyNotFound:
-		return "Strategy Not Found"
-	case PublisherNotFound:
-		return "Publisher Not Found"
-	case AccountIdentityNotFound:
-		return "Account Identity Not Found"
 	case Conflict:
 		return "Conflict conflict error"
 	case ProjectConfigConflict:
 		return "Project Config Conflict"
 	case ProjectNameConflict:
 		return "Project Name Conflict"
-	case StrategyConflict:
-		return "Strategy Conflict"
 	case InternalServerError:
 		return "InternalServerError internal error"
 	case DatabaseError:
@@ -225,8 +193,6 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case InvalidAuthPublisherID:
 		return true
-	case CurrentAccountAbsence:
-		return true
 	case Forbidden:
 		return true
 	case InstanceLimit:
@@ -241,25 +207,11 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case ConfigNotFound:
 		return true
-	case AppletNotFound:
-		return true
-	case InstanceNotFound:
-		return true
-	case ResourceNotFound:
-		return true
-	case StrategyNotFound:
-		return true
-	case PublisherNotFound:
-		return true
-	case AccountIdentityNotFound:
-		return true
 	case Conflict:
 		return true
 	case ProjectConfigConflict:
 		return true
 	case ProjectNameConflict:
-		return true
-	case StrategyConflict:
 		return true
 	case InternalServerError:
 		return true

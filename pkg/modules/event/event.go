@@ -3,6 +3,7 @@ package event
 import (
 	"context"
 	"errors"
+	"github.com/machinefi/w3bstream/pkg/modules/publisher"
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -13,7 +14,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
-	"github.com/machinefi/w3bstream/pkg/modules/publisher"
 	"github.com/machinefi/w3bstream/pkg/modules/strategy"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
