@@ -39,7 +39,7 @@ clean:
 build_docker_images: build_backend_image
 
 .PHONY: build_backend_image
-build_backend_image: update_go_module
+build_backend_image: update
 	@docker build -f Dockerfile -t ${WS_BACKEND_IMAGE} .
 
 # run server in docker containers
