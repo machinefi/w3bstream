@@ -163,35 +163,3 @@ func (v *CurrentAccount) WithPublisherBySFID(ctx context.Context, id types.SFID)
 	ctx = types.WithPublisher(ctx, pub)
 	return v.WithProjectContextBySFID(ctx, pub.ProjectID)
 }
-
-// ValidateProjectPerm
-// Deprecated: Use WithProjectContextByID instead
-func (v *CurrentAccount) ValidateProjectPerm(ctx context.Context, prjID types.SFID) (*models.Project, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	a := MustCurrentAccountFromContext(ctx)
-	m := &models.Project{RelProject: models.RelProject{ProjectID: prjID}}
-
-	if err := m.FetchByProjectID(d); err != nil {
-		return nil, status.CheckDatabaseError(err, "GetProjectByProjectID")
-	}
-	if a.AccountID != m.AccountID {
-		return nil, status.NoProjectPermission
-	}
-	return m, nil
-}
-
-// ValidateProjectPermByPrjName
-// Deprecated: Use WithProjectContextByName instead
-func (v *CurrentAccount) ValidateProjectPermByPrjName(ctx context.Context, projectName string) (*models.Project, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	a := MustCurrentAccountFromContext(ctx)
-	m := &models.Project{ProjectName: models.ProjectName{Name: projectName}}
-
-	if err := m.FetchByName(d); err != nil {
-		return nil, status.CheckDatabaseError(err, "GetProjectByProjectID")
-	}
-	if a.AccountID != m.AccountID {
-		return nil, status.NoProjectPermission
-	}
-	return m, nil
-}
