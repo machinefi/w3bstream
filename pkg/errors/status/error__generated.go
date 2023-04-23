@@ -105,6 +105,8 @@ func (v Error) Key() string {
 		return "StrategyConflict"
 	case ConfigConflict:
 		return "ConfigConflict"
+	case PublisherConflict:
+		return "PublisherConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -119,6 +121,8 @@ func (v Error) Key() string {
 		return "ConfigUninitFailed"
 	case ConfigParseFailed:
 		return "ConfigParseFailed"
+	case GenPublisherTokenFailed:
+		return "GenPublisherTokenFailed"
 	}
 	return "UNKNOWN"
 }
@@ -193,6 +197,8 @@ func (v Error) Msg() string {
 		return "Strategy Conflict"
 	case ConfigConflict:
 		return "Config Conflict"
+	case PublisherConflict:
+		return "Publisher Conflict"
 	case InternalServerError:
 		return "InternalServerError internal error"
 	case DatabaseError:
@@ -207,6 +213,8 @@ func (v Error) Msg() string {
 		return "Config Uninit Failed"
 	case ConfigParseFailed:
 		return "Config Parse Failed"
+	case GenPublisherTokenFailed:
+		return "Gen Publisher Token Failed"
 	}
 	return "-"
 }
@@ -281,6 +289,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case ConfigConflict:
 		return true
+	case PublisherConflict:
+		return true
 	case InternalServerError:
 		return true
 	case DatabaseError:
@@ -294,6 +304,8 @@ func (v Error) CanBeTalk() bool {
 	case ConfigUninitFailed:
 		return true
 	case ConfigParseFailed:
+		return true
+	case GenPublisherTokenFailed:
 		return true
 	}
 	return false

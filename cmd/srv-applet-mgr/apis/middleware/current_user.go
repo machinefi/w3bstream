@@ -131,14 +131,14 @@ func (v *CurrentAccount) WithInstanceContextBySFID(ctx context.Context, id types
 	}
 	ctx = types.WithInstance(ctx, ins)
 
-	if ctx, err = v.WithProjectContextBySFID(ctx, app.ProjectID); err != nil {
-		return nil, err
-	}
-
 	if app, err = applet.GetBySFID(ctx, ins.AppletID); err != nil {
 		return nil, err
 	}
 	ctx = types.WithApplet(ctx, app)
+
+	if ctx, err = v.WithProjectContextBySFID(ctx, app.ProjectID); err != nil {
+		return nil, err
+	}
 
 	if res, err = resource.GetBySFID(ctx, app.ResourceID); err != nil {
 		return nil, err
@@ -162,36 +162,4 @@ func (v *CurrentAccount) WithPublisherBySFID(ctx context.Context, id types.SFID)
 	}
 	ctx = types.WithPublisher(ctx, pub)
 	return v.WithProjectContextBySFID(ctx, pub.ProjectID)
-}
-
-// ValidateProjectPerm
-// Deprecated: Use WithProjectContextByID instead
-func (v *CurrentAccount) ValidateProjectPerm(ctx context.Context, prjID types.SFID) (*models.Project, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	a := MustCurrentAccountFromContext(ctx)
-	m := &models.Project{RelProject: models.RelProject{ProjectID: prjID}}
-
-	if err := m.FetchByProjectID(d); err != nil {
-		return nil, status.CheckDatabaseError(err, "GetProjectByProjectID")
-	}
-	if a.AccountID != m.AccountID {
-		return nil, status.NoProjectPermission
-	}
-	return m, nil
-}
-
-// ValidateProjectPermByPrjName
-// Deprecated: Use WithProjectContextByName instead
-func (v *CurrentAccount) ValidateProjectPermByPrjName(ctx context.Context, projectName string) (*models.Project, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	a := MustCurrentAccountFromContext(ctx)
-	m := &models.Project{ProjectName: models.ProjectName{Name: projectName}}
-
-	if err := m.FetchByName(d); err != nil {
-		return nil, status.CheckDatabaseError(err, "GetProjectByProjectID")
-	}
-	if a.AccountID != m.AccountID {
-		return nil, status.NoProjectPermission
-	}
-	return m, nil
 }

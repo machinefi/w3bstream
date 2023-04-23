@@ -13,6 +13,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/modules/publisher"
 	"github.com/machinefi/w3bstream/pkg/modules/strategy"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
@@ -127,13 +128,21 @@ func checkHeader(ctx context.Context, projectName string, l log.Logger, ret *Han
 
 	if r.Header != nil {
 		if len(r.Header.Token) > 0 {
-			var pub *models.Publisher
-			if pub, err = publisherVerification(ctx, l, r); err != nil {
+			var (
+				pub *models.Publisher
+				prj *models.Project
+			)
+			pub, err = publisherVerification(ctx, l, r)
+			if err != nil {
 				l.Error(err)
 				return
 			}
+			prj, err = project.GetByName(ctx, projectName)
+			if err != nil {
+				return
+			}
 			publisherMtc = pub.Key
-			pub, err = publisher.GetPublisherByPubKeyAndProjectName(ctx, pub.Key, projectName)
+			pub, err = publisher.GetByProjectAndKey(ctx, prj.ProjectID, r.Header.GetPubId())
 			if err != nil {
 				l.Error(err)
 				return

@@ -28,6 +28,8 @@ const (
 	ConfigUninitFailed
 	// @errTalk Config Parse Failed
 	ConfigParseFailed
+	// @errTalk Gen Publisher Token Failed
+	GenPublisherTokenFailed
 )
 
 const (
@@ -79,6 +81,8 @@ const (
 	StrategyConflict
 	// @errTalk Config Conflict
 	ConfigConflict
+	// @errTalk Publisher Conflict
+	PublisherConflict
 )
 
 const (
