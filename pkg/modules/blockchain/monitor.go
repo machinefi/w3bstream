@@ -1,15 +1,10 @@
 package blockchain
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
-	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
@@ -77,40 +72,8 @@ func (l *monitor) sendEvent(ctx context.Context, data []byte, projectName string
 	_, logger = logger.Start(ctx, "monitor.sendEvent")
 	defer logger.End()
 
-	e := event.HandleEventReq{
-		Events: []eventpb.Event{{
-			Header: &eventpb.Header{
-				EventType: eventType,
-			},
-			Payload: data,
-		}},
+	ret := &event.HandleEventResult{
+		ProjectName: projectName,
 	}
-	body, err := json.Marshal(e)
-	if err != nil {
-		logger.Error(err)
-		return err
-	}
-	url := fmt.Sprintf("http://localhost:8888/srv-applet-mgr/v0/event/%s", projectName) // TODO move to config
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
-	if err != nil {
-		logger.Error(err)
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	cli := &http.Client{}
-	resp, err := cli.Do(req)
-	if err != nil {
-		logger.Error(err)
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusCreated {
-		err := fmt.Errorf("unexpected http code %v", resp.StatusCode)
-		logger.Error(err)
-		return err
-	}
-
-	return nil
+	return event.HandleEvent(ctx, projectName, eventType, ret, data)
 }
