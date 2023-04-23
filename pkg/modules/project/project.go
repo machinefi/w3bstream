@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/pkg/errors"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
@@ -17,6 +16,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/modules/mq"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
