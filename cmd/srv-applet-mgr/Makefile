@@ -31,3 +31,14 @@ build:
 .PHONY: run
 run: build
 	@cd ../../build/srv-applet-mgr && ./srv-applet-mgr
+
+.PHONY: light
+light:
+	@go build -ldflags "-s -w -X ./global.ServiceInfo=${REMOTE}..${BRANCH}..${COMMIT_ID}..${COMMIT_AUTHOR}" -o srv-applet-mgr
+	@rm -rf build
+	@mkdir -p build
+	@mv srv-applet-mgr build/
+	@cp -r config build/
+	@cp openapi.json build/
+	@rm -rf ../../build/srv-applet-mgr
+	@mkdir -p ../../build && mv build ../../build/srv-applet-mgr

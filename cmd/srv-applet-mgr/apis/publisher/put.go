@@ -9,20 +9,22 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
+// Update Publisher by Publisher ID
 type UpdatePublisher struct {
 	httpx.MethodPut
-	PublisherID                  types.SFID `in:"path" name:"publisherID"`
-	publisher.CreatePublisherReq `in:"body"`
+	PublisherID         types.SFID `in:"path" name:"publisherID"`
+	publisher.UpdateReq `in:"body"`
 }
 
 func (r *UpdatePublisher) Path() string { return "/:publisherID" }
 
 func (r *UpdatePublisher) Output(ctx context.Context) (interface{}, error) {
-	ctx, err := middleware.MustCurrentAccountFromContext(ctx).WithPublisherBySFID(ctx, r.PublisherID)
+	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
+		WithPublisherBySFID(ctx, r.PublisherID)
 	if err != nil {
 		return nil, err
 	}
-	prj := types.MustProjectFromContext(ctx)
+	r.PublisherID = types.MustPublisherFromContext(ctx).PublisherID
 
-	return nil, publisher.UpdatePublisher(ctx, prj, r.PublisherID, &r.CreatePublisherReq)
+	return nil, publisher.Update(ctx, &r.UpdateReq)
 }

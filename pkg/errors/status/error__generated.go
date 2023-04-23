@@ -101,6 +101,8 @@ func (v Error) Key() string {
 		return "ProjectNameConflict"
 	case StrategyConflict:
 		return "StrategyConflict"
+	case PublisherConflict:
+		return "PublisherConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -111,6 +113,8 @@ func (v Error) Key() string {
 		return "CreateChannelFailed"
 	case ConfigInitializationFailed:
 		return "ConfigInitializationFailed"
+	case GenPublisherTokenFailed:
+		return "GenPublisherTokenFailed"
 	}
 	return "UNKNOWN"
 }
@@ -181,6 +185,8 @@ func (v Error) Msg() string {
 		return "Project Name Conflict"
 	case StrategyConflict:
 		return "Strategy Conflict"
+	case PublisherConflict:
+		return "Publisher Conflict"
 	case InternalServerError:
 		return "InternalServerError internal error"
 	case DatabaseError:
@@ -191,6 +197,8 @@ func (v Error) Msg() string {
 		return "Create Message Channel Failed"
 	case ConfigInitializationFailed:
 		return "Config Initialization Failed"
+	case GenPublisherTokenFailed:
+		return "Gen Publisher Token Failed"
 	}
 	return "-"
 }
@@ -261,6 +269,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case StrategyConflict:
 		return true
+	case PublisherConflict:
+		return true
 	case InternalServerError:
 		return true
 	case DatabaseError:
@@ -270,6 +280,8 @@ func (v Error) CanBeTalk() bool {
 	case CreateChannelFailed:
 		return true
 	case ConfigInitializationFailed:
+		return true
+	case GenPublisherTokenFailed:
 		return true
 	}
 	return false

@@ -24,6 +24,8 @@ const (
 	CreateChannelFailed
 	// @errTalk Config Initialization Failed
 	ConfigInitializationFailed
+	// @errTalk Gen Publisher Token Failed
+	GenPublisherTokenFailed
 )
 
 const (
@@ -73,6 +75,8 @@ const (
 	ProjectNameConflict
 	// @errTalk Strategy Conflict
 	StrategyConflict
+	// @errTalk Publisher Conflict
+	PublisherConflict
 )
 
 const (

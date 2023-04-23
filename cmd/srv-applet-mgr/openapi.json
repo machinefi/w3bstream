@@ -1593,10 +1593,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsInstance"
-                  }
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsInstance"
                 }
               }
             }
@@ -1628,8 +1625,11 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
+              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
             ]
           },
           "409": {
@@ -1642,7 +1642,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
@@ -1656,7 +1655,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
           }
@@ -2293,8 +2292,7 @@
               "@StatusErr[InvalidAuthPublisherID][401999011][Invalid Auth Publisher ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
-              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
-              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!"
             ]
           },
           "404": {
@@ -2308,7 +2306,8 @@
             },
             "x-status-errors": [
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!"
             ]
           },
           "409": {
@@ -3460,8 +3459,7 @@
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
               "@StatusErr[InvalidToken][401999002][Invalid Token]!",
-              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
-              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!"
             ]
           },
           "404": {
@@ -3477,7 +3475,9 @@
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[ConfigNotFound][404999003][Config Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!"
             ]
           },
           "409": {
@@ -4153,21 +4153,28 @@
         }
       }
     },
-    "/v0/publisher": {
+    "/v0/publisher/data/{publisherID}": {
       "delete": {
         "tags": [
           "apis/publisher"
         ],
+        "summary": "Remove Publisher by Publisher ID",
         "operationId": "RemovePublisher",
         "parameters": [
           {
-            "name": "projectName",
+            "name": "publisherID",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                },
+                {
+                  "x-go-field-name": "PublisherID",
+                  "x-tag-name": "publisherID"
+                }
+              ]
             }
           },
           {
@@ -4190,19 +4197,6 @@
               "x-go-field-name": "AuthInQuery",
               "x-tag-name": "authorization,omitempty",
               "x-tag-validate": "@string[1,]"
-            }
-          },
-          {
-            "name": "publisherID",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-              },
-              "x-go-field-name": "PublisherIDs",
-              "x-tag-name": "publisherID"
             }
           }
         ],
@@ -4238,8 +4232,8 @@
             },
             "x-status-errors": [
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!"
             ]
           },
           "409": {
@@ -4252,7 +4246,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
@@ -4267,7 +4260,124 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
+              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+            ]
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "apis/publisher"
+        ],
+        "summary": "Get Publisher by Publisher ID",
+        "operationId": "GetPublisher",
+        "parameters": [
+          {
+            "name": "publisherID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                },
+                {
+                  "x-go-field-name": "PublisherID",
+                  "x-tag-name": "publisherID"
+                }
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsPublisher"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!"
+            ]
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
           }
@@ -4275,10 +4385,176 @@
       }
     },
     "/v0/publisher/x/{projectName}": {
+      "delete": {
+        "tags": [
+          "apis/publisher"
+        ],
+        "summary": "Remove Publisher by Given Conditions",
+        "operationId": "BatchRemovePublisher",
+        "parameters": [
+          {
+            "name": "projectName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "projectName",
+              "x-go-field-name": "ProjectName",
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "x-go-field-name": "Keys",
+              "x-tag-name": "key"
+            }
+          },
+          {
+            "name": "lname",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-go-field-name": "LNameLike",
+              "x-tag-name": "lname"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-go-field-name": "NameLike",
+              "x-tag-name": "name"
+            }
+          },
+          {
+            "name": "publisherIDs",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+              },
+              "x-go-field-name": "PublisherIDs",
+              "x-tag-name": "publisherIDs"
+            }
+          },
+          {
+            "name": "rname",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-go-field-name": "RNameLike",
+              "x-tag-name": "rname"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+            ]
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+            ]
+          }
+        }
+      },
       "get": {
         "tags": [
           "apis/publisher"
         ],
+        "summary": "List Publishers by Conditions",
         "operationId": "ListPublisher",
         "parameters": [
           {
@@ -4316,6 +4592,39 @@
             }
           },
           {
+            "name": "key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "x-go-field-name": "Keys",
+              "x-tag-name": "key"
+            }
+          },
+          {
+            "name": "lname",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-go-field-name": "LNameLike",
+              "x-tag-name": "lname"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-go-field-name": "NameLike",
+              "x-tag-name": "name"
+            }
+          },
+          {
             "name": "offset",
             "in": "query",
             "schema": {
@@ -4327,6 +4636,29 @@
               "x-go-field-name": "Offset",
               "x-tag-name": "offset,omitempty",
               "x-tag-validate": "@int64[0,]"
+            }
+          },
+          {
+            "name": "publisherIDs",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+              },
+              "x-go-field-name": "PublisherIDs",
+              "x-tag-name": "publisherIDs"
+            }
+          },
+          {
+            "name": "rname",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-go-field-name": "RNameLike",
+              "x-tag-name": "rname"
             }
           },
           {
@@ -4350,7 +4682,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesPublisherListPublisherRsp"
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesPublisherListRsp"
                 }
               }
             }
@@ -4385,7 +4717,6 @@
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
@@ -4399,7 +4730,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
@@ -4415,7 +4745,6 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
           }
@@ -4425,6 +4754,7 @@
         "tags": [
           "apis/publisher"
         ],
+        "summary": "Create Publisher",
         "operationId": "CreatePublisher",
         "parameters": [
           {
@@ -4469,10 +4799,10 @@
               "schema": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesPublisherCreatePublisherReq"
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesPublisherCreateReq"
                   },
                   {
-                    "x-go-field-name": "CreatePublisherReq"
+                    "x-go-field-name": "CreateReq"
                   }
                 ]
               }
@@ -4533,7 +4863,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
+              "@StatusErr[PublisherConflict][409999005][Publisher Conflict]!"
             ]
           },
           "500": {
@@ -4548,7 +4879,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
+              "@StatusErr[GenPublisherTokenFailed][500999006][Gen Publisher Token Failed]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
           }
@@ -4560,6 +4891,7 @@
         "tags": [
           "apis/publisher"
         ],
+        "summary": "Update Publisher by Publisher ID",
         "operationId": "UpdatePublisher",
         "parameters": [
           {
@@ -4620,10 +4952,10 @@
               "schema": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesPublisherCreatePublisherReq"
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesPublisherUpdateReq"
                   },
                   {
-                    "x-go-field-name": "CreatePublisherReq"
+                    "x-go-field-name": "UpdateReq"
                   }
                 ]
               }
@@ -4664,7 +4996,6 @@
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
               "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!"
             ]
@@ -4680,7 +5011,7 @@
             },
             "x-status-errors": [
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[PublisherConflict][409999005][Publisher Conflict]!"
             ]
           },
           "500": {
@@ -4695,7 +5026,6 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
           }
@@ -7849,7 +8179,7 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/project.ListRsp",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesProjectListRsp"
       },
-      "GithubComMachinefiW3BstreamPkgModulesPublisherCreatePublisherReq": {
+      "GithubComMachinefiW3BstreamPkgModulesPublisherCreateReq": {
         "type": "object",
         "properties": {
           "key": {
@@ -7867,40 +8197,16 @@
           "name",
           "key"
         ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/publisher.CreatePublisherReq",
-        "x-id": "GithubComMachinefiW3BstreamPkgModulesPublisherCreatePublisherReq"
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/publisher.CreateReq",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesPublisherCreateReq"
       },
-      "GithubComMachinefiW3BstreamPkgModulesPublisherInfoPublisher": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsPublisher"
-          },
-          {
-            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimes"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "ProjectName": {
-                "type": "string",
-                "x-go-field-name": "ProjectName"
-              }
-            },
-            "required": [
-              "ProjectName"
-            ],
-            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/publisher.InfoPublisher",
-            "x-id": "GithubComMachinefiW3BstreamPkgModulesPublisherInfoPublisher"
-          }
-        ]
-      },
-      "GithubComMachinefiW3BstreamPkgModulesPublisherListPublisherRsp": {
+      "GithubComMachinefiW3BstreamPkgModulesPublisherListRsp": {
         "type": "object",
         "properties": {
           "data": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesPublisherInfoPublisher"
+              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsPublisher"
             },
             "x-go-field-name": "Data",
             "x-tag-json": "data"
@@ -7913,11 +8219,32 @@
           }
         },
         "required": [
-          "total",
-          "data"
+          "data",
+          "total"
         ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/publisher.ListPublisherRsp",
-        "x-id": "GithubComMachinefiW3BstreamPkgModulesPublisherListPublisherRsp"
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/publisher.ListRsp",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesPublisherListRsp"
+      },
+      "GithubComMachinefiW3BstreamPkgModulesPublisherUpdateReq": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "x-go-field-name": "Key",
+            "x-tag-json": "key"
+          },
+          "name": {
+            "type": "string",
+            "x-go-field-name": "Name",
+            "x-tag-json": "name"
+          }
+        },
+        "required": [
+          "name",
+          "key"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/publisher.UpdateReq",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesPublisherUpdateReq"
       },
       "GithubComMachinefiW3BstreamPkgModulesStrategyCreateData": {
         "allOf": [
