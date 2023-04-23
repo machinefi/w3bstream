@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/pkg/errors"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
@@ -70,8 +71,7 @@ func CreateProject(ctx context.Context, acc types.SFID, r *CreateProjectReq, hdl
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			ctx = types.WithProject(ctx, m)
-			if err := CreateOrUpdateProjectEnv(ctx, &wasm.Env{Env: r.Envs}); err != nil {
+			if _, err := config.Upsert(ctx, m.ProjectID, &wasm.Env{Env: r.Envs}); err != nil {
 				return err
 			}
 			return nil
@@ -81,7 +81,7 @@ func CreateProject(ctx context.Context, acc types.SFID, r *CreateProjectReq, hdl
 				sch := schema.NewSchema(r.Name)
 				r.Schema = &wasm.Schema{Schema: *sch}
 			}
-			if err := CreateProjectSchema(ctx, r.Schema); err != nil {
+			if _, err := config.Create(ctx, m.ProjectID, r.Schema); err != nil {
 				return err
 			}
 			return nil

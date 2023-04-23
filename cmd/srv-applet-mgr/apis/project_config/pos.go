@@ -6,7 +6,8 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/enums"
-	"github.com/machinefi/w3bstream/pkg/modules/project"
+	"github.com/machinefi/w3bstream/pkg/modules/config"
+	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
@@ -26,8 +27,7 @@ func (r *CreateProjectSchema) Output(ctx context.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	r.Schema.WithName(prj)
-	return nil, project.CreateProjectSchema(ctx, &r.Schema)
+	return config.Create(ctx, types.MustProjectFromContext(ctx).ProjectID, &r.Schema)
 }
 
 type CreateOrUpdateProjectEnv struct {
@@ -46,5 +46,5 @@ func (r *CreateOrUpdateProjectEnv) Output(ctx context.Context) (interface{}, err
 	if err != nil {
 		return nil, err
 	}
-	return nil, project.CreateOrUpdateProjectEnv(ctx, &r.Env)
+	return config.Upsert(ctx, types.MustProjectFromContext(ctx).ProjectID, &r.Env)
 }
