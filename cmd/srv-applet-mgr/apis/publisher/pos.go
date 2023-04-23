@@ -9,9 +9,10 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
+// Create Publisher
 type CreatePublisher struct {
 	httpx.MethodPost
-	publisher.CreatePublisherReq `in:"body"`
+	publisher.CreateReq `in:"body"`
 }
 
 func (r *CreatePublisher) Output(ctx context.Context) (interface{}, error) {
@@ -20,7 +21,7 @@ func (r *CreatePublisher) Output(ctx context.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	prj := types.MustProjectFromContext(ctx)
 
-	return publisher.CreatePublisher(ctx, prj, &r.CreatePublisherReq)
+	r.ProjectID = types.MustProjectFromContext(ctx).ProjectID
+	return publisher.Create(ctx, &r.CreateReq)
 }

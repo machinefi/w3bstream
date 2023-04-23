@@ -9,9 +9,27 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
+// Get Publisher by Publisher ID
+type GetPublisher struct {
+	httpx.MethodGet
+	PublisherID types.SFID `in:"path" name:"publisherID"`
+}
+
+func (r *GetPublisher) Path() string { return "/data/:publisherID" }
+
+func (r *GetPublisher) Output(ctx context.Context) (interface{}, error) {
+	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
+		WithPublisherBySFID(ctx, r.PublisherID)
+	if err != nil {
+		return nil, err
+	}
+	return types.MustPublisherFromContext(ctx), nil
+}
+
+// List Publishers by Conditions
 type ListPublisher struct {
 	httpx.MethodGet
-	publisher.ListPublisherReq
+	publisher.ListReq
 }
 
 func (r *ListPublisher) Output(ctx context.Context) (interface{}, error) {
@@ -20,8 +38,6 @@ func (r *ListPublisher) Output(ctx context.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	prj := types.MustProjectFromContext(ctx)
-
-	r.SetCurrentProject(prj.ProjectID)
-	return publisher.ListPublisher(ctx, &r.ListPublisherReq)
+	r.PublisherIDs = []types.SFID{types.MustProjectFromContext(ctx).ProjectID}
+	return publisher.List(ctx, &r.ListReq)
 }
