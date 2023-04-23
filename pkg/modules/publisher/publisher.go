@@ -64,14 +64,16 @@ func CreatePublisher(ctx context.Context, project *models.Project, r *CreatePubl
 
 func GetPublisherByPublisherKey(ctx context.Context, publisherKey string) (*models.Publisher, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
+	p := types.MustProjectFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	m := &models.Publisher{
+		RelProject:    models.RelProject{ProjectID: p.ProjectID},
 		PublisherInfo: models.PublisherInfo{Key: publisherKey},
 	}
 
 	_, l = l.Start(ctx, "GetPublisherByPublisherKey")
 
-	if err := m.FetchByKey(d); err != nil {
+	if err := m.FetchByProjectIDAndKey(d); err != nil {
 		l.Error(err)
 		return nil, status.CheckDatabaseError(err, "GetPublisherByPublisherKey")
 	}
@@ -219,25 +221,28 @@ func UpdatePublisher(ctx context.Context, project *models.Project, publisherID t
 
 func GetPublisherByPubKeyAndProjectName(ctx context.Context, pubKey, prjName string) (*models.Publisher, error) {
 	l := types.MustLoggerFromContext(ctx)
-	d := types.MustMgrDBExecutorFromContext(ctx)
-
-	_, l = l.Start(ctx, "GetPublisherByPubKeyAndProjectID")
-	defer l.End()
-
-	pub := &models.Publisher{PublisherInfo: models.PublisherInfo{Key: pubKey}}
-	// TODO change prjName to projectID, then use FetchByProjectIDAndKey
-	if err := pub.FetchByKey(d); err != nil {
-		l.Error(err)
-		return nil, status.CheckDatabaseError(err, "GetPublisherByKey")
-	}
-
-	l = l.WithValues("pub_id", pub.PublisherID)
 	prj, err := project.GetProjectByProjectName(ctx, prjName)
 	if err != nil {
 		l.Error(err)
 		return nil, err
 	}
 	l = l.WithValues("project_id", prj.ProjectID)
+
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	_, l = l.Start(ctx, "GetPublisherByPubKeyAndProjectID")
+	defer l.End()
+
+	pub := &models.Publisher{
+		RelProject:    models.RelProject{ProjectID: prj.ProjectID},
+		PublisherInfo: models.PublisherInfo{Key: pubKey},
+	}
+	// TODO change prjName to projectID, then use FetchByProjectIDAndKey
+	if err := pub.FetchByProjectIDAndKey(d); err != nil {
+		l.Error(err)
+		return nil, status.CheckDatabaseError(err, "GetPublisherByProjectIDAndKey")
+	}
+
+	l = l.WithValues("pub_id", pub.PublisherID)
 
 	if pub.ProjectID != prj.ProjectID {
 		l.Error(errors.New("no project permission"))
