@@ -21,6 +21,12 @@ srv_applet_mgr:
 	@cd cmd/srv-applet-mgr && make --no-print-directory
 	@echo srv-applet-mgr is built to "\033[31m ./build/srv-applet-mgr/... \033[0m"
 
+.PHONY: srv_applet_mgr_light
+srv_applet_mgr_light:
+	@cd cmd/srv-applet-mgr && make light --no-print-directory
+	@echo srv-applet-mgr is built to "\033[31m ./build/srv-applet-mgr/... \033[0m"
+
+
 .PHONY: pub_client
 pub_client:
 	@cd cmd/pub_client && make --no-print-directory
@@ -28,6 +34,9 @@ pub_client:
 
 .PHONY: build
 build: update toolkit srv_applet_mgr pub_client
+
+.PHONY: build_ligth
+build_light: update srv_applet_mgr_light
 
 .PHONY: clean
 clean:
