@@ -131,14 +131,14 @@ func (v *CurrentAccount) WithInstanceContextBySFID(ctx context.Context, id types
 	}
 	ctx = types.WithInstance(ctx, ins)
 
-	if ctx, err = v.WithProjectContextBySFID(ctx, app.ProjectID); err != nil {
-		return nil, err
-	}
-
 	if app, err = applet.GetBySFID(ctx, ins.AppletID); err != nil {
 		return nil, err
 	}
 	ctx = types.WithApplet(ctx, app)
+
+	if ctx, err = v.WithProjectContextBySFID(ctx, app.ProjectID); err != nil {
+		return nil, err
+	}
 
 	if res, err = resource.GetBySFID(ctx, app.ResourceID); err != nil {
 		return nil, err
