@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/fatih/color"
+
 	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 )
 
