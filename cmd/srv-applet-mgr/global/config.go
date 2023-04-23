@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	_ "github.com/machinefi/w3bstream/cmd/srv-applet-mgr/types"
 	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 	confapp "github.com/machinefi/w3bstream/pkg/depends/conf/app"
 	confhttp "github.com/machinefi/w3bstream/pkg/depends/conf/http"
@@ -71,8 +72,6 @@ func init() {
 	if name == "" {
 		name = "srv-applet-mgr"
 	}
-	os.Setenv(consts.EnvProjectName, name)
-	config.Logger.Name = name
 
 	tasks = mem_mq.New(0)
 	worker = mq.NewTaskWorker(tasks, mq.WithWorkerCount(3), mq.WithChannel(name))
@@ -80,7 +79,6 @@ func init() {
 	App = confapp.New(
 		confapp.WithName(name),
 		confapp.WithRoot(".."),
-		confapp.WithVersion("0.0.1"),
 		confapp.WithLogger(conflog.Std()),
 	)
 	App.Conf(config, worker)
