@@ -24,10 +24,15 @@ func (r *CreateProject) Output(ctx context.Context) (interface{}, error) {
 	}
 	r.Name = prefix + r.Name
 
-	return project.CreateProject(
+	rsp, err := project.CreateProject(
 		ctx, ca.AccountID, &r.CreateProjectReq,
 		func(ctx context.Context, channel string, data *eventpb.Event) (interface{}, error) {
 			return event.OnEventReceived(ctx, channel, data)
 		},
 	)
+	if err != nil {
+		return nil, err
+	}
+	rsp.Name, _ = middleware.ProjectNameForDisplay(rsp.Name)
+	return rsp, nil
 }
