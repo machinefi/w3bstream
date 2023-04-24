@@ -4429,57 +4429,52 @@
           {
             "name": "key",
             "in": "query",
-            "required": true,
             "schema": {
               "type": "array",
               "items": {
                 "type": "string"
               },
               "x-go-field-name": "Keys",
-              "x-tag-name": "key"
+              "x-tag-name": "key,omitempty"
             }
           },
           {
             "name": "lname",
             "in": "query",
-            "required": true,
             "schema": {
               "type": "string",
               "x-go-field-name": "LNameLike",
-              "x-tag-name": "lname"
+              "x-tag-name": "lname,omitempty"
             }
           },
           {
             "name": "name",
             "in": "query",
-            "required": true,
             "schema": {
               "type": "string",
               "x-go-field-name": "NameLike",
-              "x-tag-name": "name"
+              "x-tag-name": "name,omitempty"
             }
           },
           {
             "name": "publisherIDs",
             "in": "query",
-            "required": true,
             "schema": {
               "type": "array",
               "items": {
                 "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
               },
               "x-go-field-name": "PublisherIDs",
-              "x-tag-name": "publisherIDs"
+              "x-tag-name": "publisherIDs,omitempty"
             }
           },
           {
             "name": "rname",
             "in": "query",
-            "required": true,
             "schema": {
               "type": "string",
               "x-go-field-name": "RNameLike",
-              "x-tag-name": "rname"
+              "x-tag-name": "rname,omitempty"
             }
           }
         ],
@@ -4594,34 +4589,31 @@
           {
             "name": "key",
             "in": "query",
-            "required": true,
             "schema": {
               "type": "array",
               "items": {
                 "type": "string"
               },
               "x-go-field-name": "Keys",
-              "x-tag-name": "key"
+              "x-tag-name": "key,omitempty"
             }
           },
           {
             "name": "lname",
             "in": "query",
-            "required": true,
             "schema": {
               "type": "string",
               "x-go-field-name": "LNameLike",
-              "x-tag-name": "lname"
+              "x-tag-name": "lname,omitempty"
             }
           },
           {
             "name": "name",
             "in": "query",
-            "required": true,
             "schema": {
               "type": "string",
               "x-go-field-name": "NameLike",
-              "x-tag-name": "name"
+              "x-tag-name": "name,omitempty"
             }
           },
           {
@@ -4641,24 +4633,22 @@
           {
             "name": "publisherIDs",
             "in": "query",
-            "required": true,
             "schema": {
               "type": "array",
               "items": {
                 "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
               },
               "x-go-field-name": "PublisherIDs",
-              "x-tag-name": "publisherIDs"
+              "x-tag-name": "publisherIDs,omitempty"
             }
           },
           {
             "name": "rname",
             "in": "query",
-            "required": true,
             "schema": {
               "type": "string",
               "x-go-field-name": "RNameLike",
-              "x-tag-name": "rname"
+              "x-tag-name": "rname,omitempty"
             }
           },
           {
@@ -5489,14 +5479,13 @@
           {
             "name": "appletID",
             "in": "query",
-            "required": true,
             "schema": {
               "type": "array",
               "items": {
                 "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
               },
               "x-go-field-name": "AppletIDs",
-              "x-tag-name": "appletID"
+              "x-tag-name": "appletID,omitempty"
             }
           },
           {
@@ -5513,40 +5502,37 @@
           {
             "name": "eventType",
             "in": "query",
-            "required": true,
             "schema": {
               "type": "array",
               "items": {
                 "type": "string"
               },
               "x-go-field-name": "EventTypes",
-              "x-tag-name": "eventType"
+              "x-tag-name": "eventType,omitempty"
             }
           },
           {
             "name": "handler",
             "in": "query",
-            "required": true,
             "schema": {
               "type": "array",
               "items": {
                 "type": "string"
               },
               "x-go-field-name": "Handlers",
-              "x-tag-name": "handler"
+              "x-tag-name": "handler,omitempty"
             }
           },
           {
             "name": "strategyID",
             "in": "query",
-            "required": true,
             "schema": {
               "type": "array",
               "items": {
                 "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
               },
               "x-go-field-name": "StrategyIDs",
-              "x-tag-name": "strategyID"
+              "x-tag-name": "strategyID,omitempty"
             }
           }
         ],
@@ -5649,14 +5635,13 @@
           {
             "name": "appletID",
             "in": "query",
-            "required": true,
             "schema": {
               "type": "array",
               "items": {
                 "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
               },
               "x-go-field-name": "AppletIDs",
-              "x-tag-name": "appletID"
+              "x-tag-name": "appletID,omitempty"
             }
           },
           {
@@ -5673,27 +5658,25 @@
           {
             "name": "eventType",
             "in": "query",
-            "required": true,
             "schema": {
               "type": "array",
               "items": {
                 "type": "string"
               },
               "x-go-field-name": "EventTypes",
-              "x-tag-name": "eventType"
+              "x-tag-name": "eventType,omitempty"
             }
           },
           {
             "name": "handler",
             "in": "query",
-            "required": true,
             "schema": {
               "type": "array",
               "items": {
                 "type": "string"
               },
               "x-go-field-name": "Handlers",
-              "x-tag-name": "handler"
+              "x-tag-name": "handler,omitempty"
             }
           },
           {
@@ -5727,14 +5710,13 @@
           {
             "name": "strategyID",
             "in": "query",
-            "required": true,
             "schema": {
               "type": "array",
               "items": {
                 "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
               },
               "x-go-field-name": "StrategyIDs",
-              "x-tag-name": "strategyID"
+              "x-tag-name": "strategyID,omitempty"
             }
           }
         ],
