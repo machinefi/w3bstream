@@ -45,7 +45,7 @@ func (d *Detail) String() string {
 
 func (d *Detail) Log(err error) string {
 	s := d.String()
-	if err != nil {
+	if err == nil {
 		return s
 	}
 	return fmt.Sprintf("%s: %v", s, err)
