@@ -51,6 +51,8 @@ func ParseWasmDBDatatypeFromString(s string) (WasmDBDatatype, error) {
 		return WASM_DB_DATATYPE__TIMESTAMP, nil
 	case "DECIMAL":
 		return WASM_DB_DATATYPE__DECIMAL, nil
+	case "NUMERIC":
+		return WASM_DB_DATATYPE__NUMERIC, nil
 	}
 }
 
@@ -92,6 +94,8 @@ func ParseWasmDBDatatypeFromLabel(s string) (WasmDBDatatype, error) {
 		return WASM_DB_DATATYPE__TIMESTAMP, nil
 	case "DECIMAL":
 		return WASM_DB_DATATYPE__DECIMAL, nil
+	case "NUMERIC":
+		return WASM_DB_DATATYPE__NUMERIC, nil
 	}
 }
 
@@ -137,6 +141,8 @@ func (v WasmDBDatatype) String() string {
 		return "TIMESTAMP"
 	case WASM_DB_DATATYPE__DECIMAL:
 		return "DECIMAL"
+	case WASM_DB_DATATYPE__NUMERIC:
+		return "NUMERIC"
 	}
 }
 
@@ -178,6 +184,8 @@ func (v WasmDBDatatype) Label() string {
 		return "use epoch timestamp (integer, UTC)"
 	case WASM_DB_DATATYPE__DECIMAL:
 		return "DECIMAL"
+	case WASM_DB_DATATYPE__NUMERIC:
+		return "NUMERIC"
 	}
 }
 
@@ -186,7 +194,7 @@ func (v WasmDBDatatype) TypeName() string {
 }
 
 func (v WasmDBDatatype) ConstValues() []enum.IntStringerEnum {
-	return []enum.IntStringerEnum{WASM_DB_DATATYPE__INT, WASM_DB_DATATYPE__INT8, WASM_DB_DATATYPE__INT16, WASM_DB_DATATYPE__INT32, WASM_DB_DATATYPE__INT64, WASM_DB_DATATYPE__UINT, WASM_DB_DATATYPE__UINT8, WASM_DB_DATATYPE__UINT16, WASM_DB_DATATYPE__UINT32, WASM_DB_DATATYPE__UINT64, WASM_DB_DATATYPE__FLOAT32, WASM_DB_DATATYPE__FLOAT64, WASM_DB_DATATYPE__TEXT, WASM_DB_DATATYPE__BOOL, WASM_DB_DATATYPE__TIMESTAMP, WASM_DB_DATATYPE__DECIMAL}
+	return []enum.IntStringerEnum{WASM_DB_DATATYPE__INT, WASM_DB_DATATYPE__INT8, WASM_DB_DATATYPE__INT16, WASM_DB_DATATYPE__INT32, WASM_DB_DATATYPE__INT64, WASM_DB_DATATYPE__UINT, WASM_DB_DATATYPE__UINT8, WASM_DB_DATATYPE__UINT16, WASM_DB_DATATYPE__UINT32, WASM_DB_DATATYPE__UINT64, WASM_DB_DATATYPE__FLOAT32, WASM_DB_DATATYPE__FLOAT64, WASM_DB_DATATYPE__TEXT, WASM_DB_DATATYPE__BOOL, WASM_DB_DATATYPE__TIMESTAMP, WASM_DB_DATATYPE__DECIMAL, WASM_DB_DATATYPE__NUMERIC}
 }
 
 func (v WasmDBDatatype) MarshalText() ([]byte, error) {

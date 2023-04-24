@@ -2,6 +2,9 @@ package wasm
 
 import (
 	"context"
+	"fmt"
+
+	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
@@ -9,7 +12,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/migration"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/types"
-	"github.com/pkg/errors"
 )
 
 func NewDatabase(name string) *Database {
@@ -35,8 +37,6 @@ type Schema struct {
 	Name string `json:"schema,omitempty,default='public'"`
 	// Tables: tables define
 	Tables []*Table `json:"tables,omitempty"`
-
-	d sqlx.DBExecutor // database executor with schema
 }
 
 type Table struct {
@@ -66,14 +66,56 @@ type Column struct {
 	// Name column name
 	Name string `json:"name"`
 	// Constrains column constrains
-	Constrains *Constrains `json:"constrains"`
+	Constrains Constrains `json:"constrains"`
+}
+
+func (c Column) Datatype(t enums.WasmDBDatatype) string {
+	switch t {
+	case
+		enums.WASM_DB_DATATYPE__INT,
+		enums.WASM_DB_DATATYPE__INT8, enums.WASM_DB_DATATYPE__UINT8,
+		enums.WASM_DB_DATATYPE__INT16, enums.WASM_DB_DATATYPE__UINT16,
+		enums.WASM_DB_DATATYPE__INT32, enums.WASM_DB_DATATYPE__UINT32,
+		enums.WASM_DB_DATATYPE__UINT:
+		if c.Constrains.AutoIncrement {
+			return "serial"
+		} else {
+			return "integer"
+		}
+	case enums.WASM_DB_DATATYPE__INT64, enums.WASM_DB_DATATYPE__UINT64:
+		if c.Constrains.AutoIncrement {
+			return "bigserial"
+		} else {
+			return "bigint"
+		}
+	case enums.WASM_DB_DATATYPE__FLOAT32:
+		return "real"
+	case enums.WASM_DB_DATATYPE__FLOAT64:
+		return "double precision"
+	case enums.WASM_DB_DATATYPE__TEXT:
+		if c.Constrains.Length < 65536/3 {
+			return "character varying"
+		} else {
+			return "text"
+		}
+	case enums.WASM_DB_DATATYPE__BOOL:
+		return "boolean"
+	case enums.WASM_DB_DATATYPE__TIMESTAMP:
+		return "bigint"
+	case enums.WASM_DB_DATATYPE__DECIMAL:
+		return "decimal"
+	case enums.WASM_DB_DATATYPE__NUMERIC:
+		return "numeric"
+	default:
+		panic(fmt.Errorf("unsupport type: %v", t.String()))
+	}
 }
 
 func (c *Column) Build() *builder.Column {
 	col := builder.Col(c.Name)
 	dt := c.Constrains
 	col.ColumnType = &builder.ColumnType{
-		DataType:      dt.Datatype.String(),
+		DataType:      c.Datatype(c.Constrains.Datatype),
 		Length:        dt.Length,
 		Decimal:       dt.Decimal,
 		Default:       dt.Default,
@@ -130,12 +172,11 @@ func (d *Database) WithSchema(name string) (db sqlx.DBExecutor, err error) {
 		name = "public"
 	}
 
-	s, ok := d.schemas[name]
-	if !ok {
+	if _, ok := d.schemas[name]; !ok {
 		return nil, errors.Errorf("schema %s not found in database %s", name, d.Name)
 	}
-	db = s.d
-	_, err = db.Exec(builder.Expr("SET SEARCH_PATH TO ?", name))
+	db = d.ep
+	_, err = db.Exec(builder.Expr("SET SEARCH_PATH TO " + name))
 	if err != nil {
 		return nil, errors.Errorf("switch schema failed: %v", err)
 	}
@@ -181,8 +222,8 @@ func (d *Database) Init(ctx context.Context) (err error) {
 		for _, t := range s.Tables {
 			ep.AddTable(t.Build())
 		}
-		s.d = ep.WithSchema(s.Name)
-		if err = migration.Migrate(s.d, output); err != nil {
+		db := ep.WithSchema(s.Name)
+		if err = migration.Migrate(db, output); err != nil {
 			return err
 		}
 	}

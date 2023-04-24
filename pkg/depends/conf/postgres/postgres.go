@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/driver/postgres"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/retry"
-	"github.com/pkg/errors"
 )
 
 type Endpoint struct {
