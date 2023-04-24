@@ -19,9 +19,15 @@ var (
 )
 
 func init() {
-	_ = os.Setenv(consts.EnvProjectName, Name)
-	_ = os.Setenv(consts.EnvProjectFeat, Branch+"@"+Commit)
-	_ = os.Setenv(consts.EnvProjectVersion, Version)
+	if Name != "" {
+		_ = os.Setenv(consts.EnvProjectName, Name)
+	}
+	if Branch != "" && Commit != "" {
+		_ = os.Setenv(consts.EnvProjectFeat, Branch+"@"+Commit)
+	}
+	if Version != "" {
+		_ = os.Setenv(consts.EnvProjectVersion, Version)
+	}
 
 	fmt.Printf(color.CyanString(
 		"\n%s:%s was built at %s on %s(%s)\n\n",
