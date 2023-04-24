@@ -6,7 +6,7 @@ import (
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 	confapp "github.com/machinefi/w3bstream/pkg/depends/conf/app"
-	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/s3"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
 	confhttp "github.com/machinefi/w3bstream/pkg/depends/conf/http"
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	confjwt "github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
@@ -48,11 +48,10 @@ func init() {
 		Jwt         *confjwt.Jwt
 		Logger      *conflog.Log
 		StdLogger   conflog.Logger
-		UploadConf  *types.UploadConfig
 		EthClient   *types.ETHClientConfig
 		WhiteList   *types.WhiteList
 		ServerEvent *confhttp.Server
-		S3          *s3.S3
+		FileSystem  *filesystem.FileSystem
 	}{
 		Postgres:    db,
 		MonitorDB:   monitordb,
@@ -63,11 +62,10 @@ func init() {
 		Jwt:         &confjwt.Jwt{},
 		Logger:      &conflog.Log{},
 		StdLogger:   conflog.Std(),
-		UploadConf:  &types.UploadConfig{},
 		EthClient:   &types.ETHClientConfig{},
 		WhiteList:   &types.WhiteList{},
 		ServerEvent: serverEvent,
-		S3:          &s3.S3{},
+		FileSystem:  &filesystem.FileSystem{},
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
@@ -100,14 +98,13 @@ func init() {
 		types.WithLoggerContext(config.StdLogger),
 		conflog.WithLoggerContext(config.StdLogger),
 		types.WithMqttBrokerContext(config.MqttBroker),
-		types.WithUploadConfigContext(config.UploadConf),
 		confid.WithSFIDGeneratorContext(confid.MustNewSFIDGenerator()),
 		confjwt.WithConfContext(config.Jwt),
 		types.WithTaskWorkerContext(worker),
 		types.WithTaskBoardContext(mq.NewTaskBoard(tasks)),
 		types.WithETHClientConfigContext(config.EthClient),
 		types.WithWhiteListContext(config.WhiteList),
-		types.WithS3Context(config.S3),
+		types.WithFileSystemContext(config.FileSystem),
 	)
 }
 

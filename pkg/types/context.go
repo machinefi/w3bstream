@@ -2,8 +2,9 @@ package types
 
 import (
 	"context"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
 
-	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/s3"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/amazonS3"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
@@ -32,7 +33,8 @@ type (
 	CtxInstance          struct{}
 	CtxEthClient         struct{} // CtxEthClient ETHClientConfig
 	CtxWhiteList         struct{}
-	CtxS3                struct{}
+	CtxAmazonS3          struct{}
+	CtxFileSystem        struct{}
 )
 
 func WithMgrDBExecutor(ctx context.Context, v sqlx.DBExecutor) context.Context {
@@ -375,23 +377,44 @@ func MustWhiteListFromContext(ctx context.Context) *WhiteList {
 	return v
 }
 
-func WithS3(ctx context.Context, v *s3.S3) context.Context {
-	return contextx.WithValue(ctx, CtxS3{}, v)
+func WithAmazonS3(ctx context.Context, v *amazonS3.AmazonS3) context.Context {
+	return contextx.WithValue(ctx, CtxAmazonS3{}, v)
 }
 
-func WithS3Context(v *s3.S3) contextx.WithContext {
+func WithAmazonS3Context(v *amazonS3.AmazonS3) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, CtxS3{}, v)
+		return contextx.WithValue(ctx, CtxAmazonS3{}, v)
 	}
 }
 
-func S3FromContext(ctx context.Context) (*s3.S3, bool) {
-	v, ok := ctx.Value(CtxS3{}).(*s3.S3)
+func AmazonS3FromContext(ctx context.Context) (*amazonS3.AmazonS3, bool) {
+	v, ok := ctx.Value(CtxAmazonS3{}).(*amazonS3.AmazonS3)
 	return v, ok
 }
 
-func MustS3FromContext(ctx context.Context) *s3.S3 {
-	v, ok := S3FromContext(ctx)
+func MustS3FromContext(ctx context.Context) *amazonS3.AmazonS3 {
+	v, ok := AmazonS3FromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithFileSystem(ctx context.Context, v *filesystem.FileSystem) context.Context {
+	return contextx.WithValue(ctx, CtxFileSystem{}, v)
+}
+
+func WithFileSystemContext(v *filesystem.FileSystem) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxFileSystem{}, v)
+	}
+}
+
+func FileSystemFromContext(ctx context.Context) (*filesystem.FileSystem, bool) {
+	v, ok := ctx.Value(CtxFileSystem{}).(*filesystem.FileSystem)
+	return v, ok
+}
+
+func MustFileSystemFromContext(ctx context.Context) *filesystem.FileSystem {
+	v, ok := FileSystemFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

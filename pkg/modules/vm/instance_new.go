@@ -14,12 +14,12 @@ func NewInstance(ctx context.Context, path string, id types.SFID) error {
 
 func NewInstanceWithState(ctx context.Context, path string, id types.SFID, state enums.InstanceState) error {
 	l := types.MustLoggerFromContext(ctx)
-	s3Cli := types.MustS3FromContext(ctx)
+	fileSystem := types.MustFileSystemFromContext(ctx)
 
 	_, l = l.Start(ctx, "NewInstanceWithState")
 	defer l.End()
 
-	code, err := s3Cli.Read(path)
+	code, err := fileSystem.FileCli.Read(path)
 	if err != nil {
 		l.Error(err)
 		return err

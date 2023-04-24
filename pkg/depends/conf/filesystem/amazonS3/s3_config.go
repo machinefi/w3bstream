@@ -1,31 +1,47 @@
-package s3
+package amazonS3
 
 import (
 	"bytes"
+	"io/ioutil"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"io/ioutil"
 )
 
-type S3 struct {
-	Region          string
-	AccessKeyID     string
-	SecretAccessKey string
-	SessionToken    string
-	BucketName      string
+type AmazonS3 struct {
+	Region          string `env:""`
+	AccessKeyID     string `env:""`
+	SecretAccessKey string `env:""`
+	SessionToken    string `env:""`
+	BucketName      string `env:""`
 
 	cli *s3.S3
 }
 
-func (s *S3) SetDefault() {
+func NewAmazonS3(regin, accessKeyID, secretAccessKey, sessionToken, bucketName string) *AmazonS3 {
+	s3 := &AmazonS3{
+		Region:          regin,
+		AccessKeyID:     accessKeyID,
+		SecretAccessKey: secretAccessKey,
+		SessionToken:    sessionToken,
+		BucketName:      bucketName,
+	}
+	s3.SetDefault()
+	if err := s3.Init(); err != nil {
+		panic(err)
+	}
+	return s3
+}
+
+func (s *AmazonS3) SetDefault() {
 	if s.Region == "" {
 		s.Region = "us-west-1"
 	}
 }
 
-func (s *S3) Init() error {
+func (s *AmazonS3) Init() error {
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String(s.Region),
 		Credentials: credentials.NewStaticCredentials(s.AccessKeyID, s.SecretAccessKey, s.SessionToken),
@@ -37,19 +53,19 @@ func (s *S3) Init() error {
 	return nil
 }
 
-func (s *S3) Name() string {
+func (s *AmazonS3) Name() string {
 	return "s3-cli"
 }
 
-//func (s *S3) LivenessCheck() map[string]string {
+//func (s *AmazonS3) LivenessCheck() map[string]string {
 //	return nil
 //}
 
-func (s *S3) Upload(key string, file []byte) error {
+func (s *AmazonS3) Upload(key string, data []byte) error {
 	if _, err := s.cli.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(s.BucketName),
 		Key:    aws.String(key),
-		Body:   bytes.NewReader(file),
+		Body:   bytes.NewReader(data),
 	}); err != nil {
 		return err
 	}
@@ -57,7 +73,7 @@ func (s *S3) Upload(key string, file []byte) error {
 	return nil
 }
 
-func (s *S3) Read(key string) ([]byte, error) {
+func (s *AmazonS3) Read(key string) ([]byte, error) {
 	resp, err := s.cli.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(s.BucketName),
 		Key:    aws.String(key),
@@ -67,15 +83,10 @@ func (s *S3) Read(key string) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return body, nil
+	return ioutil.ReadAll(resp.Body)
 }
 
-func (s *S3) Delete(key string) error {
+func (s *AmazonS3) Delete(key string) error {
 	if _, err := s.cli.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(s.BucketName),
 		Key:    aws.String(key),

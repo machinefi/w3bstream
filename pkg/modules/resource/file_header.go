@@ -19,9 +19,9 @@ import (
 
 var reserve = int64(100 * 1024 * 1024)
 
-func UploadWithS3(ctx context.Context, f *multipart.FileHeader, owner string) (fullName string, err error) {
+func UploadFile(ctx context.Context, f *multipart.FileHeader, owner string) (fullName string, err error) {
 	l := types.MustLoggerFromContext(ctx)
-	s3Cli := types.MustS3FromContext(ctx)
+	fileSystem := types.MustFileSystemFromContext(ctx)
 
 	var (
 		fr       io.ReadSeekCloser
@@ -41,6 +41,12 @@ func UploadWithS3(ctx context.Context, f *multipart.FileHeader, owner string) (f
 		l.Error(err)
 		return
 	}
+	if filesize > fileSystem.FileSizeLimit {
+		err = errors.Wrap(err, "filesize over limit")
+		l.Error(err)
+		return
+	}
+
 	_, err = fr.Seek(0, io.SeekStart)
 	if err != nil {
 		l.Error(err)
@@ -59,7 +65,7 @@ func UploadWithS3(ctx context.Context, f *multipart.FileHeader, owner string) (f
 		l.Error(err)
 	}
 	fullName = fmt.Sprintf("%s/%s/%s", owner, sum, f.Filename)
-	err = s3Cli.Upload(fullName, data)
+	err = fileSystem.FileCli.Upload(fullName, data)
 	if err != nil {
 		l.Error(err)
 	}

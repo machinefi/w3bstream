@@ -19,7 +19,7 @@ func FetchOrCreateResource(ctx context.Context, owner string, f *multipart.FileH
 	_, l = l.Start(ctx, "FetchOrCreateResource")
 	defer l.End()
 
-	fullName, err := UploadWithS3(ctx, f, owner)
+	fullName, err := UploadFile(ctx, f, owner)
 	if err != nil {
 		l.Error(err)
 		return nil, status.UploadFileFailed.StatusErr().WithDesc(err.Error())
