@@ -3,6 +3,8 @@ package event
 import (
 	"context"
 	"errors"
+	"github.com/machinefi/w3bstream/pkg/modules/project"
+	"github.com/machinefi/w3bstream/pkg/modules/publisher"
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -13,8 +15,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
-	"github.com/machinefi/w3bstream/pkg/modules/project"
-	"github.com/machinefi/w3bstream/pkg/modules/publisher"
 	"github.com/machinefi/w3bstream/pkg/modules/strategy"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -126,37 +126,31 @@ func checkHeader(ctx context.Context, projectName string, l log.Logger, ret *Han
 	publisherMtc := projectName
 	eventType = enums.EVENTTYPEDEFAULT
 
-	if r.Header != nil {
-		if len(r.Header.Token) > 0 {
-			var (
-				pub *models.Publisher
-				prj *models.Project
-			)
-			pub, err = publisherVerification(ctx, l, r)
-			if err != nil {
-				l.Error(err)
-				return
-			}
-			prj, err = project.GetByName(ctx, projectName)
-			if err != nil {
-				return
-			}
-			publisherMtc = pub.Key
-			pub, err = publisher.GetByProjectAndKey(ctx, prj.ProjectID, r.Header.GetPubId())
-			if err != nil {
-				l.Error(err)
-				return
-			}
-			ret.PubID, ret.PubName = pub.PublisherID, pub.Name
-			l.WithValues("pub_id", pub.PublisherID)
-		}
-		if len(r.Header.EventId) > 0 {
-			ret.EventID = r.Header.EventId
-		}
-		if len(r.Header.EventType) > 0 {
-			eventType = r.Header.EventType
-		}
+	var (
+		pub *models.Publisher
+		prj *models.Project
+	)
+	pub, err = publisherVerification(ctx, l, r)
+	if err != nil {
+		l.Error(err)
+		return
 	}
+	prj, err = project.GetByName(ctx, projectName)
+	if err != nil {
+		return
+	}
+	publisherMtc = pub.Key
+	pub, err = publisher.GetByProjectAndKey(ctx, prj.ProjectID, r.Header.GetPubId())
+	if err != nil {
+		l.Error(err)
+		return
+	}
+	ret.PubID, ret.PubName = pub.PublisherID, pub.Name
+	l.WithValues("pub_id", pub.PublisherID)
+
+	ret.EventID = r.Header.GetEventId()
+	eventType = r.Header.GetEventType()
+
 	_receiveEventMtc.WithLabelValues(projectName, publisherMtc).Inc()
 	return
 }
