@@ -2,7 +2,6 @@ package wasm
 
 import (
 	"context"
-	"os"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
@@ -10,6 +9,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/migration"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/pkg/errors"
 )
 
 func NewDatabase(name string) *Database {
@@ -17,26 +17,37 @@ func NewDatabase(name string) *Database {
 }
 
 type Database struct {
-	Name    string              `json:"-"`                            // Name: database name, this should be assigned by host
-	Dialect enums.WasmDBDialect `json:"dialect,omitempty,default=''"` // Dialect database dialect
-	Schemas []*Schema           `json:"schemas,omitempty"`            // Schemas
-	schemas map[string]*Schema  // schemas reference of Schemas; key: schema name
+	// Name: database name, currently this should be assigned by host; if the
+	// database resource can be assigned by project, then open this field.
+	Name string `json:"-"`
+	// Dialect database dialect, support postgres only now
+	Dialect enums.WasmDBDialect `json:"dialect,omitempty,default=''"`
+	// Schemas schema list
+	Schemas []*Schema `json:"schemas,omitempty"`
+	// schemas reference of Schemas; key: schema name
+	schemas map[string]*Schema
 
 	ep *postgres.Endpoint // database endpoint
 }
 
 type Schema struct {
-	Name   string   `json:"schema,omitempty,default='public'"` // Name: schema name, use postgres driver, default schema is `public`
-	Tables []*Table `json:"tables,omitempty"`                  // Tables: tables define
+	// Name: schema name, use postgres driver, default schema is `public`
+	Name string `json:"schema,omitempty,default='public'"`
+	// Tables: tables define
+	Tables []*Table `json:"tables,omitempty"`
 
 	d sqlx.DBExecutor // database executor with schema
 }
 
 type Table struct {
-	Name string    `json:"name"`           // Name table name
-	Desc string    `json:"desc,omitempty"` // Desc table description
-	Cols []*Column `json:"cols"`           // Cols table column define
-	Keys []*Key    `json:"keys"`           // Keys table index or primary define
+	// Name table name
+	Name string `json:"name"`
+	// Desc table description
+	Desc string `json:"desc,omitempty"`
+	// Cols table column define
+	Cols []*Column `json:"cols"`
+	// Keys table index or primary define
+	Keys []*Key `json:"keys"`
 }
 
 func (t *Table) Build() *builder.Table {
@@ -52,8 +63,10 @@ func (t *Table) Build() *builder.Table {
 }
 
 type Column struct {
-	Name       string      `json:"name"`       // Name column name
-	Constrains *Constrains `json:"constrains"` // Constrains column constrains
+	// Name column name
+	Name string `json:"name"`
+	// Constrains column constrains
+	Constrains *Constrains `json:"constrains"`
 }
 
 func (c *Column) Build() *builder.Column {
@@ -68,6 +81,9 @@ func (c *Column) Build() *builder.Column {
 		AutoIncrement: dt.AutoIncrement,
 		Comment:       dt.Desc,
 		Desc:          []string{dt.Desc},
+	}
+	if dt.Default != nil && len(*dt.Default) == 0 {
+		*dt.Default = "''"
 	}
 	return col
 }
@@ -109,25 +125,30 @@ func (d *Database) WithContext(ctx context.Context) context.Context {
 	return WithSQLStore(ctx, d)
 }
 
-func (d *Database) WithSchema(name string) sqlx.DBExecutor {
+func (d *Database) WithSchema(name string) (db sqlx.DBExecutor, err error) {
 	if name == "" {
 		name = "public"
 	}
-	if s, ok := d.schemas[name]; ok {
-		return s.d
+
+	s, ok := d.schemas[name]
+	if !ok {
+		return nil, errors.Errorf("schema %s not found in database %s", name, d.Name)
 	}
-	return d.ep.WithSchema("public")
+	db = s.d
+	_, err = db.Exec(builder.Expr("SET SEARCH_PATH TO ?", name))
+	if err != nil {
+		return nil, errors.Errorf("switch schema failed: %v", err)
+	}
+	return db, nil
 }
 
-func (d *Database) WithDefaultSchema() sqlx.DBExecutor {
+func (d *Database) WithDefaultSchema() (sqlx.DBExecutor, error) {
 	return d.WithSchema("public")
 }
 
 func (d *Database) Init(ctx context.Context) (err error) {
-	var prj = types.MustProjectFromContext(ctx)
-
 	// init database endpoint
-	d.Name = "w3b_" + prj.ProjectID.String()
+	d.Name = types.MustProjectFromContext(ctx).DatabaseName()
 	d.ep = types.MustWasmDBEndpointFromContext(ctx)
 	d.ep.Database = sqlx.NewDatabase(d.Name)
 	if d.schemas == nil {
@@ -150,6 +171,10 @@ func (d *Database) Init(ctx context.Context) (err error) {
 		return err
 	}
 
+	// if output is not nil, migration will not be executed, only output all
+	// sql queries for inspection
+	output := migration.OutputFromContext(ctx)
+
 	// init each schema
 	for _, s := range d.schemas {
 		ep := d.ep
@@ -157,12 +182,14 @@ func (d *Database) Init(ctx context.Context) (err error) {
 			ep.AddTable(t.Build())
 		}
 		s.d = ep.WithSchema(s.Name)
-		if err = migration.Migrate(s.d, os.Stderr); err != nil {
+		if err = migration.Migrate(s.d, output); err != nil {
 			return err
 		}
-		if err = migration.Migrate(s.d, nil); err != nil {
-			return err
-		}
+	}
+
+	if output != nil {
+		// return error for stop other transaction
+		return errors.Errorf("inspection: %v", err)
 	}
 	return nil
 }

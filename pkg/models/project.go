@@ -35,3 +35,7 @@ type ProjectBase struct {
 	Proto       enums.Protocol `db:"f_proto,default='0'"  json:"protocol,omitempty"` // Proto project protocol for event publisher
 	Description string         `db:"f_description,default=''"    json:"description,omitempty"`
 }
+
+func (v *Project) DatabaseName() string {
+	return "w3b_" + v.ProjectID.String()
+}

@@ -15,7 +15,7 @@ type GetProjectSchema struct {
 }
 
 func (r *GetProjectSchema) Path() string {
-	return "/" + enums.CONFIG_TYPE__PROJECT_SCHEMA.String()
+	return "/" + enums.CONFIG_TYPE__PROJECT_DATABASE.String()
 }
 
 func (r *GetProjectSchema) Output(ctx context.Context) (interface{}, error) {
@@ -25,7 +25,7 @@ func (r *GetProjectSchema) Output(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 	prj := types.MustProjectFromContext(ctx)
-	scm, err := config.GetValueByRelAndType(ctx, prj.ProjectID, enums.CONFIG_TYPE__PROJECT_SCHEMA)
+	scm, err := config.GetValueByRelAndType(ctx, prj.ProjectID, enums.CONFIG_TYPE__PROJECT_DATABASE)
 	if err != nil {
 		return nil, err
 	}
