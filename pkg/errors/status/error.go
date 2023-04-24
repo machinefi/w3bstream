@@ -23,7 +23,11 @@ const (
 	// @errTalk Create Message Channel Failed
 	CreateChannelFailed
 	// @errTalk Config Initialization Failed
-	ConfigInitializationFailed
+	ConfigInitFailed
+	// @errTalk Config Uninit Failed
+	ConfigUninitFailed
+	// @errTalk Config Parse Failed
+	ConfigParseFailed
 	// @errTalk Gen Publisher Token Failed
 	GenPublisherTokenFailed
 )
@@ -75,6 +79,8 @@ const (
 	ProjectNameConflict
 	// @errTalk Strategy Conflict
 	StrategyConflict
+	// @errTalk Config Conflict
+	ConfigConflict
 	// @errTalk Publisher Conflict
 	PublisherConflict
 )
@@ -86,6 +92,8 @@ const (
 	MD5ChecksumFailed
 	// @errTalk Invalid Chain Client
 	InvalidChainClient
+	// @errTalk Invalid Config Type
+	InvalidConfigType
 )
 
 const (

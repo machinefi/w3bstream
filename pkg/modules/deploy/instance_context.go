@@ -44,16 +44,19 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 	}
 	ctx = types.WithResource(ctx, res)
 
-	configs, err := config.FetchConfigValuesByRelIDs(parent, prj.ProjectID, app.AppletID, res.ResourceID, ins.InstanceID)
+	configs, err := config.List(parent, &config.CondArgs{
+		RelIDs: []types.SFID{prj.ProjectID, app.AppletID, res.ResourceID, ins.InstanceID},
+	})
+
 	if err != nil {
 		return nil, err
 	}
 	for _, c := range configs {
-		if canBeInit, ok := c.(wasm.ConfigurationWithInit); ok {
+		if canBeInit, ok := c.Configuration.(wasm.ConfigurationWithInit); ok {
 			err = canBeInit.Init(ctx)
 		}
 		if err != nil {
-			return nil, status.ConfigInitializationFailed.StatusErr().WithDesc(err.Error())
+			return nil, status.ConfigInitFailed.StatusErr().WithDesc(err.Error())
 		}
 		ctx = c.WithContext(ctx)
 	}

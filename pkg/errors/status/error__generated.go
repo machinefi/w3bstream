@@ -43,6 +43,8 @@ func (v Error) Key() string {
 		return "MD5ChecksumFailed"
 	case InvalidChainClient:
 		return "InvalidChainClient"
+	case InvalidConfigType:
+		return "InvalidConfigType"
 	case Unauthorized:
 		return "Unauthorized"
 	case InvalidAuthValue:
@@ -101,6 +103,8 @@ func (v Error) Key() string {
 		return "ProjectNameConflict"
 	case StrategyConflict:
 		return "StrategyConflict"
+	case ConfigConflict:
+		return "ConfigConflict"
 	case PublisherConflict:
 		return "PublisherConflict"
 	case InternalServerError:
@@ -111,8 +115,12 @@ func (v Error) Key() string {
 		return "UploadFileFailed"
 	case CreateChannelFailed:
 		return "CreateChannelFailed"
-	case ConfigInitializationFailed:
-		return "ConfigInitializationFailed"
+	case ConfigInitFailed:
+		return "ConfigInitFailed"
+	case ConfigUninitFailed:
+		return "ConfigUninitFailed"
+	case ConfigParseFailed:
+		return "ConfigParseFailed"
 	case GenPublisherTokenFailed:
 		return "GenPublisherTokenFailed"
 	}
@@ -127,6 +135,8 @@ func (v Error) Msg() string {
 		return "Md5 Checksum Failed"
 	case InvalidChainClient:
 		return "Invalid Chain Client"
+	case InvalidConfigType:
+		return "Invalid Config Type"
 	case Unauthorized:
 		return "Unauthorized unauthorized"
 	case InvalidAuthValue:
@@ -185,6 +195,8 @@ func (v Error) Msg() string {
 		return "Project Name Conflict"
 	case StrategyConflict:
 		return "Strategy Conflict"
+	case ConfigConflict:
+		return "Config Conflict"
 	case PublisherConflict:
 		return "Publisher Conflict"
 	case InternalServerError:
@@ -195,8 +207,12 @@ func (v Error) Msg() string {
 		return "Upload File Failed"
 	case CreateChannelFailed:
 		return "Create Message Channel Failed"
-	case ConfigInitializationFailed:
+	case ConfigInitFailed:
 		return "Config Initialization Failed"
+	case ConfigUninitFailed:
+		return "Config Uninit Failed"
+	case ConfigParseFailed:
+		return "Config Parse Failed"
 	case GenPublisherTokenFailed:
 		return "Gen Publisher Token Failed"
 	}
@@ -210,6 +226,8 @@ func (v Error) CanBeTalk() bool {
 	case MD5ChecksumFailed:
 		return true
 	case InvalidChainClient:
+		return true
+	case InvalidConfigType:
 		return true
 	case Unauthorized:
 		return true
@@ -269,6 +287,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case StrategyConflict:
 		return true
+	case ConfigConflict:
+		return true
 	case PublisherConflict:
 		return true
 	case InternalServerError:
@@ -279,7 +299,11 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case CreateChannelFailed:
 		return true
-	case ConfigInitializationFailed:
+	case ConfigInitFailed:
+		return true
+	case ConfigUninitFailed:
+		return true
+	case ConfigParseFailed:
 		return true
 	case GenPublisherTokenFailed:
 		return true

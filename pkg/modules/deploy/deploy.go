@@ -2,7 +2,6 @@ package deploy
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/pkg/errors"
 
@@ -56,7 +55,8 @@ func CreateInstance(ctx context.Context, r *CreateOrReDeployInstanceReq) (*Creat
 			if r.Cache == nil {
 				r.Cache = wasm.DefaultCache()
 			}
-			return config.CreateConfig(ctx, ins.InstanceID, r.Cache)
+			_, err := config.Create(ctx, ins.InstanceID, r.Cache)
+			return err
 		},
 		func(db sqlx.DBExecutor) error {
 			var _err error
@@ -270,13 +270,7 @@ func ReDeployInstance(ctx context.Context, r *CreateOrReDeployInstanceReq) (*Cre
 			if r.Cache == nil {
 				r.Cache = wasm.DefaultCache()
 			}
-			val, err := json.Marshal(r.Cache)
-			if err != nil {
-				l.Error(err)
-				return status.InternalServerError.StatusErr().WithDesc(err.Error())
-			}
-
-			_, err = config.CreateOrUpdateConfig(ctx, ins.InstanceID, r.Cache.ConfigType(), val)
+			_, err := config.Upsert(ctx, ins.InstanceID, r.Cache)
 			return err
 		},
 		func(db sqlx.DBExecutor) error {
