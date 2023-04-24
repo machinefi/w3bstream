@@ -2,11 +2,13 @@ package middleware
 
 import (
 	"context"
+	"strings"
 
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/modules/account_identity"
+	"github.com/pkg/errors"
 )
 
 func MaybeProjectName(ctx context.Context) (string, bool) {
@@ -20,6 +22,17 @@ func MustProjectName(ctx context.Context) string {
 	p, ok := ctx.Value("ProjectProvider").(*ProjectProvider)
 	must.BeTrue(ok)
 	return p.ProjectName
+}
+
+func ProjectNameForDisplay(name string) (string, error) {
+	parts := strings.SplitN(name, "_", 3)
+	if len(parts) != 3 {
+		return "", errors.Errorf("unexpected project name format: %s", name)
+	}
+	if parts[0] != "aid" && parts[0] != "eth" {
+		return "", errors.Errorf("unexpected project name format: %s", name)
+	}
+	return parts[2], nil
 }
 
 func ProjectNameModifier(ctx context.Context) (prefix string, err error) {

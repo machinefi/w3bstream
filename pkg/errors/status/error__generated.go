@@ -43,6 +43,8 @@ func (v Error) Key() string {
 		return "MD5ChecksumFailed"
 	case InvalidChainClient:
 		return "InvalidChainClient"
+	case DeprecatedProject:
+		return "DeprecatedProject"
 	case Unauthorized:
 		return "Unauthorized"
 	case InvalidAuthValue:
@@ -127,6 +129,8 @@ func (v Error) Msg() string {
 		return "Md5 Checksum Failed"
 	case InvalidChainClient:
 		return "Invalid Chain Client"
+	case DeprecatedProject:
+		return "Deprecated Project"
 	case Unauthorized:
 		return "Unauthorized unauthorized"
 	case InvalidAuthValue:
@@ -210,6 +214,8 @@ func (v Error) CanBeTalk() bool {
 	case MD5ChecksumFailed:
 		return true
 	case InvalidChainClient:
+		return true
+	case DeprecatedProject:
 		return true
 	case Unauthorized:
 		return true

@@ -86,6 +86,8 @@ const (
 	MD5ChecksumFailed
 	// @errTalk Invalid Chain Client
 	InvalidChainClient
+	// @errTalk Deprecated Project
+	DeprecatedProject
 )
 
 const (

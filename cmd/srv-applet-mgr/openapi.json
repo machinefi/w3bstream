@@ -3844,6 +3844,19 @@
               }
             }
           },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DeprecatedProject][400999004][Deprecated Project]!"
+            ]
+          },
           "401": {
             "description": "",
             "content": {
