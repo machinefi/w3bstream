@@ -42,7 +42,7 @@ func ProjectNameModifier(ctx context.Context) (prefix string, err error) {
 		return "", status.CurrentAccountAbsence
 	}
 
-	prefix = "aid_+" + ca.AccountID.String() + "_"
+	prefix = "aid_" + ca.AccountID.String() + "_"
 	aci, err := account_identity.GetBySFIDAndType(
 		ctx,
 		ca.AccountID,
@@ -51,7 +51,7 @@ func ProjectNameModifier(ctx context.Context) (prefix string, err error) {
 	if err == nil {
 		prefix = "eth_" + aci.IdentityID + "_"
 	}
-	return
+	return prefix, nil
 }
 
 // ProjectProvider with account id prefix
