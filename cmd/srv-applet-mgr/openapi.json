@@ -3918,7 +3918,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[DeprecatedProject][400999004][Deprecated Project]!"
+              "@StatusErr[DeprecatedProject][400999005][Deprecated Project]!"
             ]
           },
           "401": {
@@ -6559,7 +6559,8 @@
           "TEXT",
           "BOOL",
           "TIMESTAMP",
-          "DECIMAL"
+          "DECIMAL",
+          "NUMERIC"
         ],
         "x-enum-labels": [
           "INT",
@@ -6577,7 +6578,8 @@
           "TEXT",
           "BOOL",
           "use epoch timestamp (integer, UTC)",
-          "DECIMAL"
+          "DECIMAL",
+          "NUMERIC"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.WasmDBDatatype",
         "x-id": "GithubComMachinefiW3BstreamPkgEnumsWasmDBDatatype"
@@ -8343,7 +8345,6 @@
               {
                 "description": "Constrains column constrains",
                 "x-go-field-name": "Constrains",
-                "x-go-star-level": 1,
                 "x-tag-json": "constrains"
               }
             ]
@@ -8429,7 +8430,7 @@
                 "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsWasmDBDialect"
               },
               {
-                "description": "Dialect database dialect",
+                "description": "Dialect database dialect, support postgres only now",
                 "x-go-field-name": "Dialect",
                 "x-tag-json": "dialect,omitempty,default=''"
               }
@@ -8440,7 +8441,7 @@
             "items": {
               "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgTypesWasmSchema"
             },
-            "description": "Schemas",
+            "description": "Schemas schema list",
             "x-go-field-name": "Schemas",
             "x-tag-json": "schemas,omitempty"
           }
