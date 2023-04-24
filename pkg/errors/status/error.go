@@ -23,9 +23,15 @@ const (
 	// @errTalk Create Message Channel Failed
 	CreateChannelFailed
 	// @errTalk Config Initialization Failed
-	ConfigInitializationFailed
+	ConfigInitFailed
+	// @errTalk Config Uninit Failed
+	ConfigUninitFailed
+	// @errTalk Config Parse Failed
+	ConfigParseFailed
 	// @errTalk Gen Publisher Token Failed
 	GenPublisherTokenFailed
+	// @errTalk Create Instance Failed
+	CreateInstanceFailed
 )
 
 const (
@@ -75,8 +81,12 @@ const (
 	ProjectNameConflict
 	// @errTalk Strategy Conflict
 	StrategyConflict
+	// @errTalk Config Conflict
+	ConfigConflict
 	// @errTalk Publisher Conflict
 	PublisherConflict
+	// @errTalk Multi Instance Deployed
+	MultiInstanceDeployed
 )
 
 const (
@@ -88,6 +98,10 @@ const (
 	InvalidChainClient
 	// @errTalk Deprecated Project
 	DeprecatedProject
+	// @errTalk Invalid Config Type
+	InvalidConfigType
+	// @errTalk Unknown Deploy Command
+	UnknownDeployCommand
 )
 
 const (

@@ -45,6 +45,10 @@ func (v Error) Key() string {
 		return "InvalidChainClient"
 	case DeprecatedProject:
 		return "DeprecatedProject"
+	case InvalidConfigType:
+		return "InvalidConfigType"
+	case UnknownDeployCommand:
+		return "UnknownDeployCommand"
 	case Unauthorized:
 		return "Unauthorized"
 	case InvalidAuthValue:
@@ -103,8 +107,12 @@ func (v Error) Key() string {
 		return "ProjectNameConflict"
 	case StrategyConflict:
 		return "StrategyConflict"
+	case ConfigConflict:
+		return "ConfigConflict"
 	case PublisherConflict:
 		return "PublisherConflict"
+	case MultiInstanceDeployed:
+		return "MultiInstanceDeployed"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -113,10 +121,16 @@ func (v Error) Key() string {
 		return "UploadFileFailed"
 	case CreateChannelFailed:
 		return "CreateChannelFailed"
-	case ConfigInitializationFailed:
-		return "ConfigInitializationFailed"
+	case ConfigInitFailed:
+		return "ConfigInitFailed"
+	case ConfigUninitFailed:
+		return "ConfigUninitFailed"
+	case ConfigParseFailed:
+		return "ConfigParseFailed"
 	case GenPublisherTokenFailed:
 		return "GenPublisherTokenFailed"
+	case CreateInstanceFailed:
+		return "CreateInstanceFailed"
 	}
 	return "UNKNOWN"
 }
@@ -131,6 +145,10 @@ func (v Error) Msg() string {
 		return "Invalid Chain Client"
 	case DeprecatedProject:
 		return "Deprecated Project"
+	case InvalidConfigType:
+		return "Invalid Config Type"
+	case UnknownDeployCommand:
+		return "Unknown Deploy Command"
 	case Unauthorized:
 		return "Unauthorized unauthorized"
 	case InvalidAuthValue:
@@ -189,8 +207,12 @@ func (v Error) Msg() string {
 		return "Project Name Conflict"
 	case StrategyConflict:
 		return "Strategy Conflict"
+	case ConfigConflict:
+		return "Config Conflict"
 	case PublisherConflict:
 		return "Publisher Conflict"
+	case MultiInstanceDeployed:
+		return "Multi Instance Deployed"
 	case InternalServerError:
 		return "InternalServerError internal error"
 	case DatabaseError:
@@ -199,10 +221,16 @@ func (v Error) Msg() string {
 		return "Upload File Failed"
 	case CreateChannelFailed:
 		return "Create Message Channel Failed"
-	case ConfigInitializationFailed:
+	case ConfigInitFailed:
 		return "Config Initialization Failed"
+	case ConfigUninitFailed:
+		return "Config Uninit Failed"
+	case ConfigParseFailed:
+		return "Config Parse Failed"
 	case GenPublisherTokenFailed:
 		return "Gen Publisher Token Failed"
+	case CreateInstanceFailed:
+		return "Create Instance Failed"
 	}
 	return "-"
 }
@@ -216,6 +244,10 @@ func (v Error) CanBeTalk() bool {
 	case InvalidChainClient:
 		return true
 	case DeprecatedProject:
+		return true
+	case InvalidConfigType:
+		return true
+	case UnknownDeployCommand:
 		return true
 	case Unauthorized:
 		return true
@@ -275,7 +307,11 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case StrategyConflict:
 		return true
+	case ConfigConflict:
+		return true
 	case PublisherConflict:
+		return true
+	case MultiInstanceDeployed:
 		return true
 	case InternalServerError:
 		return true
@@ -285,9 +321,15 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case CreateChannelFailed:
 		return true
-	case ConfigInitializationFailed:
+	case ConfigInitFailed:
+		return true
+	case ConfigUninitFailed:
+		return true
+	case ConfigParseFailed:
 		return true
 	case GenPublisherTokenFailed:
+		return true
+	case CreateInstanceFailed:
 		return true
 	}
 	return false

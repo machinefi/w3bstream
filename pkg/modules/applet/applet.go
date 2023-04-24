@@ -2,7 +2,6 @@ package applet
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"mime/multipart"
 
@@ -236,13 +235,7 @@ func UpdateAndDeploy(ctx context.Context, r *UpdateAndDeployReq) error {
 			if r.Cache == nil {
 				r.Cache = wasm.DefaultCache()
 			}
-			val, err := json.Marshal(r.Cache)
-			if err != nil {
-				l.Error(err)
-				return status.InternalServerError.StatusErr().WithDesc(err.Error())
-			}
-
-			_, err = config.CreateOrUpdateConfig(ctx, ins.InstanceID, r.Cache.ConfigType(), val)
+			_, err = config.Create(ctx, ins.InstanceID, r.Cache)
 			return err
 		},
 		func(db sqlx.DBExecutor) error {
@@ -251,7 +244,8 @@ func UpdateAndDeploy(ctx context.Context, r *UpdateAndDeployReq) error {
 			return _err
 		},
 		func(db sqlx.DBExecutor) error {
-			return vm.NewInstanceWithState(_ctx, mResource.Path, ins.InstanceID, enums.INSTANCE_STATE__STARTED)
+			// TODO wait resources s3 pr @zhiwei
+			return vm.NewInstance(_ctx, []byte("TODO"), ins.InstanceID, enums.INSTANCE_STATE__STARTED)
 		},
 	).Do()
 
