@@ -41,13 +41,13 @@ func New(setters ...OptSetter) *Ctx {
 		setter(c)
 	}
 	c.cmd = &cobra.Command{}
-	if feat, ok := os.LookupEnv(consts.EnvProjectFeat); ok {
+	if feat, ok := os.LookupEnv(consts.EnvProjectFeat); ok && feat != "" {
 		c.feat = feat
 	}
-	if version, ok := os.LookupEnv(consts.EnvProjectVersion); ok {
+	if version, ok := os.LookupEnv(consts.EnvProjectVersion); ok && version != "" {
 		c.version = version
 	}
-	if name, ok := os.LookupEnv(consts.EnvProjectName); ok {
+	if name, ok := os.LookupEnv(consts.EnvProjectName); ok && name != "" {
 		c.name = name
 	}
 	_ = os.Setenv(consts.EnvProjectName, c.name)
