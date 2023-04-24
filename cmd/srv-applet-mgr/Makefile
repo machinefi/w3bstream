@@ -34,7 +34,12 @@ run: build
 
 .PHONY: light
 light:
-	@go build -ldflags "-s -w -X ./global.ServiceInfo=${REMOTE}..${BRANCH}..${COMMIT_ID}..${COMMIT_AUTHOR}" -o srv-applet-mgr
+	@go build -ldflags "-X ${BUILD_PATH}.Name=srv-applet-mgr\
+ -X ${BUILD_PATH}.Remote=${REMOTE}\
+ -X ${BUILD_PATH}.Branch=${BRANCH}\
+ -X ${BUILD_PATH}.Commit=${COMMIT_ID}\
+ -X ${BUILD_PATH}.Version=${TAG}\
+ -X ${BUILD_PATH}.Timestamp=${NOW}"
 	@rm -rf build
 	@mkdir -p build
 	@mv srv-applet-mgr build/
