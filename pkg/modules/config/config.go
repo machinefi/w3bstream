@@ -187,7 +187,7 @@ func Remove(ctx context.Context, r *CondArgs) error {
 		err error
 	)
 
-	sqlx.NewTasks(d).With(
+	return sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
 			lst, err = List(ctx, r)
 			return err
@@ -216,8 +216,7 @@ func Remove(ctx context.Context, r *CondArgs) error {
 			}
 			return nil
 		},
-	)
-	return nil
+	).Do()
 }
 
 func Create(ctx context.Context, id types.SFID, c wasm.Configuration) (*models.Config, error) {
