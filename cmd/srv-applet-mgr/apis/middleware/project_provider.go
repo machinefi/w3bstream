@@ -4,11 +4,12 @@ import (
 	"context"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/modules/account_identity"
-	"github.com/pkg/errors"
 )
 
 func MaybeProjectName(ctx context.Context) (string, bool) {

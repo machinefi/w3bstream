@@ -3,12 +3,13 @@ package project
 import (
 	"context"
 
+	"github.com/pkg/errors"
+
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/types"
-	"github.com/pkg/errors"
 )
 
 type GetProject struct {
