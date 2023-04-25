@@ -8,6 +8,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
+// TODO change this func to NewInstanceByCode
 func NewInstance(ctx context.Context, path string, id types.SFID) error {
 	return NewInstanceWithState(ctx, path, id, enums.INSTANCE_STATE__CREATED)
 }

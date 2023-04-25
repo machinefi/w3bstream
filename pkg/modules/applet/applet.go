@@ -46,7 +46,7 @@ func CreateApplet(ctx context.Context, projectID, accountID types.SFID, r *Creat
 	defer l.End()
 
 	mResource := &models.Resource{}
-	if mResource, err = resource.FetchOrCreateResource(ctx, accountID.String(), r.File); err != nil {
+	if mResource, err = resource.FetchOrCreateResource(ctx, accountID, r.WasmName, r.File); err != nil {
 		l.Error(err)
 		return nil, err
 	}
@@ -56,7 +56,7 @@ func CreateApplet(ctx context.Context, projectID, accountID types.SFID, r *Creat
 		RelProject:  models.RelProject{ProjectID: projectID},
 		RelApplet:   models.RelApplet{AppletID: appletID},
 		RelResource: models.RelResource{ResourceID: mResource.RelResource.ResourceID},
-		AppletInfo:  models.AppletInfo{Name: r.AppletName, WasmName: r.WasmName},
+		AppletInfo:  models.AppletInfo{Name: r.AppletName},
 	}
 	if len(r.Info.Strategies) == 0 {
 		r.Info.Strategies = append(r.Info.Strategies, models.DefaultStrategyInfo)
@@ -104,7 +104,7 @@ func UpdateApplet(ctx context.Context, appletID, accountID types.SFID, r *Update
 	defer l.End()
 
 	mResource := &models.Resource{}
-	if mResource, err = resource.FetchOrCreateResource(ctx, accountID.String(), r.File); err != nil {
+	if mResource, err = resource.FetchOrCreateResource(ctx, accountID, r.WasmName, r.File); err != nil {
 		l.Error(err)
 		return err
 	}
@@ -118,7 +118,6 @@ func UpdateApplet(ctx context.Context, appletID, accountID types.SFID, r *Update
 		},
 		func(db sqlx.DBExecutor) error {
 			mApplet.RelResource = mResource.RelResource
-			mApplet.WasmName = r.WasmName
 			if needUpdateAppletName {
 				mApplet.Name = r.AppletName
 			}
@@ -182,7 +181,7 @@ func UpdateAndDeploy(ctx context.Context, accountID types.SFID, r *UpdateAndDepl
 	_, l = l.Start(ctx, "UpdateAndDeploy")
 	defer l.End()
 
-	mResource, err := resource.FetchOrCreateResource(ctx, accountID.String(), r.File)
+	mResource, err := resource.FetchOrCreateResource(ctx, accountID, r.WasmName, r.File)
 	if err != nil {
 		l.Error(err)
 		return err
@@ -195,7 +194,6 @@ func UpdateAndDeploy(ctx context.Context, accountID types.SFID, r *UpdateAndDepl
 	err = sqlx.NewTasks(d).With(
 		func(db sqlx.DBExecutor) error {
 			app.RelResource = mResource.RelResource
-			app.WasmName = r.WasmName
 			if needUpdateAppletName {
 				app.Name = r.AppletName
 			}
@@ -327,11 +325,7 @@ func ListApplets(ctx context.Context, r *ListAppletReq) (*ListAppletRsp, error) 
 	return &ListAppletRsp{applets, hints}, nil
 }
 
-type RemoveAppletReq struct {
-	AppletID types.SFID `in:"path"  name:"appletID"`
-}
-
-func RemoveApplet(ctx context.Context, r *RemoveAppletReq) error {
+func RemoveApplet(ctx context.Context, id types.SFID) error {
 	var (
 		d         = types.MustMgrDBExecutorFromContext(ctx)
 		l         = types.MustLoggerFromContext(ctx)
@@ -346,7 +340,7 @@ func RemoveApplet(ctx context.Context, r *RemoveAppletReq) error {
 
 	return sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
-			mApplet.AppletID = r.AppletID
+			mApplet.AppletID = id
 			err = mApplet.FetchByAppletID(d)
 			if err != nil {
 				l.Error(err)
@@ -355,8 +349,8 @@ func RemoveApplet(ctx context.Context, r *RemoveAppletReq) error {
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			mInstance.AppletID = r.AppletID
-			instances, err = mInstance.List(d, mInstance.ColAppletID().Eq(r.AppletID))
+			mInstance.AppletID = id
+			instances, err = mInstance.List(d, mInstance.ColAppletID().Eq(id))
 			if err != nil {
 				l.Error(err)
 				return status.CheckDatabaseError(err, "ListByAppletID")
@@ -440,4 +434,17 @@ func GetAppletByAppletID(ctx context.Context, appletID types.SFID) (*GetAppletRs
 			Path: mResource.ResourceInfo.Path,
 		},
 	}, err
+}
+
+func GetBySFID(ctx context.Context, id types.SFID) (*models.Applet, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Applet{RelApplet: models.RelApplet{AppletID: id}}
+
+	if err := m.FetchByAppletID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.AppletNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return m, nil
 }

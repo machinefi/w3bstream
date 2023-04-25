@@ -126,14 +126,6 @@ func (*Applet) FieldName() string {
 	return "Name"
 }
 
-func (m *Applet) ColWasmName() *builder.Column {
-	return AppletTable.ColByFieldName(m.FieldWasmName())
-}
-
-func (*Applet) FieldWasmName() string {
-	return "WasmName"
-}
-
 func (m *Applet) ColCreatedAt() *builder.Column {
 	return AppletTable.ColByFieldName(m.FieldCreatedAt())
 }

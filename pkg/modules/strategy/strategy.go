@@ -2,6 +2,7 @@ package strategy
 
 import (
 	"context"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -129,31 +130,25 @@ func CreateStrategy(ctx context.Context, projectID types.SFID, r *CreateStrategy
 	return
 }
 
-func UpdateStrategy(ctx context.Context, strategyID types.SFID, r *CreateStrategyReq) (err error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-	m := models.Strategy{RelStrategy: models.RelStrategy{StrategyID: strategyID}}
+func Update(ctx context.Context, id types.SFID, r *UpdateReq) (err error) {
+	var m *models.Strategy
 
-	_, l = l.Start(ctx, "UpdateStrategy")
-	defer l.End()
-
-	err = sqlx.NewTasks(d).With(
-		func(db sqlx.DBExecutor) error {
-			return m.FetchByStrategyID(d)
+	err = sqlx.NewTasks(types.MustMgrDBExecutorFromContext(ctx)).With(
+		func(d sqlx.DBExecutor) error {
+			m, err = GetBySFID(ctx, id)
+			return err
 		},
-		func(db sqlx.DBExecutor) error {
-			m.RelApplet = r.RelApplet
-			m.StrategyInfo.EventType = r.EventType
-			m.StrategyInfo.Handler = r.Handler
-			return m.UpdateByStrategyID(d)
+		func(d sqlx.DBExecutor) error {
+			m.RelApplet, m.StrategyInfo = r.RelApplet, r.StrategyInfo
+			if err = m.UpdateByStrategyID(d); err != nil {
+				if sqlx.DBErr(err).IsConflict() {
+					return status.StrategyConflict
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
 		},
 	).Do()
-
-	if err != nil {
-		l.Error(err)
-		return status.CheckDatabaseError(err, "UpdateStrategy")
-	}
-
 	return
 }
 
@@ -323,27 +318,95 @@ func ListStrategy(ctx context.Context, r *ListStrategyReq) (*ListStrategyRsp, er
 	return ret, nil
 }
 
-type RemoveStrategyReq struct {
-	ProjectName string       `in:"path" name:"projectName"`
-	StrategyIDs []types.SFID `in:"query" name:"strategyID"`
+func GetBySFID(ctx context.Context, id types.SFID) (*models.Strategy, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Strategy{RelStrategy: models.RelStrategy{StrategyID: id}}
+
+	if err := m.FetchByStrategyID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.StrategyNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return m, nil
 }
 
-func RemoveStrategy(ctx context.Context, r *RemoveStrategyReq) error {
-	var (
-		d         = types.MustMgrDBExecutorFromContext(ctx)
-		mStrategy = &models.Strategy{}
-		err       error
-	)
+func Remove(ctx context.Context, r *CondArgs) error {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Strategy{}
 
-	return sqlx.NewTasks(d).With(
-		func(db sqlx.DBExecutor) error {
-			for _, id := range r.StrategyIDs {
-				mStrategy.StrategyID = id
-				if err = mStrategy.DeleteByStrategyID(d); err != nil {
-					return status.CheckDatabaseError(err, "DeleteByStrategyID")
+	prj := types.MustProjectFromContext(ctx)
+
+	_, err := d.Exec(
+		builder.Update(d.T(m)).Set(
+			m.ColDeletedAt().ValueBy(time.Now().Unix()),
+		).Where(r.Condition(prj.ProjectID)),
+	)
+	if err != nil {
+		return status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+
+	return nil
+}
+
+func List(ctx context.Context, r *ListReq) (ret *ListRsp, err error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Strategy{}
+
+	prj := types.MustProjectFromContext(ctx)
+	cond := r.Condition(prj.ProjectID)
+	adds := builder.Additions{
+		r.Pager.Addition(),
+		builder.OrderBy(builder.DescOrder(m.ColUpdatedAt())),
+		builder.OrderBy(builder.DescOrder(m.ColCreatedAt())),
+	}
+
+	ret.Data, err = m.List(d, cond, adds...)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	ret.Total, err = m.Count(d, cond)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return ret, nil
+}
+
+func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+
+	if len(r.Data) == 0 {
+		return &CreateRsp{}, nil
+	}
+
+	prj := types.MustProjectFromContext(ctx).ProjectID
+	ids := confid.MustSFIDGeneratorFromContext(ctx).MustGenSFIDs(len(r.Data))
+	ret := &CreateRsp{Data: make([]*models.Strategy, 0, len(r.Data))}
+
+	err := sqlx.NewTasks(d).With(
+		func(d sqlx.DBExecutor) error {
+			for i := range r.Data {
+				m := &models.Strategy{
+					RelStrategy:  models.RelStrategy{StrategyID: ids[i]},
+					RelProject:   models.RelProject{ProjectID: prj},
+					RelApplet:    r.Data[i].RelApplet,
+					StrategyInfo: r.Data[i].StrategyInfo,
 				}
+				if err := m.Create(d); err != nil {
+					if sqlx.DBErr(err).IsConflict() {
+						// TODO gen model.MayBeConflictFields() for more hint to frontend
+						return status.StrategyConflict
+					}
+					return status.DatabaseError.StatusErr().WithDesc(err.Error())
+				}
+				ret.Data = append(ret.Data, m)
 			}
 			return nil
 		},
 	).Do()
+
+	if err != nil {
+		return nil, err
+	}
+	return ret, nil
 }

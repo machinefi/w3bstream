@@ -12,7 +12,7 @@ import (
 var raw = bytes.NewBuffer(nil)
 
 func init() {
-	data, err := ioutil.ReadFile("./swagger.json")
+	data, err := ioutil.ReadFile("./openapi.json")
 	if err == nil {
 		raw.Write(data)
 	} else {

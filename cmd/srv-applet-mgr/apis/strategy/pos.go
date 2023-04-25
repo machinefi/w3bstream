@@ -10,19 +10,14 @@ import (
 
 type CreateStrategy struct {
 	httpx.MethodPost
-	ProjectName                     string `in:"path" name:"projectName"`
-	strategy.CreateStrategyBatchReq `in:"body"`
-}
-
-func (r *CreateStrategy) Path() string {
-	return "/:projectName"
+	strategy.CreateReq `in:"body"`
 }
 
 func (r *CreateStrategy) Output(ctx context.Context) (interface{}, error) {
-	a := middleware.CurrentAccountFromContext(ctx)
-	if m, err := a.ValidateProjectPermByPrjName(ctx, r.ProjectName); err != nil {
+	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
+		WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
+	if err != nil {
 		return nil, err
-	} else {
-		return nil, strategy.CreateStrategy(ctx, m.ProjectID, &r.CreateStrategyBatchReq)
 	}
+	return strategy.Create(ctx, &r.CreateReq)
 }

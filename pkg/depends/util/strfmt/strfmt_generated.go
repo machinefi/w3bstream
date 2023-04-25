@@ -5,8 +5,8 @@ package strfmt
 
 import "github.com/machinefi/w3bstream/pkg/depends/kit/validator"
 
+var ProjectNameValidator = validator.NewRegexpStrfmtValidator(regexpStringProjectName, "project-name", "projectName")
+
 func init() {
 	validator.DefaultFactory.Register(ProjectNameValidator)
 }
-
-var ProjectNameValidator = validator.NewRegexpStrfmtValidator(regexpStringProjectName, "project-name", "projectName")

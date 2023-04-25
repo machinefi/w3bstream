@@ -24,6 +24,8 @@ const (
 	CreateChannelFailed
 	// @errTalk Config Initialization Failed
 	ConfigInitializationFailed
+	// @errTalk Gen Publisher Token Failed
+	GenPublisherTokenFailed
 )
 
 const (
@@ -49,6 +51,8 @@ const (
 	InvalidEthLoginMessage
 	// @errTalk Invalid Auth Publisher ID
 	InvalidAuthPublisherID
+	// @errTalk Current Account Absence
+	CurrentAccountAbsence
 )
 
 const (
@@ -69,8 +73,14 @@ const (
 	ProjectConfigConflict
 	// @errTalk Project Name Conflict
 	ProjectNameConflict
+	// @errTalk Strategy Conflict
+	StrategyConflict
+	// @errTalk Publisher Conflict
+	PublisherConflict
 	// @errTalk Resource Path Conflict
 	ResourcePathConflict
+	// @errTalk Resource Account and WasmName Conflict
+	ResourceAccountConflict
 )
 
 const (
@@ -80,6 +90,8 @@ const (
 	MD5ChecksumFailed
 	// @errTalk Invalid Chain Client
 	InvalidChainClient
+	// @errTalk Deprecated Project
+	DeprecatedProject
 )
 
 const (
@@ -89,6 +101,18 @@ const (
 	ProjectNotFound
 	// @errTalk Config Not Found
 	ConfigNotFound
+	// @errTalk Applet Not Found
+	AppletNotFound
+	// @errTalk Instance Not Found
+	InstanceNotFound
+	// @errTalk Resource Not Found
+	ResourceNotFound
+	// @errTalk Strategy Not Found
+	StrategyNotFound
+	// @errTalk Publisher Not Found
+	PublisherNotFound
+	// @errTalk Account Identity Not Found
+	AccountIdentityNotFound
 )
 
 // Deprecated: pls check database error and return defined status error

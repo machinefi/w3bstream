@@ -1,3 +1,4 @@
 #!/bin/sh
-/w3bstream/srv-applet-mgr migrate
-/w3bstream/srv-applet-mgr
+cd /w3bstream/srv-applet-mgr
+./srv-applet-mgr migrate
+./srv-applet-mgr

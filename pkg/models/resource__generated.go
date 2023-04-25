@@ -41,14 +41,14 @@ func (*Resource) TableDesc() []string {
 
 func (*Resource) Comments() map[string]string {
 	return map[string]string{
-		"Path": "Path accountID/md5",
+		"Path": "Path <=> md5",
 	}
 }
 
 func (*Resource) ColDesc() map[string][]string {
 	return map[string][]string{
 		"Path": []string{
-			"Path accountID/md5",
+			"Path <=> md5",
 		},
 	}
 }
@@ -112,14 +112,6 @@ func (m *Resource) ColPath() *builder.Column {
 
 func (*Resource) FieldPath() string {
 	return "Path"
-}
-
-func (m *Resource) ColRefCnt() *builder.Column {
-	return ResourceTable.ColByFieldName(m.FieldRefCnt())
-}
-
-func (*Resource) FieldRefCnt() string {
-	return "RefCnt"
 }
 
 func (m *Resource) ColCreatedAt() *builder.Column {

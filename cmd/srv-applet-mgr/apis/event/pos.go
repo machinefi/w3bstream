@@ -18,7 +18,7 @@ type HandleEvent struct {
 func (r *HandleEvent) Path() string { return "/:projectName" }
 
 func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
-	prj, err := project.GetProjectByProjectName(ctx, r.ProjectName)
+	prj, err := project.GetByName(ctx, r.ProjectName)
 	if err != nil {
 		return nil, err
 	}
