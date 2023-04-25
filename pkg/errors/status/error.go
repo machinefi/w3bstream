@@ -30,6 +30,10 @@ const (
 	ConfigParseFailed
 	// @errTalk Gen Publisher Token Failed
 	GenPublisherTokenFailed
+	// @errTalk Create Instance Failed
+	CreateInstanceFailed
+	// @errTalk Batch Remove Applet Failed
+	BatchRemoveAppletFailed
 )
 
 const (
@@ -83,6 +87,10 @@ const (
 	ConfigConflict
 	// @errTalk Publisher Conflict
 	PublisherConflict
+	// @errTalk Multi Instance Deployed
+	MultiInstanceDeployed
+	// @errTalk Applet Name Conflict
+	AppletNameConflict
 )
 
 const (
@@ -96,6 +104,8 @@ const (
 	DeprecatedProject
 	// @errTalk Invalid Config Type
 	InvalidConfigType
+	// @errTalk Unknown Deploy Command
+	UnknownDeployCommand
 )
 
 const (

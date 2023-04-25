@@ -47,6 +47,8 @@ func (v Error) Key() string {
 		return "DeprecatedProject"
 	case InvalidConfigType:
 		return "InvalidConfigType"
+	case UnknownDeployCommand:
+		return "UnknownDeployCommand"
 	case Unauthorized:
 		return "Unauthorized"
 	case InvalidAuthValue:
@@ -109,6 +111,10 @@ func (v Error) Key() string {
 		return "ConfigConflict"
 	case PublisherConflict:
 		return "PublisherConflict"
+	case MultiInstanceDeployed:
+		return "MultiInstanceDeployed"
+	case AppletNameConflict:
+		return "AppletNameConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -125,6 +131,10 @@ func (v Error) Key() string {
 		return "ConfigParseFailed"
 	case GenPublisherTokenFailed:
 		return "GenPublisherTokenFailed"
+	case CreateInstanceFailed:
+		return "CreateInstanceFailed"
+	case BatchRemoveAppletFailed:
+		return "BatchRemoveAppletFailed"
 	}
 	return "UNKNOWN"
 }
@@ -141,6 +151,8 @@ func (v Error) Msg() string {
 		return "Deprecated Project"
 	case InvalidConfigType:
 		return "Invalid Config Type"
+	case UnknownDeployCommand:
+		return "Unknown Deploy Command"
 	case Unauthorized:
 		return "Unauthorized unauthorized"
 	case InvalidAuthValue:
@@ -203,6 +215,10 @@ func (v Error) Msg() string {
 		return "Config Conflict"
 	case PublisherConflict:
 		return "Publisher Conflict"
+	case MultiInstanceDeployed:
+		return "Multi Instance Deployed"
+	case AppletNameConflict:
+		return "Applet Name Conflict"
 	case InternalServerError:
 		return "InternalServerError internal error"
 	case DatabaseError:
@@ -219,6 +235,10 @@ func (v Error) Msg() string {
 		return "Config Parse Failed"
 	case GenPublisherTokenFailed:
 		return "Gen Publisher Token Failed"
+	case CreateInstanceFailed:
+		return "Create Instance Failed"
+	case BatchRemoveAppletFailed:
+		return "Batch Remove Applet Failed"
 	}
 	return "-"
 }
@@ -234,6 +254,8 @@ func (v Error) CanBeTalk() bool {
 	case DeprecatedProject:
 		return true
 	case InvalidConfigType:
+		return true
+	case UnknownDeployCommand:
 		return true
 	case Unauthorized:
 		return true
@@ -297,6 +319,10 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case PublisherConflict:
 		return true
+	case MultiInstanceDeployed:
+		return true
+	case AppletNameConflict:
+		return true
 	case InternalServerError:
 		return true
 	case DatabaseError:
@@ -312,6 +338,10 @@ func (v Error) CanBeTalk() bool {
 	case ConfigParseFailed:
 		return true
 	case GenPublisherTokenFailed:
+		return true
+	case CreateInstanceFailed:
+		return true
+	case BatchRemoveAppletFailed:
 		return true
 	}
 	return false

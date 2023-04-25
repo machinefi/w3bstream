@@ -34,11 +34,11 @@ func ParseInstanceStateFromLabel(s string) (InstanceState, error) {
 		return INSTANCE_STATE_UNKNOWN, InvalidInstanceState
 	case "":
 		return INSTANCE_STATE_UNKNOWN, nil
-	case "CREATED":
+	case "applet and resource is ready but not loaded":
 		return INSTANCE_STATE__CREATED, nil
-	case "STARTED":
+	case "ready to receive data":
 		return INSTANCE_STATE__STARTED, nil
-	case "STOPPED":
+	case "stopped to receive data":
 		return INSTANCE_STATE__STOPPED, nil
 	}
 }
@@ -69,11 +69,11 @@ func (v InstanceState) Label() string {
 	case INSTANCE_STATE_UNKNOWN:
 		return ""
 	case INSTANCE_STATE__CREATED:
-		return "CREATED"
+		return "applet and resource is ready but not loaded"
 	case INSTANCE_STATE__STARTED:
-		return "STARTED"
+		return "ready to receive data"
 	case INSTANCE_STATE__STOPPED:
-		return "STOPPED"
+		return "stopped to receive data"
 	}
 }
 
