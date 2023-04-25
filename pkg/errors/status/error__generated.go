@@ -39,14 +39,12 @@ func (v Error) Key() string {
 	switch v {
 	case BadRequest:
 		return "BadRequest"
-	case MD5ChecksumFailed:
-		return "MD5ChecksumFailed"
-	case InvalidChainClient:
-		return "InvalidChainClient"
 	case InvalidConfigType:
 		return "InvalidConfigType"
 	case DeprecatedProject:
 		return "DeprecatedProject"
+	case InvalidCronExpressions:
+		return "InvalidCronExpressions"
 	case Unauthorized:
 		return "Unauthorized"
 	case InvalidAuthValue:
@@ -73,12 +71,16 @@ func (v Error) Key() string {
 		return "CurrentAccountAbsence"
 	case Forbidden:
 		return "Forbidden"
-	case InstanceLimit:
-		return "InstanceLimit"
 	case DisabledAccount:
 		return "DisabledAccount"
 	case WhiteListForbidden:
 		return "WhiteListForbidden"
+	case UploadFileSizeLimit:
+		return "UploadFileSizeLimit"
+	case UploadFileMd5Unmatched:
+		return "UploadFileMd5Unmatched"
+	case UploadFileDiskLimit:
+		return "UploadFileDiskLimit"
 	case NotFound:
 		return "NotFound"
 	case ProjectNotFound:
@@ -99,10 +101,10 @@ func (v Error) Key() string {
 		return "AccountIdentityNotFound"
 	case ResourcePermNotFound:
 		return "ResourcePermNotFound"
+	case CronJobNotFound:
+		return "CronJobNotFound"
 	case Conflict:
 		return "Conflict"
-	case ProjectConfigConflict:
-		return "ProjectConfigConflict"
 	case ProjectNameConflict:
 		return "ProjectNameConflict"
 	case ResourceConflict:
@@ -115,10 +117,8 @@ func (v Error) Key() string {
 		return "ConfigConflict"
 	case PublisherConflict:
 		return "PublisherConflict"
-	case ResourcePathConflict:
-		return "ResourcePathConflict"
-	case ResourceAccountConflict:
-		return "ResourceAccountConflict"
+	case CronJobConflict:
+		return "CronJobConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -127,10 +127,8 @@ func (v Error) Key() string {
 		return "UploadFileFailed"
 	case CreateChannelFailed:
 		return "CreateChannelFailed"
-	case ConfigInitializationFailed:
-		return "ConfigInitializationFailed"
-	case LocalResReadFailed:
-		return "LocalResReadFailed"
+	case FetchResourceFailed:
+		return "FetchResourceFailed"
 	case ConfigInitFailed:
 		return "ConfigInitFailed"
 	case ConfigUninitFailed:
@@ -139,8 +137,8 @@ func (v Error) Key() string {
 		return "ConfigParseFailed"
 	case GenPublisherTokenFailed:
 		return "GenPublisherTokenFailed"
-	case S3ResReadFailed:
-		return "S3ResReadFailed"
+	case MD5ChecksumFailed:
+		return "MD5ChecksumFailed"
 	}
 	return "UNKNOWN"
 }
@@ -149,16 +147,14 @@ func (v Error) Msg() string {
 	switch v {
 	case BadRequest:
 		return "BadRequest"
-	case MD5ChecksumFailed:
-		return "Md5 Checksum Failed"
-	case InvalidChainClient:
-		return "Invalid Chain Client"
 	case InvalidConfigType:
 		return "Invalid Config Type"
 	case DeprecatedProject:
 		return "Deprecated Project"
+	case InvalidCronExpressions:
+		return "Invalid Cron Expressions"
 	case Unauthorized:
-		return "Unauthorized unauthorized"
+		return "unauthorized"
 	case InvalidAuthValue:
 		return "Invalid Auth Value"
 	case InvalidAuthAccountID:
@@ -182,13 +178,17 @@ func (v Error) Msg() string {
 	case CurrentAccountAbsence:
 		return "Current Account Absence"
 	case Forbidden:
-		return "Forbidden"
-	case InstanceLimit:
-		return "deployed instance limit"
+		return "forbidden"
 	case DisabledAccount:
 		return "Disabled Account"
 	case WhiteListForbidden:
 		return "White List Forbidden"
+	case UploadFileSizeLimit:
+		return "Upload File Size Limit"
+	case UploadFileMd5Unmatched:
+		return "Upload File Md5 Unmatched"
+	case UploadFileDiskLimit:
+		return "Upload File Disk Limit"
 	case NotFound:
 		return "NotFound"
 	case ProjectNotFound:
@@ -209,10 +209,10 @@ func (v Error) Msg() string {
 		return "Account Identity Not Found"
 	case ResourcePermNotFound:
 		return "Resource Perm Not Found"
+	case CronJobNotFound:
+		return "Cron Job Not Found"
 	case Conflict:
 		return "Conflict conflict error"
-	case ProjectConfigConflict:
-		return "Project Config Conflict"
 	case ProjectNameConflict:
 		return "Project Name Conflict"
 	case ResourceConflict:
@@ -225,22 +225,18 @@ func (v Error) Msg() string {
 		return "Config Conflict"
 	case PublisherConflict:
 		return "Publisher Conflict"
-	case ResourcePathConflict:
-		return "Resource Path Conflict"
-	case ResourceAccountConflict:
-		return "Resource Account and WasmName Conflict"
+	case CronJobConflict:
+		return "Cron Job Conflict"
 	case InternalServerError:
-		return "InternalServerError internal error"
+		return "internal error"
 	case DatabaseError:
 		return "Database Error"
 	case UploadFileFailed:
 		return "Upload File Failed"
 	case CreateChannelFailed:
 		return "Create Message Channel Failed"
-	case ConfigInitializationFailed:
-		return "Config Initialization Failed"
-	case LocalResReadFailed:
-		return "Local Resource Read Failed"
+	case FetchResourceFailed:
+		return "Fetch Resource Failed"
 	case ConfigInitFailed:
 		return "Config Init Failed"
 	case ConfigUninitFailed:
@@ -249,8 +245,8 @@ func (v Error) Msg() string {
 		return "Config Parse Failed"
 	case GenPublisherTokenFailed:
 		return "Gen Publisher Token Failed"
-	case S3ResReadFailed:
-		return "S3 Resource Read Failed"
+	case MD5ChecksumFailed:
+		return "Md5 Checksum Failed"
 	}
 	return "-"
 }
@@ -259,16 +255,14 @@ func (v Error) CanBeTalk() bool {
 	switch v {
 	case BadRequest:
 		return true
-	case MD5ChecksumFailed:
-		return true
-	case InvalidChainClient:
-		return true
 	case InvalidConfigType:
 		return true
 	case DeprecatedProject:
 		return true
-	case Unauthorized:
+	case InvalidCronExpressions:
 		return true
+	case Unauthorized:
+		return false
 	case InvalidAuthValue:
 		return true
 	case InvalidAuthAccountID:
@@ -292,12 +286,16 @@ func (v Error) CanBeTalk() bool {
 	case CurrentAccountAbsence:
 		return true
 	case Forbidden:
-		return true
-	case InstanceLimit:
-		return true
+		return false
 	case DisabledAccount:
 		return true
 	case WhiteListForbidden:
+		return true
+	case UploadFileSizeLimit:
+		return true
+	case UploadFileMd5Unmatched:
+		return true
+	case UploadFileDiskLimit:
 		return true
 	case NotFound:
 		return true
@@ -319,9 +317,9 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case ResourcePermNotFound:
 		return true
-	case Conflict:
+	case CronJobNotFound:
 		return true
-	case ProjectConfigConflict:
+	case Conflict:
 		return true
 	case ProjectNameConflict:
 		return true
@@ -335,21 +333,17 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case PublisherConflict:
 		return true
-	case ResourcePathConflict:
-		return true
-	case ResourceAccountConflict:
+	case CronJobConflict:
 		return true
 	case InternalServerError:
-		return true
+		return false
 	case DatabaseError:
 		return true
 	case UploadFileFailed:
 		return true
 	case CreateChannelFailed:
 		return true
-	case ConfigInitializationFailed:
-		return true
-	case LocalResReadFailed:
+	case FetchResourceFailed:
 		return true
 	case ConfigInitFailed:
 		return true
@@ -359,7 +353,7 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case GenPublisherTokenFailed:
 		return true
-	case S3ResReadFailed:
+	case MD5ChecksumFailed:
 		return true
 	}
 	return false

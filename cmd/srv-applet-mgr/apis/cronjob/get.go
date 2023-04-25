@@ -9,20 +9,20 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-type CreateCronJob struct {
-	httpx.MethodPost
-	ProjectID         types.SFID `in:"path" name:"projectID"`
-	cronjob.CreateReq `in:"body"`
+type ListCronJob struct {
+	httpx.MethodGet
+	ProjectID       types.SFID `in:"path" name:"projectID"`
+	cronjob.ListReq `in:"body"`
 }
 
-func (r *CreateCronJob) Path() string { return "/:projectID" }
+func (r *CreateCronJob) ListCronJob() string { return "/:projectID" }
 
-func (r *CreateCronJob) Output(ctx context.Context) (interface{}, error) {
+func (r *ListCronJob) Output(ctx context.Context) (interface{}, error) {
 	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
 		WithProjectContextBySFID(ctx, r.ProjectID)
 	if err != nil {
 		return nil, err
 	}
-	r.CreateReq.ProjectID = types.MustProjectFromContext(ctx).ProjectID
-	return cronjob.Create(ctx, &r.CreateReq)
+	r.ListReq.ProjectID = types.MustProjectFromContext(ctx).ProjectID
+	return cronjob.List(ctx, &r.ListReq)
 }

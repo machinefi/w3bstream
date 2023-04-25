@@ -3,8 +3,6 @@ package resource
 import (
 	"context"
 	"mime/multipart"
-	"os"
-	"path/filepath"
 	"time"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
@@ -24,7 +22,6 @@ func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, md5 s
 
 	path, data, err := UploadFile(ctx, f, md5)
 	if err != nil {
-		err = status.UploadFileFailed.StatusErr().WithDesc(err.Error())
 		return nil, nil, err
 	}
 
@@ -134,19 +131,10 @@ func GetContentByMd5(ctx context.Context, md5 string) (*models.Resource, []byte,
 }
 
 func ReadContent(ctx context.Context, m *models.Resource) ([]byte, error) {
-	if fs, _ := types.AmazonS3FromContext(ctx); fs != nil {
-		data, err := fs.Read(m.Md5)
-		if err != nil {
-			return nil, status.S3ResReadFailed.StatusErr().WithDesc(err.Error())
-		}
-		return data, nil
-	}
-
-	// try local filesystem
-	c := types.MustUploadConfigFromContext(ctx)
-	data, err := os.ReadFile(filepath.Join(c.Root, m.Path))
+	fs := types.MustFileSystemOpFromContext(ctx)
+	data, err := fs.Read(m.Md5)
 	if err != nil {
-		return nil, status.LocalResReadFailed.StatusErr().WithDesc(err.Error())
+		return nil, status.FetchResourceFailed.StatusErr().WithDesc(err.Error())
 	}
 	return data, nil
 }

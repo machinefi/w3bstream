@@ -156,7 +156,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[DisabledAccount][403999003][Disabled Account]!"
+              "@StatusErr[DisabledAccount][403999002][Disabled Account]!"
             ]
           },
           "404": {
@@ -197,8 +197,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -297,7 +297,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -418,7 +418,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -513,6 +513,21 @@
               "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
             ]
           },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[UploadFileDiskLimit][403999006][Upload File Disk Limit]!",
+              "@StatusErr[UploadFileMd5Unmatched][403999005][Upload File Md5 Unmatched]!",
+              "@StatusErr[UploadFileSizeLimit][403999004][Upload File Size Limit]!"
+            ]
+          },
           "404": {
             "description": "",
             "content": {
@@ -541,8 +556,8 @@
             "x-status-errors": [
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[ResourceConflict][409999004][Resource Conflict]!",
-              "@StatusErr[ResourceOwnerConflict][409999005][Resource Owner Conflict]!"
+              "@StatusErr[ResourceConflict][409999003][Resource Conflict]!",
+              "@StatusErr[ResourceOwnerConflict][409999004][Resource Owner Conflict]!"
             ]
           },
           "500": {
@@ -557,8 +572,9 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[MD5ChecksumFailed][500999010][Md5 Checksum Failed]!",
               "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
             ]
           }
@@ -750,7 +766,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -866,8 +882,8 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -956,6 +972,21 @@
               "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
             ]
           },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[UploadFileDiskLimit][403999006][Upload File Disk Limit]!",
+              "@StatusErr[UploadFileMd5Unmatched][403999005][Upload File Md5 Unmatched]!",
+              "@StatusErr[UploadFileSizeLimit][403999004][Upload File Size Limit]!"
+            ]
+          },
           "404": {
             "description": "",
             "content": {
@@ -986,8 +1017,8 @@
             "x-status-errors": [
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[ResourceConflict][409999004][Resource Conflict]!",
-              "@StatusErr[ResourceOwnerConflict][409999005][Resource Owner Conflict]!"
+              "@StatusErr[ResourceConflict][409999003][Resource Conflict]!",
+              "@StatusErr[ResourceOwnerConflict][409999004][Resource Owner Conflict]!"
             ]
           },
           "500": {
@@ -1001,8 +1032,9 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[MD5ChecksumFailed][500999010][Md5 Checksum Failed]!",
               "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
             ]
           }
@@ -1103,7 +1135,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InvalidConfigType][400999004][Invalid Config Type]!"
+              "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!"
             ]
           },
           "401": {
@@ -1121,6 +1153,21 @@
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
               "@StatusErr[InvalidToken][401999002][Invalid Token]!",
               "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[UploadFileDiskLimit][403999006][Upload File Disk Limit]!",
+              "@StatusErr[UploadFileMd5Unmatched][403999005][Upload File Md5 Unmatched]!",
+              "@StatusErr[UploadFileSizeLimit][403999004][Upload File Size Limit]!"
             ]
           },
           "404": {
@@ -1151,11 +1198,11 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigConflict][409999007][Config Conflict]!",
+              "@StatusErr[ConfigConflict][409999006][Config Conflict]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[ResourceConflict][409999004][Resource Conflict]!",
-              "@StatusErr[ResourceOwnerConflict][409999005][Resource Owner Conflict]!"
+              "@StatusErr[ResourceConflict][409999003][Resource Conflict]!",
+              "@StatusErr[ResourceOwnerConflict][409999004][Resource Owner Conflict]!"
             ]
           },
           "500": {
@@ -1168,12 +1215,260 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigInitFailed][500999007][Config Init Failed]!",
-              "@StatusErr[ConfigParseFailed][500999009][Config Parse Failed]!",
+              "@StatusErr[ConfigInitFailed][500999006][Config Init Failed]!",
+              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[MD5ChecksumFailed][500999010][Md5 Checksum Failed]!",
               "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
+            ]
+          }
+        }
+      }
+    },
+    "/v0/cronjob": {
+      "get": {
+        "tags": [
+          "apis/cronjob"
+        ],
+        "operationId": "ListCronJob",
+        "parameters": [
+          {
+            "name": "projectID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                },
+                {
+                  "x-go-field-name": "ProjectID",
+                  "x-tag-name": "projectID"
+                }
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesCronjobListReq"
+                  },
+                  {
+                    "x-go-field-name": "ListReq"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesCronjobListRsp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+            ]
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[InternalServerError][500999001][internal error]"
+            ]
+          }
+        }
+      }
+    },
+    "/v0/cronjob/data/{cronJobID}": {
+      "delete": {
+        "tags": [
+          "apis/cronjob"
+        ],
+        "operationId": "RemoveCronJob",
+        "parameters": [
+          {
+            "name": "cronJobID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                },
+                {
+                  "x-go-field-name": "CronJobID",
+                  "x-tag-name": "cronJobID"
+                }
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[CronJobNotFound][404999011][Cron Job Not Found]!",
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+            ]
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -1232,10 +1527,10 @@
               "schema": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsCronJobInfo"
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesCronjobCreateReq"
                   },
                   {
-                    "x-go-field-name": "CreateCronJobReq"
+                    "x-go-field-name": "CreateReq"
                   }
                 ]
               }
@@ -1263,7 +1558,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[BadRequest][400999001][BadRequest]!"
+              "@StatusErr[InvalidCronExpressions][400999004][Invalid Cron Expressions]!"
             ]
           },
           "401": {
@@ -1294,7 +1589,6 @@
             },
             "x-status-errors": [
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
@@ -1309,7 +1603,7 @@
             },
             "x-status-errors": [
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[CronJobConflict][409999008][Cron Job Conflict]!"
             ]
           },
           "500": {
@@ -1323,151 +1617,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
-            ]
-          }
-        }
-      }
-    },
-    "/v0/cronjob/{projectID}/{cronJobID}": {
-      "delete": {
-        "tags": [
-          "apis/cronjob"
-        ],
-        "operationId": "RemoveCronJob",
-        "parameters": [
-          {
-            "name": "cronJobID",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-                },
-                {
-                  "x-go-field-name": "CronJobID",
-                  "x-tag-name": "cronJobID"
-                }
-              ]
-            }
-          },
-          {
-            "name": "projectID",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-                },
-                {
-                  "x-go-field-name": "ProjectID",
-                  "x-tag-name": "projectID"
-                }
-              ]
-            }
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInHeader",
-              "x-tag-name": "Authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInQuery",
-              "x-tag-name": "authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": ""
-          },
-          "400": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[BadRequest][400999001][BadRequest]!"
-            ]
-          },
-          "401": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
-              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
-              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
-              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
-              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
-            ]
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
-            ]
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -1556,7 +1706,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -1677,7 +1827,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -1765,7 +1915,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InvalidConfigType][400999004][Invalid Config Type]!"
+              "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!"
             ]
           },
           "401": {
@@ -1813,7 +1963,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigConflict][409999007][Config Conflict]!",
+              "@StatusErr[ConfigConflict][409999006][Config Conflict]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
@@ -1828,11 +1978,11 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigInitFailed][500999007][Config Init Failed]!",
-              "@StatusErr[ConfigParseFailed][500999009][Config Parse Failed]!",
+              "@StatusErr[ConfigInitFailed][500999006][Config Init Failed]!",
+              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -1938,7 +2088,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InvalidConfigType][400999004][Invalid Config Type]!"
+              "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!"
             ]
           },
           "401": {
@@ -1987,7 +2137,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigConflict][409999007][Config Conflict]!",
+              "@StatusErr[ConfigConflict][409999006][Config Conflict]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
@@ -2002,12 +2152,12 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigInitFailed][500999007][Config Init Failed]!",
-              "@StatusErr[ConfigParseFailed][500999009][Config Parse Failed]!",
-              "@StatusErr[ConfigUninitFailed][500999008][Config Uninit Failed]!",
+              "@StatusErr[ConfigInitFailed][500999006][Config Init Failed]!",
+              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -2130,8 +2280,8 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -2276,8 +2426,8 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -2387,7 +2537,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -2450,7 +2600,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[DisabledAccount][403999003][Disabled Account]!"
+              "@StatusErr[DisabledAccount][403999002][Disabled Account]!"
             ]
           },
           "404": {
@@ -2489,7 +2639,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -2553,8 +2703,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[DisabledAccount][403999003][Disabled Account]!",
-              "@StatusErr[WhiteListForbidden][403999004][White List Forbidden]!"
+              "@StatusErr[DisabledAccount][403999002][Disabled Account]!",
+              "@StatusErr[WhiteListForbidden][403999003][White List Forbidden]!"
             ]
           },
           "404": {
@@ -2593,7 +2743,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -2729,8 +2879,8 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -2871,8 +3021,8 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -3008,8 +3158,8 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -3150,8 +3300,8 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -3287,8 +3437,8 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -3429,8 +3579,8 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -3504,7 +3654,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InvalidConfigType][400999004][Invalid Config Type]!"
+              "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!"
             ]
           },
           "401": {
@@ -3556,10 +3706,10 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigConflict][409999007][Config Conflict]!",
+              "@StatusErr[ConfigConflict][409999006][Config Conflict]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[ProjectNameConflict][409999003][Project Name Conflict]!"
+              "@StatusErr[ProjectNameConflict][409999002][Project Name Conflict]!"
             ]
           },
           "500": {
@@ -3572,13 +3722,13 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigInitFailed][500999007][Config Init Failed]!",
-              "@StatusErr[ConfigParseFailed][500999009][Config Parse Failed]!",
-              "@StatusErr[ConfigUninitFailed][500999008][Config Uninit Failed]!",
+              "@StatusErr[ConfigInitFailed][500999006][Config Init Failed]!",
+              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[CreateChannelFailed][500999004][Create Message Channel Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -3742,7 +3892,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -3854,8 +4004,8 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -3924,7 +4074,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[DeprecatedProject][400999005][Deprecated Project]!"
+              "@StatusErr[DeprecatedProject][400999003][Deprecated Project]!"
             ]
           },
           "401": {
@@ -3985,7 +4135,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -4054,7 +4204,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InvalidConfigType][400999004][Invalid Config Type]!"
+              "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!"
             ]
           },
           "401": {
@@ -4114,10 +4264,10 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigParseFailed][500999009][Config Parse Failed]!",
+              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -4234,7 +4384,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigConflict][409999007][Config Conflict]!",
+              "@StatusErr[ConfigConflict][409999006][Config Conflict]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
@@ -4248,11 +4398,11 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigInitFailed][500999007][Config Init Failed]!",
-              "@StatusErr[ConfigParseFailed][500999009][Config Parse Failed]!",
+              "@StatusErr[ConfigInitFailed][500999006][Config Init Failed]!",
+              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -4365,7 +4515,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -4483,7 +4633,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -4645,7 +4795,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -4840,7 +4990,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -4959,7 +5109,7 @@
             },
             "x-status-errors": [
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[PublisherConflict][409999008][Publisher Conflict]!"
+              "@StatusErr[PublisherConflict][409999007][Publisher Conflict]!"
             ]
           },
           "500": {
@@ -4974,8 +5124,8 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[GenPublisherTokenFailed][500999010][Gen Publisher Token Failed]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[GenPublisherTokenFailed][500999009][Gen Publisher Token Failed]!",
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -5106,7 +5256,7 @@
             },
             "x-status-errors": [
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[PublisherConflict][409999008][Publisher Conflict]!"
+              "@StatusErr[PublisherConflict][409999007][Publisher Conflict]!"
             ]
           },
           "500": {
@@ -5121,7 +5271,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -5210,7 +5360,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -5440,7 +5590,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -5550,7 +5700,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -5662,7 +5812,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -5779,7 +5929,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -5937,7 +6087,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -6058,7 +6208,7 @@
             },
             "x-status-errors": [
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[StrategyConflict][409999006][Strategy Conflict]!"
+              "@StatusErr[StrategyConflict][409999005][Strategy Conflict]!"
             ]
           },
           "500": {
@@ -6073,7 +6223,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -6266,7 +6416,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -6382,7 +6532,7 @@
             },
             "x-status-errors": [
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[StrategyConflict][409999006][Strategy Conflict]!"
+              "@StatusErr[StrategyConflict][409999005][Strategy Conflict]!"
             ]
           },
           "500": {
@@ -6396,7 +6546,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -6499,6 +6649,33 @@
             "x-id": "GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimesWithDeleted"
           }
         ]
+      },
+      "GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPager": {
+        "type": "object",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 9223372036854776000,
+            "minimum": 0,
+            "default": "0",
+            "x-go-field-name": "Offset",
+            "x-tag-name": "offset,omitempty",
+            "x-tag-validate": "@int64[0,]"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 9223372036854776000,
+            "minimum": -1,
+            "default": "10",
+            "x-go-field-name": "Size",
+            "x-tag-name": "size,omitempty",
+            "x-tag-validate": "@int64[-1,]"
+          }
+        },
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes.Pager",
+        "x-id": "GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPager"
       },
       "GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPrimaryID": {
         "type": "object",
@@ -8211,6 +8388,81 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.UpdateAppletReq",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesAppletUpdateAppletReq"
+      },
+      "GithubComMachinefiW3BstreamPkgModulesCronjobCondArgs": {
+        "type": "object",
+        "properties": {
+          "cronJobID": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+            },
+            "x-go-field-name": "CronJobIDs",
+            "x-tag-name": "cronJobID,omitempty"
+          },
+          "eventType": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "x-go-field-name": "EventTypes",
+            "x-tag-name": "eventType,omitempty"
+          }
+        },
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/cronjob.CondArgs",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesCronjobCondArgs"
+      },
+      "GithubComMachinefiW3BstreamPkgModulesCronjobCreateReq": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsCronJobInfo"
+          },
+          {
+            "type": "object",
+            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/cronjob.CreateReq",
+            "x-id": "GithubComMachinefiW3BstreamPkgModulesCronjobCreateReq"
+          }
+        ]
+      },
+      "GithubComMachinefiW3BstreamPkgModulesCronjobListReq": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesCronjobCondArgs"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPager"
+          },
+          {
+            "type": "object",
+            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/cronjob.ListReq",
+            "x-id": "GithubComMachinefiW3BstreamPkgModulesCronjobListReq"
+          }
+        ]
+      },
+      "GithubComMachinefiW3BstreamPkgModulesCronjobListRsp": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsCronJob"
+            },
+            "x-go-field-name": "Data",
+            "x-tag-json": "data"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "x-go-field-name": "Total",
+            "x-tag-json": "total"
+          }
+        },
+        "required": [
+          "data",
+          "total"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/cronjob.ListRsp",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesCronjobListRsp"
       },
       "GithubComMachinefiW3BstreamPkgModulesDeployCreateOrReDeployInstanceReq": {
         "type": "object",
