@@ -4,12 +4,14 @@ import (
 	"context"
 	"errors"
 	"sync"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
+	"github.com/machinefi/w3bstream/pkg/depends/x/misc/timer"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -28,19 +30,6 @@ var _receiveEventMtc = prometheus.NewCounterVec(prometheus.CounterOpts{
 
 func init() {
 	prometheus.MustRegister(_receiveEventMtc)
-}
-
-type HandleEventResult struct {
-	ProjectName string                   `json:"projectName"`
-	PubID       types.SFID               `json:"pubID,omitempty"`
-	PubName     string                   `json:"pubName,omitempty"`
-	EventID     string                   `json:"eventID"`
-	ErrMsg      string                   `json:"errMsg,omitempty"`
-	WasmResults []wasm.EventHandleResult `json:"wasmResults"`
-}
-
-type HandleEventReq struct {
-	Events []eventpb.Event `json:"events"`
 }
 
 func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) (ret *HandleEventResult, err error) {
@@ -117,7 +106,7 @@ func HandleEvent(ctx context.Context, projectName string, eventType string, ret 
 		if v == nil {
 			continue
 		}
-		ret.WasmResults = append(ret.WasmResults, *v)
+		ret.WasmResults = append(ret.WasmResults, v)
 	}
 	return nil
 }
@@ -202,4 +191,58 @@ func HandleEvents(ctx context.Context, projectName string, r *HandleEventReq) []
 		results = append(results, ret)
 	}
 	return results
+}
+
+func OnEvent(ctx context.Context, data []byte) (ret []*wasm.EventHandleResult) {
+	l := types.MustLoggerFromContext(ctx)
+	r := types.MustStrategyResultsFromContext(ctx)
+
+	// TODO @zhiwei matrix
+	results := make(chan *wasm.EventHandleResult, len(r))
+
+	wg := &sync.WaitGroup{}
+	for _, v := range r {
+		l = l.WithValues(
+			"acc", v.AccountID,
+			"prj", v.ProjectName,
+			"app", v.AppletName,
+			"ins", v.InstanceID,
+			"hdl", v.Handler,
+			"tpe", v.EventType,
+		)
+		ins := vm.GetConsumer(v.InstanceID)
+		if ins == nil {
+			l.Warn(errors.New("instance not running"))
+			results <- &wasm.EventHandleResult{
+				InstanceID: v.InstanceID.String(),
+				Code:       -1,
+				ErrMsg:     "instance not found",
+			}
+			continue
+		}
+
+		wg.Add(1)
+		go func(v *types.StrategyResult) {
+			defer wg.Done()
+
+			cost := timer.Start()
+			select {
+			case <-time.After(time.Second * 5):
+			default:
+				rv := ins.HandleEvent(ctx, v.Handler, v.EventType, data)
+				results <- rv
+				l.WithValues("cst", cost().Milliseconds()).Info("")
+			}
+		}(v)
+	}
+	wg.Wait()
+	close(results)
+
+	for v := range results {
+		if v == nil {
+			continue
+		}
+		ret = append(ret, v)
+	}
+	return ret
 }

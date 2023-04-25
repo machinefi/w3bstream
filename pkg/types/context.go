@@ -34,7 +34,29 @@ type (
 	CtxStrategy          struct{}
 	CtxPublisher         struct{}
 	CtxAccount           struct{}
+	CtxStrategyResults   struct{}
 )
+
+func WithStrategyResults(ctx context.Context, v []*StrategyResult) context.Context {
+	return contextx.WithValue(ctx, CtxStrategyResults{}, v)
+}
+
+func WithStrategyResultsContext(v []*StrategyResult) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxStrategyResults{}, v)
+	}
+}
+
+func StrategyResultsFromContext(ctx context.Context) ([]*StrategyResult, bool) {
+	v, ok := ctx.Value(CtxStrategyResults{}).([]*StrategyResult)
+	return v, ok
+}
+
+func MustStrategyResultsFromContext(ctx context.Context) []*StrategyResult {
+	v, ok := StrategyResultsFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
 
 func WithAccount(ctx context.Context, v *models.Account) context.Context {
 	return contextx.WithValue(ctx, CtxAccount{}, v)

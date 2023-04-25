@@ -88,6 +88,8 @@ const (
 	InvalidChainClient
 	// @errTalk Deprecated Project
 	DeprecatedProject
+	// @errTalk Invalid Event Channel
+	InvalidEventChannel
 )
 
 const (

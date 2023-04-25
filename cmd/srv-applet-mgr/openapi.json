@@ -2230,7 +2230,7 @@
         }
       }
     },
-    "/v0/event/{projectName}": {
+    "/v0/event/{channel}/{eventType}": {
       "post": {
         "tags": [
           "apis/event"
@@ -2238,29 +2238,46 @@
         "operationId": "HandleEvent",
         "parameters": [
           {
-            "name": "projectName",
+            "name": "channel",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
+              "x-go-field-name": "Channel",
+              "x-tag-name": "channel"
+            }
+          },
+          {
+            "name": "eventType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-go-field-name": "EventType",
+              "x-tag-name": "eventType"
+            }
+          },
+          {
+            "name": "eventID",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "x-go-field-name": "EventID",
+              "x-tag-name": "eventID,omitempty"
             }
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesEventHandleEventReq"
-                  },
-                  {
-                    "x-go-field-name": "HandleEventReq"
-                  }
-                ]
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "uint8"
+                },
+                "x-go-field-name": "Payload"
               }
             }
           }
@@ -2271,15 +2288,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesEventHandleEventResult"
-                  }
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesEventHandleEventResult"
                 }
               }
             }
           },
-          "401": {
+          "400": {
             "description": "",
             "content": {
               "application/json": {
@@ -2289,10 +2303,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InvalidAuthPublisherID][401999011][Invalid Auth Publisher ID]!",
-              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
-              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
-              "@StatusErr[InvalidToken][401999002][Invalid Token]!"
+              "@StatusErr[InvalidEventChannel][400999005][Invalid Event Channel]!"
             ]
           },
           "404": {
@@ -2305,22 +2316,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
-              "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "500": {
@@ -2333,8 +2329,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -6298,72 +6293,6 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/statusx.StatusErr",
         "x-id": "GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
       },
-      "GithubComMachinefiW3BstreamPkgDependsProtocolEventpbEvent": {
-        "type": "object",
-        "properties": {
-          "header": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsProtocolEventpbHeader"
-              },
-              {
-                "x-go-field-name": "Header",
-                "x-go-star-level": 1,
-                "x-tag-json": "header,omitempty"
-              }
-            ]
-          },
-          "payload": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "uint8"
-            },
-            "x-go-field-name": "Payload",
-            "x-tag-json": "payload,omitempty"
-          }
-        },
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb.Event",
-        "x-id": "GithubComMachinefiW3BstreamPkgDependsProtocolEventpbEvent"
-      },
-      "GithubComMachinefiW3BstreamPkgDependsProtocolEventpbHeader": {
-        "type": "object",
-        "properties": {
-          "event_id": {
-            "type": "string",
-            "description": "event id for tracing",
-            "x-go-field-name": "EventId",
-            "x-tag-json": "event_id,omitempty"
-          },
-          "event_type": {
-            "type": "string",
-            "description": "event type",
-            "x-go-field-name": "EventType",
-            "x-tag-json": "event_type,omitempty"
-          },
-          "pub_id": {
-            "type": "string",
-            "description": "the unique identifier for publisher",
-            "x-go-field-name": "PubId",
-            "x-tag-json": "pub_id,omitempty"
-          },
-          "pub_time": {
-            "type": "integer",
-            "format": "int64",
-            "description": "event pub timestamp",
-            "x-go-field-name": "PubTime",
-            "x-tag-json": "pub_time,omitempty"
-          },
-          "token": {
-            "type": "string",
-            "description": "for validation message",
-            "x-go-field-name": "Token",
-            "x-tag-json": "token,omitempty"
-          }
-        },
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb.Header",
-        "x-id": "GithubComMachinefiW3BstreamPkgDependsProtocolEventpbHeader"
-      },
       "GithubComMachinefiW3BstreamPkgDependsSchemaColumn": {
         "type": "object",
         "properties": {
@@ -8009,24 +7938,6 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/deploy.CreateOrReDeployInstanceRsp",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesDeployCreateOrReDeployInstanceRsp"
-      },
-      "GithubComMachinefiW3BstreamPkgModulesEventHandleEventReq": {
-        "type": "object",
-        "properties": {
-          "events": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsProtocolEventpbEvent"
-            },
-            "x-go-field-name": "Events",
-            "x-tag-json": "events"
-          }
-        },
-        "required": [
-          "events"
-        ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/event.HandleEventReq",
-        "x-id": "GithubComMachinefiW3BstreamPkgModulesEventHandleEventReq"
       },
       "GithubComMachinefiW3BstreamPkgModulesEventHandleEventResult": {
         "type": "object",
