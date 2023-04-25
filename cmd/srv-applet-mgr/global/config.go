@@ -39,26 +39,27 @@ var (
 	wasmdb      = &confpostgres.Endpoint{Database: models.WasmDB}
 	server      = &confhttp.Server{}
 	serverEvent = &confhttp.Server{} // serverEvent support event http transport
+
+	fs filesystem.FileSystemOp
 )
 
 func init() {
 	config := &struct {
-		Postgres     *confpostgres.Endpoint
-		MonitorDB    *confpostgres.Endpoint
-		WasmDB       *confpostgres.Endpoint
-		MqttBroker   *confmqtt.Broker
-		Redis        *confredis.Redis
-		Server       *confhttp.Server
-		Jwt          *confjwt.Jwt
-		Logger       *conflog.Log
-		StdLogger    conflog.Logger
-		UploadConf   *types.UploadConfig
-		EthClient    *types.ETHClientConfig
-		WhiteList    *types.WhiteList
-		ServerEvent  *confhttp.Server
-		FileSystem   *types.FileSystem
-		AmazonS3     *amazonS3.AmazonS3
-		FileSystemOp filesystem.FileSystemOp
+		Postgres    *confpostgres.Endpoint
+		MonitorDB   *confpostgres.Endpoint
+		WasmDB      *confpostgres.Endpoint
+		MqttBroker  *confmqtt.Broker
+		Redis       *confredis.Redis
+		Server      *confhttp.Server
+		Jwt         *confjwt.Jwt
+		Logger      *conflog.Log
+		StdLogger   conflog.Logger
+		UploadConf  *types.UploadConfig
+		EthClient   *types.ETHClientConfig
+		WhiteList   *types.WhiteList
+		ServerEvent *confhttp.Server
+		FileSystem  *types.FileSystem
+		AmazonS3    *amazonS3.AmazonS3
 	}{
 		Postgres:    db,
 		MonitorDB:   monitordb,
@@ -93,11 +94,11 @@ func init() {
 	)
 	App.Conf(config, worker)
 
-	switch config.FileSystem.Type {
-	case enums.FILE_SYSTEM_MODE__S3:
-		config.FileSystemOp = config.AmazonS3
-	default:
-		config.FileSystemOp = &local.LocalFileSystem{}
+	if config.FileSystem.Type == enums.FILE_SYSTEM_MODE__S3 &&
+		!config.AmazonS3.IsZero() {
+		fs = config.AmazonS3
+	} else {
+		fs = &local.LocalFileSystem{}
 	}
 
 	confhttp.RegisterCheckerBy(config, worker)
@@ -118,7 +119,7 @@ func init() {
 		types.WithTaskBoardContext(mq.NewTaskBoard(tasks)),
 		types.WithETHClientConfigContext(config.EthClient),
 		types.WithWhiteListContext(config.WhiteList),
-		types.WithFileSystemOpContext(config.FileSystemOp),
+		types.WithFileSystemOpContext(fs),
 	)
 }
 

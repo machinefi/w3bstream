@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -93,6 +94,14 @@ func (c *Ctx) Conf(configs ...interface{}) {
 		rv := reflect.ValueOf(v)
 		c.conf = append(c.conf, rv)
 
+		if zero, ok := v.(types.ZeroChecker); ok && zero.IsZero() {
+			t := reflect.Indirect(reflect.ValueOf(v)).Type()
+			log.Println(errors.Errorf(
+				"zero config: %s",
+				color.CyanString("[%s.%s]:", filepath.Base(t.PkgPath()), t.Name()),
+			))
+		}
+
 		switch conf := v.(type) {
 		case interface{ Init() }:
 			conf.Init()
@@ -106,7 +115,16 @@ func (c *Ctx) Conf(configs ...interface{}) {
 		if rv.Kind() == reflect.Struct {
 			for i := 0; i < rv.NumField(); i++ {
 				value := rv.Field(i)
-				if !value.CanInterface() {
+				if !value.CanInterface() || value.IsNil() {
+					continue
+				}
+				fv := value.Interface()
+				ft := reflect.Indirect(reflect.ValueOf(fv)).Type()
+				if zero, ok := fv.(types.ZeroChecker); ok && zero.IsZero() {
+					log.Println(errors.Errorf(
+						"zero config: %s",
+						color.CyanString("[%s.%s]:", filepath.Base(ft.PkgPath()), ft.Name()),
+					))
 					continue
 				}
 				switch conf := value.Interface().(type) {
@@ -114,9 +132,8 @@ func (c *Ctx) Conf(configs ...interface{}) {
 					conf.Init()
 				case interface{ Init() error }:
 					if err = conf.Init(); err != nil {
-						t := reflect.Indirect(reflect.ValueOf(conf)).Type()
 						panic(errors.Errorf("init failed %s %s",
-							color.CyanString("[%s.%s]:", filepath.Base(t.PkgPath()), t.Name()),
+							color.CyanString("[%s.%s]:", filepath.Base(ft.PkgPath()), ft.Name()),
 							color.RedString("[%v]", err),
 						))
 					}
