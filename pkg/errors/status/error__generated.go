@@ -47,6 +47,8 @@ func (v Error) Key() string {
 		return "InvalidConfigType"
 	case DeprecatedProject:
 		return "DeprecatedProject"
+	case InvalidCronExpressions:
+		return "InvalidCronExpressions"
 	case Unauthorized:
 		return "Unauthorized"
 	case InvalidAuthValue:
@@ -97,6 +99,8 @@ func (v Error) Key() string {
 		return "PublisherNotFound"
 	case AccountIdentityNotFound:
 		return "AccountIdentityNotFound"
+	case CronJobNotFound:
+		return "CronJobNotFound"
 	case Conflict:
 		return "Conflict"
 	case ProjectConfigConflict:
@@ -113,6 +117,8 @@ func (v Error) Key() string {
 		return "ResourcePathConflict"
 	case ResourceAccountConflict:
 		return "ResourceAccountConflict"
+	case CronJobConflict:
+		return "CronJobConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -145,6 +151,8 @@ func (v Error) Msg() string {
 		return "Invalid Config Type"
 	case DeprecatedProject:
 		return "Deprecated Project"
+	case InvalidCronExpressions:
+		return "Invalid Cron Expressions"
 	case Unauthorized:
 		return "Unauthorized unauthorized"
 	case InvalidAuthValue:
@@ -195,6 +203,8 @@ func (v Error) Msg() string {
 		return "Publisher Not Found"
 	case AccountIdentityNotFound:
 		return "Account Identity Not Found"
+	case CronJobNotFound:
+		return "Cron Job Not Found"
 	case Conflict:
 		return "Conflict conflict error"
 	case ProjectConfigConflict:
@@ -211,6 +221,8 @@ func (v Error) Msg() string {
 		return "Resource Path Conflict"
 	case ResourceAccountConflict:
 		return "Resource Account and WasmName Conflict"
+	case CronJobConflict:
+		return "Cron Job Conflict"
 	case InternalServerError:
 		return "InternalServerError internal error"
 	case DatabaseError:
@@ -242,6 +254,8 @@ func (v Error) CanBeTalk() bool {
 	case InvalidConfigType:
 		return true
 	case DeprecatedProject:
+		return true
+	case InvalidCronExpressions:
 		return true
 	case Unauthorized:
 		return true
@@ -293,6 +307,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case AccountIdentityNotFound:
 		return true
+	case CronJobNotFound:
+		return true
 	case Conflict:
 		return true
 	case ProjectConfigConflict:
@@ -308,6 +324,8 @@ func (v Error) CanBeTalk() bool {
 	case ResourcePathConflict:
 		return true
 	case ResourceAccountConflict:
+		return true
+	case CronJobConflict:
 		return true
 	case InternalServerError:
 		return true

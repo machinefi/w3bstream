@@ -87,6 +87,8 @@ const (
 	ResourcePathConflict
 	// @errTalk Resource Account and WasmName Conflict
 	ResourceAccountConflict
+	// @errTalk Cron Job Conflict
+	CronJobConflict
 )
 
 const (
@@ -100,6 +102,8 @@ const (
 	InvalidConfigType
 	// @errTalk Deprecated Project
 	DeprecatedProject
+	// @errTalk Invalid Cron Expressions
+	InvalidCronExpressions
 )
 
 const (
@@ -121,6 +125,8 @@ const (
 	PublisherNotFound
 	// @errTalk Account Identity Not Found
 	AccountIdentityNotFound
+	// @errTalk Cron Job Not Found
+	CronJobNotFound
 )
 
 // Deprecated: pls check database error and return defined status error
