@@ -19,7 +19,7 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		confid.WithSFIDGeneratorContext(confid.MustSFIDGeneratorFromContext(parent)),
 		types.WithInstanceContext(ins),
 		types.WithLoggerContext(types.MustLoggerFromContext(parent)),
-		types.WithWasmDBExecutorContext(types.MustWasmDBExecutorFromContext(parent)),
+		types.WithWasmDBEndpointContext(types.MustWasmDBEndpointFromContext(parent)),
 		types.WithRedisEndpointContext(types.MustRedisEndpointFromContext(parent)),
 		types.WithTaskWorkerContext(types.MustTaskWorkerFromContext(parent)),
 		types.WithTaskBoardContext(types.MustTaskBoardFromContext(parent)),
@@ -45,21 +45,27 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 	}
 	ctx = types.WithResource(ctx, res)
 
-	configs, err := config.FetchConfigValuesByRelIDs(parent, prj.ProjectID, app.AppletID, res.ResourceID, ins.InstanceID)
+	configs, err := config.List(parent, &config.CondArgs{
+		RelIDs: []types.SFID{prj.ProjectID, app.AppletID, res.ResourceID, ins.InstanceID},
+	})
+
 	if err != nil {
 		return nil, err
 	}
 	for _, c := range configs {
-		if canBeInit, ok := c.(wasm.ConfigurationWithInit); ok {
+		if canBeInit, ok := c.Configuration.(wasm.ConfigurationWithInit); ok {
 			err = canBeInit.Init(ctx)
 		}
 		if err != nil {
-			return nil, status.ConfigInitializationFailed.StatusErr().WithDesc(err.Error())
+			return nil, status.ConfigInitFailed.StatusErr().WithDesc(err.Error())
 		}
 		ctx = c.WithContext(ctx)
 	}
 	if _, ok := wasm.KVStoreFromContext(ctx); !ok {
 		ctx = wasm.DefaultCache().WithContext(ctx)
+	}
+	if _, ok := wasm.MQTTClientFromContext(ctx); !ok {
+		ctx = wasm.DefaultMQClient().WithContext(ctx)
 	}
 
 	acc := &models.Account{RelAccount: prj.RelAccount}

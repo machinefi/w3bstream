@@ -7,24 +7,24 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/modules/blockchain"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 type RemoveProject struct {
 	httpx.MethodDelete
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
 }
 
-func (r *RemoveProject) Path() string { return "/:projectName" }
-
 func (r *RemoveProject) Output(ctx context.Context) (interface{}, error) {
-	a := middleware.CurrentAccountFromContext(ctx)
-	m, err := a.ValidateProjectPermByPrjName(ctx, r.ProjectName)
+	prj := middleware.MustProjectName(ctx)
+	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
+		WithProjectContextByName(ctx, prj)
 	if err != nil {
 		return nil, err
 	}
-	if err := blockchain.RemoveMonitor(ctx, r.ProjectName); err != nil {
+	if err := blockchain.RemoveMonitor(ctx, prj); err != nil {
 		return nil, err
 	}
 
-	return nil, project.RemoveProjectByProjectID(ctx, m.ProjectID)
+	v := types.MustProjectFromContext(ctx)
+	return nil, project.RemoveProjectByProjectID(ctx, v.ProjectID)
 }

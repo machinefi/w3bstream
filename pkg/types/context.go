@@ -2,6 +2,7 @@ package types
 
 import (
 	"context"
+
 	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/amazonS3"
@@ -19,8 +20,7 @@ import (
 type (
 	CtxMgrDBExecutor     struct{} // CtxMgrDBExecutor sqlx.DBExecutor
 	CtxMonitorDBExecutor struct{} // CtxMonitorDBExecutor sqlx.DBExecutor
-	CtxWasmDBExecutor    struct{} // CtxWasmDBExecutor sqlx.DBExecutor
-	CtxPgEndpoint        struct{} // CtxPgEndpoint postgres.Endpoint
+	CtxWasmDBEndpoint    struct{} // CtxWasmDBEndpoint sqlx.DBExecutor
 	CtxLogger            struct{} // CtxLogger log.Logger
 	CtxMqttBroker        struct{} // CtxMqttBroker mqtt.Broker
 	CtxRedisEndpoint     struct{} // CtxRedisEndpoint redis.Redis
@@ -35,7 +35,73 @@ type (
 	CtxWhiteList         struct{}
 	CtxAmazonS3          struct{}
 	CtxFileSystem        struct{}
+	CtxStrategy          struct{}
+	CtxPublisher         struct{}
+	CtxAccount           struct{}
 )
+
+func WithAccount(ctx context.Context, v *models.Account) context.Context {
+	return contextx.WithValue(ctx, CtxAccount{}, v)
+}
+
+func WithAccountContext(v *models.Account) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxAccount{}, v)
+	}
+}
+
+func AccountFromContext(ctx context.Context) (*models.Account, bool) {
+	v, ok := ctx.Value(CtxAccount{}).(*models.Account)
+	return v, ok
+}
+
+func MustAccountFromContext(ctx context.Context) *models.Account {
+	v, ok := AccountFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithPublisher(ctx context.Context, v *models.Publisher) context.Context {
+	return contextx.WithValue(ctx, CtxPublisher{}, v)
+}
+
+func WithPublisherContext(v *models.Publisher) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxPublisher{}, v)
+	}
+}
+
+func PublisherFromContext(ctx context.Context) (*models.Publisher, bool) {
+	v, ok := ctx.Value(CtxPublisher{}).(*models.Publisher)
+	return v, ok
+}
+
+func MustPublisherFromContext(ctx context.Context) *models.Publisher {
+	v, ok := PublisherFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithStrategy(ctx context.Context, v *models.Strategy) context.Context {
+	return contextx.WithValue(ctx, CtxStrategy{}, v)
+}
+
+func WithStrategyContext(v *models.Strategy) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxStrategy{}, v)
+	}
+}
+
+func StrategyFromContext(ctx context.Context) (*models.Strategy, bool) {
+	v, ok := ctx.Value(CtxStrategy{}).(*models.Strategy)
+	return v, ok
+}
+
+func MustStrategyFromContext(ctx context.Context) *models.Strategy {
+	v, ok := StrategyFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
 
 func WithMgrDBExecutor(ctx context.Context, v sqlx.DBExecutor) context.Context {
 	return contextx.WithValue(ctx, CtxMgrDBExecutor{}, v)
@@ -79,44 +145,23 @@ func MustMonitorDBExecutorFromContext(ctx context.Context) sqlx.DBExecutor {
 	return v
 }
 
-func WithWasmDBExecutor(ctx context.Context, v sqlx.DBExecutor) context.Context {
-	return contextx.WithValue(ctx, CtxWasmDBExecutor{}, v)
+func WithWasmDBEndpoint(ctx context.Context, v *postgres.Endpoint) context.Context {
+	return contextx.WithValue(ctx, CtxWasmDBEndpoint{}, v)
 }
 
-func WithWasmDBExecutorContext(v sqlx.DBExecutor) contextx.WithContext {
+func WithWasmDBEndpointContext(v *postgres.Endpoint) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, CtxWasmDBExecutor{}, v)
+		return contextx.WithValue(ctx, CtxWasmDBEndpoint{}, v)
 	}
 }
 
-func WasmDBExecutorFromContext(ctx context.Context) (sqlx.DBExecutor, bool) {
-	v, ok := ctx.Value(CtxWasmDBExecutor{}).(sqlx.DBExecutor)
+func WasmDBEndpointFromContext(ctx context.Context) (*postgres.Endpoint, bool) {
+	v, ok := ctx.Value(CtxWasmDBEndpoint{}).(*postgres.Endpoint)
 	return v, ok
 }
 
-func MustWasmDBExecutorFromContext(ctx context.Context) sqlx.DBExecutor {
-	v, ok := WasmDBExecutorFromContext(ctx)
-	must.BeTrue(ok)
-	return v
-}
-
-func WithPgEndpoint(ctx context.Context, v postgres.Endpoint) context.Context {
-	return contextx.WithValue(ctx, CtxPgEndpoint{}, v)
-}
-
-func WithPgEndpointContext(v *postgres.Endpoint) contextx.WithContext {
-	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, CtxPgEndpoint{}, v)
-	}
-}
-
-func PgEndpointFromContext(ctx context.Context) (*postgres.Endpoint, bool) {
-	v, ok := ctx.Value(CtxPgEndpoint{}).(*postgres.Endpoint)
-	return v, ok
-}
-
-func MustPgEndpointFromContext(ctx context.Context) *postgres.Endpoint {
-	v, ok := PgEndpointFromContext(ctx)
+func MustWasmDBEndpointFromContext(ctx context.Context) *postgres.Endpoint {
+	v, ok := WasmDBEndpointFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

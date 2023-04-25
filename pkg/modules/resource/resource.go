@@ -113,22 +113,41 @@ func GetContentBySFID(ctx context.Context, id types.SFID) (*models.Resource, []b
 	if err != nil {
 		return nil, nil, err
 	}
+	data, err := ReadContent(ctx, res)
+	if err != nil {
+		return nil, nil, err
+	}
+	return res, data, nil
+}
 
+func GetContentByMd5(ctx context.Context, md5 string) (*models.Resource, []byte, error) {
+	res, err := GetByMd5(ctx, md5)
+	if err != nil {
+		return nil, nil, err
+	}
+	data, err := ReadContent(ctx, res)
+	if err != nil {
+		return nil, nil, err
+	}
+	return res, data, nil
+}
+
+func ReadContent(ctx context.Context, m *models.Resource) ([]byte, error) {
 	if fs, _ := types.FileSystemFromContext(ctx); fs != nil {
-		data, err := fs.FileCli.Read(res.Md5)
+		data, err := fs.FileCli.Read(m.Md5)
 		if err != nil {
-			return nil, nil, status.LocalResReadFailed.StatusErr().WithDesc(err.Error())
+			return nil, status.S3ResReadFailed.StatusErr().WithDesc(err.Error())
 		}
-		return res, data, nil
+		return data, nil
 	}
 
 	// try local filesystem
 	c := types.MustUploadConfigFromContext(ctx)
-	data, err := os.ReadFile(filepath.Join(c.Root, res.Path))
+	data, err := os.ReadFile(filepath.Join(c.Root, m.Path))
 	if err != nil {
-		return nil, nil, status.LocalResReadFailed.StatusErr().WithDesc(err.Error())
+		return nil, status.LocalResReadFailed.StatusErr().WithDesc(err.Error())
 	}
-	return res, data, nil
+	return data, nil
 }
 
 func ListResource(ctx context.Context) ([]models.Resource, error) {

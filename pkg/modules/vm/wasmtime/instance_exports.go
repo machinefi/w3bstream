@@ -32,7 +32,7 @@ type (
 		evs *mapx.Map[uint32, []byte]
 		env *wasm.Env
 		kvs wasm.KVStore
-		db  wasm.SQLStore
+		db  *wasm.Database
 		log conflog.Logger
 		cl  *wasm.ChainClient
 		ctx context.Context
@@ -77,7 +77,7 @@ func (ef *ExportFuncs) LinkABI(impt Import) error {
 		"ws_set_sql_db":    ef.SetSQLDB,
 		"ws_get_sql_db":    ef.GetSQLDB,
 		"ws_get_env":       ef.GetEnv,
-		"ws_send_mqtt":     ef.SendMQTT,
+		"ws_send_mqtt_msg": ef.SendMqttMsg,
 	} {
 		if err := impt("env", name, ff); err != nil {
 			return err
@@ -255,7 +255,12 @@ func (ef *ExportFuncs) SetSQLDB(addr, size int32) int32 {
 		return wasm.ResultStatusCode_Failed
 	}
 
-	_, err = ef.db.ExecContext(context.Background(), prestate, params...)
+	db, err := ef.db.WithDefaultSchema()
+	if err != nil {
+		ef.log.Error(err)
+		return wasm.ResultStatusCode_Failed
+	}
+	_, err = db.ExecContext(context.Background(), prestate, params...)
 	if err != nil {
 		ef.log.Error(err)
 		return wasm.ResultStatusCode_Failed
@@ -280,7 +285,12 @@ func (ef *ExportFuncs) GetSQLDB(addr, size int32, vmAddrPtr, vmSizePtr int32) in
 		return wasm.ResultStatusCode_Failed
 	}
 
-	rows, err := ef.db.QueryContext(context.Background(), prestate, params...)
+	db, err := ef.db.WithDefaultSchema()
+	if err != nil {
+		ef.log.Error(err)
+		return wasm.ResultStatusCode_Failed
+	}
+	rows, err := db.QueryContext(context.Background(), prestate, params...)
 	if err != nil {
 		ef.log.Error(err)
 		return wasm.ResultStatusCode_Failed
@@ -324,8 +334,8 @@ func (ef *ExportFuncs) SendTX(chainID int32, offset, size, vmAddrPtr, vmSizePtr 
 	return int32(wasm.ResultStatusCode_OK)
 }
 
-func (ef *ExportFuncs) SendMQTT(topicAddr, topicSize, msgAddr, msgSize int32) int32 {
-	if ef.mq == nil {
+func (ef *ExportFuncs) SendMqttMsg(topicAddr, topicSize, msgAddr, msgSize int32) int32 {
+	if ef.mq == nil || ef.mq.Client == nil {
 		ef.log.Error(errors.New("mq client doesn't exist"))
 		return wasm.ResultStatusCode_Failed
 	}

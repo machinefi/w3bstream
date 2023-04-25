@@ -18,8 +18,8 @@ type RemoveCronJob struct {
 func (r *RemoveCronJob) Path() string { return "/:projectID/:cronJobID" }
 
 func (r *RemoveCronJob) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
-	_, err := ca.WithProjectContextByID(ctx, r.ProjectID)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
+	_, err := ca.WithProjectContextBySFID(ctx, r.ProjectID)
 	if err != nil {
 		return nil, err
 	}

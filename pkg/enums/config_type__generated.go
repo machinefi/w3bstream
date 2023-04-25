@@ -19,8 +19,8 @@ func ParseConfigTypeFromString(s string) (ConfigType, error) {
 		return CONFIG_TYPE_UNKNOWN, InvalidConfigType
 	case "":
 		return CONFIG_TYPE_UNKNOWN, nil
-	case "PROJECT_SCHEMA":
-		return CONFIG_TYPE__PROJECT_SCHEMA, nil
+	case "PROJECT_DATABASE":
+		return CONFIG_TYPE__PROJECT_DATABASE, nil
 	case "INSTANCE_CACHE":
 		return CONFIG_TYPE__INSTANCE_CACHE, nil
 	case "PROJECT_ENV":
@@ -36,8 +36,8 @@ func ParseConfigTypeFromLabel(s string) (ConfigType, error) {
 		return CONFIG_TYPE_UNKNOWN, InvalidConfigType
 	case "":
 		return CONFIG_TYPE_UNKNOWN, nil
-	case "PROJECT_SCHEMA":
-		return CONFIG_TYPE__PROJECT_SCHEMA, nil
+	case "PROJECT_DATABASE":
+		return CONFIG_TYPE__PROJECT_DATABASE, nil
 	case "INSTANCE_CACHE":
 		return CONFIG_TYPE__INSTANCE_CACHE, nil
 	case "PROJECT_ENV":
@@ -57,8 +57,8 @@ func (v ConfigType) String() string {
 		return "UNKNOWN"
 	case CONFIG_TYPE_UNKNOWN:
 		return ""
-	case CONFIG_TYPE__PROJECT_SCHEMA:
-		return "PROJECT_SCHEMA"
+	case CONFIG_TYPE__PROJECT_DATABASE:
+		return "PROJECT_DATABASE"
 	case CONFIG_TYPE__INSTANCE_CACHE:
 		return "INSTANCE_CACHE"
 	case CONFIG_TYPE__PROJECT_ENV:
@@ -74,8 +74,8 @@ func (v ConfigType) Label() string {
 		return "UNKNOWN"
 	case CONFIG_TYPE_UNKNOWN:
 		return ""
-	case CONFIG_TYPE__PROJECT_SCHEMA:
-		return "PROJECT_SCHEMA"
+	case CONFIG_TYPE__PROJECT_DATABASE:
+		return "PROJECT_DATABASE"
 	case CONFIG_TYPE__INSTANCE_CACHE:
 		return "INSTANCE_CACHE"
 	case CONFIG_TYPE__PROJECT_ENV:
@@ -90,7 +90,7 @@ func (v ConfigType) TypeName() string {
 }
 
 func (v ConfigType) ConstValues() []enum.IntStringerEnum {
-	return []enum.IntStringerEnum{CONFIG_TYPE__PROJECT_SCHEMA, CONFIG_TYPE__INSTANCE_CACHE, CONFIG_TYPE__PROJECT_ENV, CONFIG_TYPE__PROJECT_MQTT}
+	return []enum.IntStringerEnum{CONFIG_TYPE__PROJECT_DATABASE, CONFIG_TYPE__INSTANCE_CACHE, CONFIG_TYPE__PROJECT_ENV, CONFIG_TYPE__PROJECT_MQTT}
 }
 
 func (v ConfigType) MarshalText() ([]byte, error) {

@@ -9,22 +9,35 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-type ListPublisher struct {
+// Get Publisher by Publisher ID
+type GetPublisher struct {
 	httpx.MethodGet
-	ProjectName string `in:"path" name:"projectName"`
-	publisher.ListPublisherReq
+	PublisherID types.SFID `in:"path" name:"publisherID"`
 }
 
-func (r *ListPublisher) Path() string { return "/:projectName" }
+func (r *GetPublisher) Path() string { return "/data/:publisherID" }
 
-func (r *ListPublisher) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
-	ctx, err := ca.WithProjectContextByName(ctx, r.ProjectName)
+func (r *GetPublisher) Output(ctx context.Context) (interface{}, error) {
+	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
+		WithPublisherBySFID(ctx, r.PublisherID)
 	if err != nil {
 		return nil, err
 	}
-	prj := types.MustProjectFromContext(ctx)
+	return types.MustPublisherFromContext(ctx), nil
+}
 
-	r.SetCurrentProject(prj.ProjectID)
-	return publisher.ListPublisher(ctx, &r.ListPublisherReq)
+// List Publishers by Conditions
+type ListPublisher struct {
+	httpx.MethodGet
+	publisher.ListReq
+}
+
+func (r *ListPublisher) Output(ctx context.Context) (interface{}, error) {
+	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
+		WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
+	if err != nil {
+		return nil, err
+	}
+	r.ProjectIDs = []types.SFID{types.MustProjectFromContext(ctx).ProjectID}
+	return publisher.List(ctx, &r.ListReq)
 }

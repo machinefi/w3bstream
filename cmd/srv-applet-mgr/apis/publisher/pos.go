@@ -9,23 +9,19 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
+// Create Publisher
 type CreatePublisher struct {
 	httpx.MethodPost
-	ProjectName                  string `in:"path" name:"projectName"`
-	publisher.CreatePublisherReq `in:"body"`
-}
-
-func (r *CreatePublisher) Path() string {
-	return "/:projectName"
+	publisher.CreateReq `in:"body"`
 }
 
 func (r *CreatePublisher) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
-	ctx, err := ca.WithProjectContextByName(ctx, r.ProjectName)
+	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
+		WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
 	if err != nil {
 		return nil, err
 	}
-	prj := types.MustProjectFromContext(ctx)
 
-	return publisher.CreatePublisher(ctx, prj, &r.CreatePublisherReq)
+	r.ProjectID = types.MustProjectFromContext(ctx).ProjectID
+	return publisher.Create(ctx, &r.CreateReq)
 }

@@ -2,7 +2,6 @@ package deploy
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/pkg/errors"
 
@@ -56,7 +55,8 @@ func CreateInstance(ctx context.Context, r *CreateOrReDeployInstanceReq) (*Creat
 			if r.Cache == nil {
 				r.Cache = wasm.DefaultCache()
 			}
-			return config.CreateConfig(ctx, ins.InstanceID, r.Cache)
+			_, err := config.Create(ctx, ins.InstanceID, r.Cache)
+			return err
 		},
 		func(db sqlx.DBExecutor) error {
 			var _err error
@@ -270,13 +270,7 @@ func ReDeployInstance(ctx context.Context, r *CreateOrReDeployInstanceReq) (*Cre
 			if r.Cache == nil {
 				r.Cache = wasm.DefaultCache()
 			}
-			val, err := json.Marshal(r.Cache)
-			if err != nil {
-				l.Error(err)
-				return status.InternalServerError.StatusErr().WithDesc(err.Error())
-			}
-
-			_, err = config.CreateOrUpdateConfig(ctx, ins.InstanceID, r.Cache.ConfigType(), val)
+			_, err := config.Upsert(ctx, ins.InstanceID, r.Cache)
 			return err
 		},
 		func(db sqlx.DBExecutor) error {
@@ -303,4 +297,32 @@ func ReDeployInstance(ctx context.Context, r *CreateOrReDeployInstanceReq) (*Cre
 		InstanceID:    ins.InstanceID,
 		InstanceState: ins.State,
 	}, nil
+}
+
+func GetBySFID(ctx context.Context, id types.SFID) (*models.Instance, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Instance{RelInstance: models.RelInstance{InstanceID: id}}
+
+	if err := m.FetchByInstanceID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.InstanceNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	m.State, _ = vm.GetInstanceState(m.InstanceID)
+	return m, nil
+}
+
+func GetByAppletSFID(ctx context.Context, id types.SFID) (*models.Instance, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Instance{RelApplet: models.RelApplet{AppletID: id}}
+
+	if err := m.FetchByAppletID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.InstanceNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	m.State, _ = vm.GetInstanceState(m.InstanceID)
+	return m, nil
 }

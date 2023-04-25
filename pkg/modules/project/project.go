@@ -5,17 +5,17 @@ package project
 import (
 	"context"
 	"fmt"
+
 	"github.com/pkg/errors"
 
-	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
-	"github.com/machinefi/w3bstream/pkg/depends/schema"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/modules/mq"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -25,21 +25,20 @@ import (
 type CreateProjectReq struct {
 	models.ProjectName
 	models.ProjectBase
-	Envs   [][2]string  `json:"envs,omitempty"`
-	Schema *wasm.Schema `json:"schema,omitempty"`
+	Envs     [][2]string    `json:"envs,omitempty"`
+	Database *wasm.Database `json:"database,omitempty"`
 	// TODO if each project has its own mqtt broker should add *wasm.MqttClient
 }
 
 type CreateProjectRsp struct {
 	*models.Project `json:"project"`
-	Envs            [][2]string  `json:"envs,omitempty"`
-	Schema          *wasm.Schema `json:"schema,omitempty"`
+	Envs            [][2]string    `json:"envs,omitempty"`
+	Database        *wasm.Database `json:"database,omitempty"`
 }
 
-func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (*CreateProjectRsp, error) {
+func CreateProject(ctx context.Context, acc types.SFID, r *CreateProjectReq, hdl mq.OnMessage) (*CreateProjectRsp, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
-	a := middleware.CurrentAccountFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 
 	_, l = l.Start(ctx, "CreateProject")
@@ -47,7 +46,7 @@ func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (
 
 	m := &models.Project{
 		RelProject:  models.RelProject{ProjectID: idg.MustGenSFID()},
-		RelAccount:  models.RelAccount{AccountID: a.AccountID},
+		RelAccount:  models.RelAccount{AccountID: acc},
 		ProjectName: models.ProjectName{Name: r.Name},
 		ProjectBase: r.ProjectBase,
 	}
@@ -71,18 +70,16 @@ func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			ctx = types.WithProject(ctx, m)
-			if err := CreateOrUpdateProjectEnv(ctx, &wasm.Env{Env: r.Envs}); err != nil {
+			if _, err := config.Upsert(ctx, m.ProjectID, &wasm.Env{Env: r.Envs}); err != nil {
 				return err
 			}
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			if r.Schema == nil {
-				sch := schema.NewSchema(r.Name)
-				r.Schema = &wasm.Schema{Schema: *sch}
+			if r.Database == nil {
+				r.Database = wasm.NewDatabase(m.DatabaseName())
 			}
-			if err := CreateProjectSchema(ctx, r.Schema); err != nil {
+			if _, err := config.Create(ctx, m.ProjectID, r.Database); err != nil {
 				return err
 			}
 			return nil
@@ -93,9 +90,9 @@ func CreateProject(ctx context.Context, r *CreateProjectReq, hdl mq.OnMessage) (
 		return nil, err
 	}
 	return &CreateProjectRsp{
-		Project: m,
-		Envs:    r.Envs,
-		Schema:  r.Schema,
+		Project:  m,
+		Envs:     r.Envs,
+		Database: r.Database,
 	}, nil
 }
 
@@ -271,44 +268,6 @@ func ListProject(ctx context.Context, r *ListProjectReq) (*ListProjectRsp, error
 	}
 
 	return ret, nil
-}
-
-func GetProjectByProjectID(ctx context.Context, prjID types.SFID) (*Detail, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-	ca := middleware.CurrentAccountFromContext(ctx)
-
-	_, l = l.Start(ctx, "GetProjectByProjectID")
-	defer l.End()
-
-	_, err := ca.ValidateProjectPerm(ctx, prjID)
-	if err != nil {
-		l.Error(err)
-		return nil, err
-	}
-	m := &models.Project{RelProject: models.RelProject{ProjectID: prjID}}
-
-	if err = m.FetchByProjectID(d); err != nil {
-		l.Error(err)
-		return nil, status.CheckDatabaseError(err, "GetProjectByProjectID")
-	}
-
-	ret, err := ListProject(ctx, &ListProjectReq{
-		accountID:  ca.AccountID,
-		ProjectIDs: []types.SFID{prjID},
-	})
-
-	if err != nil {
-		l.Error(err)
-		return nil, err
-	}
-
-	if len(ret.Data) == 0 {
-		l.Warn(errors.New("project not found"))
-		return nil, status.NotFound
-	}
-
-	return &ret.Data[0], nil
 }
 
 func GetProjectByProjectName(ctx context.Context, prjName string) (*models.Project, error) {
@@ -499,4 +458,61 @@ func RemoveProjectByProjectID(ctx context.Context, prjID types.SFID) error {
 			return nil
 		},
 	).Do()
+}
+
+func GetBySFID(ctx context.Context, prj types.SFID) (*models.Project, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+
+	m := &models.Project{
+		RelProject: models.RelProject{ProjectID: prj},
+	}
+	if err := m.FetchByProjectID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.ProjectNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return m, nil
+}
+
+func GetByName(ctx context.Context, name string) (*models.Project, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Project{
+		ProjectName: models.ProjectName{Name: name},
+	}
+	if err := m.FetchByName(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.ProjectNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return m, nil
+}
+
+func List(ctx context.Context, r *ListReq) (ret *ListRsp, err error) {
+	var (
+		d = types.MustMgrDBExecutorFromContext(ctx)
+		m = &models.Project{}
+
+		cond = r.Condition(types.MustAccountFromContext(ctx).AccountID)
+		adds = builder.Additions{
+			r.Pager.Addition(),
+			builder.OrderBy(
+				builder.DescOrder(m.ColUpdatedAt()),
+				builder.DescOrder(m.ColCreatedAt()),
+			),
+		}
+	)
+	ret = &ListRsp{}
+	ret.Data, err = m.List(d, cond, adds...)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+
+	ret.Total, err = m.Count(d, cond)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+
+	return ret, nil
 }

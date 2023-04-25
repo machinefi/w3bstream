@@ -26,6 +26,16 @@ const (
 	ConfigInitializationFailed
 	// @errTalk Local Resource Read Failed
 	LocalResReadFailed
+	// @errTalk Config Init Failed
+	ConfigInitFailed
+	// @errTalk Config Uninit Failed
+	ConfigUninitFailed
+	// @errTalk Config Parse Failed
+	ConfigParseFailed
+	// @errTalk Gen Publisher Token Failed
+	GenPublisherTokenFailed
+	// @errTalk S3 Resource Read Failed
+	S3ResReadFailed
 )
 
 const (
@@ -51,6 +61,8 @@ const (
 	InvalidEthLoginMessage
 	// @errTalk Invalid Auth Publisher ID
 	InvalidAuthPublisherID
+	// @errTalk Current Account Absence
+	CurrentAccountAbsence
 )
 
 const (
@@ -75,6 +87,12 @@ const (
 	ResourceConflict
 	// @errTalk Resource Owner Conflict
 	ResourceOwnerConflict
+	// @errTalk Strategy Conflict
+	StrategyConflict
+	// @errTalk Config Conflict
+	ConfigConflict
+	// @errTalk Publisher Conflict
+	PublisherConflict
 )
 
 const (
@@ -84,6 +102,10 @@ const (
 	MD5ChecksumFailed
 	// @errTalk Invalid Chain Client
 	InvalidChainClient
+	// @errTalk Invalid Config Type
+	InvalidConfigType
+	// @errTalk Deprecated Project
+	DeprecatedProject
 )
 
 const (
@@ -95,6 +117,16 @@ const (
 	ConfigNotFound
 	// @errTalk Resource Not Found
 	ResourceNotFound
+	// @errTalk Applet Not Found
+	AppletNotFound
+	// @errTalk Instance Not Found
+	InstanceNotFound
+	// @errTalk Strategy Not Found
+	StrategyNotFound
+	// @errTalk Publisher Not Found
+	PublisherNotFound
+	// @errTalk Account Identity Not Found
+	AccountIdentityNotFound
 )
 
 // Deprecated: pls check database error and return defined status error
