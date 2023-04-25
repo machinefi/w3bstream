@@ -3,8 +3,6 @@ package event
 import (
 	"context"
 	"errors"
-	"github.com/machinefi/w3bstream/pkg/modules/project"
-	"github.com/machinefi/w3bstream/pkg/modules/publisher"
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -15,6 +13,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/modules/strategy"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -123,35 +122,29 @@ func HandleEvent(ctx context.Context, projectName string, eventType string, ret 
 }
 
 func checkHeader(ctx context.Context, projectName string, l log.Logger, ret *HandleEventResult, r *eventpb.Event) (eventType string, err error) {
-	publisherMtc := projectName
 	eventType = enums.EVENTTYPEDEFAULT
 
-	var (
-		pub *models.Publisher
-		prj *models.Project
-	)
-	pub, err = publisherVerification(ctx, l, r)
+	pub, err := publisherVerification(ctx, l, r)
 	if err != nil {
 		l.Error(err)
 		return
 	}
-	prj, err = project.GetByName(ctx, projectName)
+
+	prj, err := project.GetByName(ctx, projectName)
 	if err != nil {
 		return
 	}
-	publisherMtc = pub.Key
-	pub, err = publisher.GetByProjectAndKey(ctx, prj.ProjectID, r.Header.GetPubId())
-	if err != nil {
-		l.Error(err)
-		return
+	if pub.ProjectID != prj.ProjectID {
+		return eventType, status.NoProjectPermission
 	}
+
 	ret.PubID, ret.PubName = pub.PublisherID, pub.Name
 	l.WithValues("pub_id", pub.PublisherID)
 
 	ret.EventID = r.Header.GetEventId()
 	eventType = r.Header.GetEventType()
 
-	_receiveEventMtc.WithLabelValues(projectName, publisherMtc).Inc()
+	_receiveEventMtc.WithLabelValues(projectName, pub.Key).Inc()
 	return
 }
 
