@@ -21,12 +21,12 @@ type UpdateReq struct {
 
 type CondArgs struct {
 	ProjectIDs   []types.SFID `name:"-"`
-	PublisherIDs []types.SFID `in:"query" name:"publisherIDs"`
-	Names        []string     `in:"query" name:"name"`
-	Keys         []string     `in:"query" name:"key"`
-	NameLike     string       `in:"query" name:"name"`
-	LNameLike    string       `in:"query" name:"lname"`
-	RNameLike    string       `in:"query" name:"rname"`
+	PublisherIDs []types.SFID `in:"query" name:"publisherIDs,omitempty"`
+	Names        []string     `in:"query" name:"name,omitempty"`
+	Keys         []string     `in:"query" name:"key,omitempty"`
+	NameLike     string       `in:"query" name:"name,omitempty"`
+	LNameLike    string       `in:"query" name:"lname,omitempty"`
+	RNameLike    string       `in:"query" name:"rname,omitempty"`
 }
 
 func (r *CondArgs) Condition() builder.SqlCondition {

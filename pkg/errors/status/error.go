@@ -94,6 +94,8 @@ const (
 	InvalidChainClient
 	// @errTalk Invalid Config Type
 	InvalidConfigType
+	// @errTalk Deprecated Project
+	DeprecatedProject
 )
 
 const (

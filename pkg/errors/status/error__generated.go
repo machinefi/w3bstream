@@ -45,6 +45,8 @@ func (v Error) Key() string {
 		return "InvalidChainClient"
 	case InvalidConfigType:
 		return "InvalidConfigType"
+	case DeprecatedProject:
+		return "DeprecatedProject"
 	case Unauthorized:
 		return "Unauthorized"
 	case InvalidAuthValue:
@@ -137,6 +139,8 @@ func (v Error) Msg() string {
 		return "Invalid Chain Client"
 	case InvalidConfigType:
 		return "Invalid Config Type"
+	case DeprecatedProject:
+		return "Deprecated Project"
 	case Unauthorized:
 		return "Unauthorized unauthorized"
 	case InvalidAuthValue:
@@ -228,6 +232,8 @@ func (v Error) CanBeTalk() bool {
 	case InvalidChainClient:
 		return true
 	case InvalidConfigType:
+		return true
+	case DeprecatedProject:
 		return true
 	case Unauthorized:
 		return true

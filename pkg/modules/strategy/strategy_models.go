@@ -18,10 +18,10 @@ type ListRsp struct {
 }
 
 type CondArgs struct {
-	StrategyIDs []types.SFID `in:"query" name:"strategyID"`
-	AppletIDs   []types.SFID `in:"query" name:"appletID"`
-	EventTypes  []string     `in:"query" name:"eventType"`
-	Handlers    []string     `in:"query" name:"handler"`
+	StrategyIDs []types.SFID `in:"query" name:"strategyID,omitempty"`
+	AppletIDs   []types.SFID `in:"query" name:"appletID,omitempty"`
+	EventTypes  []string     `in:"query" name:"eventType,omitempty"`
+	Handlers    []string     `in:"query" name:"handler,omitempty"`
 }
 
 func (arg *CondArgs) Condition(prj types.SFID) builder.SqlCondition {
