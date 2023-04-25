@@ -315,11 +315,11 @@ func Deploy(ctx context.Context, cmd enums.DeployCmd) (err error) {
 	var m = types.MustInstanceFromContext(ctx)
 
 	switch cmd {
-	case enums.DEPLOY_CMD__STOP:
+	case enums.DEPLOY_CMD__HUNGUP:
 		m.State = enums.INSTANCE_STATE__STOPPED
 	case enums.DEPLOY_CMD__START:
 		m.State = enums.INSTANCE_STATE__STARTED
-	case enums.DEPLOY_CMD__REMOVE:
+	case enums.DEPLOY_CMD__KILL:
 		m.State = enums.INSTANCE_STATE__CREATED
 	default:
 		return status.UnknownDeployCommand.StatusErr().

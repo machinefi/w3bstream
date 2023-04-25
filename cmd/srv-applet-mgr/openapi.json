@@ -6724,13 +6724,13 @@
         "type": "string",
         "enum": [
           "START",
-          "STOP",
-          "REMOVE"
+          "HUNGUP",
+          "KILL"
         ],
         "x-enum-labels": [
-          "START",
-          "STOP",
-          "REMOVE"
+          "start wasm vm",
+          "stop wasm vm",
+          "kill wasm vm (memory released)"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.DeployCmd",
         "x-id": "GithubComMachinefiW3BstreamPkgEnumsDeployCmd"
