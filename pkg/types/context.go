@@ -32,6 +32,7 @@ type (
 	CtxWhiteList         struct{}
 	CtxStrategy          struct{}
 	CtxPublisher         struct{}
+	CtxCronJob           struct{}
 	CtxAccount           struct{}
 )
 
@@ -73,6 +74,27 @@ func PublisherFromContext(ctx context.Context) (*models.Publisher, bool) {
 
 func MustPublisherFromContext(ctx context.Context) *models.Publisher {
 	v, ok := PublisherFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithCronJob(ctx context.Context, v *models.CronJob) context.Context {
+	return contextx.WithValue(ctx, CtxCronJob{}, v)
+}
+
+func WithCronJobContext(v *models.CronJob) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxCronJob{}, v)
+	}
+}
+
+func CronJobFromContext(ctx context.Context) (*models.CronJob, bool) {
+	v, ok := ctx.Value(CtxCronJob{}).(*models.CronJob)
+	return v, ok
+}
+
+func MustCronJobFromContext(ctx context.Context) *models.CronJob {
+	v, ok := CronJobFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
