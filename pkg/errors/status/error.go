@@ -131,6 +131,8 @@ const (
 	PublisherNotFound
 	// @errTalk Account Identity Not Found
 	AccountIdentityNotFound
+	// @errTalk Resource Perm Not Found
+	ResourcePermNotFound
 )
 
 // Deprecated: pls check database error and return defined status error

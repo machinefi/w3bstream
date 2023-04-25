@@ -163,3 +163,12 @@ func (v *CurrentAccount) WithPublisherBySFID(ctx context.Context, id types.SFID)
 	ctx = types.WithPublisher(ctx, pub)
 	return v.WithProjectContextBySFID(ctx, pub.ProjectID)
 }
+
+func (v *CurrentAccount) WithResourceOwnerContextBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	_, err := resource.GetOwnerByAccountAndSFID(ctx, v.AccountID, id)
+	if err != nil {
+		return nil, err
+	}
+	// TODO if needed add ownership context
+	return types.WithAccount(ctx, &v.Account), nil
+}

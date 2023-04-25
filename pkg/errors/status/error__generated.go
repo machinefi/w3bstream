@@ -97,6 +97,8 @@ func (v Error) Key() string {
 		return "PublisherNotFound"
 	case AccountIdentityNotFound:
 		return "AccountIdentityNotFound"
+	case ResourcePermNotFound:
+		return "ResourcePermNotFound"
 	case Conflict:
 		return "Conflict"
 	case ProjectConfigConflict:
@@ -137,6 +139,8 @@ func (v Error) Key() string {
 		return "ConfigParseFailed"
 	case GenPublisherTokenFailed:
 		return "GenPublisherTokenFailed"
+	case S3ResReadFailed:
+		return "S3ResReadFailed"
 	}
 	return "UNKNOWN"
 }
@@ -203,6 +207,8 @@ func (v Error) Msg() string {
 		return "Publisher Not Found"
 	case AccountIdentityNotFound:
 		return "Account Identity Not Found"
+	case ResourcePermNotFound:
+		return "Resource Perm Not Found"
 	case Conflict:
 		return "Conflict conflict error"
 	case ProjectConfigConflict:
@@ -243,6 +249,8 @@ func (v Error) Msg() string {
 		return "Config Parse Failed"
 	case GenPublisherTokenFailed:
 		return "Gen Publisher Token Failed"
+	case S3ResReadFailed:
+		return "S3 Resource Read Failed"
 	}
 	return "-"
 }
@@ -309,6 +317,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case AccountIdentityNotFound:
 		return true
+	case ResourcePermNotFound:
+		return true
 	case Conflict:
 		return true
 	case ProjectConfigConflict:
@@ -348,6 +358,8 @@ func (v Error) CanBeTalk() bool {
 	case ConfigParseFailed:
 		return true
 	case GenPublisherTokenFailed:
+		return true
+	case S3ResReadFailed:
 		return true
 	}
 	return false

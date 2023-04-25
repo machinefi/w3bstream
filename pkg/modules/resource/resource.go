@@ -9,6 +9,7 @@ import (
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -150,16 +151,70 @@ func ReadContent(ctx context.Context, m *models.Resource) ([]byte, error) {
 	return data, nil
 }
 
-func ListResource(ctx context.Context) ([]models.Resource, error) {
-	res, err := (&models.Resource{}).List(types.MustMgrDBExecutorFromContext(ctx), nil)
-	if err != nil {
-		return nil, status.CheckDatabaseError(err)
+func GetOwnerByAccountAndSFID(ctx context.Context, acc, res types.SFID) (*models.ResourceOwnership, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.ResourceOwnership{
+		RelAccount:  models.RelAccount{AccountID: acc},
+		RelResource: models.RelResource{ResourceID: res},
 	}
-	return res, err
+
+	if err := m.FetchByResourceIDAndAccountID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.ResourcePermNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return m, nil
 }
 
-func DeleteResource(ctx context.Context, resID types.SFID) error {
-	return status.CheckDatabaseError((&models.Resource{
-		RelResource: models.RelResource{ResourceID: resID},
-	}).DeleteByResourceID(types.MustMgrDBExecutorFromContext(ctx)))
+func List(ctx context.Context, r *ListReq) (*ListRsp, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	res := &models.Resource{}
+	own := &models.ResourceOwnership{}
+	rsp := &ListRsp{}
+
+	err := d.QueryAndScan(
+		builder.Select(
+			builder.MultiWith(",",
+				builder.Alias(res.ColResourceID(), "f_resource_id"),
+				builder.Alias(res.ColMd5(), "f_md5"),
+				builder.Alias(own.ColUploadedAt(), "f_uploaded_at"),
+				builder.Alias(own.ColExpireAt(), "f_expire_at"),
+				builder.Alias(own.ColFilename(), "f_filename"),
+				builder.Alias(own.ColComment(), "f_comment"),
+				builder.Alias(own.ColCreatedAt(), "f_created_at"),
+				builder.Alias(own.ColUpdatedAt(), "f_updated_at"),
+			),
+		).From(
+			d.T(res),
+			builder.LeftJoin(d.T(own)).On(res.ColResourceID().Eq(own.ResourceID)),
+			builder.Where(r.Condition()),
+		), &rsp.Data)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+
+	err = d.QueryAndScan(builder.Select(builder.Count()).From(
+		d.T(res),
+		builder.LeftJoin(d.T(own)).On(res.ColResourceID().Eq(own.ResourceID)),
+		builder.Where(r.Condition()),
+	), &rsp.Total)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return rsp, nil
+}
+
+func RemoveBySFID(ctx context.Context, id types.SFID) error {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	acc := types.MustAccountFromContext(ctx)
+
+	m := &models.ResourceOwnership{
+		RelResource: models.RelResource{ResourceID: id},
+		RelAccount:  acc.RelAccount,
+	}
+	if err := m.DeleteByResourceIDAndAccountID(d); err != nil {
+		return status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return nil
 }
