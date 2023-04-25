@@ -21,22 +21,22 @@ type (
 	CtxMqttClient        struct{}
 )
 
-func WithSQLStore(ctx context.Context, v SQLStore) context.Context {
+func WithSQLStore(ctx context.Context, v *Database) context.Context {
 	return contextx.WithValue(ctx, CtxSQLStore{}, v)
 }
 
-func WithSQLStoreContext(v SQLStore) contextx.WithContext {
+func WithSQLStoreContext(v *Database) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
 		return contextx.WithValue(ctx, CtxSQLStore{}, v)
 	}
 }
 
-func SQLStoreFromContext(ctx context.Context) (SQLStore, bool) {
-	v, ok := ctx.Value(CtxSQLStore{}).(SQLStore)
+func SQLStoreFromContext(ctx context.Context) (*Database, bool) {
+	v, ok := ctx.Value(CtxSQLStore{}).(*Database)
 	return v, ok
 }
 
-func MustSQLStoreFromContext(ctx context.Context) SQLStore {
+func MustSQLStoreFromContext(ctx context.Context) *Database {
 	v, ok := SQLStoreFromContext(ctx)
 	must.BeTrue(ok)
 	return v

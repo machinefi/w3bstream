@@ -43,10 +43,10 @@ func (v Error) Key() string {
 		return "MD5ChecksumFailed"
 	case InvalidChainClient:
 		return "InvalidChainClient"
-	case DeprecatedProject:
-		return "DeprecatedProject"
 	case InvalidConfigType:
 		return "InvalidConfigType"
+	case DeprecatedProject:
+		return "DeprecatedProject"
 	case UnknownDeployCommand:
 		return "UnknownDeployCommand"
 	case Unauthorized:
@@ -147,10 +147,10 @@ func (v Error) Msg() string {
 		return "Md5 Checksum Failed"
 	case InvalidChainClient:
 		return "Invalid Chain Client"
-	case DeprecatedProject:
-		return "Deprecated Project"
 	case InvalidConfigType:
 		return "Invalid Config Type"
+	case DeprecatedProject:
+		return "Deprecated Project"
 	case UnknownDeployCommand:
 		return "Unknown Deploy Command"
 	case Unauthorized:
@@ -251,9 +251,9 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case InvalidChainClient:
 		return true
-	case DeprecatedProject:
-		return true
 	case InvalidConfigType:
+		return true
+	case DeprecatedProject:
 		return true
 	case UnknownDeployCommand:
 		return true

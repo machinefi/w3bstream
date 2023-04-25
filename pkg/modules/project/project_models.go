@@ -61,22 +61,22 @@ type ListDetailRsp struct {
 type CreateReq struct {
 	models.ProjectName
 	models.ProjectBase
-	Env *wasm.Env `json:"envs,omitempty"`
-	// TODO after iss/feat/387_ioslate_wasm_database merge Database*wasm.Database `json:"Database,omitempty"`
+	Env      *wasm.Env      `json:"envs,omitempty"`
+	Database *wasm.Database `json:"database,omitempty"`
 }
 
 func (r *CreateReq) Configs() []wasm.Configuration {
 	if r.Env == nil {
 		r.Env = &wasm.Env{}
 	}
-	// if r.Database == nil {
-	// 	r.Database = &wasm.Database{}
-	// }
+	if r.Database == nil {
+		r.Database = &wasm.Database{}
+	}
 	return []wasm.Configuration{r.Env /*r.Database*/}
 }
 
 type CreateRsp struct {
 	*models.Project
-	Env *wasm.Env `json:"envs,omitempty"`
-	// TODO after iss/feat/387_ioslate_wasm_database merge Database*wasm.Database `json:"Database,omitempty"`
+	Env      *wasm.Env      `json:"envs,omitempty"`
+	Database *wasm.Database `json:"database,omitempty"`
 }

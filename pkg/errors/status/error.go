@@ -100,10 +100,10 @@ const (
 	MD5ChecksumFailed
 	// @errTalk Invalid Chain Client
 	InvalidChainClient
-	// @errTalk Deprecated Project
-	DeprecatedProject
 	// @errTalk Invalid Config Type
 	InvalidConfigType
+	// @errTalk Deprecated Project
+	DeprecatedProject
 	// @errTalk Unknown Deploy Command
 	UnknownDeployCommand
 )

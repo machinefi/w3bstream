@@ -124,6 +124,7 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 				}
 				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
+			ctx = types.WithProject(ctx, prj)
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
@@ -132,11 +133,11 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 				return err
 			}
 			rsp.Env = r.Env
-			// _, err = config.Create(ctx, prj.ProjectID, r.Database)
-			// if err != nil {
-			// 	return err
-			// }
-			// rsp.Database = r.Database
+			_, err = config.Create(ctx, prj.ProjectID, r.Database)
+			if err != nil {
+				return err
+			}
+			rsp.Database = r.Database
 			return nil
 		},
 	).Do()
@@ -188,10 +189,5 @@ func Init(ctx context.Context) error {
 		}
 		l.Info("start subscribe")
 	}
-	return nil
-}
-
-func StartMqttBySFID(ctx context.Context, id types.SFID) error {
-	// TODO
 	return nil
 }
