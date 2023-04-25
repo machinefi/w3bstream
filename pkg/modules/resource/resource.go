@@ -133,8 +133,8 @@ func GetContentByMd5(ctx context.Context, md5 string) (*models.Resource, []byte,
 }
 
 func ReadContent(ctx context.Context, m *models.Resource) ([]byte, error) {
-	if fs, _ := types.FileSystemFromContext(ctx); fs != nil {
-		data, err := fs.FileCli.Read(m.Md5)
+	if fs, _ := types.AmazonS3FromContext(ctx); fs != nil {
+		data, err := fs.Read(m.Md5)
 		if err != nil {
 			return nil, status.S3ResReadFailed.StatusErr().WithDesc(err.Error())
 		}

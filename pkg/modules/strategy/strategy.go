@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/pkg/errors"
 
+	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/enums"

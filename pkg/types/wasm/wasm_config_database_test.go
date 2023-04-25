@@ -1,8 +1,6 @@
 package wasm_test
 
-import (
-	"testing"
-)
+import "testing"
 
 func DISABLE_TestDatabase_Init(t *testing.T) {
 	/*

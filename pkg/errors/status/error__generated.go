@@ -113,6 +113,10 @@ func (v Error) Key() string {
 		return "ConfigConflict"
 	case PublisherConflict:
 		return "PublisherConflict"
+	case ResourcePathConflict:
+		return "ResourcePathConflict"
+	case ResourceAccountConflict:
+		return "ResourceAccountConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -215,6 +219,10 @@ func (v Error) Msg() string {
 		return "Config Conflict"
 	case PublisherConflict:
 		return "Publisher Conflict"
+	case ResourcePathConflict:
+		return "Resource Path Conflict"
+	case ResourceAccountConflict:
+		return "Resource Account and WasmName Conflict"
 	case InternalServerError:
 		return "InternalServerError internal error"
 	case DatabaseError:
@@ -316,6 +324,10 @@ func (v Error) CanBeTalk() bool {
 	case ConfigConflict:
 		return true
 	case PublisherConflict:
+		return true
+	case ResourcePathConflict:
+		return true
+	case ResourceAccountConflict:
 		return true
 	case InternalServerError:
 		return true

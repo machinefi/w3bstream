@@ -69,9 +69,9 @@ func UploadFile(ctx context.Context, f io.ReadSeekCloser, md5 string) (path stri
 	}
 
 	path = md5
-	if fs, ok := types.FileSystemFromContext(ctx); ok && fs != nil {
+	if fs, ok := types.AmazonS3FromContext(ctx); ok && fs != nil {
 		// store to s3
-		err = fs.FileCli.Upload(path, data)
+		err = fs.Upload(path, data)
 	} else {
 		// store local
 		var (

@@ -1,13 +1,11 @@
 GO_RUNTIME_ENV: DEV
+SRV_APPLET_MGR__AmazonS3_AccessKeyID: ""
+SRV_APPLET_MGR__AmazonS3_BucketName: ""
+SRV_APPLET_MGR__AmazonS3_Region: us-west-1
+SRV_APPLET_MGR__AmazonS3_SecretAccessKey: ""
+SRV_APPLET_MGR__AmazonS3_SessionToken: ""
 SRV_APPLET_MGR__EthClient_Endpoints: ""
-SRV_APPLET_MGR__FileSystem_FileSizeLimit: "0"
-SRV_APPLET_MGR__FileSystem_LocalRoot: ""
-SRV_APPLET_MGR__FileSystem_S3AccessKeyID: ""
-SRV_APPLET_MGR__FileSystem_S3BucketName: ""
-SRV_APPLET_MGR__FileSystem_S3Region: ""
-SRV_APPLET_MGR__FileSystem_S3SecretAccessKey: ""
-SRV_APPLET_MGR__FileSystem_S3SessionToken: ""
-SRV_APPLET_MGR__FileSystem_Type: ""
+SRV_APPLET_MGR__FileSystem_Type: LOCAL
 SRV_APPLET_MGR__Jwt_ExpIn: 0s
 SRV_APPLET_MGR__Jwt_Issuer: ""
 SRV_APPLET_MGR__Jwt_SignKey: ""
@@ -62,6 +60,11 @@ SRV_APPLET_MGR__ServerEvent_Debug: "true"
 SRV_APPLET_MGR__ServerEvent_HealthCheck: http://:80/
 SRV_APPLET_MGR__ServerEvent_Port: "80"
 SRV_APPLET_MGR__ServerEvent_Spec: ./openapi.json
+<<<<<<< HEAD
+=======
+SRV_APPLET_MGR__UploadConf_FileSizeLimit: "104857600"
+SRV_APPLET_MGR__UploadConf_Root: ./asserts
+>>>>>>> be7846625075f43c40ff66ab258f0fc8ed2b4cde
 SRV_APPLET_MGR__WasmDB_ConnMaxLifetime: 1h
 SRV_APPLET_MGR__WasmDB_Master: postgres://127.0.0.1:5432
 SRV_APPLET_MGR__WasmDB_PoolSize: "10"
