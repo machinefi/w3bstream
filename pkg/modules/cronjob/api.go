@@ -114,21 +114,12 @@ func Create(ctx context.Context, r *CreateReq) (*models.CronJob, error) {
 
 func RemoveBySFID(ctx context.Context, id types.SFID) error {
 	d := types.MustMgrDBExecutorFromContext(ctx)
-	m := &models.CronJob{}
+	m := &models.CronJob{RelCronJob: models.RelCronJob{CronJobID: id}}
 
-	return sqlx.NewTasks(d).With(
-		func(d sqlx.DBExecutor) error {
-			var err error
-			m, err = GetBySFID(ctx, id)
-			return err
-		},
-		func(d sqlx.DBExecutor) error {
-			if err := m.DeleteByCronJobID(d); err != nil {
-				return status.DatabaseError.StatusErr().WithDesc(err.Error())
-			}
-			return nil
-		},
-	).Do()
+	if err := m.DeleteByCronJobID(d); err != nil {
+		return status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return nil
 }
 
 func GetBySFID(ctx context.Context, id types.SFID) (*models.CronJob, error) {
