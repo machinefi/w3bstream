@@ -304,10 +304,140 @@
       }
     },
     "/v0/applet/data/{appletID}": {
+      "delete": {
+        "tags": [
+          "apis/applet"
+        ],
+        "summary": "RemoveApplet remove applet by applet id",
+        "operationId": "RemoveApplet",
+        "parameters": [
+          {
+            "name": "appletID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                },
+                {
+                  "x-go-field-name": "AppletID",
+                  "x-tag-name": "appletID"
+                }
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidConfigType][400999005][Invalid Config Type]!"
+            ]
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
+              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
+            ]
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
+              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+            ]
+          }
+        }
+      },
       "get": {
         "tags": [
           "apis/applet"
         ],
+        "summary": "GetApplet get applet by applet id",
         "operationId": "GetApplet",
         "parameters": [
           {
@@ -425,6 +555,175 @@
       }
     },
     "/v0/applet/x/{projectName}": {
+      "delete": {
+        "tags": [
+          "apis/applet"
+        ],
+        "summary": "BatchRemoveApplet remove applets with condition under project permission",
+        "operationId": "BatchRemoveApplet",
+        "parameters": [
+          {
+            "name": "projectName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "projectName",
+              "x-go-field-name": "ProjectName",
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "appletID",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+              },
+              "x-go-field-name": "AppletIDs",
+              "x-tag-name": "appletID,omitempty"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "lName",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "x-go-field-name": "LNameLike",
+              "x-tag-name": "lName,omitempty"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "x-go-field-name": "NameLike",
+              "x-tag-name": "name,omitempty"
+            }
+          },
+          {
+            "name": "names",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "x-go-field-name": "Names",
+              "x-tag-name": "names,omitempty"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidConfigType][400999005][Invalid Config Type]!"
+            ]
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
+              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+            ]
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[BatchRemoveAppletFailed][500999010][Batch Remove Applet Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
+              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+            ]
+          }
+        }
+      },
       "post": {
         "tags": [
           "apis/applet"
@@ -473,10 +772,10 @@
               "schema": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAppletCreateAppletReq"
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAppletCreateReq"
                   },
                   {
-                    "x-go-field-name": "CreateAppletReq",
+                    "x-go-field-name": "CreateReq",
                     "x-tag-mime": "multipart"
                   }
                 ]
@@ -490,10 +789,23 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsApplet"
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAppletCreateRsp"
                 }
               }
             }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidConfigType][400999005][Invalid Config Type]!"
+            ]
           },
           "401": {
             "description": "",
@@ -525,7 +837,6 @@
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
@@ -539,8 +850,10 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AppletNameConflict][409999008][Applet Name Conflict]!",
+              "@StatusErr[ConfigConflict][409999005][Config Conflict]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[MultiInstanceDeployed][409999007][Multi Instance Deployed]!"
             ]
           },
           "500": {
@@ -553,11 +866,14 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[ConfigInitFailed][500999005][Config Initialization Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!",
+              "@StatusErr[CreateInstanceFailed][500999009][Create Instance Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
+              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
           }
         }
@@ -568,6 +884,7 @@
         "tags": [
           "apis/applet"
         ],
+        "summary": "ListApplet list applets with condition under project permission",
         "operationId": "ListApplet",
         "parameters": [
           {
@@ -617,16 +934,12 @@
             }
           },
           {
-            "name": "id",
+            "name": "lName",
             "in": "query",
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "integer",
-                "format": "uint64"
-              },
-              "x-go-field-name": "IDs",
-              "x-tag-name": "id,omitempty"
+              "type": "string",
+              "x-go-field-name": "LNameLike",
+              "x-tag-name": "lName,omitempty"
             }
           },
           {
@@ -685,7 +998,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAppletListAppletRsp"
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAppletListRsp"
                 }
               }
             }
@@ -755,121 +1068,6 @@
       }
     },
     "/v0/applet/{appletID}": {
-      "delete": {
-        "tags": [
-          "apis/applet"
-        ],
-        "operationId": "RemoveApplet",
-        "parameters": [
-          {
-            "name": "appletID",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-                },
-                {
-                  "x-go-field-name": "AppletID",
-                  "x-tag-name": "appletID"
-                }
-              ]
-            }
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInHeader",
-              "x-tag-name": "Authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInQuery",
-              "x-tag-name": "authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": ""
-          },
-          "401": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
-              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
-              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
-              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
-              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
-            ]
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
-              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
-              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
-            ]
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
-            ]
-          }
-        }
-      },
       "put": {
         "tags": [
           "apis/applet"
@@ -922,10 +1120,10 @@
               "schema": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAppletUpdateAppletReq"
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAppletUpdateReq"
                   },
                   {
-                    "x-go-field-name": "UpdateAppletReq",
+                    "x-go-field-name": "UpdateReq",
                     "x-tag-mime": "multipart"
                   }
                 ]
@@ -934,160 +1132,15 @@
           }
         },
         "responses": {
-          "204": {
-            "description": ""
-          },
-          "401": {
+          "200": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAppletCreateRsp"
                 }
               }
-            },
-            "x-status-errors": [
-              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
-              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
-              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
-              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
-              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
-            ]
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
-              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
-              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
-            ]
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
-            ]
-          }
-        }
-      }
-    },
-    "/v0/applet/{appletID}/{instanceID}": {
-      "put": {
-        "tags": [
-          "apis/applet"
-        ],
-        "operationId": "UpdateAndDeploy",
-        "parameters": [
-          {
-            "name": "appletID",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-                },
-                {
-                  "x-go-field-name": "AppletID",
-                  "x-tag-name": "appletID"
-                }
-              ]
             }
-          },
-          {
-            "name": "instanceID",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-                },
-                {
-                  "x-go-field-name": "InstanceID",
-                  "x-tag-name": "instanceID"
-                }
-              ]
-            }
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInHeader",
-              "x-tag-name": "Authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInQuery",
-              "x-tag-name": "authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAppletUpdateAndDeployReq"
-                  },
-                  {
-                    "x-go-field-name": "UpdateAndDeployReq",
-                    "x-tag-mime": "multipart"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": ""
           },
           "400": {
             "description": "",
@@ -1132,7 +1185,6 @@
               "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
               "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
               "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
             ]
@@ -1147,9 +1199,10 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AppletNameConflict][409999008][Applet Name Conflict]!",
               "@StatusErr[ConfigConflict][409999005][Config Conflict]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[MultiInstanceDeployed][409999007][Multi Instance Deployed]!"
             ]
           },
           "500": {
@@ -1164,10 +1217,11 @@
             "x-status-errors": [
               "@StatusErr[ConfigInitFailed][500999005][Config Initialization Failed]!",
               "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!",
+              "@StatusErr[CreateInstanceFailed][500999009][Create Instance Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
-              "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
+              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
           }
         }
@@ -6289,6 +6343,11 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/base/types.Timestamp",
         "x-id": "GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp"
       },
+      "GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesBool": {
+        "type": "boolean",
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes.Bool",
+        "x-id": "GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesBool"
+      },
       "GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimes": {
         "type": "object",
         "properties": {
@@ -8057,7 +8116,7 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/account.UpdatePasswordReq",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesAccountUpdatePasswordReq"
       },
-      "GithubComMachinefiW3BstreamPkgModulesAppletCreateAppletReq": {
+      "GithubComMachinefiW3BstreamPkgModulesAppletCreateReq": {
         "type": "object",
         "properties": {
           "file": {
@@ -8083,8 +8142,46 @@
           "file",
           "info"
         ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.CreateAppletReq",
-        "x-id": "GithubComMachinefiW3BstreamPkgModulesAppletCreateAppletReq"
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.CreateReq",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesAppletCreateReq"
+      },
+      "GithubComMachinefiW3BstreamPkgModulesAppletCreateRsp": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsApplet"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "instance": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsInstance"
+                  },
+                  {
+                    "x-go-field-name": "Instance",
+                    "x-go-star-level": 1,
+                    "x-tag-json": "instance"
+                  }
+                ]
+              },
+              "strategies": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsStrategy"
+                },
+                "x-go-field-name": "Strategies",
+                "x-tag-json": "strategies"
+              }
+            },
+            "required": [
+              "instance",
+              "strategies"
+            ],
+            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.CreateRsp",
+            "x-id": "GithubComMachinefiW3BstreamPkgModulesAppletCreateRsp"
+          }
+        ]
       },
       "GithubComMachinefiW3BstreamPkgModulesAppletInfo": {
         "type": "object",
@@ -8094,6 +8191,18 @@
             "x-go-field-name": "AppletName",
             "x-tag-json": "appletName"
           },
+          "start": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesBool"
+              },
+              {
+                "description": "Deploy and start vm after created",
+                "x-go-field-name": "Deploy",
+                "x-tag-json": "start"
+              }
+            ]
+          },
           "strategies": {
             "type": "array",
             "items": {
@@ -8102,20 +8211,94 @@
             "x-go-field-name": "Strategies",
             "x-tag-json": "strategies,omitempty"
           },
+          "wasmCache": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgTypesWasmCache"
+              },
+              {
+                "x-go-field-name": "WasmCache",
+                "x-go-star-level": 1,
+                "x-tag-json": "wasmCache,omitempty"
+              }
+            ]
+          },
+          "wasmMd5": {
+            "type": "string",
+            "x-go-field-name": "WasmMd5",
+            "x-tag-json": "wasmMd5,omitempty"
+          },
           "wasmName": {
             "type": "string",
             "x-go-field-name": "WasmName",
-            "x-tag-json": "wasmName"
+            "x-tag-json": "wasmName,omitempty"
           }
         },
         "required": [
           "appletName",
-          "wasmName"
+          "start"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.Info",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesAppletInfo"
       },
-      "GithubComMachinefiW3BstreamPkgModulesAppletListAppletRsp": {
+      "GithubComMachinefiW3BstreamPkgModulesAppletInfoForUpdate": {
+        "type": "object",
+        "properties": {
+          "appletName": {
+            "type": "string",
+            "x-go-field-name": "AppletName",
+            "x-tag-json": "appletName,omitempty"
+          },
+          "deploy": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesBool"
+              },
+              {
+                "description": "deploy and start applet after updated",
+                "x-go-field-name": "Deploy",
+                "x-tag-json": "deploy"
+              }
+            ]
+          },
+          "strategies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsStrategyInfo"
+            },
+            "x-go-field-name": "Strategies",
+            "x-tag-json": "strategies,omitempty"
+          },
+          "wasmCache": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgTypesWasmCache"
+              },
+              {
+                "x-go-field-name": "WasmCache",
+                "x-go-star-level": 1,
+                "x-tag-json": "wasmCache,omitempty"
+              }
+            ]
+          },
+          "wasmMd5": {
+            "type": "string",
+            "x-go-field-name": "WasmMd5",
+            "x-tag-json": "wasmMd5,omitempty"
+          },
+          "wasmName": {
+            "type": "string",
+            "x-go-field-name": "WasmName",
+            "x-tag-json": "wasmName,omitempty"
+          }
+        },
+        "required": [
+          "deploy"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.InfoForUpdate",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesAppletInfoForUpdate"
+      },
+      "GithubComMachinefiW3BstreamPkgModulesAppletListRsp": {
         "type": "object",
         "properties": {
           "data": {
@@ -8126,46 +8309,34 @@
             "x-go-field-name": "Data",
             "x-tag-json": "data"
           },
-          "hints": {
+          "total": {
             "type": "integer",
             "format": "int64",
-            "x-go-field-name": "Hints",
-            "x-tag-json": "hints"
+            "x-go-field-name": "Total",
+            "x-tag-json": "total"
           }
         },
         "required": [
           "data",
-          "hints"
+          "total"
         ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.ListAppletRsp",
-        "x-id": "GithubComMachinefiW3BstreamPkgModulesAppletListAppletRsp"
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.ListRsp",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesAppletListRsp"
       },
-      "GithubComMachinefiW3BstreamPkgModulesAppletUpdateAndDeployReq": {
+      "GithubComMachinefiW3BstreamPkgModulesAppletUpdateReq": {
         "type": "object",
         "properties": {
-          "cache": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgTypesWasmCache"
-              },
-              {
-                "x-go-field-name": "Cache",
-                "x-go-star-level": 1,
-                "x-tag-name": "cache,omitempty"
-              }
-            ]
-          },
           "file": {
             "type": "string",
             "format": "binary",
             "x-go-field-name": "File",
             "x-go-star-level": 1,
-            "x-tag-name": "file"
+            "x-tag-name": "file,omitempty"
           },
           "info": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAppletInfo"
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAppletInfoForUpdate"
               },
               {
                 "x-go-field-name": "Info",
@@ -8176,41 +8347,10 @@
           }
         },
         "required": [
-          "file",
           "info"
         ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.UpdateAndDeployReq",
-        "x-id": "GithubComMachinefiW3BstreamPkgModulesAppletUpdateAndDeployReq"
-      },
-      "GithubComMachinefiW3BstreamPkgModulesAppletUpdateAppletReq": {
-        "type": "object",
-        "properties": {
-          "file": {
-            "type": "string",
-            "format": "binary",
-            "x-go-field-name": "File",
-            "x-go-star-level": 1,
-            "x-tag-name": "file"
-          },
-          "info": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAppletInfo"
-              },
-              {
-                "x-go-field-name": "Info",
-                "x-go-star-level": 1,
-                "x-tag-name": "info"
-              }
-            ]
-          }
-        },
-        "required": [
-          "file",
-          "info"
-        ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.UpdateAppletReq",
-        "x-id": "GithubComMachinefiW3BstreamPkgModulesAppletUpdateAppletReq"
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.UpdateReq",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesAppletUpdateReq"
       },
       "GithubComMachinefiW3BstreamPkgModulesDeployCreateReq": {
         "type": "object",
