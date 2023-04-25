@@ -24,6 +24,8 @@ const (
 	CreateChannelFailed
 	// @errTalk Config Initialization Failed
 	ConfigInitializationFailed
+	// @errTalk Local Resource Read Failed
+	LocalResReadFailed
 )
 
 const (
@@ -69,6 +71,10 @@ const (
 	ProjectConfigConflict
 	// @errTalk Project Name Conflict
 	ProjectNameConflict
+	// @errTalk Resource Conflict
+	ResourceConflict
+	// @errTalk Resource Owner Conflict
+	ResourceOwnerConflict
 )
 
 const (
@@ -87,6 +93,8 @@ const (
 	ProjectNotFound
 	// @errTalk Config Not Found
 	ConfigNotFound
+	// @errTalk Resource Not Found
+	ResourceNotFound
 )
 
 // Deprecated: pls check database error and return defined status error

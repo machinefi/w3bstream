@@ -3,6 +3,9 @@ package resource
 import (
 	"context"
 	"mime/multipart"
+	"os"
+	"path/filepath"
+	"time"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
@@ -11,70 +14,121 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-func FetchOrCreateResource(ctx context.Context, owner string, f *multipart.FileHeader) (*models.Resource, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-	idg := confid.MustSFIDGeneratorFromContext(ctx)
-
-	_, l = l.Start(ctx, "FetchOrCreateResource")
-	defer l.End()
-
-	fullName, err := UploadFile(ctx, f, owner)
+func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, md5 string) (*models.Resource, []byte, error) {
+	f, err := fh.Open()
 	if err != nil {
-		l.Error(err)
-		return nil, status.UploadFileFailed.StatusErr().WithDesc(err.Error())
+		err = status.UploadFileFailed.StatusErr().WithDesc(err.Error())
+		return nil, nil, err
 	}
 
-	m := &models.Resource{ResourceInfo: models.ResourceInfo{Path: fullName}}
+	path, data, err := UploadFile(ctx, f, md5)
+	if err != nil {
+		err = status.UploadFileFailed.StatusErr().WithDesc(err.Error())
+		return nil, nil, err
+	}
 
-	var exists bool
-	err = sqlx.NewTasks(d).With(
-		// fetch Resource
-		func(db sqlx.DBExecutor) error {
-			err := m.FetchByPath(d)
-			if err != nil {
+	id := confid.MustNewSFIDGenerator().MustGenSFID()
+	res := &models.Resource{}
+	found := false
+
+	err = sqlx.NewTasks(types.MustMgrDBExecutorFromContext(ctx)).With(
+		func(d sqlx.DBExecutor) error {
+			res.Md5 = md5
+			if err = res.FetchByMd5(d); err != nil {
 				if sqlx.DBErr(err).IsNotFound() {
-					exists = false
+					found = false
 					return nil
-				} else {
-					return status.CheckDatabaseError(err, "FetchResource")
 				}
-			} else {
-				exists = true
-				return nil
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
+			found = true
+			return nil
 		},
-		// create or update Resource
-		func(db sqlx.DBExecutor) error {
-			if exists {
-				m.ResourceInfo.RefCnt += 1
-				if err := m.UpdateByPath(d); err != nil {
-					return status.CheckDatabaseError(err, "UpdateResource")
-				}
-				return nil
-			} else {
-				m.ResourceID = idg.MustGenSFID()
-				m.ResourceInfo.Path = fullName
-				m.ResourceInfo.RefCnt = 1
-				if err := m.Create(db); err != nil {
-					return status.CheckDatabaseError(err, "CreateResource")
-				}
+		func(d sqlx.DBExecutor) error {
+			if found {
 				return nil
 			}
+			res = &models.Resource{
+				RelResource:  models.RelResource{ResourceID: id},
+				ResourceInfo: models.ResourceInfo{Path: path, Md5: md5},
+			}
+			if err = res.Create(d); err != nil {
+				if sqlx.DBErr(err).IsConflict() {
+					return status.ResourceConflict
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			own := &models.ResourceOwnership{
+				RelResource: models.RelResource{ResourceID: res.ResourceID},
+				RelAccount:  models.RelAccount{AccountID: acc},
+				ResourceOwnerInfo: models.ResourceOwnerInfo{
+					UploadedAt: types.Timestamp{Time: time.Now()},
+				},
+			}
+			if err = own.Create(d); err != nil {
+				if sqlx.DBErr(err).IsConflict() {
+					return status.ResourceOwnerConflict
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
 		},
 	).Do()
 
-	l.Info("get wasm resource from db")
-	return m, err
+	if err != nil {
+		return nil, nil, err
+	}
+	return res, data, nil
 }
 
-func CheckResourceExist(ctx context.Context, path string) bool {
-	l := types.MustLoggerFromContext(ctx)
+func GetBySFID(ctx context.Context, id types.SFID) (*models.Resource, error) {
+	res := &models.Resource{}
+	res.ResourceID = id
+	if err := res.FetchByResourceID(types.MustMgrDBExecutorFromContext(ctx)); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.ResourceNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return res, nil
+}
 
-	_, l = l.Start(ctx, "CheckResourceExist")
-	defer l.End()
+func GetByMd5(ctx context.Context, md5 string) (*models.Resource, error) {
+	res := &models.Resource{}
+	res.Md5 = md5
+	if err := res.FetchByMd5(types.MustMgrDBExecutorFromContext(ctx)); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.ResourceNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return res, nil
+}
 
-	return IsPathExists(path)
+func GetContentBySFID(ctx context.Context, id types.SFID) (*models.Resource, []byte, error) {
+	res, err := GetBySFID(ctx, id)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if fs, _ := types.FileSystemFromContext(ctx); fs != nil {
+		data, err := fs.FileCli.Read(res.Md5)
+		if err != nil {
+			return nil, nil, status.LocalResReadFailed.StatusErr().WithDesc(err.Error())
+		}
+		return res, data, nil
+	}
+
+	// try local filesystem
+	c := types.MustUploadConfigFromContext(ctx)
+	data, err := os.ReadFile(filepath.Join(c.Root, res.Path))
+	if err != nil {
+		return nil, nil, status.LocalResReadFailed.StatusErr().WithDesc(err.Error())
+	}
+	return res, data, nil
 }
 
 func ListResource(ctx context.Context) ([]models.Resource, error) {

@@ -46,7 +46,7 @@ func CreateApplet(ctx context.Context, projectID, accountID types.SFID, r *Creat
 	defer l.End()
 
 	mResource := &models.Resource{}
-	if mResource, err = resource.FetchOrCreateResource(ctx, accountID.String(), r.File); err != nil {
+	if mResource, _, err = resource.Create(ctx, accountID, r.File, ""); err != nil {
 		l.Error(err)
 		return nil, err
 	}
@@ -104,7 +104,7 @@ func UpdateApplet(ctx context.Context, appletID, accountID types.SFID, r *Update
 	defer l.End()
 
 	mResource := &models.Resource{}
-	if mResource, err = resource.FetchOrCreateResource(ctx, accountID.String(), r.File); err != nil {
+	if mResource, _, err = resource.Create(ctx, accountID, r.File, ""); err != nil {
 		l.Error(err)
 		return err
 	}
@@ -182,7 +182,7 @@ func UpdateAndDeploy(ctx context.Context, accountID types.SFID, r *UpdateAndDepl
 	_, l = l.Start(ctx, "UpdateAndDeploy")
 	defer l.End()
 
-	mResource, err := resource.FetchOrCreateResource(ctx, accountID.String(), r.File)
+	mResource, _, err := resource.Create(ctx, accountID, r.File, "")
 	if err != nil {
 		l.Error(err)
 		return err
