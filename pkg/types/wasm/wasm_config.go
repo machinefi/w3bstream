@@ -11,8 +11,8 @@ import (
 
 func NewConfigurationByType(t enums.ConfigType) (Configuration, error) {
 	switch t {
-	case enums.CONFIG_TYPE__PROJECT_SCHEMA:
-		return &Schema{}, nil
+	case enums.CONFIG_TYPE__PROJECT_DATABASE:
+		return &Database{}, nil
 	case enums.CONFIG_TYPE__INSTANCE_CACHE:
 		return &Cache{}, nil
 	case enums.CONFIG_TYPE__PROJECT_ENV:

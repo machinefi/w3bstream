@@ -206,43 +206,35 @@ func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.In
 
 	err := sqlx.NewTasks(types.MustMgrDBExecutorFromContext(ctx)).With(
 		func(d sqlx.DBExecutor) error {
-			if !forUpdate {
-				return nil
-			}
-			if err := ins.UpdateByInstanceID(d); err != nil {
-				if sqlx.DBErr(err).IsConflict() {
-					return status.MultiInstanceDeployed.StatusErr().
-						WithDesc(app.AppletID.String())
-				}
-				return status.DatabaseError.StatusErr().WithDesc(err.Error())
-			}
-			return nil
-		},
-		func(d sqlx.DBExecutor) error {
 			if forUpdate {
-				return nil
-			}
-			if err := ins.Create(d); err != nil {
-				if sqlx.DBErr(err).IsConflict() {
-					return status.MultiInstanceDeployed.StatusErr().
-						WithDesc(app.AppletID.String())
+				if err := ins.UpdateByInstanceID(d); err != nil {
+					if sqlx.DBErr(err).IsConflict() {
+						return status.MultiInstanceDeployed.StatusErr().
+							WithDesc(app.AppletID.String())
+					}
+					return status.DatabaseError.StatusErr().WithDesc(err.Error())
 				}
-				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			} else {
+				if err := ins.Create(d); err != nil {
+					if sqlx.DBErr(err).IsConflict() {
+						return status.MultiInstanceDeployed.StatusErr().
+							WithDesc(app.AppletID.String())
+					}
+					return status.DatabaseError.StatusErr().WithDesc(err.Error())
+				}
 			}
 			return nil
 		},
 		func(db sqlx.DBExecutor) error {
 			if r != nil && r.Cache != nil {
-				return config.Remove(ctx, &config.CondArgs{
+				if err := config.Remove(ctx, &config.CondArgs{
 					RelIDs: []types.SFID{ins.InstanceID},
-				})
-			}
-			return nil
-		},
-		func(db sqlx.DBExecutor) error {
-			if r != nil && r.Cache != nil {
-				_, err := config.Create(ctx, ins.InstanceID, r.Cache)
-				return err
+				}); err != nil {
+					return err
+				}
+				if _, err := config.Create(ctx, ins.InstanceID, r.Cache); err != nil {
+					return err
+				}
 			}
 			return nil
 		},

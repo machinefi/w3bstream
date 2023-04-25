@@ -13,11 +13,11 @@ import (
 
 type CreateProjectSchema struct {
 	httpx.MethodPost
-	wasm.Schema `in:"body"`
+	wasm.Database `in:"body"`
 }
 
 func (r *CreateProjectSchema) Path() string {
-	return "/" + enums.CONFIG_TYPE__PROJECT_SCHEMA.String()
+	return "/" + enums.CONFIG_TYPE__PROJECT_DATABASE.String()
 }
 
 func (r *CreateProjectSchema) Output(ctx context.Context) (interface{}, error) {
@@ -27,7 +27,7 @@ func (r *CreateProjectSchema) Output(ctx context.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return config.Create(ctx, types.MustProjectFromContext(ctx).ProjectID, &r.Schema)
+	return config.Create(ctx, types.MustProjectFromContext(ctx).ProjectID, &r.Database)
 }
 
 type CreateOrUpdateProjectEnv struct {

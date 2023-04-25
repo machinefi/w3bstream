@@ -90,8 +90,7 @@ func init() {
 	WithContext = contextx.WithContextCompose(
 		types.WithMgrDBExecutorContext(config.Postgres),
 		types.WithMonitorDBExecutorContext(config.MonitorDB),
-		types.WithWasmDBExecutorContext(config.WasmDB),
-		types.WithPgEndpointContext(config.Postgres),
+		types.WithWasmDBEndpointContext(config.WasmDB),
 		types.WithRedisEndpointContext(config.Redis),
 		types.WithLoggerContext(config.StdLogger),
 		conflog.WithLoggerContext(config.StdLogger),
