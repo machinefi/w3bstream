@@ -60,7 +60,7 @@ func Init(ctx context.Context) error {
 
 		if state := ins.State; state == enums.INSTANCE_STATE__STARTED ||
 			state == enums.INSTANCE_STATE__STOPPED {
-			ins, err = Upsert(ctx, state, ins.InstanceID)
+			ins, err = Upsert(ctx, nil, state, ins.InstanceID)
 			if err != nil {
 				l.Warn(err)
 			} else {
@@ -185,7 +185,7 @@ func Remove(ctx context.Context, r *CondArgs) error {
 	).Do()
 }
 
-func UpsertByCode(ctx context.Context, code []byte, state enums.InstanceState, old ...types.SFID) (*models.Instance, error) {
+func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.InstanceState, old ...types.SFID) (*models.Instance, error) {
 	var (
 		id        types.SFID
 		forUpdate = false
@@ -231,6 +231,21 @@ func UpsertByCode(ctx context.Context, code []byte, state enums.InstanceState, o
 			}
 			return nil
 		},
+		func(db sqlx.DBExecutor) error {
+			if r != nil && r.Cache != nil {
+				return config.Remove(ctx, &config.CondArgs{
+					RelIDs: []types.SFID{ins.InstanceID},
+				})
+			}
+			return nil
+		},
+		func(db sqlx.DBExecutor) error {
+			if r != nil && r.Cache != nil {
+				_, err := config.Create(ctx, ins.InstanceID, r.Cache)
+				return err
+			}
+			return nil
+		},
 		func(d sqlx.DBExecutor) error {
 			if forUpdate {
 				if err := vm.DelInstance(ctx, ins.InstanceID); err != nil {
@@ -258,7 +273,7 @@ func UpsertByCode(ctx context.Context, code []byte, state enums.InstanceState, o
 	return ins, nil
 }
 
-func Upsert(ctx context.Context, state enums.InstanceState, old ...types.SFID) (*models.Instance, error) {
+func Upsert(ctx context.Context, r *CreateReq, state enums.InstanceState, old ...types.SFID) (*models.Instance, error) {
 	res := types.MustResourceFromContext(ctx)
 
 	code, err := resource.GetContentBySFID(ctx, res.ResourceID)
@@ -266,7 +281,7 @@ func Upsert(ctx context.Context, state enums.InstanceState, old ...types.SFID) (
 		return nil, err
 	}
 
-	return UpsertByCode(ctx, code, state, old...)
+	return UpsertByCode(ctx, r, code, state, old...)
 }
 
 func Create(ctx context.Context, r *CreateReq) (*models.Instance, error) {
