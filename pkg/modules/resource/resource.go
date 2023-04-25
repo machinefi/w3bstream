@@ -79,13 +79,13 @@ func GetBySFID(ctx context.Context, id types.SFID) (*models.Resource, error) {
 	return m, nil
 }
 
-func GetContentBySFID(ctx context.Context, id types.SFID) (code []byte, err error) {
-	var res, _ = types.ResourceFromContext(ctx)
+func GetContentBySFID(ctx context.Context, id types.SFID) (res *models.Resource, code []byte, err error) {
+	res, _ = types.ResourceFromContext(ctx)
 	if res == nil || id != res.ResourceID {
 		if res, err = GetBySFID(ctx, id); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 	// TODO fetch resource content from fs
-	return code, nil
+	return res, code, nil
 }

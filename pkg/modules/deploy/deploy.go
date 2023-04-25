@@ -276,7 +276,7 @@ func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.In
 func Upsert(ctx context.Context, r *CreateReq, state enums.InstanceState, old ...types.SFID) (*models.Instance, error) {
 	res := types.MustResourceFromContext(ctx)
 
-	code, err := resource.GetContentBySFID(ctx, res.ResourceID)
+	_, code, err := resource.GetContentBySFID(ctx, res.ResourceID)
 	if err != nil {
 		return nil, err
 	}

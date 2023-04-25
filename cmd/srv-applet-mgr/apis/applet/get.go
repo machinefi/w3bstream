@@ -9,9 +9,10 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
+// ListApplet list applets with condition under project permission
 type ListApplet struct {
 	httpx.MethodGet
-	applet.ListAppletReq
+	applet.ListReq
 }
 
 func (r *ListApplet) Path() string { return "/datalist" }
@@ -23,9 +24,11 @@ func (r *ListApplet) Output(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	return applet.ListApplets(ctx, &r.ListAppletReq)
+	r.ProjectID = types.MustProjectFromContext(ctx).ProjectID
+	return applet.List(ctx, &r.ListReq)
 }
 
+// GetApplet get applet by applet id
 type GetApplet struct {
 	httpx.MethodGet
 	AppletID types.SFID `in:"path" name:"appletID"`
