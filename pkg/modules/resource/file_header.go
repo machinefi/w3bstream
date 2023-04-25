@@ -19,59 +19,6 @@ import (
 
 var reserve = int64(100 * 1024 * 1024)
 
-func UploadFile(ctx context.Context, f *multipart.FileHeader, owner string) (fullName string, err error) {
-	l := types.MustLoggerFromContext(ctx)
-	fileSystem := types.MustFileSystemFromContext(ctx)
-
-	var (
-		fr       io.ReadSeekCloser
-		sum      string
-		filesize = int64(0)
-	)
-
-	_, l = l.Start(ctx, "Upload")
-	defer l.End()
-
-	if fr, err = f.Open(); err != nil {
-		return
-	}
-	defer fr.Close()
-
-	if filesize, err = fr.Seek(0, io.SeekEnd); err != nil {
-		l.Error(err)
-		return
-	}
-	if filesize > fileSystem.FileSizeLimit {
-		err = errors.Wrap(err, "filesize over limit")
-		l.Error(err)
-		return
-	}
-
-	_, err = fr.Seek(0, io.SeekStart)
-	if err != nil {
-		l.Error(err)
-		return
-	}
-
-	data := make([]byte, filesize)
-	_, err = fr.Read(data)
-	if err != nil {
-		l.Error(err)
-		return
-	}
-
-	sum, err = util.ByteMD5(data)
-	if err != nil {
-		l.Error(err)
-	}
-	fullName = fmt.Sprintf("%s/%s/%s", owner, sum, f.Filename)
-	err = fileSystem.FileCli.Upload(fullName, data)
-	if err != nil {
-		l.Error(err)
-	}
-	return
-}
-
 func Upload(ctx context.Context, f *multipart.FileHeader, id string) (root, fullName, sum string, err error) {
 	l := types.MustLoggerFromContext(ctx)
 	conf := types.MustUploadConfigFromContext(ctx)

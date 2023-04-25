@@ -69,6 +69,8 @@ const (
 	ProjectConfigConflict
 	// @errTalk Project Name Conflict
 	ProjectNameConflict
+	// @errTalk Resource Path Conflict
+	ResourcePathConflict
 )
 
 const (

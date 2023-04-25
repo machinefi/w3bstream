@@ -85,6 +85,8 @@ func (v Error) Key() string {
 		return "ProjectConfigConflict"
 	case ProjectNameConflict:
 		return "ProjectNameConflict"
+	case ResourcePathConflict:
+		return "ResourcePathConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -149,6 +151,8 @@ func (v Error) Msg() string {
 		return "Project Config Conflict"
 	case ProjectNameConflict:
 		return "Project Name Conflict"
+	case ResourcePathConflict:
+		return "Resource Path Conflict"
 	case InternalServerError:
 		return "InternalServerError internal error"
 	case DatabaseError:
@@ -212,6 +216,8 @@ func (v Error) CanBeTalk() bool {
 	case ProjectConfigConflict:
 		return true
 	case ProjectNameConflict:
+		return true
+	case ResourcePathConflict:
 		return true
 	case InternalServerError:
 		return true

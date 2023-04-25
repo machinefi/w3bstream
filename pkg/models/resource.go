@@ -23,6 +23,6 @@ type RelResource struct {
 }
 
 type ResourceInfo struct {
-	Path   string `db:"f_path,default=''"       json:"path"` // Path accountID/md5
+	Path   string `db:"f_path,default=''"       json:"path"` // Path <=> md5
 	RefCnt int    `db:"f_ref_cnt,default=0"     json:"refCnt"`
 }

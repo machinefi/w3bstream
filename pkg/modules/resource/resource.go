@@ -2,10 +2,14 @@ package resource
 
 import (
 	"context"
+	"io"
 	"mime/multipart"
+
+	"github.com/pkg/errors"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
+	"github.com/machinefi/w3bstream/pkg/depends/util"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -15,17 +19,16 @@ func FetchOrCreateResource(ctx context.Context, owner string, f *multipart.FileH
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
+	fileSystemOp := types.MustFileSystemOpFromContext(ctx)
 
 	_, l = l.Start(ctx, "FetchOrCreateResource")
 	defer l.End()
 
-	fullName, err := UploadFile(ctx, f, owner)
+	data, md5, err := getDataFromFileHeader(ctx, f)
 	if err != nil {
-		l.Error(err)
-		return nil, status.UploadFileFailed.StatusErr().WithDesc(err.Error())
+		return nil, err
 	}
-
-	m := &models.Resource{ResourceInfo: models.ResourceInfo{Path: fullName}}
+	m := &models.Resource{ResourceInfo: models.ResourceInfo{Path: md5}}
 
 	var exists bool
 	err = sqlx.NewTasks(d).With(
@@ -37,7 +40,8 @@ func FetchOrCreateResource(ctx context.Context, owner string, f *multipart.FileH
 					exists = false
 					return nil
 				} else {
-					return status.CheckDatabaseError(err, "FetchResource")
+					return status.DatabaseError.StatusErr().
+						WithDesc(errors.Wrap(err, "FetchResource").Error())
 				}
 			} else {
 				exists = true
@@ -49,15 +53,25 @@ func FetchOrCreateResource(ctx context.Context, owner string, f *multipart.FileH
 			if exists {
 				m.ResourceInfo.RefCnt += 1
 				if err := m.UpdateByPath(d); err != nil {
-					return status.CheckDatabaseError(err, "UpdateResource")
+					return status.DatabaseError.StatusErr().
+						WithDesc(errors.Wrap(err, "UpdateResource").Error())
 				}
 				return nil
 			} else {
+				if err := fileSystemOp.Upload(md5, data); err != nil {
+					return status.UploadFileFailed.StatusErr().WithDesc(err.Error())
+				}
+
 				m.ResourceID = idg.MustGenSFID()
-				m.ResourceInfo.Path = fullName
+				m.ResourceInfo.Path = md5
 				m.ResourceInfo.RefCnt = 1
 				if err := m.Create(db); err != nil {
-					return status.CheckDatabaseError(err, "CreateResource")
+					l.WithValues("stg", "CreateResource").Error(err)
+					if sqlx.DBErr(err).IsConflict() {
+						return status.ResourcePathConflict
+					}
+					return status.DatabaseError.StatusErr().
+						WithDesc(errors.Wrap(err, "CreateResource").Error())
 				}
 				return nil
 			}
@@ -66,6 +80,50 @@ func FetchOrCreateResource(ctx context.Context, owner string, f *multipart.FileH
 
 	l.Info("get wasm resource from db")
 	return m, err
+}
+
+func getDataFromFileHeader(ctx context.Context, f *multipart.FileHeader) (data []byte, sum string, err error) {
+	l := types.MustLoggerFromContext(ctx)
+	uploadConf := types.MustUploadConfigFromContext(ctx)
+
+	var (
+		fr       io.ReadSeekCloser
+		filesize = int64(0)
+	)
+
+	_, l = l.Start(ctx, "getDataFromFileHeader")
+	defer l.End()
+
+	if fr, err = f.Open(); err != nil {
+		return
+	}
+	defer fr.Close()
+
+	if filesize, err = fr.Seek(0, io.SeekEnd); err != nil {
+		l.Error(err)
+		return
+	}
+	if filesize > uploadConf.FileSizeLimit {
+		err = errors.Wrap(err, "filesize over limit")
+		l.Error(err)
+		return
+	}
+
+	_, err = fr.Seek(0, io.SeekStart)
+	if err != nil {
+		l.Error(err)
+		return
+	}
+
+	data = make([]byte, filesize)
+	_, err = fr.Read(data)
+	if err != nil {
+		l.Error(err)
+		return
+	}
+
+	sum, err = util.ByteMD5(data)
+	return
 }
 
 func CheckResourceExist(ctx context.Context, path string) bool {

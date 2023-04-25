@@ -2,8 +2,8 @@ package types
 
 import (
 	"context"
-	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/amazonS3"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
@@ -34,7 +34,7 @@ type (
 	CtxEthClient         struct{} // CtxEthClient ETHClientConfig
 	CtxWhiteList         struct{}
 	CtxAmazonS3          struct{}
-	CtxFileSystem        struct{}
+	CtxFileSystemOp      struct{}
 )
 
 func WithMgrDBExecutor(ctx context.Context, v sqlx.DBExecutor) context.Context {
@@ -398,23 +398,23 @@ func MustS3FromContext(ctx context.Context) *amazonS3.AmazonS3 {
 	return v
 }
 
-func WithFileSystem(ctx context.Context, v *filesystem.FileSystem) context.Context {
-	return contextx.WithValue(ctx, CtxFileSystem{}, v)
+func WithFileSystemOp(ctx context.Context, v filesystem.FileSystemOp) context.Context {
+	return contextx.WithValue(ctx, CtxFileSystemOp{}, v)
 }
 
-func WithFileSystemContext(v *filesystem.FileSystem) contextx.WithContext {
+func WithFileSystemOpContext(v filesystem.FileSystemOp) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, CtxFileSystem{}, v)
+		return contextx.WithValue(ctx, CtxFileSystemOp{}, v)
 	}
 }
 
-func FileSystemFromContext(ctx context.Context) (*filesystem.FileSystem, bool) {
-	v, ok := ctx.Value(CtxFileSystem{}).(*filesystem.FileSystem)
+func FileSystemOpFromContext(ctx context.Context) (filesystem.FileSystemOp, bool) {
+	v, ok := ctx.Value(CtxFileSystemOp{}).(filesystem.FileSystemOp)
 	return v, ok
 }
 
-func MustFileSystemFromContext(ctx context.Context) *filesystem.FileSystem {
-	v, ok := FileSystemFromContext(ctx)
+func MustFileSystemOpFromContext(ctx context.Context) filesystem.FileSystemOp {
+	v, ok := FileSystemOpFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

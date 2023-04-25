@@ -2,7 +2,7 @@ package amazonS3
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -57,10 +57,6 @@ func (s *AmazonS3) Name() string {
 	return "s3-cli"
 }
 
-//func (s *AmazonS3) LivenessCheck() map[string]string {
-//	return nil
-//}
-
 func (s *AmazonS3) Upload(key string, data []byte) error {
 	if _, err := s.cli.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(s.BucketName),
@@ -83,7 +79,7 @@ func (s *AmazonS3) Read(key string) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 
-	return ioutil.ReadAll(resp.Body)
+	return io.ReadAll(resp.Body)
 }
 
 func (s *AmazonS3) Delete(key string) error {
