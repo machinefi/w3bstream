@@ -6156,6 +6156,26 @@
           }
         }
       }
+    },
+    "/version": {
+      "get": {
+        "tags": [
+          "apis/version"
+        ],
+        "operationId": "VersionRouter",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
