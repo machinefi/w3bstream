@@ -15,16 +15,17 @@ type RemoveProject struct {
 }
 
 func (r *RemoveProject) Output(ctx context.Context) (interface{}, error) {
-	prj := middleware.MustProjectName(ctx)
+	name := middleware.MustProjectName(ctx)
 	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
-		WithProjectContextByName(ctx, prj)
+		WithProjectContextByName(ctx, name)
 	if err != nil {
 		return nil, err
 	}
-	if err := blockchain.RemoveMonitor(ctx, prj); err != nil {
+	// TODO @zhiran  move this to bff request
+	if err := blockchain.RemoveMonitor(ctx, name); err != nil {
 		return nil, err
 	}
 
 	v := types.MustProjectFromContext(ctx)
-	return nil, project.RemoveProjectByProjectID(ctx, v.ProjectID)
+	return nil, project.RemoveBySFID(ctx, v.ProjectID)
 }

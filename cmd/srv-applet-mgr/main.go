@@ -9,12 +9,10 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/global"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/tasks"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
-	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/modules/account"
 	"github.com/machinefi/w3bstream/pkg/modules/blockchain"
 	"github.com/machinefi/w3bstream/pkg/modules/cronjob"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
-	"github.com/machinefi/w3bstream/pkg/modules/event"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -37,30 +35,22 @@ func main() {
 				kit.Run(tasks.Root, global.TaskServer())
 			},
 			func() {
-				if err := project.InitChannels(
-					global.WithContext(context.Background()),
-					func(ctx context.Context, channel string, data *eventpb.Event) (interface{}, error) {
-						return event.OnEventReceived(ctx, channel, data)
-					},
-				); err != nil {
+				if err := project.Init(global.Context); err != nil {
 					panic(err)
 				}
 			},
 			func() {
-				if err := deploy.Init(
-					global.WithContext(context.Background()),
-				); err != nil {
+				if err := deploy.Init(global.Context); err != nil {
 					panic(err)
 				}
 			},
 			func() {
-				ctx := global.WithContext(context.Background())
-				l := types.MustLoggerFromContext(ctx)
+				l := types.MustLoggerFromContext(global.Context)
 
-				_, l = l.Start(ctx, "init.CreateAdmin")
+				_, l = l.Start(context.Background(), "init.CreateAdmin")
 				defer l.End()
 
-				passwd, err := account.CreateAdminIfNotExist(ctx)
+				passwd, err := account.CreateAdminIfNotExist(global.Context)
 				if err != nil {
 					l.Panic(err)
 					return
@@ -71,22 +61,21 @@ func main() {
 				}
 			},
 			func() {
-				ctx := global.WithContext(context.Background())
-				l := types.MustLoggerFromContext(ctx)
+				l := types.MustLoggerFromContext(global.Context)
 
-				_, l = l.Start(ctx, "init.InitChainDB")
+				_, l = l.Start(context.Background(), "init.InitChainDB")
 				defer l.End()
 
-				if err := blockchain.InitChainDB(ctx); err != nil {
+				if err := blockchain.InitChainDB(global.Context); err != nil {
 					l.Panic(err)
 					return
 				}
 			},
 			func() {
-				blockchain.Monitor(global.WithContext(context.Background()))
+				blockchain.Monitor(global.Context)
 			},
 			func() {
-				cronjob.Run(global.WithContext(context.Background()))
+				cronjob.Run(global.Context)
 			},
 		)
 	})

@@ -26,6 +26,7 @@ import (
 var (
 	App         *confapp.Ctx
 	WithContext contextx.WithContext
+	Context     context.Context
 
 	tasks  mq.TaskManager
 	worker *mq.TaskWorker
@@ -104,6 +105,7 @@ func init() {
 		types.WithETHClientConfigContext(config.EthClient),
 		types.WithWhiteListContext(config.WhiteList),
 	)
+	Context = WithContext(context.Background())
 }
 
 func Server() kit.Transport { return server.WithContextInjector(WithContext) }
