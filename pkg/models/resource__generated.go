@@ -75,9 +75,11 @@ func (*Resource) UniqueIndexes() builder.Indexes {
 	return builder.Indexes{
 		"ui_path": []string{
 			"Path",
+			"DeletedAt",
 		},
 		"ui_resource_id": []string{
 			"ResourceID",
+			"DeletedAt",
 		},
 	}
 }
@@ -130,11 +132,19 @@ func (*Resource) FieldUpdatedAt() string {
 	return "UpdatedAt"
 }
 
+func (m *Resource) ColDeletedAt() *builder.Column {
+	return ResourceTable.ColByFieldName(m.FieldDeletedAt())
+}
+
+func (*Resource) FieldDeletedAt() string {
+	return "DeletedAt"
+}
+
 func (m *Resource) CondByValue(db sqlx.DBExecutor) builder.SqlCondition {
 	var (
 		tbl  = db.T(m)
 		fvs  = builder.FieldValueFromStructByNoneZero(m)
-		cond = make([]builder.SqlCondition, 0)
+		cond = []builder.SqlCondition{tbl.ColByFieldName("DeletedAt").Eq(0)}
 	)
 
 	for _, fn := range m.IndexFieldNames() {
@@ -171,6 +181,7 @@ func (m *Resource) List(db sqlx.DBExecutor, cond builder.SqlCondition, adds ...b
 		tbl = db.T(m)
 		lst = make([]Resource, 0)
 	)
+	cond = builder.And(tbl.ColByFieldName("DeletedAt").Eq(0), cond)
 	adds = append([]builder.Addition{builder.Where(cond), builder.Comment("Resource.List")}, adds...)
 	err := db.QueryAndScan(builder.Select(nil).From(tbl, adds...), &lst)
 	return lst, err
@@ -178,6 +189,7 @@ func (m *Resource) List(db sqlx.DBExecutor, cond builder.SqlCondition, adds ...b
 
 func (m *Resource) Count(db sqlx.DBExecutor, cond builder.SqlCondition, adds ...builder.Addition) (cnt int64, err error) {
 	tbl := db.T(m)
+	cond = builder.And(tbl.ColByFieldName("DeletedAt").Eq(0), cond)
 	adds = append([]builder.Addition{builder.Where(cond), builder.Comment("Resource.List")}, adds...)
 	err = db.QueryAndScan(builder.Select(builder.Count()).From(tbl, adds...), &cnt)
 	return
@@ -192,6 +204,7 @@ func (m *Resource) FetchByID(db sqlx.DBExecutor) error {
 				builder.Where(
 					builder.And(
 						tbl.ColByFieldName("ID").Eq(m.ID),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
 				builder.Comment("Resource.FetchByID"),
@@ -210,6 +223,7 @@ func (m *Resource) FetchByPath(db sqlx.DBExecutor) error {
 				builder.Where(
 					builder.And(
 						tbl.ColByFieldName("Path").Eq(m.Path),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
 				builder.Comment("Resource.FetchByPath"),
@@ -228,6 +242,7 @@ func (m *Resource) FetchByResourceID(db sqlx.DBExecutor) error {
 				builder.Where(
 					builder.And(
 						tbl.ColByFieldName("ResourceID").Eq(m.ResourceID),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
 				builder.Comment("Resource.FetchByResourceID"),
@@ -248,6 +263,7 @@ func (m *Resource) UpdateByIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues
 			Where(
 				builder.And(
 					tbl.ColByFieldName("ID").Eq(m.ID),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
 				builder.Comment("Resource.UpdateByIDWithFVs"),
 			).
@@ -278,6 +294,7 @@ func (m *Resource) UpdateByPathWithFVs(db sqlx.DBExecutor, fvs builder.FieldValu
 			Where(
 				builder.And(
 					tbl.ColByFieldName("Path").Eq(m.Path),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
 				builder.Comment("Resource.UpdateByPathWithFVs"),
 			).
@@ -308,6 +325,7 @@ func (m *Resource) UpdateByResourceIDWithFVs(db sqlx.DBExecutor, fvs builder.Fie
 			Where(
 				builder.And(
 					tbl.ColByFieldName("ResourceID").Eq(m.ResourceID),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
 				builder.Comment("Resource.UpdateByResourceIDWithFVs"),
 			).
@@ -348,10 +366,36 @@ func (m *Resource) DeleteByID(db sqlx.DBExecutor) error {
 				builder.Where(
 					builder.And(
 						tbl.ColByFieldName("ID").Eq(m.ID),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
 				builder.Comment("Resource.DeleteByID"),
 			),
+	)
+	return err
+}
+
+func (m *Resource) SoftDeleteByID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	fvs := builder.FieldValues{}
+
+	if _, ok := fvs["DeletedAt"]; !ok {
+		fvs["DeletedAt"] = types.Timestamp{Time: time.Now()}
+	}
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	_, err := db.Exec(
+		builder.Update(db.T(m)).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("ID").Eq(m.ID),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
+				),
+				builder.Comment("Resource.SoftDeleteByID"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
 	return err
 }
@@ -365,10 +409,36 @@ func (m *Resource) DeleteByPath(db sqlx.DBExecutor) error {
 				builder.Where(
 					builder.And(
 						tbl.ColByFieldName("Path").Eq(m.Path),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
 				builder.Comment("Resource.DeleteByPath"),
 			),
+	)
+	return err
+}
+
+func (m *Resource) SoftDeleteByPath(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	fvs := builder.FieldValues{}
+
+	if _, ok := fvs["DeletedAt"]; !ok {
+		fvs["DeletedAt"] = types.Timestamp{Time: time.Now()}
+	}
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	_, err := db.Exec(
+		builder.Update(db.T(m)).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("Path").Eq(m.Path),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
+				),
+				builder.Comment("Resource.SoftDeleteByPath"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
 	return err
 }
@@ -382,10 +452,36 @@ func (m *Resource) DeleteByResourceID(db sqlx.DBExecutor) error {
 				builder.Where(
 					builder.And(
 						tbl.ColByFieldName("ResourceID").Eq(m.ResourceID),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
 				builder.Comment("Resource.DeleteByResourceID"),
 			),
+	)
+	return err
+}
+
+func (m *Resource) SoftDeleteByResourceID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	fvs := builder.FieldValues{}
+
+	if _, ok := fvs["DeletedAt"]; !ok {
+		fvs["DeletedAt"] = types.Timestamp{Time: time.Now()}
+	}
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	_, err := db.Exec(
+		builder.Update(db.T(m)).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("ResourceID").Eq(m.ResourceID),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
+				),
+				builder.Comment("Resource.SoftDeleteByResourceID"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
 	return err
 }

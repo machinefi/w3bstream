@@ -9,13 +9,14 @@ import (
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/util"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-func FetchOrCreateResource(ctx context.Context, accountID types.SFID, fileName string, f *multipart.FileHeader) (*models.Resource, error) {
+func FetchOrCreateResource(ctx context.Context, accountID, appletID types.SFID, fileName string, f *multipart.FileHeader) (*models.Resource, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
@@ -74,8 +75,8 @@ func FetchOrCreateResource(ctx context.Context, accountID types.SFID, fileName s
 		func(db sqlx.DBExecutor) error {
 			mMeta.ResourceID = m.ResourceID
 			mMeta.AccountID = accountID
-			mMeta.MetaInfo.ResName = fileName
-			err := mMeta.FetchByResourceIDAndAccountIDAndResName(db)
+			mMeta.AppletID = appletID
+			err := mMeta.FetchByResourceIDAndAccountIDAndAppletID(db)
 			if err != nil {
 				if sqlx.DBErr(err).IsNotFound() {
 					metaExists = false
@@ -92,7 +93,7 @@ func FetchOrCreateResource(ctx context.Context, accountID types.SFID, fileName s
 		// create or update resource meta info
 		func(db sqlx.DBExecutor) error {
 			if metaExists {
-				mMeta.MetaInfo.RefCnt += 1
+				mMeta.MetaInfo.FileName = fileName
 				if err := mMeta.UpdateByMetaID(db); err != nil {
 					return status.DatabaseError.StatusErr().
 						WithDesc(errors.Wrap(err, "UpdateResourceMeta").Error())
@@ -100,7 +101,7 @@ func FetchOrCreateResource(ctx context.Context, accountID types.SFID, fileName s
 				return nil
 			} else {
 				mMeta.MetaID = idg.MustGenSFID()
-				mMeta.MetaInfo.RefCnt = 1
+				mMeta.MetaInfo.FileName = fileName
 				if err := mMeta.Create(db); err != nil {
 					l.WithValues("stg", "CreateResourceMeta").Error(err)
 					if sqlx.DBErr(err).IsConflict() {
@@ -171,12 +172,64 @@ func CheckResourceExist(ctx context.Context, path string) bool {
 	return IsPathExists(path)
 }
 
-func ListResource(ctx context.Context) ([]models.Resource, error) {
-	res, err := (&models.Resource{}).List(types.MustMgrDBExecutorFromContext(ctx), nil)
+func ListResourceMeta(ctx context.Context, r *ListReq) (*ListRsp, error) {
+	var (
+		d    = types.MustMgrDBExecutorFromContext(ctx)
+		m    = &models.ResourceMeta{}
+		ret  = &ListRsp{}
+		cond = r.Condition()
+		adds = r.Additions()
+
+		err error
+	)
+
+	ret.Data, err = m.List(d, cond, adds...)
 	if err != nil {
-		return nil, status.CheckDatabaseError(err)
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
-	return res, err
+	ret.Total, err = m.Count(d, cond)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return ret, nil
+}
+
+func ListResourceMetaDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
+	var (
+		d     = types.MustMgrDBExecutorFromContext(ctx)
+		mMeta = &models.ResourceMeta{}
+		mPrj  = &models.Project{}
+		mApp  = &models.Applet{}
+		ret   = &ListDetailRsp{}
+		cond  = r.Condition()
+	)
+
+	expr := builder.Select(builder.MultiWith(",",
+		builder.Alias(mMeta.ColAccountID(), "f_acc_id"),
+		builder.Alias(mMeta.ColAccountID(), "f_res_id"),
+		builder.Alias(mPrj.ColProjectID(), "f_prj_id"),
+		builder.Alias(mPrj.ColName(), "f_prj_name"),
+		builder.Alias(mApp.ColAppletID(), "f_app_id"),
+		builder.Alias(mApp.ColName(), "f_app_name"),
+		builder.Alias(mMeta.ColFileName(), "f_file_name"),
+		builder.Alias(mMeta.ColUpdatedAt(), "f_updated_at"),
+		builder.Alias(mMeta.ColCreatedAt(), "f_created_at"),
+	)).From(
+		d.T(mMeta),
+		append([]builder.Addition{
+			builder.LeftJoin(d.T(mApp)).On(mMeta.ColResourceID().Eq(mApp.ColResourceID())),
+			builder.LeftJoin(d.T(mPrj)).On(mApp.ColProjectID().Eq(mPrj.ColProjectID())),
+			builder.Where(cond),
+		}, r.Addition())...,
+	)
+	err := d.QueryAndScan(expr, &ret.Data)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	if ret.Total, err = mMeta.Count(d, cond); err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return ret, nil
 }
 
 func DeleteResource(ctx context.Context, resID types.SFID) error {
@@ -196,4 +249,41 @@ func GetBySFID(ctx context.Context, id types.SFID) (*models.Resource, error) {
 		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
 	return m, nil
+}
+
+func RemoveBySFID(ctx context.Context, id types.SFID) error {
+	m := &models.ResourceMeta{RelMeta: models.RelMeta{MetaID: id}}
+
+	if err := m.DeleteByMetaID(types.MustMgrDBExecutorFromContext(ctx)); err != nil {
+		return status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return nil
+}
+
+func RemoveByResIDAndAccIDAndAppID(ctx context.Context, resID, accID, appID types.SFID) error {
+	m := &models.ResourceMeta{
+		RelResource: models.RelResource{ResourceID: resID},
+		RelAccount:  models.RelAccount{AccountID: accID},
+		RelApplet:   models.RelApplet{AppletID: appID},
+	}
+
+	if err := m.DeleteByResourceIDAndAccountIDAndAppletID(types.MustMgrDBExecutorFromContext(ctx)); err != nil {
+		return status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return nil
+}
+func Remove(ctx context.Context, r *CondArgs) error {
+	var (
+		d = types.MustMgrDBExecutorFromContext(ctx)
+		m = &models.ResourceMeta{}
+	)
+
+	_, err := d.Exec(builder.Delete().From(
+		d.T(m),
+		builder.Where(r.Condition()),
+	))
+	if err != nil {
+		return status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return nil
 }

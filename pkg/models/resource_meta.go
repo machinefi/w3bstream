@@ -8,7 +8,7 @@ import (
 // ResourceMeta database model wasm_resource_meta
 // @def primary                        ID
 // @def unique_index UI_meta_id        MetaID
-// @def unique_index UI_res_acc_name   ResourceID AccountID ResName
+// @def unique_index UI_res_acc_app   ResourceID AccountID AppletID
 //
 //go:generate toolkit gen model ResourceMeta --database DB
 type ResourceMeta struct {
@@ -16,8 +16,9 @@ type ResourceMeta struct {
 	RelMeta
 	RelResource
 	RelAccount
+	RelApplet
 	MetaInfo
-	datatypes.OperationTimes
+	datatypes.OperationTimesWithDeleted
 }
 
 type RelMeta struct {
@@ -25,6 +26,5 @@ type RelMeta struct {
 }
 
 type MetaInfo struct {
-	ResName string `db:"f_res_name"              json:"resName"`
-	RefCnt  int    `db:"f_ref_cnt,default=0"     json:"refCnt"`
+	FileName   string          `db:"f_file_name"            json:"fileName"`
 }

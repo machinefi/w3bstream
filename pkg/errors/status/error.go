@@ -119,6 +119,8 @@ const (
 	InstanceNotFound
 	// @errTalk Resource Not Found
 	ResourceNotFound
+	// @errTalk Resource Meta Not Found
+	ResourceMetaNotFound
 	// @errTalk Strategy Not Found
 	StrategyNotFound
 	// @errTalk Publisher Not Found

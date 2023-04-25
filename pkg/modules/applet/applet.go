@@ -44,13 +44,14 @@ func CreateApplet(ctx context.Context, projectID, accountID types.SFID, r *Creat
 	_, l = l.Start(ctx, "CreateApplet")
 	defer l.End()
 
+	appletID := idg.MustGenSFID()
+
 	mResource := &models.Resource{}
-	if mResource, err = resource.FetchOrCreateResource(ctx, accountID, r.WasmName, r.File); err != nil {
+	if mResource, err = resource.FetchOrCreateResource(ctx, accountID, appletID, r.WasmName, r.File); err != nil {
 		l.Error(err)
 		return nil, err
 	}
 
-	appletID := idg.MustGenSFID()
 	mApplet = &models.Applet{
 		RelProject:  models.RelProject{ProjectID: projectID},
 		RelApplet:   models.RelApplet{AppletID: appletID},
@@ -103,7 +104,7 @@ func UpdateApplet(ctx context.Context, appletID, accountID types.SFID, r *Update
 	defer l.End()
 
 	mResource := &models.Resource{}
-	if mResource, err = resource.FetchOrCreateResource(ctx, accountID, r.WasmName, r.File); err != nil {
+	if mResource, err = resource.FetchOrCreateResource(ctx, accountID, mApplet.AppletID, r.WasmName, r.File); err != nil {
 		l.Error(err)
 		return err
 	}
@@ -180,7 +181,7 @@ func UpdateAndDeploy(ctx context.Context, accountID types.SFID, r *UpdateAndDepl
 	_, l = l.Start(ctx, "UpdateAndDeploy")
 	defer l.End()
 
-	mResource, err := resource.FetchOrCreateResource(ctx, accountID, r.WasmName, r.File)
+	mResource, err := resource.FetchOrCreateResource(ctx, accountID, app.AppletID, r.WasmName, r.File)
 	if err != nil {
 		l.Error(err)
 		return err
