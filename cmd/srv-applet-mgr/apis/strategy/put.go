@@ -20,7 +20,8 @@ func (r *UpdateStrategy) Path() string {
 }
 
 func (r *UpdateStrategy) Output(ctx context.Context) (interface{}, error) {
-	ctx, err := middleware.MustCurrentAccountFromContext(ctx).WithStrategyBySFID(ctx, r.StrategyID)
+	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
+		WithStrategyBySFID(ctx, r.StrategyID)
 	if err != nil {
 		return nil, err
 	}

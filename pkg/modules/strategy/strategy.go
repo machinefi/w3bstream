@@ -2,19 +2,21 @@ package strategy
 
 import (
 	"context"
-	"time"
-
-	"github.com/pkg/errors"
+	"fmt"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	"github.com/pkg/errors"
+
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
+
+// TODO
+func FilterStrategy(ctx context.Context, channel, eventType string) {}
 
 type InstanceHandler struct {
 	AppletID   types.SFID
@@ -89,233 +91,34 @@ func FindStrategyInstances(ctx context.Context, prjName string, eventType string
 	return handlers, nil
 }
 
-type CreateStrategyBatchReq struct {
-	Strategies []CreateStrategyReq `json:"strategies"`
-}
-
-type CreateStrategyReq struct {
-	models.RelApplet
-	models.StrategyInfo
-}
-
-func CreateStrategy(ctx context.Context, projectID types.SFID, r *CreateStrategyBatchReq) (err error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-	idg := confid.MustSFIDGeneratorFromContext(ctx)
-
-	_, l = l.Start(ctx, "CreateStrategy")
-	defer l.End()
-
-	err = sqlx.NewTasks(d).With(
-		func(db sqlx.DBExecutor) error {
-			for i := range r.Strategies {
-				if err := (&models.Strategy{
-					RelStrategy:  models.RelStrategy{StrategyID: idg.MustGenSFID()},
-					RelProject:   models.RelProject{ProjectID: projectID},
-					RelApplet:    models.RelApplet{AppletID: r.Strategies[i].AppletID},
-					StrategyInfo: models.StrategyInfo{EventType: r.Strategies[i].EventType, Handler: r.Strategies[i].Handler},
-				}).Create(db); err != nil {
-					return err
-				}
-			}
-			return nil
-		},
-	).Do()
-
-	if err != nil {
-		l.Error(err)
-		return status.CheckDatabaseError(err, "CreateStrategy")
-	}
-
-	return
-}
-
 func Update(ctx context.Context, id types.SFID, r *UpdateReq) (err error) {
 	var m *models.Strategy
 
-	err = sqlx.NewTasks(types.MustMgrDBExecutorFromContext(ctx)).With(
+	return sqlx.NewTasks(types.MustMgrDBExecutorFromContext(ctx)).With(
 		func(d sqlx.DBExecutor) error {
-			m, err = GetBySFID(ctx, id)
+			m, _ = types.StrategyFromContext(ctx)
+			if m == nil || m.StrategyID != id {
+				m, err = GetBySFID(ctx, id)
+			}
 			return err
 		},
 		func(d sqlx.DBExecutor) error {
-			m.RelApplet, m.StrategyInfo = r.RelApplet, r.StrategyInfo
+			m.RelApplet = r.RelApplet
+			m.StrategyInfo = r.StrategyInfo
 			if err = m.UpdateByStrategyID(d); err != nil {
 				if sqlx.DBErr(err).IsConflict() {
-					return status.StrategyConflict
+					return status.StrategyConflict.StatusErr().WithDesc(
+						fmt.Sprintf(
+							"[prj: %s] [app: %s] [type: %s] [hdl: %s]",
+							m.ProjectID, m.AppletID, m.EventType, m.Handler,
+						),
+					)
 				}
 				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
 		},
 	).Do()
-	return
-}
-
-func GetStrategyByStrategyID(ctx context.Context, strategyID types.SFID) (*models.Strategy, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	m := models.Strategy{RelStrategy: models.RelStrategy{StrategyID: strategyID}}
-
-	err := m.FetchByStrategyID(d)
-	if err != nil {
-		return nil, status.CheckDatabaseError(err, "FetchByStrategyID")
-	}
-
-	return &m, nil
-}
-
-type ListStrategyReq struct {
-	projectID   types.SFID
-	IDs         []uint64     `in:"query" name:"id,omitempty"`
-	AppletIDs   []types.SFID `in:"query" name:"appletID,omitempty"`
-	StrategyIDs []types.SFID `in:"query" name:"strategyID,omitempty"`
-	EventTypes  []string     `in:"query" name:"eventType,omitempty"`
-	datatypes.Pager
-}
-
-func (r *ListStrategyReq) SetCurrentProjectID(projectID types.SFID) {
-	r.projectID = projectID
-}
-func (r *ListStrategyReq) Condition() builder.SqlCondition {
-	var (
-		m  = &models.Strategy{}
-		cs []builder.SqlCondition
-	)
-
-	cs = append(cs, m.ColProjectID().Eq(r.projectID))
-	if len(r.IDs) > 0 {
-		cs = append(cs, m.ColID().In(r.IDs))
-	}
-	if len(r.AppletIDs) > 0 {
-		cs = append(cs, m.ColAppletID().In(r.AppletIDs))
-	}
-	if len(r.StrategyIDs) > 0 {
-		cs = append(cs, m.ColStrategyID().In(r.StrategyIDs))
-	}
-	if len(r.EventTypes) > 0 {
-		cs = append(cs, m.ColEventType().In(r.EventTypes))
-	}
-
-	return builder.And(cs...)
-}
-
-func (r *ListStrategyReq) Additions() builder.Additions {
-	m := &models.Strategy{}
-	return builder.Additions{
-		builder.OrderBy(builder.DescOrder(m.ColCreatedAt())),
-		r.Pager.Addition(),
-	}
-}
-
-type ListStrategyRsp struct {
-	Data  []Detail `json:"data"`  // Data strategy data list
-	Total int64    `json:"total"` // Total strategy count under current projectID
-}
-
-type Detail struct {
-	ProjectID  types.SFID   `json:"projectID"`
-	Strategies []InfoDetail `json:"strategies,omitempty"`
-	datatypes.OperationTimes
-}
-
-type InfoDetail struct {
-	StrategyID types.SFID `json:"strategyID"`
-	AppletID   types.SFID `json:"appletID"`
-	AppletName string     `json:"appletName"`
-	EventType  string     `json:"eventType"`
-	Handler    string     `json:"handler"`
-}
-
-type detail struct {
-	StrategyID types.SFID `db:"f_strategy_id"`
-	AppletID   types.SFID `db:"f_applet_id"`
-	AppletName string     `db:"f_applet_name"`
-	EventType  string     `db:"f_event_type"`
-	Handler    string     `db:"f_handler"`
-	datatypes.OperationTimes
-}
-
-func ListStrategy(ctx context.Context, r *ListStrategyReq) (*ListStrategyRsp, error) {
-	var (
-		d    = types.MustMgrDBExecutorFromContext(ctx)
-		ret  = &ListStrategyRsp{}
-		err  error
-		cond = r.Condition()
-
-		mApplet   = &models.Applet{}
-		mStrategy = &models.Strategy{}
-	)
-	ret.Total, err = mStrategy.Count(d, cond)
-	if err != nil {
-		return nil, status.CheckDatabaseError(err, "CountStrategy")
-	}
-
-	details := make([]detail, 0)
-
-	// TODO eventType:applet => 1:n
-	err = d.QueryAndScan(
-		builder.Select(
-			builder.MultiWith(
-				",",
-				builder.Alias(mStrategy.ColStrategyID(), "f_strategy_id"),
-				builder.Alias(mStrategy.ColAppletID(), "f_applet_id"),
-				builder.Alias(mApplet.ColName(), "f_applet_name"),
-				builder.Alias(mStrategy.ColEventType(), "f_event_type"),
-				builder.Alias(mStrategy.ColHandler(), "f_handler"),
-				builder.Alias(mStrategy.ColCreatedAt(), "f_created_at"),
-				builder.Alias(mStrategy.ColUpdatedAt(), "f_updated_at"),
-			),
-		).From(
-			d.T(mStrategy),
-			builder.LeftJoin(d.T(mApplet)).
-				On(mStrategy.ColAppletID().Eq(mApplet.ColAppletID())),
-			builder.Where(cond),
-			builder.OrderBy(
-				builder.DescOrder(mStrategy.ColCreatedAt()),
-				builder.AscOrder(mApplet.ColName()),
-			),
-			r.Pager.Addition(),
-		),
-		&details,
-	)
-	if err != nil {
-		return nil, status.CheckDatabaseError(err, "ListStrategy")
-	}
-
-	detailsMap := make(map[types.SFID][]*detail)
-	for i := range details {
-		appletID := details[i].AppletID
-		detailsMap[appletID] = append(detailsMap[appletID], &details[i])
-	}
-
-	for _, vmap := range detailsMap {
-		infoDetails := make([]InfoDetail, 0, len(vmap))
-		for _, v := range vmap {
-			if v.AppletID == 0 {
-				continue
-			}
-			infoDetails = append(infoDetails, InfoDetail{
-				StrategyID: v.StrategyID,
-				AppletID:   v.AppletID,
-				AppletName: v.AppletName,
-				EventType:  v.EventType,
-				Handler:    v.Handler,
-			})
-		}
-		if len(infoDetails) == 0 {
-			infoDetails = nil
-		}
-		ret.Data = append(ret.Data, Detail{
-			ProjectID:  r.projectID,
-			Strategies: infoDetails,
-			OperationTimes: datatypes.OperationTimes{
-				CreatedAt: vmap[0].CreatedAt,
-				UpdatedAt: vmap[0].UpdatedAt,
-			},
-		})
-	}
-
-	return ret, nil
 }
 
 func GetBySFID(ctx context.Context, id types.SFID) (*models.Strategy, error) {
@@ -331,35 +134,16 @@ func GetBySFID(ctx context.Context, id types.SFID) (*models.Strategy, error) {
 	return m, nil
 }
 
-func Remove(ctx context.Context, r *CondArgs) error {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	m := &models.Strategy{}
+func List(ctx context.Context, r *ListReq) (*ListRsp, error) {
+	var (
+		d = types.MustMgrDBExecutorFromContext(ctx)
+		m = &models.Strategy{}
 
-	prj := types.MustProjectFromContext(ctx)
-
-	_, err := d.Exec(
-		builder.Update(d.T(m)).Set(
-			m.ColDeletedAt().ValueBy(time.Now().Unix()),
-		).Where(r.Condition(prj.ProjectID)),
+		err  error
+		ret  = &ListRsp{}
+		cond = r.Condition()
+		adds = r.Additions()
 	)
-	if err != nil {
-		return status.DatabaseError.StatusErr().WithDesc(err.Error())
-	}
-
-	return nil
-}
-
-func List(ctx context.Context, r *ListReq) (ret *ListRsp, err error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	m := &models.Strategy{}
-
-	prj := types.MustProjectFromContext(ctx)
-	cond := r.Condition(prj.ProjectID)
-	adds := builder.Additions{
-		r.Pager.Addition(),
-		builder.OrderBy(builder.DescOrder(m.ColUpdatedAt())),
-		builder.OrderBy(builder.DescOrder(m.ColCreatedAt())),
-	}
 
 	ret.Data, err = m.List(d, cond, adds...)
 	if err != nil {
@@ -372,41 +156,142 @@ func List(ctx context.Context, r *ListReq) (ret *ListRsp, err error) {
 	return ret, nil
 }
 
-func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
+func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
+	var (
+		d    = types.MustMgrDBExecutorFromContext(ctx)
+		sty  = &models.Strategy{}
+		app  = &models.Applet{}
+		ins  = &models.Instance{}
+		prj  = &models.Project{}
+		ret  = &ListDetailRsp{}
+		cond = r.Condition()
+	)
 
-	if len(r.Data) == 0 {
-		return &CreateRsp{}, nil
+	expr := builder.Select(builder.MultiWith(",",
+		builder.Alias(sty.ColStrategyID(), "f_sty_id"),
+		builder.Alias(sty.ColProjectID(), "f_prj_id"),
+		builder.Alias(prj.ColName(), "f_prj_name"),
+		builder.Alias(sty.ColAppletID(), "f_app_id"),
+		builder.Alias(app.ColName(), "f_app_name"),
+		builder.Alias(ins.ColInstanceID(), "f_ins_id"),
+		builder.Alias(sty.ColEventType(), "f_event_type"),
+		builder.Alias(sty.ColHandler(), "f_handler"),
+		builder.Alias(sty.ColUpdatedAt(), "f_updated_at"),
+		builder.Alias(sty.ColCreatedAt(), "f_created_at"),
+	)).From(
+		d.T(sty),
+		append([]builder.Addition{
+			builder.LeftJoin(d.T(app)).On(sty.ColAppletID().Eq(app.ColAppletID())),
+			builder.LeftJoin(d.T(prj)).On(sty.ColProjectID().Eq(prj.ColProjectID())),
+			builder.Where(cond),
+		}, r.Addition())...,
+	)
+	err := d.QueryAndScan(expr, &ret.Data)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
+	if ret.Total, err = sty.Count(d, cond); err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return ret, nil
+}
 
-	prj := types.MustProjectFromContext(ctx).ProjectID
-	ids := confid.MustSFIDGeneratorFromContext(ctx).MustGenSFIDs(len(r.Data))
-	ret := &CreateRsp{Data: make([]*models.Strategy, 0, len(r.Data))}
+func RemoveBySFID(ctx context.Context, id types.SFID) error {
+	m := &models.Strategy{RelStrategy: models.RelStrategy{StrategyID: id}}
 
-	err := sqlx.NewTasks(d).With(
+	if err := m.DeleteByStrategyID(types.MustMgrDBExecutorFromContext(ctx)); err != nil {
+		return status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return nil
+}
+
+func Remove(ctx context.Context, r *CondArgs) error {
+	var (
+		d = types.MustMgrDBExecutorFromContext(ctx)
+		m = &models.Strategy{}
+	)
+
+	_, err := d.Exec(builder.Delete().From(
+		d.T(m),
+		builder.Where(r.Condition()),
+	))
+	if err != nil {
+		return status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return nil
+}
+
+func Create(ctx context.Context, r *CreateReq) (*models.Strategy, error) {
+	var (
+		idg = confid.MustNewSFIDGenerator()
+		app *models.Applet
+		sty = &models.Strategy{
+			RelApplet:    r.RelApplet,
+			StrategyInfo: r.StrategyInfo,
+		}
+	)
+
+	err := sqlx.NewTasks(types.MustMgrDBExecutorFromContext(ctx)).With(
 		func(d sqlx.DBExecutor) error {
-			for i := range r.Data {
-				m := &models.Strategy{
-					RelStrategy:  models.RelStrategy{StrategyID: ids[i]},
-					RelProject:   models.RelProject{ProjectID: prj},
-					RelApplet:    r.Data[i].RelApplet,
-					StrategyInfo: r.Data[i].StrategyInfo,
+			app, _ = types.AppletFromContext(ctx)
+			if app == nil || app.AppletID != sty.AppletID {
+				app = &models.Applet{
+					RelApplet: models.RelApplet{AppletID: sty.AppletID},
 				}
-				if err := m.Create(d); err != nil {
-					if sqlx.DBErr(err).IsConflict() {
-						// TODO gen model.MayBeConflictFields() for more hint to frontend
-						return status.StrategyConflict
+				if err := app.FetchByAppletID(d); err != nil {
+					if sqlx.DBErr(err).IsNotFound() {
+						return status.AppletNotFound
 					}
 					return status.DatabaseError.StatusErr().WithDesc(err.Error())
 				}
-				ret.Data = append(ret.Data, m)
+			}
+			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			sty.ProjectID = app.ProjectID
+			sty.StrategyID = idg.MustGenSFID()
+			if err := sty.Create(d); err != nil {
+				if sqlx.DBErr(err).IsConflict() {
+					return status.StrategyConflict.StatusErr().WithDesc(
+						fmt.Sprintf(
+							"[prj: %s] [app: %s] [type: %s] [hdl: %s]",
+							sty.ProjectID, sty.AppletID, sty.EventType, sty.Handler,
+						),
+					)
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
 		},
 	).Do()
-
 	if err != nil {
 		return nil, err
 	}
-	return ret, nil
+	return sty, nil
+}
+
+func BatchCreate(ctx context.Context, sty []models.Strategy) error {
+	if len(sty) == 0 {
+		return nil
+	}
+
+	return sqlx.NewTasks(types.MustMgrDBExecutorFromContext(ctx)).With(
+		func(d sqlx.DBExecutor) error {
+			for i := range sty {
+				s := &sty[i]
+				if err := s.Create(d); err != nil {
+					if sqlx.DBErr(err).IsConflict() {
+						return status.StrategyConflict.StatusErr().WithDesc(
+							fmt.Sprintf(
+								"[prj: %s] [app: %s] [type: %s] [hdl: %s]",
+								s.ProjectID, s.AppletID, s.EventType, s.Handler,
+							),
+						)
+					}
+					return status.DatabaseError.StatusErr().WithDesc(err.Error())
+				}
+			}
+			return nil
+		},
+	).Do()
 }
