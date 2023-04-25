@@ -1089,6 +1089,19 @@
           "204": {
             "description": ""
           },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidConfigType][400999004][Invalid Config Type]!"
+            ]
+          },
           "401": {
             "description": "",
             "content": {
@@ -1134,6 +1147,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[ConfigConflict][409999005][Config Conflict]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
@@ -1148,7 +1162,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigInitializationFailed][500999005][Config Initialization Failed]!",
+              "@StatusErr[ConfigInitFailed][500999005][Config Initialization Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
@@ -1734,6 +1749,19 @@
               }
             }
           },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidConfigType][400999004][Invalid Config Type]!"
+            ]
+          },
           "401": {
             "description": "",
             "content": {
@@ -1779,6 +1807,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[ConfigConflict][409999005][Config Conflict]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
@@ -1793,7 +1822,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigInitializationFailed][500999005][Config Initialization Failed]!",
+              "@StatusErr[ConfigInitFailed][500999005][Config Initialization Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
@@ -1892,6 +1922,19 @@
               }
             }
           },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidConfigType][400999004][Invalid Config Type]!"
+            ]
+          },
           "401": {
             "description": "",
             "content": {
@@ -1920,6 +1963,7 @@
             },
             "x-status-errors": [
               "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
+              "@StatusErr[ConfigNotFound][404999003][Config Not Found]!",
               "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
@@ -1937,6 +1981,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[ConfigConflict][409999005][Config Conflict]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
@@ -1951,7 +1996,9 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigInitializationFailed][500999005][Config Initialization Failed]!",
+              "@StatusErr[ConfigInitFailed][500999005][Config Initialization Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
@@ -3441,6 +3488,19 @@
               }
             }
           },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidConfigType][400999004][Invalid Config Type]!"
+            ]
+          },
           "401": {
             "description": "",
             "content": {
@@ -3490,6 +3550,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[ConfigConflict][409999005][Config Conflict]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[ProjectNameConflict][409999003][Project Name Conflict]!"
@@ -3505,6 +3566,9 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[ConfigInitFailed][500999005][Config Initialization Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!",
               "@StatusErr[CreateChannelFailed][500999004][Create Message Channel Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
@@ -3969,10 +4033,23 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgTypesWasmSchema"
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgTypesWasmConfiguration"
                 }
               }
             }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidConfigType][400999004][Invalid Config Type]!"
+            ]
           },
           "401": {
             "description": "",
@@ -4031,9 +4108,9 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
           }
@@ -4098,8 +4175,15 @@
           }
         },
         "responses": {
-          "204": {
-            "description": ""
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsConfig"
+                }
+              }
+            }
           },
           "401": {
             "description": "",
@@ -4144,6 +4228,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[ConfigConflict][409999005][Config Conflict]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
@@ -4157,9 +4242,10 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[ConfigInitFailed][500999005][Config Initialization Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
           }
@@ -4867,7 +4953,7 @@
             },
             "x-status-errors": [
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[PublisherConflict][409999005][Publisher Conflict]!"
+              "@StatusErr[PublisherConflict][409999006][Publisher Conflict]!"
             ]
           },
           "500": {
@@ -4882,7 +4968,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[GenPublisherTokenFailed][500999006][Gen Publisher Token Failed]!",
+              "@StatusErr[GenPublisherTokenFailed][500999008][Gen Publisher Token Failed]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
           }
@@ -5014,7 +5100,7 @@
             },
             "x-status-errors": [
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[PublisherConflict][409999005][Publisher Conflict]!"
+              "@StatusErr[PublisherConflict][409999006][Publisher Conflict]!"
             ]
           },
           "500": {
@@ -6645,6 +6731,23 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.CacheMode",
         "x-id": "GithubComMachinefiW3BstreamPkgEnumsCacheMode"
       },
+      "GithubComMachinefiW3BstreamPkgEnumsConfigType": {
+        "type": "string",
+        "enum": [
+          "PROJECT_SCHEMA",
+          "INSTANCE_CACHE",
+          "PROJECT_ENV",
+          "PROJECT_MQTT"
+        ],
+        "x-enum-labels": [
+          "PROJECT_SCHEMA",
+          "INSTANCE_CACHE",
+          "PROJECT_ENV",
+          "PROJECT_MQTT"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.ConfigType",
+        "x-id": "GithubComMachinefiW3BstreamPkgEnumsConfigType"
+      },
       "GithubComMachinefiW3BstreamPkgEnumsDeployCmd": {
         "type": "string",
         "enum": [
@@ -6959,6 +7062,61 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.ChainTxInfo",
         "x-id": "GithubComMachinefiW3BstreamPkgModelsChainTxInfo"
+      },
+      "GithubComMachinefiW3BstreamPkgModelsConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPrimaryID"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsRelConfig"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsConfigBase"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimes"
+          },
+          {
+            "type": "object",
+            "description": "Config database model config for configuration management",
+            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.Config",
+            "x-id": "GithubComMachinefiW3BstreamPkgModelsConfig"
+          }
+        ]
+      },
+      "GithubComMachinefiW3BstreamPkgModelsConfigBase": {
+        "type": "object",
+        "properties": {
+          "relID": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+              },
+              {
+                "x-go-field-name": "RelID",
+                "x-tag-json": "relID"
+              }
+            ]
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsConfigType"
+              },
+              {
+                "x-go-field-name": "Type",
+                "x-tag-json": "type"
+              }
+            ]
+          }
+        },
+        "required": [
+          "relID",
+          "type"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.ConfigBase",
+        "x-id": "GithubComMachinefiW3BstreamPkgModelsConfigBase"
       },
       "GithubComMachinefiW3BstreamPkgModelsContractLog": {
         "allOf": [
@@ -7385,6 +7543,27 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.RelChainTx",
         "x-id": "GithubComMachinefiW3BstreamPkgModelsRelChainTx"
+      },
+      "GithubComMachinefiW3BstreamPkgModelsRelConfig": {
+        "type": "object",
+        "properties": {
+          "configID": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+              },
+              {
+                "x-go-field-name": "ConfigID",
+                "x-tag-json": "configID"
+              }
+            ]
+          }
+        },
+        "required": [
+          "configID"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.RelConfig",
+        "x-id": "GithubComMachinefiW3BstreamPkgModelsRelConfig"
       },
       "GithubComMachinefiW3BstreamPkgModelsRelContractLog": {
         "type": "object",
@@ -8362,6 +8541,10 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/types/wasm.Cache",
         "x-id": "GithubComMachinefiW3BstreamPkgTypesWasmCache"
+      },
+      "GithubComMachinefiW3BstreamPkgTypesWasmConfiguration": {
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/types/wasm.Configuration",
+        "x-id": "GithubComMachinefiW3BstreamPkgTypesWasmConfiguration"
       },
       "GithubComMachinefiW3BstreamPkgTypesWasmEnv": {
         "type": "object",
