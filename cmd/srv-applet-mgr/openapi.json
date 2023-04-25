@@ -387,11 +387,11 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
-              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
+              "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
+              "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
-              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
+              "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
             ]
           },
           "409": {
@@ -540,7 +540,9 @@
             },
             "x-status-errors": [
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
+              "@StatusErr[ResourceConflict][409999004][Resource Conflict]!",
+              "@StatusErr[ResourceOwnerConflict][409999005][Resource Owner Conflict]!"
             ]
           },
           "500": {
@@ -831,12 +833,12 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
-              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
+              "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
+              "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
-              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
+              "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
             ]
           },
           "409": {
@@ -964,12 +966,12 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
-              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
+              "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
+              "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
-              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
+              "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
             ]
           },
           "409": {
@@ -983,7 +985,9 @@
             },
             "x-status-errors": [
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
+              "@StatusErr[ResourceConflict][409999004][Resource Conflict]!",
+              "@StatusErr[ResourceOwnerConflict][409999005][Resource Owner Conflict]!"
             ]
           },
           "500": {
@@ -1129,12 +1133,12 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
-              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
+              "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
+              "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
-              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
+              "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
             ]
           },
           "409": {
@@ -1147,9 +1151,11 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigConflict][409999005][Config Conflict]!",
+              "@StatusErr[ConfigConflict][409999007][Config Conflict]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
+              "@StatusErr[ResourceConflict][409999004][Resource Conflict]!",
+              "@StatusErr[ResourceOwnerConflict][409999005][Resource Owner Conflict]!"
             ]
           },
           "500": {
@@ -1162,8 +1168,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigInitFailed][500999005][Config Initialization Failed]!",
-              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
+              "@StatusErr[ConfigInitFailed][500999007][Config Init Failed]!",
+              "@StatusErr[ConfigParseFailed][500999009][Config Parse Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
@@ -1640,11 +1646,11 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
-              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
+              "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
+              "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
-              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
+              "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
             ]
           },
           "409": {
@@ -1789,12 +1795,12 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
-              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
+              "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
+              "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
-              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
+              "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
             ]
           },
           "409": {
@@ -1807,7 +1813,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigConflict][409999005][Config Conflict]!",
+              "@StatusErr[ConfigConflict][409999007][Config Conflict]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
@@ -1822,8 +1828,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigInitFailed][500999005][Config Initialization Failed]!",
-              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
+              "@StatusErr[ConfigInitFailed][500999007][Config Init Failed]!",
+              "@StatusErr[ConfigParseFailed][500999009][Config Parse Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
@@ -1962,13 +1968,13 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
+              "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
               "@StatusErr[ConfigNotFound][404999003][Config Not Found]!",
-              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
+              "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
-              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
+              "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
             ]
           },
           "409": {
@@ -1981,7 +1987,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigConflict][409999005][Config Conflict]!",
+              "@StatusErr[ConfigConflict][409999007][Config Conflict]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
@@ -1996,9 +2002,9 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigInitFailed][500999005][Config Initialization Failed]!",
-              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
-              "@StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!",
+              "@StatusErr[ConfigInitFailed][500999007][Config Init Failed]!",
+              "@StatusErr[ConfigParseFailed][500999009][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999008][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
@@ -2091,12 +2097,12 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
-              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
+              "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
+              "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
-              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
+              "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
             ]
           },
           "409": {
@@ -2237,12 +2243,12 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
-              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
+              "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
+              "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
-              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
+              "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
             ]
           },
           "409": {
@@ -3550,7 +3556,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigConflict][409999005][Config Conflict]!",
+              "@StatusErr[ConfigConflict][409999007][Config Conflict]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[ProjectNameConflict][409999003][Project Name Conflict]!"
@@ -3566,9 +3572,9 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigInitFailed][500999005][Config Initialization Failed]!",
-              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
-              "@StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!",
+              "@StatusErr[ConfigInitFailed][500999007][Config Init Failed]!",
+              "@StatusErr[ConfigParseFailed][500999009][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999008][Config Uninit Failed]!",
               "@StatusErr[CreateChannelFailed][500999004][Create Message Channel Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
@@ -4108,7 +4114,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
+              "@StatusErr[ConfigParseFailed][500999009][Config Parse Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
@@ -4228,7 +4234,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigConflict][409999005][Config Conflict]!",
+              "@StatusErr[ConfigConflict][409999007][Config Conflict]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
@@ -4242,8 +4248,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigInitFailed][500999005][Config Initialization Failed]!",
-              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
+              "@StatusErr[ConfigInitFailed][500999007][Config Init Failed]!",
+              "@StatusErr[ConfigParseFailed][500999009][Config Parse Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
@@ -4953,7 +4959,7 @@
             },
             "x-status-errors": [
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[PublisherConflict][409999006][Publisher Conflict]!"
+              "@StatusErr[PublisherConflict][409999008][Publisher Conflict]!"
             ]
           },
           "500": {
@@ -4968,7 +4974,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[GenPublisherTokenFailed][500999008][Gen Publisher Token Failed]!",
+              "@StatusErr[GenPublisherTokenFailed][500999010][Gen Publisher Token Failed]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
           }
@@ -5100,7 +5106,7 @@
             },
             "x-status-errors": [
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[PublisherConflict][409999006][Publisher Conflict]!"
+              "@StatusErr[PublisherConflict][409999008][Publisher Conflict]!"
             ]
           },
           "500": {
@@ -5238,6 +5244,136 @@
               "x-tag-name": "authorization,omitempty",
               "x-tag-validate": "@string[1,]"
             }
+          },
+          {
+            "name": "expireAfter",
+            "in": "query",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp"
+                },
+                {
+                  "x-go-field-name": "ExpireAfter",
+                  "x-tag-name": "expireAfter,omitempty"
+                }
+              ]
+            }
+          },
+          {
+            "name": "expireBefore",
+            "in": "query",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp"
+                },
+                {
+                  "x-go-field-name": "ExpireBefore",
+                  "x-tag-name": "expireBefore,omitempty"
+                }
+              ]
+            }
+          },
+          {
+            "name": "filename",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "x-go-field-name": "Filenames",
+              "x-tag-name": "filename,omitempty"
+            }
+          },
+          {
+            "name": "filenameLike",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "x-go-field-name": "FilenameLike",
+              "x-tag-name": "filenameLike,omitempty"
+            }
+          },
+          {
+            "name": "md5",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "x-go-field-name": "Md5",
+              "x-tag-name": "md5,omitempty"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 9223372036854776000,
+              "minimum": 0,
+              "default": "0",
+              "x-go-field-name": "Offset",
+              "x-tag-name": "offset,omitempty",
+              "x-tag-validate": "@int64[0,]"
+            }
+          },
+          {
+            "name": "resourceID",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+              },
+              "x-go-field-name": "ResourceIDs",
+              "x-tag-name": "resourceID,omitempty"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 9223372036854776000,
+              "minimum": -1,
+              "default": "10",
+              "x-go-field-name": "Size",
+              "x-tag-name": "size,omitempty",
+              "x-tag-validate": "@int64[-1,]"
+            }
+          },
+          {
+            "name": "uploadedAfter",
+            "in": "query",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp"
+                },
+                {
+                  "x-go-field-name": "UploadedAfter",
+                  "x-tag-name": "uploadedAfter,omitempty"
+                }
+              ]
+            }
+          },
+          {
+            "name": "uploadedBefore",
+            "in": "query",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp"
+                },
+                {
+                  "x-go-field-name": "UploadedBefore",
+                  "x-tag-name": "uploadedBefore,omitempty"
+                }
+              ]
+            }
           }
         ],
         "responses": {
@@ -5246,10 +5382,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsResource"
-                  }
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesResourceListRsp"
                 }
               }
             }
@@ -5280,7 +5413,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[NotFound][404999001][NotFound]!"
             ]
           },
@@ -5294,7 +5426,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
@@ -5308,7 +5439,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
           }
@@ -5392,7 +5523,7 @@
             },
             "x-status-errors": [
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[ResourcePermNotFound][404999010][Resource Perm Not Found]!"
             ]
           },
           "409": {
@@ -5405,7 +5536,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
@@ -5419,7 +5549,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
             ]
           }
@@ -5910,11 +6040,11 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
-              "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
+              "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
+              "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
-              "@StatusErr[ResourceNotFound][404999006][Resource Not Found]!"
+              "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
             ]
           },
           "409": {
@@ -5928,7 +6058,7 @@
             },
             "x-status-errors": [
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[StrategyConflict][409999004][Strategy Conflict]!"
+              "@StatusErr[StrategyConflict][409999006][Strategy Conflict]!"
             ]
           },
           "500": {
@@ -6252,7 +6382,7 @@
             },
             "x-status-errors": [
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[StrategyConflict][409999004][Strategy Conflict]!"
+              "@StatusErr[StrategyConflict][409999006][Strategy Conflict]!"
             ]
           },
           "500": {
@@ -6833,16 +6963,10 @@
             "type": "string",
             "x-go-field-name": "Name",
             "x-tag-json": "name"
-          },
-          "wasmName": {
-            "type": "string",
-            "x-go-field-name": "WasmName",
-            "x-tag-json": "wasmName"
           }
         },
         "required": [
-          "name",
-          "wasmName"
+          "name"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.AppletInfo",
         "x-id": "GithubComMachinefiW3BstreamPkgModelsAppletInfo"
@@ -7639,28 +7763,6 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.RelStrategy",
         "x-id": "GithubComMachinefiW3BstreamPkgModelsRelStrategy"
       },
-      "GithubComMachinefiW3BstreamPkgModelsResource": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPrimaryID"
-          },
-          {
-            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsRelResource"
-          },
-          {
-            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsResourceInfo"
-          },
-          {
-            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimes"
-          },
-          {
-            "type": "object",
-            "description": "Resource database model wasm_resource",
-            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.Resource",
-            "x-id": "GithubComMachinefiW3BstreamPkgModelsResource"
-          }
-        ]
-      },
       "GithubComMachinefiW3BstreamPkgModelsResourceInfo": {
         "type": "object",
         "properties": {
@@ -7671,6 +7773,7 @@
           },
           "path": {
             "type": "string",
+            "description": "Path rel path",
             "x-go-field-name": "Path",
             "x-tag-json": "path"
           }
@@ -7681,6 +7784,51 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.ResourceInfo",
         "x-id": "GithubComMachinefiW3BstreamPkgModelsResourceInfo"
+      },
+      "GithubComMachinefiW3BstreamPkgModelsResourceOwnerInfo": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "type": "string",
+            "x-go-field-name": "Comment",
+            "x-tag-json": "comment"
+          },
+          "expireAt": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp"
+              },
+              {
+                "x-go-field-name": "ExpireAt",
+                "x-tag-json": "expireAt"
+              }
+            ]
+          },
+          "filename": {
+            "type": "string",
+            "x-go-field-name": "Filename",
+            "x-tag-json": "filename"
+          },
+          "uploadedAt": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp"
+              },
+              {
+                "x-go-field-name": "UploadedAt",
+                "x-tag-json": "uploadedAt"
+              }
+            ]
+          }
+        },
+        "required": [
+          "uploadedAt",
+          "expireAt",
+          "filename",
+          "comment"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.ResourceOwnerInfo",
+        "x-id": "GithubComMachinefiW3BstreamPkgModelsResourceOwnerInfo"
       },
       "GithubComMachinefiW3BstreamPkgModelsStrategy": {
         "allOf": [
@@ -8366,6 +8514,52 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/publisher.UpdateReq",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesPublisherUpdateReq"
+      },
+      "GithubComMachinefiW3BstreamPkgModulesResourceListRsp": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesResourceResourceInfo"
+            },
+            "x-go-field-name": "Data",
+            "x-tag-json": "data"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "x-go-field-name": "Total",
+            "x-tag-json": "total"
+          }
+        },
+        "required": [
+          "data",
+          "total"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/resource.ListRsp",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesResourceListRsp"
+      },
+      "GithubComMachinefiW3BstreamPkgModulesResourceResourceInfo": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsRelResource"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsResourceInfo"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsResourceOwnerInfo"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimes"
+          },
+          {
+            "type": "object",
+            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/resource.ResourceInfo",
+            "x-id": "GithubComMachinefiW3BstreamPkgModulesResourceResourceInfo"
+          }
+        ]
       },
       "GithubComMachinefiW3BstreamPkgModulesStrategyCreateReq": {
         "allOf": [

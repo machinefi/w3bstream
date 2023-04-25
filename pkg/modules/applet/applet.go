@@ -55,7 +55,7 @@ func CreateApplet(ctx context.Context, projectID, accountID types.SFID, r *Creat
 		RelProject:  models.RelProject{ProjectID: projectID},
 		RelApplet:   models.RelApplet{AppletID: appletID},
 		RelResource: models.RelResource{ResourceID: mResource.RelResource.ResourceID},
-		AppletInfo:  models.AppletInfo{Name: r.AppletName, WasmName: r.WasmName},
+		AppletInfo:  models.AppletInfo{Name: r.AppletName},
 	}
 	if len(r.Info.Strategies) == 0 {
 		r.Info.Strategies = append(r.Info.Strategies, models.DefaultStrategyInfo)
@@ -117,7 +117,6 @@ func UpdateApplet(ctx context.Context, appletID, accountID types.SFID, r *Update
 		},
 		func(db sqlx.DBExecutor) error {
 			mApplet.RelResource = mResource.RelResource
-			mApplet.WasmName = r.WasmName
 			if needUpdateAppletName {
 				mApplet.Name = r.AppletName
 			}
@@ -194,7 +193,6 @@ func UpdateAndDeploy(ctx context.Context, accountID types.SFID, r *UpdateAndDepl
 	err = sqlx.NewTasks(d).With(
 		func(db sqlx.DBExecutor) error {
 			app.RelResource = mResource.RelResource
-			app.WasmName = r.WasmName
 			if needUpdateAppletName {
 				app.Name = r.AppletName
 			}
