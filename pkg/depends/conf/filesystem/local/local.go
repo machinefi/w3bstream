@@ -15,11 +15,7 @@ type LocalFileSystem struct {
 }
 
 func (l *LocalFileSystem) Init() error {
-	err := os.MkdirAll(l.Root, 0777)
-	if err != nil {
-		return err
-	}
-	return nil
+	return os.MkdirAll(l.Root, 0777)
 }
 
 func (l *LocalFileSystem) SetDefault() {
