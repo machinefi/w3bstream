@@ -114,8 +114,6 @@ const (
 	InvalidConfigType
 	// @errTalk Deprecated Project
 	DeprecatedProject
-	// @errTalk Invalid Event Channel
-	InvalidEventChannel
 	// @errTalk Unknown Deploy Command
 	UnknownDeployCommand
 	// @errTalk Invalid Cron Expressions

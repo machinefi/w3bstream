@@ -43,8 +43,6 @@ func (v Error) Key() string {
 		return "InvalidConfigType"
 	case DeprecatedProject:
 		return "DeprecatedProject"
-	case InvalidEventChannel:
-		return "InvalidEventChannel"
 	case UnknownDeployCommand:
 		return "UnknownDeployCommand"
 	case InvalidCronExpressions:
@@ -165,8 +163,6 @@ func (v Error) Msg() string {
 		return "Invalid Config Type"
 	case DeprecatedProject:
 		return "Deprecated Project"
-	case InvalidEventChannel:
-		return "Invalid Event Channel"
 	case UnknownDeployCommand:
 		return "Unknown Deploy Command"
 	case InvalidCronExpressions:
@@ -286,8 +282,6 @@ func (v Error) CanBeTalk() bool {
 	case InvalidConfigType:
 		return true
 	case DeprecatedProject:
-		return true
-	case InvalidEventChannel:
 		return true
 	case UnknownDeployCommand:
 		return true
