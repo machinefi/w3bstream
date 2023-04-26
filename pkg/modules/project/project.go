@@ -51,12 +51,6 @@ func CreateProject(ctx context.Context, acc types.SFID, r *CreateProjectReq, hdl
 		ProjectBase: r.ProjectBase,
 	}
 
-	if err := mq.CreateChannel(ctx, m.Name, hdl); err != nil {
-		l.Error(err)
-		return nil, status.CreateChannelFailed.StatusErr().
-			WithDesc(fmt.Sprintf("create channel: [project:%s] [err:%v]", m.Name, err))
-	}
-
 	err := sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
 			if err := m.Create(d); err != nil {
@@ -68,6 +62,14 @@ func CreateProject(ctx context.Context, acc types.SFID, r *CreateProjectReq, hdl
 					WithDesc(errors.Wrap(err, "CreateProject").Error())
 			}
 			ctx = types.WithProject(ctx, m)
+			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			if err := mq.CreateChannel(ctx, m.Name, hdl); err != nil {
+				l.Error(err)
+				return status.CreateChannelFailed.StatusErr().
+					WithDesc(fmt.Sprintf("create channel: [project:%s] [err:%v]", m.Name, err))
+			}
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
@@ -303,6 +305,7 @@ func InitChannels(ctx context.Context, hdl mq.OnMessage) error {
 
 	for i := range lst {
 		v := &lst[i]
+		ctx = types.WithProject(ctx, v)
 		err = mq.CreateChannel(ctx, v.Name, hdl)
 		if err != nil {
 			err = errors.Errorf("create channel: [project:%s] [err:%v]", v.Name, err)

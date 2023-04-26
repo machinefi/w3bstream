@@ -13,7 +13,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
-	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/modules/strategy"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -44,14 +43,19 @@ type HandleEventReq struct {
 
 func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) (ret *HandleEventResult, err error) {
 	l := types.MustLoggerFromContext(ctx)
+	prj, ok := types.ProjectFromContext(ctx)
+	if !ok || prj == nil {
+		return nil, status.ProjectNotFound.StatusErr().
+			WithDesc("project not found in context")
+	}
 
 	_, l = l.Start(ctx, "OnEventReceived")
 	defer l.End()
 
-	l = l.WithValues("project_name", projectName)
+	l = l.WithValues("project_name", prj.ProjectName.Name)
 
 	ret = &HandleEventResult{
-		ProjectName: projectName,
+		ProjectName: prj.ProjectName.Name,
 	}
 
 	defer func() {
@@ -61,13 +65,13 @@ func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) 
 	}()
 
 	eventType := enums.EVENTTYPEDEFAULT
-	eventType, err = checkHeader(ctx, projectName, l, ret, r)
+	eventType, err = checkHeader(ctx, prj, l, ret, r)
 	if err != nil {
 		return
 	}
 	l = l.WithValues("event_type", eventType)
 
-	err = HandleEvent(ctx, projectName, eventType, ret, r.Payload)
+	err = HandleEvent(ctx, prj.ProjectName.Name, eventType, ret, r.Payload)
 	if err != nil {
 		return
 	}
@@ -121,7 +125,7 @@ func HandleEvent(ctx context.Context, projectName string, eventType string, ret 
 	return nil
 }
 
-func checkHeader(ctx context.Context, projectName string, l log.Logger, ret *HandleEventResult, r *eventpb.Event) (eventType string, err error) {
+func checkHeader(ctx context.Context, prj *models.Project, l log.Logger, ret *HandleEventResult, r *eventpb.Event) (eventType string, err error) {
 	eventType = enums.EVENTTYPEDEFAULT
 
 	pub, err := publisherVerification(ctx, l, r)
@@ -130,10 +134,6 @@ func checkHeader(ctx context.Context, projectName string, l log.Logger, ret *Han
 		return
 	}
 
-	prj, err := project.GetByName(ctx, projectName)
-	if err != nil {
-		return
-	}
 	if pub.ProjectID != prj.ProjectID {
 		return eventType, status.NoProjectPermission
 	}
@@ -144,7 +144,7 @@ func checkHeader(ctx context.Context, projectName string, l log.Logger, ret *Han
 	ret.EventID = r.Header.GetEventId()
 	eventType = r.Header.GetEventType()
 
-	_receiveEventMtc.WithLabelValues(projectName, pub.Key).Inc()
+	_receiveEventMtc.WithLabelValues(prj.ProjectName.Name, pub.Key).Inc()
 	return
 }
 
