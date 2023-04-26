@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/local"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/shirou/gopsutil/v3/disk"
@@ -62,14 +63,16 @@ func UploadFile(ctx context.Context, f io.ReadSeekCloser, md5 string) (path stri
 		return
 	}
 
-	info, _err := disk.Usage(c.Root)
-	if _err != nil {
-		err = status.UploadFileFailed.StatusErr().WithDesc(_err.Error())
-		return
-	}
-	if info.Free < uint64(reserve) {
-		err = status.UploadFileDiskLimit
-		return
+	if _, ok := fs.(*local.LocalFileSystem); ok {
+		info, _err := disk.Usage(c.Root)
+		if _err != nil {
+			err = status.UploadFileFailed.StatusErr().WithDesc(_err.Error())
+			return
+		}
+		if info.Free < uint64(reserve) {
+			err = status.UploadFileDiskLimit
+			return
+		}
 	}
 
 	sum := ""
