@@ -1,9 +1,10 @@
 package event
 
 import (
+	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
-	"github.com/prometheus/client_golang/prometheus"
 )
 
 var Root = kit.NewRouter(httptransport.Group("/event"))

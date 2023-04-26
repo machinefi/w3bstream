@@ -5,7 +5,6 @@ package project
 import (
 	"context"
 
-	"github.com/machinefi/w3bstream/pkg/modules/transporter/mqtt"
 	"github.com/pkg/errors"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
@@ -16,6 +15,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
+	"github.com/machinefi/w3bstream/pkg/modules/transporter/mqtt"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 

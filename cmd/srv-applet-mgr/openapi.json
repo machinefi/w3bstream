@@ -2606,7 +2606,7 @@
         }
       }
     },
-    "/v0/event/{projectName}": {
+    "/v0/event/{channel}/0": {
       "post": {
         "tags": [
           "apis/event"
@@ -2614,29 +2614,82 @@
         "operationId": "HandleEvent",
         "parameters": [
           {
-            "name": "projectName",
+            "name": "channel",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "x-go-field-name": "ProjectName",
-              "x-tag-name": "projectName"
+              "description": "Channel message channel named (intact project name)",
+              "x-go-field-name": "Channel",
+              "x-tag-name": "channel"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "eventID",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "EventID unique id for tracing event under channel",
+              "x-go-field-name": "EventID",
+              "x-tag-name": "eventID,omitempty"
+            }
+          },
+          {
+            "name": "eventType",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "EventType used for filter strategies created in w3b before",
+              "x-go-field-name": "EventType",
+              "x-tag-name": "eventType,omitempty"
+            }
+          },
+          {
+            "name": "timestamp",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Timestamp event time when publisher do send",
+              "x-go-field-name": "Timestamp",
+              "x-tag-name": "timestamp,omitempty"
             }
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesEventHandleEventReq"
-                  },
-                  {
-                    "x-go-field-name": "HandleEventReq"
-                  }
-                ]
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "uint8"
+                },
+                "description": "Payload event payload (binary only)",
+                "x-go-field-name": "Payload"
               }
             }
           }
@@ -2647,13 +2700,27 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesEventHandleEventResult"
-                  }
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesEventEventRsp"
                 }
               }
             }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[BadRequest][400999001][BadRequest]!",
+              "@StatusErr[DeprecatedProject][400999003][Deprecated Project]!",
+              "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!",
+              "@StatusErr[InvalidCronExpressions][400999005][Invalid Cron Expressions]!",
+              "@StatusErr[UnknownDeployCommand][400999004][Unknown Deploy Command]!"
+            ]
           },
           "401": {
             "description": "",
@@ -2665,11 +2732,43 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthPublisherID][401999011][Invalid Auth Publisher ID]!",
               "@StatusErr[InvalidAuthPublisherID][401999011][Invalid Auth Publisher ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidEthLoginMessage][401999010][Invalid Siwe Message]!",
+              "@StatusErr[InvalidEthLoginSignature][401999009][Invalid Siwe Signature]!",
+              "@StatusErr[InvalidEventChannel][401999013][Invalid Event Channel]!",
+              "@StatusErr[InvalidEventToken][401999014][Invalid Event Token]!",
+              "@StatusErr[InvalidNewPassword][401999007][Invalid New Password]!",
+              "@StatusErr[InvalidOldPassword][401999006][Invalid Old Password]!",
+              "@StatusErr[InvalidPassword][401999008][Invalid Password]!",
               "@StatusErr[InvalidToken][401999002][Invalid Token]!",
-              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+              "@StatusErr[NoAdminPermission][401999005][No Admin Permission]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!",
+              "@StatusErr[Unauthorized][401999001][unauthorized]"
+            ]
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DisabledAccount][403999002][Disabled Account]!",
+              "@StatusErr[Forbidden][403999001][forbidden]",
+              "@StatusErr[TopicAlreadySubscribed][403999007][Topic Already Subscribed]!",
+              "@StatusErr[UploadFileDiskLimit][403999006][Upload File Disk Limit]!",
+              "@StatusErr[UploadFileMd5Unmatched][403999005][Upload File Md5 Unmatched]!",
+              "@StatusErr[UploadFileSizeLimit][403999004][Upload File Size Limit]!",
+              "@StatusErr[WhiteListForbidden][403999003][White List Forbidden]!"
             ]
           },
           "404": {
@@ -2682,8 +2781,19 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
+              "@StatusErr[ConfigNotFound][404999003][Config Not Found]!",
+              "@StatusErr[CronJobNotFound][404999011][Cron Job Not Found]!",
+              "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
+              "@StatusErr[InstanceNotRunning][404999012][Instance Not Running]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!",
+              "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!",
+              "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!",
+              "@StatusErr[ResourcePermNotFound][404999010][Resource Perm Not Found]!",
+              "@StatusErr[StrategyNotFound][404999007][Strategy Not Found]!"
             ]
           },
           "409": {
@@ -2696,7 +2806,16 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[AppletNameConflict][409999009][Applet Name Conflict]!",
+              "@StatusErr[ConfigConflict][409999006][Config Conflict]!",
+              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
+              "@StatusErr[CronJobConflict][409999010][Cron Job Conflict]!",
+              "@StatusErr[MultiInstanceDeployed][409999008][Multi Instance Deployed]!",
+              "@StatusErr[ProjectNameConflict][409999002][Project Name Conflict]!",
+              "@StatusErr[PublisherConflict][409999007][Publisher Conflict]!",
+              "@StatusErr[ResourceConflict][409999003][Resource Conflict]!",
+              "@StatusErr[ResourceOwnerConflict][409999004][Resource Owner Conflict]!",
+              "@StatusErr[StrategyConflict][409999005][Strategy Conflict]!"
             ]
           },
           "500": {
@@ -2709,8 +2828,21 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[BatchRemoveAppletFailed][500999011][Batch Remove Applet Failed]!",
+              "@StatusErr[ConfigInitFailed][500999006][Config Init Failed]!",
+              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
+              "@StatusErr[CreateChannelFailed][500999004][Create Message Channel Failed]!",
+              "@StatusErr[CreateInstanceFailed][500999010][Create Instance Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[FetchResourceFailed][500999005][Fetch Resource Failed]!",
+              "@StatusErr[GenPublisherTokenFailed][500999009][Gen Publisher Token Failed]!",
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[MD5ChecksumFailed][500999012][Md5 Checksum Failed]!",
+              "@StatusErr[MqttConnectFailed][500999014][MQTT Connect Failed]!",
+              "@StatusErr[MqttSubscribeFailed][500999013][MQTT Subscribe Failed]!",
+              "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
             ]
           }
         }
@@ -3817,6 +3949,19 @@
               }
             }
           },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[RequestTransformFailed][400000000][RequestTransformFailed]"
+            ]
+          },
           "401": {
             "description": "",
             "content": {
@@ -3831,7 +3976,21 @@
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidEventToken][401999014][Invalid Event Token]!",
               "@StatusErr[InvalidToken][401999002][Invalid Token]!"
+            ]
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[TopicAlreadySubscribed][403999007][Topic Already Subscribed]!"
             ]
           },
           "404": {
@@ -3863,6 +4022,19 @@
               "@StatusErr[ProjectNameConflict][409999002][Project Name Conflict]!"
             ]
           },
+          "499": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[ClientClosedRequest][499000000][ClientClosedRequest]"
+            ]
+          },
           "500": {
             "description": "",
             "content": {
@@ -3876,7 +4048,10 @@
               "@StatusErr[ConfigInitFailed][500999006][Config Init Failed]!",
               "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[MqttConnectFailed][500999014][MQTT Connect Failed]!",
+              "@StatusErr[MqttSubscribeFailed][500999013][MQTT Subscribe Failed]!",
+              "@StatusErr[RequestFailed][500000000][RequestFailed]"
             ]
           }
         }
@@ -6923,6 +7098,17 @@
           }
         ]
       },
+      "CurrentPublisher": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsPublisher"
+          },
+          {
+            "type": "object",
+            "x-id": "CurrentPublisher"
+          }
+        ]
+      },
       "GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID": {
         "type": "integer",
         "format": "uint64",
@@ -7114,72 +7300,6 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/statusx.StatusErr",
         "x-id": "GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-      },
-      "GithubComMachinefiW3BstreamPkgDependsProtocolEventpbEvent": {
-        "type": "object",
-        "properties": {
-          "header": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsProtocolEventpbHeader"
-              },
-              {
-                "x-go-field-name": "Header",
-                "x-go-star-level": 1,
-                "x-tag-json": "header,omitempty"
-              }
-            ]
-          },
-          "payload": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "uint8"
-            },
-            "x-go-field-name": "Payload",
-            "x-tag-json": "payload,omitempty"
-          }
-        },
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb.Event",
-        "x-id": "GithubComMachinefiW3BstreamPkgDependsProtocolEventpbEvent"
-      },
-      "GithubComMachinefiW3BstreamPkgDependsProtocolEventpbHeader": {
-        "type": "object",
-        "properties": {
-          "event_id": {
-            "type": "string",
-            "description": "event id for tracing",
-            "x-go-field-name": "EventId",
-            "x-tag-json": "event_id,omitempty"
-          },
-          "event_type": {
-            "type": "string",
-            "description": "event type",
-            "x-go-field-name": "EventType",
-            "x-tag-json": "event_type,omitempty"
-          },
-          "pub_id": {
-            "type": "string",
-            "description": "the unique identifier for publisher",
-            "x-go-field-name": "PubId",
-            "x-tag-json": "pub_id,omitempty"
-          },
-          "pub_time": {
-            "type": "integer",
-            "format": "int64",
-            "description": "event pub timestamp",
-            "x-go-field-name": "PubTime",
-            "x-tag-json": "pub_time,omitempty"
-          },
-          "token": {
-            "type": "string",
-            "description": "for validation message",
-            "x-go-field-name": "Token",
-            "x-tag-json": "token,omitempty"
-          }
-        },
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb.Header",
-        "x-id": "GithubComMachinefiW3BstreamPkgDependsProtocolEventpbHeader"
       },
       "GithubComMachinefiW3BstreamPkgEnumsAccountRole": {
         "type": "string",
@@ -8791,74 +8911,118 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/deploy.CreateReq",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesDeployCreateReq"
       },
-      "GithubComMachinefiW3BstreamPkgModulesEventHandleEventReq": {
+      "GithubComMachinefiW3BstreamPkgModulesEventEventRsp": {
         "type": "object",
         "properties": {
-          "events": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsProtocolEventpbEvent"
-            },
-            "x-go-field-name": "Events",
-            "x-tag-json": "events"
-          }
-        },
-        "required": [
-          "events"
-        ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/event.HandleEventReq",
-        "x-id": "GithubComMachinefiW3BstreamPkgModulesEventHandleEventReq"
-      },
-      "GithubComMachinefiW3BstreamPkgModulesEventHandleEventResult": {
-        "type": "object",
-        "properties": {
-          "errMsg": {
+          "channel": {
             "type": "string",
-            "x-go-field-name": "ErrMsg",
-            "x-tag-json": "errMsg,omitempty"
+            "description": "Channel intact project name",
+            "x-go-field-name": "Channel",
+            "x-tag-json": "channel"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error error message from w3b node (api level), different from Result.Error",
+            "x-go-field-name": "Error",
+            "x-tag-json": "error,omitempty"
           },
           "eventID": {
             "type": "string",
+            "description": "EventID same as EventReq.EventID",
             "x-go-field-name": "EventID",
             "x-tag-json": "eventID"
           },
-          "projectName": {
-            "type": "string",
-            "x-go-field-name": "ProjectName",
-            "x-tag-json": "projectName"
-          },
-          "pubID": {
+          "publisherID": {
             "allOf": [
               {
                 "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
               },
               {
-                "x-go-field-name": "PubID",
-                "x-tag-json": "pubID,omitempty"
+                "description": "PublisherID publisher(device) unique id in w3b node",
+                "x-go-field-name": "PublisherID",
+                "x-tag-json": "publisherID"
               }
             ]
           },
-          "pubName": {
-            "type": "string",
-            "x-go-field-name": "PubName",
-            "x-tag-json": "pubName,omitempty"
-          },
-          "wasmResults": {
+          "results": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgTypesWasmEventHandleResult"
+              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesEventResult"
             },
-            "x-go-field-name": "WasmResults",
-            "x-tag-json": "wasmResults"
+            "description": "Results result for each wasm invoke, which hits strategies.",
+            "x-go-field-name": "Results",
+            "x-tag-json": "results"
           }
         },
         "required": [
-          "projectName",
+          "channel",
+          "publisherID",
           "eventID",
-          "wasmResults"
+          "results"
         ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/event.HandleEventResult",
-        "x-id": "GithubComMachinefiW3BstreamPkgModulesEventHandleEventResult"
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/event.EventRsp",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesEventEventRsp"
+      },
+      "GithubComMachinefiW3BstreamPkgModulesEventResult": {
+        "type": "object",
+        "properties": {
+          "appletName": {
+            "type": "string",
+            "description": "AppletName applet name(unique) under published channel(project)",
+            "x-go-field-name": "AppletName",
+            "x-tag-json": "appletName"
+          },
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "description": "ReturnCode wasm call returned code",
+            "x-go-field-name": "ReturnCode",
+            "x-tag-json": "code"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message instance module, presents result for wasm invoking",
+            "x-go-field-name": "Error",
+            "x-tag-json": "error,omitempty"
+          },
+          "handler": {
+            "type": "string",
+            "description": "Handler invoked wasm entry name",
+            "x-go-field-name": "Handler",
+            "x-tag-json": "handler"
+          },
+          "instanceID": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+              },
+              {
+                "description": "InstanceID the unique wasm vm  id",
+                "x-go-field-name": "InstanceID",
+                "x-tag-json": "instanceID"
+              }
+            ]
+          },
+          "returnValue": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "uint8"
+            },
+            "description": "ReturnValue wasm call returned value",
+            "x-go-field-name": "ReturnValue",
+            "x-tag-json": "returnValue"
+          }
+        },
+        "required": [
+          "appletName",
+          "instanceID",
+          "handler",
+          "returnValue",
+          "code"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/event.Result",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesEventResult"
       },
       "GithubComMachinefiW3BstreamPkgModulesProjectCreateReq": {
         "allOf": [
@@ -9355,39 +9519,6 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/types/wasm.Env",
         "x-id": "GithubComMachinefiW3BstreamPkgTypesWasmEnv"
       },
-      "GithubComMachinefiW3BstreamPkgTypesWasmEventHandleResult": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgTypesWasmResultStatusCode"
-              },
-              {
-                "x-go-field-name": "Code",
-                "x-tag-json": "code"
-              }
-            ]
-          },
-          "errMsg": {
-            "type": "string",
-            "x-go-field-name": "ErrMsg",
-            "x-tag-json": "errMsg"
-          },
-          "instanceID": {
-            "type": "string",
-            "x-go-field-name": "InstanceID",
-            "x-tag-json": "instanceID"
-          }
-        },
-        "required": [
-          "instanceID",
-          "code",
-          "errMsg"
-        ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/types/wasm.EventHandleResult",
-        "x-id": "GithubComMachinefiW3BstreamPkgTypesWasmEventHandleResult"
-      },
       "GithubComMachinefiW3BstreamPkgTypesWasmKey": {
         "type": "object",
         "properties": {
@@ -9426,36 +9557,6 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/types/wasm.Key",
         "x-id": "GithubComMachinefiW3BstreamPkgTypesWasmKey"
-      },
-      "GithubComMachinefiW3BstreamPkgTypesWasmResultStatusCode": {
-        "type": "integer",
-        "format": "int32",
-        "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9
-        ],
-        "x-enum-labels": [
-          "0",
-          "1",
-          "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8",
-          "9"
-        ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/types/wasm.ResultStatusCode",
-        "x-id": "GithubComMachinefiW3BstreamPkgTypesWasmResultStatusCode"
       },
       "GithubComMachinefiW3BstreamPkgTypesWasmSchema": {
         "type": "object",
