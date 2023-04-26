@@ -12,6 +12,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/account"
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
+	"github.com/machinefi/w3bstream/pkg/modules/blockchain"
 	"github.com/machinefi/w3bstream/pkg/modules/cronjob"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
@@ -181,4 +182,31 @@ func (v *CurrentAccount) WithCronJobBySFID(ctx context.Context, id types.SFID) (
 	}
 	ctx = types.WithCronJob(ctx, cronJob)
 	return v.WithProjectContextBySFID(ctx, cronJob.ProjectID)
+}
+
+func (v *CurrentAccount) WithContractLogBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	l, err := blockchain.GetContractLogBySFID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	ctx = types.WithContractLog(ctx, l)
+	return v.WithProjectContextByName(ctx, l.ProjectName)
+}
+
+func (v *CurrentAccount) WithChainHeightBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	h, err := blockchain.GetChainHeightBySFID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	ctx = types.WithChainHeight(ctx, h)
+	return v.WithProjectContextByName(ctx, h.ProjectName)
+}
+
+func (v *CurrentAccount) WithChainTxBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	t, err := blockchain.GetChainTxBySFID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	ctx = types.WithChainTx(ctx, t)
+	return v.WithProjectContextByName(ctx, t.ProjectName)
 }

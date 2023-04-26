@@ -113,6 +113,12 @@ const (
 	AppletNameConflict
 	// @errTalk Cron Job Conflict
 	CronJobConflict
+	// @errTalk Contract Log Conflict
+	ContractLogConflict
+	// @errTalk Chain Tx Conflict
+	ChainTxConflict
+	// @errTalk Chain Height Conflict
+	ChainHeightConflict
 )
 
 const (
@@ -153,6 +159,14 @@ const (
 	CronJobNotFound
 	// @errTalk Instance Not Running
 	InstanceNotRunning
+	// @errTalk Blockchain Not Found
+	BlockchainNotFound
+	// @errTalk Contract Log Not Found
+	ContractLogNotFound
+	// @errTalk Chain Tx Not Found
+	ChainTxNotFound
+	// @errTalk Chain Height Not Found
+	ChainHeightNotFound
 )
 
 // Deprecated: pls check database error and return defined status error

@@ -106,6 +106,7 @@ func (t *cronJob) sendEvent(ctx context.Context, c models.CronJob) {
 		return
 	}
 
+	ctx = types.WithProject(ctx, m)
 	if _, err = event.HandleEvent(ctx, c.EventType, payload); err != nil {
 		l.Error(errors.Wrap(err, "send event failed"))
 	}
