@@ -115,8 +115,11 @@ func (c *Ctx) Conf(configs ...interface{}) {
 		if rv.Kind() == reflect.Struct {
 			for i := 0; i < rv.NumField(); i++ {
 				value := rv.Field(i)
-				if !value.CanInterface() || value.IsNil() {
+				if !value.CanInterface() {
 					continue
+				}
+				if value.Type().Kind() == reflect.Interface {
+					panic("interface type unsupported in config scanning")
 				}
 				fv := value.Interface()
 				ft := reflect.Indirect(reflect.ValueOf(fv)).Type()
