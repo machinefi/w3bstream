@@ -3,6 +3,7 @@ package resource
 import (
 	"context"
 
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/modules/resource"
@@ -16,5 +17,10 @@ type RemoveResource struct {
 func (r *RemoveResource) Path() string { return "/:resourceID" }
 
 func (r *RemoveResource) Output(ctx context.Context) (interface{}, error) {
-	return nil, resource.DeleteResource(ctx, r.ResourceID)
+	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
+		WithResourceOwnerContextBySFID(ctx, r.ResourceID)
+	if err != nil {
+		return nil, err
+	}
+	return nil, resource.RemoveOwnershipBySFID(ctx, r.ResourceID)
 }

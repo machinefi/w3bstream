@@ -41,14 +41,14 @@ func (*Resource) TableDesc() []string {
 
 func (*Resource) Comments() map[string]string {
 	return map[string]string{
-		"Path": "Path <=> md5",
+		"Path": "Path rel path",
 	}
 }
 
 func (*Resource) ColDesc() map[string][]string {
 	return map[string][]string{
 		"Path": []string{
-			"Path <=> md5",
+			"Path rel path",
 		},
 	}
 }
@@ -66,15 +66,15 @@ func (*Resource) PrimaryKey() []string {
 func (m *Resource) IndexFieldNames() []string {
 	return []string{
 		"ID",
-		"Path",
+		"Md5",
 		"ResourceID",
 	}
 }
 
 func (*Resource) UniqueIndexes() builder.Indexes {
 	return builder.Indexes{
-		"ui_path": []string{
-			"Path",
+		"ui_md5": []string{
+			"Md5",
 		},
 		"ui_resource_id": []string{
 			"ResourceID",
@@ -82,8 +82,8 @@ func (*Resource) UniqueIndexes() builder.Indexes {
 	}
 }
 
-func (*Resource) UniqueIndexUIPath() string {
-	return "ui_path"
+func (*Resource) UniqueIndexUIMd5() string {
+	return "ui_md5"
 }
 
 func (*Resource) UniqueIndexUIResourceID() string {
@@ -112,6 +112,14 @@ func (m *Resource) ColPath() *builder.Column {
 
 func (*Resource) FieldPath() string {
 	return "Path"
+}
+
+func (m *Resource) ColMd5() *builder.Column {
+	return ResourceTable.ColByFieldName(m.FieldMd5())
+}
+
+func (*Resource) FieldMd5() string {
+	return "Md5"
 }
 
 func (m *Resource) ColCreatedAt() *builder.Column {
@@ -201,7 +209,7 @@ func (m *Resource) FetchByID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *Resource) FetchByPath(db sqlx.DBExecutor) error {
+func (m *Resource) FetchByMd5(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	err := db.QueryAndScan(
 		builder.Select(nil).
@@ -209,10 +217,10 @@ func (m *Resource) FetchByPath(db sqlx.DBExecutor) error {
 				tbl,
 				builder.Where(
 					builder.And(
-						tbl.ColByFieldName("Path").Eq(m.Path),
+						tbl.ColByFieldName("Md5").Eq(m.Md5),
 					),
 				),
-				builder.Comment("Resource.FetchByPath"),
+				builder.Comment("Resource.FetchByMd5"),
 			),
 		m,
 	)
@@ -267,7 +275,7 @@ func (m *Resource) UpdateByID(db sqlx.DBExecutor, zeros ...string) error {
 	return m.UpdateByIDWithFVs(db, fvs)
 }
 
-func (m *Resource) UpdateByPathWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+func (m *Resource) UpdateByMd5WithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
 		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
@@ -277,9 +285,9 @@ func (m *Resource) UpdateByPathWithFVs(db sqlx.DBExecutor, fvs builder.FieldValu
 		builder.Update(tbl).
 			Where(
 				builder.And(
-					tbl.ColByFieldName("Path").Eq(m.Path),
+					tbl.ColByFieldName("Md5").Eq(m.Md5),
 				),
-				builder.Comment("Resource.UpdateByPathWithFVs"),
+				builder.Comment("Resource.UpdateByMd5WithFVs"),
 			).
 			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
@@ -287,14 +295,14 @@ func (m *Resource) UpdateByPathWithFVs(db sqlx.DBExecutor, fvs builder.FieldValu
 		return err
 	}
 	if affected, _ := res.RowsAffected(); affected == 0 {
-		return m.FetchByPath(db)
+		return m.FetchByMd5(db)
 	}
 	return nil
 }
 
-func (m *Resource) UpdateByPath(db sqlx.DBExecutor, zeros ...string) error {
+func (m *Resource) UpdateByMd5(db sqlx.DBExecutor, zeros ...string) error {
 	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
-	return m.UpdateByPathWithFVs(db, fvs)
+	return m.UpdateByMd5WithFVs(db, fvs)
 }
 
 func (m *Resource) UpdateByResourceIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
@@ -356,7 +364,7 @@ func (m *Resource) DeleteByID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *Resource) DeleteByPath(db sqlx.DBExecutor) error {
+func (m *Resource) DeleteByMd5(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	_, err := db.Exec(
 		builder.Delete().
@@ -364,10 +372,10 @@ func (m *Resource) DeleteByPath(db sqlx.DBExecutor) error {
 				tbl,
 				builder.Where(
 					builder.And(
-						tbl.ColByFieldName("Path").Eq(m.Path),
+						tbl.ColByFieldName("Md5").Eq(m.Md5),
 					),
 				),
-				builder.Comment("Resource.DeleteByPath"),
+				builder.Comment("Resource.DeleteByMd5"),
 			),
 	)
 	return err

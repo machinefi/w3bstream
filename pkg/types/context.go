@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
-	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/amazonS3"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
@@ -23,7 +22,6 @@ type (
 	CtxLogger            struct{} // CtxLogger log.Logger
 	CtxMqttBroker        struct{} // CtxMqttBroker mqtt.Broker
 	CtxRedisEndpoint     struct{} // CtxRedisEndpoint redis.Redis
-	CtxUploadConfig      struct{} // CtxUploadConfig UploadConfig
 	CtxTaskWorker        struct{}
 	CtxTaskBoard         struct{}
 	CtxProject           struct{}
@@ -32,11 +30,11 @@ type (
 	CtxInstance          struct{}
 	CtxEthClient         struct{} // CtxEthClient ETHClientConfig
 	CtxWhiteList         struct{}
+	CtxFileSystem        struct{}
 	CtxStrategy          struct{}
 	CtxPublisher         struct{}
 	CtxCronJob           struct{}
 	CtxAccount           struct{}
-	CtxAmazonS3          struct{}
 	CtxFileSystemOp      struct{}
 )
 
@@ -250,27 +248,6 @@ func MustMqttBrokerFromContext(ctx context.Context) *mqtt.Broker {
 	return v
 }
 
-func WithUploadConfig(ctx context.Context, v *UploadConfig) context.Context {
-	return contextx.WithValue(ctx, CtxUploadConfig{}, v)
-}
-
-func WithUploadConfigContext(v *UploadConfig) contextx.WithContext {
-	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, CtxUploadConfig{}, v)
-	}
-}
-
-func UploadConfigFromContext(ctx context.Context) (*UploadConfig, bool) {
-	v, ok := ctx.Value(CtxUploadConfig{}).(*UploadConfig)
-	return v, ok
-}
-
-func MustUploadConfigFromContext(ctx context.Context) *UploadConfig {
-	v, ok := UploadConfigFromContext(ctx)
-	must.BeTrue(ok)
-	return v
-}
-
 func WithTaskBoard(ctx context.Context, tb *mq.TaskBoard) context.Context {
 	return contextx.WithValue(ctx, CtxTaskBoard{}, tb)
 }
@@ -439,27 +416,6 @@ func WhiteListFromContext(ctx context.Context) (*WhiteList, bool) {
 
 func MustWhiteListFromContext(ctx context.Context) *WhiteList {
 	v, ok := WhiteListFromContext(ctx)
-	must.BeTrue(ok)
-	return v
-}
-
-func WithAmazonS3(ctx context.Context, v *amazonS3.AmazonS3) context.Context {
-	return contextx.WithValue(ctx, CtxAmazonS3{}, v)
-}
-
-func WithAmazonS3Context(v *amazonS3.AmazonS3) contextx.WithContext {
-	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, CtxAmazonS3{}, v)
-	}
-}
-
-func AmazonS3FromContext(ctx context.Context) (*amazonS3.AmazonS3, bool) {
-	v, ok := ctx.Value(CtxAmazonS3{}).(*amazonS3.AmazonS3)
-	return v, ok
-}
-
-func MustS3FromContext(ctx context.Context) *amazonS3.AmazonS3 {
-	v, ok := AmazonS3FromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
