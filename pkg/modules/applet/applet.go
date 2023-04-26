@@ -180,7 +180,7 @@ func UpdateAndDeploy(ctx context.Context, accountID types.SFID, r *UpdateAndDepl
 	_, l = l.Start(ctx, "UpdateAndDeploy")
 	defer l.End()
 
-	mResource, _, err := resource.Create(ctx, accountID, r.File, "")
+	mResource, code, err := resource.Create(ctx, accountID, r.File, "")
 	if err != nil {
 		l.Error(err)
 		return err
@@ -243,7 +243,7 @@ func UpdateAndDeploy(ctx context.Context, accountID types.SFID, r *UpdateAndDepl
 		},
 		func(db sqlx.DBExecutor) error {
 			// TODO wait resources s3 pr @zhiwei
-			return vm.NewInstance(_ctx, []byte("TODO"), ins.InstanceID, enums.INSTANCE_STATE__STARTED)
+			return vm.NewInstance(_ctx, code, ins.InstanceID, enums.INSTANCE_STATE__STARTED)
 		},
 	).Do()
 
