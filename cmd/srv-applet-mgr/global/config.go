@@ -30,6 +30,7 @@ import (
 var (
 	App         *confapp.Ctx
 	WithContext contextx.WithContext
+	Context     context.Context
 
 	tasks  mq.TaskManager
 	worker *mq.TaskWorker
@@ -119,6 +120,7 @@ func init() {
 		types.WithWhiteListContext(config.WhiteList),
 		types.WithFileSystemOpContext(fs),
 	)
+	Context = WithContext(context.Background())
 }
 
 func Server() kit.Transport { return server.WithContextInjector(WithContext) }

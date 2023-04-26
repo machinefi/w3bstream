@@ -61,3 +61,17 @@ func (r *ListProject) Output(ctx context.Context) (interface{}, error) {
 	}
 	return rsp, nil
 }
+
+type ListProjectDetail struct {
+	httpx.MethodGet
+	project.ListReq
+}
+
+func (r *ListProjectDetail) Path() string { return "/detail_list" }
+
+func (r *ListProjectDetail) Output(ctx context.Context) (interface{}, error) {
+	ca := middleware.MustCurrentAccountFromContext(ctx)
+
+	r.AccountID = ca.AccountID
+	return project.ListDetail(types.WithAccount(ctx, &ca.Account), &r.ListReq)
+}

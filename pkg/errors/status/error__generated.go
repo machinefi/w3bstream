@@ -71,6 +71,8 @@ func (v Error) Key() string {
 		return "InvalidAuthPublisherID"
 	case CurrentAccountAbsence:
 		return "CurrentAccountAbsence"
+	case InvalidEventChannel:
+		return "InvalidEventChannel"
 	case Forbidden:
 		return "Forbidden"
 	case DisabledAccount:
@@ -129,6 +131,8 @@ func (v Error) Key() string {
 		return "PublisherConflict"
 	case MultiInstanceDeployed:
 		return "MultiInstanceDeployed"
+	case AppletNameConflict:
+		return "AppletNameConflict"
 	case CronJobConflict:
 		return "CronJobConflict"
 	case ContractLogConflict:
@@ -157,6 +161,8 @@ func (v Error) Key() string {
 		return "GenPublisherTokenFailed"
 	case CreateInstanceFailed:
 		return "CreateInstanceFailed"
+	case BatchRemoveAppletFailed:
+		return "BatchRemoveAppletFailed"
 	case MD5ChecksumFailed:
 		return "MD5ChecksumFailed"
 	}
@@ -199,6 +205,8 @@ func (v Error) Msg() string {
 		return "Invalid Auth Publisher ID"
 	case CurrentAccountAbsence:
 		return "Current Account Absence"
+	case InvalidEventChannel:
+		return "Invalid Event Channel"
 	case Forbidden:
 		return "forbidden"
 	case DisabledAccount:
@@ -257,6 +265,8 @@ func (v Error) Msg() string {
 		return "Publisher Conflict"
 	case MultiInstanceDeployed:
 		return "Multi Instance Deployed"
+	case AppletNameConflict:
+		return "Applet Name Conflict"
 	case CronJobConflict:
 		return "Cron Job Conflict"
 	case ContractLogConflict:
@@ -285,6 +295,8 @@ func (v Error) Msg() string {
 		return "Gen Publisher Token Failed"
 	case CreateInstanceFailed:
 		return "Create Instance Failed"
+	case BatchRemoveAppletFailed:
+		return "Batch Remove Applet Failed"
 	case MD5ChecksumFailed:
 		return "Md5 Checksum Failed"
 	}
@@ -326,6 +338,8 @@ func (v Error) CanBeTalk() bool {
 	case InvalidAuthPublisherID:
 		return true
 	case CurrentAccountAbsence:
+		return true
+	case InvalidEventChannel:
 		return true
 	case Forbidden:
 		return false
@@ -385,6 +399,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case MultiInstanceDeployed:
 		return true
+	case AppletNameConflict:
+		return true
 	case CronJobConflict:
 		return true
 	case ContractLogConflict:
@@ -412,6 +428,8 @@ func (v Error) CanBeTalk() bool {
 	case GenPublisherTokenFailed:
 		return true
 	case CreateInstanceFailed:
+		return true
+	case BatchRemoveAppletFailed:
 		return true
 	case MD5ChecksumFailed:
 		return true

@@ -11,43 +11,18 @@ import (
 
 type UpdateApplet struct {
 	httpx.MethodPut
-	AppletID               types.SFID `in:"path" name:"appletID"`
-	applet.UpdateAppletReq `in:"body" mime:"multipart"`
+	AppletID         types.SFID `in:"path" name:"appletID"`
+	applet.UpdateReq `in:"body" mime:"multipart"`
 }
 
 func (r *UpdateApplet) Path() string { return "/:appletID" }
 
 func (r *UpdateApplet) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.MustCurrentAccountFromContext(ctx)
-
-	ctx, err := ca.WithAppletContextBySFID(ctx, r.AppletID)
+	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
+		WithAppletContextBySFID(ctx, r.AppletID)
 	if err != nil {
 		return nil, err
 	}
 
-	return nil, applet.UpdateApplet(ctx, r.AppletID, ca.AccountID, &r.UpdateAppletReq)
-}
-
-type UpdateAndDeploy struct {
-	httpx.MethodPut
-	AppletID                  types.SFID `in:"path" name:"appletID"`
-	InstanceID                types.SFID `in:"path" name:"instanceID"`
-	applet.UpdateAndDeployReq `in:"body" mime:"multipart"`
-}
-
-func (r *UpdateAndDeploy) Path() string {
-	return "/:appletID/:instanceID"
-}
-
-func (r *UpdateAndDeploy) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.MustCurrentAccountFromContext(ctx)
-	ctx, err := ca.WithAppletContextBySFID(ctx, r.AppletID)
-	if err != nil {
-		return nil, err
-	}
-	ctx, err = ca.WithInstanceContextBySFID(ctx, r.InstanceID)
-	if err != nil {
-		return nil, err
-	}
-	return nil, applet.UpdateAndDeploy(ctx, ca.AccountID, &r.UpdateAndDeployReq)
+	return applet.Update(ctx, &r.UpdateReq)
 }

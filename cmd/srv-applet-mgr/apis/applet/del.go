@@ -9,12 +9,13 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
+// RemoveApplet remove applet by applet id
 type RemoveApplet struct {
 	httpx.MethodDelete
 	AppletID types.SFID `in:"path" name:"appletID"`
 }
 
-func (r *RemoveApplet) Path() string { return "/:appletID" }
+func (r *RemoveApplet) Path() string { return "/data/:appletID" }
 
 func (r *RemoveApplet) Output(ctx context.Context) (interface{}, error) {
 	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
@@ -23,5 +24,21 @@ func (r *RemoveApplet) Output(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	return nil, applet.RemoveApplet(ctx, r.AppletID)
+	return nil, applet.RemoveBySFID(ctx, r.AppletID)
+}
+
+// BatchRemoveApplet remove applets with condition under project permission
+type BatchRemoveApplet struct {
+	httpx.MethodDelete
+	applet.CondArgs
+}
+
+func (r *BatchRemoveApplet) Output(ctx context.Context) (interface{}, error) {
+	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
+		WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
+	if err != nil {
+		return nil, err
+	}
+	r.ProjectID = types.MustProjectFromContext(ctx).ProjectID
+	return nil, applet.Remove(ctx, &r.CondArgs)
 }
