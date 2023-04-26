@@ -17,6 +17,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/resource"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
 func Init(ctx context.Context) error {
@@ -185,6 +186,7 @@ func Remove(ctx context.Context, r *CondArgs) error {
 	).Do()
 }
 
+// UpsertByCode upsert instance and its config, and deploy wasm if needed
 func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.InstanceState, old ...types.SFID) (*models.Instance, error) {
 	var (
 		id        types.SFID
@@ -301,6 +303,9 @@ func Create(ctx context.Context, r *CreateReq) (*models.Instance, error) {
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
+			if r.Cache == nil {
+				r.Cache = wasm.DefaultCache()
+			}
 			_, err = config.Create(ctx, ins.InstanceID, r.Cache)
 			return nil
 		},

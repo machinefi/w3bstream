@@ -12,5 +12,6 @@ func init() {
 	Root.Register(kit.NewRouter(&CreateProject{}))
 	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &GetProject{}))
 	Root.Register(kit.NewRouter(&ListProject{}))
+	Root.Register(kit.NewRouter(&ListProjectDetail{}))
 	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &RemoveProject{}))
 }

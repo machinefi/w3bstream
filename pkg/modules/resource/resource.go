@@ -13,7 +13,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, md5 string) (*models.Resource, []byte, error) {
+func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filename, md5 string) (*models.Resource, []byte, error) {
 	f, err := fh.Open()
 	if err != nil {
 		err = status.UploadFileFailed.StatusErr().WithDesc(err.Error())
@@ -65,6 +65,7 @@ func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, md5 s
 				RelAccount:  models.RelAccount{AccountID: acc},
 				ResourceOwnerInfo: models.ResourceOwnerInfo{
 					UploadedAt: types.Timestamp{Time: time.Now()},
+					Filename:   filename,
 				},
 			}
 			if err = own.Create(d); err != nil {

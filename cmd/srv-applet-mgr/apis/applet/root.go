@@ -13,6 +13,6 @@ func init() {
 	Root.Register(kit.NewRouter(&GetApplet{}))
 	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &ListApplet{}))
 	Root.Register(kit.NewRouter(&RemoveApplet{}))
+	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &BatchRemoveApplet{}))
 	Root.Register(kit.NewRouter(&UpdateApplet{}))
-	Root.Register(kit.NewRouter(&UpdateAndDeploy{}))
 }
