@@ -101,6 +101,14 @@ func (v Error) Key() string {
 		return "AccountIdentityNotFound"
 	case CronJobNotFound:
 		return "CronJobNotFound"
+	case BlockchainNotFound:
+		return "BlockchainNotFound"
+	case ContractLogNotFound:
+		return "ContractLogNotFound"
+	case ChainTxNotFound:
+		return "ChainTxNotFound"
+	case ChainHeightNotFound:
+		return "ChainHeightNotFound"
 	case Conflict:
 		return "Conflict"
 	case ProjectConfigConflict:
@@ -119,6 +127,12 @@ func (v Error) Key() string {
 		return "ResourceAccountConflict"
 	case CronJobConflict:
 		return "CronJobConflict"
+	case ContractLogConflict:
+		return "ContractLogConflict"
+	case ChainTxConflict:
+		return "ChainTxConflict"
+	case ChainHeightConflict:
+		return "ChainHeightConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -205,6 +219,14 @@ func (v Error) Msg() string {
 		return "Account Identity Not Found"
 	case CronJobNotFound:
 		return "Cron Job Not Found"
+	case BlockchainNotFound:
+		return "Blockchain Not Found"
+	case ContractLogNotFound:
+		return "Contract Log Not Found"
+	case ChainTxNotFound:
+		return "Chain Tx Not Found"
+	case ChainHeightNotFound:
+		return "Chain Height Not Found"
 	case Conflict:
 		return "Conflict conflict error"
 	case ProjectConfigConflict:
@@ -223,6 +245,12 @@ func (v Error) Msg() string {
 		return "Resource Account and WasmName Conflict"
 	case CronJobConflict:
 		return "Cron Job Conflict"
+	case ContractLogConflict:
+		return "Contract Log Conflict"
+	case ChainTxConflict:
+		return "Chain Tx Conflict"
+	case ChainHeightConflict:
+		return "Chain Height Conflict"
 	case InternalServerError:
 		return "InternalServerError internal error"
 	case DatabaseError:
@@ -309,6 +337,14 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case CronJobNotFound:
 		return true
+	case BlockchainNotFound:
+		return true
+	case ContractLogNotFound:
+		return true
+	case ChainTxNotFound:
+		return true
+	case ChainHeightNotFound:
+		return true
 	case Conflict:
 		return true
 	case ProjectConfigConflict:
@@ -326,6 +362,12 @@ func (v Error) CanBeTalk() bool {
 	case ResourceAccountConflict:
 		return true
 	case CronJobConflict:
+		return true
+	case ContractLogConflict:
+		return true
+	case ChainTxConflict:
+		return true
+	case ChainHeightConflict:
 		return true
 	case InternalServerError:
 		return true

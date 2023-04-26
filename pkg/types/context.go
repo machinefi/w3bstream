@@ -35,6 +35,9 @@ type (
 	CtxStrategy          struct{}
 	CtxPublisher         struct{}
 	CtxCronJob           struct{}
+	ContractLog          struct{}
+	ChainHeight          struct{}
+	ChainTx              struct{}
 	CtxAccount           struct{}
 	CtxAmazonS3          struct{}
 	CtxFileSystemOp      struct{}
@@ -99,6 +102,69 @@ func CronJobFromContext(ctx context.Context) (*models.CronJob, bool) {
 
 func MustCronJobFromContext(ctx context.Context) *models.CronJob {
 	v, ok := CronJobFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithContractLog(ctx context.Context, v *models.ContractLog) context.Context {
+	return contextx.WithValue(ctx, ContractLog{}, v)
+}
+
+func WithContractLogContext(v *models.ContractLog) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, ContractLog{}, v)
+	}
+}
+
+func ContractLogFromContext(ctx context.Context) (*models.ContractLog, bool) {
+	v, ok := ctx.Value(ContractLog{}).(*models.ContractLog)
+	return v, ok
+}
+
+func MustContractLogFromContext(ctx context.Context) *models.ContractLog {
+	v, ok := ContractLogFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithChainHeight(ctx context.Context, v *models.ChainHeight) context.Context {
+	return contextx.WithValue(ctx, ChainHeight{}, v)
+}
+
+func WithChainHeightContext(v *models.ChainHeight) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, ChainHeight{}, v)
+	}
+}
+
+func ChainHeightFromContext(ctx context.Context) (*models.ChainHeight, bool) {
+	v, ok := ctx.Value(ChainHeight{}).(*models.ChainHeight)
+	return v, ok
+}
+
+func MustChainHeightFromContext(ctx context.Context) *models.ChainHeight {
+	v, ok := ChainHeightFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithChainTx(ctx context.Context, v *models.ChainTx) context.Context {
+	return contextx.WithValue(ctx, ChainTx{}, v)
+}
+
+func WithChainTxContext(v *models.ChainTx) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, ChainTx{}, v)
+	}
+}
+
+func ChainTxFromContext(ctx context.Context) (*models.ChainTx, bool) {
+	v, ok := ctx.Value(ChainTx{}).(*models.ChainTx)
+	return v, ok
+}
+
+func MustChainTxFromContext(ctx context.Context) *models.ChainTx {
+	v, ok := ChainTxFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
