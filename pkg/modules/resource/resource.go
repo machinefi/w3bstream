@@ -3,89 +3,208 @@ package resource
 import (
 	"context"
 	"mime/multipart"
-
-	"github.com/pkg/errors"
+	"time"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-func FetchOrCreateResource(ctx context.Context, f *multipart.FileHeader) (*models.Resource, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-	idg := confid.MustSFIDGeneratorFromContext(ctx)
-
-	_, l = l.Start(ctx, "FetchOrCreateResource")
-	defer l.End()
-
-	_, fullName, md5, err := Upload(ctx, f, idg.MustGenSFID().String())
+func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filename, md5 string) (*models.Resource, []byte, error) {
+	f, err := fh.Open()
 	if err != nil {
-		l.Error(err)
-		return nil, status.UploadFileFailed.StatusErr().WithDesc(err.Error())
+		err = status.UploadFileFailed.StatusErr().WithDesc(err.Error())
+		return nil, nil, err
 	}
+	defer f.Close()
 
-	m := &models.Resource{ResourceInfo: models.ResourceInfo{Md5: md5}}
-
-	if err = m.FetchByMd5(d); err != nil && sqlx.DBErr(err).IsNotFound() {
-		m.ResourceID = idg.MustGenSFID()
-		m.ResourceInfo.Path = fullName
-		m.ResourceInfo.Md5 = md5
-		if err = m.Create(d); err != nil {
-			l.Error(errors.Wrap(err, "create wasm resource db failed"))
-			return nil, status.CheckDatabaseError(err, "CreateResource")
-		}
-		l.Info("wasm resource created")
-	}
-	l.Info("get wasm resource from db")
-	return m, err
-}
-
-func CheckResourceExist(ctx context.Context, path string) bool {
-	l := types.MustLoggerFromContext(ctx)
-
-	_, l = l.Start(ctx, "CheckResourceExist")
-	defer l.End()
-
-	return IsPathExists(path)
-}
-
-func ListResource(ctx context.Context) ([]models.Resource, error) {
-	res, err := (&models.Resource{}).List(types.MustMgrDBExecutorFromContext(ctx), nil)
+	path, data, err := UploadFile(ctx, f, md5)
 	if err != nil {
-		return nil, status.CheckDatabaseError(err)
+		return nil, nil, err
 	}
-	return res, err
-}
 
-func DeleteResource(ctx context.Context, resID types.SFID) error {
-	return status.CheckDatabaseError((&models.Resource{
-		RelResource: models.RelResource{ResourceID: resID},
-	}).DeleteByResourceID(types.MustMgrDBExecutorFromContext(ctx)))
+	id := confid.MustNewSFIDGenerator().MustGenSFID()
+	res := &models.Resource{}
+	found := false
+
+	err = sqlx.NewTasks(types.MustMgrDBExecutorFromContext(ctx)).With(
+		func(d sqlx.DBExecutor) error {
+			res.Md5 = md5
+			if err = res.FetchByMd5(d); err != nil {
+				if sqlx.DBErr(err).IsNotFound() {
+					found = false
+					return nil
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			found = true
+			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			if found {
+				return nil
+			}
+			res = &models.Resource{
+				RelResource:  models.RelResource{ResourceID: id},
+				ResourceInfo: models.ResourceInfo{Path: path, Md5: md5},
+			}
+			if err = res.Create(d); err != nil {
+				if sqlx.DBErr(err).IsConflict() {
+					return status.ResourceConflict
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			own := &models.ResourceOwnership{
+				RelResource: models.RelResource{ResourceID: res.ResourceID},
+				RelAccount:  models.RelAccount{AccountID: acc},
+				ResourceOwnerInfo: models.ResourceOwnerInfo{
+					UploadedAt: types.Timestamp{Time: time.Now()},
+					Filename:   filename,
+				},
+			}
+			if err = own.Create(d); err != nil {
+				if sqlx.DBErr(err).IsConflict() {
+					return status.ResourceOwnerConflict
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
+		},
+	).Do()
+
+	if err != nil {
+		return nil, nil, err
+	}
+	return res, data, nil
 }
 
 func GetBySFID(ctx context.Context, id types.SFID) (*models.Resource, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	m := &models.Resource{RelResource: models.RelResource{ResourceID: id}}
-
-	if err := m.FetchByResourceID(d); err != nil {
+	res := &models.Resource{}
+	res.ResourceID = id
+	if err := res.FetchByResourceID(types.MustMgrDBExecutorFromContext(ctx)); err != nil {
 		if sqlx.DBErr(err).IsNotFound() {
 			return nil, status.ResourceNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return res, nil
+}
+
+func GetByMd5(ctx context.Context, md5 string) (*models.Resource, error) {
+	res := &models.Resource{}
+	res.Md5 = md5
+	if err := res.FetchByMd5(types.MustMgrDBExecutorFromContext(ctx)); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.ResourceNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return res, nil
+}
+
+func GetContentBySFID(ctx context.Context, id types.SFID) (*models.Resource, []byte, error) {
+	res, err := GetBySFID(ctx, id)
+	if err != nil {
+		return nil, nil, err
+	}
+	data, err := ReadContent(ctx, res)
+	if err != nil {
+		return nil, nil, err
+	}
+	return res, data, nil
+}
+
+func GetContentByMd5(ctx context.Context, md5 string) (*models.Resource, []byte, error) {
+	res, err := GetByMd5(ctx, md5)
+	if err != nil {
+		return nil, nil, err
+	}
+	data, err := ReadContent(ctx, res)
+	if err != nil {
+		return nil, nil, err
+	}
+	return res, data, nil
+}
+
+func ReadContent(ctx context.Context, m *models.Resource) ([]byte, error) {
+	fs := types.MustFileSystemOpFromContext(ctx)
+	data, err := fs.Read(m.Md5)
+	if err != nil {
+		return nil, status.FetchResourceFailed.StatusErr().WithDesc(err.Error())
+	}
+	return data, nil
+}
+
+func GetOwnerByAccountAndSFID(ctx context.Context, acc, res types.SFID) (*models.ResourceOwnership, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.ResourceOwnership{
+		RelAccount:  models.RelAccount{AccountID: acc},
+		RelResource: models.RelResource{ResourceID: res},
+	}
+
+	if err := m.FetchByResourceIDAndAccountID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.ResourcePermNotFound
 		}
 		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
 	return m, nil
 }
 
-func GetContentBySFID(ctx context.Context, id types.SFID) (res *models.Resource, code []byte, err error) {
-	res, _ = types.ResourceFromContext(ctx)
-	if res == nil || id != res.ResourceID {
-		if res, err = GetBySFID(ctx, id); err != nil {
-			return nil, nil, err
-		}
+func List(ctx context.Context, r *ListReq) (*ListRsp, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	res := &models.Resource{}
+	own := &models.ResourceOwnership{}
+	rsp := &ListRsp{}
+
+	err := d.QueryAndScan(
+		builder.Select(
+			builder.MultiWith(",",
+				builder.Alias(res.ColResourceID(), "f_resource_id"),
+				builder.Alias(res.ColMd5(), "f_md5"),
+				builder.Alias(own.ColUploadedAt(), "f_uploaded_at"),
+				builder.Alias(own.ColExpireAt(), "f_expire_at"),
+				builder.Alias(own.ColFilename(), "f_filename"),
+				builder.Alias(own.ColComment(), "f_comment"),
+				builder.Alias(own.ColCreatedAt(), "f_created_at"),
+				builder.Alias(own.ColUpdatedAt(), "f_updated_at"),
+			),
+		).From(
+			d.T(res),
+			builder.LeftJoin(d.T(own)).On(res.ColResourceID().Eq(own.ResourceID)),
+			builder.Where(r.Condition()),
+		), &rsp.Data)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
-	// TODO fetch resource content from fs
-	return res, code, nil
+
+	err = d.QueryAndScan(builder.Select(builder.Count()).From(
+		d.T(res),
+		builder.LeftJoin(d.T(own)).On(res.ColResourceID().Eq(own.ResourceID)),
+		builder.Where(r.Condition()),
+	), &rsp.Total)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return rsp, nil
+}
+
+func RemoveOwnershipBySFID(ctx context.Context, id types.SFID) error {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	acc := types.MustAccountFromContext(ctx)
+
+	m := &models.ResourceOwnership{
+		RelResource: models.RelResource{ResourceID: id},
+		RelAccount:  acc.RelAccount,
+	}
+	if err := m.DeleteByResourceIDAndAccountID(d); err != nil {
+		return status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return nil
 }

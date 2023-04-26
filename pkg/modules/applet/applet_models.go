@@ -79,6 +79,7 @@ type CreateReq struct {
 	Info `name:"info"`
 }
 
+// BuildStrategies, must be built. if nil default strategy returned
 func (r *CreateReq) BuildStrategies(ctx context.Context) []models.Strategy {
 	ids := confid.MustSFIDGeneratorFromContext(ctx).MustGenSFIDs(len(r.Strategies) + 1)
 	app := types.MustAppletFromContext(ctx)
@@ -109,35 +110,20 @@ type CreateRsp struct {
 	Strategies       []models.Strategy `json:"strategies"`
 }
 
-type InfoForUpdate struct {
-	AppletName string                `json:"appletName,omitempty"`
-	Deploy     datatypes.Bool        `json:"deploy"` // deploy and start applet after updated
-	WasmName   string                `json:"wasmName,omitempty"`
-	WasmMd5    string                `json:"wasmMd5,omitempty"`
-	WasmCache  *wasm.Cache           `json:"wasmCache,omitempty"`
-	Strategies []models.StrategyInfo `json:"strategies,omitempty"`
-}
-
 type UpdateReq struct {
 	File *multipart.FileHeader `name:"file,omitempty"`
-	Info *InfoForUpdate        `name:"info"`
+	Info `name:"info"`
 }
 
+// BuildStrategies try build, if invalid nil return
 func (r *UpdateReq) BuildStrategies(ctx context.Context) []models.Strategy {
-	idg := confid.MustSFIDGeneratorFromContext(ctx)
+	if len(r.Strategies) == 0 {
+		return nil
+	}
 	app := types.MustAppletFromContext(ctx)
 	prj := types.MustProjectFromContext(ctx)
-	if r.Info == nil || len(r.Info.Strategies) == 0 {
-		return []models.Strategy{{
-			RelStrategy:  models.RelStrategy{StrategyID: idg.MustGenSFID()},
-			RelProject:   models.RelProject{ProjectID: prj.ProjectID},
-			RelApplet:    models.RelApplet{AppletID: app.AppletID},
-			StrategyInfo: models.DefaultStrategyInfo,
-		}}
-	}
-
 	sty := make([]models.Strategy, 0, len(r.Info.Strategies))
-	ids := idg.MustGenSFIDs(len(r.Info.Strategies))
+	ids := confid.MustSFIDGeneratorFromContext(ctx).MustGenSFIDs(len(r.Info.Strategies))
 	for i := range r.Info.Strategies {
 		sty = append(sty, models.Strategy{
 			RelStrategy:  models.RelStrategy{StrategyID: ids[i]},
