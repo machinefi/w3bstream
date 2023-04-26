@@ -98,12 +98,8 @@ func Upsert(ctx context.Context, rel types.SFID, c wasm.Configuration) (*models.
 				}
 				return status.DatabaseError.StatusErr().WithDesc(v.Log(err))
 			}
-			old, err = Unmarshal(m.Value, c.ConfigType())
-			return err
-		},
-		func(db sqlx.DBExecutor) error {
-			if old == nil {
-				return nil
+			if old, err = Unmarshal(m.Value, c.ConfigType()); err != nil {
+				return err
 			}
 			if err = wasm.UninitConfiguration(ctx, old); err != nil {
 				return status.ConfigUninitFailed.StatusErr().WithDesc(v.Log(err))
@@ -111,39 +107,21 @@ func Upsert(ctx context.Context, rel types.SFID, c wasm.Configuration) (*models.
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			if old != nil {
-				return nil
-			}
 			var raw []byte
 			raw, err = Marshal(c)
 			if err != nil {
 				return err
 			}
-			m = &models.Config{
-				RelConfig: models.RelConfig{ConfigID: idg.MustGenSFID()},
-				ConfigBase: models.ConfigBase{
-					Type:  c.ConfigType(),
-					RelID: rel,
-					Value: raw,
-				},
-			}
-			if err = m.Create(d); err != nil {
-				if sqlx.DBErr(err).IsConflict() {
-					return status.ConfigConflict.StatusErr().WithDesc(v.Log(err))
-				}
-				return status.DatabaseError.StatusErr().WithDesc(err.Error())
-			}
-			return nil
-		},
-		func(d sqlx.DBExecutor) error {
+			m = &models.Config{ConfigBase: models.ConfigBase{
+				Type: c.ConfigType(), RelID: rel, Value: raw,
+			}}
 			if old == nil {
-				return nil
+				m.ConfigID = idg.MustGenSFID()
+				err = m.Create(d)
+			} else {
+				err = m.UpdateByConfigID(d)
 			}
-			m.Value, err = Marshal(c)
 			if err != nil {
-				return err
-			}
-			if err = m.UpdateByConfigID(d); err != nil {
 				if sqlx.DBErr(err).IsConflict() {
 					return status.ConfigConflict.StatusErr().WithDesc(v.Log(err))
 				}
