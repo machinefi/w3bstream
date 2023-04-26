@@ -41,6 +41,7 @@ require (
 )
 
 require (
+	github.com/aws/aws-sdk-go v1.44.245
 	github.com/ethereum/go-ethereum v1.10.15
 	github.com/go-co-op/gocron v1.22.0
 	github.com/robfig/cron/v3 v3.0.1
@@ -63,6 +64,7 @@ require (
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect

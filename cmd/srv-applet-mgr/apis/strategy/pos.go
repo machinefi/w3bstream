@@ -15,7 +15,7 @@ type CreateStrategy struct {
 
 func (r *CreateStrategy) Output(ctx context.Context) (interface{}, error) {
 	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
-		WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
+		WithAppletContextBySFID(ctx, r.AppletID)
 	if err != nil {
 		return nil, err
 	}

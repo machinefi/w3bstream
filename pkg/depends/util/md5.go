@@ -22,3 +22,8 @@ func FileMD5(path string) (string, error) {
 	sum := hash.Sum(nil)
 	return fmt.Sprintf("%x", sum), nil
 }
+
+func ByteMD5(bytes []byte) (string, error) {
+	sum := md5.Sum(bytes)
+	return fmt.Sprintf("%x", sum), nil
+}

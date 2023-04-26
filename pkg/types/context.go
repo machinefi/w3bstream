@@ -3,6 +3,7 @@ package types
 import (
 	"context"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
@@ -17,12 +18,10 @@ import (
 type (
 	CtxMgrDBExecutor     struct{} // CtxMgrDBExecutor sqlx.DBExecutor
 	CtxMonitorDBExecutor struct{} // CtxMonitorDBExecutor sqlx.DBExecutor
-	CtxWasmDBExecutor    struct{} // CtxWasmDBExecutor sqlx.DBExecutor
-	CtxPgEndpoint        struct{} // CtxPgEndpoint postgres.Endpoint
+	CtxWasmDBEndpoint    struct{} // CtxWasmDBEndpoint sqlx.DBExecutor
 	CtxLogger            struct{} // CtxLogger log.Logger
 	CtxMqttBroker        struct{} // CtxMqttBroker mqtt.Broker
 	CtxRedisEndpoint     struct{} // CtxRedisEndpoint redis.Redis
-	CtxUploadConfig      struct{} // CtxUploadConfig UploadConfig
 	CtxTaskWorker        struct{}
 	CtxTaskBoard         struct{}
 	CtxProject           struct{}
@@ -31,9 +30,15 @@ type (
 	CtxInstance          struct{}
 	CtxEthClient         struct{} // CtxEthClient ETHClientConfig
 	CtxWhiteList         struct{}
+	CtxFileSystem        struct{}
 	CtxStrategy          struct{}
 	CtxPublisher         struct{}
+	CtxCronJob           struct{}
+	ContractLog          struct{}
+	ChainHeight          struct{}
+	ChainTx              struct{}
 	CtxAccount           struct{}
+	CtxFileSystemOp      struct{}
 )
 
 func WithAccount(ctx context.Context, v *models.Account) context.Context {
@@ -74,6 +79,90 @@ func PublisherFromContext(ctx context.Context) (*models.Publisher, bool) {
 
 func MustPublisherFromContext(ctx context.Context) *models.Publisher {
 	v, ok := PublisherFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithCronJob(ctx context.Context, v *models.CronJob) context.Context {
+	return contextx.WithValue(ctx, CtxCronJob{}, v)
+}
+
+func WithCronJobContext(v *models.CronJob) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxCronJob{}, v)
+	}
+}
+
+func CronJobFromContext(ctx context.Context) (*models.CronJob, bool) {
+	v, ok := ctx.Value(CtxCronJob{}).(*models.CronJob)
+	return v, ok
+}
+
+func MustCronJobFromContext(ctx context.Context) *models.CronJob {
+	v, ok := CronJobFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithContractLog(ctx context.Context, v *models.ContractLog) context.Context {
+	return contextx.WithValue(ctx, ContractLog{}, v)
+}
+
+func WithContractLogContext(v *models.ContractLog) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, ContractLog{}, v)
+	}
+}
+
+func ContractLogFromContext(ctx context.Context) (*models.ContractLog, bool) {
+	v, ok := ctx.Value(ContractLog{}).(*models.ContractLog)
+	return v, ok
+}
+
+func MustContractLogFromContext(ctx context.Context) *models.ContractLog {
+	v, ok := ContractLogFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithChainHeight(ctx context.Context, v *models.ChainHeight) context.Context {
+	return contextx.WithValue(ctx, ChainHeight{}, v)
+}
+
+func WithChainHeightContext(v *models.ChainHeight) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, ChainHeight{}, v)
+	}
+}
+
+func ChainHeightFromContext(ctx context.Context) (*models.ChainHeight, bool) {
+	v, ok := ctx.Value(ChainHeight{}).(*models.ChainHeight)
+	return v, ok
+}
+
+func MustChainHeightFromContext(ctx context.Context) *models.ChainHeight {
+	v, ok := ChainHeightFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithChainTx(ctx context.Context, v *models.ChainTx) context.Context {
+	return contextx.WithValue(ctx, ChainTx{}, v)
+}
+
+func WithChainTxContext(v *models.ChainTx) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, ChainTx{}, v)
+	}
+}
+
+func ChainTxFromContext(ctx context.Context) (*models.ChainTx, bool) {
+	v, ok := ctx.Value(ChainTx{}).(*models.ChainTx)
+	return v, ok
+}
+
+func MustChainTxFromContext(ctx context.Context) *models.ChainTx {
+	v, ok := ChainTxFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
@@ -141,44 +230,23 @@ func MustMonitorDBExecutorFromContext(ctx context.Context) sqlx.DBExecutor {
 	return v
 }
 
-func WithWasmDBExecutor(ctx context.Context, v sqlx.DBExecutor) context.Context {
-	return contextx.WithValue(ctx, CtxWasmDBExecutor{}, v)
+func WithWasmDBEndpoint(ctx context.Context, v *postgres.Endpoint) context.Context {
+	return contextx.WithValue(ctx, CtxWasmDBEndpoint{}, v)
 }
 
-func WithWasmDBExecutorContext(v sqlx.DBExecutor) contextx.WithContext {
+func WithWasmDBEndpointContext(v *postgres.Endpoint) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, CtxWasmDBExecutor{}, v)
+		return contextx.WithValue(ctx, CtxWasmDBEndpoint{}, v)
 	}
 }
 
-func WasmDBExecutorFromContext(ctx context.Context) (sqlx.DBExecutor, bool) {
-	v, ok := ctx.Value(CtxWasmDBExecutor{}).(sqlx.DBExecutor)
+func WasmDBEndpointFromContext(ctx context.Context) (*postgres.Endpoint, bool) {
+	v, ok := ctx.Value(CtxWasmDBEndpoint{}).(*postgres.Endpoint)
 	return v, ok
 }
 
-func MustWasmDBExecutorFromContext(ctx context.Context) sqlx.DBExecutor {
-	v, ok := WasmDBExecutorFromContext(ctx)
-	must.BeTrue(ok)
-	return v
-}
-
-func WithPgEndpoint(ctx context.Context, v postgres.Endpoint) context.Context {
-	return contextx.WithValue(ctx, CtxPgEndpoint{}, v)
-}
-
-func WithPgEndpointContext(v *postgres.Endpoint) contextx.WithContext {
-	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, CtxPgEndpoint{}, v)
-	}
-}
-
-func PgEndpointFromContext(ctx context.Context) (*postgres.Endpoint, bool) {
-	v, ok := ctx.Value(CtxPgEndpoint{}).(*postgres.Endpoint)
-	return v, ok
-}
-
-func MustPgEndpointFromContext(ctx context.Context) *postgres.Endpoint {
-	v, ok := PgEndpointFromContext(ctx)
+func MustWasmDBEndpointFromContext(ctx context.Context) *postgres.Endpoint {
+	v, ok := WasmDBEndpointFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
@@ -242,27 +310,6 @@ func MqttBrokerFromContext(ctx context.Context) (*mqtt.Broker, bool) {
 
 func MustMqttBrokerFromContext(ctx context.Context) *mqtt.Broker {
 	v, ok := MqttBrokerFromContext(ctx)
-	must.BeTrue(ok)
-	return v
-}
-
-func WithUploadConfig(ctx context.Context, v *UploadConfig) context.Context {
-	return contextx.WithValue(ctx, CtxUploadConfig{}, v)
-}
-
-func WithUploadConfigContext(v *UploadConfig) contextx.WithContext {
-	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, CtxUploadConfig{}, v)
-	}
-}
-
-func UploadConfigFromContext(ctx context.Context) (*UploadConfig, bool) {
-	v, ok := ctx.Value(CtxUploadConfig{}).(*UploadConfig)
-	return v, ok
-}
-
-func MustUploadConfigFromContext(ctx context.Context) *UploadConfig {
-	v, ok := UploadConfigFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
@@ -435,6 +482,27 @@ func WhiteListFromContext(ctx context.Context) (*WhiteList, bool) {
 
 func MustWhiteListFromContext(ctx context.Context) *WhiteList {
 	v, ok := WhiteListFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithFileSystemOp(ctx context.Context, v filesystem.FileSystemOp) context.Context {
+	return contextx.WithValue(ctx, CtxFileSystemOp{}, v)
+}
+
+func WithFileSystemOpContext(v filesystem.FileSystemOp) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxFileSystemOp{}, v)
+	}
+}
+
+func FileSystemOpFromContext(ctx context.Context) (filesystem.FileSystemOp, bool) {
+	v, ok := ctx.Value(CtxFileSystemOp{}).(filesystem.FileSystemOp)
+	return v, ok
+}
+
+func MustFileSystemOpFromContext(ctx context.Context) filesystem.FileSystemOp {
+	v, ok := FileSystemOpFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

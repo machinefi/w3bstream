@@ -13,7 +13,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
-	"github.com/machinefi/w3bstream/pkg/modules/publisher"
 	"github.com/machinefi/w3bstream/pkg/modules/strategy"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -27,6 +26,10 @@ var _receiveEventMtc = prometheus.NewCounterVec(prometheus.CounterOpts{
 
 func init() {
 	prometheus.MustRegister(_receiveEventMtc)
+}
+
+var Handler = func(ctx context.Context, ch string, ev *eventpb.Event) (interface{}, error) {
+	return OnEventReceived(ctx, ch, ev)
 }
 
 type HandleEventResult struct {
@@ -44,14 +47,19 @@ type HandleEventReq struct {
 
 func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) (ret *HandleEventResult, err error) {
 	l := types.MustLoggerFromContext(ctx)
+	prj, ok := types.ProjectFromContext(ctx)
+	if !ok || prj == nil {
+		return nil, status.ProjectNotFound.StatusErr().
+			WithDesc("project not found in context")
+	}
 
 	_, l = l.Start(ctx, "OnEventReceived")
 	defer l.End()
 
-	l = l.WithValues("project_name", projectName)
+	l = l.WithValues("project_name", prj.ProjectName.Name)
 
 	ret = &HandleEventResult{
-		ProjectName: projectName,
+		ProjectName: prj.ProjectName.Name,
 	}
 
 	defer func() {
@@ -61,13 +69,13 @@ func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) 
 	}()
 
 	eventType := enums.EVENTTYPEDEFAULT
-	eventType, err = checkHeader(ctx, projectName, l, ret, r)
+	eventType, err = checkHeader(ctx, prj, l, ret, r)
 	if err != nil {
 		return
 	}
 	l = l.WithValues("event_type", eventType)
 
-	err = HandleEvent(ctx, projectName, eventType, ret, r.Payload)
+	err = HandleEvent(ctx, prj.ProjectName.Name, eventType, ret, r.Payload)
 	if err != nil {
 		return
 	}
@@ -121,34 +129,26 @@ func HandleEvent(ctx context.Context, projectName string, eventType string, ret 
 	return nil
 }
 
-func checkHeader(ctx context.Context, projectName string, l log.Logger, ret *HandleEventResult, r *eventpb.Event) (eventType string, err error) {
-	publisherMtc := projectName
+func checkHeader(ctx context.Context, prj *models.Project, l log.Logger, ret *HandleEventResult, r *eventpb.Event) (eventType string, err error) {
 	eventType = enums.EVENTTYPEDEFAULT
 
-	if r.Header != nil {
-		if len(r.Header.Token) > 0 {
-			var pub *models.Publisher
-			if pub, err = publisherVerification(ctx, l, r); err != nil {
-				l.Error(err)
-				return
-			}
-			publisherMtc = pub.Key
-			pub, err = publisher.GetPublisherByPubKeyAndProjectName(ctx, pub.Key, projectName)
-			if err != nil {
-				l.Error(err)
-				return
-			}
-			ret.PubID, ret.PubName = pub.PublisherID, pub.Name
-			l.WithValues("pub_id", pub.PublisherID)
-		}
-		if len(r.Header.EventId) > 0 {
-			ret.EventID = r.Header.EventId
-		}
-		if len(r.Header.EventType) > 0 {
-			eventType = r.Header.EventType
-		}
+	pub, err := publisherVerification(ctx, l, r)
+	if err != nil {
+		l.Error(err)
+		return
 	}
-	_receiveEventMtc.WithLabelValues(projectName, publisherMtc).Inc()
+
+	if pub.ProjectID != prj.ProjectID {
+		return eventType, status.NoProjectPermission
+	}
+
+	ret.PubID, ret.PubName = pub.PublisherID, pub.Name
+	l.WithValues("pub_id", pub.PublisherID)
+
+	ret.EventID = r.Header.GetEventId()
+	eventType = r.Header.GetEventType()
+
+	_receiveEventMtc.WithLabelValues(prj.ProjectName.Name, pub.Key).Inc()
 	return
 }
 

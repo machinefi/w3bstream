@@ -11,17 +11,16 @@ import (
 
 type RemoveCronJob struct {
 	httpx.MethodDelete
-	ProjectID types.SFID `in:"path" name:"projectID"`
 	CronJobID types.SFID `in:"path" name:"cronJobID"`
 }
 
-func (r *RemoveCronJob) Path() string { return "/:projectID/:cronJobID" }
+func (r *RemoveCronJob) Path() string { return "/data/:cronJobID" }
 
 func (r *RemoveCronJob) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.MustCurrentAccountFromContext(ctx)
-	_, err := ca.WithProjectContextBySFID(ctx, r.ProjectID)
+	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
+		WithCronJobBySFID(ctx, r.CronJobID)
 	if err != nil {
 		return nil, err
 	}
-	return nil, cronjob.RemoveCronJob(ctx, r.ProjectID, r.CronJobID)
+	return nil, cronjob.RemoveBySFID(ctx, r.CronJobID)
 }

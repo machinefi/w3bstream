@@ -41,6 +41,7 @@ func (cc *ChannelContext) Run(ctx context.Context) {
 			l.Error(err)
 			return
 		}
+		// trans event to event proxy and call c.hdl(ctx, payload)
 		_, err = cc.hdl(ctx, cc.Name, ev)
 		if err != nil {
 			l.Error(err)

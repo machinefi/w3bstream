@@ -12,6 +12,8 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/account"
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
+	"github.com/machinefi/w3bstream/pkg/modules/blockchain"
+	"github.com/machinefi/w3bstream/pkg/modules/cronjob"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/modules/publisher"
@@ -131,14 +133,14 @@ func (v *CurrentAccount) WithInstanceContextBySFID(ctx context.Context, id types
 	}
 	ctx = types.WithInstance(ctx, ins)
 
-	if ctx, err = v.WithProjectContextBySFID(ctx, app.ProjectID); err != nil {
-		return nil, err
-	}
-
 	if app, err = applet.GetBySFID(ctx, ins.AppletID); err != nil {
 		return nil, err
 	}
 	ctx = types.WithApplet(ctx, app)
+
+	if ctx, err = v.WithProjectContextBySFID(ctx, app.ProjectID); err != nil {
+		return nil, err
+	}
 
 	if res, err = resource.GetBySFID(ctx, app.ResourceID); err != nil {
 		return nil, err
@@ -164,34 +166,47 @@ func (v *CurrentAccount) WithPublisherBySFID(ctx context.Context, id types.SFID)
 	return v.WithProjectContextBySFID(ctx, pub.ProjectID)
 }
 
-// ValidateProjectPerm
-// Deprecated: Use WithProjectContextByID instead
-func (v *CurrentAccount) ValidateProjectPerm(ctx context.Context, prjID types.SFID) (*models.Project, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	a := MustCurrentAccountFromContext(ctx)
-	m := &models.Project{RelProject: models.RelProject{ProjectID: prjID}}
-
-	if err := m.FetchByProjectID(d); err != nil {
-		return nil, status.CheckDatabaseError(err, "GetProjectByProjectID")
+func (v *CurrentAccount) WithResourceOwnerContextBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	_, err := resource.GetOwnerByAccountAndSFID(ctx, v.AccountID, id)
+	if err != nil {
+		return nil, err
 	}
-	if a.AccountID != m.AccountID {
-		return nil, status.NoProjectPermission
-	}
-	return m, nil
+	// TODO if needed add ownership context
+	return types.WithAccount(ctx, &v.Account), nil
 }
 
-// ValidateProjectPermByPrjName
-// Deprecated: Use WithProjectContextByName instead
-func (v *CurrentAccount) ValidateProjectPermByPrjName(ctx context.Context, projectName string) (*models.Project, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	a := MustCurrentAccountFromContext(ctx)
-	m := &models.Project{ProjectName: models.ProjectName{Name: projectName}}
+func (v *CurrentAccount) WithCronJobBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	cronJob, err := cronjob.GetBySFID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	ctx = types.WithCronJob(ctx, cronJob)
+	return v.WithProjectContextBySFID(ctx, cronJob.ProjectID)
+}
 
-	if err := m.FetchByName(d); err != nil {
-		return nil, status.CheckDatabaseError(err, "GetProjectByProjectID")
+func (v *CurrentAccount) WithContractLogBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	l, err := blockchain.GetContractLogBySFID(ctx, id)
+	if err != nil {
+		return nil, err
 	}
-	if a.AccountID != m.AccountID {
-		return nil, status.NoProjectPermission
+	ctx = types.WithContractLog(ctx, l)
+	return v.WithProjectContextByName(ctx, l.ProjectName)
+}
+
+func (v *CurrentAccount) WithChainHeightBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	h, err := blockchain.GetChainHeightBySFID(ctx, id)
+	if err != nil {
+		return nil, err
 	}
-	return m, nil
+	ctx = types.WithChainHeight(ctx, h)
+	return v.WithProjectContextByName(ctx, h.ProjectName)
+}
+
+func (v *CurrentAccount) WithChainTxBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	t, err := blockchain.GetChainTxBySFID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	ctx = types.WithChainTx(ctx, t)
+	return v.WithProjectContextByName(ctx, t.ProjectName)
 }

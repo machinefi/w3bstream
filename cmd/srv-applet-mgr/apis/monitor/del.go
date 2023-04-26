@@ -17,13 +17,13 @@ type RemoveContractLog struct {
 func (r *RemoveContractLog) Path() string { return "/contract_log/:contractLogID" }
 
 func (r *RemoveContractLog) Output(ctx context.Context) (interface{}, error) {
-	prj := middleware.MustProjectName(ctx)
 	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
-		WithProjectContextByName(ctx, prj)
+		WithContractLogBySFID(ctx, r.ContractLogID)
 	if err != nil {
 		return nil, err
 	}
-	return nil, blockchain.RemoveContractLog(ctx, prj, r.ContractLogID)
+
+	return nil, blockchain.RemoveContractLogBySFID(ctx, r.ContractLogID)
 }
 
 type RemoveChainTx struct {
@@ -34,13 +34,13 @@ type RemoveChainTx struct {
 func (r *RemoveChainTx) Path() string { return "/chain_tx/:chainTxID" }
 
 func (r *RemoveChainTx) Output(ctx context.Context) (interface{}, error) {
-	prj := middleware.MustProjectName(ctx)
 	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
-		WithProjectContextByName(ctx, prj)
+		WithChainTxBySFID(ctx, r.ChainTxID)
 	if err != nil {
 		return nil, err
 	}
-	return nil, blockchain.RemoveChainTx(ctx, prj, r.ChainTxID)
+
+	return nil, blockchain.RemoveChainTxBySFID(ctx, r.ChainTxID)
 }
 
 type RemoveChainHeight struct {
@@ -51,11 +51,11 @@ type RemoveChainHeight struct {
 func (r *RemoveChainHeight) Path() string { return "/chain_height/:chainHeightID" }
 
 func (r *RemoveChainHeight) Output(ctx context.Context) (interface{}, error) {
-	prj := middleware.MustProjectName(ctx)
 	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
-		WithProjectContextByName(ctx, prj)
+		WithContractLogBySFID(ctx, r.ChainHeightID)
 	if err != nil {
 		return nil, err
 	}
-	return nil, blockchain.RemoveChainHeight(ctx, prj, r.ChainHeightID)
+
+	return nil, blockchain.RemoveChainHeightBySFID(ctx, r.ChainHeightID)
 }
