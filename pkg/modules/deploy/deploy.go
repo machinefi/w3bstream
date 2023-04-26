@@ -4,7 +4,6 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/machinefi/w3bstream/pkg/types/wasm"
 	"github.com/pkg/errors"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
@@ -18,6 +17,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/resource"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
 func Init(ctx context.Context) error {

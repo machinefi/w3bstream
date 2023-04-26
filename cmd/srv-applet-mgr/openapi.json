@@ -8909,6 +8909,17 @@
           {
             "type": "object",
             "properties": {
+              "channelState": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesBool"
+                  },
+                  {
+                    "x-go-field-name": "ChannelState",
+                    "x-tag-json": "channelState"
+                  }
+                ]
+              },
               "database": {
                 "allOf": [
                   {
@@ -8934,6 +8945,9 @@
                 ]
               }
             },
+            "required": [
+              "channelState"
+            ],
             "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/project.CreateRsp",
             "x-id": "GithubComMachinefiW3BstreamPkgModulesProjectCreateRsp"
           }

@@ -77,6 +77,7 @@ func (r *CreateReq) Configs() []wasm.Configuration {
 
 type CreateRsp struct {
 	*models.Project
-	Env      *wasm.Env      `json:"envs,omitempty"`
-	Database *wasm.Database `json:"database,omitempty"`
+	Env          *wasm.Env      `json:"envs,omitempty"`
+	Database     *wasm.Database `json:"database,omitempty"`
+	ChannelState datatypes.Bool `json:"channelState"`
 }

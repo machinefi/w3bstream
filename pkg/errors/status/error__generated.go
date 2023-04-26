@@ -71,6 +71,8 @@ func (v Error) Key() string {
 		return "InvalidAuthPublisherID"
 	case CurrentAccountAbsence:
 		return "CurrentAccountAbsence"
+	case InvalidEventChannel:
+		return "InvalidEventChannel"
 	case Forbidden:
 		return "Forbidden"
 	case DisabledAccount:
@@ -189,6 +191,8 @@ func (v Error) Msg() string {
 		return "Invalid Auth Publisher ID"
 	case CurrentAccountAbsence:
 		return "Current Account Absence"
+	case InvalidEventChannel:
+		return "Invalid Event Channel"
 	case Forbidden:
 		return "forbidden"
 	case DisabledAccount:
@@ -306,6 +310,8 @@ func (v Error) CanBeTalk() bool {
 	case InvalidAuthPublisherID:
 		return true
 	case CurrentAccountAbsence:
+		return true
+	case InvalidEventChannel:
 		return true
 	case Forbidden:
 		return false

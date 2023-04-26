@@ -65,6 +65,8 @@ const (
 	InvalidAuthPublisherID
 	// @errTalk Current Account Absence
 	CurrentAccountAbsence
+	// @errTalk Invalid Event Channel
+	InvalidEventChannel
 )
 
 const (

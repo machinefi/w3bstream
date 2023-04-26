@@ -70,6 +70,8 @@ type ListProjectDetail struct {
 func (r *ListProjectDetail) Path() string { return "/detail_list" }
 
 func (r *ListProjectDetail) Output(ctx context.Context) (interface{}, error) {
-	ctx = middleware.MustCurrentAccountFromContext(ctx).WithAccount(ctx)
-	return project.ListDetail(ctx, &r.ListReq)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
+
+	r.AccountID = ca.AccountID
+	return project.ListDetail(types.WithAccount(ctx, &ca.Account), &r.ListReq)
 }

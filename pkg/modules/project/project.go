@@ -5,9 +5,13 @@ package project
 import (
 	"context"
 
+	"github.com/pkg/errors"
+
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
+	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
@@ -145,9 +149,17 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 		return nil, err
 	}
 
-	// TODO start mqtt channel
+	if err = mq.CreateChannel(ctx, prj.Name, handler); err != nil {
+		conflog.FromContext(ctx).WithValues("prj", prj.Name).
+			Warn(errors.New("channel create failed"))
+	}
 
-	return &CreateRsp{Project: nil}, nil
+	return &CreateRsp{
+		Project:      prj,
+		Env:          r.Env,
+		Database:     r.Database,
+		ChannelState: datatypes.BooleanValue(err == nil),
+	}, nil
 }
 
 func RemoveBySFID(ctx context.Context, id types.SFID) error {
@@ -183,11 +195,17 @@ func Init(ctx context.Context) error {
 	}
 	for i := range data {
 		v := &data[i]
-		l = l.WithValues("prj", v.ProjectID)
-		if err = mq.CreateChannel(ctx, v.Name, nil); err != nil {
+		l = l.WithValues("prj", v.Name)
+		ctx = types.WithProject(ctx, v)
+		if err = mq.CreateChannel(ctx, v.Name, handler); err != nil {
 			l.Warn(err)
 		}
 		l.Info("start subscribe")
 	}
 	return nil
+}
+
+func handler(ctx context.Context, ch string, ev *eventpb.Event) (interface{}, error) {
+	// TODO wait event pr #463 merge
+	return nil, nil
 }
