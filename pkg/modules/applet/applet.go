@@ -242,7 +242,6 @@ func UpdateAndDeploy(ctx context.Context, accountID types.SFID, r *UpdateAndDepl
 			return _err
 		},
 		func(db sqlx.DBExecutor) error {
-			// TODO wait resources s3 pr @zhiwei
 			return vm.NewInstance(_ctx, code, ins.InstanceID, enums.INSTANCE_STATE__STARTED)
 		},
 	).Do()
