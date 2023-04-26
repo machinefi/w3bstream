@@ -193,7 +193,7 @@ func List(ctx context.Context, r *ListReq) (*ListRsp, error) {
 	return rsp, nil
 }
 
-func RemoveBySFID(ctx context.Context, id types.SFID) error {
+func RemoveOwnershipBySFID(ctx context.Context, id types.SFID) error {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	acc := types.MustAccountFromContext(ctx)
 

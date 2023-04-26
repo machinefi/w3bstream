@@ -22,5 +22,5 @@ func (r *RemoveResource) Output(ctx context.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return nil, resource.RemoveBySFID(ctx, r.ResourceID)
+	return nil, resource.RemoveOwnershipBySFID(ctx, r.ResourceID)
 }
