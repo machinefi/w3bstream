@@ -44,6 +44,7 @@ var (
 )
 
 func init() {
+	// TODO config struct should be defined outside this method and impl it's Init() interface{}
 	config := &struct {
 		Postgres    *confpostgres.Endpoint
 		MonitorDB   *confpostgres.Endpoint
@@ -54,7 +55,6 @@ func init() {
 		Jwt         *confjwt.Jwt
 		Logger      *conflog.Log
 		StdLogger   conflog.Logger
-		UploadConf  *types.UploadConfig
 		EthClient   *types.ETHClientConfig
 		WhiteList   *types.WhiteList
 		ServerEvent *confhttp.Server
@@ -71,7 +71,6 @@ func init() {
 		Jwt:         &confjwt.Jwt{},
 		Logger:      &conflog.Log{},
 		StdLogger:   conflog.Std(),
-		UploadConf:  &types.UploadConfig{},
 		EthClient:   &types.ETHClientConfig{},
 		WhiteList:   &types.WhiteList{},
 		ServerEvent: serverEvent,
@@ -114,7 +113,6 @@ func init() {
 		types.WithLoggerContext(config.StdLogger),
 		conflog.WithLoggerContext(config.StdLogger),
 		types.WithMqttBrokerContext(config.MqttBroker),
-		types.WithUploadConfigContext(config.UploadConf),
 		confid.WithSFIDGeneratorContext(confid.MustNewSFIDGenerator()),
 		confjwt.WithConfContext(config.Jwt),
 		types.WithTaskWorkerContext(worker),

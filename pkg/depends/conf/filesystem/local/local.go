@@ -11,6 +11,7 @@ import (
 type LocalFileSystem struct {
 	Root          string `env:""`
 	FilesizeLimit int64  `env:""`
+	DiskReserve   int64  `env:""`
 }
 
 func (l *LocalFileSystem) Init() error {
@@ -35,6 +36,9 @@ func (l *LocalFileSystem) SetDefault() {
 	}
 	if l.FilesizeLimit == 0 {
 		l.FilesizeLimit = 1024 * 1024
+	}
+	if l.DiskReserve == 0 {
+		l.DiskReserve = 20 * 1024 * 1024
 	}
 }
 

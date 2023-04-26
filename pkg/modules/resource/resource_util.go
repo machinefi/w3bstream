@@ -47,29 +47,38 @@ func checkFileMd5Sum(f io.Reader) (data []byte, sum string, err error) {
 
 func UploadFile(ctx context.Context, f io.ReadSeekCloser, md5 string) (path string, data []byte, err error) {
 	var (
-		c    = types.MustUploadConfigFromContext(ctx)
-		fs   = types.MustFileSystemOpFromContext(ctx)
-		size = int64(0)
+		fs          = types.MustFileSystemOpFromContext(ctx)
+		size        = int64(0)
+		limit       = int64(0)
+		diskReserve = int64(0)
+		root        = ""
 	)
+	if v, ok := fs.(*local.LocalFileSystem); ok {
+		limit = v.FilesizeLimit
+		diskReserve = v.DiskReserve
+		root = v.Root
+	}
 
-	if err, _ = checkFilesize(f, c.FileSizeLimit); err != nil {
-		if err != nil {
-			err = status.UploadFileFailed.StatusErr().WithDesc(err.Error())
+	if limit > 0 {
+		if err, _ = checkFilesize(f, limit); err != nil {
+			if err != nil {
+				err = status.UploadFileFailed.StatusErr().WithDesc(err.Error())
+				return
+			}
+		}
+		if size > limit {
+			err = status.UploadFileSizeLimit
 			return
 		}
 	}
-	if size > c.FileSizeLimit {
-		err = status.UploadFileSizeLimit
-		return
-	}
 
-	if _, ok := fs.(*local.LocalFileSystem); ok {
-		info, _err := disk.Usage(c.Root)
+	if root != "" && diskReserve != 0 {
+		info, _err := disk.Usage(root)
 		if _err != nil {
 			err = status.UploadFileFailed.StatusErr().WithDesc(_err.Error())
 			return
 		}
-		if info.Free < uint64(reserve) {
+		if info.Free < uint64(diskReserve) {
 			err = status.UploadFileDiskLimit
 			return
 		}
@@ -82,7 +91,7 @@ func UploadFile(ctx context.Context, f io.ReadSeekCloser, md5 string) (path stri
 		return
 	}
 
-	if sum != md5 {
+	if md5 != "" && sum != md5 {
 		err = status.UploadFileMd5Unmatched
 		return
 	}

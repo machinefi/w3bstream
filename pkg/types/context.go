@@ -22,7 +22,6 @@ type (
 	CtxLogger            struct{} // CtxLogger log.Logger
 	CtxMqttBroker        struct{} // CtxMqttBroker mqtt.Broker
 	CtxRedisEndpoint     struct{} // CtxRedisEndpoint redis.Redis
-	CtxUploadConfig      struct{} // CtxUploadConfig UploadConfig
 	CtxTaskWorker        struct{}
 	CtxTaskBoard         struct{}
 	CtxProject           struct{}
@@ -245,27 +244,6 @@ func MqttBrokerFromContext(ctx context.Context) (*mqtt.Broker, bool) {
 
 func MustMqttBrokerFromContext(ctx context.Context) *mqtt.Broker {
 	v, ok := MqttBrokerFromContext(ctx)
-	must.BeTrue(ok)
-	return v
-}
-
-func WithUploadConfig(ctx context.Context, v *UploadConfig) context.Context {
-	return contextx.WithValue(ctx, CtxUploadConfig{}, v)
-}
-
-func WithUploadConfigContext(v *UploadConfig) contextx.WithContext {
-	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, CtxUploadConfig{}, v)
-	}
-}
-
-func UploadConfigFromContext(ctx context.Context) (*UploadConfig, bool) {
-	v, ok := ctx.Value(CtxUploadConfig{}).(*UploadConfig)
-	return v, ok
-}
-
-func MustUploadConfigFromContext(ctx context.Context) *UploadConfig {
-	v, ok := UploadConfigFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
