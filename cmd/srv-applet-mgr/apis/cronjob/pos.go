@@ -11,17 +11,18 @@ import (
 
 type CreateCronJob struct {
 	httpx.MethodPost
-	ProjectID                types.SFID `in:"path" name:"projectID"`
-	cronjob.CreateCronJobReq `in:"body"`
+	ProjectID         types.SFID `in:"path" name:"projectID"`
+	cronjob.CreateReq `in:"body"`
 }
 
 func (r *CreateCronJob) Path() string { return "/:projectID" }
 
 func (r *CreateCronJob) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.MustCurrentAccountFromContext(ctx)
-	_, err := ca.WithProjectContextBySFID(ctx, r.ProjectID)
+	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
+		WithProjectContextBySFID(ctx, r.ProjectID)
 	if err != nil {
 		return nil, err
 	}
-	return cronjob.CreateCronJob(ctx, r.ProjectID, &r.CreateCronJobReq)
+	r.CreateReq.ProjectID = types.MustProjectFromContext(ctx).ProjectID
+	return cronjob.Create(ctx, &r.CreateReq)
 }

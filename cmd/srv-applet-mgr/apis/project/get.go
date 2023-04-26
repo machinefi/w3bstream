@@ -3,8 +3,11 @@ package project
 import (
 	"context"
 
+	"github.com/pkg/errors"
+
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -21,7 +24,13 @@ func (r *GetProject) Output(ctx context.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return types.MustProjectFromContext(ctx), nil
+	prj := types.MustProjectFromContext(ctx)
+	prj.Name, err = middleware.ProjectNameForDisplay(prj.Name)
+	if err != nil {
+		return nil, status.DeprecatedProject.StatusErr().
+			WithDesc("this project is deprecated")
+	}
+	return prj, nil
 }
 
 type ListProject struct {
@@ -33,5 +42,22 @@ func (r *ListProject) Path() string { return "/datalist" }
 
 func (r *ListProject) Output(ctx context.Context) (interface{}, error) {
 	ctx = middleware.MustCurrentAccountFromContext(ctx).WithAccount(ctx)
-	return project.List(ctx, &r.ListReq)
+	rsp, err := project.List(ctx, &r.ListReq)
+	if err != nil {
+		return nil, err
+	}
+
+	_, l := types.MustLoggerFromContext(ctx).Start(ctx, "ListProject")
+	for i := 0; i < len(rsp.Data); i++ {
+		v := &rsp.Data[i]
+		v.Name, err = middleware.ProjectNameForDisplay(v.Name)
+		if err != nil {
+			l.WithValues("prj", v.ProjectID).Warn(
+				errors.New("this project is deprecated, no prefix"),
+			)
+			rsp.Data = append(rsp.Data[0:i], rsp.Data[i+1:]...)
+			continue
+		}
+	}
+	return rsp, nil
 }

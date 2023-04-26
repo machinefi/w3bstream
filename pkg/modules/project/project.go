@@ -12,10 +12,10 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
-	"github.com/machinefi/w3bstream/pkg/depends/schema"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/modules/mq"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -25,15 +25,15 @@ import (
 type CreateProjectReq struct {
 	models.ProjectName
 	models.ProjectBase
-	Envs   [][2]string  `json:"envs,omitempty"`
-	Schema *wasm.Schema `json:"schema,omitempty"`
+	Envs     [][2]string    `json:"envs,omitempty"`
+	Database *wasm.Database `json:"database,omitempty"`
 	// TODO if each project has its own mqtt broker should add *wasm.MqttClient
 }
 
 type CreateProjectRsp struct {
 	*models.Project `json:"project"`
-	Envs            [][2]string  `json:"envs,omitempty"`
-	Schema          *wasm.Schema `json:"schema,omitempty"`
+	Envs            [][2]string    `json:"envs,omitempty"`
+	Database        *wasm.Database `json:"database,omitempty"`
 }
 
 func CreateProject(ctx context.Context, acc types.SFID, r *CreateProjectReq, hdl mq.OnMessage) (*CreateProjectRsp, error) {
@@ -67,21 +67,20 @@ func CreateProject(ctx context.Context, acc types.SFID, r *CreateProjectReq, hdl
 				return status.DatabaseError.StatusErr().
 					WithDesc(errors.Wrap(err, "CreateProject").Error())
 			}
+			ctx = types.WithProject(ctx, m)
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			ctx = types.WithProject(ctx, m)
-			if err := CreateOrUpdateProjectEnv(ctx, &wasm.Env{Env: r.Envs}); err != nil {
+			if _, err := config.Upsert(ctx, m.ProjectID, &wasm.Env{Env: r.Envs}); err != nil {
 				return err
 			}
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			if r.Schema == nil {
-				sch := schema.NewSchema(r.Name)
-				r.Schema = &wasm.Schema{Schema: *sch}
+			if r.Database == nil {
+				r.Database = wasm.NewDatabase(m.DatabaseName())
 			}
-			if err := CreateProjectSchema(ctx, r.Schema); err != nil {
+			if _, err := config.Create(ctx, m.ProjectID, r.Database); err != nil {
 				return err
 			}
 			return nil
@@ -92,9 +91,9 @@ func CreateProject(ctx context.Context, acc types.SFID, r *CreateProjectReq, hdl
 		return nil, err
 	}
 	return &CreateProjectRsp{
-		Project: m,
-		Envs:    r.Envs,
-		Schema:  r.Schema,
+		Project:  m,
+		Envs:     r.Envs,
+		Database: r.Database,
 	}, nil
 }
 

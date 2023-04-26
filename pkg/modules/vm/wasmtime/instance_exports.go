@@ -32,7 +32,7 @@ type (
 		evs *mapx.Map[uint32, []byte]
 		env *wasm.Env
 		kvs wasm.KVStore
-		db  wasm.SQLStore
+		db  *wasm.Database
 		log conflog.Logger
 		cl  *wasm.ChainClient
 		ctx context.Context
@@ -255,7 +255,12 @@ func (ef *ExportFuncs) SetSQLDB(addr, size int32) int32 {
 		return wasm.ResultStatusCode_Failed
 	}
 
-	_, err = ef.db.ExecContext(context.Background(), prestate, params...)
+	db, err := ef.db.WithDefaultSchema()
+	if err != nil {
+		ef.log.Error(err)
+		return wasm.ResultStatusCode_Failed
+	}
+	_, err = db.ExecContext(context.Background(), prestate, params...)
 	if err != nil {
 		ef.log.Error(err)
 		return wasm.ResultStatusCode_Failed
@@ -280,7 +285,12 @@ func (ef *ExportFuncs) GetSQLDB(addr, size int32, vmAddrPtr, vmSizePtr int32) in
 		return wasm.ResultStatusCode_Failed
 	}
 
-	rows, err := ef.db.QueryContext(context.Background(), prestate, params...)
+	db, err := ef.db.WithDefaultSchema()
+	if err != nil {
+		ef.log.Error(err)
+		return wasm.ResultStatusCode_Failed
+	}
+	rows, err := db.QueryContext(context.Background(), prestate, params...)
 	if err != nil {
 		ef.log.Error(err)
 		return wasm.ResultStatusCode_Failed
