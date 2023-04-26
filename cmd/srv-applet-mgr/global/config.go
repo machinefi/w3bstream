@@ -60,6 +60,7 @@ func init() {
 		ServerEvent *confhttp.Server
 		FileSystem  *types.FileSystem
 		AmazonS3    *amazonS3.AmazonS3
+		LocalFS     *local.LocalFileSystem
 	}{
 		Postgres:    db,
 		MonitorDB:   monitordb,
@@ -76,6 +77,7 @@ func init() {
 		ServerEvent: serverEvent,
 		FileSystem:  &types.FileSystem{},
 		AmazonS3:    &amazonS3.AmazonS3{},
+		LocalFS:     &local.LocalFileSystem{},
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
@@ -98,7 +100,7 @@ func init() {
 		!config.AmazonS3.IsZero() {
 		fs = config.AmazonS3
 	} else {
-		fs = &local.LocalFileSystem{}
+		fs = config.LocalFS
 	}
 
 	confhttp.RegisterCheckerBy(config, worker)

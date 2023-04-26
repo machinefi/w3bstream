@@ -38,7 +38,7 @@ func (l *LocalFileSystem) SetDefault() {
 	}
 }
 
-// Upload key filename without path
+// Upload key full path with filename
 func (l *LocalFileSystem) Upload(md5 string, data []byte) error {
 	var (
 		fw  io.WriteCloser

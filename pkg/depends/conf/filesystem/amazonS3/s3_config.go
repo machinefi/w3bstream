@@ -59,15 +59,12 @@ func (s *AmazonS3) Name() string {
 }
 
 func (s *AmazonS3) Upload(key string, data []byte) error {
-	if _, err := s.cli.PutObject(&s3.PutObjectInput{
+	_, err := s.cli.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(s.BucketName),
 		Key:    aws.String(key),
 		Body:   bytes.NewReader(data),
-	}); err != nil {
-		return err
-	}
-
-	return nil
+	})
+	return err
 }
 
 func (s *AmazonS3) Read(key string) ([]byte, error) {
@@ -84,12 +81,9 @@ func (s *AmazonS3) Read(key string) ([]byte, error) {
 }
 
 func (s *AmazonS3) Delete(key string) error {
-	if _, err := s.cli.DeleteObject(&s3.DeleteObjectInput{
+	_, err := s.cli.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(s.BucketName),
 		Key:    aws.String(key),
-	}); err != nil {
-		return err
-	}
-
-	return nil
+	})
+	return err
 }
