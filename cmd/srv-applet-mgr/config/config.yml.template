@@ -1,5 +1,11 @@
 GO_RUNTIME_ENV: DEV
+SRV_APPLET_MGR__AmazonS3_AccessKeyID: ""
+SRV_APPLET_MGR__AmazonS3_BucketName: ""
+SRV_APPLET_MGR__AmazonS3_Region: us-west-1
+SRV_APPLET_MGR__AmazonS3_SecretAccessKey: ""
+SRV_APPLET_MGR__AmazonS3_SessionToken: ""
 SRV_APPLET_MGR__EthClient_Endpoints: ""
+SRV_APPLET_MGR__FileSystem_Type: LOCAL
 SRV_APPLET_MGR__Jwt_ExpIn: 0s
 SRV_APPLET_MGR__Jwt_Issuer: ""
 SRV_APPLET_MGR__Jwt_SignKey: ""

@@ -9,8 +9,10 @@ import (
 var Root = kit.NewRouter(httptransport.Group("/publisher"))
 
 func init() {
+	Root.Register(kit.NewRouter(&GetPublisher{}))
 	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &ListPublisher{}))
+	Root.Register(kit.NewRouter(&RemovePublisher{}))
+	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &BatchRemovePublisher{}))
 	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &CreatePublisher{}))
 	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &UpdatePublisher{}))
-	Root.Register(kit.NewRouter(&RemovePublisher{}))
 }

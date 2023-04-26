@@ -23,7 +23,13 @@ const (
 	// @errTalk Create Message Channel Failed
 	CreateChannelFailed
 	// @errTalk Config Initialization Failed
-	ConfigInitializationFailed
+	ConfigInitFailed
+	// @errTalk Config Uninit Failed
+	ConfigUninitFailed
+	// @errTalk Config Parse Failed
+	ConfigParseFailed
+	// @errTalk Gen Publisher Token Failed
+	GenPublisherTokenFailed
 )
 
 const (
@@ -73,6 +79,16 @@ const (
 	ProjectNameConflict
 	// @errTalk Strategy Conflict
 	StrategyConflict
+	// @errTalk Config Conflict
+	ConfigConflict
+	// @errTalk Publisher Conflict
+	PublisherConflict
+	// @errTalk Resource Path Conflict
+	ResourcePathConflict
+	// @errTalk Resource Account and WasmName Conflict
+	ResourceAccountConflict
+	// @errTalk Cron Job Conflict
+	CronJobConflict
 )
 
 const (
@@ -82,6 +98,12 @@ const (
 	MD5ChecksumFailed
 	// @errTalk Invalid Chain Client
 	InvalidChainClient
+	// @errTalk Invalid Config Type
+	InvalidConfigType
+	// @errTalk Deprecated Project
+	DeprecatedProject
+	// @errTalk Invalid Cron Expressions
+	InvalidCronExpressions
 )
 
 const (
@@ -103,6 +125,8 @@ const (
 	PublisherNotFound
 	// @errTalk Account Identity Not Found
 	AccountIdentityNotFound
+	// @errTalk Cron Job Not Found
+	CronJobNotFound
 )
 
 // Deprecated: pls check database error and return defined status error

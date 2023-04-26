@@ -13,5 +13,6 @@ func init() {
 	Root.Register(kit.NewRouter(&UpdateStrategy{}))
 	Root.Register(kit.NewRouter(&GetStrategy{}))
 	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &ListStrategy{}))
-	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &RemoveStrategy{}))
+	Root.Register(kit.NewRouter(&RemoveStrategy{}))
+	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &BatchRemoveStrategy{}))
 }
