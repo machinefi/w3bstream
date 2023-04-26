@@ -1271,25 +1271,60 @@
               "x-tag-name": "authorization,omitempty",
               "x-tag-validate": "@string[1,]"
             }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesCronjobListReq"
-                  },
-                  {
-                    "x-go-field-name": "ListReq"
-                  }
-                ]
-              }
+          },
+          {
+            "name": "cronJobID",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+              },
+              "x-go-field-name": "CronJobIDs",
+              "x-tag-name": "cronJobID,omitempty"
+            }
+          },
+          {
+            "name": "eventType",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "x-go-field-name": "EventTypes",
+              "x-tag-name": "eventType,omitempty"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 9223372036854776000,
+              "minimum": 0,
+              "default": "0",
+              "x-go-field-name": "Offset",
+              "x-tag-name": "offset,omitempty",
+              "x-tag-validate": "@int64[0,]"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 9223372036854776000,
+              "minimum": -1,
+              "default": "10",
+              "x-go-field-name": "Size",
+              "x-tag-name": "size,omitempty",
+              "x-tag-validate": "@int64[-1,]"
             }
           }
-        },
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -6650,33 +6685,6 @@
           }
         ]
       },
-      "GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPager": {
-        "type": "object",
-        "properties": {
-          "offset": {
-            "type": "integer",
-            "format": "int64",
-            "maximum": 9223372036854776000,
-            "minimum": 0,
-            "default": "0",
-            "x-go-field-name": "Offset",
-            "x-tag-name": "offset,omitempty",
-            "x-tag-validate": "@int64[0,]"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int64",
-            "maximum": 9223372036854776000,
-            "minimum": -1,
-            "default": "10",
-            "x-go-field-name": "Size",
-            "x-tag-name": "size,omitempty",
-            "x-tag-validate": "@int64[-1,]"
-          }
-        },
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes.Pager",
-        "x-id": "GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPager"
-      },
       "GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPrimaryID": {
         "type": "object",
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes.PrimaryID",
@@ -8389,29 +8397,6 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.UpdateAppletReq",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesAppletUpdateAppletReq"
       },
-      "GithubComMachinefiW3BstreamPkgModulesCronjobCondArgs": {
-        "type": "object",
-        "properties": {
-          "cronJobID": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-            },
-            "x-go-field-name": "CronJobIDs",
-            "x-tag-name": "cronJobID,omitempty"
-          },
-          "eventType": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "x-go-field-name": "EventTypes",
-            "x-tag-name": "eventType,omitempty"
-          }
-        },
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/cronjob.CondArgs",
-        "x-id": "GithubComMachinefiW3BstreamPkgModulesCronjobCondArgs"
-      },
       "GithubComMachinefiW3BstreamPkgModulesCronjobCreateReq": {
         "allOf": [
           {
@@ -8421,21 +8406,6 @@
             "type": "object",
             "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/cronjob.CreateReq",
             "x-id": "GithubComMachinefiW3BstreamPkgModulesCronjobCreateReq"
-          }
-        ]
-      },
-      "GithubComMachinefiW3BstreamPkgModulesCronjobListReq": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesCronjobCondArgs"
-          },
-          {
-            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPager"
-          },
-          {
-            "type": "object",
-            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/cronjob.ListReq",
-            "x-id": "GithubComMachinefiW3BstreamPkgModulesCronjobListReq"
           }
         ]
       },
