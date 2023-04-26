@@ -50,7 +50,9 @@ func GetByName(ctx context.Context, name string) (*models.Project, error) {
 }
 
 func GetDetail(ctx context.Context, prj *models.Project) (*Detail, error) {
-	rsp, err := applet.ListDetail(ctx, prj.ProjectID, &applet.ListReq{})
+	rsp, err := applet.ListDetail(ctx, &applet.ListReq{
+		CondArgs: applet.CondArgs{ProjectID: prj.ProjectID},
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +153,7 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 
 	if err = mq.CreateChannel(ctx, prj.Name, event.Handler); err != nil {
 		conflog.FromContext(ctx).WithValues("prj", prj.Name).
-			Warn(errors.New("channel create failed"))
+			Warn(errors.Wrap(err, "channel create failed"))
 	}
 
 	return &CreateRsp{
@@ -198,7 +200,7 @@ func Init(ctx context.Context) error {
 		l = l.WithValues("prj", v.Name)
 		ctx = types.WithProject(ctx, v)
 		if err = mq.CreateChannel(ctx, v.Name, event.Handler); err != nil {
-			l.Warn(err)
+			l.Warn(errors.Wrap(err, "channel create failed"))
 		}
 		l.Info("start subscribe")
 	}

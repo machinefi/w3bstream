@@ -109,7 +109,7 @@ func List(ctx context.Context, r *ListReq) (*ListRsp, error) {
 	return ret, nil
 }
 
-func ListDetail(ctx context.Context, prj types.SFID, r *ListReq) (*ListDetailRsp, error) {
+func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
 	var (
 		lst *ListRsp
 		err error
