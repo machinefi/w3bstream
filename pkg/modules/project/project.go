@@ -67,6 +67,7 @@ func CreateProject(ctx context.Context, acc types.SFID, r *CreateProjectReq, hdl
 				return status.DatabaseError.StatusErr().
 					WithDesc(errors.Wrap(err, "CreateProject").Error())
 			}
+			ctx = types.WithProject(ctx, m)
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {

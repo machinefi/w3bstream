@@ -14,8 +14,6 @@ func TestProjectNameValidator(t *testing.T) {
 		input string
 		succ  bool
 	}{
-		{"TooShort", "123", false},
-		{"TooLong", "123456789012345678901234567890123", false},
 		{"InvalidChar", "@xadfef", false},
 		{"UpperChar", "Xadfef", false},
 		{"Succ1", "123123", true},

@@ -36,7 +36,7 @@ func (r *CondArgs) Condition() builder.SqlCondition {
 	if len(r.Handlers) > 0 {
 		cs = append(cs, m.ColHandler().In(r.Handlers))
 	}
-	cs = append(cs, m.ColDeletedAt().Neq(0))
+	cs = append(cs, m.ColDeletedAt().Eq(0))
 
 	return builder.And(cs...)
 }
