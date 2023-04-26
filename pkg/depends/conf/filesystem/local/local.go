@@ -9,9 +9,9 @@ import (
 )
 
 type LocalFileSystem struct {
-	Root          string `env:""`
-	FilesizeLimit int64  `env:""`
-	DiskReserve   int64  `env:""`
+	Root               string `env:""`
+	FilesizeLimitBytes int64  `env:""`
+	DiskReserveBytes   int64  `env:""`
 }
 
 func (l *LocalFileSystem) Init() error {
@@ -30,11 +30,11 @@ func (l *LocalFileSystem) SetDefault() {
 		}
 		l.Root = filepath.Join(tmp, serviceName)
 	}
-	if l.FilesizeLimit == 0 {
-		l.FilesizeLimit = 1024 * 1024
+	if l.FilesizeLimitBytes == 0 {
+		l.FilesizeLimitBytes = 1024 * 1024
 	}
-	if l.DiskReserve == 0 {
-		l.DiskReserve = 20 * 1024 * 1024
+	if l.DiskReserveBytes == 0 {
+		l.DiskReserveBytes = 20 * 1024 * 1024
 	}
 }
 
@@ -70,13 +70,11 @@ func (l *LocalFileSystem) Delete(md5 string) error {
 	return os.Remove(filepath.Join(l.Root, md5))
 }
 
+func (l *LocalFileSystem) path(name string) string {
+	return filepath.Join(l.Root, name)
+}
+
 func isPathExists(path string) bool {
 	_, err := os.Stat(path)
-	if err == nil {
-		return true
-	}
-	if os.IsNotExist(err) {
-		return false
-	}
-	return false
+	return err == nil
 }

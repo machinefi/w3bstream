@@ -9,10 +9,11 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/shirou/gopsutil/v3/disk"
+
 	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/local"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/types"
-	"github.com/shirou/gopsutil/v3/disk"
 )
 
 var reserve = int64(100 * 1024 * 1024)
@@ -54,8 +55,8 @@ func UploadFile(ctx context.Context, f io.ReadSeekCloser, md5 string) (path stri
 		root        = ""
 	)
 	if v, ok := fs.(*local.LocalFileSystem); ok {
-		limit = v.FilesizeLimit
-		diskReserve = v.DiskReserve
+		limit = v.FilesizeLimitBytes
+		diskReserve = v.DiskReserveBytes
 		root = v.Root
 	}
 
