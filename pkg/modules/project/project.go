@@ -5,13 +5,13 @@ package project
 import (
 	"context"
 
+	"github.com/machinefi/w3bstream/pkg/modules/event"
 	"github.com/pkg/errors"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
-	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
@@ -149,7 +149,7 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 		return nil, err
 	}
 
-	if err = mq.CreateChannel(ctx, prj.Name, handler); err != nil {
+	if err = mq.CreateChannel(ctx, prj.Name, event.Handler); err != nil {
 		conflog.FromContext(ctx).WithValues("prj", prj.Name).
 			Warn(errors.New("channel create failed"))
 	}
@@ -197,15 +197,10 @@ func Init(ctx context.Context) error {
 		v := &data[i]
 		l = l.WithValues("prj", v.Name)
 		ctx = types.WithProject(ctx, v)
-		if err = mq.CreateChannel(ctx, v.Name, handler); err != nil {
+		if err = mq.CreateChannel(ctx, v.Name, event.Handler); err != nil {
 			l.Warn(err)
 		}
 		l.Info("start subscribe")
 	}
 	return nil
-}
-
-func handler(ctx context.Context, ch string, ev *eventpb.Event) (interface{}, error) {
-	// TODO wait event pr #463 merge
-	return nil, nil
 }

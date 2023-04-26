@@ -28,6 +28,10 @@ func init() {
 	prometheus.MustRegister(_receiveEventMtc)
 }
 
+var Handler = func(ctx context.Context, ch string, ev *eventpb.Event) (interface{}, error) {
+	return OnEventReceived(ctx, ch, ev)
+}
+
 type HandleEventResult struct {
 	ProjectName string                   `json:"projectName"`
 	PubID       types.SFID               `json:"pubID,omitempty"`
