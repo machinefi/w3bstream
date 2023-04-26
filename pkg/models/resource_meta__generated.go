@@ -71,9 +71,9 @@ func (*ResourceMeta) PrimaryKey() []string {
 func (m *ResourceMeta) IndexFieldNames() []string {
 	return []string{
 		"AccountID",
+		"AppletID",
 		"ID",
 		"MetaID",
-		"ResName",
 		"ResourceID",
 	}
 }
@@ -82,11 +82,13 @@ func (*ResourceMeta) UniqueIndexes() builder.Indexes {
 	return builder.Indexes{
 		"ui_meta_id": []string{
 			"MetaID",
+			"DeletedAt",
 		},
-		"ui_res_acc_name": []string{
+		"ui_res_acc_app": []string{
 			"ResourceID",
 			"AccountID",
-			"ResName",
+			"AppletID",
+			"DeletedAt",
 		},
 	}
 }
@@ -95,8 +97,8 @@ func (*ResourceMeta) UniqueIndexUIMetaID() string {
 	return "ui_meta_id"
 }
 
-func (*ResourceMeta) UniqueIndexUIResAccName() string {
-	return "ui_res_acc_name"
+func (*ResourceMeta) UniqueIndexUIResAccApp() string {
+	return "ui_res_acc_app"
 }
 
 func (m *ResourceMeta) ColID() *builder.Column {
@@ -131,20 +133,20 @@ func (*ResourceMeta) FieldAccountID() string {
 	return "AccountID"
 }
 
-func (m *ResourceMeta) ColResName() *builder.Column {
-	return ResourceMetaTable.ColByFieldName(m.FieldResName())
+func (m *ResourceMeta) ColAppletID() *builder.Column {
+	return ResourceMetaTable.ColByFieldName(m.FieldAppletID())
 }
 
-func (*ResourceMeta) FieldResName() string {
-	return "ResName"
+func (*ResourceMeta) FieldAppletID() string {
+	return "AppletID"
 }
 
-func (m *ResourceMeta) ColRefCnt() *builder.Column {
-	return ResourceMetaTable.ColByFieldName(m.FieldRefCnt())
+func (m *ResourceMeta) ColFileName() *builder.Column {
+	return ResourceMetaTable.ColByFieldName(m.FieldFileName())
 }
 
-func (*ResourceMeta) FieldRefCnt() string {
-	return "RefCnt"
+func (*ResourceMeta) FieldFileName() string {
+	return "FileName"
 }
 
 func (m *ResourceMeta) ColCreatedAt() *builder.Column {
@@ -163,11 +165,19 @@ func (*ResourceMeta) FieldUpdatedAt() string {
 	return "UpdatedAt"
 }
 
+func (m *ResourceMeta) ColDeletedAt() *builder.Column {
+	return ResourceMetaTable.ColByFieldName(m.FieldDeletedAt())
+}
+
+func (*ResourceMeta) FieldDeletedAt() string {
+	return "DeletedAt"
+}
+
 func (m *ResourceMeta) CondByValue(db sqlx.DBExecutor) builder.SqlCondition {
 	var (
 		tbl  = db.T(m)
 		fvs  = builder.FieldValueFromStructByNoneZero(m)
-		cond = make([]builder.SqlCondition, 0)
+		cond = []builder.SqlCondition{tbl.ColByFieldName("DeletedAt").Eq(0)}
 	)
 
 	for _, fn := range m.IndexFieldNames() {
@@ -204,6 +214,7 @@ func (m *ResourceMeta) List(db sqlx.DBExecutor, cond builder.SqlCondition, adds 
 		tbl = db.T(m)
 		lst = make([]ResourceMeta, 0)
 	)
+	cond = builder.And(tbl.ColByFieldName("DeletedAt").Eq(0), cond)
 	adds = append([]builder.Addition{builder.Where(cond), builder.Comment("ResourceMeta.List")}, adds...)
 	err := db.QueryAndScan(builder.Select(nil).From(tbl, adds...), &lst)
 	return lst, err
@@ -211,6 +222,7 @@ func (m *ResourceMeta) List(db sqlx.DBExecutor, cond builder.SqlCondition, adds 
 
 func (m *ResourceMeta) Count(db sqlx.DBExecutor, cond builder.SqlCondition, adds ...builder.Addition) (cnt int64, err error) {
 	tbl := db.T(m)
+	cond = builder.And(tbl.ColByFieldName("DeletedAt").Eq(0), cond)
 	adds = append([]builder.Addition{builder.Where(cond), builder.Comment("ResourceMeta.List")}, adds...)
 	err = db.QueryAndScan(builder.Select(builder.Count()).From(tbl, adds...), &cnt)
 	return
@@ -225,6 +237,7 @@ func (m *ResourceMeta) FetchByID(db sqlx.DBExecutor) error {
 				builder.Where(
 					builder.And(
 						tbl.ColByFieldName("ID").Eq(m.ID),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
 				builder.Comment("ResourceMeta.FetchByID"),
@@ -243,6 +256,7 @@ func (m *ResourceMeta) FetchByMetaID(db sqlx.DBExecutor) error {
 				builder.Where(
 					builder.And(
 						tbl.ColByFieldName("MetaID").Eq(m.MetaID),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
 				builder.Comment("ResourceMeta.FetchByMetaID"),
@@ -252,7 +266,7 @@ func (m *ResourceMeta) FetchByMetaID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *ResourceMeta) FetchByResourceIDAndAccountIDAndResName(db sqlx.DBExecutor) error {
+func (m *ResourceMeta) FetchByResourceIDAndAccountIDAndAppletID(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	err := db.QueryAndScan(
 		builder.Select(nil).
@@ -262,10 +276,11 @@ func (m *ResourceMeta) FetchByResourceIDAndAccountIDAndResName(db sqlx.DBExecuto
 					builder.And(
 						tbl.ColByFieldName("ResourceID").Eq(m.ResourceID),
 						tbl.ColByFieldName("AccountID").Eq(m.AccountID),
-						tbl.ColByFieldName("ResName").Eq(m.ResName),
+						tbl.ColByFieldName("AppletID").Eq(m.AppletID),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
-				builder.Comment("ResourceMeta.FetchByResourceIDAndAccountIDAndResName"),
+				builder.Comment("ResourceMeta.FetchByResourceIDAndAccountIDAndAppletID"),
 			),
 		m,
 	)
@@ -283,6 +298,7 @@ func (m *ResourceMeta) UpdateByIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldVa
 			Where(
 				builder.And(
 					tbl.ColByFieldName("ID").Eq(m.ID),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
 				builder.Comment("ResourceMeta.UpdateByIDWithFVs"),
 			).
@@ -313,6 +329,7 @@ func (m *ResourceMeta) UpdateByMetaIDWithFVs(db sqlx.DBExecutor, fvs builder.Fie
 			Where(
 				builder.And(
 					tbl.ColByFieldName("MetaID").Eq(m.MetaID),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
 				builder.Comment("ResourceMeta.UpdateByMetaIDWithFVs"),
 			).
@@ -332,7 +349,7 @@ func (m *ResourceMeta) UpdateByMetaID(db sqlx.DBExecutor, zeros ...string) error
 	return m.UpdateByMetaIDWithFVs(db, fvs)
 }
 
-func (m *ResourceMeta) UpdateByResourceIDAndAccountIDAndResNameWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+func (m *ResourceMeta) UpdateByResourceIDAndAccountIDAndAppletIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
 		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
@@ -344,9 +361,10 @@ func (m *ResourceMeta) UpdateByResourceIDAndAccountIDAndResNameWithFVs(db sqlx.D
 				builder.And(
 					tbl.ColByFieldName("ResourceID").Eq(m.ResourceID),
 					tbl.ColByFieldName("AccountID").Eq(m.AccountID),
-					tbl.ColByFieldName("ResName").Eq(m.ResName),
+					tbl.ColByFieldName("AppletID").Eq(m.AppletID),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
-				builder.Comment("ResourceMeta.UpdateByResourceIDAndAccountIDAndResNameWithFVs"),
+				builder.Comment("ResourceMeta.UpdateByResourceIDAndAccountIDAndAppletIDWithFVs"),
 			).
 			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
@@ -354,14 +372,14 @@ func (m *ResourceMeta) UpdateByResourceIDAndAccountIDAndResNameWithFVs(db sqlx.D
 		return err
 	}
 	if affected, _ := res.RowsAffected(); affected == 0 {
-		return m.FetchByResourceIDAndAccountIDAndResName(db)
+		return m.FetchByResourceIDAndAccountIDAndAppletID(db)
 	}
 	return nil
 }
 
-func (m *ResourceMeta) UpdateByResourceIDAndAccountIDAndResName(db sqlx.DBExecutor, zeros ...string) error {
+func (m *ResourceMeta) UpdateByResourceIDAndAccountIDAndAppletID(db sqlx.DBExecutor, zeros ...string) error {
 	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
-	return m.UpdateByResourceIDAndAccountIDAndResNameWithFVs(db, fvs)
+	return m.UpdateByResourceIDAndAccountIDAndAppletIDWithFVs(db, fvs)
 }
 
 func (m *ResourceMeta) Delete(db sqlx.DBExecutor) error {
@@ -385,10 +403,36 @@ func (m *ResourceMeta) DeleteByID(db sqlx.DBExecutor) error {
 				builder.Where(
 					builder.And(
 						tbl.ColByFieldName("ID").Eq(m.ID),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
 				builder.Comment("ResourceMeta.DeleteByID"),
 			),
+	)
+	return err
+}
+
+func (m *ResourceMeta) SoftDeleteByID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	fvs := builder.FieldValues{}
+
+	if _, ok := fvs["DeletedAt"]; !ok {
+		fvs["DeletedAt"] = types.Timestamp{Time: time.Now()}
+	}
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	_, err := db.Exec(
+		builder.Update(db.T(m)).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("ID").Eq(m.ID),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
+				),
+				builder.Comment("ResourceMeta.SoftDeleteByID"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
 	return err
 }
@@ -402,6 +446,7 @@ func (m *ResourceMeta) DeleteByMetaID(db sqlx.DBExecutor) error {
 				builder.Where(
 					builder.And(
 						tbl.ColByFieldName("MetaID").Eq(m.MetaID),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
 				builder.Comment("ResourceMeta.DeleteByMetaID"),
@@ -410,7 +455,32 @@ func (m *ResourceMeta) DeleteByMetaID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *ResourceMeta) DeleteByResourceIDAndAccountIDAndResName(db sqlx.DBExecutor) error {
+func (m *ResourceMeta) SoftDeleteByMetaID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	fvs := builder.FieldValues{}
+
+	if _, ok := fvs["DeletedAt"]; !ok {
+		fvs["DeletedAt"] = types.Timestamp{Time: time.Now()}
+	}
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	_, err := db.Exec(
+		builder.Update(db.T(m)).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("MetaID").Eq(m.MetaID),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
+				),
+				builder.Comment("ResourceMeta.SoftDeleteByMetaID"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
+	)
+	return err
+}
+
+func (m *ResourceMeta) DeleteByResourceIDAndAccountIDAndAppletID(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	_, err := db.Exec(
 		builder.Delete().
@@ -420,11 +490,39 @@ func (m *ResourceMeta) DeleteByResourceIDAndAccountIDAndResName(db sqlx.DBExecut
 					builder.And(
 						tbl.ColByFieldName("ResourceID").Eq(m.ResourceID),
 						tbl.ColByFieldName("AccountID").Eq(m.AccountID),
-						tbl.ColByFieldName("ResName").Eq(m.ResName),
+						tbl.ColByFieldName("AppletID").Eq(m.AppletID),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
-				builder.Comment("ResourceMeta.DeleteByResourceIDAndAccountIDAndResName"),
+				builder.Comment("ResourceMeta.DeleteByResourceIDAndAccountIDAndAppletID"),
 			),
+	)
+	return err
+}
+
+func (m *ResourceMeta) SoftDeleteByResourceIDAndAccountIDAndAppletID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	fvs := builder.FieldValues{}
+
+	if _, ok := fvs["DeletedAt"]; !ok {
+		fvs["DeletedAt"] = types.Timestamp{Time: time.Now()}
+	}
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	_, err := db.Exec(
+		builder.Update(db.T(m)).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("ResourceID").Eq(m.ResourceID),
+					tbl.ColByFieldName("AccountID").Eq(m.AccountID),
+					tbl.ColByFieldName("AppletID").Eq(m.AppletID),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
+				),
+				builder.Comment("ResourceMeta.SoftDeleteByResourceIDAndAccountIDAndAppletID"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
 	return err
 }

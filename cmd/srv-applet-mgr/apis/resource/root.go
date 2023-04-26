@@ -9,5 +9,7 @@ var Root = kit.NewRouter(httptransport.Group("/resource"))
 
 func init() {
 	Root.Register(kit.NewRouter(&ListResources{}))
+	Root.Register(kit.NewRouter(&ListResourcesDetail{}))
 	Root.Register(kit.NewRouter(&RemoveResource{}))
+	Root.Register(kit.NewRouter(&BatchRemoveResource{}))
 }

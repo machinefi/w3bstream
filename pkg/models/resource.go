@@ -15,7 +15,7 @@ type Resource struct {
 	datatypes.PrimaryID
 	RelResource
 	ResourceInfo
-	datatypes.OperationTimes
+	datatypes.OperationTimesWithDeleted
 }
 
 type RelResource struct {
