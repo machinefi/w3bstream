@@ -14,7 +14,7 @@ func (Error) ServiceCode() int {
 }
 
 const (
-	// @errTalk InternalServerError internal error
+	// internal error
 	InternalServerError Error = http.StatusInternalServerError*1e6 + iota + 1
 	// @errTalk Database Error
 	DatabaseError
@@ -22,7 +22,9 @@ const (
 	UploadFileFailed
 	// @errTalk Create Message Channel Failed
 	CreateChannelFailed
-	// @errTalk Config Initialization Failed
+	// @errTalk Fetch Resource Failed
+	FetchResourceFailed
+	// @errTalk Config Init Failed
 	ConfigInitFailed
 	// @errTalk Config Uninit Failed
 	ConfigUninitFailed
@@ -30,10 +32,12 @@ const (
 	ConfigParseFailed
 	// @errTalk Gen Publisher Token Failed
 	GenPublisherTokenFailed
+	// @errTalk Md5 Checksum Failed
+	MD5ChecksumFailed
 )
 
 const (
-	// @errTalk Unauthorized unauthorized
+	// unauthorized
 	Unauthorized Error = http.StatusUnauthorized*1e6 + iota + 1
 	// @errTalk Invalid Auth Value
 	InvalidAuthValue
@@ -60,33 +64,35 @@ const (
 )
 
 const (
-	// @errTalk Forbidden
+	// forbidden
 	Forbidden Error = http.StatusForbidden*1e6 + iota + 1
-	// @errTalk deployed instance limit
-	InstanceLimit
 	// @errTalk Disabled Account
 	DisabledAccount
 	// @errTalk White List Forbidden
 	WhiteListForbidden
+	// @errTalk Upload File Size Limit
+	UploadFileSizeLimit
+	// @errTalk Upload File Md5 Unmatched
+	UploadFileMd5Unmatched
+	// @errTalk Upload File Disk Limit
+	UploadFileDiskLimit
 )
 
 const (
 	// @errTalk Conflict conflict error
 	Conflict Error = http.StatusConflict*1e6 + iota + 1
-	// @errTalk Project Config Conflict
-	ProjectConfigConflict
 	// @errTalk Project Name Conflict
 	ProjectNameConflict
+	// @errTalk Resource Conflict
+	ResourceConflict
+	// @errTalk Resource Owner Conflict
+	ResourceOwnerConflict
 	// @errTalk Strategy Conflict
 	StrategyConflict
 	// @errTalk Config Conflict
 	ConfigConflict
 	// @errTalk Publisher Conflict
 	PublisherConflict
-	// @errTalk Resource Path Conflict
-	ResourcePathConflict
-	// @errTalk Resource Account and WasmName Conflict
-	ResourceAccountConflict
 	// @errTalk Cron Job Conflict
 	CronJobConflict
 )
@@ -94,10 +100,6 @@ const (
 const (
 	// @errTalk BadRequest
 	BadRequest Error = http.StatusBadRequest*1e6 + iota + 1
-	// @errTalk Md5 Checksum Failed
-	MD5ChecksumFailed
-	// @errTalk Invalid Chain Client
-	InvalidChainClient
 	// @errTalk Invalid Config Type
 	InvalidConfigType
 	// @errTalk Deprecated Project
@@ -113,18 +115,20 @@ const (
 	ProjectNotFound
 	// @errTalk Config Not Found
 	ConfigNotFound
+	// @errTalk Resource Not Found
+	ResourceNotFound
 	// @errTalk Applet Not Found
 	AppletNotFound
 	// @errTalk Instance Not Found
 	InstanceNotFound
-	// @errTalk Resource Not Found
-	ResourceNotFound
 	// @errTalk Strategy Not Found
 	StrategyNotFound
 	// @errTalk Publisher Not Found
 	PublisherNotFound
 	// @errTalk Account Identity Not Found
 	AccountIdentityNotFound
+	// @errTalk Resource Perm Not Found
+	ResourcePermNotFound
 	// @errTalk Cron Job Not Found
 	CronJobNotFound
 )

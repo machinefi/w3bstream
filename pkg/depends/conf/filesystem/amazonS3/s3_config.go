@@ -28,17 +28,10 @@ func NewAmazonS3(regin, accessKeyID, secretAccessKey, sessionToken, bucketName s
 		SessionToken:    sessionToken,
 		BucketName:      bucketName,
 	}
-	s3.SetDefault()
 	if err := s3.Init(); err != nil {
 		panic(err)
 	}
 	return s3
-}
-
-func (s *AmazonS3) SetDefault() {
-	if s.Region == "" {
-		s.Region = "us-west-1"
-	}
 }
 
 func (s *AmazonS3) Init() error {
@@ -51,6 +44,14 @@ func (s *AmazonS3) Init() error {
 	}
 	s.cli = s3.New(sess)
 	return nil
+}
+
+func (s *AmazonS3) IsZero() bool {
+	return s.Region == "" ||
+		s.AccessKeyID == "" ||
+		s.SecretAccessKey == "" ||
+		s.SessionToken == "" ||
+		s.BucketName == ""
 }
 
 func (s *AmazonS3) Name() string {
