@@ -2982,7 +2982,7 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[BlockchainNotFound][404999011][Blockchain Not Found]!",
+              "@StatusErr[BlockchainNotFound][404999012][Blockchain Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
@@ -3013,7 +3013,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -3110,7 +3110,7 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[ContractLogNotFound][404999012][Contract Log Not Found]!",
+              "@StatusErr[ContractLogNotFound][404999013][Contract Log Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
@@ -3140,7 +3140,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -3245,7 +3245,7 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[BlockchainNotFound][404999011][Blockchain Not Found]!",
+              "@StatusErr[BlockchainNotFound][404999012][Blockchain Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
@@ -3276,7 +3276,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -3373,7 +3373,7 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[ChainTxNotFound][404999013][Chain Tx Not Found]!",
+              "@StatusErr[ChainTxNotFound][404999014][Chain Tx Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
@@ -3403,7 +3403,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -3508,7 +3508,7 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[BlockchainNotFound][404999011][Blockchain Not Found]!",
+              "@StatusErr[BlockchainNotFound][404999012][Blockchain Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
@@ -3539,7 +3539,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -3636,7 +3636,7 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[ContractLogNotFound][404999012][Contract Log Not Found]!",
+              "@StatusErr[ContractLogNotFound][404999013][Contract Log Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
@@ -3666,7 +3666,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][InternalServerError internal error]!"
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
