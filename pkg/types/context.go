@@ -3,6 +3,8 @@ package types
 import (
 	"context"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/amazonS3"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
@@ -32,7 +34,10 @@ type (
 	CtxWhiteList         struct{}
 	CtxStrategy          struct{}
 	CtxPublisher         struct{}
+	CtxCronJob           struct{}
 	CtxAccount           struct{}
+	CtxAmazonS3          struct{}
+	CtxFileSystemOp      struct{}
 )
 
 func WithAccount(ctx context.Context, v *models.Account) context.Context {
@@ -73,6 +78,27 @@ func PublisherFromContext(ctx context.Context) (*models.Publisher, bool) {
 
 func MustPublisherFromContext(ctx context.Context) *models.Publisher {
 	v, ok := PublisherFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithCronJob(ctx context.Context, v *models.CronJob) context.Context {
+	return contextx.WithValue(ctx, CtxCronJob{}, v)
+}
+
+func WithCronJobContext(v *models.CronJob) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxCronJob{}, v)
+	}
+}
+
+func CronJobFromContext(ctx context.Context) (*models.CronJob, bool) {
+	v, ok := ctx.Value(CtxCronJob{}).(*models.CronJob)
+	return v, ok
+}
+
+func MustCronJobFromContext(ctx context.Context) *models.CronJob {
+	v, ok := CronJobFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
@@ -413,6 +439,48 @@ func WhiteListFromContext(ctx context.Context) (*WhiteList, bool) {
 
 func MustWhiteListFromContext(ctx context.Context) *WhiteList {
 	v, ok := WhiteListFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithAmazonS3(ctx context.Context, v *amazonS3.AmazonS3) context.Context {
+	return contextx.WithValue(ctx, CtxAmazonS3{}, v)
+}
+
+func WithAmazonS3Context(v *amazonS3.AmazonS3) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxAmazonS3{}, v)
+	}
+}
+
+func AmazonS3FromContext(ctx context.Context) (*amazonS3.AmazonS3, bool) {
+	v, ok := ctx.Value(CtxAmazonS3{}).(*amazonS3.AmazonS3)
+	return v, ok
+}
+
+func MustS3FromContext(ctx context.Context) *amazonS3.AmazonS3 {
+	v, ok := AmazonS3FromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithFileSystemOp(ctx context.Context, v filesystem.FileSystemOp) context.Context {
+	return contextx.WithValue(ctx, CtxFileSystemOp{}, v)
+}
+
+func WithFileSystemOpContext(v filesystem.FileSystemOp) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxFileSystemOp{}, v)
+	}
+}
+
+func FileSystemOpFromContext(ctx context.Context) (filesystem.FileSystemOp, bool) {
+	v, ok := ctx.Value(CtxFileSystemOp{}).(filesystem.FileSystemOp)
+	return v, ok
+}
+
+func MustFileSystemOpFromContext(ctx context.Context) filesystem.FileSystemOp {
+	v, ok := FileSystemOpFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

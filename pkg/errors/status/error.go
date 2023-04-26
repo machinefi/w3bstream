@@ -64,8 +64,6 @@ const (
 const (
 	// @errTalk Forbidden
 	Forbidden Error = http.StatusForbidden*1e6 + iota + 1
-	// @errTalk deployed instance limit
-	InstanceLimit
 	// @errTalk Disabled Account
 	DisabledAccount
 	// @errTalk White List Forbidden
@@ -75,8 +73,6 @@ const (
 const (
 	// @errTalk Conflict conflict error
 	Conflict Error = http.StatusConflict*1e6 + iota + 1
-	// @errTalk Project Config Conflict
-	ProjectConfigConflict
 	// @errTalk Project Name Conflict
 	ProjectNameConflict
 	// @errTalk Strategy Conflict
@@ -87,6 +83,12 @@ const (
 	PublisherConflict
 	// @errTalk Multi Instance Deployed
 	MultiInstanceDeployed
+	// @errTalk Resource Path Conflict
+	ResourcePathConflict
+	// @errTalk Resource Account and WasmName Conflict
+	ResourceAccountConflict
+	// @errTalk Cron Job Conflict
+	CronJobConflict
 )
 
 const (
@@ -102,6 +104,8 @@ const (
 	InvalidConfigType
 	// @errTalk Unknown Deploy Command
 	UnknownDeployCommand
+	// @errTalk Invalid Cron Expressions
+	InvalidCronExpressions
 )
 
 const (
@@ -123,6 +127,8 @@ const (
 	PublisherNotFound
 	// @errTalk Account Identity Not Found
 	AccountIdentityNotFound
+	// @errTalk Cron Job Not Found
+	CronJobNotFound
 )
 
 // Deprecated: pls check database error and return defined status error

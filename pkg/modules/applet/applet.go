@@ -36,7 +36,7 @@ type InfoApplet struct {
 	Path string `db:"f_wasm_path" json:"-"`
 }
 
-func CreateApplet(ctx context.Context, projectID types.SFID, r *CreateAppletReq) (mApplet *models.Applet, err error) {
+func CreateApplet(ctx context.Context, projectID, accountID types.SFID, r *CreateAppletReq) (mApplet *models.Applet, err error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
@@ -45,7 +45,7 @@ func CreateApplet(ctx context.Context, projectID types.SFID, r *CreateAppletReq)
 	defer l.End()
 
 	mResource := &models.Resource{}
-	if mResource, err = resource.FetchOrCreateResource(ctx, r.File); err != nil {
+	if mResource, err = resource.FetchOrCreateResource(ctx, accountID, r.WasmName, r.File); err != nil {
 		l.Error(err)
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func CreateApplet(ctx context.Context, projectID types.SFID, r *CreateAppletReq)
 		RelProject:  models.RelProject{ProjectID: projectID},
 		RelApplet:   models.RelApplet{AppletID: appletID},
 		RelResource: models.RelResource{ResourceID: mResource.RelResource.ResourceID},
-		AppletInfo:  models.AppletInfo{Name: r.AppletName, WasmName: r.WasmName},
+		AppletInfo:  models.AppletInfo{Name: r.AppletName},
 	}
 	if len(r.Info.Strategies) == 0 {
 		r.Info.Strategies = append(r.Info.Strategies, models.DefaultStrategyInfo)
@@ -93,7 +93,7 @@ type UpdateAppletReq struct {
 	*Info `name:"info"`
 }
 
-func UpdateApplet(ctx context.Context, appletID types.SFID, r *UpdateAppletReq) (err error) {
+func UpdateApplet(ctx context.Context, appletID, accountID types.SFID, r *UpdateAppletReq) (err error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	mApplet := &models.Applet{RelApplet: models.RelApplet{AppletID: appletID}}
@@ -103,7 +103,7 @@ func UpdateApplet(ctx context.Context, appletID types.SFID, r *UpdateAppletReq) 
 	defer l.End()
 
 	mResource := &models.Resource{}
-	if mResource, err = resource.FetchOrCreateResource(ctx, r.File); err != nil {
+	if mResource, err = resource.FetchOrCreateResource(ctx, accountID, r.WasmName, r.File); err != nil {
 		l.Error(err)
 		return err
 	}
@@ -117,7 +117,6 @@ func UpdateApplet(ctx context.Context, appletID types.SFID, r *UpdateAppletReq) 
 		},
 		func(db sqlx.DBExecutor) error {
 			mApplet.RelResource = mResource.RelResource
-			mApplet.WasmName = r.WasmName
 			if needUpdateAppletName {
 				mApplet.Name = r.AppletName
 			}
@@ -171,7 +170,7 @@ type UpdateAndDeployReq struct {
 	Cache *wasm.Cache `name:"cache,omitempty"`
 }
 
-func UpdateAndDeploy(ctx context.Context, r *UpdateAndDeployReq) error {
+func UpdateAndDeploy(ctx context.Context, accountID types.SFID, r *UpdateAndDeployReq) error {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
@@ -181,7 +180,7 @@ func UpdateAndDeploy(ctx context.Context, r *UpdateAndDeployReq) error {
 	_, l = l.Start(ctx, "UpdateAndDeploy")
 	defer l.End()
 
-	mResource, err := resource.FetchOrCreateResource(ctx, r.File)
+	mResource, err := resource.FetchOrCreateResource(ctx, accountID, r.WasmName, r.File)
 	if err != nil {
 		l.Error(err)
 		return err
@@ -194,7 +193,6 @@ func UpdateAndDeploy(ctx context.Context, r *UpdateAndDeployReq) error {
 	err = sqlx.NewTasks(d).With(
 		func(db sqlx.DBExecutor) error {
 			app.RelResource = mResource.RelResource
-			app.WasmName = r.WasmName
 			if needUpdateAppletName {
 				app.Name = r.AppletName
 			}

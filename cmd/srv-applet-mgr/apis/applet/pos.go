@@ -21,7 +21,7 @@ func (r *CreateApplet) Output(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 	prj := types.MustProjectFromContext(ctx)
-	return applet.CreateApplet(ctx, prj.ProjectID, &r.CreateAppletReq)
+	return applet.CreateApplet(ctx, prj.ProjectID, ca.AccountID, &r.CreateAppletReq)
 }
 
 type CreateAppletAndDeploy struct{}

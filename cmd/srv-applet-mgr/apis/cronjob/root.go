@@ -10,4 +10,5 @@ var Root = kit.NewRouter(httptransport.Group("/cronjob"))
 func init() {
 	Root.Register(kit.NewRouter(&CreateCronJob{}))
 	Root.Register(kit.NewRouter(&RemoveCronJob{}))
+	Root.Register(kit.NewRouter(&ListCronJob{}))
 }

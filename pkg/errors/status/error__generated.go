@@ -49,6 +49,8 @@ func (v Error) Key() string {
 		return "InvalidConfigType"
 	case UnknownDeployCommand:
 		return "UnknownDeployCommand"
+	case InvalidCronExpressions:
+		return "InvalidCronExpressions"
 	case Unauthorized:
 		return "Unauthorized"
 	case InvalidAuthValue:
@@ -75,8 +77,6 @@ func (v Error) Key() string {
 		return "CurrentAccountAbsence"
 	case Forbidden:
 		return "Forbidden"
-	case InstanceLimit:
-		return "InstanceLimit"
 	case DisabledAccount:
 		return "DisabledAccount"
 	case WhiteListForbidden:
@@ -99,10 +99,10 @@ func (v Error) Key() string {
 		return "PublisherNotFound"
 	case AccountIdentityNotFound:
 		return "AccountIdentityNotFound"
+	case CronJobNotFound:
+		return "CronJobNotFound"
 	case Conflict:
 		return "Conflict"
-	case ProjectConfigConflict:
-		return "ProjectConfigConflict"
 	case ProjectNameConflict:
 		return "ProjectNameConflict"
 	case StrategyConflict:
@@ -113,6 +113,12 @@ func (v Error) Key() string {
 		return "PublisherConflict"
 	case MultiInstanceDeployed:
 		return "MultiInstanceDeployed"
+	case ResourcePathConflict:
+		return "ResourcePathConflict"
+	case ResourceAccountConflict:
+		return "ResourceAccountConflict"
+	case CronJobConflict:
+		return "CronJobConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -149,6 +155,8 @@ func (v Error) Msg() string {
 		return "Invalid Config Type"
 	case UnknownDeployCommand:
 		return "Unknown Deploy Command"
+	case InvalidCronExpressions:
+		return "Invalid Cron Expressions"
 	case Unauthorized:
 		return "Unauthorized unauthorized"
 	case InvalidAuthValue:
@@ -175,8 +183,6 @@ func (v Error) Msg() string {
 		return "Current Account Absence"
 	case Forbidden:
 		return "Forbidden"
-	case InstanceLimit:
-		return "deployed instance limit"
 	case DisabledAccount:
 		return "Disabled Account"
 	case WhiteListForbidden:
@@ -199,10 +205,10 @@ func (v Error) Msg() string {
 		return "Publisher Not Found"
 	case AccountIdentityNotFound:
 		return "Account Identity Not Found"
+	case CronJobNotFound:
+		return "Cron Job Not Found"
 	case Conflict:
 		return "Conflict conflict error"
-	case ProjectConfigConflict:
-		return "Project Config Conflict"
 	case ProjectNameConflict:
 		return "Project Name Conflict"
 	case StrategyConflict:
@@ -213,6 +219,12 @@ func (v Error) Msg() string {
 		return "Publisher Conflict"
 	case MultiInstanceDeployed:
 		return "Multi Instance Deployed"
+	case ResourcePathConflict:
+		return "Resource Path Conflict"
+	case ResourceAccountConflict:
+		return "Resource Account and WasmName Conflict"
+	case CronJobConflict:
+		return "Cron Job Conflict"
 	case InternalServerError:
 		return "InternalServerError internal error"
 	case DatabaseError:
@@ -249,6 +261,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case UnknownDeployCommand:
 		return true
+	case InvalidCronExpressions:
+		return true
 	case Unauthorized:
 		return true
 	case InvalidAuthValue:
@@ -275,8 +289,6 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case Forbidden:
 		return true
-	case InstanceLimit:
-		return true
 	case DisabledAccount:
 		return true
 	case WhiteListForbidden:
@@ -299,9 +311,9 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case AccountIdentityNotFound:
 		return true
-	case Conflict:
+	case CronJobNotFound:
 		return true
-	case ProjectConfigConflict:
+	case Conflict:
 		return true
 	case ProjectNameConflict:
 		return true
@@ -312,6 +324,12 @@ func (v Error) CanBeTalk() bool {
 	case PublisherConflict:
 		return true
 	case MultiInstanceDeployed:
+		return true
+	case ResourcePathConflict:
+		return true
+	case ResourceAccountConflict:
+		return true
+	case CronJobConflict:
 		return true
 	case InternalServerError:
 		return true
