@@ -2106,7 +2106,6 @@
             },
             "x-status-errors": [
               "@StatusErr[AppletNotFound][404999004][Applet Not Found]!",
-              "@StatusErr[ConfigNotFound][404999003][Config Not Found]!",
               "@StatusErr[InstanceNotFound][404999005][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
@@ -3676,7 +3675,6 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[ConfigNotFound][404999003][Config Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",

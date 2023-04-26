@@ -89,9 +89,14 @@ func Upsert(ctx context.Context, rel types.SFID, c wasm.Configuration) (*models.
 
 	err = sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
-			m, err = GetByRelAndType(ctx, rel, c.ConfigType())
-			if err != nil {
-				return err
+			m = &models.Config{
+				ConfigBase: models.ConfigBase{RelID: rel, Type: c.ConfigType()},
+			}
+			if err = m.FetchByRelIDAndType(d); err != nil {
+				if sqlx.DBErr(err).IsNotFound() {
+					return nil
+				}
+				return status.DatabaseError.StatusErr().WithDesc(v.Log(err))
 			}
 			old, err = Unmarshal(m.Value, c.ConfigType())
 			return err
@@ -106,7 +111,7 @@ func Upsert(ctx context.Context, rel types.SFID, c wasm.Configuration) (*models.
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			if m != nil {
+			if old != nil {
 				return nil
 			}
 			var raw []byte
@@ -115,8 +120,12 @@ func Upsert(ctx context.Context, rel types.SFID, c wasm.Configuration) (*models.
 				return err
 			}
 			m = &models.Config{
-				RelConfig:  models.RelConfig{ConfigID: idg.MustGenSFID()},
-				ConfigBase: models.ConfigBase{RelID: rel, Value: raw},
+				RelConfig: models.RelConfig{ConfigID: idg.MustGenSFID()},
+				ConfigBase: models.ConfigBase{
+					Type:  c.ConfigType(),
+					RelID: rel,
+					Value: raw,
+				},
 			}
 			if err = m.Create(d); err != nil {
 				if sqlx.DBErr(err).IsConflict() {
@@ -127,7 +136,7 @@ func Upsert(ctx context.Context, rel types.SFID, c wasm.Configuration) (*models.
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			if m == nil {
+			if old == nil {
 				return nil
 			}
 			m.Value, err = Marshal(c)
