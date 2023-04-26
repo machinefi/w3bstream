@@ -12,6 +12,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/account"
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
+	"github.com/machinefi/w3bstream/pkg/modules/cronjob"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/modules/publisher"
@@ -162,4 +163,22 @@ func (v *CurrentAccount) WithPublisherBySFID(ctx context.Context, id types.SFID)
 	}
 	ctx = types.WithPublisher(ctx, pub)
 	return v.WithProjectContextBySFID(ctx, pub.ProjectID)
+}
+
+func (v *CurrentAccount) WithResourceOwnerContextBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	_, err := resource.GetOwnerByAccountAndSFID(ctx, v.AccountID, id)
+	if err != nil {
+		return nil, err
+	}
+	// TODO if needed add ownership context
+	return types.WithAccount(ctx, &v.Account), nil
+}
+
+func (v *CurrentAccount) WithCronJobBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	cronJob, err := cronjob.GetBySFID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	ctx = types.WithCronJob(ctx, cronJob)
+	return v.WithProjectContextBySFID(ctx, cronJob.ProjectID)
 }

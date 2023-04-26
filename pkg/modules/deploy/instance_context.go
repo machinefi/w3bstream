@@ -19,12 +19,13 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		confid.WithSFIDGeneratorContext(confid.MustSFIDGeneratorFromContext(parent)),
 		types.WithInstanceContext(ins),
 		types.WithLoggerContext(types.MustLoggerFromContext(parent)),
-		types.WithWasmDBExecutorContext(types.MustWasmDBExecutorFromContext(parent)),
+		types.WithWasmDBEndpointContext(types.MustWasmDBEndpointFromContext(parent)),
 		types.WithRedisEndpointContext(types.MustRedisEndpointFromContext(parent)),
 		types.WithTaskWorkerContext(types.MustTaskWorkerFromContext(parent)),
 		types.WithTaskBoardContext(types.MustTaskBoardFromContext(parent)),
 		types.WithMqttBrokerContext(types.MustMqttBrokerFromContext(parent)),
 		types.WithETHClientConfigContext(types.MustETHClientConfigFromContext(parent)),
+		types.WithFileSystemOpContext(types.MustFileSystemOpFromContext(parent)),
 	)(context.Background())
 
 	app := &models.Applet{RelApplet: models.RelApplet{AppletID: ins.AppletID}}
