@@ -47,7 +47,7 @@ func main() {
 				}
 			},
 			func() {
-				if err := deploy.StartInstances(
+				if err := deploy.Init(
 					global.WithContext(context.Background()),
 				); err != nil {
 					panic(err)

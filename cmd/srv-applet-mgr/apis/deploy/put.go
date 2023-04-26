@@ -25,5 +25,5 @@ func (r *ControlInstance) Output(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	return nil, deploy.ControlInstance(ctx, r.InstanceID, r.Cmd)
+	return nil, deploy.Deploy(ctx, r.Cmd)
 }

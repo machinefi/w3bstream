@@ -1,11 +1,13 @@
 package enums
 
+// InstanceState presents if wasm was loaded to memory and if it can receive data
+//
 //go:generate toolkit gen enum InstanceState
 type InstanceState uint8
 
 const (
-	INSTANCE_STATE_UNKNOWN InstanceState = iota
-	INSTANCE_STATE__CREATED
-	INSTANCE_STATE__STARTED
-	INSTANCE_STATE__STOPPED
+	INSTANCE_STATE_UNKNOWN  InstanceState = iota
+	INSTANCE_STATE__CREATED               // applet and resource is ready but not loaded
+	INSTANCE_STATE__STARTED               // ready to receive data
+	INSTANCE_STATE__STOPPED               // stopped to receive data
 )

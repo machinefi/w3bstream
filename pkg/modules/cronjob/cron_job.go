@@ -2,7 +2,7 @@ package cronjob
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 	"strconv"
 	"strings"
 	"time"
@@ -95,12 +95,23 @@ func (t *cronJob) sendEvent(ctx context.Context, c models.CronJob) {
 		l.Error(errors.Wrap(err, "get project failed"))
 		return
 	}
+	payload, err := json.Marshal(struct {
+		ID        types.SFID
+		Timestamp time.Time
+	}{
+		c.CronJobID,
+		time.Now(),
+	})
+	if err != nil {
+		l.Error(errors.Wrap(err, "failed to marshal payload"))
+		return
+	}
 
 	e := eventpb.Event{
 		Header: &eventpb.Header{
 			EventType: c.EventType,
 		},
-		Payload: []byte(fmt.Sprintf("cronJobID:%d", c.CronJobID)),
+		Payload: payload,
 	}
 	if _, err := event.OnEventReceived(ctx, m.ProjectName.Name, &e); err != nil {
 		l.Error(errors.Wrap(err, "send event failed"))

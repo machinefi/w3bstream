@@ -89,16 +89,17 @@ func Upsert(ctx context.Context, rel types.SFID, c wasm.Configuration) (*models.
 
 	err = sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
-			m, err = GetByRelAndType(ctx, rel, c.ConfigType())
-			if err != nil {
-				return err
+			m = &models.Config{
+				ConfigBase: models.ConfigBase{RelID: rel, Type: c.ConfigType()},
 			}
-			old, err = Unmarshal(m.Value, c.ConfigType())
-			return err
-		},
-		func(db sqlx.DBExecutor) error {
-			if old == nil {
-				return nil
+			if err = m.FetchByRelIDAndType(d); err != nil {
+				if sqlx.DBErr(err).IsNotFound() {
+					return nil
+				}
+				return status.DatabaseError.StatusErr().WithDesc(v.Log(err))
+			}
+			if old, err = Unmarshal(m.Value, c.ConfigType()); err != nil {
+				return err
 			}
 			if err = wasm.UninitConfiguration(ctx, old); err != nil {
 				return status.ConfigUninitFailed.StatusErr().WithDesc(v.Log(err))
@@ -106,35 +107,21 @@ func Upsert(ctx context.Context, rel types.SFID, c wasm.Configuration) (*models.
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			if m != nil {
-				return nil
-			}
 			var raw []byte
 			raw, err = Marshal(c)
 			if err != nil {
 				return err
 			}
-			m = &models.Config{
-				RelConfig:  models.RelConfig{ConfigID: idg.MustGenSFID()},
-				ConfigBase: models.ConfigBase{RelID: rel, Value: raw},
+			m = &models.Config{ConfigBase: models.ConfigBase{
+				Type: c.ConfigType(), RelID: rel, Value: raw,
+			}}
+			if old == nil {
+				m.ConfigID = idg.MustGenSFID()
+				err = m.Create(d)
+			} else {
+				err = m.UpdateByConfigID(d)
 			}
-			if err = m.Create(d); err != nil {
-				if sqlx.DBErr(err).IsConflict() {
-					return status.ConfigConflict.StatusErr().WithDesc(v.Log(err))
-				}
-				return status.DatabaseError.StatusErr().WithDesc(err.Error())
-			}
-			return nil
-		},
-		func(d sqlx.DBExecutor) error {
-			if m == nil {
-				return nil
-			}
-			m.Value, err = Marshal(c)
 			if err != nil {
-				return err
-			}
-			if err = m.UpdateByConfigID(d); err != nil {
 				if sqlx.DBErr(err).IsConflict() {
 					return status.ConfigConflict.StatusErr().WithDesc(v.Log(err))
 				}
