@@ -38,6 +38,6 @@ func (r *ListPublisher) Output(ctx context.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	r.PublisherIDs = []types.SFID{types.MustProjectFromContext(ctx).ProjectID}
+	r.ProjectIDs = []types.SFID{types.MustProjectFromContext(ctx).ProjectID}
 	return publisher.List(ctx, &r.ListReq)
 }

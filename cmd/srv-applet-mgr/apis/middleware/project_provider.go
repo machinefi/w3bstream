@@ -2,6 +2,9 @@ package middleware
 
 import (
 	"context"
+	"strings"
+
+	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
 	"github.com/machinefi/w3bstream/pkg/enums"
@@ -22,13 +25,24 @@ func MustProjectName(ctx context.Context) string {
 	return p.ProjectName
 }
 
+func ProjectNameForDisplay(name string) (string, error) {
+	parts := strings.SplitN(name, "_", 3)
+	if len(parts) != 3 {
+		return "", errors.Errorf("unexpected project name format: %s", name)
+	}
+	if parts[0] != "aid" && parts[0] != "eth" {
+		return "", errors.Errorf("unexpected project name format: %s", name)
+	}
+	return parts[2], nil
+}
+
 func ProjectNameModifier(ctx context.Context) (prefix string, err error) {
 	ca, ok := CurrentAccountFromContext(ctx)
 	if !ok {
 		return "", status.CurrentAccountAbsence
 	}
 
-	prefix = "aid_+" + ca.AccountID.String() + "_"
+	prefix = "aid_" + ca.AccountID.String() + "_"
 	aci, err := account_identity.GetBySFIDAndType(
 		ctx,
 		ca.AccountID,
@@ -37,7 +51,7 @@ func ProjectNameModifier(ctx context.Context) (prefix string, err error) {
 	if err == nil {
 		prefix = "eth_" + aci.IdentityID + "_"
 	}
-	return
+	return prefix, nil
 }
 
 // ProjectProvider with account id prefix

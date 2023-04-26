@@ -17,7 +17,7 @@ type Instance struct {
 	RelInstance
 	RelApplet
 	InstanceInfo
-	datatypes.OperationTimesWithDeleted
+	datatypes.OperationTimes
 }
 
 type RelInstance struct {

@@ -5,7 +5,6 @@ import (
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
-	"github.com/machinefi/w3bstream/pkg/modules/deploy"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -25,7 +24,7 @@ func (r *GetInstanceByInstanceID) Output(ctx context.Context) (interface{}, erro
 		return nil, err
 	}
 
-	return deploy.GetInstanceByInstanceID(ctx, r.InstanceID)
+	return types.MustInstanceFromContext(ctx), nil
 }
 
 type GetInstanceByAppletID struct {
