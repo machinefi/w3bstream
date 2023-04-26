@@ -13,7 +13,7 @@ update:
 
 .PHONY: toolkit
 toolkit:
-	@go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/...@toolkit
+	@go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/...@toolkit-patch-0.0.1
 	@echo installed `which toolkit`
 
 .PHONY: srv_applet_mgr

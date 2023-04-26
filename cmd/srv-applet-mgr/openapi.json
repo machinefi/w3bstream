@@ -2681,7 +2681,7 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "application/octet-stream": {
               "schema": {
                 "type": "array",
                 "items": {
@@ -2689,7 +2689,8 @@
                   "format": "uint8"
                 },
                 "description": "Payload event payload (binary only)",
-                "x-go-field-name": "Payload"
+                "x-go-field-name": "Payload",
+                "x-tag-mime": "stream"
               }
             }
           }

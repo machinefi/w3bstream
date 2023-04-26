@@ -19,7 +19,7 @@ type EventReq struct {
 	// Timestamp event time when publisher do send
 	Timestamp int64 `in:"query" name:"timestamp,omitempty"`
 	// Payload event payload (binary only)
-	Payload []byte `in:"body"`
+	Payload []byte `in:"body" mime:"stream"`
 }
 
 func (r *EventReq) SetDefault() {
