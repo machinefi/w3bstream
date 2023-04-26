@@ -3,19 +3,48 @@ package blockchain
 import (
 	"context"
 
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/enums"
+	"github.com/machinefi/w3bstream/pkg/errors/status"
+	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 const chainUniqFlag = 0
 
 func RemoveMonitor(ctx context.Context, projectName string) error {
-	if err := removeContractLogByProject(ctx, projectName); err != nil {
-		return err
-	}
-	if err := removeChainTxByProject(ctx, projectName); err != nil {
-		return err
-	}
-	return removeChainHeightByProject(ctx, projectName)
+	d := types.MustMgrDBExecutorFromContext(ctx)
+
+	return sqlx.NewTasks(d).With(
+		func(d sqlx.DBExecutor) error {
+			m := &models.ContractLog{}
+
+			expr := builder.Delete().From(d.T(m), builder.Where(m.ColProjectName().Eq(projectName)))
+			if _, err := d.Exec(expr); err != nil {
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			m := &models.ChainTx{}
+
+			expr := builder.Delete().From(d.T(m), builder.Where(m.ColProjectName().Eq(projectName)))
+			if _, err := d.Exec(expr); err != nil {
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			m := &models.ChainHeight{}
+
+			expr := builder.Delete().From(d.T(m), builder.Where(m.ColProjectName().Eq(projectName)))
+			if _, err := d.Exec(expr); err != nil {
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
+		},
+	).Do()
 }
 
 func getEventType(eventType string) string {

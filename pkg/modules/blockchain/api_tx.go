@@ -66,19 +66,3 @@ func RemoveChainTxBySFID(ctx context.Context, id types.SFID) error {
 	}
 	return nil
 }
-
-func removeChainTxByProject(ctx context.Context, projectName string) error {
-	d := types.MustMonitorDBExecutorFromContext(ctx)
-
-	m := &models.ChainTx{}
-	exists, err := m.List(d, m.ColProjectName().Eq(projectName))
-	if err != nil {
-		return err
-	}
-	for _, e := range exists {
-		if err := RemoveChainTxBySFID(ctx, e.ChainTxID); err != nil {
-			return err
-		}
-	}
-	return nil
-}

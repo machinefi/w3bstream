@@ -76,19 +76,3 @@ func RemoveContractLogBySFID(ctx context.Context, id types.SFID) error {
 	}
 	return nil
 }
-
-func removeContractLogByProject(ctx context.Context, projectName string) error {
-	d := types.MustMonitorDBExecutorFromContext(ctx)
-
-	m := &models.ContractLog{}
-	exists, err := m.List(d, m.ColProjectName().Eq(projectName))
-	if err != nil {
-		return err
-	}
-	for _, e := range exists {
-		if err := RemoveContractLogBySFID(ctx, e.ContractLogID); err != nil {
-			return err
-		}
-	}
-	return nil
-}
