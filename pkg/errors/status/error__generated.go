@@ -73,6 +73,8 @@ func (v Error) Key() string {
 		return "CurrentAccountAbsence"
 	case InvalidEventChannel:
 		return "InvalidEventChannel"
+	case InvalidEventToken:
+		return "InvalidEventToken"
 	case Forbidden:
 		return "Forbidden"
 	case DisabledAccount:
@@ -85,6 +87,8 @@ func (v Error) Key() string {
 		return "UploadFileMd5Unmatched"
 	case UploadFileDiskLimit:
 		return "UploadFileDiskLimit"
+	case TopicAlreadySubscribed:
+		return "TopicAlreadySubscribed"
 	case NotFound:
 		return "NotFound"
 	case ProjectNotFound:
@@ -107,6 +111,8 @@ func (v Error) Key() string {
 		return "ResourcePermNotFound"
 	case CronJobNotFound:
 		return "CronJobNotFound"
+	case InstanceNotRunning:
+		return "InstanceNotRunning"
 	case Conflict:
 		return "Conflict"
 	case ProjectNameConflict:
@@ -151,6 +157,10 @@ func (v Error) Key() string {
 		return "BatchRemoveAppletFailed"
 	case MD5ChecksumFailed:
 		return "MD5ChecksumFailed"
+	case MqttSubscribeFailed:
+		return "MqttSubscribeFailed"
+	case MqttConnectFailed:
+		return "MqttConnectFailed"
 	}
 	return "UNKNOWN"
 }
@@ -193,6 +203,8 @@ func (v Error) Msg() string {
 		return "Current Account Absence"
 	case InvalidEventChannel:
 		return "Invalid Event Channel"
+	case InvalidEventToken:
+		return "Invalid Event Token"
 	case Forbidden:
 		return "forbidden"
 	case DisabledAccount:
@@ -205,6 +217,8 @@ func (v Error) Msg() string {
 		return "Upload File Md5 Unmatched"
 	case UploadFileDiskLimit:
 		return "Upload File Disk Limit"
+	case TopicAlreadySubscribed:
+		return "Topic Already Subscribed"
 	case NotFound:
 		return "NotFound"
 	case ProjectNotFound:
@@ -227,6 +241,8 @@ func (v Error) Msg() string {
 		return "Resource Perm Not Found"
 	case CronJobNotFound:
 		return "Cron Job Not Found"
+	case InstanceNotRunning:
+		return "Instance Not Running"
 	case Conflict:
 		return "Conflict conflict error"
 	case ProjectNameConflict:
@@ -271,6 +287,10 @@ func (v Error) Msg() string {
 		return "Batch Remove Applet Failed"
 	case MD5ChecksumFailed:
 		return "Md5 Checksum Failed"
+	case MqttSubscribeFailed:
+		return "MQTT Subscribe Failed"
+	case MqttConnectFailed:
+		return "MQTT Connect Failed"
 	}
 	return "-"
 }
@@ -313,6 +333,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case InvalidEventChannel:
 		return true
+	case InvalidEventToken:
+		return true
 	case Forbidden:
 		return false
 	case DisabledAccount:
@@ -324,6 +346,8 @@ func (v Error) CanBeTalk() bool {
 	case UploadFileMd5Unmatched:
 		return true
 	case UploadFileDiskLimit:
+		return true
+	case TopicAlreadySubscribed:
 		return true
 	case NotFound:
 		return true
@@ -346,6 +370,8 @@ func (v Error) CanBeTalk() bool {
 	case ResourcePermNotFound:
 		return true
 	case CronJobNotFound:
+		return true
+	case InstanceNotRunning:
 		return true
 	case Conflict:
 		return true
@@ -390,6 +416,10 @@ func (v Error) CanBeTalk() bool {
 	case BatchRemoveAppletFailed:
 		return true
 	case MD5ChecksumFailed:
+		return true
+	case MqttSubscribeFailed:
+		return true
+	case MqttConnectFailed:
 		return true
 	}
 	return false

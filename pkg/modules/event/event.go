@@ -6,45 +6,50 @@ import (
 	"sync"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
-
-	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/timer"
+	"github.com/machinefi/w3bstream/pkg/errors/status"
+	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/strategy"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
-	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
-var _receiveEventMtc = prometheus.NewCounterVec(prometheus.CounterOpts{
-	Name: "w3b_receive_event_metrics",
-	Help: "receive event counter metrics.",
-}, []string{"project", "publisher"})
-
-func init() {
-	prometheus.MustRegister(_receiveEventMtc)
+var Handler = func(ctx context.Context, data []byte) []*Result {
+	return OnEvent(ctx, data)
 }
 
-// 	_receiveEventMtc.WithLabelValues(projectName, publisherMtc).Inc()
+// HandleEvent support other module call
+// TODO the full project info is not in context so query and set here. this impl
+// is for support other module, which is temporary.
+// And it will be deprecated when rpc/http is ready
+func HandleEvent(ctx context.Context, t string, data []byte) (interface{}, error) {
+	prj := &models.Project{ProjectName: models.ProjectName{
+		Name: types.MustProjectFromContext(ctx).Name,
+	}}
 
-var Handler = func(ctx context.Context, ch string, ev *eventpb.Event) (interface{}, error) {
-	return OnEventReceived(ctx, ch, ev)
+	err := prj.FetchByName(types.MustMgrDBExecutorFromContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	strategies, err := strategy.FilterByProjectAndEvent(ctx, prj.ProjectID, t)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx = types.WithStrategyResults(ctx, strategies)
+	return OnEvent(ctx, data), nil
 }
 
-func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) (ret *HandleEventResult, err error) {
-	return nil, nil
-}
-
-func OnEvent(ctx context.Context, data []byte) (ret []*wasm.EventHandleResult) {
+func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
 	l := types.MustLoggerFromContext(ctx)
 	r := types.MustStrategyResultsFromContext(ctx)
 
-	// TODO @zhiwei matrix
-	results := make(chan *wasm.EventHandleResult, len(r))
+	results := make(chan *Result, len(r))
 
 	wg := &sync.WaitGroup{}
 	for _, v := range r {
 		l = l.WithValues(
-			"acc", v.AccountID,
 			"prj", v.ProjectName,
 			"app", v.AppletName,
 			"ins", v.InstanceID,
@@ -54,10 +59,13 @@ func OnEvent(ctx context.Context, data []byte) (ret []*wasm.EventHandleResult) {
 		ins := vm.GetConsumer(v.InstanceID)
 		if ins == nil {
 			l.Warn(errors.New("instance not running"))
-			results <- &wasm.EventHandleResult{
-				InstanceID: v.InstanceID.String(),
-				Code:       -1,
-				ErrMsg:     "instance not found",
+			results <- &Result{
+				AppletName:  v.AppletName,
+				InstanceID:  v.InstanceID,
+				Handler:     v.Handler,
+				ReturnValue: nil,
+				ReturnCode:  -1,
+				Error:       status.InstanceNotRunning.Key(),
 			}
 			continue
 		}
@@ -71,7 +79,14 @@ func OnEvent(ctx context.Context, data []byte) (ret []*wasm.EventHandleResult) {
 			case <-time.After(time.Second * 5):
 			default:
 				rv := ins.HandleEvent(ctx, v.Handler, v.EventType, data)
-				results <- rv
+				results <- &Result{
+					AppletName:  v.AppletName,
+					InstanceID:  v.InstanceID,
+					Handler:     v.Handler,
+					ReturnValue: nil,
+					ReturnCode:  int(rv.Code),
+					Error:       rv.ErrMsg,
+				}
 				l.WithValues("cst", cost().Milliseconds()).Info("")
 			}
 		}(v)

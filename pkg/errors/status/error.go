@@ -38,6 +38,10 @@ const (
 	BatchRemoveAppletFailed
 	// @errTalk Md5 Checksum Failed
 	MD5ChecksumFailed
+	// @errTalk MQTT Subscribe Failed
+	MqttSubscribeFailed
+	// @errTalk MQTT Connect Failed
+	MqttConnectFailed
 )
 
 const (
@@ -67,6 +71,8 @@ const (
 	CurrentAccountAbsence
 	// @errTalk Invalid Event Channel
 	InvalidEventChannel
+	// @errTalk Invalid Event Token
+	InvalidEventToken
 )
 
 const (
@@ -82,6 +88,8 @@ const (
 	UploadFileMd5Unmatched
 	// @errTalk Upload File Disk Limit
 	UploadFileDiskLimit
+	// @errTalk Topic Already Subscribed
+	TopicAlreadySubscribed
 )
 
 const (
@@ -143,6 +151,8 @@ const (
 	ResourcePermNotFound
 	// @errTalk Cron Job Not Found
 	CronJobNotFound
+	// @errTalk Instance Not Running
+	InstanceNotRunning
 )
 
 // Deprecated: pls check database error and return defined status error

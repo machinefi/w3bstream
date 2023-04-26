@@ -12,6 +12,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/account"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/modules/publisher"
+	"github.com/machinefi/w3bstream/pkg/modules/strategy"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -80,7 +81,7 @@ func (v *CurrentPublisher) WithAccountContext(ctx context.Context) (context.Cont
 	return types.WithAccount(ctx, acc), nil
 }
 
-func (v *CurrentPublisher) WithStrategiesContextByChannelAndType(ctx context.Context, ch, tpe string) (context.Context, error) {
+func (v *CurrentPublisher) WithStrategiesByChanAndType(ctx context.Context, ch, tpe string) (context.Context, error) {
 	var (
 		err error
 		res []*types.StrategyResult
@@ -97,8 +98,7 @@ func (v *CurrentPublisher) WithStrategiesContextByChannelAndType(ctx context.Con
 		return nil, status.InvalidEventChannel
 	}
 
-	// TODO @zhiwei fileter all result with given condition
-	// res, err = strategy.ListResultsByProjectAndEventType(ctx, prj.ProjectID, t)
+	res, err = strategy.FilterByProjectAndEvent(ctx, prj.ProjectID, tpe)
 	if err != nil {
 		return nil, err
 	}

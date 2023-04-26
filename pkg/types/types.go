@@ -73,8 +73,6 @@ func (v *WhiteList) Validate(address string) bool {
 }
 
 type StrategyResult struct {
-	AccountID   types.SFID `json:"accountID"   db:"f_acc_id"`
-	ProjectID   types.SFID `json:"projectID"   db:"f_prj_id"`
 	ProjectName string     `json:"projectName" db:"f_prj_name"`
 	AppletID    types.SFID `json:"appletID"    db:"f_app_id"`
 	AppletName  string     `json:"appletName"  db:"f_app_name"`

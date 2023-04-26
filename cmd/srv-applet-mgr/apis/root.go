@@ -1,6 +1,8 @@
 package apis
 
 import (
+	"os"
+
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/account"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/applet"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/cronjob"
@@ -15,6 +17,7 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/resource"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/strategy"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/version"
+	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 	confhttp "github.com/machinefi/w3bstream/pkg/depends/conf/http"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
@@ -23,13 +26,16 @@ import (
 )
 
 var (
-	name = "srv-applet-mgr"
+	name = os.Getenv(consts.EnvProjectName)
 
 	Root      = kit.NewRouter(httptransport.Group("/"))
 	RootEvent = kit.NewRouter(httptransport.Group("/"))
 )
 
 func init() {
+	if name == "" {
+		name = "srv-applet-mgr"
+	}
 	// root router register for applet-mgr
 	{
 		var (
@@ -68,12 +74,13 @@ func init() {
 		var (
 			RouterServer = kit.NewRouter(httptransport.Group("/" + name))
 			RouterV0     = kit.NewRouter(httptransport.Group("/v0"))
+			RouterAuth   = kit.NewRouter(&jwt.Auth{}, &middleware.ContextPublisherAuth{})
 		)
 
 		RootEvent.Register(RouterServer)
-		RootEvent.Register(kit.NewRouter(&confhttp.Liveness{}))
 		RouterServer.Register(RouterV0)
+		RouterV0.Register(RouterAuth)
 
-		RouterV0.Register(event.Root)
+		RouterAuth.Register(event.Root)
 	}
 }
