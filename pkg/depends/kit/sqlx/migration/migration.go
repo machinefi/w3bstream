@@ -19,6 +19,10 @@ func OutputFromContext(ctx context.Context) io.Writer {
 	return nil
 }
 
+func WithInspectionOutput(ctx context.Context, w io.Writer) context.Context {
+	return contextx.WithValue(ctx, key{}, w)
+}
+
 func MustMigrate(db sqlx.DBExecutor, w io.Writer) {
 	if err := Migrate(db, w); err != nil {
 		panic(err)

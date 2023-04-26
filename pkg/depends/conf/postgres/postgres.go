@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/driver/postgres"
-	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/retry"
 )
 
@@ -99,31 +100,43 @@ func (e *Endpoint) conn(url string, readonly bool) (*sqlx.DB, error) {
 	return db, nil
 }
 
-func (e *Endpoint) Init() {
+func (e *Endpoint) Init() error {
 	// cover default database name
 	if len(e.Master.Base) > 0 {
 		e.Database.Name = e.Master.Base
 	}
-	// must try master
-	must.NoError(e.Retry.Do(func() error {
+	// try master
+	err := e.Retry.Do(func() error {
 		db, err := e.conn(e.masterURL(), false)
 		if err != nil {
 			return err
 		}
 		e.DB = db
 		return nil
-	}))
+	})
+	if err != nil {
+		return errors.Errorf(
+			"try to connect master: %s failed: %v",
+			e.masterURL(), err,
+		)
+	}
 	// try slave if config
 	if !e.Slave.IsZero() {
-		must.NoError(e.Retry.Do(func() error {
+		if err = e.Retry.Do(func() error {
 			db, err := e.conn(e.slaveURL(), false)
 			if err != nil {
 				return err
 			}
 			e.slave = db
 			return nil
-		}))
+		}); err != nil {
+			return errors.Errorf(
+				"try to connect master: %s failed: %v",
+				e.masterURL(), err,
+			)
+		}
 	}
+	return nil
 }
 
 func (e Endpoint) masterURL() string {

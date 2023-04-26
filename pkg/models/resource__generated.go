@@ -40,11 +40,17 @@ func (*Resource) TableDesc() []string {
 }
 
 func (*Resource) Comments() map[string]string {
-	return map[string]string{}
+	return map[string]string{
+		"Path": "Path rel path",
+	}
 }
 
 func (*Resource) ColDesc() map[string][]string {
-	return map[string][]string{}
+	return map[string][]string{
+		"Path": []string{
+			"Path rel path",
+		},
+	}
 }
 
 func (*Resource) ColRel() map[string][]string {

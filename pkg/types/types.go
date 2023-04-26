@@ -5,6 +5,7 @@ import (
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/validator/strfmt"
+	"github.com/machinefi/w3bstream/pkg/enums"
 )
 
 type UploadConfig struct {
@@ -18,6 +19,16 @@ func (c *UploadConfig) SetDefault() {
 	}
 	if c.FileSizeLimit == 0 {
 		c.FileSizeLimit = 100 * 1024 * 1024
+	}
+}
+
+type FileSystem struct {
+	Type enums.FileSystemMode `env:""`
+}
+
+func (f *FileSystem) SetDefault() {
+	if f.Type > enums.FILE_SYSTEM_MODE__S3 || f.Type <= 0 {
+		f.Type = enums.FILE_SYSTEM_MODE__LOCAL
 	}
 }
 
