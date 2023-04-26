@@ -7,6 +7,9 @@ import (
 	_ "github.com/machinefi/w3bstream/cmd/srv-applet-mgr/types"
 	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 	confapp "github.com/machinefi/w3bstream/pkg/depends/conf/app"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/amazonS3"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/local"
 	confhttp "github.com/machinefi/w3bstream/pkg/depends/conf/http"
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	confjwt "github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
@@ -19,6 +22,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq/mem_mq"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/migration"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
+	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -39,19 +43,22 @@ var (
 
 func init() {
 	config := &struct {
-		Postgres    *confpostgres.Endpoint
-		MonitorDB   *confpostgres.Endpoint
-		WasmDB      *confpostgres.Endpoint
-		MqttBroker  *confmqtt.Broker
-		Redis       *confredis.Redis
-		Server      *confhttp.Server
-		Jwt         *confjwt.Jwt
-		Logger      *conflog.Log
-		StdLogger   conflog.Logger
-		UploadConf  *types.UploadConfig
-		EthClient   *types.ETHClientConfig
-		WhiteList   *types.WhiteList
-		ServerEvent *confhttp.Server
+		Postgres     *confpostgres.Endpoint
+		MonitorDB    *confpostgres.Endpoint
+		WasmDB       *confpostgres.Endpoint
+		MqttBroker   *confmqtt.Broker
+		Redis        *confredis.Redis
+		Server       *confhttp.Server
+		Jwt          *confjwt.Jwt
+		Logger       *conflog.Log
+		StdLogger    conflog.Logger
+		UploadConf   *types.UploadConfig
+		EthClient    *types.ETHClientConfig
+		WhiteList    *types.WhiteList
+		ServerEvent  *confhttp.Server
+		FileSystem   *types.FileSystem
+		AmazonS3     *amazonS3.AmazonS3
+		FileSystemOp filesystem.FileSystemOp
 	}{
 		Postgres:    db,
 		MonitorDB:   monitordb,
@@ -66,6 +73,8 @@ func init() {
 		EthClient:   &types.ETHClientConfig{},
 		WhiteList:   &types.WhiteList{},
 		ServerEvent: serverEvent,
+		FileSystem:  &types.FileSystem{},
+		AmazonS3:    &amazonS3.AmazonS3{},
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
@@ -83,6 +92,13 @@ func init() {
 		confapp.WithLogger(conflog.Std()),
 	)
 	App.Conf(config, worker)
+
+	switch config.FileSystem.Type {
+	case enums.FILE_SYSTEM_MODE__S3:
+		config.FileSystemOp = config.AmazonS3
+	default:
+		config.FileSystemOp = &local.LocalFileSystem{}
+	}
 
 	confhttp.RegisterCheckerBy(config, worker)
 	config.StdLogger.(conflog.LevelSetter).SetLevel(conflog.InfoLevel)
@@ -102,6 +118,7 @@ func init() {
 		types.WithTaskBoardContext(mq.NewTaskBoard(tasks)),
 		types.WithETHClientConfigContext(config.EthClient),
 		types.WithWhiteListContext(config.WhiteList),
+		types.WithFileSystemOpContext(config.FileSystemOp),
 	)
 }
 

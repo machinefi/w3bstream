@@ -8,7 +8,7 @@ import (
 // Resource database model wasm_resource
 // @def primary                            ID
 // @def unique_index UI_resource_id        ResourceID
-// @def unique_index UI_md5                Md5
+// @def unique_index UI_path               Path
 //
 //go:generate toolkit gen model Resource --database DB
 type Resource struct {
@@ -23,6 +23,5 @@ type RelResource struct {
 }
 
 type ResourceInfo struct {
-	Path string `db:"f_path,default=''" json:"path"`
-	Md5  string `db:"f_md5"             json:"md5"`
+	Path string `db:"f_path,default=''"       json:"path"` // Path <=> md5
 }
