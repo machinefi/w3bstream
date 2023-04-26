@@ -32,6 +32,8 @@ const (
 	ConfigParseFailed
 	// @errTalk Gen Publisher Token Failed
 	GenPublisherTokenFailed
+	// @errTalk Create Instance Failed
+	CreateInstanceFailed
 	// @errTalk Md5 Checksum Failed
 	MD5ChecksumFailed
 )
@@ -93,6 +95,8 @@ const (
 	ConfigConflict
 	// @errTalk Publisher Conflict
 	PublisherConflict
+	// @errTalk Multi Instance Deployed
+	MultiInstanceDeployed
 	// @errTalk Cron Job Conflict
 	CronJobConflict
 )
@@ -104,6 +108,8 @@ const (
 	InvalidConfigType
 	// @errTalk Deprecated Project
 	DeprecatedProject
+	// @errTalk Unknown Deploy Command
+	UnknownDeployCommand
 	// @errTalk Invalid Cron Expressions
 	InvalidCronExpressions
 )

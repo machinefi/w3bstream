@@ -9,8 +9,8 @@ SRV_APPLET_MGR__FileSystem_Type: LOCAL
 SRV_APPLET_MGR__Jwt_ExpIn: 0s
 SRV_APPLET_MGR__Jwt_Issuer: ""
 SRV_APPLET_MGR__Jwt_SignKey: ""
-SRV_APPLET_MGR__LocalFS_DiskReserve: "20971520"
-SRV_APPLET_MGR__LocalFS_FilesizeLimit: "1048576"
+SRV_APPLET_MGR__LocalFS_DiskReserveBytes: "20971520"
+SRV_APPLET_MGR__LocalFS_FilesizeLimitBytes: "1048576"
 SRV_APPLET_MGR__LocalFS_Root: /var/folders/dz/qbnhx75s34s4snfq75219n3m0000gn/T/srv-applet-mgr
 SRV_APPLET_MGR__Logger_Format: JSON
 SRV_APPLET_MGR__Logger_Level: debug

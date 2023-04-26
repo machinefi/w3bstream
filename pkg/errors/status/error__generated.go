@@ -43,6 +43,8 @@ func (v Error) Key() string {
 		return "InvalidConfigType"
 	case DeprecatedProject:
 		return "DeprecatedProject"
+	case UnknownDeployCommand:
+		return "UnknownDeployCommand"
 	case InvalidCronExpressions:
 		return "InvalidCronExpressions"
 	case Unauthorized:
@@ -117,6 +119,8 @@ func (v Error) Key() string {
 		return "ConfigConflict"
 	case PublisherConflict:
 		return "PublisherConflict"
+	case MultiInstanceDeployed:
+		return "MultiInstanceDeployed"
 	case CronJobConflict:
 		return "CronJobConflict"
 	case InternalServerError:
@@ -137,6 +141,8 @@ func (v Error) Key() string {
 		return "ConfigParseFailed"
 	case GenPublisherTokenFailed:
 		return "GenPublisherTokenFailed"
+	case CreateInstanceFailed:
+		return "CreateInstanceFailed"
 	case MD5ChecksumFailed:
 		return "MD5ChecksumFailed"
 	}
@@ -151,6 +157,8 @@ func (v Error) Msg() string {
 		return "Invalid Config Type"
 	case DeprecatedProject:
 		return "Deprecated Project"
+	case UnknownDeployCommand:
+		return "Unknown Deploy Command"
 	case InvalidCronExpressions:
 		return "Invalid Cron Expressions"
 	case Unauthorized:
@@ -225,6 +233,8 @@ func (v Error) Msg() string {
 		return "Config Conflict"
 	case PublisherConflict:
 		return "Publisher Conflict"
+	case MultiInstanceDeployed:
+		return "Multi Instance Deployed"
 	case CronJobConflict:
 		return "Cron Job Conflict"
 	case InternalServerError:
@@ -245,6 +255,8 @@ func (v Error) Msg() string {
 		return "Config Parse Failed"
 	case GenPublisherTokenFailed:
 		return "Gen Publisher Token Failed"
+	case CreateInstanceFailed:
+		return "Create Instance Failed"
 	case MD5ChecksumFailed:
 		return "Md5 Checksum Failed"
 	}
@@ -258,6 +270,8 @@ func (v Error) CanBeTalk() bool {
 	case InvalidConfigType:
 		return true
 	case DeprecatedProject:
+		return true
+	case UnknownDeployCommand:
 		return true
 	case InvalidCronExpressions:
 		return true
@@ -333,6 +347,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case PublisherConflict:
 		return true
+	case MultiInstanceDeployed:
+		return true
 	case CronJobConflict:
 		return true
 	case InternalServerError:
@@ -352,6 +368,8 @@ func (v Error) CanBeTalk() bool {
 	case ConfigParseFailed:
 		return true
 	case GenPublisherTokenFailed:
+		return true
+	case CreateInstanceFailed:
 		return true
 	case MD5ChecksumFailed:
 		return true

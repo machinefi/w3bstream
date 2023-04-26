@@ -19,16 +19,12 @@ func ParseDeployCmdFromString(s string) (DeployCmd, error) {
 		return DEPLOY_CMD_UNKNOWN, InvalidDeployCmd
 	case "":
 		return DEPLOY_CMD_UNKNOWN, nil
-	case "CREATE":
-		return DEPLOY_CMD__CREATE, nil
 	case "START":
 		return DEPLOY_CMD__START, nil
-	case "STOP":
-		return DEPLOY_CMD__STOP, nil
-	case "REMOVE":
-		return DEPLOY_CMD__REMOVE, nil
-	case "RESTART":
-		return DEPLOY_CMD__RESTART, nil
+	case "HUNGUP":
+		return DEPLOY_CMD__HUNGUP, nil
+	case "KILL":
+		return DEPLOY_CMD__KILL, nil
 	}
 }
 
@@ -38,16 +34,12 @@ func ParseDeployCmdFromLabel(s string) (DeployCmd, error) {
 		return DEPLOY_CMD_UNKNOWN, InvalidDeployCmd
 	case "":
 		return DEPLOY_CMD_UNKNOWN, nil
-	case "CREATE":
-		return DEPLOY_CMD__CREATE, nil
-	case "START":
+	case "start wasm vm":
 		return DEPLOY_CMD__START, nil
-	case "STOP":
-		return DEPLOY_CMD__STOP, nil
-	case "REMOVE":
-		return DEPLOY_CMD__REMOVE, nil
-	case "RESTART":
-		return DEPLOY_CMD__RESTART, nil
+	case "stop wasm vm":
+		return DEPLOY_CMD__HUNGUP, nil
+	case "kill wasm vm (memory released)":
+		return DEPLOY_CMD__KILL, nil
 	}
 }
 
@@ -61,16 +53,12 @@ func (v DeployCmd) String() string {
 		return "UNKNOWN"
 	case DEPLOY_CMD_UNKNOWN:
 		return ""
-	case DEPLOY_CMD__CREATE:
-		return "CREATE"
 	case DEPLOY_CMD__START:
 		return "START"
-	case DEPLOY_CMD__STOP:
-		return "STOP"
-	case DEPLOY_CMD__REMOVE:
-		return "REMOVE"
-	case DEPLOY_CMD__RESTART:
-		return "RESTART"
+	case DEPLOY_CMD__HUNGUP:
+		return "HUNGUP"
+	case DEPLOY_CMD__KILL:
+		return "KILL"
 	}
 }
 
@@ -80,16 +68,12 @@ func (v DeployCmd) Label() string {
 		return "UNKNOWN"
 	case DEPLOY_CMD_UNKNOWN:
 		return ""
-	case DEPLOY_CMD__CREATE:
-		return "CREATE"
 	case DEPLOY_CMD__START:
-		return "START"
-	case DEPLOY_CMD__STOP:
-		return "STOP"
-	case DEPLOY_CMD__REMOVE:
-		return "REMOVE"
-	case DEPLOY_CMD__RESTART:
-		return "RESTART"
+		return "start wasm vm"
+	case DEPLOY_CMD__HUNGUP:
+		return "stop wasm vm"
+	case DEPLOY_CMD__KILL:
+		return "kill wasm vm (memory released)"
 	}
 }
 
@@ -98,7 +82,7 @@ func (v DeployCmd) TypeName() string {
 }
 
 func (v DeployCmd) ConstValues() []enum.IntStringerEnum {
-	return []enum.IntStringerEnum{DEPLOY_CMD__CREATE, DEPLOY_CMD__START, DEPLOY_CMD__STOP, DEPLOY_CMD__REMOVE, DEPLOY_CMD__RESTART}
+	return []enum.IntStringerEnum{DEPLOY_CMD__START, DEPLOY_CMD__HUNGUP, DEPLOY_CMD__KILL}
 }
 
 func (v DeployCmd) MarshalText() ([]byte, error) {

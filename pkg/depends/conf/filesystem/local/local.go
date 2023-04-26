@@ -63,11 +63,11 @@ func (l *LocalFileSystem) Upload(md5 string, data []byte) error {
 }
 
 func (l *LocalFileSystem) Read(md5 string) ([]byte, error) {
-	return os.ReadFile(filepath.Join(l.Root, md5))
+	return os.ReadFile(l.path(md5))
 }
 
 func (l *LocalFileSystem) Delete(md5 string) error {
-	return os.Remove(filepath.Join(l.Root, md5))
+	return os.Remove(l.path(md5))
 }
 
 func (l *LocalFileSystem) path(name string) string {

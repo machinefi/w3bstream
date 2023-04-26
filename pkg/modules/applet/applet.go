@@ -180,7 +180,7 @@ func UpdateAndDeploy(ctx context.Context, accountID types.SFID, r *UpdateAndDepl
 	_, l = l.Start(ctx, "UpdateAndDeploy")
 	defer l.End()
 
-	mResource, _, err := resource.Create(ctx, accountID, r.File, "")
+	mResource, code, err := resource.Create(ctx, accountID, r.File, "")
 	if err != nil {
 		l.Error(err)
 		return err
@@ -242,7 +242,7 @@ func UpdateAndDeploy(ctx context.Context, accountID types.SFID, r *UpdateAndDepl
 			return _err
 		},
 		func(db sqlx.DBExecutor) error {
-			return vm.NewInstanceWithState(_ctx, mResource.Path, ins.InstanceID, enums.INSTANCE_STATE__STARTED)
+			return vm.NewInstance(_ctx, code, ins.InstanceID, enums.INSTANCE_STATE__STARTED)
 		},
 	).Do()
 
