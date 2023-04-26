@@ -1593,7 +1593,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InvalidCronExpressions][400999005][Invalid Cron Expressions]!"
+              "@StatusErr[InvalidCronExpressions][400999006][Invalid Cron Expressions]!"
             ]
           },
           "401": {
@@ -2499,7 +2499,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[UnknownDeployCommand][400999004][Unknown Deploy Command]!"
+              "@StatusErr[UnknownDeployCommand][400999005][Unknown Deploy Command]!"
             ]
           },
           "401": {
@@ -2607,7 +2607,7 @@
         "requestBody": {
           "required": true,
           "content": {
-            "text/plain": {
+            "application/json": {
               "schema": {
                 "type": "array",
                 "items": {
@@ -2640,7 +2640,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InvalidEventChannel][400999005][Invalid Event Channel]!"
+              "@StatusErr[InvalidEventChannel][400999004][Invalid Event Channel]!"
             ]
           },
           "404": {
@@ -2666,12 +2666,7 @@
               }
             },
             "x-status-errors": [
-<<<<<<< HEAD
               "@StatusErr[DatabaseError][500999002][Database Error]!"
-=======
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
->>>>>>> f3ffa044ecae60f21cce38f82e1962371d4088b4
             ]
           }
         }
@@ -6911,316 +6906,6 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/statusx.StatusErr",
         "x-id": "GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-      },
-<<<<<<< HEAD
-      "GithubComMachinefiW3BstreamPkgDependsSchemaColumn": {
-        "type": "object",
-        "properties": {
-          "constrains": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsSchemaColumnType"
-              },
-              {
-                "x-go-field-name": "Constrains",
-                "x-go-star-level": 1,
-                "x-tag-json": "constrains"
-              }
-            ]
-          },
-          "name": {
-            "type": "string",
-            "x-go-field-name": "Name",
-            "x-tag-json": "name"
-          }
-        },
-        "required": [
-          "name",
-          "constrains"
-        ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/schema.Column",
-        "x-id": "GithubComMachinefiW3BstreamPkgDependsSchemaColumn"
-      },
-      "GithubComMachinefiW3BstreamPkgDependsSchemaColumnType": {
-        "type": "object",
-        "properties": {
-          "autoincrement": {
-            "type": "boolean",
-            "x-go-field-name": "AutoIncrement",
-            "x-tag-json": "autoincrement,omitempty"
-          },
-          "datatype": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsSchemaDatatype"
-              },
-              {
-                "x-go-field-name": "Datatype",
-                "x-tag-json": "datatype"
-              }
-            ]
-          },
-          "decimal": {
-            "type": "integer",
-            "format": "uint64",
-            "x-go-field-name": "Decimal",
-            "x-tag-json": "decimal,omitempty"
-          },
-          "default": {
-            "type": "string",
-            "x-go-field-name": "Default",
-            "x-go-star-level": 1,
-            "x-tag-json": "default,omitempty"
-          },
-          "desc": {
-            "type": "string",
-            "x-go-field-name": "Desc",
-            "x-tag-json": "desc,omitempty"
-          },
-          "length": {
-            "type": "integer",
-            "format": "uint64",
-            "x-go-field-name": "Length",
-            "x-tag-json": "length,omitempty"
-          },
-          "null": {
-            "type": "boolean",
-            "x-go-field-name": "Null",
-            "x-tag-json": "null,omitempty"
-          }
-        },
-        "required": [
-          "datatype"
-        ],
-        "description": "ColumnType defines universal column constrains",
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/schema.ColumnType",
-        "x-id": "GithubComMachinefiW3BstreamPkgDependsSchemaColumnType"
-      },
-      "GithubComMachinefiW3BstreamPkgDependsSchemaDatatype": {
-        "type": "string",
-        "enum": [
-          "INT",
-          "INT8",
-          "INT16",
-          "INT32",
-          "INT64",
-          "UINT",
-          "UINT8",
-          "UINT16",
-          "UINT32",
-          "UINT64",
-          "FLOAT32",
-          "FLOAT64",
-          "TEXT",
-          "BOOL",
-          "TIMESTAMP"
-        ],
-        "x-enum-labels": [
-          "INT",
-          "INT8",
-          "INT16",
-          "INT32",
-          "INT64",
-          "UINT",
-          "UINT8",
-          "UINT16",
-          "UINT32",
-          "UINT64",
-          "FLOAT32",
-          "FLOAT64",
-          "TEXT",
-          "BOOL",
-          "TIMESTAMP"
-        ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/schema.Datatype",
-        "x-id": "GithubComMachinefiW3BstreamPkgDependsSchemaDatatype"
-      },
-      "GithubComMachinefiW3BstreamPkgDependsSchemaIndexDef": {
-        "type": "object",
-        "properties": {
-          "columnNames": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "x-go-field-name": "ColumnNames",
-            "x-tag-json": "columnNames"
-          },
-          "expr": {
-            "type": "string",
-            "x-go-field-name": "Expr",
-            "x-tag-json": "expr,omitempty"
-          }
-        },
-        "required": [
-          "columnNames"
-        ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/schema.IndexDef",
-        "x-id": "GithubComMachinefiW3BstreamPkgDependsSchemaIndexDef"
-      },
-      "GithubComMachinefiW3BstreamPkgDependsSchemaKey": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsSchemaIndexDef"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "isUnique": {
-                "type": "boolean",
-                "x-go-field-name": "IsUnique",
-                "x-tag-json": "isUnique,omitempty"
-              },
-              "method": {
-                "type": "string",
-                "x-go-field-name": "Method",
-                "x-tag-json": "method,omitempty"
-              },
-              "name": {
-                "type": "string",
-                "x-go-field-name": "Name",
-                "x-tag-json": "name,omitempty"
-              }
-            },
-            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/schema.Key",
-            "x-id": "GithubComMachinefiW3BstreamPkgDependsSchemaKey"
-          }
-        ]
-      },
-      "GithubComMachinefiW3BstreamPkgDependsSchemaSchema": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "x-go-field-name": "Name",
-            "x-tag-json": "name,omitempty"
-          },
-          "tables": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsSchemaTable"
-            },
-            "x-go-field-name": "Tables",
-            "x-tag-json": "tables,omitempty"
-          }
-        },
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/schema.Schema",
-        "x-id": "GithubComMachinefiW3BstreamPkgDependsSchemaSchema"
-      },
-      "GithubComMachinefiW3BstreamPkgDependsSchemaTable": {
-        "type": "object",
-        "properties": {
-          "cols": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsSchemaColumn"
-            },
-            "x-go-field-name": "Cols",
-            "x-tag-json": "cols"
-          },
-          "desc": {
-            "type": "string",
-            "x-go-field-name": "Desc",
-            "x-tag-json": "desc,omitempty"
-          },
-          "keys": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsSchemaKey"
-            },
-            "x-go-field-name": "Keys",
-            "x-tag-json": "keys"
-          },
-          "name": {
-            "type": "string",
-            "x-go-field-name": "Name",
-            "x-tag-json": "name"
-          },
-          "withPrimaryKey": {
-            "type": "boolean",
-            "x-go-field-name": "WithPrimaryKey",
-            "x-tag-json": "withPrimaryKey,omitempty"
-          },
-          "withSoftDeletion": {
-            "type": "boolean",
-            "x-go-field-name": "WithSoftDeletion",
-            "x-tag-json": "withSoftDeletion,omitempty"
-          }
-        },
-        "required": [
-          "name",
-          "cols",
-          "keys"
-        ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/schema.Table",
-        "x-id": "GithubComMachinefiW3BstreamPkgDependsSchemaTable"
-=======
-      "GithubComMachinefiW3BstreamPkgDependsProtocolEventpbEvent": {
-        "type": "object",
-        "properties": {
-          "header": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsProtocolEventpbHeader"
-              },
-              {
-                "x-go-field-name": "Header",
-                "x-go-star-level": 1,
-                "x-tag-json": "header,omitempty"
-              }
-            ]
-          },
-          "payload": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "uint8"
-            },
-            "x-go-field-name": "Payload",
-            "x-tag-json": "payload,omitempty"
-          }
-        },
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb.Event",
-        "x-id": "GithubComMachinefiW3BstreamPkgDependsProtocolEventpbEvent"
-      },
-      "GithubComMachinefiW3BstreamPkgDependsProtocolEventpbHeader": {
-        "type": "object",
-        "properties": {
-          "event_id": {
-            "type": "string",
-            "description": "event id for tracing",
-            "x-go-field-name": "EventId",
-            "x-tag-json": "event_id,omitempty"
-          },
-          "event_type": {
-            "type": "string",
-            "description": "event type",
-            "x-go-field-name": "EventType",
-            "x-tag-json": "event_type,omitempty"
-          },
-          "pub_id": {
-            "type": "string",
-            "description": "the unique identifier for publisher",
-            "x-go-field-name": "PubId",
-            "x-tag-json": "pub_id,omitempty"
-          },
-          "pub_time": {
-            "type": "integer",
-            "format": "int64",
-            "description": "event pub timestamp",
-            "x-go-field-name": "PubTime",
-            "x-tag-json": "pub_time,omitempty"
-          },
-          "token": {
-            "type": "string",
-            "description": "for validation message",
-            "x-go-field-name": "Token",
-            "x-tag-json": "token,omitempty"
-          }
-        },
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb.Header",
-        "x-id": "GithubComMachinefiW3BstreamPkgDependsProtocolEventpbHeader"
->>>>>>> f3ffa044ecae60f21cce38f82e1962371d4088b4
       },
       "GithubComMachinefiW3BstreamPkgEnumsAccountRole": {
         "type": "string",
