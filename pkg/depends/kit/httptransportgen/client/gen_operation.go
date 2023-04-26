@@ -133,6 +133,9 @@ type OperationGen struct {
 
 func (og *OperationGen) Gen(ctx context.Context, spec *oas.OpenAPI) error {
 	EachOperation(spec, func(method string, path string, op *oas.Operation) {
+		if op.OperationId == "" {
+			return
+		}
 		og.Write(ctx, method, path, op)
 	})
 	_, err := og.f.Write()

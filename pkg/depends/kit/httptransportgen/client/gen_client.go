@@ -83,6 +83,9 @@ type ClientGen struct {
 
 func (cg *ClientGen) Gen(ctx context.Context, spec *oas.OpenAPI) error {
 	EachOperation(spec, func(method string, path string, op *oas.Operation) {
+		if op.OperationId == "" {
+			return
+		}
 		cg.mths = append(cg.mths, cg.SnippetMethodByOperation(ctx, op))
 	})
 
