@@ -11,8 +11,8 @@ import (
 
 type ListCronJob struct {
 	httpx.MethodGet
-	ProjectID       types.SFID `in:"path" name:"projectID"`
-	cronjob.ListReq `in:"body"`
+	ProjectID types.SFID `in:"path" name:"projectID"`
+	cronjob.ListReq
 }
 
 func (r *CreateCronJob) ListCronJob() string { return "/:projectID" }
