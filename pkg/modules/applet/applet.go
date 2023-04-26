@@ -12,6 +12,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
 	"github.com/machinefi/w3bstream/pkg/modules/resource"
+	"github.com/machinefi/w3bstream/pkg/modules/strategy"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
@@ -41,9 +42,9 @@ func RemoveBySFID(ctx context.Context, id types.SFID) error {
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			// TODO
-			// batch remove strategies.
-			return nil
+			return strategy.Remove(ctx, &strategy.CondArgs{
+				AppletIDs: types.SFIDs{id},
+			})
 		},
 		func(d sqlx.DBExecutor) error {
 			return deploy.RemoveByAppletSFID(ctx, m.AppletID)
@@ -135,13 +136,12 @@ func ListDetail(ctx context.Context, prj types.SFID, r *ListReq) (*ListDetailRsp
 func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 	var (
 		res *models.Resource
-		// acc = types.MustAccountFromContext(ctx)
+		acc = types.MustAccountFromContext(ctx)
 		raw []byte
 		err error
 	)
 
-	// TODO create resource with code bytes return @zhiwei
-	// res, raw, err = resource.Create(ctx, acc.AccountID, r.WasmMd5, r.File)
+	res, raw, err = resource.Create(ctx, acc.AccountID, r.File, r.AppletName, r.WasmMd5)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 			RelApplet:   models.RelApplet{AppletID: idg.MustGenSFID()},
 			RelProject:  models.RelProject{ProjectID: prj.ProjectID},
 			RelResource: models.RelResource{ResourceID: res.ResourceID},
-			AppletInfo:  models.AppletInfo{Name: r.AppletName, WasmName: r.WasmName},
+			AppletInfo:  models.AppletInfo{Name: r.AppletName},
 		}
 		sty []models.Strategy
 		ins *models.Instance
@@ -212,30 +212,31 @@ func Update(ctx context.Context, r *UpdateReq) (*UpdateRsp, error) {
 
 	// create resource if needed
 	if r.File != nil {
-		// res *models.Resource
-		// acc = types.MustAccountFromContext(ctx)
-		// md5 := ""
-		// if r.Info != nil {
-		// 	md5 = r.Info.WasmMd5
-		// }
-		// TODO create resource with code bytes return @zhiwei
-		// res, raw, err = resource.Create(ctx, acc.AccountID, md5, r.File)
+		acc := types.MustAccountFromContext(ctx)
+		filename, md5 := r.Info.WasmName, r.Info.WasmMd5
+		_, raw, err = resource.Create(ctx, acc.AccountID, r.File, filename, md5)
 	}
 
 	err = sqlx.NewTasks(d).With(
 		// update strategy
 		func(d sqlx.DBExecutor) error {
-			if r.Info != nil && len(r.Info.Strategies) > 0 {
-				// TODO
-				// batch remove old strategies related with this applet
-				// batch create new strategies
+			sty = r.BuildStrategies(ctx)
+			if len(sty) == 0 {
+				return nil
+			}
+			if err = strategy.Remove(ctx, &strategy.CondArgs{
+				AppletIDs: types.SFIDs{app.AppletID},
+			}); err != nil {
+				return err
+			}
+			if err = strategy.BatchCreate(ctx, r.BuildStrategies(ctx)); err != nil {
+				return err
 			}
 			return nil
 		},
 		// update applet info
 		func(d sqlx.DBExecutor) error {
-			if r.Info != nil && r.Info.WasmName != "" && r.Info.AppletName != "" {
-				app.WasmName = r.Info.WasmName
+			if r.Info.AppletName != "" {
 				app.Name = r.Info.AppletName
 				if err = app.UpdateByAppletID(d); err != nil {
 					if sqlx.DBErr(err).IsConflict() {
@@ -248,15 +249,18 @@ func Update(ctx context.Context, r *UpdateReq) (*UpdateRsp, error) {
 		},
 		// update and deploy instance
 		func(d sqlx.DBExecutor) error {
+			if r.File == nil {
+				return nil // instance state will not be changed
+			}
+			if r.Info.Deploy != datatypes.TRUE {
+				return nil
+			}
 			ins, err = deploy.GetByAppletSFID(ctx, app.AppletID)
 			if err != nil {
 				return err
 			}
-			if r.File == nil {
-				return nil
-			}
 			var rb *deploy.CreateReq
-			if r.Info != nil && r.Info.WasmCache != nil {
+			if r.Info.WasmCache != nil {
 				rb = &deploy.CreateReq{Cache: r.Info.WasmCache}
 			}
 			ins, err = deploy.UpsertByCode(ctx, rb, raw, ins.State, ins.InstanceID)
