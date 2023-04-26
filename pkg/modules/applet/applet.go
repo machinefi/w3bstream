@@ -231,7 +231,7 @@ func UpdateAndDeploy(ctx context.Context, accountID types.SFID, r *UpdateAndDepl
 		},
 		func(db sqlx.DBExecutor) error {
 			if r.Cache == nil {
-				r.Cache = wasm.DefaultCache()
+				return nil
 			}
 			_, err = config.Create(ctx, ins.InstanceID, r.Cache)
 			return err
