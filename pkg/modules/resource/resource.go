@@ -19,6 +19,7 @@ func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, md5 s
 		err = status.UploadFileFailed.StatusErr().WithDesc(err.Error())
 		return nil, nil, err
 	}
+	defer f.Close()
 
 	path, data, err := UploadFile(ctx, f, md5)
 	if err != nil {

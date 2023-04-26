@@ -40,7 +40,8 @@ var (
 	server      = &confhttp.Server{}
 	serverEvent = &confhttp.Server{} // serverEvent support event http transport
 
-	fs filesystem.FileSystemOp
+	fs  filesystem.FileSystemOp
+	std = conflog.Std().(conflog.LevelSetter).SetLevel(conflog.InfoLevel)
 )
 
 func init() {
@@ -54,7 +55,6 @@ func init() {
 		Server      *confhttp.Server
 		Jwt         *confjwt.Jwt
 		Logger      *conflog.Log
-		StdLogger   conflog.Logger
 		EthClient   *types.ETHClientConfig
 		WhiteList   *types.WhiteList
 		ServerEvent *confhttp.Server
@@ -70,7 +70,6 @@ func init() {
 		Server:      server,
 		Jwt:         &confjwt.Jwt{},
 		Logger:      &conflog.Log{},
-		StdLogger:   conflog.Std(),
 		EthClient:   &types.ETHClientConfig{},
 		WhiteList:   &types.WhiteList{},
 		ServerEvent: serverEvent,
@@ -103,15 +102,14 @@ func init() {
 	}
 
 	confhttp.RegisterCheckerBy(config, worker)
-	config.StdLogger.(conflog.LevelSetter).SetLevel(conflog.InfoLevel)
 
 	WithContext = contextx.WithContextCompose(
 		types.WithMgrDBExecutorContext(config.Postgres),
 		types.WithMonitorDBExecutorContext(config.MonitorDB),
 		types.WithWasmDBEndpointContext(config.WasmDB),
 		types.WithRedisEndpointContext(config.Redis),
-		types.WithLoggerContext(config.StdLogger),
-		conflog.WithLoggerContext(config.StdLogger),
+		types.WithLoggerContext(std),
+		conflog.WithLoggerContext(std),
 		types.WithMqttBrokerContext(config.MqttBroker),
 		confid.WithSFIDGeneratorContext(confid.MustNewSFIDGenerator()),
 		confjwt.WithConfContext(config.Jwt),
