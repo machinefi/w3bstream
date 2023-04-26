@@ -69,9 +69,9 @@ func Remove(ctx context.Context, r *CondArgs) error {
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
+			summary := statusx.ErrorFields{}
 			for i := range lst {
 				v := &lst[i]
-				summary := statusx.ErrorFields{}
 				if err = RemoveBySFID(ctx, v.AppletID); err != nil {
 					se := statusx.FromErr(err)
 					summary = append(summary, &statusx.ErrorField{
@@ -80,10 +80,10 @@ func Remove(ctx context.Context, r *CondArgs) error {
 						Msg:   se.Desc,
 					})
 				}
-				if len(summary) > 0 {
-					return status.BatchRemoveAppletFailed.StatusErr().
-						AppendErrorFields(summary...)
-				}
+			}
+			if len(summary) > 0 {
+				return status.BatchRemoveAppletFailed.StatusErr().
+					AppendErrorFields(summary...)
 			}
 			return nil
 		},
