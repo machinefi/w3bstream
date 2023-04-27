@@ -11,7 +11,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
-	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -106,14 +105,10 @@ func (t *cronJob) sendEvent(ctx context.Context, c models.CronJob) {
 		l.Error(errors.Wrap(err, "failed to marshal payload"))
 		return
 	}
-
-	e := eventpb.Event{
-		Header: &eventpb.Header{
-			EventType: c.EventType,
-		},
-		Payload: payload,
+	ret := &event.HandleEventResult{
+		ProjectName: m.ProjectName.Name,
 	}
-	if _, err := event.OnEventReceived(ctx, m.ProjectName.Name, &e); err != nil {
+	if err := event.HandleEvent(ctx, m.ProjectName.Name, c.EventType, ret, payload); err != nil {
 		l.Error(errors.Wrap(err, "send event failed"))
 	}
 }
