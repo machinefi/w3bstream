@@ -7,10 +7,12 @@ import (
 )
 
 // Account w3bstream account
-// @def primary                  AccountID DeletedAt
+// @def primary                    ID
+// @def unique_index UI_account_id AccountID
 //
 //go:generate toolkit gen model Account --database DB
 type Account struct {
+	datatypes.PrimaryID
 	RelAccount
 	AccountInfo
 	datatypes.OperationTimesWithDeleted
