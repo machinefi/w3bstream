@@ -18,6 +18,7 @@ toolkit:
 
 .PHONY: srv_applet_mgr
 srv_applet_mgr:
+	@toolkit fmt
 	@cd cmd/srv-applet-mgr && make --no-print-directory
 	@echo srv-applet-mgr is built to "\033[31m ./build/srv-applet-mgr/... \033[0m"
 
