@@ -169,22 +169,10 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[AccountPasswordNotFound][404999018][Account Password Not Found]!"
             ]
           },
           "500": {
@@ -197,8 +185,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InternalServerError][500999001][internal error]",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -271,20 +259,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
             ]
           },
           "500": {
@@ -297,7 +272,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -394,24 +369,11 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
               "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
               "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -427,7 +389,7 @@
               "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
@@ -517,24 +479,11 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
               "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
               "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -548,7 +497,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -685,22 +634,9 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -718,7 +654,7 @@
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
@@ -851,7 +787,7 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
@@ -867,7 +803,6 @@
             "x-status-errors": [
               "@StatusErr[AppletNameConflict][409999009][Applet Name Conflict]!",
               "@StatusErr[ConfigConflict][409999006][Config Conflict]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[MultiInstanceDeployed][409999008][Multi Instance Deployed]!",
               "@StatusErr[ResourceConflict][409999003][Resource Conflict]!",
               "@StatusErr[ResourceOwnerConflict][409999004][Resource Owner Conflict]!"
@@ -889,7 +824,7 @@
               "@StatusErr[CreateInstanceFailed][500999010][Create Instance Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][internal error]",
               "@StatusErr[MD5ChecksumFailed][500999012][Md5 Checksum Failed]!",
               "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
@@ -1051,21 +986,8 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -1080,7 +1002,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -1216,9 +1138,9 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
               "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
               "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
             ]
@@ -1235,7 +1157,6 @@
             "x-status-errors": [
               "@StatusErr[AppletNameConflict][409999009][Applet Name Conflict]!",
               "@StatusErr[ConfigConflict][409999006][Config Conflict]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[MultiInstanceDeployed][409999008][Multi Instance Deployed]!",
               "@StatusErr[ResourceConflict][409999003][Resource Conflict]!",
               "@StatusErr[ResourceOwnerConflict][409999004][Resource Owner Conflict]!",
@@ -1257,7 +1178,7 @@
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[CreateInstanceFailed][500999010][Create Instance Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][internal error]",
               "@StatusErr[MD5ChecksumFailed][500999012][Md5 Checksum Failed]!",
               "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
@@ -1402,21 +1323,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -1430,7 +1338,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -1513,22 +1421,9 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[CronJobNotFound][404999011][Cron Job Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -1542,7 +1437,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -1662,7 +1557,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
@@ -1676,7 +1571,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[CronJobConflict][409999010][Cron Job Conflict]!"
             ]
           },
@@ -1691,7 +1585,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -1754,20 +1648,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
             ]
           },
           "500": {
@@ -1780,7 +1661,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -1870,24 +1751,11 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
               "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
               "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -1901,7 +1769,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -2006,9 +1874,9 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
               "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
               "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
             ]
@@ -2024,7 +1892,6 @@
             },
             "x-status-errors": [
               "@StatusErr[ConfigConflict][409999006][Config Conflict]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[MultiInstanceDeployed][409999008][Multi Instance Deployed]!"
             ]
           },
@@ -2041,7 +1908,7 @@
               "@StatusErr[ConfigInitFailed][500999006][Config Init Failed]!",
               "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -2138,24 +2005,11 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
               "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
               "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -2171,7 +2025,7 @@
               "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
@@ -2262,24 +2116,11 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
               "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
               "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -2293,7 +2134,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -2424,21 +2265,8 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -2455,7 +2283,7 @@
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
@@ -2568,9 +2396,9 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
               "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
               "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
             ]
@@ -2585,7 +2413,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[MultiInstanceDeployed][409999008][Multi Instance Deployed]!"
             ]
           },
@@ -2600,7 +2427,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -2783,6 +2610,8 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[AccountPasswordNotFound][404999018][Account Password Not Found]!",
               "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
               "@StatusErr[BlockchainNotFound][404999013][Blockchain Not Found]!",
               "@StatusErr[ChainHeightNotFound][404999016][Chain Height Not Found]!",
@@ -2811,6 +2640,9 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountConflict][409999015][Account Conflict]!",
+              "@StatusErr[AccountIdentityConflict][409999014][Account Identity Conflict]!",
+              "@StatusErr[AccountPasswordConflict][409999016][Account Password Conflict]!",
               "@StatusErr[AppletNameConflict][409999009][Applet Name Conflict]!",
               "@StatusErr[ChainHeightConflict][409999013][Chain Height Conflict]!",
               "@StatusErr[ChainTxConflict][409999012][Chain Tx Conflict]!",
@@ -2926,20 +2758,9 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[AccountPasswordNotFound][404999018][Account Password Not Found]!"
             ]
           },
           "500": {
@@ -2952,6 +2773,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
@@ -3030,7 +2852,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
             ]
           },
           "409": {
@@ -3043,7 +2865,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[AccountIdentityConflict][409999014][Account Identity Conflict]!"
             ]
           },
           "500": {
@@ -3056,6 +2878,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
@@ -3161,8 +2984,8 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[BlockchainNotFound][404999013][Blockchain Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
@@ -3176,8 +2999,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ChainHeightConflict][409999013][Chain Height Conflict]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[ChainHeightConflict][409999013][Chain Height Conflict]!"
             ]
           },
           "500": {
@@ -3192,7 +3014,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -3289,22 +3111,9 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ContractLogNotFound][404999014][Contract Log Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -3319,7 +3128,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -3424,8 +3233,8 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[BlockchainNotFound][404999013][Blockchain Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
@@ -3439,8 +3248,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ChainTxConflict][409999012][Chain Tx Conflict]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[ChainTxConflict][409999012][Chain Tx Conflict]!"
             ]
           },
           "500": {
@@ -3455,7 +3263,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -3552,22 +3360,9 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ChainTxNotFound][404999015][Chain Tx Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -3582,7 +3377,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -3687,8 +3482,8 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[BlockchainNotFound][404999013][Blockchain Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
@@ -3702,7 +3497,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[ContractLogConflict][409999011][Contract Log Conflict]!"
             ]
           },
@@ -3718,7 +3512,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -3815,22 +3609,9 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ContractLogNotFound][404999014][Contract Log Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -3845,7 +3626,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -3964,7 +3745,7 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!"
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
             ]
           },
           "409": {
@@ -3978,7 +3759,6 @@
             },
             "x-status-errors": [
               "@StatusErr[ConfigConflict][409999006][Config Conflict]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[ProjectNameConflict][409999002][Project Name Conflict]!"
             ]
           },
@@ -4008,7 +3788,7 @@
               "@StatusErr[ConfigInitFailed][500999006][Config Init Failed]!",
               "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[MqttConnectFailed][500999014][MQTT Connect Failed]!",
               "@StatusErr[MqttSubscribeFailed][500999013][MQTT Subscribe Failed]!",
               "@StatusErr[RequestFailed][500000000][RequestFailed]"
@@ -4148,20 +3928,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
             ]
           },
           "500": {
@@ -4175,7 +3942,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -4312,22 +4079,9 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -4341,7 +4095,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -4435,22 +4189,9 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -4468,7 +4209,7 @@
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
@@ -4570,21 +4311,8 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -4599,7 +4327,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -4700,22 +4428,9 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ConfigNotFound][404999003][Config Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -4731,7 +4446,7 @@
               "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -4834,7 +4549,7 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
@@ -4848,8 +4563,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigConflict][409999006][Config Conflict]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[ConfigConflict][409999006][Config Conflict]!"
             ]
           },
           "500": {
@@ -4866,7 +4580,7 @@
               "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -4950,22 +4664,9 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
               "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -4979,7 +4680,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -5068,22 +4769,9 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
               "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -5097,7 +4785,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -5230,21 +4918,8 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -5259,7 +4934,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -5425,21 +5100,8 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -5454,7 +5116,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -5558,7 +5220,7 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
@@ -5572,7 +5234,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[PublisherConflict][409999007][Publisher Conflict]!"
             ]
           },
@@ -5588,8 +5249,8 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[GenPublisherTokenFailed][500999009][Gen Publisher Token Failed]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[GenPublisherTokenFailed][500999009][Gen Publisher Token Failed]!"
             ]
           }
         }
@@ -5704,7 +5365,7 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
               "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!"
             ]
@@ -5719,7 +5380,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[PublisherConflict][409999007][Publisher Conflict]!"
             ]
           },
@@ -5735,7 +5395,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -5788,19 +5448,6 @@
               "@StatusErr[NoAdminPermission][401999005][No Admin Permission]!"
             ]
           },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!"
-            ]
-          },
           "409": {
             "description": "",
             "content": {
@@ -5811,7 +5458,9 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[AccountConflict][409999015][Account Conflict]!",
+              "@StatusErr[AccountIdentityConflict][409999014][Account Identity Conflict]!",
+              "@StatusErr[AccountPasswordConflict][409999016][Account Password Conflict]!"
             ]
           },
           "500": {
@@ -5824,7 +5473,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -6027,20 +5676,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
             ]
           },
           "500": {
@@ -6054,7 +5690,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -6136,21 +5772,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ResourcePermNotFound][404999010][Resource Perm Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -6164,7 +5787,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -6247,22 +5870,9 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
               "@StatusErr[StrategyNotFound][404999007][Strategy Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -6276,7 +5886,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -6364,22 +5974,9 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
               "@StatusErr[StrategyNotFound][404999007][Strategy Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -6393,7 +5990,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -6522,21 +6119,8 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -6551,7 +6135,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -6654,9 +6238,9 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
               "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
               "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
             ]
@@ -6671,7 +6255,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[StrategyConflict][409999005][Strategy Conflict]!"
             ]
           },
@@ -6687,7 +6270,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -6851,21 +6434,8 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
           "500": {
@@ -6880,7 +6450,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -6980,7 +6550,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
               "@StatusErr[StrategyNotFound][404999007][Strategy Not Found]!"
             ]
@@ -6995,7 +6565,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[StrategyConflict][409999005][Strategy Conflict]!"
             ]
           },
@@ -7010,7 +6579,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -7422,6 +6991,9 @@
       },
       "GithubComMachinefiW3BstreamPkgModelsAccount": {
         "allOf": [
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPrimaryID"
+          },
           {
             "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsRelAccount"
           },
