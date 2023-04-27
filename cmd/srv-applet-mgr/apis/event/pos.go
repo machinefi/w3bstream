@@ -15,7 +15,7 @@ type HandleEvent struct {
 }
 
 func (r *HandleEvent) Path() string {
-	return "/:channel/:eventType"
+	return "/:channel"
 }
 
 func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
