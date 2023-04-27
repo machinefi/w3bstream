@@ -50,7 +50,6 @@ func (s *AmazonS3) IsZero() bool {
 	return s.Region == "" ||
 		s.AccessKeyID == "" ||
 		s.SecretAccessKey == "" ||
-		s.SessionToken == "" ||
 		s.BucketName == ""
 }
 

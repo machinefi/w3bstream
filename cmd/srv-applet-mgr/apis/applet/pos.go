@@ -15,7 +15,7 @@ type CreateApplet struct {
 
 func (r *CreateApplet) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.MustCurrentAccountFromContext(ctx)
-	ctx, err := ca.WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
+	ctx, err := ca.WithProjectContextByName(ca.WithAccount(ctx), middleware.MustProjectName(ctx))
 	if err != nil {
 		return nil, err
 	}

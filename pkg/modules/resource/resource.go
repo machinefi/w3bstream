@@ -2,10 +2,14 @@ package resource
 
 import (
 	"context"
+	"fmt"
 	"mime/multipart"
 	"time"
 
+	"github.com/pkg/errors"
+
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
@@ -21,7 +25,7 @@ func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filen
 	}
 	defer f.Close()
 
-	path, data, err := UploadFile(ctx, f, md5)
+	path, sum, data, err := UploadFile(ctx, f, md5)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -32,7 +36,7 @@ func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filen
 
 	err = sqlx.NewTasks(types.MustMgrDBExecutorFromContext(ctx)).With(
 		func(d sqlx.DBExecutor) error {
-			res.Md5 = md5
+			res.Md5 = sum
 			if err = res.FetchByMd5(d); err != nil {
 				if sqlx.DBErr(err).IsNotFound() {
 					found = false
@@ -49,7 +53,7 @@ func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filen
 			}
 			res = &models.Resource{
 				RelResource:  models.RelResource{ResourceID: id},
-				ResourceInfo: models.ResourceInfo{Path: path, Md5: md5},
+				ResourceInfo: models.ResourceInfo{Path: path, Md5: sum},
 			}
 			if err = res.Create(d); err != nil {
 				if sqlx.DBErr(err).IsConflict() {
@@ -70,7 +74,9 @@ func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filen
 			}
 			if err = own.Create(d); err != nil {
 				if sqlx.DBErr(err).IsConflict() {
-					return status.ResourceOwnerConflict
+					conflog.FromContext(ctx).Warn(errors.New(
+						fmt.Sprintf("ResourceOwnership of %s and %s has exists", own.ResourceID, own.AccountID)))
+					return nil
 				}
 				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}

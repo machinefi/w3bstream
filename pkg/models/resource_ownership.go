@@ -18,8 +18,8 @@ type ResourceOwnership struct {
 	datatypes.OperationTimes
 }
 type ResourceOwnerInfo struct {
-	UploadedAt types.Timestamp `db:"f_uploaded_at"          json:"uploadedAt"`
-	ExpireAt   types.Timestamp `db:"f_expire_at,default='0'"json:"expireAt"`
-	Filename   string          `db:"f_filename,default=''"  json:"filename"`
-	Comment    string          `db:"f_comment,default=''"   json:"comment"`
+	UploadedAt types.Timestamp `db:"f_uploaded_at"           json:"uploadedAt"`
+	ExpireAt   types.Timestamp `db:"f_expire_at,default='0'" json:"expireAt"`
+	Filename   string          `db:"f_filename,default=''"   json:"filename"`
+	Comment    string          `db:"f_comment,default=''"    json:"comment"`
 }

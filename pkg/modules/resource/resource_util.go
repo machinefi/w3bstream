@@ -46,7 +46,7 @@ func checkFileMd5Sum(f io.Reader) (data []byte, sum string, err error) {
 	return data, fmt.Sprintf("%x", hash.Sum(nil)), nil
 }
 
-func UploadFile(ctx context.Context, f io.ReadSeekCloser, md5 string) (path string, data []byte, err error) {
+func UploadFile(ctx context.Context, f io.ReadSeekCloser, md5 string) (path, sum string, data []byte, err error) {
 	var (
 		fs          = types.MustFileSystemOpFromContext(ctx)
 		size        = int64(0)
@@ -85,7 +85,6 @@ func UploadFile(ctx context.Context, f io.ReadSeekCloser, md5 string) (path stri
 		}
 	}
 
-	sum := ""
 	data, sum, err = checkFileMd5Sum(f)
 	if err != nil {
 		err = status.MD5ChecksumFailed
@@ -97,8 +96,8 @@ func UploadFile(ctx context.Context, f io.ReadSeekCloser, md5 string) (path stri
 		return
 	}
 
-	path = md5
-	err = fs.Upload(md5, data)
+	path = sum
+	err = fs.Upload(path, data)
 	if err != nil {
 		err = status.UploadFileFailed.StatusErr().WithDesc(err.Error())
 		return

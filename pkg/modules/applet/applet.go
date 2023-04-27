@@ -172,9 +172,7 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			// TODO batch create strategies @zhiwei
-			// return strategy.BatchCreate(ctx, r.BuildStrategies(ctx))
-			return nil
+			return strategy.BatchCreate(ctx, r.BuildStrategies(ctx))
 		},
 		func(d sqlx.DBExecutor) error {
 			if r.WasmCache == nil {
