@@ -2,8 +2,6 @@ package status
 
 import (
 	"net/http"
-
-	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 )
 
 //go:generate toolkit gen status Error
@@ -178,24 +176,3 @@ const (
 	// @errTalk Account Password Not Found
 	AccountPasswordNotFound
 )
-
-// Deprecated: pls check database error and return defined status error
-func CheckDatabaseError(err error, msg ...string) error {
-	desc := ""
-	if len(msg) > 0 {
-		desc = msg[0]
-	}
-	if err != nil {
-		desc = desc + ":" + err.Error()
-		e := sqlx.DBErr(err)
-		if e.IsNotFound() {
-			return NotFound.StatusErr().WithDesc(desc)
-		} else if e.IsConflict() {
-			return Conflict.StatusErr().WithDesc(desc)
-		} else {
-			desc = desc + " " + err.Error()
-			return InternalServerError.StatusErr().WithDesc(desc)
-		}
-	}
-	return nil
-}

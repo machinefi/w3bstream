@@ -9,6 +9,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // TODO move to config
@@ -36,7 +37,8 @@ func InitChainDB(ctx context.Context) error {
 			),
 		), &results)
 	if err != nil {
-		return status.CheckDatabaseError(err, "FetchChain")
+		return status.DatabaseError.StatusErr().
+			WithDesc(errors.Wrap(err, "FetchChain").Error())
 	}
 	if len(results) > 0 {
 		return nil
