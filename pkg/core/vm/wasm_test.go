@@ -1,8 +1,6 @@
 package vm
 
-import (
-	"testing"
-)
+import "testing"
 
 func DISABLE_TestNewWasm(t *testing.T) {
 	/*
