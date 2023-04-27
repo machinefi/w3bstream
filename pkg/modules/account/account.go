@@ -7,7 +7,6 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
-	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/depends/util"
@@ -282,9 +281,6 @@ func GetAccountByAccountID(ctx context.Context, accountID types.SFID) (*models.A
 }
 
 func CreateAdminIfNotExist(ctx context.Context) (string, error) {
-	_, l := conflog.FromContext(ctx).Start(ctx, "CreateAdminIfNotExist")
-	defer l.End()
-
 	ret, err := CreateAccountByUsername(ctx, &CreateAccountByUsernameReq{
 		Username: "admin",
 		Role:     enums.ACCOUNT_ROLE__ADMIN,
@@ -292,16 +288,12 @@ func CreateAdminIfNotExist(ctx context.Context) (string, error) {
 		Source:   enums.ACCOUNT_SOURCE__INIT,
 	})
 	if err != nil {
-		if sqlx.DBErr(err).IsConflict() {
-			l.Info("admin already exists, default password: `%s`", "iotex.W3B.admin")
+		key := statusx.FromErr(err).Key
+		if key == status.AccountConflict.Key() ||
+			key == status.AccountIdentityConflict.Key() {
 			return "", nil
-		} else if se, ok := err.(*statusx.StatusErr); ok && se.Code == status.Conflict.Code() {
-			l.Info("admin already exists, default password: `%s`", "iotex.W3B.admin")
-			return "", nil
-		} else {
-			l.Error(err)
-			return "", err
 		}
+		return "", err
 	}
 	return ret.Password, nil
 }

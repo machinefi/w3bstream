@@ -53,11 +53,11 @@ func main() {
 				passwd, err := account.CreateAdminIfNotExist(global.Context)
 				if err != nil {
 					l.Panic(err)
-					return
 				}
 				if passwd == "" {
-					l.Info("admin already created")
-					return
+					l.Info("admin already exists")
+				} else {
+					l.Info("admin created, default password is: '%s'", passwd)
 				}
 			},
 			func() {
