@@ -7295,6 +7295,9 @@
       "GithubComMachinefiW3BstreamPkgModelsAccount": {
         "allOf": [
           {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPrimaryID"
+          },
+          {
             "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsRelAccount"
           },
           {
