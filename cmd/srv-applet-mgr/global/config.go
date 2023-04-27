@@ -3,6 +3,7 @@ package global
 import (
 	"context"
 	"os"
+	"time"
 
 	_ "github.com/machinefi/w3bstream/cmd/srv-applet-mgr/types"
 	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
@@ -17,6 +18,7 @@ import (
 	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	confpostgres "github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
 	confredis "github.com/machinefi/w3bstream/pkg/depends/conf/redis"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/client"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq/mem_mq"
@@ -35,6 +37,8 @@ var (
 	tasks  mq.TaskManager
 	worker *mq.TaskWorker
 
+	proxy *client.Client // proxy client for forward mqtt event
+
 	db          = &confpostgres.Endpoint{Database: models.DB}
 	monitordb   = &confpostgres.Endpoint{Database: models.MonitorDB}
 	wasmdb      = &confpostgres.Endpoint{Database: models.WasmDB}
@@ -47,6 +51,7 @@ var (
 
 func init() {
 	// TODO config struct should be defined outside this method and impl it's Init() interface{}
+	// TODO split this init too long
 	config := &struct {
 		Postgres    *confpostgres.Endpoint
 		MonitorDB   *confpostgres.Endpoint
@@ -104,6 +109,9 @@ func init() {
 
 	confhttp.RegisterCheckerBy(config, worker)
 
+	proxy = &client.Client{Port: uint16(serverEvent.Port), Timeout: 10 * time.Second}
+	proxy.SetDefault()
+
 	WithContext = contextx.WithContextCompose(
 		types.WithMgrDBExecutorContext(config.Postgres),
 		types.WithMonitorDBExecutorContext(config.MonitorDB),
@@ -119,6 +127,7 @@ func init() {
 		types.WithETHClientConfigContext(config.EthClient),
 		types.WithWhiteListContext(config.WhiteList),
 		types.WithFileSystemOpContext(fs),
+		types.WithProxyClientContext(proxy),
 	)
 	Context = WithContext(context.Background())
 }

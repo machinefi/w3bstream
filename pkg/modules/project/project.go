@@ -15,8 +15,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
-	"github.com/machinefi/w3bstream/pkg/modules/event"
-	"github.com/machinefi/w3bstream/pkg/modules/mq"
+	"github.com/machinefi/w3bstream/pkg/modules/transporter/mqtt"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -151,7 +150,7 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 		return nil, err
 	}
 
-	if err = mq.CreateChannel(ctx, prj.Name, event.Handler); err != nil {
+	if err = mqtt.Subscribe(ctx, prj.Name); err != nil {
 		conflog.FromContext(ctx).WithValues("prj", prj.Name).
 			Warn(errors.Wrap(err, "channel create failed"))
 	}
@@ -164,13 +163,21 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 	}, nil
 }
 
-func RemoveBySFID(ctx context.Context, id types.SFID) error {
+func RemoveBySFID(ctx context.Context, id types.SFID) (err error) {
 	var (
 		d = types.MustMgrDBExecutorFromContext(ctx)
-		p = &models.Project{RelProject: models.RelProject{ProjectID: id}}
+		p *models.Project
 	)
 
 	return sqlx.NewTasks(d).With(
+		func(d sqlx.DBExecutor) error {
+			if p, err = GetBySFID(ctx, id); err != nil {
+				return err
+			}
+			mqtt.Stop(ctx, p.Name)
+			conflog.FromContext(ctx).WithValues("prj", p.Name).Info("stop subscribing")
+			return nil
+		},
 		func(d sqlx.DBExecutor) error {
 			if err := p.DeleteByProjectID(d); err != nil {
 				return status.DatabaseError.StatusErr().WithDesc(err.Error())
@@ -199,7 +206,7 @@ func Init(ctx context.Context) error {
 		v := &data[i]
 		l = l.WithValues("prj", v.Name)
 		ctx = types.WithProject(ctx, v)
-		if err = mq.CreateChannel(ctx, v.Name, event.Handler); err != nil {
+		if err = mqtt.Subscribe(ctx, v.Name); err != nil {
 			l.Warn(errors.Wrap(err, "channel create failed"))
 		}
 		l.Info("start subscribe")

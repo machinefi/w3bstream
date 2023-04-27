@@ -9,6 +9,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // TODO move to config
@@ -36,7 +37,8 @@ func InitChainDB(ctx context.Context) error {
 			),
 		), &results)
 	if err != nil {
-		return status.CheckDatabaseError(err, "FetchChain")
+		return status.DatabaseError.StatusErr().
+			WithDesc(errors.Wrap(err, "FetchChain").Error())
 	}
 	if len(results) > 0 {
 		return nil
@@ -72,8 +74,10 @@ func (l *monitor) sendEvent(ctx context.Context, data []byte, projectName string
 	_, logger = logger.Start(ctx, "monitor.sendEvent")
 	defer logger.End()
 
-	ret := &event.HandleEventResult{
-		ProjectName: projectName,
-	}
-	return event.HandleEvent(ctx, projectName, eventType, ret, data)
+	// COMMENT: this should be a rpc, projectName is enough? TODO @zhiran
+	ctx = types.WithProject(ctx, &models.Project{
+		ProjectName: models.ProjectName{Name: projectName}},
+	)
+	_, err := event.HandleEvent(ctx, eventType, data)
+	return err
 }

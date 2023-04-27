@@ -4,193 +4,101 @@ import (
 	"context"
 	"errors"
 	"sync"
+	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
-
-	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
-	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
-	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
-	"github.com/machinefi/w3bstream/pkg/enums"
+	"github.com/machinefi/w3bstream/pkg/depends/x/misc/timer"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/strategy"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
-	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
-var _receiveEventMtc = prometheus.NewCounterVec(prometheus.CounterOpts{
-	Name: "w3b_receive_event_metrics",
-	Help: "receive event counter metrics.",
-}, []string{"project", "publisher"})
-
-func init() {
-	prometheus.MustRegister(_receiveEventMtc)
+var Handler = func(ctx context.Context, data []byte) []*Result {
+	return OnEvent(ctx, data)
 }
 
-var Handler = func(ctx context.Context, ch string, ev *eventpb.Event) (interface{}, error) {
-	return OnEventReceived(ctx, ch, ev)
+// HandleEvent support other module call
+// TODO the full project info is not in context so query and set here. this impl
+// is for support other module, which is temporary.
+// And it will be deprecated when rpc/http is ready
+func HandleEvent(ctx context.Context, t string, data []byte) (interface{}, error) {
+	prj := &models.Project{ProjectName: models.ProjectName{
+		Name: types.MustProjectFromContext(ctx).Name,
+	}}
+
+	err := prj.FetchByName(types.MustMgrDBExecutorFromContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	strategies, err := strategy.FilterByProjectAndEvent(ctx, prj.ProjectID, t)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx = types.WithStrategyResults(ctx, strategies)
+	return OnEvent(ctx, data), nil
 }
 
-type HandleEventResult struct {
-	ProjectName string                   `json:"projectName"`
-	PubID       types.SFID               `json:"pubID,omitempty"`
-	PubName     string                   `json:"pubName,omitempty"`
-	EventID     string                   `json:"eventID"`
-	ErrMsg      string                   `json:"errMsg,omitempty"`
-	WasmResults []wasm.EventHandleResult `json:"wasmResults"`
-}
-
-type HandleEventReq struct {
-	Events []eventpb.Event `json:"events"`
-}
-
-func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) (ret *HandleEventResult, err error) {
+func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
 	l := types.MustLoggerFromContext(ctx)
-	prj, ok := types.ProjectFromContext(ctx)
-	if !ok || prj == nil {
-		return nil, status.ProjectNotFound.StatusErr().
-			WithDesc("project not found in context")
-	}
+	r := types.MustStrategyResultsFromContext(ctx)
 
-	_, l = l.Start(ctx, "OnEventReceived")
-	defer l.End()
-
-	l = l.WithValues("project_name", prj.ProjectName.Name)
-
-	ret = &HandleEventResult{
-		ProjectName: prj.ProjectName.Name,
-	}
-
-	defer func() {
-		if err != nil {
-			ret.ErrMsg = err.Error()
-		}
-	}()
-
-	eventType := enums.EVENTTYPEDEFAULT
-	eventType, err = checkHeader(ctx, prj, l, ret, r)
-	if err != nil {
-		return
-	}
-	l = l.WithValues("event_type", eventType)
-
-	err = HandleEvent(ctx, prj.ProjectName.Name, eventType, ret, r.Payload)
-	if err != nil {
-		return
-	}
-	return ret, nil
-}
-
-func HandleEvent(ctx context.Context, projectName string, eventType string, ret *HandleEventResult, payload []byte) error {
-	l := types.MustLoggerFromContext(ctx)
-
-	_, l = l.Start(ctx, "HandleEvent")
-	defer l.End()
-
-	l = l.WithValues("event_type", eventType)
-	handlers, err := strategy.FindStrategyInstances(ctx, projectName, eventType)
-	if err != nil {
-		l.Error(err)
-		return err
-	}
-
-	l.Info("matched strategies: %d", len(handlers))
-
-	res := make(chan *wasm.EventHandleResult, len(handlers))
+	results := make(chan *Result, len(r))
 
 	wg := &sync.WaitGroup{}
-	for _, v := range handlers {
-		i := vm.GetConsumer(v.InstanceID)
-		if i == nil {
-			res <- &wasm.EventHandleResult{
-				InstanceID: v.InstanceID.String(),
-				Code:       -1,
-				ErrMsg:     "instance not found",
+	for _, v := range r {
+		l = l.WithValues(
+			"prj", v.ProjectName,
+			"app", v.AppletName,
+			"ins", v.InstanceID,
+			"hdl", v.Handler,
+			"tpe", v.EventType,
+		)
+		ins := vm.GetConsumer(v.InstanceID)
+		if ins == nil {
+			l.Warn(errors.New("instance not running"))
+			results <- &Result{
+				AppletName:  v.AppletName,
+				InstanceID:  v.InstanceID,
+				Handler:     v.Handler,
+				ReturnValue: nil,
+				ReturnCode:  -1,
+				Error:       status.InstanceNotRunning.Key(),
 			}
 			continue
 		}
 
 		wg.Add(1)
-		go func(v *strategy.InstanceHandler) {
+		go func(v *types.StrategyResult) {
 			defer wg.Done()
-			res <- i.HandleEvent(ctx, v.Handler, eventType, payload)
+
+			cost := timer.Start()
+			select {
+			case <-time.After(time.Second * 5):
+			default:
+				rv := ins.HandleEvent(ctx, v.Handler, v.EventType, data)
+				results <- &Result{
+					AppletName:  v.AppletName,
+					InstanceID:  v.InstanceID,
+					Handler:     v.Handler,
+					ReturnValue: nil,
+					ReturnCode:  int(rv.Code),
+					Error:       rv.ErrMsg,
+				}
+				l.WithValues("cst", cost().Milliseconds()).Info("")
+			}
 		}(v)
 	}
 	wg.Wait()
-	close(res)
+	close(results)
 
-	for v := range res {
+	for v := range results {
 		if v == nil {
 			continue
 		}
-		ret.WasmResults = append(ret.WasmResults, *v)
+		ret = append(ret, v)
 	}
-	return nil
-}
-
-func checkHeader(ctx context.Context, prj *models.Project, l log.Logger, ret *HandleEventResult, r *eventpb.Event) (eventType string, err error) {
-	eventType = enums.EVENTTYPEDEFAULT
-
-	pub, err := publisherVerification(ctx, l, r)
-	if err != nil {
-		l.Error(err)
-		return
-	}
-
-	if pub.ProjectID != prj.ProjectID {
-		return eventType, status.NoProjectPermission
-	}
-
-	ret.PubID, ret.PubName = pub.PublisherID, pub.Name
-	l.WithValues("pub_id", pub.PublisherID)
-
-	ret.EventID = r.Header.GetEventId()
-	eventType = r.Header.GetEventType()
-
-	_receiveEventMtc.WithLabelValues(prj.ProjectName.Name, pub.Key).Inc()
-	return
-}
-
-func publisherVerification(ctx context.Context, l log.Logger, r *eventpb.Event) (*models.Publisher, error) {
-	if r.Header == nil || len(r.Header.Token) == 0 {
-		return nil, errors.New("message token is invalid")
-	}
-
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	publisherJwt := jwt.MustConfFromContext(ctx)
-
-	claim, err := publisherJwt.ParseToken(r.Header.Token)
-	if err != nil {
-		l.Error(err)
-		return nil, err
-	}
-
-	v, ok := claim.Payload.(string)
-	if !ok {
-		l.Error(errors.New("claim of publisher convert string error"))
-		return nil, status.InvalidAuthValue
-	}
-	publisherID := types.SFID(0)
-	if err := publisherID.UnmarshalText([]byte(v)); err != nil {
-		return nil, status.InvalidAuthPublisherID
-	}
-
-	m := &models.Publisher{RelPublisher: models.RelPublisher{PublisherID: publisherID}}
-	err = m.FetchByPublisherID(d)
-	if err != nil {
-		l.Error(err)
-		return nil, status.CheckDatabaseError(err, "FetchByPublisherID")
-	}
-
-	return m, nil
-}
-
-func HandleEvents(ctx context.Context, projectName string, r *HandleEventReq) []*HandleEventResult {
-	results := make([]*HandleEventResult, 0, len(r.Events))
-	for i := range r.Events {
-		ret, _ := OnEventReceived(ctx, projectName, &r.Events[i])
-		results = append(results, ret)
-	}
-	return results
+	return ret
 }

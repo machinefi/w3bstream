@@ -8,6 +8,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/redis"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/client"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
@@ -38,8 +39,31 @@ type (
 	ChainHeight          struct{}
 	ChainTx              struct{}
 	CtxAccount           struct{}
+	CtxStrategyResults   struct{}
 	CtxFileSystemOp      struct{}
+	CtxProxyClient       struct{}
 )
+
+func WithStrategyResults(ctx context.Context, v []*StrategyResult) context.Context {
+	return contextx.WithValue(ctx, CtxStrategyResults{}, v)
+}
+
+func WithStrategyResultsContext(v []*StrategyResult) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxStrategyResults{}, v)
+	}
+}
+
+func StrategyResultsFromContext(ctx context.Context) ([]*StrategyResult, bool) {
+	v, ok := ctx.Value(CtxStrategyResults{}).([]*StrategyResult)
+	return v, ok
+}
+
+func MustStrategyResultsFromContext(ctx context.Context) []*StrategyResult {
+	v, ok := StrategyResultsFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
 
 func WithAccount(ctx context.Context, v *models.Account) context.Context {
 	return contextx.WithValue(ctx, CtxAccount{}, v)
@@ -503,6 +527,27 @@ func FileSystemOpFromContext(ctx context.Context) (filesystem.FileSystemOp, bool
 
 func MustFileSystemOpFromContext(ctx context.Context) filesystem.FileSystemOp {
 	v, ok := FileSystemOpFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithProxyClient(ctx context.Context, v *client.Client) context.Context {
+	return contextx.WithValue(ctx, CtxProxyClient{}, v)
+}
+
+func WithProxyClientContext(v *client.Client) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxProxyClient{}, v)
+	}
+}
+
+func ProxyClientFromContext(ctx context.Context) (*client.Client, bool) {
+	v, ok := ctx.Value(CtxProxyClient{}).(*client.Client)
+	return v, ok
+}
+
+func MustProxyClientFromContext(ctx context.Context) *client.Client {
+	v, ok := ProxyClientFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

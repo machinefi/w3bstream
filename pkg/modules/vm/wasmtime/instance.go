@@ -100,6 +100,7 @@ func (i *Instance) Handle(ctx context.Context, t *Task) *wasm.EventHandleResult 
 	rid := i.AddResource(ctx, []byte(t.EventType), t.Payload)
 	defer i.RmvResource(ctx, rid)
 
+	// TODO support wasm return data(not only code) for HTTP responding
 	result, err := i.rt.Call(t.Handler, int32(rid))
 	if err != nil {
 		l.Error(err)

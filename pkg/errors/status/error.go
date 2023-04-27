@@ -2,8 +2,6 @@ package status
 
 import (
 	"net/http"
-
-	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 )
 
 //go:generate toolkit gen status Error
@@ -38,6 +36,10 @@ const (
 	BatchRemoveAppletFailed
 	// @errTalk Md5 Checksum Failed
 	MD5ChecksumFailed
+	// @errTalk MQTT Subscribe Failed
+	MqttSubscribeFailed
+	// @errTalk MQTT Connect Failed
+	MqttConnectFailed
 )
 
 const (
@@ -67,6 +69,8 @@ const (
 	CurrentAccountAbsence
 	// @errTalk Invalid Event Channel
 	InvalidEventChannel
+	// @errTalk Invalid Event Token
+	InvalidEventToken
 )
 
 const (
@@ -82,6 +86,8 @@ const (
 	UploadFileMd5Unmatched
 	// @errTalk Upload File Disk Limit
 	UploadFileDiskLimit
+	// @errTalk Topic Already Subscribed
+	TopicAlreadySubscribed
 )
 
 const (
@@ -111,6 +117,12 @@ const (
 	ChainTxConflict
 	// @errTalk Chain Height Conflict
 	ChainHeightConflict
+	// @errTalk Account Identity Conflict
+	AccountIdentityConflict
+	// @errTalk Account Conflict
+	AccountConflict
+	// @errTalk Account Password Conflict
+	AccountPasswordConflict
 )
 
 const (
@@ -149,6 +161,8 @@ const (
 	ResourcePermNotFound
 	// @errTalk Cron Job Not Found
 	CronJobNotFound
+	// @errTalk Instance Not Running
+	InstanceNotRunning
 	// @errTalk Blockchain Not Found
 	BlockchainNotFound
 	// @errTalk Contract Log Not Found
@@ -157,25 +171,8 @@ const (
 	ChainTxNotFound
 	// @errTalk Chain Height Not Found
 	ChainHeightNotFound
+	// @errTalk Account Not Found
+	AccountNotFound
+	// @errTalk Account Password Not Found
+	AccountPasswordNotFound
 )
-
-// Deprecated: pls check database error and return defined status error
-func CheckDatabaseError(err error, msg ...string) error {
-	desc := ""
-	if len(msg) > 0 {
-		desc = msg[0]
-	}
-	if err != nil {
-		desc = desc + ":" + err.Error()
-		e := sqlx.DBErr(err)
-		if e.IsNotFound() {
-			return NotFound.StatusErr().WithDesc(desc)
-		} else if e.IsConflict() {
-			return Conflict.StatusErr().WithDesc(desc)
-		} else {
-			desc = desc + " " + err.Error()
-			return InternalServerError.StatusErr().WithDesc(desc)
-		}
-	}
-	return nil
-}
