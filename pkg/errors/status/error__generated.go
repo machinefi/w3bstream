@@ -115,6 +115,10 @@ func (v Error) Key() string {
 		return "ChainTxNotFound"
 	case ChainHeightNotFound:
 		return "ChainHeightNotFound"
+	case AccountNotFound:
+		return "AccountNotFound"
+	case AccountPasswordNotFound:
+		return "AccountPasswordNotFound"
 	case Conflict:
 		return "Conflict"
 	case ProjectNameConflict:
@@ -249,6 +253,10 @@ func (v Error) Msg() string {
 		return "Chain Tx Not Found"
 	case ChainHeightNotFound:
 		return "Chain Height Not Found"
+	case AccountNotFound:
+		return "Account Not Found"
+	case AccountPasswordNotFound:
+		return "Account Password Not Found"
 	case Conflict:
 		return "Conflict conflict error"
 	case ProjectNameConflict:
@@ -382,6 +390,10 @@ func (v Error) CanBeTalk() bool {
 	case ChainTxNotFound:
 		return true
 	case ChainHeightNotFound:
+		return true
+	case AccountNotFound:
+		return true
+	case AccountPasswordNotFound:
 		return true
 	case Conflict:
 		return true

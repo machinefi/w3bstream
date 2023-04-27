@@ -157,6 +157,10 @@ const (
 	ChainTxNotFound
 	// @errTalk Chain Height Not Found
 	ChainHeightNotFound
+	// @errTalk Account Not Found
+	AccountNotFound
+	// @errTalk Account Password Not Found
+	AccountPasswordNotFound
 )
 
 // Deprecated: pls check database error and return defined status error
