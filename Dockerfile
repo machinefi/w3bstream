@@ -4,6 +4,7 @@ FROM golang:1.19 AS build-go
 WORKDIR /w3bstream
 
 COPY . /w3bstream/
+RUN git fetch
 RUN make build_light
 
 
