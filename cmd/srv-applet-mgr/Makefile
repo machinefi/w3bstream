@@ -17,16 +17,14 @@ build:
  -X ${BUILD_PATH}.Commit=${COMMIT_ID}\
  -X ${BUILD_PATH}.Version=${TAG}\
  -X ${BUILD_PATH}.Timestamp=${NOW}"
-	@rm -rf build
-	@mkdir -p build
-	@mv srv-applet-mgr build/
-	@cp -r config build/
-	@rm -rf openapi.json
 	@go generate .
-	@cp openapi.json build/
-	@rm -rf ../../build/srv-applet-mgr
+	@rm -rf ../../build/srv-applet-mgr/srv-applet-mgr
+	@rm -rf ../../build/srv-applet-mgr/config
+	@rm -rf ../../build/srv-applet-mgr/openapi.json
 	@mkdir -p ../../build
-	@mv build ../../build/srv-applet-mgr
+	@mv srv-applet-mgr ../../build/srv-applet-mgr
+	@cp -r config ../../build/srv-applet-mgr
+	@cp -r openapi.json ../../build/srv-applet-mgr
 
 .PHONY: run
 run: build
@@ -40,10 +38,10 @@ light:
  -X ${BUILD_PATH}.Commit=${COMMIT_ID}\
  -X ${BUILD_PATH}.Version=${TAG}\
  -X ${BUILD_PATH}.Timestamp=${NOW}"
-	@rm -rf build
-	@mkdir -p build
-	@mv srv-applet-mgr build/
-	@cp -r config build/
-	@cp openapi.json build/
-	@rm -rf ../../build/srv-applet-mgr
-	@mkdir -p ../../build && mv build ../../build/srv-applet-mgr
+	@rm -rf ../../build/srv-applet-mgr/srv-applet-mgr
+	@rm -rf ../../build/srv-applet-mgr/config
+	@rm -rf ../../build/srv-applet-mgr/openapi.json
+	@mkdir -p ../../build
+	@mv srv-applet-mgr ../../build/srv-applet-mgr
+	@cp -r config ../../build/srv-applet-mgr
+	@cp -r openapi.json ../../build/srv-applet-mgr
