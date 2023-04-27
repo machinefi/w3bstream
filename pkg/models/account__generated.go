@@ -64,15 +64,36 @@ func (*Account) ColRel() map[string][]string {
 
 func (*Account) PrimaryKey() []string {
 	return []string{
-		"AccountID",
-		"DeletedAt",
+		"ID",
 	}
 }
 
 func (m *Account) IndexFieldNames() []string {
 	return []string{
 		"AccountID",
+		"ID",
 	}
+}
+
+func (*Account) UniqueIndexes() builder.Indexes {
+	return builder.Indexes{
+		"ui_account_id": []string{
+			"AccountID",
+			"DeletedAt",
+		},
+	}
+}
+
+func (*Account) UniqueIndexUIAccountID() string {
+	return "ui_account_id"
+}
+
+func (m *Account) ColID() *builder.Column {
+	return AccountTable.ColByFieldName(m.FieldID())
+}
+
+func (*Account) FieldID() string {
+	return "ID"
 }
 
 func (m *Account) ColAccountID() *builder.Column {
@@ -202,6 +223,25 @@ func (m *Account) Count(db sqlx.DBExecutor, cond builder.SqlCondition, adds ...b
 	return
 }
 
+func (m *Account) FetchByID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	err := db.QueryAndScan(
+		builder.Select(nil).
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("ID").Eq(m.ID),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
+					),
+				),
+				builder.Comment("Account.FetchByID"),
+			),
+		m,
+	)
+	return err
+}
+
 func (m *Account) FetchByAccountID(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	err := db.QueryAndScan(
@@ -212,7 +252,6 @@ func (m *Account) FetchByAccountID(db sqlx.DBExecutor) error {
 					builder.And(
 						tbl.ColByFieldName("AccountID").Eq(m.AccountID),
 						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
-						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
 				builder.Comment("Account.FetchByAccountID"),
@@ -220,6 +259,37 @@ func (m *Account) FetchByAccountID(db sqlx.DBExecutor) error {
 		m,
 	)
 	return err
+}
+
+func (m *Account) UpdateByIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	tbl := db.T(m)
+	res, err := db.Exec(
+		builder.Update(tbl).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("ID").Eq(m.ID),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
+				),
+				builder.Comment("Account.UpdateByIDWithFVs"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
+	)
+	if err != nil {
+		return err
+	}
+	if affected, _ := res.RowsAffected(); affected == 0 {
+		return m.FetchByID(db)
+	}
+	return nil
+}
+
+func (m *Account) UpdateByID(db sqlx.DBExecutor, zeros ...string) error {
+	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
+	return m.UpdateByIDWithFVs(db, fvs)
 }
 
 func (m *Account) UpdateByAccountIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
@@ -233,7 +303,6 @@ func (m *Account) UpdateByAccountIDWithFVs(db sqlx.DBExecutor, fvs builder.Field
 			Where(
 				builder.And(
 					tbl.ColByFieldName("AccountID").Eq(m.AccountID),
-					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
 				builder.Comment("Account.UpdateByAccountIDWithFVs"),
@@ -266,6 +335,49 @@ func (m *Account) Delete(db sqlx.DBExecutor) error {
 	return err
 }
 
+func (m *Account) DeleteByID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	_, err := db.Exec(
+		builder.Delete().
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("ID").Eq(m.ID),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
+					),
+				),
+				builder.Comment("Account.DeleteByID"),
+			),
+	)
+	return err
+}
+
+func (m *Account) SoftDeleteByID(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	fvs := builder.FieldValues{}
+
+	if _, ok := fvs["DeletedAt"]; !ok {
+		fvs["DeletedAt"] = types.Timestamp{Time: time.Now()}
+	}
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	_, err := db.Exec(
+		builder.Update(db.T(m)).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("ID").Eq(m.ID),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
+				),
+				builder.Comment("Account.SoftDeleteByID"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
+	)
+	return err
+}
+
 func (m *Account) DeleteByAccountID(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	_, err := db.Exec(
@@ -275,7 +387,6 @@ func (m *Account) DeleteByAccountID(db sqlx.DBExecutor) error {
 				builder.Where(
 					builder.And(
 						tbl.ColByFieldName("AccountID").Eq(m.AccountID),
-						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
@@ -301,7 +412,6 @@ func (m *Account) SoftDeleteByAccountID(db sqlx.DBExecutor) error {
 			Where(
 				builder.And(
 					tbl.ColByFieldName("AccountID").Eq(m.AccountID),
-					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
 				builder.Comment("Account.SoftDeleteByAccountID"),

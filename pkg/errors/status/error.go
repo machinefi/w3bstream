@@ -119,6 +119,12 @@ const (
 	ChainTxConflict
 	// @errTalk Chain Height Conflict
 	ChainHeightConflict
+	// @errTalk Account Identity Conflict
+	AccountIdentityConflict
+	// @errTalk Account Conflict
+	AccountConflict
+	// @errTalk Account Password Conflict
+	AccountPasswordConflict
 )
 
 const (
@@ -167,6 +173,10 @@ const (
 	ChainTxNotFound
 	// @errTalk Chain Height Not Found
 	ChainHeightNotFound
+	// @errTalk Account Not Found
+	AccountNotFound
+	// @errTalk Account Password Not Found
+	AccountPasswordNotFound
 )
 
 // Deprecated: pls check database error and return defined status error
