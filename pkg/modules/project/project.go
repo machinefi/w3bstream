@@ -68,7 +68,7 @@ func List(ctx context.Context, r *ListReq) (*ListRsp, error) {
 	var (
 		err  error
 		d    = types.MustMgrDBExecutorFromContext(ctx)
-		prj  = types.MustProjectFromContext(ctx)
+		prj  = &models.Project{}
 		ret  = &ListRsp{}
 		cond = r.Condition()
 	)
