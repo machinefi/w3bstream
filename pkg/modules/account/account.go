@@ -53,6 +53,9 @@ func CreateAccountByUsername(ctx context.Context, r *CreateAccountByUsernameReq)
 				},
 			}
 			if err := acc.Create(db); err != nil {
+				if sqlx.DBErr(err).IsConflict() {
+					return status.AccountConflict
+				}
 				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
@@ -66,6 +69,9 @@ func CreateAccountByUsername(ctx context.Context, r *CreateAccountByUsernameReq)
 					Source:     r.Source,
 				},
 			}).Create(db); err != nil {
+				if sqlx.DBErr(err).IsConflict() {
+					return status.AccountIdentityConflict
+				}
 				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
@@ -84,6 +90,9 @@ func CreateAccountByUsername(ctx context.Context, r *CreateAccountByUsernameReq)
 					),
 				},
 			}).Create(db); err != nil {
+				if sqlx.DBErr(err).IsConflict() {
+					return status.AccountPasswordConflict
+				}
 				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil

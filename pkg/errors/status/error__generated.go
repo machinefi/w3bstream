@@ -145,6 +145,12 @@ func (v Error) Key() string {
 		return "ChainTxConflict"
 	case ChainHeightConflict:
 		return "ChainHeightConflict"
+	case AccountIdentityConflict:
+		return "AccountIdentityConflict"
+	case AccountConflict:
+		return "AccountConflict"
+	case AccountPasswordConflict:
+		return "AccountPasswordConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -283,6 +289,12 @@ func (v Error) Msg() string {
 		return "Chain Tx Conflict"
 	case ChainHeightConflict:
 		return "Chain Height Conflict"
+	case AccountIdentityConflict:
+		return "Account Identity Conflict"
+	case AccountConflict:
+		return "Account Conflict"
+	case AccountPasswordConflict:
+		return "Account Password Conflict"
 	case InternalServerError:
 		return "internal error"
 	case DatabaseError:
@@ -420,6 +432,12 @@ func (v Error) CanBeTalk() bool {
 	case ChainTxConflict:
 		return true
 	case ChainHeightConflict:
+		return true
+	case AccountIdentityConflict:
+		return true
+	case AccountConflict:
+		return true
+	case AccountPasswordConflict:
 		return true
 	case InternalServerError:
 		return false

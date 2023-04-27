@@ -111,6 +111,12 @@ const (
 	ChainTxConflict
 	// @errTalk Chain Height Conflict
 	ChainHeightConflict
+	// @errTalk Account Identity Conflict
+	AccountIdentityConflict
+	// @errTalk Account Conflict
+	AccountConflict
+	// @errTalk Account Password Conflict
+	AccountPasswordConflict
 )
 
 const (

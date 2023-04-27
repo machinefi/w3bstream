@@ -82,6 +82,9 @@ func FetchOrCreateAccountByEthAddress(ctx context.Context, address types.EthAddr
 			aci.RelAccount = rel
 			aci.Source = enums.ACCOUNT_SOURCE__SUBMIT
 			if err := aci.Create(db); err != nil {
+				if sqlx.DBErr(err).IsConflict() {
+					return status.AccountIdentityConflict
+				}
 				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
