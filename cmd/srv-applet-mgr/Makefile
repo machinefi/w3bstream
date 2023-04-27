@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := build
 
-VERSION=$(shell git describe --tags)
+VERSION=$(shell git describe --tags --always)
 FEATURE=$(shell git branch | grep '*' | awk '{ print $$2; }')
 BUILD_TIME=$(shell date +%Y%m%d%H%M%S)
 VERSION_PATH=github.com/machinefi/w3bstream/cmd/srv-applet-mgr/types
