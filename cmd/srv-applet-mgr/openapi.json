@@ -2710,6 +2710,19 @@
               "@StatusErr[AccountNotFound][404999016][Account Not Found]!"
             ]
           },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountIdentityConflict][409999014][Account Identity Conflict]!"
+            ]
+          },
           "500": {
             "description": "",
             "content": {
@@ -5245,6 +5258,21 @@
             },
             "x-status-errors": [
               "@StatusErr[NoAdminPermission][401999005][No Admin Permission]!"
+            ]
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountConflict][409999015][Account Conflict]!",
+              "@StatusErr[AccountIdentityConflict][409999014][Account Identity Conflict]!",
+              "@StatusErr[AccountPasswordConflict][409999016][Account Password Conflict]!"
             ]
           },
           "500": {
