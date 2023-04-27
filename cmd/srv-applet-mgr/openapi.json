@@ -2433,7 +2433,7 @@
         }
       }
     },
-    "/v0/event/{channel}/0": {
+    "/v0/event/{channel}": {
       "post": {
         "tags": [
           "apis/event"
