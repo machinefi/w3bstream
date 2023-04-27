@@ -16,6 +16,10 @@ toolkit:
 	@go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/...@toolkit-patch-0.0.1
 	@echo installed `which toolkit`
 
+.PHONY: test
+test:
+	@go test ./...
+
 .PHONY: srv_applet_mgr
 srv_applet_mgr:
 	@toolkit fmt
@@ -34,7 +38,7 @@ pub_client:
 	@echo pub_client is built to "\033[31m ./build/pub_client/... \033[0m"
 
 .PHONY: build
-build: update toolkit srv_applet_mgr pub_client
+build: update test toolkit srv_applet_mgr pub_client
 
 .PHONY: build_lite
 build_lite: update srv_applet_mgr_lite
