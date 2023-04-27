@@ -100,7 +100,6 @@ func SnippetOperationInvokeContextMethod(f *g.File, op string, rt g.SnippetType)
 
 func SnippetOperationInvokeMethod(f *g.File, op string, rt g.SnippetType) g.Snippet {
 	return g.Func(
-		g.Var(g.Type(f.Use("context", "Context")), "ctx"),
 		g.Var(g.Type(f.Use(PkgKit, "Client")), "cli"),
 		g.Var(g.Ellipsis(g.Type(f.Use(PkgKit, "Metadata"))), "metas"),
 	).
