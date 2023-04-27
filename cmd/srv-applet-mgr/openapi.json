@@ -3036,7 +3036,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ChainHeightConflict][409999012][Chain Height Conflict]!",
+              "@StatusErr[ChainHeightConflict][409999013][Chain Height Conflict]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
@@ -3299,7 +3299,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ChainTxConflict][409999011][Chain Tx Conflict]!",
+              "@StatusErr[ChainTxConflict][409999012][Chain Tx Conflict]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
@@ -3563,7 +3563,7 @@
             },
             "x-status-errors": [
               "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[ContractLogConflict][409999010][Contract Log Conflict]!"
+              "@StatusErr[ContractLogConflict][409999011][Contract Log Conflict]!"
             ]
           },
           "500": {
@@ -4254,7 +4254,6 @@
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
@@ -4268,7 +4267,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
               "@StatusErr[Conflict][409999001][Conflict conflict error]!"
             ]
           },
