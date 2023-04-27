@@ -1,8 +1,6 @@
 package status
 
-import (
-	"net/http"
-)
+import "net/http"
 
 //go:generate toolkit gen status Error
 type Error int
