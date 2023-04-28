@@ -1,9 +1,7 @@
 package vm
 
-import "testing"
-
-func DISABLE_TestNewWasm(t *testing.T) {
-	/*
+/*
+func TestNewWasm(t *testing.T) {
 		var wasm *Wasm
 
 		code, _ := ioutil.ReadFile("release.wasm")
@@ -56,5 +54,5 @@ func DISABLE_TestNewWasm(t *testing.T) {
 
 		_, e = wasm.ExecuteFunction("hello")
 		NewWithT(t).Expect(e).To(BeNil())
-	*/
 }
+*/
