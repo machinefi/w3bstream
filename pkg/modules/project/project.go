@@ -132,7 +132,6 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 				}
 				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
-			conflog.Std().Info("project created")
 			ctx = types.WithProject(ctx, prj)
 			return nil
 		},

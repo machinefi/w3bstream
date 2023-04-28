@@ -197,6 +197,9 @@ func (d *Database) Init(ctx context.Context) (err error) {
 	}
 
 	// combine schema tables
+	if len(d.Schemas) == 0 {
+		d.Schemas = append(d.Schemas, &Schema{Name: "public"})
+	}
 	for _, s := range d.Schemas {
 		if s.Name == "" {
 			s.Name = "public" // pg default
