@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	base "github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -21,8 +21,8 @@ func NewWasmLogTask(ctx context.Context, logLevel, msg string) *WasmLogTask {
 				AppletName:  types.MustAppletFromContext(ctx).Name,
 				InstanceID:  types.MustInstanceFromContext(ctx).InstanceID,
 				Level:       logLevel,
-				LogTime:     base.AsTimestamp(time.Now()),
-				Msg:         msg,
+				LogTime:     time.Now().UnixNano(),
+				Msg:         subStringWithLength(msg, consts.WasmLogMaxLength),
 			},
 		},
 	}
@@ -45,4 +45,21 @@ func (t *WasmLogTask) Arg() interface{} {
 
 func (t *WasmLogTask) ID() string {
 	return fmt.Sprintf("%s::%s", t.Subject(), t.wasmLog.WasmLogID)
+}
+
+// subStringWithLength
+// If the length is negative, an empty string is returned.
+// If the length is greater than the length of the input string, the entire string is returned.
+// Otherwise, a substring of the input string with the specified length is returned.
+func subStringWithLength(str string, length int) string {
+	if length < 0 {
+		return ""
+	}
+	rs := []rune(str)
+	strLen := len(rs)
+
+	if length > strLen {
+		return str
+	}
+	return string(rs[0:length])
 }

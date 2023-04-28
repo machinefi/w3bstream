@@ -1,39 +1,85 @@
 package mqtt_test
 
 import (
+	"encoding/json"
+	"fmt"
 	"testing"
+	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/google/uuid"
 	. "github.com/onsi/gomega"
 
-	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	. "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 )
 
-func TestBroker(t *testing.T) {
-	topic := "test_demo"
-	server := types.Endpoint{}
+type PayloadBody struct {
+	EventID      string
+	PubTimestamp int64
+	Message      string
+}
 
-	err := server.UnmarshalText([]byte("mqtt://broker.emqx.io:1883"))
-	NewWithT(t).Expect(err).To(BeNil())
+func NewPayloadBody(msg string) *PayloadBody {
+	return &PayloadBody{
+		EventID:      uuid.New().String(),
+		PubTimestamp: time.Now().UnixMilli(),
+		Message:      msg,
+	}
+}
 
-	broker := &Broker{Server: server}
+func UnsafeJsonMarshal(v interface{}) []byte {
+	data, _ := json.Marshal(v)
+	return data
+}
+
+var (
+	topic  = "test_demo"
+	broker = &Broker{}
+)
+
+func init() {
+	err := broker.Server.UnmarshalText([]byte("mqtt://broker.emqx.io:1883"))
+	if err != nil {
+		panic(err)
+	}
+
 	broker.SetDefault()
-	broker.Init()
+	err = broker.Init()
+	if err != nil {
+		panic(err)
+	}
+}
 
-	c1, err := broker.Client("c1")
+func TestBroker(t *testing.T) {
+	cpub, err := broker.Client("pub")
 	NewWithT(t).Expect(err).To(BeNil())
-	NewWithT(t).Expect(c1).NotTo(BeNil())
+	cpub.WithTopic(topic).WithQoS(QOS__ONCE)
 
-	c2, err := broker.Client("c2")
+	csub, err := broker.Client("sub")
 	NewWithT(t).Expect(err).To(BeNil())
-	NewWithT(t).Expect(c2).NotTo(BeNil())
+	csub.WithTopic(topic).WithQoS(QOS__ONCE)
 
-	err = c1.WithTopic(topic).WithQoS(QOS__AT_LEAST_ONCE).WithRetain(false).
-		Publish("testpublish")
+	go func() {
+		err = csub.Subscribe(func(cli mqtt.Client, msg mqtt.Message) {
+			pl := &PayloadBody{}
+			ts := time.Now()
+			NewWithT(t).Expect(json.Unmarshal(msg.Payload(), pl)).To(BeNil())
+			fmt.Printf("topic: %s cst: %dms\n", msg.Topic(), ts.UnixMilli()-pl.PubTimestamp)
+		})
+		NewWithT(t).Expect(err).To(BeNil())
+	}()
+
+	num := 5
+	for i := 0; i < num; i++ {
+		err = cpub.WithRetain(false).Publish(UnsafeJsonMarshal(NewPayloadBody("payload")))
+		NewWithT(t).Expect(err).To(BeNil())
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	err = cpub.Unsubscribe()
 	NewWithT(t).Expect(err).To(BeNil())
-
-	c2.WithTopic(topic).Subscribe(func(c mqtt.Client, msg mqtt.Message) {
-		NewWithT(t).Expect(string(msg.Payload())).To(Equal("testpublish"))
-	})
+	err = csub.Unsubscribe()
+	NewWithT(t).Expect(err).To(BeNil())
+	broker.Close(cpub)
+	broker.Close(csub)
 }

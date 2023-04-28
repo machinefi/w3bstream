@@ -39,10 +39,14 @@ func (v Error) Key() string {
 	switch v {
 	case BadRequest:
 		return "BadRequest"
-	case MD5ChecksumFailed:
-		return "MD5ChecksumFailed"
-	case InvalidChainClient:
-		return "InvalidChainClient"
+	case InvalidConfigType:
+		return "InvalidConfigType"
+	case DeprecatedProject:
+		return "DeprecatedProject"
+	case UnknownDeployCommand:
+		return "UnknownDeployCommand"
+	case InvalidCronExpressions:
+		return "InvalidCronExpressions"
 	case Unauthorized:
 		return "Unauthorized"
 	case InvalidAuthValue:
@@ -63,26 +67,96 @@ func (v Error) Key() string {
 		return "InvalidEthLoginSignature"
 	case InvalidEthLoginMessage:
 		return "InvalidEthLoginMessage"
+	case InvalidAuthPublisherID:
+		return "InvalidAuthPublisherID"
+	case CurrentAccountAbsence:
+		return "CurrentAccountAbsence"
+	case InvalidEventChannel:
+		return "InvalidEventChannel"
+	case InvalidEventToken:
+		return "InvalidEventToken"
 	case Forbidden:
 		return "Forbidden"
-	case InstanceLimit:
-		return "InstanceLimit"
 	case DisabledAccount:
 		return "DisabledAccount"
 	case WhiteListForbidden:
 		return "WhiteListForbidden"
+	case UploadFileSizeLimit:
+		return "UploadFileSizeLimit"
+	case UploadFileMd5Unmatched:
+		return "UploadFileMd5Unmatched"
+	case UploadFileDiskLimit:
+		return "UploadFileDiskLimit"
+	case TopicAlreadySubscribed:
+		return "TopicAlreadySubscribed"
 	case NotFound:
 		return "NotFound"
 	case ProjectNotFound:
 		return "ProjectNotFound"
 	case ConfigNotFound:
 		return "ConfigNotFound"
+	case ResourceNotFound:
+		return "ResourceNotFound"
+	case AppletNotFound:
+		return "AppletNotFound"
+	case InstanceNotFound:
+		return "InstanceNotFound"
+	case StrategyNotFound:
+		return "StrategyNotFound"
+	case PublisherNotFound:
+		return "PublisherNotFound"
+	case AccountIdentityNotFound:
+		return "AccountIdentityNotFound"
+	case ResourcePermNotFound:
+		return "ResourcePermNotFound"
+	case CronJobNotFound:
+		return "CronJobNotFound"
+	case InstanceNotRunning:
+		return "InstanceNotRunning"
+	case BlockchainNotFound:
+		return "BlockchainNotFound"
+	case ContractLogNotFound:
+		return "ContractLogNotFound"
+	case ChainTxNotFound:
+		return "ChainTxNotFound"
+	case ChainHeightNotFound:
+		return "ChainHeightNotFound"
+	case AccountNotFound:
+		return "AccountNotFound"
+	case AccountPasswordNotFound:
+		return "AccountPasswordNotFound"
 	case Conflict:
 		return "Conflict"
-	case ProjectConfigConflict:
-		return "ProjectConfigConflict"
 	case ProjectNameConflict:
 		return "ProjectNameConflict"
+	case ResourceConflict:
+		return "ResourceConflict"
+	case ResourceOwnerConflict:
+		return "ResourceOwnerConflict"
+	case StrategyConflict:
+		return "StrategyConflict"
+	case ConfigConflict:
+		return "ConfigConflict"
+	case PublisherConflict:
+		return "PublisherConflict"
+	case MultiInstanceDeployed:
+		return "MultiInstanceDeployed"
+	case AppletNameConflict:
+		return "AppletNameConflict"
+	case CronJobConflict:
+		return "CronJobConflict"
+	case ContractLogConflict:
+		return "ContractLogConflict"
+	case ChainTxConflict:
+		return "ChainTxConflict"
+	case ChainHeightConflict:
+		return "ChainHeightConflict"
+	case AccountIdentityConflict:
+		return "AccountIdentityConflict"
+	case AccountConflict:
+		return "AccountConflict"
+	case AccountPasswordConflict:
+		return "AccountPasswordConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -91,8 +165,26 @@ func (v Error) Key() string {
 		return "UploadFileFailed"
 	case CreateChannelFailed:
 		return "CreateChannelFailed"
-	case ConfigInitializationFailed:
-		return "ConfigInitializationFailed"
+	case FetchResourceFailed:
+		return "FetchResourceFailed"
+	case ConfigInitFailed:
+		return "ConfigInitFailed"
+	case ConfigUninitFailed:
+		return "ConfigUninitFailed"
+	case ConfigParseFailed:
+		return "ConfigParseFailed"
+	case GenPublisherTokenFailed:
+		return "GenPublisherTokenFailed"
+	case CreateInstanceFailed:
+		return "CreateInstanceFailed"
+	case BatchRemoveAppletFailed:
+		return "BatchRemoveAppletFailed"
+	case MD5ChecksumFailed:
+		return "MD5ChecksumFailed"
+	case MqttSubscribeFailed:
+		return "MqttSubscribeFailed"
+	case MqttConnectFailed:
+		return "MqttConnectFailed"
 	}
 	return "UNKNOWN"
 }
@@ -101,12 +193,16 @@ func (v Error) Msg() string {
 	switch v {
 	case BadRequest:
 		return "BadRequest"
-	case MD5ChecksumFailed:
-		return "Md5 Checksum Failed"
-	case InvalidChainClient:
-		return "Invalid Chain Client"
+	case InvalidConfigType:
+		return "Invalid Config Type"
+	case DeprecatedProject:
+		return "Deprecated Project"
+	case UnknownDeployCommand:
+		return "Unknown Deploy Command"
+	case InvalidCronExpressions:
+		return "Invalid Cron Expressions"
 	case Unauthorized:
-		return "Unauthorized unauthorized"
+		return "unauthorized"
 	case InvalidAuthValue:
 		return "Invalid Auth Value"
 	case InvalidAuthAccountID:
@@ -125,36 +221,124 @@ func (v Error) Msg() string {
 		return "Invalid Siwe Signature"
 	case InvalidEthLoginMessage:
 		return "Invalid Siwe Message"
+	case InvalidAuthPublisherID:
+		return "Invalid Auth Publisher ID"
+	case CurrentAccountAbsence:
+		return "Current Account Absence"
+	case InvalidEventChannel:
+		return "Invalid Event Channel"
+	case InvalidEventToken:
+		return "Invalid Event Token"
 	case Forbidden:
-		return "Forbidden"
-	case InstanceLimit:
-		return "deployed instance limit"
+		return "forbidden"
 	case DisabledAccount:
 		return "Disabled Account"
 	case WhiteListForbidden:
 		return "White List Forbidden"
+	case UploadFileSizeLimit:
+		return "Upload File Size Limit"
+	case UploadFileMd5Unmatched:
+		return "Upload File Md5 Unmatched"
+	case UploadFileDiskLimit:
+		return "Upload File Disk Limit"
+	case TopicAlreadySubscribed:
+		return "Topic Already Subscribed"
 	case NotFound:
 		return "NotFound"
 	case ProjectNotFound:
 		return "Project Not Found"
 	case ConfigNotFound:
 		return "Config Not Found"
+	case ResourceNotFound:
+		return "Resource Not Found"
+	case AppletNotFound:
+		return "Applet Not Found"
+	case InstanceNotFound:
+		return "Instance Not Found"
+	case StrategyNotFound:
+		return "Strategy Not Found"
+	case PublisherNotFound:
+		return "Publisher Not Found"
+	case AccountIdentityNotFound:
+		return "Account Identity Not Found"
+	case ResourcePermNotFound:
+		return "Resource Perm Not Found"
+	case CronJobNotFound:
+		return "Cron Job Not Found"
+	case InstanceNotRunning:
+		return "Instance Not Running"
+	case BlockchainNotFound:
+		return "Blockchain Not Found"
+	case ContractLogNotFound:
+		return "Contract Log Not Found"
+	case ChainTxNotFound:
+		return "Chain Tx Not Found"
+	case ChainHeightNotFound:
+		return "Chain Height Not Found"
+	case AccountNotFound:
+		return "Account Not Found"
+	case AccountPasswordNotFound:
+		return "Account Password Not Found"
 	case Conflict:
 		return "Conflict conflict error"
-	case ProjectConfigConflict:
-		return "Project Config Conflict"
 	case ProjectNameConflict:
 		return "Project Name Conflict"
+	case ResourceConflict:
+		return "Resource Conflict"
+	case ResourceOwnerConflict:
+		return "Resource Owner Conflict"
+	case StrategyConflict:
+		return "Strategy Conflict"
+	case ConfigConflict:
+		return "Config Conflict"
+	case PublisherConflict:
+		return "Publisher Conflict"
+	case MultiInstanceDeployed:
+		return "Multi Instance Deployed"
+	case AppletNameConflict:
+		return "Applet Name Conflict"
+	case CronJobConflict:
+		return "Cron Job Conflict"
+	case ContractLogConflict:
+		return "Contract Log Conflict"
+	case ChainTxConflict:
+		return "Chain Tx Conflict"
+	case ChainHeightConflict:
+		return "Chain Height Conflict"
+	case AccountIdentityConflict:
+		return "Account Identity Conflict"
+	case AccountConflict:
+		return "Account Conflict"
+	case AccountPasswordConflict:
+		return "Account Password Conflict"
 	case InternalServerError:
-		return "InternalServerError internal error"
+		return "internal error"
 	case DatabaseError:
 		return "Database Error"
 	case UploadFileFailed:
 		return "Upload File Failed"
 	case CreateChannelFailed:
 		return "Create Message Channel Failed"
-	case ConfigInitializationFailed:
-		return "Config Initialization Failed"
+	case FetchResourceFailed:
+		return "Fetch Resource Failed"
+	case ConfigInitFailed:
+		return "Config Init Failed"
+	case ConfigUninitFailed:
+		return "Config Uninit Failed"
+	case ConfigParseFailed:
+		return "Config Parse Failed"
+	case GenPublisherTokenFailed:
+		return "Gen Publisher Token Failed"
+	case CreateInstanceFailed:
+		return "Create Instance Failed"
+	case BatchRemoveAppletFailed:
+		return "Batch Remove Applet Failed"
+	case MD5ChecksumFailed:
+		return "Md5 Checksum Failed"
+	case MqttSubscribeFailed:
+		return "MQTT Subscribe Failed"
+	case MqttConnectFailed:
+		return "MQTT Connect Failed"
 	}
 	return "-"
 }
@@ -163,12 +347,16 @@ func (v Error) CanBeTalk() bool {
 	switch v {
 	case BadRequest:
 		return true
-	case MD5ChecksumFailed:
+	case InvalidConfigType:
 		return true
-	case InvalidChainClient:
+	case DeprecatedProject:
+		return true
+	case UnknownDeployCommand:
+		return true
+	case InvalidCronExpressions:
 		return true
 	case Unauthorized:
-		return true
+		return false
 	case InvalidAuthValue:
 		return true
 	case InvalidAuthAccountID:
@@ -187,13 +375,27 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case InvalidEthLoginMessage:
 		return true
+	case InvalidAuthPublisherID:
+		return true
+	case CurrentAccountAbsence:
+		return true
+	case InvalidEventChannel:
+		return true
+	case InvalidEventToken:
+		return true
 	case Forbidden:
-		return true
-	case InstanceLimit:
-		return true
+		return false
 	case DisabledAccount:
 		return true
 	case WhiteListForbidden:
+		return true
+	case UploadFileSizeLimit:
+		return true
+	case UploadFileMd5Unmatched:
+		return true
+	case UploadFileDiskLimit:
+		return true
+	case TopicAlreadySubscribed:
 		return true
 	case NotFound:
 		return true
@@ -201,21 +403,95 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case ConfigNotFound:
 		return true
-	case Conflict:
+	case ResourceNotFound:
 		return true
-	case ProjectConfigConflict:
+	case AppletNotFound:
+		return true
+	case InstanceNotFound:
+		return true
+	case StrategyNotFound:
+		return true
+	case PublisherNotFound:
+		return true
+	case AccountIdentityNotFound:
+		return true
+	case ResourcePermNotFound:
+		return true
+	case CronJobNotFound:
+		return true
+	case InstanceNotRunning:
+		return true
+	case BlockchainNotFound:
+		return true
+	case ContractLogNotFound:
+		return true
+	case ChainTxNotFound:
+		return true
+	case ChainHeightNotFound:
+		return true
+	case AccountNotFound:
+		return true
+	case AccountPasswordNotFound:
+		return true
+	case Conflict:
 		return true
 	case ProjectNameConflict:
 		return true
-	case InternalServerError:
+	case ResourceConflict:
 		return true
+	case ResourceOwnerConflict:
+		return true
+	case StrategyConflict:
+		return true
+	case ConfigConflict:
+		return true
+	case PublisherConflict:
+		return true
+	case MultiInstanceDeployed:
+		return true
+	case AppletNameConflict:
+		return true
+	case CronJobConflict:
+		return true
+	case ContractLogConflict:
+		return true
+	case ChainTxConflict:
+		return true
+	case ChainHeightConflict:
+		return true
+	case AccountIdentityConflict:
+		return true
+	case AccountConflict:
+		return true
+	case AccountPasswordConflict:
+		return true
+	case InternalServerError:
+		return false
 	case DatabaseError:
 		return true
 	case UploadFileFailed:
 		return true
 	case CreateChannelFailed:
 		return true
-	case ConfigInitializationFailed:
+	case FetchResourceFailed:
+		return true
+	case ConfigInitFailed:
+		return true
+	case ConfigUninitFailed:
+		return true
+	case ConfigParseFailed:
+		return true
+	case GenPublisherTokenFailed:
+		return true
+	case CreateInstanceFailed:
+		return true
+	case BatchRemoveAppletFailed:
+		return true
+	case MD5ChecksumFailed:
+		return true
+	case MqttSubscribeFailed:
+		return true
+	case MqttConnectFailed:
 		return true
 	}
 	return false

@@ -2,338 +2,275 @@ package applet
 
 import (
 	"context"
-	"fmt"
-	"mime/multipart"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
+	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/deploy"
 	"github.com/machinefi/w3bstream/pkg/modules/resource"
-	"github.com/machinefi/w3bstream/pkg/modules/vm"
+	"github.com/machinefi/w3bstream/pkg/modules/strategy"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
-type CreateAppletReq struct {
-	File *multipart.FileHeader `name:"file"`
-	Info `name:"info"`
-}
-
-type Info struct {
-	AppletName string                `json:"appletName"`
-	WasmName   string                `json:"wasmName"`
-	Strategies []models.StrategyInfo `json:"strategies,omitempty"`
-}
-
-type InfoApplet struct {
-	models.Applet
-	Path string `db:"f_wasm_path" json:"-"`
-}
-
-func CreateApplet(ctx context.Context, projectID types.SFID, r *CreateAppletReq) (mApplet *models.Applet, err error) {
+func GetBySFID(ctx context.Context, id types.SFID) (*models.Applet, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-	idg := confid.MustSFIDGeneratorFromContext(ctx)
+	m := &models.Applet{RelApplet: models.RelApplet{AppletID: id}}
 
-	_, l = l.Start(ctx, "CreateApplet")
-	defer l.End()
-
-	mResource := &models.Resource{}
-	if mResource, err = resource.FetchOrCreateResource(ctx, r.File); err != nil {
-		l.Error(err)
-		return nil, err
+	if err := m.FetchByAppletID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.AppletNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
-
-	appletID := idg.MustGenSFID()
-	mApplet = &models.Applet{
-		RelProject:  models.RelProject{ProjectID: projectID},
-		RelApplet:   models.RelApplet{AppletID: appletID},
-		RelResource: models.RelResource{ResourceID: mResource.RelResource.ResourceID},
-		AppletInfo:  models.AppletInfo{Name: r.AppletName, WasmName: r.WasmName},
-	}
-	if len(r.Info.Strategies) == 0 {
-		r.Info.Strategies = append(r.Info.Strategies, models.DefaultStrategyInfo)
-	}
-
-	err = sqlx.NewTasks(d).With(
-		func(db sqlx.DBExecutor) error {
-			return mApplet.Create(db)
-		},
-		func(db sqlx.DBExecutor) error {
-			for i := range r.Info.Strategies {
-				if err := (&models.Strategy{
-					RelStrategy:  models.RelStrategy{StrategyID: idg.MustGenSFID()},
-					RelProject:   models.RelProject{ProjectID: projectID},
-					RelApplet:    models.RelApplet{AppletID: mApplet.AppletID},
-					StrategyInfo: r.Info.Strategies[i],
-				}).Create(db); err != nil {
-					return err
-				}
-			}
-			return nil
-		},
-	).Do()
-
-	if err != nil {
-		l.Error(err)
-		return nil, status.CheckDatabaseError(err, "CreateApplet")
-	}
-
-	return mApplet, nil
+	return m, nil
 }
 
-type UpdateAppletReq struct {
-	File  *multipart.FileHeader `name:"file"`
-	*Info `name:"info"`
-}
-
-func UpdateApplet(ctx context.Context, appletID types.SFID, r *UpdateAppletReq) (err error) {
+func RemoveBySFID(ctx context.Context, id types.SFID) error {
 	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-	mApplet := &models.Applet{RelApplet: models.RelApplet{AppletID: appletID}}
-	idg := confid.MustSFIDGeneratorFromContext(ctx)
-
-	_, l = l.Start(ctx, "UpdateApplet")
-	defer l.End()
-
-	mResource := &models.Resource{}
-	if mResource, err = resource.FetchOrCreateResource(ctx, r.File); err != nil {
-		l.Error(err)
-		return err
-	}
-
-	needUpdateStrategies := r.Info != nil && len(r.Strategies) > 0
-
-	err = sqlx.NewTasks(d).With(
-		func(db sqlx.DBExecutor) error {
-			return mApplet.FetchByAppletID(db)
-		},
-		func(db sqlx.DBExecutor) error {
-			mApplet.RelResource = mResource.RelResource
-			mApplet.WasmName = r.WasmName
-			if r.Info != nil {
-				mApplet.Name = r.AppletName
-			}
-			return mApplet.UpdateByAppletID(db)
-		},
-		func(db sqlx.DBExecutor) error {
-			if !needUpdateStrategies {
-				return nil
-			}
-			s := &models.Strategy{}
-			_, err := db.Exec(
-				builder.Delete().From(
-					db.T(s),
-					builder.Where(
-						builder.And(
-							s.ColProjectID().Eq(mApplet.ProjectID),
-							s.ColAppletID().Eq(mApplet.AppletID),
-						),
-					),
-				),
-			)
-			return err
-		},
-		func(db sqlx.DBExecutor) error {
-			for i := range r.Info.Strategies {
-				if err := (&models.Strategy{
-					RelStrategy:  models.RelStrategy{StrategyID: idg.MustGenSFID()},
-					RelProject:   models.RelProject{ProjectID: mApplet.ProjectID},
-					RelApplet:    models.RelApplet{AppletID: mApplet.AppletID},
-					StrategyInfo: r.Info.Strategies[i],
-				}).Create(db); err != nil {
-					return err
-				}
-			}
-			return nil
-		},
-	).Do()
-
-	if err != nil {
-		l.Error(err)
-		return status.CheckDatabaseError(err, "UpdateApplet")
-	}
-
-	l.WithValues("applet", appletID, "path", mResource.ResourceInfo.Path).Info("applet uploaded")
-	return nil
-}
-
-type ListAppletReq struct {
-	IDs       []uint64     `in:"query" name:"id,omitempty"`
-	AppletIDs []types.SFID `in:"query" name:"appletID,omitempty"`
-	Names     []string     `in:"query" name:"names,omitempty"`
-	NameLike  string       `in:"query" name:"name,omitempty"`
-	datatypes.Pager
-}
-
-func (r *ListAppletReq) Condition() builder.SqlCondition {
-	var (
-		m  = &models.Applet{}
-		cs []builder.SqlCondition
-	)
-	if len(r.IDs) > 0 {
-		cs = append(cs, m.ColID().In(r.IDs))
-	}
-	if len(r.AppletIDs) > 0 {
-		cs = append(cs, m.ColAppletID().In(r.AppletIDs))
-	}
-	if len(r.Names) > 0 {
-		cs = append(cs, m.ColName().In(r.Names))
-	}
-	if r.NameLike != "" {
-		cs = append(cs, m.ColName().Like(r.NameLike))
-	}
-	return builder.And(cs...)
-}
-
-func (r *ListAppletReq) Additions() builder.Additions {
-	m := &models.Applet{}
-	return builder.Additions{
-		builder.OrderBy(builder.DescOrder(m.ColCreatedAt())),
-		r.Pager.Addition(),
-	}
-}
-
-type ListAppletRsp struct {
-	Data  []models.Applet `json:"data"`
-	Hints int64           `json:"hints"`
-}
-
-func ListApplets(ctx context.Context, r *ListAppletReq) (*ListAppletRsp, error) {
-	applet := &models.Applet{}
-
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-
-	_, l = l.Start(ctx, "ListApplets")
-	defer l.End()
-
-	applets, err := applet.List(d, r.Condition(), r.Additions()...)
-	if err != nil {
-		l.Error(err)
-		return nil, err
-	}
-	hints, err := applet.Count(d, r.Condition())
-	if err != nil {
-		l.Error(err)
-		return nil, err
-	}
-	return &ListAppletRsp{applets, hints}, nil
-}
-
-type RemoveAppletReq struct {
-	AppletID types.SFID `in:"path"  name:"appletID"`
-}
-
-func RemoveApplet(ctx context.Context, r *RemoveAppletReq) error {
-	var (
-		d         = types.MustMgrDBExecutorFromContext(ctx)
-		l         = types.MustLoggerFromContext(ctx)
-		mApplet   = &models.Applet{}
-		mInstance = &models.Instance{}
-		instances []models.Instance
-		err       error
-	)
-
-	_, l = l.Start(ctx, "RemoveApplet")
-	defer l.End()
+	m := &models.Applet{RelApplet: models.RelApplet{AppletID: id}}
 
 	return sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
-			mApplet.AppletID = r.AppletID
-			err = mApplet.FetchByAppletID(d)
-			if err != nil {
-				l.Error(err)
-				return status.CheckDatabaseError(err, "fetch by applet id")
+			if err := m.DeleteByAppletID(d); err != nil {
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			mInstance.AppletID = r.AppletID
-			instances, err = mInstance.List(d, mInstance.ColAppletID().Eq(r.AppletID))
+			return strategy.Remove(ctx, &strategy.CondArgs{
+				AppletIDs: types.SFIDs{id},
+			})
+		},
+		func(d sqlx.DBExecutor) error {
+			return deploy.RemoveByAppletSFID(ctx, m.AppletID)
+		},
+	).Do()
+}
+
+func Remove(ctx context.Context, r *CondArgs) error {
+	var (
+		d = types.MustMgrDBExecutorFromContext(ctx)
+		m = &models.Applet{}
+
+		err error
+		lst []models.Applet
+	)
+
+	return sqlx.NewTasks(d).With(
+		func(d sqlx.DBExecutor) error {
+			lst, err = m.List(d, r.Condition())
 			if err != nil {
-				l.Error(err)
-				return status.CheckDatabaseError(err, "ListByAppletID")
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			for _, i := range instances {
-				if err = vm.DelInstance(ctx, i.InstanceID); err != nil {
-					l.Error(err)
-					return status.InternalServerError.StatusErr().WithDesc(
-						fmt.Sprintf("delete instance %s failed: %s",
-							i.InstanceID, err.Error(),
-						),
-					)
+			summary := statusx.ErrorFields{}
+			for i := range lst {
+				v := &lst[i]
+				if err = RemoveBySFID(ctx, v.AppletID); err != nil {
+					se := statusx.FromErr(err)
+					summary = append(summary, &statusx.ErrorField{
+						In:    v.AppletID.String(),
+						Field: se.Key,
+						Msg:   se.Desc,
+					})
 				}
-				if err = i.DeleteByInstanceID(d); err != nil {
-					l.Error(err)
-					return status.CheckDatabaseError(err, "DeleteByInstanceID")
-				}
 			}
-			return nil
-		},
-		func(d sqlx.DBExecutor) error {
-			err = mApplet.DeleteByAppletID(d)
-			if err != nil {
-				l.Error(err)
-				return status.CheckDatabaseError(err, "DeleteAppletByAppletID")
+			if len(summary) > 0 {
+				return status.BatchRemoveAppletFailed.StatusErr().
+					AppendErrorFields(summary...)
 			}
 			return nil
 		},
 	).Do()
 }
 
-type GetAppletReq struct {
-	ProjectName string     `in:"path" name:"projectName"`
-	AppletID    types.SFID `in:"path" name:"appletID"`
+func List(ctx context.Context, r *ListReq) (*ListRsp, error) {
+	var (
+		d    = types.MustMgrDBExecutorFromContext(ctx)
+		err  error
+		app  = &models.Applet{}
+		ret  = &ListRsp{}
+		cond = r.Condition()
+	)
+
+	if ret.Data, err = app.List(d, cond, r.Addition()); err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	if ret.Total, err = app.Count(d, cond); err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return ret, nil
 }
 
-type GetAppletRsp struct {
-	InfoApplet
-	Instances []models.Instance `json:"instances"`
-}
+func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
+	var (
+		lst *ListRsp
+		err error
+		ins *models.Instance
+		res *models.Resource
+		ret = &ListDetailRsp{}
+	)
 
-func GetAppletByAppletID(ctx context.Context, appletID types.SFID) (*GetAppletRsp, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-	mApplet := &models.Applet{RelApplet: models.RelApplet{AppletID: appletID}}
-	mResource := &models.Resource{}
-
-	_, l = l.Start(ctx, "GetAppletByAppletID")
-	defer l.End()
-
-	err := sqlx.NewTasks(d).With(
-		func(d sqlx.DBExecutor) error {
-			err := mApplet.FetchByAppletID(d)
-			if err != nil {
-				l.Error(err)
-				return status.CheckDatabaseError(err, "FetchByAppletID")
-			}
-			return nil
-		},
-		func(d sqlx.DBExecutor) error {
-			mResource.ResourceID = mApplet.ResourceID
-			err := mResource.FetchByResourceID(d)
-			if err != nil {
-				l.Error(err)
-				return status.CheckDatabaseError(err, "FetchByWasmResourceID")
-			}
-			return nil
-		},
-	).Do()
-
+	lst, err = List(ctx, r)
 	if err != nil {
-		l.Error(err)
-		return nil, status.CheckDatabaseError(err, "GetAppletByAppletID")
+		return nil, err
+	}
+	ret = &ListDetailRsp{Total: lst.Total}
+
+	for i := range lst.Data {
+		app := &lst.Data[i]
+		ins, _ = deploy.GetByAppletSFID(ctx, app.AppletID)
+		res, _ = resource.GetBySFID(ctx, app.ResourceID)
+		ret.Data = append(ret.Data, detail(app, ins, res))
+	}
+	return ret, nil
+}
+
+func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
+	var (
+		res *models.Resource
+		acc = types.MustAccountFromContext(ctx)
+		raw []byte
+		err error
+	)
+
+	res, raw, err = resource.Create(ctx, acc.AccountID, r.File, r.AppletName, r.WasmMd5)
+	if err != nil {
+		return nil, err
+	}
+	ctx = types.WithResource(ctx, res)
+
+	var (
+		idg = confid.MustNewSFIDGenerator()
+		prj = types.MustProjectFromContext(ctx)
+		app = &models.Applet{
+			RelApplet:   models.RelApplet{AppletID: idg.MustGenSFID()},
+			RelProject:  models.RelProject{ProjectID: prj.ProjectID},
+			RelResource: models.RelResource{ResourceID: res.ResourceID},
+			AppletInfo:  models.AppletInfo{Name: idg.MustGenSFID().String()},
+		}
+		sty []models.Strategy
+		ins *models.Instance
+	)
+
+	err = sqlx.NewTasks(types.MustMgrDBExecutorFromContext(ctx)).With(
+		func(d sqlx.DBExecutor) error {
+			if err = app.Create(d); err != nil {
+				if sqlx.DBErr(err).IsConflict() {
+					return status.AppletNameConflict
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			ctx = types.WithApplet(ctx, app)
+			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			return strategy.BatchCreate(ctx, r.BuildStrategies(ctx))
+		},
+		func(d sqlx.DBExecutor) error {
+			if r.WasmCache == nil {
+				r.WasmCache = wasm.DefaultCache()
+			}
+			rb := &deploy.CreateReq{Cache: r.WasmCache}
+			if r.Deploy == datatypes.TRUE {
+				ins, err = deploy.UpsertByCode(ctx, rb, raw, enums.INSTANCE_STATE__STARTED)
+			} else {
+				ins, err = deploy.Create(ctx, rb)
+			}
+			return err
+		},
+	).Do()
+	if err != nil {
+		return nil, err
 	}
 
-	return &GetAppletRsp{
-		InfoApplet: InfoApplet{Applet: *mApplet,
-			Path: mResource.ResourceInfo.Path,
+	return &CreateRsp{
+		Applet:     app,
+		Instance:   ins,
+		Resource:   res,
+		Strategies: sty,
+	}, nil
+}
+
+func Update(ctx context.Context, r *UpdateReq) (*UpdateRsp, error) {
+	var (
+		d   = types.MustMgrDBExecutorFromContext(ctx)
+		app = types.MustAppletFromContext(ctx)
+		ins *models.Instance // maybe not deployed
+		res *models.Resource
+		sty []models.Strategy
+		raw []byte
+		err error
+	)
+
+	// create resource if needed
+	if r.File != nil {
+		acc := types.MustAccountFromContext(ctx)
+		filename, md5 := r.Info.WasmName, r.Info.WasmMd5
+		res, raw, err = resource.Create(ctx, acc.AccountID, r.File, filename, md5)
+	}
+
+	err = sqlx.NewTasks(d).With(
+		// update strategy
+		func(d sqlx.DBExecutor) error {
+			sty = r.BuildStrategies(ctx)
+			if len(sty) == 0 {
+				return nil
+			}
+			if err = strategy.Remove(ctx, &strategy.CondArgs{
+				AppletIDs: types.SFIDs{app.AppletID},
+			}); err != nil {
+				return err
+			}
+			if err = strategy.BatchCreate(ctx, r.BuildStrategies(ctx)); err != nil {
+				return err
+			}
+			return nil
 		},
-	}, err
+		// update and deploy instance
+		func(d sqlx.DBExecutor) error {
+			if r.File == nil {
+				return nil // instance state will not be changed
+			}
+			if r.Info.Deploy != datatypes.TRUE {
+				return nil
+			}
+			ins, err = deploy.GetByAppletSFID(ctx, app.AppletID)
+			if err != nil {
+				return err
+			}
+			var rb *deploy.CreateReq
+			if r.Info.WasmCache != nil {
+				rb = &deploy.CreateReq{Cache: r.Info.WasmCache}
+			}
+			ins, err = deploy.UpsertByCode(ctx, rb, raw, ins.State, ins.InstanceID)
+			return err
+		},
+		// update applet info
+		func(d sqlx.DBExecutor) error {
+			if r.Info.AppletName != "" {
+				app.Name = r.Info.AppletName
+			}
+			app.ResourceID = res.ResourceID
+			if err = app.UpdateByAppletID(d); err != nil {
+				if sqlx.DBErr(err).IsConflict() {
+					return status.AppletNameConflict
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
+		},
+	).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	return &UpdateRsp{app, ins, res, sty}, nil
 }

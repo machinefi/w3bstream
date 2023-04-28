@@ -52,6 +52,7 @@ func TestStrfmtValidator_ValidateFailed(t *testing.T) {
 		rule  string
 		vldt  *StrFmt
 	}{
+		// TODO should support multi validator like @alpha|@string[1,32]
 		{1, "@number", NumberValidator},
 		{".", "@number", NumberValidator},
 		{"x#abc.com", "@email", EmailValidator},

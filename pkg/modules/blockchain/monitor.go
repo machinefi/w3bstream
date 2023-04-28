@@ -1,15 +1,12 @@
 package blockchain
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"fmt"
-	"net/http"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
-	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
@@ -41,7 +38,8 @@ func InitChainDB(ctx context.Context) error {
 			),
 		), &results)
 	if err != nil {
-		return status.CheckDatabaseError(err, "FetchChain")
+		return status.DatabaseError.StatusErr().
+			WithDesc(errors.Wrap(err, "FetchChain").Error())
 	}
 	if len(results) > 0 {
 		return nil
@@ -77,40 +75,10 @@ func (l *monitor) sendEvent(ctx context.Context, data []byte, projectName string
 	_, logger = logger.Start(ctx, "monitor.sendEvent")
 	defer logger.End()
 
-	e := event.HandleEventReq{
-		Events: []eventpb.Event{{
-			Header: &eventpb.Header{
-				EventType: eventType,
-			},
-			Payload: data,
-		}},
-	}
-	body, err := json.Marshal(e)
-	if err != nil {
-		logger.Error(err)
-		return err
-	}
-	url := fmt.Sprintf("http://localhost:8888/srv-applet-mgr/v0/event/%s", projectName) // TODO move to config
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
-	if err != nil {
-		logger.Error(err)
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	cli := &http.Client{}
-	resp, err := cli.Do(req)
-	if err != nil {
-		logger.Error(err)
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusCreated {
-		err := fmt.Errorf("unexpected http code %v", resp.StatusCode)
-		logger.Error(err)
-		return err
-	}
-
-	return nil
+	// COMMENT: this should be a rpc, projectName is enough? TODO @zhiran
+	ctx = types.WithProject(ctx, &models.Project{
+		ProjectName: models.ProjectName{Name: projectName}},
+	)
+	_, err := event.HandleEvent(ctx, eventType, data)
+	return err
 }

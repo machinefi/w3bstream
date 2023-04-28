@@ -157,6 +157,14 @@ func (*Project) FieldProto() string {
 	return "Proto"
 }
 
+func (m *Project) ColDescription() *builder.Column {
+	return ProjectTable.ColByFieldName(m.FieldDescription())
+}
+
+func (*Project) FieldDescription() string {
+	return "Description"
+}
+
 func (m *Project) ColCreatedAt() *builder.Column {
 	return ProjectTable.ColByFieldName(m.FieldCreatedAt())
 }

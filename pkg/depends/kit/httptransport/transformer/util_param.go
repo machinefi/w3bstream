@@ -193,6 +193,7 @@ func EachReqParam(ctx context.Context, tpe typesx.Type, each func(rp *ReqParam))
 		}
 		rp.Tsf = tsf
 
+		// TODO check if current struct or field impled Validator
 		paramVldt, err := NewValidator(ctx, rp.Type, rp.Tags, rp.Option.Omitempty, tsf)
 		if err != nil {
 			errs.AddErr(err, rp.Name)

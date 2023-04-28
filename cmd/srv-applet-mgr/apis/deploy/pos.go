@@ -11,8 +11,8 @@ import (
 
 type CreateInstance struct {
 	httpx.MethodPost
-	AppletID                 types.SFID `in:"path" name:"appletID"`
-	deploy.CreateInstanceReq `in:"body"`
+	AppletID         types.SFID `in:"path" name:"appletID"`
+	deploy.CreateReq `in:"body"`
 }
 
 func (r *CreateInstance) Path() string {
@@ -20,10 +20,10 @@ func (r *CreateInstance) Path() string {
 }
 
 func (r *CreateInstance) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
-	ctx, err := ca.WithAppletContext(ctx, r.AppletID)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
+	ctx, err := ca.WithAppletContextBySFID(ctx, r.AppletID)
 	if err != nil {
 		return nil, err
 	}
-	return deploy.CreateInstance(ctx, &r.CreateInstanceReq)
+	return deploy.Create(ctx, &r.CreateReq)
 }

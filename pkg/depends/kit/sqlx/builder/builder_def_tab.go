@@ -247,6 +247,9 @@ type Tables struct {
 }
 
 func (t *Tables) TableNames() []string {
+	if t.lst == nil {
+		return nil
+	}
 	names := make([]string, 0, t.lst.Len())
 	t.Range(func(tbl *Table, _ int) {
 		names = append(names, tbl.Name)

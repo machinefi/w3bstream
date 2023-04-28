@@ -8,27 +8,25 @@ import (
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/types"
-	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
 type GetProjectSchema struct {
 	httpx.MethodGet
-	ProjectName string `name:"projectName" in:"path"`
 }
 
 func (r *GetProjectSchema) Path() string {
-	return "/:projectName/" + enums.CONFIG_TYPE__PROJECT_SCHEMA.String()
+	return "/" + enums.CONFIG_TYPE__PROJECT_DATABASE.String()
 }
 
 func (r *GetProjectSchema) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
-	ctx, err := ca.WithProjectContextByName(ctx, r.ProjectName)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
+	ctx, err := ca.WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
 	if err != nil {
 		return nil, err
 	}
 	prj := types.MustProjectFromContext(ctx)
-	scm := &wasm.Schema{}
-	if err = config.GetConfigValue(ctx, prj.ProjectID, scm); err != nil {
+	scm, err := config.GetValueByRelAndType(ctx, prj.ProjectID, enums.CONFIG_TYPE__PROJECT_DATABASE)
+	if err != nil {
 		return nil, err
 	}
 	return scm, nil
@@ -36,22 +34,21 @@ func (r *GetProjectSchema) Output(ctx context.Context) (interface{}, error) {
 
 type GetProjectEnv struct {
 	httpx.MethodGet
-	ProjectName string `name:"projectName" in:"path"`
 }
 
 func (r *GetProjectEnv) Path() string {
-	return "/:projectName/" + enums.CONFIG_TYPE__PROJECT_ENV.String()
+	return "/" + enums.CONFIG_TYPE__PROJECT_ENV.String()
 }
 
 func (r *GetProjectEnv) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
-	ctx, err := ca.WithProjectContextByName(ctx, r.ProjectName)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
+	ctx, err := ca.WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
 	if err != nil {
 		return nil, err
 	}
 	prj := types.MustProjectFromContext(ctx)
-	env := &wasm.Env{}
-	if err = config.GetConfigValue(ctx, prj.ProjectID, env); err != nil {
+	env, err := config.GetValueByRelAndType(ctx, prj.ProjectID, enums.CONFIG_TYPE__PROJECT_ENV)
+	if err != nil {
 		return nil, err
 	}
 	return env, nil

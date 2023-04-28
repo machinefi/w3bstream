@@ -5,9 +5,9 @@ type DeployCmd uint8
 
 const (
 	DEPLOY_CMD_UNKNOWN DeployCmd = iota
-	DEPLOY_CMD__CREATE
-	DEPLOY_CMD__START
-	DEPLOY_CMD__STOP
-	DEPLOY_CMD__REMOVE
-	DEPLOY_CMD__RESTART
+	_
+	DEPLOY_CMD__START  // start wasm vm
+	DEPLOY_CMD__HUNGUP // stop wasm vm
+	DEPLOY_CMD__KILL   // kill wasm vm (memory released)
+	_
 )

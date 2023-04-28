@@ -26,6 +26,7 @@ var _ interface {
 type Connector struct {
 	Host       string
 	DBName     string
+	MustSchema string
 	Extra      string
 	Extensions []string
 }
@@ -67,6 +68,17 @@ func (c *Connector) Connect(ctx context.Context) (driver.Conn, error) {
 		}
 	}
 
+	if c.MustSchema != "" {
+		_, err = conn.(driver.ExecerContext).ExecContext(
+			context.Background(),
+			"SET SEARCH_PATH TO "+c.MustSchema+";",
+			nil,
+		)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return conn, nil
 }
 
@@ -98,11 +110,8 @@ func (c *Connector) Migrate(ctx context.Context, db sqlx.DBExecutor) error {
 			return nil
 		}
 
-		if output != nil {
-			_, _ = io.WriteString(output, builder.ResolveExpr(expr).Query())
-			_, _ = io.WriteString(output, "\n")
-			return nil
-		}
+		_, _ = io.WriteString(output, builder.ResolveExpr(expr).Query())
+		_, _ = io.WriteString(output, "\n")
 
 		_, err := db.Exec(expr)
 		return err

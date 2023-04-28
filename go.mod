@@ -21,7 +21,6 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.5.0
 	github.com/tidwall/gjson v1.14.3
-	github.com/wasmerio/wasmer-go v1.0.4
 	golang.org/x/mod v0.8.0
 	golang.org/x/net v0.8.0
 	golang.org/x/term v0.6.0
@@ -41,9 +40,11 @@ require (
 )
 
 require (
+	github.com/aws/aws-sdk-go v1.44.245
 	github.com/ethereum/go-ethereum v1.10.15
+	github.com/go-co-op/gocron v1.22.0
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/spruceid/siwe-go v0.2.0
-	google.golang.org/grpc v1.41.0
 )
 
 require (
@@ -60,6 +61,7 @@ require (
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
@@ -81,7 +83,6 @@ require (
 	golang.org/x/crypto v0.7.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
-	google.golang.org/genproto v0.0.0-20200825200019-8632dd797987 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

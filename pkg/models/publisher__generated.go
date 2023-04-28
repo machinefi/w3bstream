@@ -67,27 +67,29 @@ func (m *Publisher) IndexFieldNames() []string {
 	return []string{
 		"ID",
 		"Key",
+		"ProjectID",
 		"PublisherID",
 	}
 }
 
 func (*Publisher) UniqueIndexes() builder.Indexes {
 	return builder.Indexes{
+		"ui_project_id_publisher_key": []string{
+			"ProjectID",
+			"Key",
+		},
 		"ui_publisher_id": []string{
 			"PublisherID",
-		},
-		"ui_publisher_key": []string{
-			"Key",
 		},
 	}
 }
 
-func (*Publisher) UniqueIndexUIPublisherID() string {
-	return "ui_publisher_id"
+func (*Publisher) UniqueIndexUIProjectIDPublisherKey() string {
+	return "ui_project_id_publisher_key"
 }
 
-func (*Publisher) UniqueIndexUIPublisherKey() string {
-	return "ui_publisher_key"
+func (*Publisher) UniqueIndexUIPublisherID() string {
+	return "ui_publisher_id"
 }
 
 func (m *Publisher) ColID() *builder.Column {
@@ -225,6 +227,25 @@ func (m *Publisher) FetchByID(db sqlx.DBExecutor) error {
 	return err
 }
 
+func (m *Publisher) FetchByProjectIDAndKey(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	err := db.QueryAndScan(
+		builder.Select(nil).
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
+						tbl.ColByFieldName("Key").Eq(m.Key),
+					),
+				),
+				builder.Comment("Publisher.FetchByProjectIDAndKey"),
+			),
+		m,
+	)
+	return err
+}
+
 func (m *Publisher) FetchByPublisherID(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	err := db.QueryAndScan(
@@ -237,24 +258,6 @@ func (m *Publisher) FetchByPublisherID(db sqlx.DBExecutor) error {
 					),
 				),
 				builder.Comment("Publisher.FetchByPublisherID"),
-			),
-		m,
-	)
-	return err
-}
-
-func (m *Publisher) FetchByKey(db sqlx.DBExecutor) error {
-	tbl := db.T(m)
-	err := db.QueryAndScan(
-		builder.Select(nil).
-			From(
-				tbl,
-				builder.Where(
-					builder.And(
-						tbl.ColByFieldName("Key").Eq(m.Key),
-					),
-				),
-				builder.Comment("Publisher.FetchByKey"),
 			),
 		m,
 	)
@@ -291,6 +294,37 @@ func (m *Publisher) UpdateByID(db sqlx.DBExecutor, zeros ...string) error {
 	return m.UpdateByIDWithFVs(db, fvs)
 }
 
+func (m *Publisher) UpdateByProjectIDAndKeyWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	tbl := db.T(m)
+	res, err := db.Exec(
+		builder.Update(tbl).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
+					tbl.ColByFieldName("Key").Eq(m.Key),
+				),
+				builder.Comment("Publisher.UpdateByProjectIDAndKeyWithFVs"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
+	)
+	if err != nil {
+		return err
+	}
+	if affected, _ := res.RowsAffected(); affected == 0 {
+		return m.FetchByProjectIDAndKey(db)
+	}
+	return nil
+}
+
+func (m *Publisher) UpdateByProjectIDAndKey(db sqlx.DBExecutor, zeros ...string) error {
+	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
+	return m.UpdateByProjectIDAndKeyWithFVs(db, fvs)
+}
+
 func (m *Publisher) UpdateByPublisherIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
@@ -319,36 +353,6 @@ func (m *Publisher) UpdateByPublisherIDWithFVs(db sqlx.DBExecutor, fvs builder.F
 func (m *Publisher) UpdateByPublisherID(db sqlx.DBExecutor, zeros ...string) error {
 	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
 	return m.UpdateByPublisherIDWithFVs(db, fvs)
-}
-
-func (m *Publisher) UpdateByKeyWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
-
-	if _, ok := fvs["UpdatedAt"]; !ok {
-		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
-	}
-	tbl := db.T(m)
-	res, err := db.Exec(
-		builder.Update(tbl).
-			Where(
-				builder.And(
-					tbl.ColByFieldName("Key").Eq(m.Key),
-				),
-				builder.Comment("Publisher.UpdateByKeyWithFVs"),
-			).
-			Set(tbl.AssignmentsByFieldValues(fvs)...),
-	)
-	if err != nil {
-		return err
-	}
-	if affected, _ := res.RowsAffected(); affected == 0 {
-		return m.FetchByKey(db)
-	}
-	return nil
-}
-
-func (m *Publisher) UpdateByKey(db sqlx.DBExecutor, zeros ...string) error {
-	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
-	return m.UpdateByKeyWithFVs(db, fvs)
 }
 
 func (m *Publisher) Delete(db sqlx.DBExecutor) error {
@@ -380,6 +384,24 @@ func (m *Publisher) DeleteByID(db sqlx.DBExecutor) error {
 	return err
 }
 
+func (m *Publisher) DeleteByProjectIDAndKey(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	_, err := db.Exec(
+		builder.Delete().
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
+						tbl.ColByFieldName("Key").Eq(m.Key),
+					),
+				),
+				builder.Comment("Publisher.DeleteByProjectIDAndKey"),
+			),
+	)
+	return err
+}
+
 func (m *Publisher) DeleteByPublisherID(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	_, err := db.Exec(
@@ -392,23 +414,6 @@ func (m *Publisher) DeleteByPublisherID(db sqlx.DBExecutor) error {
 					),
 				),
 				builder.Comment("Publisher.DeleteByPublisherID"),
-			),
-	)
-	return err
-}
-
-func (m *Publisher) DeleteByKey(db sqlx.DBExecutor) error {
-	tbl := db.T(m)
-	_, err := db.Exec(
-		builder.Delete().
-			From(
-				tbl,
-				builder.Where(
-					builder.And(
-						tbl.ColByFieldName("Key").Eq(m.Key),
-					),
-				),
-				builder.Comment("Publisher.DeleteByKey"),
 			),
 	)
 	return err
