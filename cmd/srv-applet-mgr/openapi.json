@@ -8,7 +8,7 @@
     "/": {
       "get": {
         "tags": [
-          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/swagger"
+          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/openapi"
         ],
         "operationId": "OpenAPI",
         "responses": {
@@ -805,7 +805,7 @@
               "@StatusErr[ConfigConflict][409999006][Config Conflict]!",
               "@StatusErr[MultiInstanceDeployed][409999008][Multi Instance Deployed]!",
               "@StatusErr[ResourceConflict][409999003][Resource Conflict]!",
-              "@StatusErr[ResourceOwnerConflict][409999004][Resource Owner Conflict]!"
+              "@StatusErr[StrategyConflict][409999005][Strategy Conflict]!"
             ]
           },
           "500": {
@@ -1159,7 +1159,6 @@
               "@StatusErr[ConfigConflict][409999006][Config Conflict]!",
               "@StatusErr[MultiInstanceDeployed][409999008][Multi Instance Deployed]!",
               "@StatusErr[ResourceConflict][409999003][Resource Conflict]!",
-              "@StatusErr[ResourceOwnerConflict][409999004][Resource Owner Conflict]!",
               "@StatusErr[StrategyConflict][409999005][Strategy Conflict]!"
             ]
           },

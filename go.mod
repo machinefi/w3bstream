@@ -21,7 +21,6 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.5.0
 	github.com/tidwall/gjson v1.14.3
-	github.com/wasmerio/wasmer-go v1.0.4
 	golang.org/x/mod v0.8.0
 	golang.org/x/net v0.8.0
 	golang.org/x/term v0.6.0
