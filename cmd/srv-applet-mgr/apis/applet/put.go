@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
-	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 type UpdateApplet struct {
@@ -18,8 +18,9 @@ type UpdateApplet struct {
 func (r *UpdateApplet) Path() string { return "/:appletID" }
 
 func (r *UpdateApplet) Output(ctx context.Context) (interface{}, error) {
-	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
-		WithAppletContextBySFID(ctx, r.AppletID)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
+	ctx = ca.WithAccount(ctx)
+	ctx, err := ca.WithAppletContextBySFID(ctx, r.AppletID)
 	if err != nil {
 		return nil, err
 	}

@@ -194,6 +194,7 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 	return &CreateRsp{
 		Applet:     app,
 		Instance:   ins,
+		Resource:   res,
 		Strategies: sty,
 	}, nil
 }
@@ -203,6 +204,7 @@ func Update(ctx context.Context, r *UpdateReq) (*UpdateRsp, error) {
 		d   = types.MustMgrDBExecutorFromContext(ctx)
 		app = types.MustAppletFromContext(ctx)
 		ins *models.Instance // maybe not deployed
+		res *models.Resource
 		sty []models.Strategy
 		raw []byte
 		err error
@@ -212,7 +214,7 @@ func Update(ctx context.Context, r *UpdateReq) (*UpdateRsp, error) {
 	if r.File != nil {
 		acc := types.MustAccountFromContext(ctx)
 		filename, md5 := r.Info.WasmName, r.Info.WasmMd5
-		_, raw, err = resource.Create(ctx, acc.AccountID, r.File, filename, md5)
+		res, raw, err = resource.Create(ctx, acc.AccountID, r.File, filename, md5)
 	}
 
 	err = sqlx.NewTasks(d).With(
@@ -229,19 +231,6 @@ func Update(ctx context.Context, r *UpdateReq) (*UpdateRsp, error) {
 			}
 			if err = strategy.BatchCreate(ctx, r.BuildStrategies(ctx)); err != nil {
 				return err
-			}
-			return nil
-		},
-		// update applet info
-		func(d sqlx.DBExecutor) error {
-			if r.Info.AppletName != "" {
-				app.Name = r.Info.AppletName
-				if err = app.UpdateByAppletID(d); err != nil {
-					if sqlx.DBErr(err).IsConflict() {
-						return status.AppletNameConflict
-					}
-					return status.DatabaseError.StatusErr().WithDesc(err.Error())
-				}
 			}
 			return nil
 		},
@@ -264,10 +253,24 @@ func Update(ctx context.Context, r *UpdateReq) (*UpdateRsp, error) {
 			ins, err = deploy.UpsertByCode(ctx, rb, raw, ins.State, ins.InstanceID)
 			return err
 		},
+		// update applet info
+		func(d sqlx.DBExecutor) error {
+			if r.Info.AppletName != "" {
+				app.Name = r.Info.AppletName
+			}
+			app.ResourceID = res.ResourceID
+			if err = app.UpdateByAppletID(d); err != nil {
+				if sqlx.DBErr(err).IsConflict() {
+					return status.AppletNameConflict
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
+		},
 	).Do()
 	if err != nil {
 		return nil, err
 	}
 
-	return &UpdateRsp{app, ins, sty}, nil
+	return &UpdateRsp{app, ins, res, sty}, nil
 }
