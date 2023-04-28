@@ -154,7 +154,7 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 			RelApplet:   models.RelApplet{AppletID: idg.MustGenSFID()},
 			RelProject:  models.RelProject{ProjectID: prj.ProjectID},
 			RelResource: models.RelResource{ResourceID: res.ResourceID},
-			AppletInfo:  models.AppletInfo{Name: r.AppletName},
+			AppletInfo:  models.AppletInfo{Name: idg.MustGenSFID().String()},
 		}
 		sty []models.Strategy
 		ins *models.Instance
