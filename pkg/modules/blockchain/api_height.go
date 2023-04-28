@@ -45,7 +45,7 @@ func CreateChainHeight(ctx context.Context, r *CreateChainHeightReq) (*models.Ch
 }
 
 func GetChainHeightBySFID(ctx context.Context, id types.SFID) (*models.ChainHeight, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
+	d := types.MustMonitorDBExecutorFromContext(ctx)
 
 	m := &models.ChainHeight{RelChainHeight: models.RelChainHeight{ChainHeightID: id}}
 	if err := m.FetchByChainHeightID(d); err != nil {

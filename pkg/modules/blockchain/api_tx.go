@@ -45,7 +45,7 @@ func CreateChainTx(ctx context.Context, r *CreateChainTxReq) (*models.ChainTx, e
 }
 
 func GetChainTxBySFID(ctx context.Context, id types.SFID) (*models.ChainTx, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
+	d := types.MustMonitorDBExecutorFromContext(ctx)
 
 	m := &models.ChainTx{RelChainTx: models.RelChainTx{ChainTxID: id}}
 	if err := m.FetchByChainTxID(d); err != nil {

@@ -55,7 +55,7 @@ func checkChainID(d sqlx.DBExecutor, id uint64) error {
 }
 
 func GetContractLogBySFID(ctx context.Context, id types.SFID) (*models.ContractLog, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
+	d := types.MustMonitorDBExecutorFromContext(ctx)
 
 	m := &models.ContractLog{RelContractLog: models.RelContractLog{ContractLogID: id}}
 	if err := m.FetchByContractLogID(d); err != nil {
