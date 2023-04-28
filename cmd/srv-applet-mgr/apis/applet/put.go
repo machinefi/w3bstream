@@ -19,8 +19,7 @@ func (r *UpdateApplet) Path() string { return "/:appletID" }
 
 func (r *UpdateApplet) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.MustCurrentAccountFromContext(ctx)
-	ctx = ca.WithAccount(ctx)
-	ctx, err := ca.WithAppletContextBySFID(ctx, r.AppletID)
+	ctx, err := ca.WithAppletContextBySFID(ca.WithAccount(ctx), r.AppletID)
 	if err != nil {
 		return nil, err
 	}

@@ -113,6 +113,7 @@ func ListDetailByCond(ctx context.Context, r *CondArgs, adds ...builder.Addition
 		append([]builder.Addition{
 			builder.LeftJoin(d.T(app)).On(sty.ColAppletID().Eq(app.ColAppletID())),
 			builder.LeftJoin(d.T(prj)).On(sty.ColProjectID().Eq(prj.ColProjectID())),
+			builder.LeftJoin(d.T(ins)).On(sty.ColAppletID().Eq(ins.ColAppletID())),
 			builder.Where(cond),
 		}, adds...)...,
 	)
@@ -246,7 +247,7 @@ func FilterByProjectAndEvent(ctx context.Context, id types.SFID, tpe string) ([]
 		return nil, err
 	}
 
-	results := make([]*types.StrategyResult, len(data))
+	results := make([]*types.StrategyResult, 0, len(data))
 	for i := range data {
 		results = append(results, &data[i].StrategyResult)
 	}
