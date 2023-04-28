@@ -112,14 +112,17 @@ func Upsert(ctx context.Context, rel types.SFID, c wasm.Configuration) (*models.
 			if err != nil {
 				return err
 			}
-			m = &models.Config{ConfigBase: models.ConfigBase{
-				Type: c.ConfigType(), RelID: rel, Value: raw,
-			}}
 			if old == nil {
-				m.ConfigID = idg.MustGenSFID()
+				m = &models.Config{
+					RelConfig: models.RelConfig{ConfigID: idg.MustGenSFID()},
+					ConfigBase: models.ConfigBase{
+						Type: c.ConfigType(), RelID: rel, Value: raw,
+					},
+				}
 				err = m.Create(d)
 			} else {
-				err = m.UpdateByConfigID(d)
+				m.Value = raw
+				err = m.UpdateByRelIDAndType(d)
 			}
 			if err != nil {
 				if sqlx.DBErr(err).IsConflict() {
