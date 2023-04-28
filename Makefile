@@ -40,9 +40,6 @@ pub_client:
 .PHONY: build
 build: update test toolkit srv_applet_mgr pub_client
 
-.PHONY: build_ci
-build_ci: update test srv_applet_mgr_lite
-
 .PHONY: build_lite
 build_lite: update srv_applet_mgr_lite
 
