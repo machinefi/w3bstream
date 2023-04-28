@@ -5,6 +5,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
@@ -12,12 +13,21 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
+type ForwardRequest struct {
+	httpx.MethodPost
+	event.EventReq
+}
+
+func (r *ForwardRequest) Path() string {
+	return "/srv-applet-mgr/v0/event/" + r.Channel
+}
+
 func Forward(ctx context.Context, channel string, ev *eventpb.Event) (interface{}, error) {
 	cli := types.MustProxyClientFromContext(ctx)
-	req := &event.EventReq{
+	req := event.EventReq{
 		Channel:   channel,
 		EventType: ev.Header.GetEventType(),
-		EventID:   ev.Header.EventId,
+		EventID:   ev.Header.GetEventId(),
 		Payload:   *(bytes.NewBuffer(ev.Payload)),
 	}
 
@@ -35,7 +45,7 @@ func Forward(ctx context.Context, channel string, ev *eventpb.Event) (interface{
 	}
 
 	rsp := &event.EventRsp{}
-	if _, err := cli.Do(ctx, req, meta).Into(rsp); err != nil {
+	if _, err := cli.Do(ctx, &ForwardRequest{EventReq: req}, meta).Into(rsp); err != nil {
 		return nil, err
 	}
 	return rsp, nil
