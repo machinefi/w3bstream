@@ -16,14 +16,19 @@ toolkit:
 	@go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/...@toolkit-patch-0.0.1
 	@echo installed `which toolkit`
 
+.PHONY: test
+test:
+	@go test ./...
+
 .PHONY: srv_applet_mgr
 srv_applet_mgr:
+	@toolkit fmt
 	@cd cmd/srv-applet-mgr && make --no-print-directory
 	@echo srv-applet-mgr is built to "\033[31m ./build/srv-applet-mgr/... \033[0m"
 
-.PHONY: srv_applet_mgr_light
-srv_applet_mgr_light:
-	@cd cmd/srv-applet-mgr && make light --no-print-directory
+.PHONY: srv_applet_mgr_lite
+srv_applet_mgr_lite:
+	@cd cmd/srv-applet-mgr && make lite --no-print-directory
 	@echo srv-applet-mgr is built to "\033[31m ./build/srv-applet-mgr/... \033[0m"
 
 
@@ -33,10 +38,10 @@ pub_client:
 	@echo pub_client is built to "\033[31m ./build/pub_client/... \033[0m"
 
 .PHONY: build
-build: update toolkit srv_applet_mgr pub_client
+build: update test toolkit srv_applet_mgr pub_client
 
-.PHONY: build_ligth
-build_light: update srv_applet_mgr_light
+.PHONY: build_lite
+build_lite: update srv_applet_mgr_lite
 
 .PHONY: clean
 clean:

@@ -2,14 +2,10 @@ package resource
 
 import (
 	"context"
-	"fmt"
 	"mime/multipart"
 	"time"
 
-	"github.com/pkg/errors"
-
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
-	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
@@ -72,12 +68,11 @@ func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filen
 					Filename:   filename,
 				},
 			}
+			err = own.FetchByResourceIDAndAccountID(d)
+			if err != nil && !sqlx.DBErr(err).IsNotFound() {
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
 			if err = own.Create(d); err != nil {
-				if sqlx.DBErr(err).IsConflict() {
-					conflog.FromContext(ctx).Warn(errors.New(
-						fmt.Sprintf("ResourceOwnership of %s and %s has exists", own.ResourceID, own.AccountID)))
-					return nil
-				}
 				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
