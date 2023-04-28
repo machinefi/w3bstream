@@ -24,10 +24,10 @@ lite:
 	@rm -rf ../../build/srv-applet-mgr/srv-applet-mgr
 	@rm -rf ../../build/srv-applet-mgr/config
 	@rm -rf ../../build/srv-applet-mgr/openapi.json
-	@mkdir -p ../../build
-	@mv srv-applet-mgr ../../build/srv-applet-mgr
-	@cp -r config ../../build/config
-	@cp -r openapi.json ../../build/openapi.json
+	@mkdir -p ../../build/srv-applet-mgr
+	@mv srv-applet-mgr ../../build/srv-applet-mgr/srv-applet-mgr
+	@cp -r config ../../build/srv-applet-mgr/config
+	@cp -r openapi.json ../../build/srv-applet-mgr/openapi.json
 
 .PHONY: build
 build: openapi lite
