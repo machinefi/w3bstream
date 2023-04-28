@@ -3,7 +3,9 @@ package wasm
 import (
 	"context"
 	"fmt"
+	"os"
 
+	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
@@ -215,9 +217,10 @@ func (d *Database) Init(ctx context.Context) (err error) {
 		return err
 	}
 
-	// if output is not nil, migration will not be executed, only output all
-	// sql queries for inspection
-	output := migration.OutputFromContext(ctx)
+	// try to create database before migration
+	if _, err = d.ep.Exec(builder.Expr("CREATE DATABASE " + d.Name)); err != nil {
+		conflog.Std().Warn(err)
+	}
 
 	// init each schema
 	for _, s := range d.schemas {
@@ -226,14 +229,12 @@ func (d *Database) Init(ctx context.Context) (err error) {
 			ep.AddTable(t.Build())
 		}
 		db := ep.WithSchema(s.Name)
-		if err = migration.Migrate(db, output); err != nil {
+		conflog.Std().Info("migrating %s", s.Name)
+		if err = migration.Migrate(db, os.Stderr); err != nil {
+			conflog.Std().Info(err.Error())
 			return err
 		}
 	}
 
-	if output != nil {
-		// return error for stop other transaction
-		return errors.Errorf("inspection: %v", err)
-	}
 	return nil
 }
