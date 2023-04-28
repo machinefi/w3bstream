@@ -1,6 +1,7 @@
 package event
 
 import (
+	"bytes"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,7 +20,7 @@ type EventReq struct {
 	// Timestamp event time when publisher do send
 	Timestamp int64 `in:"query" name:"timestamp,omitempty"`
 	// Payload event payload (binary only)
-	Payload []byte `in:"body" mime:"stream"`
+	Payload bytes.Buffer `in:"body" mime:"stream"`
 }
 
 func (r *EventReq) SetDefault() {

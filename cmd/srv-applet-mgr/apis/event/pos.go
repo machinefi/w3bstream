@@ -39,6 +39,6 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 		rsp.Error = statusx.FromErr(err).Key
 		return rsp, nil
 	}
-	rsp.Results = event.OnEvent(ctx, r.Payload)
+	rsp.Results = event.OnEvent(ctx, r.Payload.Bytes())
 	return rsp, nil
 }

@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"bytes"
 	"context"
 	"strings"
 
@@ -17,7 +18,7 @@ func Forward(ctx context.Context, channel string, ev *eventpb.Event) (interface{
 		Channel:   channel,
 		EventType: ev.Header.GetEventType(),
 		EventID:   ev.Header.EventId,
-		Payload:   ev.Payload,
+		Payload:   *(bytes.NewBuffer(ev.Payload)),
 	}
 
 	tok := ev.Header.GetToken()

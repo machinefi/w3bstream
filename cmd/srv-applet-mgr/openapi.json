@@ -2509,14 +2509,16 @@
           "content": {
             "application/octet-stream": {
               "schema": {
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "format": "uint8"
-                },
-                "description": "Payload event payload (binary only)",
-                "x-go-field-name": "Payload",
-                "x-tag-mime": "stream"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/BytesBuffer"
+                  },
+                  {
+                    "description": "Payload event payload (binary only)",
+                    "x-go-field-name": "Payload",
+                    "x-tag-mime": "stream"
+                  }
+                ]
               }
             }
           }
@@ -7894,6 +7896,28 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.RelStrategy",
         "x-id": "GithubComMachinefiW3BstreamPkgModelsRelStrategy"
       },
+      "GithubComMachinefiW3BstreamPkgModelsResource": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPrimaryID"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsRelResource"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsResourceInfo"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimes"
+          },
+          {
+            "type": "object",
+            "description": "Resource database model wasm_resource",
+            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.Resource",
+            "x-id": "GithubComMachinefiW3BstreamPkgModelsResource"
+          }
+        ]
+      },
       "GithubComMachinefiW3BstreamPkgModelsResourceInfo": {
         "type": "object",
         "properties": {
@@ -8237,18 +8261,29 @@
                   }
                 ]
               },
+              "resource": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsResource"
+                  },
+                  {
+                    "x-go-field-name": "Resource",
+                    "x-go-star-level": 1,
+                    "x-tag-json": "resource,omitempty"
+                  }
+                ]
+              },
               "strategies": {
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsStrategy"
                 },
                 "x-go-field-name": "Strategies",
-                "x-tag-json": "strategies"
+                "x-tag-json": "strategies,omitempty"
               }
             },
             "required": [
-              "instance",
-              "strategies"
+              "instance"
             ],
             "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.CreateRsp",
             "x-id": "GithubComMachinefiW3BstreamPkgModulesAppletCreateRsp"
@@ -8279,7 +8314,7 @@
           "appletName": {
             "type": "string",
             "x-go-field-name": "AppletName",
-            "x-tag-json": "appletName"
+            "x-tag-json": "appletName,omitempty"
           },
           "start": {
             "allOf": [
@@ -8325,7 +8360,6 @@
           }
         },
         "required": [
-          "appletName",
           "start"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.Info",
