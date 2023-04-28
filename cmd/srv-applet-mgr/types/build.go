@@ -11,26 +11,31 @@ import (
 
 var (
 	Name      string
-	Remote    string
-	Branch    string
-	Commit    string
+	Feature   string
 	Version   string
 	Timestamp string
+
+	BuildVersion string
 )
 
 func init() {
-	if Name != "" {
-		_ = os.Setenv(consts.EnvProjectName, Name)
+	if Name == "" {
+		Name = "srv-applet-mgr"
 	}
-	if Branch != "" && Commit != "" {
-		_ = os.Setenv(consts.EnvProjectFeat, Branch+"@"+Commit)
+	if Feature == "" {
+		Feature = "unknown"
 	}
-	if Version != "" {
-		_ = os.Setenv(consts.EnvProjectVersion, Version)
+	if Version == "" {
+		Version = "unknown"
 	}
+	if Timestamp == "" {
+		Timestamp = "unknown"
+	}
+	_ = os.Setenv(consts.EnvProjectName, Name)
+	_ = os.Setenv(consts.EnvProjectFeat, Feature)
+	_ = os.Setenv(consts.EnvProjectVersion, Version)
 
-	fmt.Printf(color.CyanString(
-		"\n%s:%s was built at %s on %s(%s)\n\n",
-		Remote, Name, Timestamp, Branch, Commit,
-	))
+	BuildVersion = fmt.Sprintf("%s@%s_%s", Feature, Version, Timestamp)
+
+	fmt.Printf(color.CyanString("%s: %s\n\n", Name, BuildVersion))
 }

@@ -1,5 +1,6 @@
 package vm
 
+/*
 import w "github.com/wasmerio/wasmer-go/wasmer"
 
 type Wasm struct {
@@ -81,3 +82,4 @@ func (wasm *Wasm) GetMemory(name string) ([]byte, error) {
 	}
 	return memory.Data(), nil
 }
+*/

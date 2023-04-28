@@ -1,49 +1,38 @@
 .DEFAULT_GOAL := build
 
-REMOTE=$(shell git remote -v | head -n 1 | awk -F" " '{ print $$2 }')
-BRANCH=$(shell git branch | grep '*' | awk '{ print $$2; }')
-COMMIT_ID=$(shell git rev-parse --short HEAD)
-COMMIT_AUTHOR=$(shell git log | head -n 2 | grep Author | awk -F "[<>]" '{ print $$2;  }')
-TAG=$(shell git describe --tags `git rev-list --tags --max-count=1`)
-NOW=$(shell date +%Y%m%d%H%M%S)
-BUILD_PATH=github.com/machinefi/w3bstream/cmd/srv-applet-mgr/types
+VERSION=$(shell git describe --tags --always)
+FEATURE=$(shell git branch | grep '*' | awk '{ print $$2; }')
+BUILD_TIME=$(shell date +%Y%m%d%H%M%S)
+VERSION_PATH=github.com/machinefi/w3bstream/cmd/srv-applet-mgr/types
 
+.PHONY: debug
+debug:
+	@echo ${FEATURE}
+	@echo ${VERSION}
+	@echo ${BUILD_TIME}
+
+.PHONY: openapi
+openapi:
+	@go generate .
+
+.PHONY: lite
+lite:
+	@go build -ldflags "-X ${VERSION_PATH}.ProjectName=srv-applet-mgr\
+ -X ${VERSION_PATH}.Feature=${FEATURE}\
+ -X ${VERSION_PATH}.Version=${VERSION}\
+ -X ${VERSION_PATH}.Timestamp=${BUILD_TIME}"
+	@rm -rf ../../build/srv-applet-mgr/srv-applet-mgr
+	@rm -rf ../../build/srv-applet-mgr/config
+	@rm -rf ../../build/srv-applet-mgr/openapi.json
+	@mkdir -p ../../build
+	@mv srv-applet-mgr ../../build/srv-applet-mgr
+	@cp -r config ../../build/config
+	@cp -r openapi.json ../../build/openapi.json
 
 .PHONY: build
-build:
-	@go build -ldflags "-X ${BUILD_PATH}.Name=srv-applet-mgr\
- -X ${BUILD_PATH}.Remote=${REMOTE}\
- -X ${BUILD_PATH}.Branch=${BRANCH}\
- -X ${BUILD_PATH}.Commit=${COMMIT_ID}\
- -X ${BUILD_PATH}.Version=${TAG}\
- -X ${BUILD_PATH}.Timestamp=${NOW}"
-	@rm -rf build
-	@mkdir -p build
-	@mv srv-applet-mgr build/
-	@cp -r config build/
-	@rm -rf openapi.json
-	@go generate .
-	@cp openapi.json build/
-	@rm -rf ../../build/srv-applet-mgr
-	@mkdir -p ../../build
-	@mv build ../../build/srv-applet-mgr
+build: openapi lite
 
 .PHONY: run
 run: build
 	@cd ../../build/srv-applet-mgr && ./srv-applet-mgr
 
-.PHONY: light
-light:
-	@go build -ldflags "-X ${BUILD_PATH}.Name=srv-applet-mgr\
- -X ${BUILD_PATH}.Remote=${REMOTE}\
- -X ${BUILD_PATH}.Branch=${BRANCH}\
- -X ${BUILD_PATH}.Commit=${COMMIT_ID}\
- -X ${BUILD_PATH}.Version=${TAG}\
- -X ${BUILD_PATH}.Timestamp=${NOW}"
-	@rm -rf build
-	@mkdir -p build
-	@mv srv-applet-mgr build/
-	@cp -r config build/
-	@cp openapi.json build/
-	@rm -rf ../../build/srv-applet-mgr
-	@mkdir -p ../../build && mv build ../../build/srv-applet-mgr

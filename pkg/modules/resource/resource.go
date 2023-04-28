@@ -60,9 +60,6 @@ func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filen
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			if found {
-				return nil
-			}
 			own := &models.ResourceOwnership{
 				RelResource: models.RelResource{ResourceID: res.ResourceID},
 				RelAccount:  models.RelAccount{AccountID: acc},
@@ -71,10 +68,11 @@ func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filen
 					Filename:   filename,
 				},
 			}
+			err = own.FetchByResourceIDAndAccountID(d)
+			if err != nil && !sqlx.DBErr(err).IsNotFound() {
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
 			if err = own.Create(d); err != nil {
-				if sqlx.DBErr(err).IsConflict() {
-					return nil
-				}
 				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil

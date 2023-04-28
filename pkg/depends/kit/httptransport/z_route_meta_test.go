@@ -37,7 +37,7 @@ func ExampleHttpRouteMeta() {
 		fmt.Println(rm.String())
 	}
 	// Output:
-	// GET /demo swagger.OpenAPI
+	// GET /demo openapi.OpenAPI
 	// GET /demo/binary/files routes.DownloadFile
 	// GET /demo/binary/images routes.ShowImage
 	// POS /demo/binary/protobuf routes.Protobuf
