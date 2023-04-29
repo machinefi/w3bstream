@@ -14,7 +14,7 @@ import (
 const chainUniqFlag = 0
 
 func RemoveMonitor(ctx context.Context, projectName string) error {
-	d := types.MustMgrDBExecutorFromContext(ctx)
+	d := types.MustMonitorDBExecutorFromContext(ctx)
 
 	return sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
