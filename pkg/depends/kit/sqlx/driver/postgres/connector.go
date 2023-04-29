@@ -113,7 +113,6 @@ func (c *Connector) Migrate(ctx context.Context, db sqlx.DBExecutor) error {
 		if output != nil {
 			_, _ = io.WriteString(output, builder.ResolveExpr(expr).Query())
 			_, _ = io.WriteString(output, "\n")
-			return nil
 		}
 
 		_, err := db.Exec(expr)

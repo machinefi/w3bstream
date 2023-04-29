@@ -77,6 +77,7 @@ func init() {
 			RouterAuth   = kit.NewRouter(&jwt.Auth{}, &middleware.ContextPublisherAuth{})
 		)
 
+		RouterServer.Register(kit.NewRouter(&openapi.OpenAPI{}))
 		RootEvent.Register(RouterServer)
 		RouterServer.Register(RouterV0)
 		RouterV0.Register(RouterAuth)

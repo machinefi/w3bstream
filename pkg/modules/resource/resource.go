@@ -72,6 +72,9 @@ func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filen
 			if err != nil && !sqlx.DBErr(err).IsNotFound() {
 				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
+			if err == nil {
+				return nil
+			}
 			if err = own.Create(d); err != nil {
 				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}

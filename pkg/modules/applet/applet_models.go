@@ -66,7 +66,7 @@ type ListDetailRsp struct {
 }
 
 type Info struct {
-	AppletName string                `json:"appletName"`
+	AppletName string                `json:"appletName,omitempty"`
 	Deploy     datatypes.Bool        `json:"start"` // Deploy and start vm after created
 	WasmName   string                `json:"wasmName,omitempty"`
 	WasmMd5    string                `json:"wasmMd5,omitempty"`
@@ -107,7 +107,8 @@ func (r *CreateReq) BuildStrategies(ctx context.Context) []models.Strategy {
 type CreateRsp struct {
 	*models.Applet
 	*models.Instance `json:"instance"`
-	Strategies       []models.Strategy `json:"strategies"`
+	*models.Resource `json:"resource,omitempty"`
+	Strategies       []models.Strategy `json:"strategies,omitempty"`
 }
 
 type UpdateReq struct {
