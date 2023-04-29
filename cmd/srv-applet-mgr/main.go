@@ -26,7 +26,7 @@ func main() {
 	app.Execute(func(args ...string) {
 		BatchRun(
 			func() {
-				kit.Run(apis.Root, global.Server())
+				kit.Run(apis.RootMgr, global.Server())
 			},
 			func() {
 				kit.Run(apis.RootEvent, global.EventServer())
