@@ -38,22 +38,16 @@ func (rs *RouterScanner) init() {
 				continue
 			}
 			r := NewRouter(v)
-			ast.Inspect(
-				id.Obj.Decl.(ast.Node),
-				func(node ast.Node) bool {
-					switch call := node.(type) {
-					case *ast.CallExpr:
-						r.AppendOperators(
-							rs.OperatorTypeNamesFromArgs(
-								pkgx.New(pkg),
-								call.Args...,
-							)...,
-						)
-						return false
-					}
-					return true
-				},
-			)
+			ast.Inspect(id.Obj.Decl.(ast.Node), func(node ast.Node) bool {
+				switch n := node.(type) {
+				case *ast.CallExpr:
+					r.AppendOperators(
+						rs.OperatorTypeNamesFromArgs(pkgx.New(pkg), n.Args...)...,
+					)
+					return false
+				}
+				return true
+			})
 			rs.routers[v] = r
 		}
 	}

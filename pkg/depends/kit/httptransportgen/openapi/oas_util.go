@@ -40,7 +40,7 @@ var (
 	PkgPathHttpTspt     = pkgx.Import(reflect.TypeOf(httptransport.HttpRouteMeta{}).PkgPath())
 	PkgPathHttpx        = pkgx.Import(reflect.TypeOf(httpx.Response{}).PkgPath())
 	PkgPathKit          = pkgx.Import(reflect.TypeOf(kit.Router{}).PkgPath())
-	PkgPathStatusErr    = reflect.TypeOf(statusx.StatusErr{}).PkgPath()
+	PkgPathStatusErr    = pkgx.Import(reflect.TypeOf(statusx.StatusErr{}).PkgPath())
 	PkgPathTaskOperator = pkgx.Import(reflect.TypeOf((*mq.TaskOperator)(nil)).Elem().PkgPath())
 )
 

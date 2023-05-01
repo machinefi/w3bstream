@@ -61,15 +61,18 @@ func root(pkg *pkgx.Pkg, call *ast.CallExpr) *types.Var {
 	if !isRouterType(sig.Params().At(0).Type()) {
 		return nil
 	}
-	if sel.Sel.Name == "Run" || sel.Sel.Name == "Serve" {
-		switch node := call.Args[0].(type) {
-		case *ast.SelectorExpr:
-			return pkg.TypesInfo.ObjectOf(node.Sel).(*types.Var)
-		case *ast.Ident:
-			return pkg.TypesInfo.ObjectOf(node).(*types.Var)
-		}
+
+	if sel.Sel.Name != "Run" && sel.Sel.Name != "Serve" {
+		return nil
 	}
-	return nil
+	switch node := call.Args[0].(type) {
+	case *ast.SelectorExpr:
+		return pkg.TypesInfo.ObjectOf(node.Sel).(*types.Var)
+	case *ast.Ident:
+		return pkg.TypesInfo.ObjectOf(node).(*types.Var)
+	default:
+		return nil
+	}
 }
 
 func (g *Generator) Scan(ctx context.Context) {

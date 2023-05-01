@@ -23,13 +23,18 @@ import (
 )
 
 func NewOperatorScanner(pkg *pkgx.Pkg) *OperatorScanner {
-	return &OperatorScanner{
+	ret := &OperatorScanner{
 		pkg:              pkg,
 		DefScanner:       NewDefScanner(pkg),
 		StatusErrScanner: NewStatusErrScanner(pkg),
-		typeTaskOperator: pkgx.New(pkg.PkgByPath(PkgPathTaskOperator)).
-			TypeName("TaskOperator").Type().Underlying().(*types.Interface),
 	}
+	pkgTaskOperator := pkgx.New(pkg.PkgByPath(PkgPathTaskOperator))
+
+	if pkgTaskOperator != nil {
+		ret.typeTaskOperator = pkgTaskOperator.TypeName("TaskOperator").Type().
+			Underlying().(*types.Interface)
+	}
+	return ret
 }
 
 type OperatorScanner struct {
@@ -45,8 +50,8 @@ func (os *OperatorScanner) Operator(ctx context.Context, tn *types.TypeName) *Op
 		return nil
 	}
 
-	if typesx.FromGoType(types.NewPointer(tn.Type())).Implements(typesx.FromGoType(os.typeTaskOperator)) {
-		return nil
+	if op, ok := os.ops[tn]; ok {
+		return op
 	}
 
 	if tn.Pkg().Path() == PkgPathHttpTspt {
@@ -55,14 +60,12 @@ func (os *OperatorScanner) Operator(ctx context.Context, tn *types.TypeName) *Op
 		}
 	}
 
-	if op, ok := os.ops[tn]; ok {
-		return op
+	if os.typeTaskOperator != nil &&
+		typesx.FromGoType(types.NewPointer(tn.Type())).Implements(typesx.FromGoType(os.typeTaskOperator)) {
+		return nil
 	}
 
-	log.FromContext(ctx).Debug(
-		"scanning Operator `%s.%s`",
-		tn.Pkg().Path(), tn.Name(),
-	)
+	log.Std().Debug("scanning Operator `%s.%s`", tn.Pkg().Path(), tn.Name())
 
 	defer func() {
 		if e := recover(); e != nil {
