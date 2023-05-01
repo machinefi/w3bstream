@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	. "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 )
 
 type PayloadBody struct {
