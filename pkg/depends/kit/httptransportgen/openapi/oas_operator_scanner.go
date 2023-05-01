@@ -28,12 +28,13 @@ func NewOperatorScanner(pkg *pkgx.Pkg) *OperatorScanner {
 		DefScanner:       NewDefScanner(pkg),
 		StatusErrScanner: NewStatusErrScanner(pkg),
 	}
-	pkgTaskOperator := pkgx.New(pkg.PkgByPath(PkgPathTaskOperator))
 
-	if pkgTaskOperator != nil {
+	if imported := pkg.PkgByPath(PkgPathTaskOperator); imported != nil {
+		pkgTaskOperator := pkgx.New(imported)
 		ret.typeTaskOperator = pkgTaskOperator.TypeName("TaskOperator").Type().
 			Underlying().(*types.Interface)
 	}
+
 	return ret
 }
 

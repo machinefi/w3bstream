@@ -5,9 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/tools/go/packages"
+
+	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 )
 
 func OptionVendorImportByGoMod() WithOption {

@@ -84,10 +84,10 @@ func ExampleSnippetOperationInvokeMethod() {
 		client.SnippetOperationInvokeMethod(f, "Cookie", nil),
 	)
 	// Output:
-	// func (o *Cookie) Invoke(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*FAKE_RESPONSE, kit.Metadata, error) {
+	// func (o *Cookie) Invoke(cli kit.Client, metas ...kit.Metadata) (*FAKE_RESPONSE, kit.Metadata, error) {
 	// return o.InvokeContext(context.Background(), cli, metas...)
 	// }
-	// func (o *Cookie) Invoke(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
+	// func (o *Cookie) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
 	// return o.InvokeContext(context.Background(), cli, metas...)
 	// }
 }
@@ -100,9 +100,9 @@ func ExampleSnippetClientInterface() {
 		),
 	)
 	// Output:
-	// type DemoInterface interface {
+	// type Interface interface {
 	// Context() context.Context
-	// WithContext(context.Context) DemoInterface
+	// WithContext(context.Context) Interface
 	// ABC()
 	// DEF()
 	// }
@@ -111,8 +111,8 @@ func ExampleSnippetClientInterface() {
 func ExampleSnippetNewClient() {
 	output(client.SnippetNewClient(f, "demo"))
 	// Output:
-	// func NewDemo(c kit.Client) *Demo {
-	// return &(Demo{
+	// func NewClient(c kit.Client) *Client {
+	// return &(Client{
 	// Client: c,
 	// })
 	// }
@@ -121,7 +121,7 @@ func ExampleSnippetNewClient() {
 func ExampleSnippetClientDefine() {
 	output(client.SnippetClientDefine(f, "demo"))
 	// Output:
-	// type Demo struct {
+	// type Client struct {
 	// Client kit.Client
 	// ctx context.Context
 	// }
@@ -130,7 +130,7 @@ func ExampleSnippetClientDefine() {
 func ExampleSnippetClientContextMethod() {
 	output(client.SnippetClientContextMethod(f, "demo"))
 	// Output:
-	// func (c *Demo) Context() context.Context {
+	// func (c *Client) Context() context.Context {
 	// if c.ctx != nil {
 	// return c.ctx
 	// }
@@ -141,8 +141,8 @@ func ExampleSnippetClientContextMethod() {
 func ExampleSnippetClientWithContextMethod() {
 	output(client.SnippetClientWithContextMethod(f, "demo"))
 	// Output:
-	// func (c *Demo) WithContext(ctx context.Context) DemoInterface {
-	// cc := new(Demo)
+	// func (c *Client) WithContext(ctx context.Context) Interface {
+	// cc := new(Client)
 	// cc.Client, cc.ctx = c.Client, ctx
 	// return cc
 	// }

@@ -8,13 +8,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/depends/oas"
 	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"

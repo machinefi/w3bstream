@@ -15,7 +15,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/metax"
 	"github.com/machinefi/w3bstream/pkg/depends/oas"
 	"github.com/machinefi/w3bstream/pkg/depends/x/pkgx"
-	"github.com/machinefi/w3bstream/pkg/depends/x/stringsx"
 )
 
 var (
@@ -132,14 +131,6 @@ func ToColonPath(path string) string {
 		name := regxBraceToColon.FindAllStringSubmatch(str, -1)[0][1]
 		return "/:" + name
 	})
-}
-
-func clientInterfaceName(serviceName string) string {
-	return stringsx.UpperCamelCase(serviceName + "-Interface")
-}
-
-func clientStructName(serviceName string) string {
-	return stringsx.UpperCamelCase(serviceName)
 }
 
 func ImportPathAndExpose(schema *oas.Schema) (string, string) {

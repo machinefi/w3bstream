@@ -13,22 +13,22 @@ func SnippetClientInterface(f *g.File, name string, fns ...g.IfCanBeIfMethod) g.
 	methods := []g.IfCanBeIfMethod{
 		g.Func().Named("Context").Return(varContext),
 		g.Func(g.Var(g.Type(f.Use("context", "Context")))).Named("WithContext").
-			Return(g.Var(g.Type(clientInterfaceName(name)))),
+			Return(g.Var(g.Type("Interface"))),
 	}
 	for _, fn := range fns {
 		methods = append(methods, fn.(*g.FuncType).WithoutBlock().WithoutReceiver())
 	}
 
-	return g.DeclType(g.Var(g.Interface(methods...), clientInterfaceName(name)))
+	return g.DeclType(g.Var(g.Interface(methods...), "Interface"))
 }
 
 func SnippetNewClient(f *g.File, name string) g.Snippet {
 	return g.Func(g.Var(g.Type(f.Use(PkgKit, "Client")), "c")).
-		Named("New" + clientStructName(name)).
-		Return(g.Var(g.Star(g.Type(clientStructName(name))))).
+		Named("NewClient").
+		Return(g.Var(g.Star(g.Type("Client")))).
 		Do(
 			g.Return(g.Addr(g.Paren(g.Compose(
-				g.Type(clientStructName(name)),
+				g.Type("Client"),
 				g.KeyValue(g.Ident("Client"), g.Ident("c")),
 			)))),
 		)
@@ -39,15 +39,13 @@ func SnippetClientDefine(f *g.File, name string) g.Snippet {
 		g.Var(g.Struct(
 			g.Var(g.Type(f.Use(PkgKit, "Client")), "Client"),
 			g.Var(g.Type(f.Use("context", "Context")), "ctx"),
-		),
-			clientStructName(name),
-		),
+		), "Client"),
 	)
 }
 
 func SnippetClientContextMethod(f *g.File, name string) g.Snippet {
 	return g.Func().Named("Context").
-		MethodOf(MethodStarReceiver(clientStructName(name), "c")).
+		MethodOf(MethodStarReceiver("Client", "c")).
 		Return(g.Var(g.Type(f.Use("context", "Context")))).
 		Do(
 			g.If(g.Literal(`c.ctx != nil`)).
@@ -58,11 +56,11 @@ func SnippetClientContextMethod(f *g.File, name string) g.Snippet {
 
 func SnippetClientWithContextMethod(f *g.File, name string) g.Snippet {
 	return g.Func(g.Var(g.Type(f.Use("context", "Context")), "ctx")).
-		MethodOf(MethodStarReceiver(clientStructName(name), "c")).
+		MethodOf(MethodStarReceiver("Client", "c")).
 		Named("WithContext").
-		Return(g.Var(g.Type(clientInterfaceName(name)))).
+		Return(g.Var(g.Type("Interface"))).
 		Do(
-			g.Define(g.Ident("cc")).By(g.Call("new", g.Type(clientStructName(name)))),
+			g.Define(g.Ident("cc")).By(g.Call("new", g.Type("Client"))),
 			g.Literal("cc.Client, cc.ctx = c.Client, ctx"),
 			g.Return(g.Ident("cc")),
 		)
@@ -139,7 +137,7 @@ func (cg *ClientGen) SnippetMethodByOperation(ctx context.Context, op *oas.Opera
 	)
 
 	m := g.Func(args...).Return(rets...).Named(op.OperationId).
-		MethodOf(MethodStarReceiver(clientStructName(cg.ServiceName), "c"))
+		MethodOf(MethodStarReceiver("Client", "c"))
 
 	if hasReq {
 		return m.Do(g.Return(

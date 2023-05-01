@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/pkg/errors"
+
 	g "github.com/machinefi/w3bstream/pkg/depends/gen/codegen"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/openapi"
 	"github.com/machinefi/w3bstream/pkg/depends/oas"
 	"github.com/machinefi/w3bstream/pkg/depends/x/ptrx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/stringsx"
-	"github.com/pkg/errors"
 )
 
 func NewTypeGen(serviceName string, file *g.File) *TypeGen {

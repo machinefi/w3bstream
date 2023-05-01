@@ -11,10 +11,11 @@ import (
 	"path/filepath"
 
 	"github.com/fatih/color"
+	"github.com/pkg/errors"
+
 	"github.com/machinefi/w3bstream/pkg/depends/gen/codegen"
 	"github.com/machinefi/w3bstream/pkg/depends/oas"
 	"github.com/machinefi/w3bstream/pkg/depends/x/stringsx"
-	"github.com/pkg/errors"
 )
 
 type OasGenerator interface {
