@@ -77,7 +77,7 @@
         }
       }
     },
-    "/srv-applet-mgr/v0/account/0": {
+    "/srv-applet-mgr/v0/account": {
       "put": {
         "tags": [
           "apis/account"
