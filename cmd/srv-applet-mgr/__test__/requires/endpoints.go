@@ -1,6 +1,7 @@
 package requires
 
 import (
+	"log"
 	"os"
 	"time"
 
@@ -9,6 +10,8 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/global"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/client"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 func Client(transports ...client.HttpTransport) *applet_mgr.Client {
@@ -36,4 +39,18 @@ func Serve() (stop func()) {
 		_ = p.Signal(os.Interrupt)
 		time.Sleep(3 * time.Second)
 	}
+}
+
+func DropTempWasmDatabase(projectID types.SFID) {
+	if projectID == 0 {
+		return
+	}
+
+	d := types.MustMgrDBExecutorFromContext(global.Context)
+
+	_, err := d.Exec(builder.Expr("DROP DATABASE w3b_" + projectID.String()))
+	if err != nil {
+		log.Println(err)
+	}
+	log.Printf("database: %v dropped", projectID)
 }

@@ -339,8 +339,6 @@ type GithubComMachinefiW3BstreamPkgTypesWasmCache = wasm.Cache
 
 type GithubComMachinefiW3BstreamPkgTypesWasmColumn = wasm.Column
 
-type GithubComMachinefiW3BstreamPkgTypesWasmConfiguration = wasm.Configuration
-
 type GithubComMachinefiW3BstreamPkgTypesWasmConstrains = wasm.Constrains
 
 type GithubComMachinefiW3BstreamPkgTypesWasmDatabase = wasm.Database

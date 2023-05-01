@@ -9,6 +9,9 @@ import (
 )
 
 func CheckError(t *testing.T, err error, expect error) {
+	if err == nil && expect == nil {
+		return
+	}
 	se1 := statusx.FromErr(err)
 	se2 := statusx.FromErr(expect)
 

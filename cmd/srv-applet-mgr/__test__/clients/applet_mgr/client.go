@@ -24,6 +24,7 @@ type Interface interface {
 	CreateContractLog(req *CreateContractLog, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsContractLog, kit.Metadata, error)
 	CreateCronJob(req *CreateCronJob, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsCronJob, kit.Metadata, error)
 	CreateInstance(req *CreateInstance, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsInstance, kit.Metadata, error)
+	CreateOrUpdateProjectEnv(req *CreateOrUpdateProjectEnv, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsConfig, kit.Metadata, error)
 	CreateProject(req *CreateProject, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesProjectCreateRsp, kit.Metadata, error)
 	CreateProjectSchema(req *CreateProjectSchema, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsConfig, kit.Metadata, error)
 	CreatePublisher(req *CreatePublisher, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsPublisher, kit.Metadata, error)
@@ -33,7 +34,8 @@ type Interface interface {
 	GetInstanceByInstanceID(req *GetInstanceByInstanceID, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsInstance, kit.Metadata, error)
 	GetOperatorAddr(req *GetOperatorAddr, metas ...kit.Metadata) (*string, kit.Metadata, error)
 	GetProject(req *GetProject, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsProject, kit.Metadata, error)
-	GetProjectSchema(req *GetProjectSchema, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgTypesWasmConfiguration, kit.Metadata, error)
+	GetProjectEnv(req *GetProjectEnv, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgTypesWasmEnv, kit.Metadata, error)
+	GetProjectSchema(req *GetProjectSchema, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgTypesWasmDatabase, kit.Metadata, error)
 	GetPublisher(req *GetPublisher, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsPublisher, kit.Metadata, error)
 	GetStrategy(req *GetStrategy, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsStrategy, kit.Metadata, error)
 	HandleEvent(req *HandleEvent, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesEventEventRsp, kit.Metadata, error)
@@ -136,6 +138,10 @@ func (c *Client) CreateInstance(req *CreateInstance, metas ...kit.Metadata) (*Gi
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
+func (c *Client) CreateOrUpdateProjectEnv(req *CreateOrUpdateProjectEnv, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsConfig, kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
 func (c *Client) CreateProject(req *CreateProject, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesProjectCreateRsp, kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
@@ -172,7 +178,11 @@ func (c *Client) GetProject(req *GetProject, metas ...kit.Metadata) (*GithubComM
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
-func (c *Client) GetProjectSchema(req *GetProjectSchema, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgTypesWasmConfiguration, kit.Metadata, error) {
+func (c *Client) GetProjectEnv(req *GetProjectEnv, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgTypesWasmEnv, kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
+func (c *Client) GetProjectSchema(req *GetProjectSchema, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgTypesWasmDatabase, kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
