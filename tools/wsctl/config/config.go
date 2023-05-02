@@ -17,4 +17,13 @@ type Config struct {
 	Endpoint   string   `json:"endpoint" yaml:"endpoint"`
 	Language   Language `json:"language" yaml:"language"`
 	PrivateKey string   `json:"prikey" yaml:"prikey"`
+	LoginToken string   `json:"logintoken" yaml:"logintoken"`
+}
+
+type Info interface {
+	LoadConfig() error
+	WriteConfig() error
+	Reset() error
+	Config() *Config
+	ConfigPath() string
 }

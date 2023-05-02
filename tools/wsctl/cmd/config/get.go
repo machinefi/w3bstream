@@ -38,8 +38,7 @@ func newConfigGetCmd(client client.Client) *cobra.Command {
 		Args:      cobra.ExactValidArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
-			info := info{config: client.Config(), configFile: client.ConfigFilePath()}
-			result, err := info.get(args[0])
+			result, err := get(client.Config(), args[0])
 			if err != nil {
 				return errors.Wrap(err, fmt.Sprintf("issue fetching config value %s", args[0]))
 			}
@@ -50,17 +49,17 @@ func newConfigGetCmd(client client.Client) *cobra.Command {
 }
 
 // get retrieves a config item from its key.
-func (c *info) get(arg string) (string, error) {
+func get(c *config.Config, arg string) (string, error) {
 	switch arg {
 	case "endpoint":
-		if c.config.Endpoint == "" {
+		if c.Endpoint == "" {
 			return "", ErrEmptyEndpoint
 		}
-		return fmt.Sprintf("%s", c.config.Endpoint), nil
+		return fmt.Sprintf("%s", c.Endpoint), nil
 	case "language":
-		return string(c.config.Language), nil
+		return string(c.Language), nil
 	case "all":
-		return jsonString(c.config)
+		return jsonString(c)
 	default:
 		return "", ErrConfigNotMatch
 	}

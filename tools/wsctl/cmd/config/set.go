@@ -46,8 +46,7 @@ func newConfigSetCmd(client client.Client) *cobra.Command {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
-			info := info{config: client.Config(), configFile: client.ConfigFilePath()}
-			result, err := info.set(args)
+			result, err := set(client.ConfigInfo(), args)
 			if err != nil {
 				return errors.Wrap(err, fmt.Sprintf("problem setting config fields %+v", args))
 			}
@@ -58,24 +57,24 @@ func newConfigSetCmd(client client.Client) *cobra.Command {
 }
 
 // set sets config variable
-func (c *info) set(args []string) (string, error) {
+func set(c config.Info, args []string) (string, error) {
 	switch args[0] {
 	case "endpoint":
 		if !isValidEndpoint(args[1]) {
 			return "", errors.Errorf("endpoint %s is not valid", args[1])
 		}
-		c.config.Endpoint = args[1]
+		c.Config().Endpoint = args[1]
 	case "language":
 		if !isSupportedLanguage(config.Language(args[1])) {
 			return "", errors.Errorf("language %s is not supported\nSupported languages: %s",
 				args[1], config.SupportedLanguage)
 		}
-		c.config.Language = config.Language(args[1])
+		c.Config().Language = config.Language(args[1])
 	default:
 		return "", ErrConfigNotMatch
 	}
 
-	if err := c.writeConfig(); err != nil {
+	if err := c.WriteConfig(); err != nil {
 		return "", err
 	}
 

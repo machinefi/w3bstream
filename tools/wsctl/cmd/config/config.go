@@ -53,7 +53,7 @@ func NewConfigCmd(client client.Client) *cobra.Command {
 }
 
 // InitConfig load config data from default config file
-func InitConfig() (config.Config, string, error) {
+func InitConfig() (config.Info, error) {
 	info := &info{
 		config: config.Config{},
 	}
@@ -61,17 +61,17 @@ func InitConfig() (config.Config, string, error) {
 	// Create path to config directory
 	err := os.MkdirAll(_configDir, 0700)
 	if err != nil {
-		return info.config, info.configFile, err
+		return info, err
 	}
 	info.configFile = filepath.Join(_configDir, _defaultConfigFileName)
 
 	// Load or reset config file
-	err = info.loadConfig()
+	err = info.LoadConfig()
 	if os.IsNotExist(err) {
-		err = info.reset()
+		err = info.Reset()
 	}
 	if err != nil {
-		return info.config, info.configFile, err
+		return info, err
 	}
 
 	// Check completeness of config file
@@ -85,14 +85,14 @@ func InitConfig() (config.Config, string, error) {
 		completeness = false
 	}
 	if !completeness {
-		if err = info.writeConfig(); err != nil {
-			return info.config, info.configFile, err
+		if err = info.WriteConfig(); err != nil {
+			return info, err
 		}
 	}
 	if !isSupportedLanguage(info.config.Language) {
 		fmt.Printf("Warn: Language %s is not supported, using English.\n", info.config.Language)
 	}
-	return info.config, info.configFile, nil
+	return info, nil
 }
 
 // info contains the information of config file
@@ -102,7 +102,7 @@ type info struct {
 }
 
 // loadConfig loads config file in yaml format
-func (c *info) loadConfig() error {
+func (c *info) LoadConfig() error {
 	in, err := os.ReadFile(c.configFile)
 	if err != nil {
 		return err
@@ -114,11 +114,11 @@ func (c *info) loadConfig() error {
 }
 
 // reset resets all values of config
-func (c *info) reset() error {
+func (c *info) Reset() error {
 	c.config.Endpoint = _defaultEndpoint
 	c.config.Language = config.English
 
-	err := c.writeConfig()
+	err := c.WriteConfig()
 	if err != nil {
 		return err
 	}
@@ -128,7 +128,7 @@ func (c *info) reset() error {
 }
 
 // writeConfig writes to config file
-func (c *info) writeConfig() error {
+func (c *info) WriteConfig() error {
 	out, err := yaml.Marshal(&c.config)
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal config")
@@ -137,6 +137,14 @@ func (c *info) writeConfig() error {
 		return errors.Wrap(err, fmt.Sprintf("failed to write to config file %s", c.configFile))
 	}
 	return nil
+}
+
+func (c *info) Config() *config.Config {
+	return &c.config
+}
+
+func (c *info) ConfigPath() string {
+	return c.configFile
 }
 
 func isSupportedLanguage(l config.Language) bool {

@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/dchest/uniuri"
@@ -26,42 +27,42 @@ type (
 
 var pvk1 = "3b3a4ccb94b92b43af8e3987d181d340a754e6b4168811f3a80bdc7e6edbcda4"
 
-func (c *client) login() error {
+func (c *client) login() (string, error) {
 	// pvk1 := c.Config().PrivateKey
 
 	pvk, err := loadPrivateKey(pvk1)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	msg, err := prepareMessage(pvk.PublicKey)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if _, err := siwe.ParseMessage(msg); err != nil {
-		return err
+		return "", err
 	}
 
 	sig, err := signMessage(msg, pvk)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	body, err := json.Marshal(loginByAddress{msg, sig})
 	if err != nil {
-		return err
+		return "", err
 	}
-	url := fmt.Sprintf("%s/srv-applet-mgr/v0/login/wallet", c.cfg.Endpoint)
+	url := fmt.Sprintf("%s/srv-applet-mgr/v0/login/wallet", c.Config().Endpoint)
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer([]byte(body)))
 	if err != nil {
-		c.logger.Panic(errors.Wrap(err, "failed to create login request"))
+		log.Panic(errors.Wrap(err, "failed to create login request"))
 	}
 	req.Header.Set("Content-Type", "application/json")
 	cli := &http.Client{}
 	resp, err := cli.Do(req)
 	if err != nil {
-		c.logger.Panic(errors.Wrapf(err, "failed to login %s", url))
+		log.Panic(errors.Wrapf(err, "failed to login %s", url))
 	}
 	defer resp.Body.Close()
 
@@ -75,11 +76,8 @@ func (c *client) login() error {
 	}
 
 	ret := gjson.ParseBytes(respBody)
-	tt := ret.Get("token").String()
-	fmt.Println("token acquired", tt)
 
-	c.token.Store(tt)
-	return nil
+	return ret.Get("token").String(), nil
 }
 
 func loadPrivateKey(pvkStr string) (*ecdsa.PrivateKey, error) {

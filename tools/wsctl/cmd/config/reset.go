@@ -22,8 +22,7 @@ func newConfigResetCmd(client client.Client) *cobra.Command {
 		Short: client.SelectTranslation(_configResetCmdShorts),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
-			info := info{config: client.Config(), configFile: client.ConfigFilePath()}
-			err := info.reset()
+			err := client.ConfigInfo().Reset()
 			if err != nil {
 				return errors.Wrap(err, "failed to reset config")
 			}

@@ -29,12 +29,7 @@ func newAppletDeleteCmd(client client.Client) *cobra.Command {
 	return &cobra.Command{
 		Use:   client.SelectTranslation(_appletDeleteUse),
 		Short: client.SelectTranslation(_appletDeleteCmdShorts),
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) != 1 {
-				return fmt.Errorf("accepts 1 arg(s), received %d", len(args))
-			}
-			return nil
-		},
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
 			if err := delete(cmd, client, args); err != nil {
@@ -46,7 +41,7 @@ func newAppletDeleteCmd(client client.Client) *cobra.Command {
 	}
 }
 
-func delete(cmd *cobra.Command, client client.Client, args []string) error {
+func delete(client client.Client, args []string) error {
 	url := GetAppletCmdUrl(client.Config().Endpoint, args[0])
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {

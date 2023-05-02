@@ -3,20 +3,17 @@ package main
 import (
 	"os"
 
-	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/tools/wsctl/client"
 	"github.com/machinefi/w3bstream/tools/wsctl/cmd"
 	"github.com/machinefi/w3bstream/tools/wsctl/cmd/config"
 )
 
 func main() {
-	logger := log.Std()
-
-	readConfig, defaultConfigFile, err := config.InitConfig()
+	cfg, err := config.InitConfig()
 	if err != nil {
-		logger.Panic(err)
+		panic(err)
 	}
-	client := client.NewClient(readConfig, defaultConfigFile, logger)
+	client := client.NewClient(cfg)
 	if err := cmd.NewWsctl(client).Execute(); err != nil {
 		os.Exit(1)
 	}
