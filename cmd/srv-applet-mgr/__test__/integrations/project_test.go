@@ -1,8 +1,12 @@
 package integrations
 
 import (
+	"strings"
 	"testing"
 
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/global"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
+	"github.com/machinefi/w3bstream/pkg/modules/config"
 	. "github.com/onsi/gomega"
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/__test__/clients/applet_mgr"
@@ -13,12 +17,16 @@ import (
 )
 
 func TestProjectAPIs(t *testing.T) {
-	defer requires.Serve()()
 	var (
+		ctx         = global.Context
 		client      = requires.AuthClient()
 		projectName = "testdemo"
 		projectID   types.SFID
 	)
+
+	defer requires.DropTempWasmDatabase(&projectID)
+	// close server first to release database connection
+	defer requires.Serve()()
 
 	t.Logf("random a project name: %s", projectName)
 
@@ -36,7 +44,6 @@ func TestProjectAPIs(t *testing.T) {
 					NewWithT(t).Expect(err).To(BeNil())
 					NewWithT(t).Expect(rsp.Name).To(Equal(projectName))
 					projectID = rsp.ProjectID
-					defer requires.DropTempWasmDatabase(projectID)
 				}
 
 				// check project default config
@@ -67,18 +74,36 @@ func TestProjectAPIs(t *testing.T) {
 
 				// check project config is removed
 				{
-					req := &applet_mgr.GetProjectSchema{ProjectName: projectName}
-					_, _, err := client.GetProjectSchema(req)
-
-					requires.CheckError(t, err, status.ProjectNotFound)
+					_, err := config.GetByRelAndType(ctx, projectID, enums.CONFIG_TYPE__PROJECT_DATABASE)
+					requires.CheckError(t, err, status.ConfigNotFound)
 				}
 
 				{
-					req := &applet_mgr.GetProjectEnv{ProjectName: projectName}
-					_, _, err := client.GetProjectEnv(req)
-
-					requires.CheckError(t, err, status.ProjectNotFound)
+					_, err := config.GetByRelAndType(ctx, projectID, enums.CONFIG_TYPE__PROJECT_ENV)
+					requires.CheckError(t, err, status.ConfigNotFound)
 				}
+			})
+			t.Run("#InvalidProjectName", func(t *testing.T) {
+				// project name is empty
+				{
+					req := &applet_mgr.CreateProject{}
+
+					_, _, err := client.CreateProject(req)
+					requires.CheckError(t, err, &statusx.StatusErr{
+						Key: "badRequest",
+					})
+				}
+
+				{
+					req := &applet_mgr.CreateProject{}
+					req.CreateReq.Name = strings.Repeat("a", 33)
+
+					_, _, err := client.CreateProject(req)
+					requires.CheckError(t, err, &statusx.StatusErr{
+						Key: "badRequest",
+					})
+				}
+
 			})
 		})
 	})

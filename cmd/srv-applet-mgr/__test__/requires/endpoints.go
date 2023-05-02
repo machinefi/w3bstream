@@ -41,8 +41,8 @@ func Serve() (stop func()) {
 	}
 }
 
-func DropTempWasmDatabase(projectID types.SFID) {
-	if projectID == 0 {
+func DropTempWasmDatabase(projectID *types.SFID) {
+	if *projectID == 0 {
 		return
 	}
 
