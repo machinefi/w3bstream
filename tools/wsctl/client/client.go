@@ -1,32 +1,16 @@
 package client
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
-	"os"
+	"net/http/httputil"
 	"sync/atomic"
 
 	"github.com/pkg/errors"
-	"github.com/tidwall/gjson"
-	"golang.org/x/term"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/tools/wsctl/config"
-)
-
-// Multi-language support
-var (
-	_userNameInput = map[config.Language]string{
-		config.English: "Please enter your name: ",
-		config.Chinese: "请输入用户名：",
-	}
-	_userPasswordInput = map[config.Language]string{
-		config.English: "Please enter password: ",
-		config.Chinese: "请输入密码：",
-	}
 )
 
 // Client defines the interface of an wsctl client
@@ -38,7 +22,7 @@ type Client interface {
 	// SelectTranslation select a translation based on UILanguage
 	SelectTranslation(map[config.Language]string) string
 	// Call http call
-	Call(url string, req *http.Request) ([]byte, error)
+	Call(req *http.Request) ([]byte, error)
 }
 
 type client struct {
@@ -73,75 +57,40 @@ func (c *client) SelectTranslation(trls map[config.Language]string) string {
 	return trl
 }
 
-func (c *client) Call(url string, req *http.Request) ([]byte, error) {
-	resp, err := c.call(url, req, c.getToken())
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to call w3bstream api")
-	}
-	body, err := ioutil.ReadAll(resp.Body)
+func (c *client) Call(req *http.Request) ([]byte, error) {
+	token, err := c.getToken()
 	if err != nil {
 		return nil, err
 	}
-	if gjson.ValidBytes(body) {
-		ret := gjson.ParseBytes(body)
-		if code := ret.Get("code"); code.Exists() && (code.Uint()/1e6 == 401) {
-			c.login()
-			return c.Call(url, req)
-		}
+	resp, err := c.call(req, token)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to call w3bstream api")
 	}
-	return body, err
+	defer resp.Body.Close()
+	dump, err := httputil.DumpResponse(resp, true)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println("\033[36mhttp response:\033[0m")
+	fmt.Println(string(dump))
+	if resp.StatusCode >= 400 {
+		return nil, errors.New("error in the http response")
+	}
+	return io.ReadAll(resp.Body)
 }
 
-func (c *client) call(url string, req *http.Request, token string) (*http.Response, error) {
+func (c *client) call(req *http.Request, token string) (*http.Response, error) {
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 	cli := &http.Client{}
 	return cli.Do(req)
 }
 
-func (c *client) getToken() string {
+func (c *client) getToken() (string, error) {
 	if t := c.token.Load(); t != nil {
-		return t.(string)
+		return t.(string), nil
 	}
-	c.login()
-	return c.token.Load().(string)
-}
-
-type tokenResp struct {
-	Token string `json:"token"`
-}
-
-func (c *client) login() {
-	var userName, password string
-	fmt.Println(c.SelectTranslation(_userNameInput))
-	if _, err := fmt.Scanln(&userName); err != nil {
-		c.logger.Panic(errors.Wrap(err, "failed to read username"))
+	if err := c.login(); err != nil {
+		return "", err
 	}
-
-	fmt.Println(c.SelectTranslation(_userPasswordInput))
-	p, err := term.ReadPassword(int(os.Stdin.Fd()))
-	if err != nil {
-		c.logger.Panic(errors.Wrap(err, "failed to read password"))
-	}
-	password = string(p)
-
-	body := fmt.Sprintf(`{"username":"%s","password":"%s"}`, userName, password)
-	url := fmt.Sprintf("%s/srv-applet-mgr/v0/login", c.cfg.Endpoint)
-	req, err := http.NewRequest("PUT", url, bytes.NewBuffer([]byte(body)))
-	if err != nil {
-		c.logger.Panic(errors.Wrap(err, "failed to create login request"))
-	}
-	req.Header.Set("Content-Type", "application/json")
-	cli := &http.Client{}
-	resp, err := cli.Do(req)
-	if err != nil {
-		c.logger.Panic(errors.Wrapf(err, "failed to login %s", url))
-	}
-	defer resp.Body.Close()
-
-	ts := tokenResp{}
-
-	if err := json.NewDecoder(resp.Body).Decode(&ts); err != nil {
-		c.logger.Panic(errors.Wrap(err, "failed to decode login response"))
-	}
-	c.token.Store(ts.Token)
+	return c.token.Load().(string), nil
 }

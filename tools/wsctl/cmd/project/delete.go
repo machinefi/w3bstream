@@ -6,11 +6,8 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 
 	"github.com/machinefi/w3bstream/tools/wsctl/client"
-	"github.com/machinefi/w3bstream/tools/wsctl/cmd/utils"
 	"github.com/machinefi/w3bstream/tools/wsctl/config"
 )
 
@@ -20,8 +17,8 @@ var (
 		config.Chinese: "delete project名称",
 	}
 	_projectDeleteCmdShorts = map[config.Language]string{
-		config.English: "Delete a new project",
-		config.Chinese: "删除一个新的project",
+		config.English: "Delete a project",
+		config.Chinese: "删除一个project",
 	}
 )
 
@@ -30,34 +27,28 @@ func newProjectDeleteCmd(client client.Client) *cobra.Command {
 	return &cobra.Command{
 		Use:   client.SelectTranslation(_projectDeleteUse),
 		Short: client.SelectTranslation(_projectDeleteCmdShorts),
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) != 1 {
-				return fmt.Errorf("accepts 1 arg(s), received %d", len(args))
-			}
-			return nil
-		},
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
-			if err := delete(cmd, client, args); err != nil {
+			projectName := args[0]
+			if _, err := Delete(client, projectName); err != nil {
 				return errors.Wrap(err, fmt.Sprintf("problem delete project %+v", args))
 			}
-			cmd.Println(cases.Title(language.Und).String(args[0]) + " project deleted successfully ")
+			cmd.Printf("project %s deleted successfully\n", projectName)
 			return nil
 		},
 	}
 }
 
-func delete(cmd *cobra.Command, client client.Client, args []string) error {
-	url := fmt.Sprintf("%s/srv-applet-mgr/v0/project/%s", client.Config().Endpoint, args[0])
-	req, err := http.NewRequest("DELETE", url, nil)
+func deleteURL(endpoint, name string) string {
+	return fmt.Sprintf("%s/srv-applet-mgr/v0/project/x/%s", endpoint, name)
+}
+
+func Delete(client client.Client, name string) ([]byte, error) {
+	req, err := http.NewRequest("DELETE", deleteURL(client.Config().Endpoint, name), nil)
 	if err != nil {
-		return errors.Wrap(err, "failed to delete project request")
+		return nil, errors.Wrap(err, "failed to create request")
 	}
 	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := client.Call(url, req)
-	if err != nil {
-		return errors.Wrap(err, "failed to delete project")
-	}
-	return utils.PrintResponse(cmd, resp)
+	return client.Call(req)
 }

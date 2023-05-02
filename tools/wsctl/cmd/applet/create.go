@@ -15,7 +15,6 @@ import (
 	"golang.org/x/text/language"
 
 	"github.com/machinefi/w3bstream/tools/wsctl/client"
-	"github.com/machinefi/w3bstream/tools/wsctl/cmd/utils"
 	"github.com/machinefi/w3bstream/tools/wsctl/config"
 )
 
@@ -64,11 +63,11 @@ func create(cmd *cobra.Command, client client.Client, args []string) error {
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := client.Call(createURL, req)
+	_, err = client.Call(req)
 	if err != nil {
 		return errors.Wrap(err, "failed to create applet")
 	}
-	return utils.PrintResponse(cmd, resp)
+	return nil
 }
 
 func loadFile(filePath string, info string) (io.Reader, error) {

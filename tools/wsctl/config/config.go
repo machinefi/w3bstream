@@ -14,6 +14,7 @@ type Language string
 
 // Config defines the config schema
 type Config struct {
-	Endpoint string   `json:"endpoint" yaml:"endpoint"`
-	Language Language `json:"language" yaml:"language"`
+	Endpoint   string   `json:"endpoint" yaml:"endpoint"`
+	Language   Language `json:"language" yaml:"language"`
+	PrivateKey string   `json:"prikey" yaml:"prikey"`
 }

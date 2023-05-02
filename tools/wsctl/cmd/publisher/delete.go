@@ -54,7 +54,7 @@ func delete(cmd *cobra.Command, client client.Client, args []string) error {
 		return errors.Wrap(err, "failed to delete publisher request")
 	}
 	req.Header.Set("Content-Type", "application/json")
-	resp, err := client.Call(url, req)
+	resp, err := client.Call(req)
 	if err != nil {
 		return errors.Wrap(err, "failed to delete publisher")
 	}

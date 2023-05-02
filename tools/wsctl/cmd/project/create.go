@@ -2,16 +2,14 @@ package project
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 
 	"github.com/machinefi/w3bstream/tools/wsctl/client"
-	"github.com/machinefi/w3bstream/tools/wsctl/cmd/utils"
 	"github.com/machinefi/w3bstream/tools/wsctl/config"
 )
 
@@ -31,35 +29,40 @@ func newProjectCreateCmd(client client.Client) *cobra.Command {
 	return &cobra.Command{
 		Use:   client.SelectTranslation(_projectCreateUse),
 		Short: client.SelectTranslation(_projectCreateCmdShorts),
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) != 1 {
-				return fmt.Errorf("accepts 1 arg(s), received %d", len(args))
-			}
-			return nil
-		},
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
-			if err := create(cmd, client, args); err != nil {
-				return errors.Wrap(err, fmt.Sprintf("problem create project %+v", args))
+			projectName := args[0]
+			if _, err := Create(client, projectName); err != nil {
+				return errors.Wrap(err, fmt.Sprintf("failed to create project %s", projectName))
 			}
-			cmd.Println(cases.Title(language.Und).String(args[0]) + " project created successfully ")
+			cmd.Printf("project %s created successfully\n", projectName)
 			return nil
 		},
 	}
 }
 
-func create(cmd *cobra.Command, client client.Client, args []string) error {
-	body := fmt.Sprintf(`{"name":"%s"}`, args[0])
-	url := fmt.Sprintf("%s/srv-applet-mgr/v0/project", client.Config().Endpoint)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(body)))
+type projectCreate struct {
+	Name string `json:"name"`
+}
+
+func createURL(endpoint string) string {
+	return fmt.Sprintf("%s/srv-applet-mgr/v0/project", endpoint)
+}
+
+func Create(client client.Client, name string) ([]byte, error) {
+	bodyBytes, err := json.Marshal(projectCreate{name})
 	if err != nil {
-		return errors.Wrap(err, "failed to create project request")
+		return nil, err
+	}
+	req, err := http.NewRequest(
+		"POST",
+		createURL(client.Config().Endpoint),
+		bytes.NewBuffer(bodyBytes),
+	)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create request")
 	}
 	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := client.Call(url, req)
-	if err != nil {
-		return errors.Wrap(err, "failed to create project")
-	}
-	return utils.PrintResponse(cmd, resp)
+	return client.Call(req)
 }

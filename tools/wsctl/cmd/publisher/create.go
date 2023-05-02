@@ -57,7 +57,7 @@ func create(cmd *cobra.Command, client client.Client, args []string) error {
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := client.Call(createURL, req)
+	resp, err := client.Call(req)
 	if err != nil {
 		return errors.Wrap(err, "failed to create publisher")
 	}

@@ -89,3 +89,7 @@ generate: toolkit
 .PHONY: migrate
 migrate: toolkit
 	go run cmd/srv-applet-mgr/main.go migrate
+
+.PHONY: wsctl
+wsctl: 
+	@go build -o ./build/wsctl -v ./cmd/wsctl/main.go 

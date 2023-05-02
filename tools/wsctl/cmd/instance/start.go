@@ -55,7 +55,7 @@ func start(cmd *cobra.Command, client client.Client, args []string) error {
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := client.Call(url, req)
+	resp, err := client.Call(req)
 	if err != nil {
 		return errors.Wrap(err, "failed to start instance")
 	}
