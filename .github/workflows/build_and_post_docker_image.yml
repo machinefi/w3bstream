@@ -12,7 +12,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build:
+  build_docker_image:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
