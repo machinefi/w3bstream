@@ -25,13 +25,6 @@ type (
 )
 
 func NewRuntime() *Runtime {
-	/*
-		store := wasmtime.NewStore(engine)
-		store.SetWasi(wasmtime.NewWasiConfig())
-
-		return &Runtime{store: store}
-	*/
-
 	return &Runtime{}
 }
 
