@@ -14,7 +14,7 @@ import (
 	"golang.org/x/term"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
-	"github.com/machinefi/w3bstream/pkg/wsctl/config"
+	"github.com/machinefi/w3bstream/tools/wsctl/config"
 )
 
 // Multi-language support

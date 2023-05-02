@@ -12,8 +12,8 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 
-	"github.com/machinefi/w3bstream/pkg/wsctl/client"
-	"github.com/machinefi/w3bstream/pkg/wsctl/config"
+	"github.com/machinefi/w3bstream/tools/wsctl/client"
+	"github.com/machinefi/w3bstream/tools/wsctl/config"
 )
 
 const (

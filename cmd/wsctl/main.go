@@ -4,9 +4,9 @@ import (
 	"os"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
-	"github.com/machinefi/w3bstream/pkg/wsctl/client"
-	"github.com/machinefi/w3bstream/pkg/wsctl/cmd"
-	"github.com/machinefi/w3bstream/pkg/wsctl/cmd/config"
+	"github.com/machinefi/w3bstream/tools/wsctl/client"
+	"github.com/machinefi/w3bstream/tools/wsctl/cmd"
+	"github.com/machinefi/w3bstream/tools/wsctl/cmd/config"
 )
 
 func main() {

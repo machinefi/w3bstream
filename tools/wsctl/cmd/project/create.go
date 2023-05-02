@@ -10,9 +10,9 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 
-	"github.com/machinefi/w3bstream/pkg/wsctl/client"
-	"github.com/machinefi/w3bstream/pkg/wsctl/cmd/utils"
-	"github.com/machinefi/w3bstream/pkg/wsctl/config"
+	"github.com/machinefi/w3bstream/tools/wsctl/client"
+	"github.com/machinefi/w3bstream/tools/wsctl/cmd/utils"
+	"github.com/machinefi/w3bstream/tools/wsctl/config"
 )
 
 var (

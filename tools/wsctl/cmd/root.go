@@ -3,11 +3,11 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/machinefi/w3bstream/pkg/wsctl/client"
-	cfgcmd "github.com/machinefi/w3bstream/pkg/wsctl/cmd/config"
-	"github.com/machinefi/w3bstream/pkg/wsctl/cmd/instance"
-	"github.com/machinefi/w3bstream/pkg/wsctl/cmd/project"
-	"github.com/machinefi/w3bstream/pkg/wsctl/config"
+	"github.com/machinefi/w3bstream/tools/wsctl/client"
+	cfgcmd "github.com/machinefi/w3bstream/tools/wsctl/cmd/config"
+	"github.com/machinefi/w3bstream/tools/wsctl/cmd/instance"
+	"github.com/machinefi/w3bstream/tools/wsctl/cmd/project"
+	"github.com/machinefi/w3bstream/tools/wsctl/config"
 )
 
 // Multi-language support

@@ -3,8 +3,8 @@ package project
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/machinefi/w3bstream/pkg/wsctl/client"
-	"github.com/machinefi/w3bstream/pkg/wsctl/config"
+	"github.com/machinefi/w3bstream/tools/wsctl/client"
+	"github.com/machinefi/w3bstream/tools/wsctl/config"
 )
 
 // Multi-language support
