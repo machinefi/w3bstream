@@ -56,288 +56,590 @@ output like
 export TOK=${token}
 ```
 
-### Create your project without schema
+### Create your project with default config
 
 command
 
 ```sh
 export PROJECTNAME=${project_name}
-echo '{"name":"'$PROJECTNAME'"}' | http :8888/srv-applet-mgr/v0/project -A bearer -a $TOK
+echo '{"name":"'$PROJECTNAME'"}' | http post :8888/srv-applet-mgr/v0/project -A bearer -a $TOK
 ```
 
 output like
 
 ```json
 {
-  "accountID": "${account_id}",
-  "createdAt": "2022-10-14T12:50:26.890393+08:00",
-  "name": "${project_name}",
-  "projectID": "${project_id}",
-  "updatedAt": "2022-10-14T12:50:26.890407+08:00"
+  "accountID": "11276794515805192",
+  "channelState": true,
+  "createdAt": "2023-05-03T05:39:17.835566714Z",
+  "database": {
+    "schemas": [
+      {
+        "schema": "public"
+      }
+    ]
+  },
+  "envs": {
+    "env": null
+  },
+  "name": "demo",
+  "projectID": "11276839333473280",
+  "updatedAt": "2023-05-03T05:39:17.835567047Z"
 }
 ```
 
-### Create project database schema for wasm db storage
+### Create project with database and env vars configuration
 
 ```sh
-export PROJECTSCHEMA='{
-  "tables": [
+export PROJECTDATABASE='{
+  "schemas": [
     {
-      "name": "tbl",
-      "desc": "test table",
-      "cols": [
+      "schema": "public",
+      "tables": [
         {
-          "name": "f_username",
-          "constrains": {
-            "datatype": "TEXT",
-            "length": 255,
-            "desc": "user name"
-          }
-        },
-        {
-          "name": "f_gender",
-          "constrains": {
-            "datatype": "UINT8",
-            "length": 255,
-            "default": "0",
-            "desc": "user name"
-          }
-        }
-      ],
-      "keys": [
-        {
-          "name": "ui_username",
-          "isUnique": true,
-          "columnNames": [
-            "f_username"
+          "name": "t_demo",
+          "desc": "demo table",
+          "cols": [
+            {
+              "name": "f_id",
+              "constrains": {
+                "datatype": "INT64",
+                "autoincrement": true,
+                "desc": "primary id"
+              }
+            },
+            {
+              "name": "f_name",
+              "constrains": {
+                "datatype": "TEXT",
+                "length": 255,
+                "desc": "name"
+              }
+            },
+            {
+              "name": "f_amount",
+              "constrains": {
+                "datatype": "FLOAT64",
+                "desc": "amount"
+              }
+            },
+            {
+              "name": "f_income",
+              "constrains": {
+                "datatype": "DECIMAL",
+                "length": 512,
+                "decimal": 512,
+                "default": "0",
+                "desc": "income"
+              }
+            },
+            {
+              "name": "f_comment",
+              "constrains": {
+                "datatype": "TEXT",
+                "default": "''",
+                "null": true,
+                "desc": "comment"
+              }
+            }
+          ],
+          "keys": [
+            {
+              "name": "primary",
+              "isUnique": false,
+              "columnNames": [
+                "f_id"
+              ]
+            },
+            {
+              "name": "t_demo_ui_name",
+              "isUnique": true,
+              "columnNames": [
+                "f_name"
+              ]
+            },
+            {
+              "name": "i_amount",
+              "isUnique": false,
+              "columnNames": [
+                "f_amount"
+              ]
+            }
           ]
         }
-      ],
-      "withSoftDeletion": true,
-      "withPrimaryKey": true
+      ]
     }
   ]
 }'
-echo $PROJECTSCHEMA | http post :8888/srv-applet-mgr/v0/project_config/$PROJECTNAME/PROJECT_SCHEMA -A bearer -a $TOK
+export PROJECTENV='{
+  "env": [
+    ["envKey1", "envValue1"],
+    ["envKey2", "envValue2"],
+    ["envKey3", "envValue3"]
+  ]
+}'
+echo '{"name":"'$PROJECTNAME'","database": '$PROJECTDATABASE',"envs":'$PROJECTENV'}' | http post :8888/srv-applet-mgr/v0/project -A bearer -a $TOK
 ```
 
-### Create or update project env vars
+You can define your own database model.
 
-```sh
-export PROJECTENV='[["key1","value1"],["key2","value2"],["key3","value3"]]'
-echo '{"env":'$PROJECTENV'}' | http post :8888/srv-applet-mgr/v0/project_config/$PROJECTNAME/PROJECT_ENV -A bearer -a $TOK
-```
+`schemas` defines database schema structure
 
-> the database for wasm storage is configured by w3bstream server and the name
-> of schema is name of project.
+`schemas[i].schema` defines schema name, default using `public` schema
 
-### Create project with project env vars and schema
+`schemas[i].tables` defines table structures in schema.
 
-```sh
-echo '{"name":"'$PROJECTNAME'","envs":'$PROJECTENV',"schema":'$PROJECTSCHEMA'}' | http post :8888/srv-applet-mgr/v0/project -A bearer -a $TOK
-```
+`schemas[i].tables[i].name` defines table name(required)
 
-output like 
+`schemas[i].tables[i].desc` defines table description
+
+`schemas[i].tables[i].cols` defines table columns
+
+`schemas[i].tables[i].cols[i].name` defines column name
+
+`schemas[i].tables[i].cols[i].constrains.datatype` defines column datatype
+
+> column datatype
+
+| column datatype | postgres datatype |
+|:----------------|:------------------|
+| "INT"           | integer           |
+| "INT8"          | integer           |
+| "INT16"         | integer           |
+| "INT32"         | integer           |
+| "INT64"         | bigint            |
+| "UINT"          | integer           |
+| "UINT8"         | integer           |
+| "UINT16"        | integer           |
+| "UINT32"        | integer           |
+| "UINT64"        | bigint            |
+| "FLOAT32"       | real              |
+| "FLOAT64"       | double precision  |
+| "TEXT"          | character varying |
+| "BOOL"          | boolean           |
+| "TIMESTAMP"     | bigint            |
+| "DECIMAL"       | numeric           |
+| "NUMERIC"       | numeric           |
+
+> the timestamp stored in database using epoch timestamp (microsecond)
+
+`schemas[i].tables[i].cols[i].constrains.datatype` defines column datatype
+
+`schemas[i].tables[i].cols[i].constrains.length` defines `character varying`
+length or `numeric` precision
+
+`schemas[i].tables[i].cols[i].constrains.decimal` defines `numeric` scale
+
+`schemas[i].tables[i].cols[i].constrains.default` defines column default value
+
+`schemas[i].tables[i].cols[i].constrains.null` defines if column can be null
+
+`schemas[i].tables[i].cols[i].constrains.autoincrement` defines if column is
+autoincrement
+
+> when column is autoincrement, integer defined as `serial` and bigint defined
+> as `bigserial` in postgres datatype
+
+`schemas[i].tables[i].cols[i].constrains.desc` column description
+
+`schemas[i].tables[i].keys[i].name` defines index name
+
+`schemas[i].tables[i].keys[i].isUnique` defines if index is unique
+
+`schemas[i].tables[i].keys[i].columnNames` index related column names
+
+> if the key's name is `primary` or `pkey`, it defined as primary key of the
+> table.
+
+output like:
+
 ```json
 {
-    "envs": [
-        [
-            "key1",
-            "value1"
-        ],
-        [
-            "key2",
-            "value2"
-        ],
-        [
-            "key3",
-            "value3"
+  "accountID": "11276794515805192",
+  "channelState": true,
+  "createdAt": "2023-05-03T06:44:05.132275513Z",
+  "database": {
+    "schemas": [
+      {
+        "schema": "public",
+        "tables": [
+          {
+            "cols": [
+              {
+                "constrains": {
+                  "autoincrement": true,
+                  "datatype": "INT64",
+                  "desc": "primary id"
+                },
+                "name": "f_id"
+              },
+              {
+                "constrains": {
+                  "datatype": "TEXT",
+                  "desc": "name",
+                  "length": 255
+                },
+                "name": "f_name"
+              },
+              {
+                "constrains": {
+                  "datatype": "FLOAT64",
+                  "desc": "amount"
+                },
+                "name": "f_amount"
+              },
+              {
+                "constrains": {
+                  "datatype": "DECIMAL",
+                  "decimal": 512,
+                  "default": "0",
+                  "desc": "income",
+                  "length": 512
+                },
+                "name": "f_income"
+              },
+              {
+                "constrains": {
+                  "datatype": "TEXT",
+                  "default": "''",
+                  "desc": "comment",
+                  "null": true
+                },
+                "name": "f_comment"
+              }
+            ],
+            "desc": "demo table",
+            "keys": [
+              {
+                "columnNames": [
+                  "f_id"
+                ],
+                "name": "primary"
+              },
+              {
+                "columnNames": [
+                  "f_name"
+                ],
+                "isUnique": true,
+                "name": "t_demo_ui_name"
+              },
+              {
+                "columnNames": [
+                  "f_amount"
+                ],
+                "name": "i_amount"
+              }
+            ],
+            "name": "t_demo"
+          }
         ]
-    ],
-    "project": {
-        "accountID": "186913331796320263",
-        "createdAt": "2023-03-27T14:52:20.037217+08:00",
-        "name": "demo2",
-        "projectID": "186913955765090305",
-        "updatedAt": "2023-03-27T14:52:20.037217+08:00"
-    },
-    "schema": {
-        "name": "wasm_project__demo2"
-    }
+      }
+    ]
+  },
+  "envs": {
+    "env": [
+      [
+        "envKey1",
+        "envValue1"
+      ],
+      [
+        "envKey2",
+        "envValue2"
+      ],
+      [
+        "envKey3",
+        "envValue3"
+      ]
+    ]
+  },
+  "name": "demo2",
+  "projectID": "11276843314064388",
+  "updatedAt": "2023-05-03T06:44:05.132275805Z"
 }
 ```
 
-### Review your project config
+### Create or update project configurations after project created
+
+```sh
+echo $PROJECTENV | http post :8888/srv-applet-mgr/v0/project_config/x/$PROJECTNAME/PROJECT_ENV -A bearer -a $TOK
+echo $PROJECTDATABASE | http post :8888/srv-applet-mgr/v0/project_config/x/$PROJECTNAME/PROJECT_DATABASE -A bearer -a $TOK
+```
+
+### Review your projects and project configurations
 
 ```shell
-http get :8888/srv-applet-mgr/v0/project_config/$PROJECTNAME/PROJECT_SCHEMA -A bearer -a $TOK
-http get :8888/srv-applet-mgr/v0/project_config/$PROJECTNAME/PROJECT_ENV -A bearer -a $TOK
+http get :8888/srv-applet-mgr/v0/project/x/$PROJECTNAME/data -A bearer -a $TOK ## fetch project by name
+http get :8888/srv-applet-mgr/v0/project_config/x/demo/PROJECT_ENV -A bearer -a $TOK  # fetch project env configuration
+http get :8888/srv-applet-mgr/v0/project_config/x/demo/PROJECT_DATABASE -A bearer -a $TOK  # fetch project database configuration
+http get :8888/srv-applet-mgr/v0/project/datalist -A bearer -a $TOK # fetch project list you created
 ```
 
-### Create and deploy applet
-
-upload wasm script
-
+### Create and deploy applet under project created previously
 
 ```sh
-## set env vars
-export WASMFILE=${wasm_path}
-export APPLETNAME=${applet_name}
-export WASMNAME=${wasm_name}
-http --form post :8888/srv-applet-mgr/v0/applet/$PROJECTNAME file@$WASMFILE info='{"appletName":"'$APPLETNAME'","wasmName":"'$WASMNAME'","strategies":[{"eventType":"DEFAULT","handler":"start"}]}' -A bearer -a $TOK
+export WASMFILE=build/wasms/log.wasm
+export WASMNAME=log.wasm
+export APPLETNAME=log
+http --form post :8888/srv-applet-mgr/v0/applet/x/$PROJECTNAME file@$WASMFILE info='{"appletName":"'$APPLETNAME'","wasmName":"'$WASMNAME'","start":true}' -A bearer -a $TOK 
 ```
 
 output like
 
 ```json
 {
-  "appletID": "${apple_id}",
-  "createdAt": "2022-10-14T12:53:10.590926+08:00",
-  "name": "${applet_name}",
-  "projectID": "${project_id}",
-  "updatedAt": "2022-10-14T12:53:10.590926+08:00"
+  "appletID": "11276843999120385",
+  "createdAt": "2023-05-03T06:55:14.131370253Z",
+  "instance": {
+    "appletID": "11276843999120385",
+    "createdAt": "2023-05-03T06:55:14.146653045Z",
+    "instanceID": "11276843999135746",
+    "state": "STARTED",
+    "updatedAt": "2023-05-03T06:55:14.146653128Z"
+  },
+  "name": "11276843999120386",
+  "projectID": "11276843314064388",
+  "resource": {
+    "createdAt": "2023-05-03T06:55:14.112226878Z",
+    "md5": "30b11f90b1d7453474496f5cc42f0869",
+    "path": "30b11f90b1d7453474496f5cc42f0869",
+    "resourceID": "11276843999092744",
+    "updatedAt": "2023-05-03T06:55:14.112227086Z"
+  },
+  "resourceID": "11276843999092744",
+  "updatedAt": "2023-05-03T06:55:14.131370336Z"
 }
 ```
 
-deploy applet
+> you can create applet with deploy state and event routing strategy, if no
+> strategy configuration, the default
+> strategy with `DEFAULT` event type and `start` handler will be created
+
+`info.appletName` defined the unique applet name under the project
+
+`info.deploy` if set as `true`, the applet will be created and start running.
+
+`info.wasmName` the resource filename
+
+`info.wasmMd5` the wasm file md5, if it is not empty, w3bstream node will check
+md5 sum
+
+`info.wasmCache` wasm cache config
+
+`info.wasmCache.mode` cache mode, enumerated in `MEMORY` and `REDIS`, `MEMORY`
+is default
+
+`info.strategies` event routing strategies
+
+`info.strategies[i].eventType` routing with eventType (user defined)
+
+`info.strategies[i].handler` routing wasm handler name (wasm exported)
+
+### create instance of the applet you created before
 
 ```sh
-export APPLETID=${applet_id}
+export APPLETID=11276843999120385 ## created before
 http post :8888/srv-applet-mgr/v0/deploy/applet/$APPLETID -A bearer -a $TOK
-
-# in-memory cache is used in default, to use redis cache:
-# echo '{"cache":{"mode": "REDIS"}}' | http post :8888/srv-applet-mgr/v0/deploy/applet/$APPLETID -A bearer -a $TOK
+## with cache config
+export WASMCACHECONFIG='{"cache":{"mode": "REDIS"}}'
+echo $WASMCACHECONFIG | http post :8888/srv-applet-mgr/v0/deploy/applet/$APPLETID -A bearer -a $TOK
 ```
 
 output like
 
 ```json
 {
-  "instanceID": "${instance_id}",
-  "instanceState": "CREATED"
+  "appletID": "11276843999120385",
+  "createdAt": "2023-05-03T07:13:28.409513718Z",
+  "instanceID": "11276845119659014",
+  "state": "CREATED",
+  "updatedAt": "2023-05-03T07:13:28.409514176Z"
 }
 ```
 
-start applet
+if the instance is already created, output like
 
-```sh
-export INSTANCEID=${instance_id}
-http put :8888/srv-applet-mgr/v0/deploy/$INSTANCEID/START -A bearer -a $TOK
+```json
+{
+  "canBeTalk": true,
+  "code": 409999008,
+  "desc": "11276843999120385",
+  "fields": null,
+  "id": "",
+  "key": "MultiInstanceDeployed",
+  "msg": "Multi Instance Deployed",
+  "sources": [
+    "srv-applet-mgr@v1.1.0-rc3-6-gbf5cbc0"
+  ]
+}
 ```
 
+### Control instance
+
+```sh
+export INSTANCEID=11276845119659014 ## created before
+export DEPLOYCMD=START
+http put :8888/srv-applet-mgr/v0/deploy/$INSTANCEID/$DEPLOYCMD -A bearer -a $TOK
+```
+
+deploy command enumerated in `START`, `HUNGUP` and `KILL`
+
+`START` change the instance state to `STARTED`
+
+`HUNGUP` change the instance state to `STOPPED`
+
+`KILL` change the instance state to `CREATED`
+
+### Update applet and redeploy instance
+
+```sh
+http --form put :8888/srv-applet-mgr/v0/applet/$APPLETID file@$WASMFILE info='{"appletName":"'$APPLETNAME'","wasmName":"'$WASMNAME'","start":true}' -A bearer -a $TOK
+```
 
 ### Register publisher
 
 ```sh
-export PUBNAME=${publisher_name}
-export PUBKEY=${publisher_unique_key} # global unique
-echo '{"name":"'$PUBNAME'", "key":"'$PUBKEY'"}' | http post :8888/srv-applet-mgr/v0/publisher/$PROJECTNAME -A bearer -a $TOK
+export PUBNAME=mobile    # device name
+export PUBKEY=mn20130503 # device unique identity, usually it is device's machine number or serial number
+echo '{"name":"'$PUBNAME'", "key":"'$PUBKEY'"}' | http post :8888/srv-applet-mgr/v0/publisher/x/$PROJECTNAME -A bearer -a $TOK
 ```
 
 output like
 
 ```sh
 {
-    "createdAt": "2022-10-16T12:28:49.628716+08:00",
-    "key": "${publisher_unique_key}",
-    "name": "${publisher_name}",
-    "projectID": "935772081365103",
-    "publisherID": "${pub_id}",
-    "token": "${pub_token}",
-    "updatedAt": "2022-10-16T12:28:49.628716+08:00"
+    "createdAt": "2023-05-03T16:13:16.343103+08:00",
+    "key": "mn20130503",
+    "name": "mobile",
+    "projectID": "11276843314064388",
+    "publisherID": "155392036869560322",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJQYXlsb2FkIjoiMTU1MzkyMDM2ODY5NTYwMzIyIiwiaXNzIjoiaW90ZXgtdzNic3RyZWFtIn0.OHME3ij5MaJcvekctgYvosQ8DIo-K-guQbYPbQAdyYo",
+    "updatedAt": "2023-05-03T16:13:16.343103+08:00"
 }
 ```
 
-### Config Strategy
+> the `token` responded is used for validating publisher when publishing event.
+
+## Review registered publisher
+
+```sh
+http get :8888/srv-applet-mgr/v0/publisher/x/$PROJECTNAME -A bearer -a $TOK 
+```
+
+output like:
+
+```json
+{
+  "data": [
+    {
+      "createdAt": "2023-05-03T16:13:16+08:00",
+      "key": "mn20130503",
+      "name": "mobile",
+      "projectID": "11276843314064388",
+      "publisherID": "155392036869560322",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJQYXlsb2FkIjoiMTU1MzkyMDM2ODY5NTYwMzIyIiwiaXNzIjoiaW90ZXgtdzNic3RyZWFtIn0.OHME3ij5MaJcvekctgYvosQ8DIo-K-guQbYPbQAdyYo",
+      "updatedAt": "2023-05-03T16:13:16+08:00"
+    }
+  ],
+  "total": 1
+}
+```
+
+### Create strategy for applet created before
 
 Create a strategy of handler in applet and eventType
 
 ```sh
-export EVENTTYPE=${event_type}
-export HANDLER=${applet_handler}
-echo '{"strategies":[{"appletID":"'$APPLETID'", "eventType":"'$EVENTTYPE'", "handler":"'$HANDLER'"}]}' | http post :8888/srv-applet-mgr/v0/strategy/$PROJECTNAME -A bearer -a $TOK
+export EVENTTYPE=mobile_geo
+export HANDLER=handle_geo_data
+echo '{"appletID":"'$APPLETID'", "eventType":"'$EVENTTYPE'", "handler":"'$HANDLER'"}' | http post :8888/srv-applet-mgr/v0/strategy/x/$PROJECTNAME -A bearer -a $TOK
 ```
 
-get strategy info in the applet
+output like:
+
+```json
+{
+  "appletID": "11276843999120385",
+  "createdAt": "2023-05-03T16:17:40.942225+08:00",
+  "eventType": "mobile_geo",
+  "handler": "handle_geo_data",
+  "projectID": "11276843314064388",
+  "strategyID": "155392037140510721",
+  "updatedAt": "2023-05-03T16:17:40.942225+08:00"
+}
+```
+
+### Review strategies under current project
 
 ```sh
-http -v get :8888/srv-applet-mgr/v0/strategy/$PROJECTNAME appletID==$APPLETID -A bearer -a $TOK
+http get :8888/srv-applet-mgr/v0/strategy/x/$PROJECTNAME/datalist -A bearer -a $TOK
 ```
 
-### Publish event to server by http
+output like:
+
+```json
+{
+  "data": [
+    {
+      "appletID": "11276843999120385",
+      "createdAt": "2023-05-03T16:17:40+08:00",
+      "eventType": "mobile_geo",
+      "handler": "handle_geo_data",
+      "projectID": "11276843314064388",
+      "strategyID": "155392037140510721",
+      "updatedAt": "2023-05-03T16:17:40+08:00"
+    },
+    {
+      "appletID": "11276843999120385",
+      "createdAt": "2023-05-03T14:55:14+08:00",
+      "eventType": "DEFAULT",
+      "handler": "start",
+      "projectID": "11276843314064388",
+      "strategyID": "11276843999125505",
+      "updatedAt": "2023-05-03T14:55:14+08:00"
+    }
+  ],
+  "total": 2
+}
+```
+
+### Publish event through http
 
 ```sh
-export PUBTOKEN=${pub_token}
-export EVENTTYPE=DEFAULT # default means start handler
-export EVENTID=`uuidgen`
-export PAYLOAD=${payload} # set your payload
-echo '{"events":[{"header":{"event_id":"'$EVENTID'","event_type":"'$EVENTTYPE'","pub_id":"'$PUBKEY'","pub_time":'`date +%s`',"token":"'$PUBTOKEN'"},"payload":"'`echo $PAYLOAD | base64 -w 0`'"}]}' | http post :8888/srv-applet-mgr/v0/event/$PROJECTNAME
+export TOPIC=${pub_topic} ## intact project name(required)
+export PUBTOK=${pub_token} ## created before(required)
+export EVENTTYPE=mobile_geo # default means start handler
+export EVENTID=`uuidgen` ## this id is used for tracing event(recommended)
+export PAYLOAD=${payload} ## set your payload
+export TIMESTAMP=`date +%s` ## event pub timestamp(recommended)
+http post :8889/srv-applet-mgr/v0/event/$TOPIC\?eventType=$EVENTTYPE\&eventID=$EVENTID\&timestamp=$TIMESTAMP --raw=$PAYLOAD -A bearer -a $PUBTOK 
 ```
+
+> note event handler service using 8889 for default
 
 output like
 
 ```json
-[
-  {
-    "eventID": "78C77DA7-8CE3-4E78-B970-95B685B02409",
-    "projectName": "test",
-    "wasmResults": [
-      {
-        "code": 0,
-        "errMsg": "",
-        "instanceID": "2612094299059956738"
-      }
-    ]
-  }
-]
-```
-
-that means some instance handled this event successfully
-
-### Delete project
-
-Be careful.
-It will delete anything in the project, contains applet, publisher, strategy
-etc.
-
-```sh
-http delete :8888/srv-applet-mgr/v0/project/$PROJECTNAME -A bearer -a $TOK
-```
-
-### Publish event to server through MQTT
-
-- make publishing client
-
-```sh
-make build_pub_client
-```
-
-- try to publish a message
-
-* event json message
-
-```json
 {
-  "header": {
-    "event_type": '$EVENTTYPE',
-    "pub_id": "'$PUBKEY'",
-    "pub_time": '`date +%s`',
-    "token": "'$PUBTOKEN'"
-  },
-  "payload": "xxx yyy zzz"
+  "channel": "aid_11276794515805192_demo2",
+  "eventID": "3d5d76d6-24be-4e47-9f44-cac2b4855e1a_w3b",
+  "publisherID": "155392036869560322",
+  "results": [
+    {
+      "appletName": "log",
+      "code": -1,
+      "error": "instance not running",
+      "handler": "handle_geo_data",
+      "instanceID": "11276845119659014",
+      "returnValue": null
+    }
+  ]
 }
 ```
 
-* event_type: 0x7FFFFFFF any type
-* pub_id: the unique publisher id assiged when publisher registering
-* token: empty if dont have
-* pub_time: timestamp when message published
+### Publish event through mqtt (use `pub_client` CLI)
 
 ```sh
-# -c means published content
-# -t means mqtt topic, the target project name created before
-export PAYLOAD=${payload}
-cd build/pub_client && ./pub_client -c '{"header":{"event_type":"'$EVENTTYPE'","pub_id":"'$PUBKEY'","pub_time":'`date +%s`',"token":"'$PUBTOKEN'"},"payload":"'`echo $PAYLOAD | base64 -w 0`'"}' -t $PROJECTNAME
+./pub_client -topic $TOPIC -token $PUBTOK -data $PAYLOAD
 ```
 
 server log like
@@ -349,9 +651,26 @@ server log like
   "@ts": "20221017-092252.877+08:00",
   "msg": "sub handled",
   "payload": {
-    "payload": "xxx yyy zzz"
+    "payload": "..."
   }
 }
+```
+
+### Data cleanup
+
+Be careful.
+It will delete anything in the project, contains applet, publisher, strategy
+etc.
+
+```sh
+## delete project, all configurations in the project, contains applet, publisher,
+## strategy and instances will be deleted, the database model will be kept.
+http delete :8888/srv-applet-mgr/v0/project/x/$PROJECTNAME -A bearer -a $TOK
+## delete applet, all instances, strategy and the configurations will be deleted
+http delete :8888/srv-applet-mgr/v0/applet/data/$APPLETID -A bearer -a $TOK
+## delete instance, the instance will be released from host memory and the configurations
+## will be deleted.
+http delete :8888/srv-applet-mgr/v0/deploy/data/$INSTANCEID -A bearer -a $TOK
 ```
 
 ### Post blockchain contract event log monitor
@@ -432,14 +751,12 @@ output like
 }
 ```
 
-
 delete it
 
 ```sh
 export ChainHeightID=${chainHeightID}
 http delete :8888/srv-applet-mgr/v0/monitor/chain_height/$PROJECTNAME/$ChainHeightID -A bearer -a $TOK
 ```
-
 
 ### remove instance
 
@@ -459,7 +776,8 @@ http delete :8888/srv-applet-mgr/v0/applet/$APPLETID -A bearer -a $TOK
 
 ### remove project
 
-> the applets and the related instances included in this project will be stopped and removed
+> the applets and the related instances included in this project will be stopped
+> and removed
 
 ```shell
 export PROJECTNAME=${project_name}
@@ -473,18 +791,21 @@ export MESSAGE=...   # siwe serailized message
 export SIGNATURE=... # message signature
 echo '{"message":"'$MESSAGE'","signature":"'$SIGNATURE'"}' | http put :8888/srv-applet-mgr/v0/login/eth
 ```
+
 output like:
+
 ```json
 {
-    "accountID": "186912900253363206",
-    "accountRole": "DEVELOPER",
-    "expireAt": "2023-03-16T19:07:57.624481+08:00",
-    "issuer": "iotex-w3bstream",
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJQYXlsb2FkIjoiMTg2OTEyOTAwMjUzMzYzMjA2IiwiaXNzIjoiaW90ZXgtdzNic3RyZWFtIiwiZXhwIjoxNjc4OTY0ODc3fQ.u7wLOBUeehHTURNY2L2d_F4u-dZ5sHnBBHZKujnpMRw"
+  "accountID": "186912900253363206",
+  "accountRole": "DEVELOPER",
+  "expireAt": "2023-03-16T19:07:57.624481+08:00",
+  "issuer": "iotex-w3bstream",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJQYXlsb2FkIjoiMTg2OTEyOTAwMjUzMzYzMjA2IiwiaXNzIjoiaW90ZXgtdzNic3RyZWFtIiwiZXhwIjoxNjc4OTY0ODc3fQ.u7wLOBUeehHTURNY2L2d_F4u-dZ5sHnBBHZKujnpMRw"
 }
 ```
 
 ### Account's Operator Address
+
 ```shell
 http get :8888/srv-applet-mgr/v0/account/operatoraddr -A bearer -a $TOK
 ```

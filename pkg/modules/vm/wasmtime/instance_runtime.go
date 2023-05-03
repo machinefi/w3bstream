@@ -8,27 +8,28 @@ import (
 )
 
 var (
-	ErrNotLinked     = errors.New("not linked")
-	ErrAlreadyLinked = errors.New("already linked")
-	engine           = wasmtime.NewEngineWithConfig(wasmtime.NewConfig())
+	ErrNotLinked           = errors.New("not linked")
+	ErrAlreadyInstantiated = errors.New("already instantiated")
+	ErrNotInstantiated     = errors.New("not instantiated")
+	ErrAlreadyLinked       = errors.New("already linked")
+	engine                 = wasmtime.NewEngineWithConfig(wasmtime.NewConfig())
 )
 
 type (
 	Runtime struct {
+		module   *wasmtime.Module
+		linker   *wasmtime.Linker
 		store    *wasmtime.Store
 		instance *wasmtime.Instance
 	}
 )
 
 func NewRuntime() *Runtime {
-	store := wasmtime.NewStore(engine)
-	store.SetWasi(wasmtime.NewWasiConfig())
-
-	return &Runtime{store: store}
+	return &Runtime{}
 }
 
 func (rt *Runtime) Link(lk ABILinker, code []byte) error {
-	if rt.instance != nil {
+	if rt.module != nil {
 		return ErrAlreadyLinked
 	}
 	linker := wasmtime.NewLinker(engine)
@@ -40,17 +41,38 @@ func (rt *Runtime) Link(lk ABILinker, code []byte) error {
 	if err := linker.DefineWasi(); err != nil {
 		return err
 	}
+	rt.linker = linker
 	module, err := wasmtime.NewModule(engine, code)
 	if err != nil {
 		return err
 	}
-	instance, err := linker.Instantiate(rt.store, module)
+	rt.module = module
+	return nil
+}
+
+func (rt *Runtime) Instantiate() error {
+	if rt.module == nil {
+		return ErrNotLinked
+	}
+	if rt.instance != nil {
+		return ErrAlreadyInstantiated
+	}
+	store := wasmtime.NewStore(engine)
+	store.SetWasi(wasmtime.NewWasiConfig())
+
+	instance, err := rt.linker.Instantiate(store, rt.module)
 	if err != nil {
 		return err
 	}
 	rt.instance = instance
+	rt.store = store
 
 	return nil
+}
+
+func (rt *Runtime) Deinstantiate() {
+	rt.instance = nil
+	rt.store = nil
 }
 
 func (rt *Runtime) newMemory() []byte {
@@ -78,8 +100,11 @@ func putUint32Le(buf []byte, vmAddr int32, val uint32) error {
 }
 
 func (rt *Runtime) Call(name string, args ...interface{}) (interface{}, error) {
-	if rt.instance == nil {
+	if rt.module == nil {
 		return nil, ErrNotLinked
+	}
+	if rt.instance == nil {
+		return nil, ErrNotInstantiated
 	}
 	fn := rt.instance.GetFunc(rt.store, name)
 	if fn == nil {
@@ -89,8 +114,11 @@ func (rt *Runtime) Call(name string, args ...interface{}) (interface{}, error) {
 }
 
 func (rt *Runtime) Read(addr, size int32) ([]byte, error) {
-	if rt.instance == nil {
+	if rt.module == nil {
 		return nil, ErrNotLinked
+	}
+	if rt.instance == nil {
+		return nil, ErrNotInstantiated
 	}
 	mem := rt.newMemory()
 	if addr > int32(len(mem)) || addr+size > int32(len(mem)) {
@@ -104,8 +132,11 @@ func (rt *Runtime) Read(addr, size int32) ([]byte, error) {
 }
 
 func (rt *Runtime) Copy(hostData []byte, vmAddrPtr, vmSizePtr int32) error {
-	if rt.instance == nil {
+	if rt.module == nil {
 		return ErrNotLinked
+	}
+	if rt.instance == nil {
+		return ErrNotInstantiated
 	}
 	size := len(hostData)
 	addr, mem, err := rt.alloc(int32(size))

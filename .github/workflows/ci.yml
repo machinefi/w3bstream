@@ -35,5 +35,6 @@ jobs:
 
       - name: Test Go
         run: go test ./...
-
-    
+        
+      - name: Upload Code Coverage Profile
+        uses: codecov/codecov-action@v3
