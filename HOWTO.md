@@ -377,9 +377,9 @@ http get :8888/srv-applet-mgr/v0/project/datalist -A bearer -a $TOK # fetch proj
 ### Create and deploy applet under project created previously
 
 ```sh
-export WASMFILE=build/wasms/log.wasm                                                                                                                                                                                                                                      <main ✗>
-export WASMNAME=log.wasm                                                                                                                                                                                                                                                  <main ✗>
-export APPLETNAME=log                                                                                                                                                                                                                                                     <main ✗>
+export WASMFILE=build/wasms/log.wasm
+export WASMNAME=log.wasm
+export APPLETNAME=log
 http --form post :8888/srv-applet-mgr/v0/applet/x/$PROJECTNAME file@$WASMFILE info='{"appletName":"'$APPLETNAME'","wasmName":"'$WASMNAME'","start":true}' -A bearer -a $TOK 
 ```
 
