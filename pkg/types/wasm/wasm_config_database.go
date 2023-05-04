@@ -145,7 +145,7 @@ type Constrains struct {
 type Key struct {
 	Name        string   `json:"name,omitempty"`
 	Method      string   `json:"method,omitempty"`
-	IsUnique    bool     `json:"isUnique"`
+	IsUnique    bool     `json:"isUnique,omitempty"`
 	ColumnNames []string `json:"columnNames"`
 	Expr        string   `json:"expr,omitempty"`
 }

@@ -18,6 +18,16 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
+type Instance struct {
+	id       types.SFID
+	rt       *Runtime
+	state    wasm.InstanceState
+	res      *mapx.Map[uint32, []byte]
+	evs      *mapx.Map[uint32, []byte]
+	handlers map[string]*wasmtime.Func
+	kvs      wasm.KVStore
+}
+
 func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte, st enums.InstanceState) (i *Instance, err error) {
 	l := types.MustLoggerFromContext(ctx)
 
@@ -47,16 +57,6 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte, st enums
 		handlers: make(map[string]*wasmtime.Func),
 		kvs:      wasm.MustKVStoreFromContext(ctx),
 	}, nil
-}
-
-type Instance struct {
-	id       types.SFID
-	rt       *Runtime
-	state    wasm.InstanceState
-	res      *mapx.Map[uint32, []byte]
-	evs      *mapx.Map[uint32, []byte]
-	handlers map[string]*wasmtime.Func
-	kvs      wasm.KVStore
 }
 
 var _ wasm.Instance = (*Instance)(nil)
@@ -99,6 +99,15 @@ func (i *Instance) Handle(ctx context.Context, t *Task) *wasm.EventHandleResult 
 
 	rid := i.AddResource(ctx, []byte(t.EventType), t.Payload)
 	defer i.RmvResource(ctx, rid)
+
+	if err := i.rt.Instantiate(); err != nil {
+		return &wasm.EventHandleResult{
+			InstanceID: i.id.String(),
+			ErrMsg:     err.Error(),
+			Code:       wasm.ResultStatusCode_Failed,
+		}
+	}
+	defer i.rt.Deinstantiate()
 
 	// TODO support wasm return data(not only code) for HTTP responding
 	result, err := i.rt.Call(t.Handler, int32(rid))
