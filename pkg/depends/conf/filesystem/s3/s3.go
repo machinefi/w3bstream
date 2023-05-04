@@ -1,6 +1,7 @@
 package confs3
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"io"
@@ -97,7 +98,7 @@ func (db *ObjectDB) ProtectURL(ctx context.Context, meta *ObjectMeta, exp time.D
 	return u, nil
 }
 
-func (db *ObjectDB) PutObject(ctx context.Context, r io.Reader, meta ObjectMeta) error {
+func (db *ObjectDB) PutObject(ctx context.Context, r io.Reader, meta *ObjectMeta) error {
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -227,6 +228,35 @@ func (db *ObjectDB) ListObjectByGroup(ctx context.Context, grp string) ([]*Objec
 	}
 
 	return metas, nil
+}
+
+func (db *ObjectDB) Upload(key string, content []byte) error {
+	meta, err := ParseObjectMetaFromKey(key)
+	if err != nil {
+		return err
+	}
+	return db.PutObject(context.Background(), bytes.NewBuffer(content), meta)
+}
+
+func (db *ObjectDB) Read(key string) ([]byte, error) {
+	meta, err := ParseObjectMetaFromKey(key)
+	if err != nil {
+		return nil, err
+	}
+	buf := bytes.NewBuffer(nil)
+	err = db.ReadObject(context.Background(), buf, meta.Group, meta.ObjectID)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), err
+}
+
+func (db *ObjectDB) Delete(key string) error {
+	meta, err := ParseObjectMetaFromKey(key)
+	if err != nil {
+		return err
+	}
+	return db.DeleteObject(context.Background(), meta.Group, meta.ObjectID)
 }
 
 var ErrInvalidObjectKey = errors.New("invalid object key")
