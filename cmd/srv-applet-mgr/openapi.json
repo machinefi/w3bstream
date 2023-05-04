@@ -9137,7 +9137,7 @@
           "isUnique": {
             "type": "boolean",
             "x-go-field-name": "IsUnique",
-            "x-tag-json": "isUnique"
+            "x-tag-json": "isUnique,omitempty"
           },
           "method": {
             "type": "string",
@@ -9151,7 +9151,6 @@
           }
         },
         "required": [
-          "isUnique",
           "columnNames"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/types/wasm.Key",
