@@ -23,7 +23,7 @@ type S3Endpoint interface {
 	Secure() bool
 }
 
-type PresignedFn func(db *ObjectDB, key string, expiresIn time.Duration) url.Values
+type PresignedFn func(db *ObjectDB, key string, exp time.Duration) url.Values
 
 type ObjectDB struct {
 	Endpoint        string
@@ -236,17 +236,14 @@ func ParseObjectMetaFromKey(key string) (*ObjectMeta, error) {
 	if len(parts) != 2 {
 		return nil, ErrInvalidObjectKey
 	}
-	group := parts[0]
+	grp := parts[0]
 
-	objectID, err := strconv.ParseUint(parts[1], 10, 64)
+	oid, err := strconv.ParseUint(parts[1], 10, 64)
 	if err != nil {
 		return nil, ErrInvalidObjectKey
 	}
 
-	om := &ObjectMeta{
-		ObjectID: objectID,
-		Group:    group,
-	}
+	om := &ObjectMeta{ObjectID: oid, Group: grp}
 
 	return om, nil
 }
