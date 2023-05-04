@@ -31,7 +31,7 @@ func newProjectDeleteCmd(client client.Client) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
 			projectName := args[0]
-			if _, err := Delete(client, projectName); err != nil {
+			if err := Delete(client, projectName); err != nil {
 				return errors.Wrap(err, fmt.Sprintf("problem delete project %+v", args))
 			}
 			cmd.Printf("project %s deleted successfully\n", projectName)
@@ -44,11 +44,14 @@ func deleteURL(endpoint, name string) string {
 	return fmt.Sprintf("%s/srv-applet-mgr/v0/project/x/%s", endpoint, name)
 }
 
-func Delete(client client.Client, name string) ([]byte, error) {
+func Delete(client client.Client, name string) error {
 	req, err := http.NewRequest("DELETE", deleteURL(client.Config().Endpoint, name), nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create request")
+		return errors.Wrap(err, "failed to create request")
 	}
 	req.Header.Set("Content-Type", "application/json")
-	return client.Call(req)
+	if _, err = client.Call(req); err != nil {
+		return err
+	}
+	return nil
 }

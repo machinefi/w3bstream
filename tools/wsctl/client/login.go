@@ -25,17 +25,12 @@ type (
 	}
 )
 
-var pvk1 = "3b3a4ccb94b92b43af8e3987d181d340a754e6b4168811f3a80bdc7e6edbcda4"
-
 func (c *client) login() (string, error) {
-	// pvk1 := c.Config().PrivateKey
-
-	pvk, err := loadPrivateKey(pvk1)
+	pvk, err := c.loadPrivateKey(c.Config().PrivateKey)
 	if err != nil {
 		return "", err
 	}
-
-	msg, err := prepareMessage(pvk.PublicKey)
+	msg, err := prepareMessage(c.Address())
 	if err != nil {
 		return "", err
 	}
@@ -70,7 +65,6 @@ func (c *client) login() (string, error) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(string(respBody))
 	if !gjson.ValidBytes(respBody) {
 		panic("invalid response")
 	}
@@ -80,24 +74,9 @@ func (c *client) login() (string, error) {
 	return ret.Get("token").String(), nil
 }
 
-func loadPrivateKey(pvkStr string) (*ecdsa.PrivateKey, error) {
-	var pvk *ecdsa.PrivateKey
-	if len(pvkStr) > 0 {
-		fmt.Println("loaded private key from the config.")
-		pvk = crypto.ToECDSAUnsafe(common.FromHex(pvkStr))
-	} else {
-		fmt.Println("no private key is found in the config; a new one is randomly generated.")
-		var err error
-		if pvk, err = crypto.GenerateKey(); err != nil {
-			return nil, err
-		}
-	}
-	return pvk, nil
-}
-
-func prepareMessage(pbk ecdsa.PublicKey) (string, error) {
+func prepareMessage(pbk string) (string, error) {
 	msg, err := siwe.InitMessage("w3bstream.com",
-		crypto.PubkeyToAddress(pbk).String(),
+		pbk,
 		"https://w3bstream.com",
 		uniuri.NewLen(16),
 		nil,

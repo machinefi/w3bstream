@@ -6,8 +6,6 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 
 	"github.com/machinefi/w3bstream/tools/wsctl/client"
 	"github.com/machinefi/w3bstream/tools/wsctl/config"
@@ -32,18 +30,21 @@ func newAppletDeleteCmd(client client.Client) *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
-			if err := delete(cmd, client, args); err != nil {
+			if err := Delete(client, args[0]); err != nil {
 				return errors.Wrap(err, fmt.Sprintf("problem delete applet %+v", args))
 			}
-			cmd.Println(cases.Title(language.Und).String(args[0]) + " applet deleted successfully ")
+			cmd.Printf("applet %s deleted successfully\n", args[0])
 			return nil
 		},
 	}
 }
 
-func delete(client client.Client, args []string) error {
-	url := GetAppletCmdUrl(client.Config().Endpoint, args[0])
-	req, err := http.NewRequest("DELETE", url, nil)
+func deleteURL(endpoint, appID string) string {
+	return fmt.Sprintf("%s/srv-applet-mgr/v0/applet/data/%s", endpoint, appID)
+}
+
+func Delete(client client.Client, appID string) error {
+	req, err := http.NewRequest("DELETE", deleteURL(client.Config().Endpoint, appID), nil)
 	if err != nil {
 		return errors.Wrap(err, "failed to delete applet request")
 	}

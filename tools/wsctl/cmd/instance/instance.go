@@ -23,13 +23,13 @@ func NewInstanceCmd(client client.Client) *cobra.Command {
 		Use:   "instance",
 		Short: client.SelectTranslation(_instanceCmdShorts),
 	}
-	cmd.AddCommand(newInstanceStartCmd(client))
+	// cmd.AddCommand(newInstanceStartCmd(client))
 	cmd.AddCommand(newInstanceStopCmd(client))
 	cmd.AddCommand(newInstanceDeleteCmd(client))
 
 	return cmd
 }
 
-func GetInstanceCmdUrl(endpoint, insId, cmd string) string {
+func getInstanceCmdUrl(endpoint, insId, cmd string) string {
 	return fmt.Sprintf("%s/srv-applet-mgr/v0/deploy/%s/%s", endpoint, insId, cmd)
 }

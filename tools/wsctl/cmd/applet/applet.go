@@ -1,8 +1,6 @@
 package applet
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 
 	"github.com/machinefi/w3bstream/tools/wsctl/client"
@@ -26,8 +24,4 @@ func NewAppletCmd(client client.Client) *cobra.Command {
 	cmd.AddCommand(newAppletDeleteCmd(client))
 	cmd.AddCommand(newAppletCreateCmd(client))
 	return cmd
-}
-
-func GetAppletCmdUrl(endpoint, cmd string) string {
-	return fmt.Sprintf("%s/srv-applet-mgr/v0/applet/%s", endpoint, cmd)
 }

@@ -6,11 +6,8 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 
 	"github.com/machinefi/w3bstream/tools/wsctl/client"
-	"github.com/machinefi/w3bstream/tools/wsctl/cmd/utils"
 	"github.com/machinefi/w3bstream/tools/wsctl/config"
 )
 
@@ -30,34 +27,29 @@ func newInstanceDeleteCmd(client client.Client) *cobra.Command {
 	return &cobra.Command{
 		Use:   client.SelectTranslation(_instanceDeleteUse),
 		Short: client.SelectTranslation(_instanceDeleteCmdShorts),
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) != 1 {
-				return fmt.Errorf("accepts 1 arg(s), received %d", len(args))
-			}
-			return nil
-		},
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
-			if err := delete(cmd, client, args); err != nil {
+			if err := Delete(client, args[0]); err != nil {
 				return errors.Wrap(err, fmt.Sprintf("problem delete instance %+v", args))
 			}
-			cmd.Println(cases.Title(language.Und).String(args[0]) + " instance deleted successfully ")
+			cmd.Printf("instance %s deleted successfully\n", args[0])
 			return nil
 		},
 	}
 }
 
-func delete(cmd *cobra.Command, client client.Client, args []string) error {
-	url := GetInstanceCmdUrl(client.Config().Endpoint, args[0], "REMOVE")
+func Delete(client client.Client, insID string) error {
+	url := getInstanceCmdUrl(client.Config().Endpoint, insID, "KILL")
 	req, err := http.NewRequest("PUT", url, nil)
 	if err != nil {
 		return errors.Wrap(err, "failed to delete instance request")
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := client.Call(req)
+	_, err = client.Call(req)
 	if err != nil {
 		return errors.Wrap(err, "failed to delete instance")
 	}
-	return utils.PrintResponse(cmd, resp)
+	return nil
 }

@@ -6,22 +6,19 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 
 	"github.com/machinefi/w3bstream/tools/wsctl/client"
-	"github.com/machinefi/w3bstream/tools/wsctl/cmd/utils"
 	"github.com/machinefi/w3bstream/tools/wsctl/config"
 )
 
 var (
 	_publisherDeleteUse = map[config.Language]string{
-		config.English: "delete PROJECT_NAME",
-		config.Chinese: "delete PROJECT_NAME",
+		config.English: "delete PUBLISHER_ID",
+		config.Chinese: "delete PUBLISHER_ID",
 	}
 	_publisherDeleteCmdShorts = map[config.Language]string{
 		config.English: "Delete a publisher",
-		config.Chinese: "通过 PROJECT_NAME 删除 PUBLISHER",
+		config.Chinese: "删除 PUBLISHER",
 	}
 )
 
@@ -30,33 +27,31 @@ func newPublisherDeleteCmd(client client.Client) *cobra.Command {
 	return &cobra.Command{
 		Use:   client.SelectTranslation(_publisherDeleteUse),
 		Short: client.SelectTranslation(_publisherDeleteCmdShorts),
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) != 1 {
-				return fmt.Errorf("accepts 1 arg(s), received %d", len(args))
-			}
-			return nil
-		},
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
-			if err := delete(cmd, client, args); err != nil {
+			if err := Delete(client, args[0]); err != nil {
 				return errors.Wrap(err, fmt.Sprintf("problem delete publisher %+v", args))
 			}
-			cmd.Println(cases.Title(language.Und).String(args[0]) + " publisher deleted successfully ")
+			cmd.Printf("publisher %s deleted successfully\n", args[0])
 			return nil
 		},
 	}
 }
 
-func delete(cmd *cobra.Command, client client.Client, args []string) error {
-	url := GetPublisherCmdUrl(client.Config().Endpoint, args[0])
-	req, err := http.NewRequest("DELETE", url, nil)
+func deleteURL(endpoint, pubID string) string {
+	return fmt.Sprintf("%s/srv-applet-mgr/v0/publisher/data/%s", endpoint, pubID)
+}
+
+func Delete(client client.Client, pubID string) error {
+	req, err := http.NewRequest("DELETE", deleteURL(client.Config().Endpoint, pubID), nil)
 	if err != nil {
 		return errors.Wrap(err, "failed to delete publisher request")
 	}
 	req.Header.Set("Content-Type", "application/json")
-	resp, err := client.Call(req)
+	_, err = client.Call(req)
 	if err != nil {
 		return errors.Wrap(err, "failed to delete publisher")
 	}
-	return utils.PrintResponse(cmd, resp)
+	return nil
 }

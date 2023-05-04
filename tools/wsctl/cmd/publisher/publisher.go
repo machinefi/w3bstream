@@ -1,8 +1,6 @@
 package publisher
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 
 	"github.com/machinefi/w3bstream/tools/wsctl/client"
@@ -25,9 +23,6 @@ func NewPublisherCmd(client client.Client) *cobra.Command {
 	}
 	cmd.AddCommand(newPublisherDeleteCmd(client))
 	cmd.AddCommand(newPublisherCreateCmd(client))
+	cmd.AddCommand(newHttpEventCmd(client))
 	return cmd
-}
-
-func GetPublisherCmdUrl(endpoint, cmd string) string {
-	return fmt.Sprintf("%s/srv-publisher-mgr/v0/publisher/%s", endpoint, cmd)
 }

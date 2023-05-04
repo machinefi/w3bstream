@@ -4,7 +4,12 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/machinefi/w3bstream/tools/wsctl/client"
+	"github.com/machinefi/w3bstream/tools/wsctl/cmd/applet"
+	cfgcmd "github.com/machinefi/w3bstream/tools/wsctl/cmd/config"
+	"github.com/machinefi/w3bstream/tools/wsctl/cmd/instance"
 	"github.com/machinefi/w3bstream/tools/wsctl/cmd/project"
+	"github.com/machinefi/w3bstream/tools/wsctl/cmd/publisher"
+	"github.com/machinefi/w3bstream/tools/wsctl/cmd/strategy"
 	"github.com/machinefi/w3bstream/tools/wsctl/config"
 )
 
@@ -28,9 +33,12 @@ func NewWsctl(client client.Client) *cobra.Command {
 		Long:  client.SelectTranslation(_wsctlRootCmdLongs),
 	}
 
-	// rootCmd.AddCommand(cfgcmd.NewConfigCmd(client))
+	rootCmd.AddCommand(cfgcmd.NewConfigCmd(client))
 	rootCmd.AddCommand(project.NewProjectCmd(client))
-	// rootCmd.AddCommand(instance.NewInstanceCmd(client))
+	rootCmd.AddCommand(applet.NewAppletCmd(client))
+	rootCmd.AddCommand(instance.NewInstanceCmd(client))
+	rootCmd.AddCommand(publisher.NewPublisherCmd(client))
+	rootCmd.AddCommand(strategy.NewStrategyCmd(client))
 
 	return rootCmd
 }
