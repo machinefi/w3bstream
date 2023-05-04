@@ -57,7 +57,7 @@ const (
 )
 const defaultAuthExpire = time.Hour
 
-// AuthTime 用于生成签名所需的 q-signSearch-time 和 q-key-time 相关参数
+// AuthTime is a struct storing the q-signSearch-time and q-key-time which are needed to generate signature
 type AuthTime struct {
 	SignStartTime time.Time
 	SignEndTime   time.Time
