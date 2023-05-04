@@ -11,12 +11,12 @@ import (
 	"time"
 )
 
-func COSPresignedValues(db *ObjectDB, objectKey string, expiresIn time.Duration) url.Values {
-	authTime := NewAuthTime(expiresIn)
+func COSPresignedValues(db *ObjectDB, key string, exp time.Duration) url.Values {
+	authTime := NewAuthTime(exp)
 	signTime := authTime.signString()
 	keyTime := authTime.keyString()
 	signKey := calSignKey(db.SecretAccessKey.String(), keyTime)
-	formatString := genFormatString("get", "/"+objectKey, "", "")
+	formatString := genFormatString("get", "/"+key, "", "")
 	stringToSign := calStringToSign(sha1SignAlgorithm, keyTime, formatString)
 	signature := calSignature(signKey, stringToSign)
 	signedHeaderList := make([]string, 0)
