@@ -656,6 +656,19 @@ server log like
 }
 ```
 
+the `pub_client` sends event message through mqtt broker using protobuf
+encoding. the event defined as follows
+
+| field name       | protobuf filed    | datatype | requirement | comment                                                                            |
+|:-----------------|:------------------|:---------|:------------|:-----------------------------------------------------------------------------------|
+| Header           | header            | object   | required    |                                                                                    |
+| Header.EventType | header.event_type | string   | recommended | event type(user defined) for event routing, according to strategies created before |
+| Header.EventId   | header.event_id   | string   | recommended | event id is the unique identity of this message related with the publisher         |
+| Header.PubId     | header.pub_id     | string   | recommended | publisher id, usually it is the device machine number, you register before         |
+| Header.Token     | header.token      | string   | required    | publisher token. it contains the publisher id (or DID)                             |
+| Header.PubTime   | header.pub_time   | int64    | recommended | message timestamp when published, use unix epoch timestamp (in UTC)                |
+| Payload          | payload           | bytes    | -           | message payload                                                                    |
+
 ### Data cleanup
 
 Be careful.
