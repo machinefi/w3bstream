@@ -37,7 +37,8 @@ jobs:
         run: go build -v ./...
 
       - name: Test Go
-        run: go test ./...
-        
+        #run: go test ./...
+        run: make test
+
       - name: Upload Code Coverage Profile
         uses: codecov/codecov-action@v3
