@@ -6,8 +6,8 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/__test__/clients/applet_mgr"
-	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/__test__/requires"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/tests/clients/applet_mgr"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/tests/requires"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
