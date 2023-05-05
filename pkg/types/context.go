@@ -3,10 +3,10 @@ package types
 import (
 	"context"
 
+	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
-	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/client"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
@@ -254,22 +254,22 @@ func MustMonitorDBExecutorFromContext(ctx context.Context) sqlx.DBExecutor {
 	return v
 }
 
-func WithWasmDBEndpoint(ctx context.Context, v *postgres.Endpoint) context.Context {
+func WithWasmDBEndpoint(ctx context.Context, v *types.Endpoint) context.Context {
 	return contextx.WithValue(ctx, CtxWasmDBEndpoint{}, v)
 }
 
-func WithWasmDBEndpointContext(v *postgres.Endpoint) contextx.WithContext {
+func WithWasmDBEndpointContext(v *types.Endpoint) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
 		return contextx.WithValue(ctx, CtxWasmDBEndpoint{}, v)
 	}
 }
 
-func WasmDBEndpointFromContext(ctx context.Context) (*postgres.Endpoint, bool) {
-	v, ok := ctx.Value(CtxWasmDBEndpoint{}).(*postgres.Endpoint)
+func WasmDBEndpointFromContext(ctx context.Context) (*types.Endpoint, bool) {
+	v, ok := ctx.Value(CtxWasmDBEndpoint{}).(*types.Endpoint)
 	return v, ok
 }
 
-func MustWasmDBEndpointFromContext(ctx context.Context) *postgres.Endpoint {
+func MustWasmDBEndpointFromContext(ctx context.Context) *types.Endpoint {
 	v, ok := WasmDBEndpointFromContext(ctx)
 	must.BeTrue(ok)
 	return v

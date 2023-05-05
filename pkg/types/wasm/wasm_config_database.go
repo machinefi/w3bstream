@@ -12,6 +12,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/migration"
+	"github.com/machinefi/w3bstream/pkg/depends/x/misc/retry"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -178,11 +179,6 @@ func (d *Database) WithSchema(name string) (db sqlx.DBExecutor, err error) {
 		return nil, errors.Errorf("schema %s not found in database %s", name, d.Name)
 	}
 	db = d.ep
-	conflog.Std().WithValues(
-		"schema", d.ep.Schema,
-		"database", d.ep.Database.Name,
-		"base", d.ep.Master.Base,
-	).Info("")
 	_, err = db.Exec(builder.Expr("SET SEARCH_PATH TO " + name))
 	if err != nil {
 		return nil, errors.Errorf("switch schema failed: %v", err)
@@ -197,12 +193,17 @@ func (d *Database) WithDefaultSchema() (sqlx.DBExecutor, error) {
 func (d *Database) Init(ctx context.Context) (err error) {
 	// init database endpoint
 	d.Name = types.MustProjectFromContext(ctx).DatabaseName()
-	d.ep = types.MustWasmDBEndpointFromContext(ctx)
-	d.ep.Database = sqlx.NewDatabase(d.Name)
-	d.ep.Master.Base = d.Name
-	if !d.ep.Slave.IsZero() {
-		d.ep.Slave.Base = d.Name
+
+	// clone config and init config
+	ep := *types.MustWasmDBEndpointFromContext(ctx)
+	ep.Base = d.Name
+
+	d.ep = &postgres.Endpoint{
+		Master:   ep,
+		Database: sqlx.NewDatabase(d.Name),
+		Retry:    retry.Default,
 	}
+	d.ep.SetDefault()
 
 	if d.schemas == nil {
 		d.schemas = make(map[string]*Schema)
