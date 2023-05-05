@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 	"golang.org/x/text/encoding/unicode"
@@ -273,39 +274,59 @@ func (ef *ExportFuncs) GetSQLDB(addr, size int32, vmAddrPtr, vmSizePtr int32) in
 	if ef.db == nil {
 		return int32(wasm.ResultStatusCode_NoDBContext)
 	}
+
+	l := ef.log.WithValues("phase", "read_query")
 	data, err := ef.rt.Read(addr, size)
 	if err != nil {
-		ef.log.Error(err)
+		l.Error(err)
 		return int32(wasm.ResultStatusCode_ResourceNotFound)
 	}
+	l.Info("query: %s", string(data))
 
+	l = ef.log.WithValues("phase", "parse_query")
 	prestate, params, err := sql_util.ParseQuery(data)
 	if err != nil {
-		ef.log.Error(err)
+		l.Error(err)
 		return wasm.ResultStatusCode_Failed
 	}
+	l.Info("statement: %s param: %v", prestate, params)
 
+	l = ef.log.WithValues("phase", "switch_schema")
 	db, err := ef.db.WithDefaultSchema()
 	if err != nil {
-		ef.log.Error(err)
+		l.Error(err)
 		return wasm.ResultStatusCode_Failed
 	}
+	if ep, ok := db.(*postgres.Endpoint); ok && ep.Database != nil {
+		l.Info("schema: public, database: %s", ep.Database.Name)
+	} else {
+		l.Info("cannot fetch database info")
+	}
+
+	l = ef.log.WithValues("phase", "exec_query")
 	rows, err := db.QueryContext(context.Background(), prestate, params...)
 	if err != nil {
-		ef.log.Error(err)
+		l.Error(err)
 		return wasm.ResultStatusCode_Failed
 	}
+	if queried, err := rows.Columns(); err != nil {
+		l.Info("query succeeded, result length: %d", queried)
+	}
 
+	l = ef.log.WithValues("phase", "parse_result")
 	ret, err := sql_util.JsonifyRows(rows)
 	if err != nil {
-		ef.log.Error(err)
+		l.Error(err)
 		return wasm.ResultStatusCode_Failed
 	}
+	l.Info("")
 
+	l = ef.log.WithValues("phase", "pass_result")
 	if err := ef.rt.Copy(ret, vmAddrPtr, vmSizePtr); err != nil {
 		ef.log.Error(err)
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
+	l.Info("")
 
 	return int32(wasm.ResultStatusCode_OK)
 }
