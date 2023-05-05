@@ -11,7 +11,7 @@ SRV_APPLET_MGR__Jwt_Issuer: ""
 SRV_APPLET_MGR__Jwt_SignKey: ""
 SRV_APPLET_MGR__LocalFS_DiskReserveBytes: "20971520"
 SRV_APPLET_MGR__LocalFS_FilesizeLimitBytes: "1048576"
-SRV_APPLET_MGR__LocalFS_Root: /var/folders/ww/b5kk1xzx1tn0f7dk_k6hft4r0000gn/T/srv-applet-mgr
+SRV_APPLET_MGR__LocalFS_Root: /var/folders/dz/qbnhx75s34s4snfq75219n3m0000gn/T/srv-applet-mgr
 SRV_APPLET_MGR__Logger_Format: JSON
 SRV_APPLET_MGR__Logger_Level: debug
 SRV_APPLET_MGR__Logger_Name: srv-applet-mgr
@@ -63,9 +63,4 @@ SRV_APPLET_MGR__ServerEvent_Debug: "true"
 SRV_APPLET_MGR__ServerEvent_HealthCheck: http://:80/
 SRV_APPLET_MGR__ServerEvent_Port: "80"
 SRV_APPLET_MGR__ServerEvent_Spec: ./openapi.json
-SRV_APPLET_MGR__WasmDB_ConnMaxLifetime: 1h
-SRV_APPLET_MGR__WasmDB_Master: postgres://127.0.0.1:5432
-SRV_APPLET_MGR__WasmDB_PoolSize: "10"
-SRV_APPLET_MGR__WasmDB_Retry_Interval: 3s
-SRV_APPLET_MGR__WasmDB_Retry_Repeats: "3"
-SRV_APPLET_MGR__WasmDB_Slave: ""
+SRV_APPLET_MGR__WasmDB: ""
