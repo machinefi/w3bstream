@@ -66,7 +66,7 @@ type ListDetailRsp struct {
 }
 
 type Info struct {
-	AppletName string                `json:"appletName,omitempty"`
+	AppletName string                `json:"appletName"`
 	Deploy     datatypes.Bool        `json:"start"` // Deploy and start vm after created
 	WasmName   string                `json:"wasmName,omitempty"`
 	WasmMd5    string                `json:"wasmMd5,omitempty"`
