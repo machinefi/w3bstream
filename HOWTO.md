@@ -658,16 +658,29 @@ server log like
 
 the `pub_client` sends event message through mqtt broker using protobuf
 encoding. the event defined as follows
+message Header {
+string event_type = 1; // event type
+string pub_id = 2;     // the unique identifier for publisher
+string token = 3;      // for validation message
+int64 pub_time = 4;    // event pub timestamp
+string event_id = 5;   // event id for tracing
+}
 
-| field name       | protobuf filed    | datatype | requirement | comment                                                                            |
-|:-----------------|:------------------|:---------|:------------|:-----------------------------------------------------------------------------------|
-| Header           | header            | object   | required    |                                                                                    |
-| Header.EventType | header.event_type | string   | recommended | event type(user defined) for event routing, according to strategies created before |
-| Header.EventId   | header.event_id   | string   | recommended | event id is the unique identity of this message related with the publisher         |
-| Header.PubId     | header.pub_id     | string   | recommended | publisher id, usually it is the device machine number, you register before         |
-| Header.Token     | header.token      | string   | required    | publisher token. it contains the publisher id (or DID)                             |
-| Header.PubTime   | header.pub_time   | int64    | recommended | message timestamp when published, use unix epoch timestamp (in UTC)                |
-| Payload          | payload           | bytes    | -           | message payload                                                                    |
+message Event {
+Header header = 1;
+bytes payload = 2;
+}
+
+
+| field name       | protobuf filed    | protobuf seq | datatype | requirement | comment                                                                            |
+|:-----------------|:------------------|:-------------|:---------|:------------|:-----------------------------------------------------------------------------------|
+| Header           | header            | 1            | object   | required    |                                                                                    |
+| Header.EventType | header.event_type | header.1     | string   | recommended | event type(user defined) for event routing, according to strategies created before |
+| Header.PubId     | header.pub_id     | header.2     | string   | recommended | publisher id, usually it is the device machine number, you register before         |
+| Header.Token     | header.token      | header.3     | string   | required    | publisher token. it contains the publisher id (or DID)                             |
+| Header.PubTime   | header.pub_time   | header.4     | int64    | recommended | message timestamp when published, use unix epoch timestamp (in UTC)                |
+| Header.EventId   | header.event_id   | header.5     | string   | recommended | event id is the unique identity of this message related with the publisher         |
+| Payload          | payload           | 2            | bytes    | -           | message payload                                                                    |
 
 ### Data cleanup
 
