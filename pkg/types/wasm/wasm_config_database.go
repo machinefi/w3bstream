@@ -154,7 +154,10 @@ type Key struct {
 
 func (k *Key) Build(tblName string) *builder.Key {
 	names := []string{tblName}
-	if k.IsUnique {
+
+	if k.IsUnique && (k.Name == "primary" || strings.HasSuffix(k.Name, "pkey")) {
+		names = append(names, "primary")
+	} else if k.IsUnique {
 		names = append(names, "ui")
 	} else {
 		names = append(names, "i")
