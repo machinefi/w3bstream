@@ -141,7 +141,11 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 		err error
 	)
 
-	res, raw, err = resource.Create(ctx, acc.AccountID, r.File, r.AppletName, r.WasmMd5)
+	filename := r.WasmName
+	if filename == "" {
+		filename = r.AppletName + ".wasm"
+	}
+	res, raw, err = resource.Create(ctx, acc.AccountID, r.File, filename, r.WasmMd5)
 	if err != nil {
 		return nil, err
 	}
@@ -214,6 +218,9 @@ func Update(ctx context.Context, r *UpdateReq) (*UpdateRsp, error) {
 	if r.File != nil {
 		acc := types.MustAccountFromContext(ctx)
 		filename, md5 := r.Info.WasmName, r.Info.WasmMd5
+		if filename == "" {
+			filename = r.AppletName + ".wasm"
+		}
 		res, raw, err = resource.Create(ctx, acc.AccountID, r.File, filename, md5)
 	}
 
