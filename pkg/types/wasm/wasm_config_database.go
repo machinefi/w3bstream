@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -60,7 +61,7 @@ func (t *Table) Build() *builder.Table {
 		tbl.AddCol(c.Build())
 	}
 	for _, k := range t.Keys {
-		tbl.AddKey(k.Build())
+		tbl.AddKey(k.Build(t.Name))
 	}
 	return tbl
 }
@@ -151,9 +152,18 @@ type Key struct {
 	Expr        string   `json:"expr,omitempty"`
 }
 
-func (k *Key) Build() *builder.Key {
+func (k *Key) Build(tblName string) *builder.Key {
+	names := []string{tblName}
+	if k.IsUnique {
+		names = append(names, "ui")
+	} else {
+		names = append(names, "i")
+	}
+	for _, colName := range k.ColumnNames {
+		names = append(names, colName)
+	}
 	return &builder.Key{
-		Name:     k.Name,
+		Name:     strings.Join(names, "_"),
 		IsUnique: k.IsUnique,
 		Method:   k.Method,
 		Def: builder.IndexDef{
@@ -162,6 +172,7 @@ func (k *Key) Build() *builder.Key {
 		},
 	}
 }
+
 func (d *Database) ConfigType() enums.ConfigType {
 	return enums.CONFIG_TYPE__PROJECT_DATABASE
 }

@@ -244,6 +244,9 @@ autoincrement
 
 `schemas[i].tables[i].keys[i].name` defines index name
 
+> NOTE: index name pattern `tableName_[i|ui]_[columnName1]_[columnName2]_...`.
+> The index name will be built by this pattern for better migration.
+
 `schemas[i].tables[i].keys[i].isUnique` defines if index is unique
 
 `schemas[i].tables[i].keys[i].columnNames` index related column names

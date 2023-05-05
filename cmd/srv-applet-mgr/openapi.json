@@ -8314,7 +8314,7 @@
           "appletName": {
             "type": "string",
             "x-go-field-name": "AppletName",
-            "x-tag-json": "appletName,omitempty"
+            "x-tag-json": "appletName"
           },
           "start": {
             "allOf": [
@@ -8360,6 +8360,7 @@
           }
         },
         "required": [
+          "appletName",
           "start"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.Info",
