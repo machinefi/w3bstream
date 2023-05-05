@@ -105,3 +105,4 @@ postgres_test:
 .PHONY: mqtt_test
 mqtt_test:
 	docker run --name mqtt_test -p 1883:1883 -d eclipse-mosquitto:1.6.15
+
