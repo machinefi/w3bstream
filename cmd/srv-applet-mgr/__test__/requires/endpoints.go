@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/__test__/clients/applet_mgr"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis"
-	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/tests/clients/applet_mgr"
 	base "github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/http"
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
