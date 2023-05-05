@@ -23,8 +23,6 @@ func ParseDeployCmdFromString(s string) (DeployCmd, error) {
 		return DEPLOY_CMD__START, nil
 	case "HUNGUP":
 		return DEPLOY_CMD__HUNGUP, nil
-	case "KILL":
-		return DEPLOY_CMD__KILL, nil
 	}
 }
 
@@ -38,8 +36,6 @@ func ParseDeployCmdFromLabel(s string) (DeployCmd, error) {
 		return DEPLOY_CMD__START, nil
 	case "stop wasm vm":
 		return DEPLOY_CMD__HUNGUP, nil
-	case "kill wasm vm (memory released)":
-		return DEPLOY_CMD__KILL, nil
 	}
 }
 
@@ -57,8 +53,6 @@ func (v DeployCmd) String() string {
 		return "START"
 	case DEPLOY_CMD__HUNGUP:
 		return "HUNGUP"
-	case DEPLOY_CMD__KILL:
-		return "KILL"
 	}
 }
 
@@ -72,8 +66,6 @@ func (v DeployCmd) Label() string {
 		return "start wasm vm"
 	case DEPLOY_CMD__HUNGUP:
 		return "stop wasm vm"
-	case DEPLOY_CMD__KILL:
-		return "kill wasm vm (memory released)"
 	}
 }
 
@@ -82,7 +74,7 @@ func (v DeployCmd) TypeName() string {
 }
 
 func (v DeployCmd) ConstValues() []enum.IntStringerEnum {
-	return []enum.IntStringerEnum{DEPLOY_CMD__START, DEPLOY_CMD__HUNGUP, DEPLOY_CMD__KILL}
+	return []enum.IntStringerEnum{DEPLOY_CMD__START, DEPLOY_CMD__HUNGUP}
 }
 
 func (v DeployCmd) MarshalText() ([]byte, error) {

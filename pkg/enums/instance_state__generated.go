@@ -19,8 +19,6 @@ func ParseInstanceStateFromString(s string) (InstanceState, error) {
 		return INSTANCE_STATE_UNKNOWN, InvalidInstanceState
 	case "":
 		return INSTANCE_STATE_UNKNOWN, nil
-	case "CREATED":
-		return INSTANCE_STATE__CREATED, nil
 	case "STARTED":
 		return INSTANCE_STATE__STARTED, nil
 	case "STOPPED":
@@ -34,8 +32,6 @@ func ParseInstanceStateFromLabel(s string) (InstanceState, error) {
 		return INSTANCE_STATE_UNKNOWN, InvalidInstanceState
 	case "":
 		return INSTANCE_STATE_UNKNOWN, nil
-	case "applet and resource is ready but not loaded":
-		return INSTANCE_STATE__CREATED, nil
 	case "ready to receive data":
 		return INSTANCE_STATE__STARTED, nil
 	case "stopped to receive data":
@@ -53,8 +49,6 @@ func (v InstanceState) String() string {
 		return "UNKNOWN"
 	case INSTANCE_STATE_UNKNOWN:
 		return ""
-	case INSTANCE_STATE__CREATED:
-		return "CREATED"
 	case INSTANCE_STATE__STARTED:
 		return "STARTED"
 	case INSTANCE_STATE__STOPPED:
@@ -68,8 +62,6 @@ func (v InstanceState) Label() string {
 		return "UNKNOWN"
 	case INSTANCE_STATE_UNKNOWN:
 		return ""
-	case INSTANCE_STATE__CREATED:
-		return "applet and resource is ready but not loaded"
 	case INSTANCE_STATE__STARTED:
 		return "ready to receive data"
 	case INSTANCE_STATE__STOPPED:
@@ -82,7 +74,7 @@ func (v InstanceState) TypeName() string {
 }
 
 func (v InstanceState) ConstValues() []enum.IntStringerEnum {
-	return []enum.IntStringerEnum{INSTANCE_STATE__CREATED, INSTANCE_STATE__STARTED, INSTANCE_STATE__STOPPED}
+	return []enum.IntStringerEnum{INSTANCE_STATE__STARTED, INSTANCE_STATE__STOPPED}
 }
 
 func (v InstanceState) MarshalText() ([]byte, error) {
