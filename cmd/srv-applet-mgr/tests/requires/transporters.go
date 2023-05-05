@@ -3,11 +3,11 @@ package requires
 import (
 	"net/http"
 
-	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/global"
 	confjwt "github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/account"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -33,11 +33,16 @@ func (rt *AuthPatchRT) RoundTrip(req *http.Request) (*http.Response, error) {
 var tok string
 
 func init() {
-	d := types.MustMgrDBExecutorFromContext(global.Context)
-	j := confjwt.MustConfFromContext(global.Context)
 	m := &models.Account{}
+	d := types.MustMgrDBExecutorFromContext(_ctx)
+	j := confjwt.MustConfFromContext(_ctx)
 
-	err := d.QueryAndScan(
+	_, err := account.CreateAdminIfNotExist(_ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	err = d.QueryAndScan(
 		builder.Select(nil).From(
 			d.T(m),
 			builder.Where(m.ColRole().Eq(enums.ACCOUNT_ROLE__ADMIN)),

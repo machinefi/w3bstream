@@ -4,13 +4,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/global"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
 	. "github.com/onsi/gomega"
 
-	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/__test__/clients/applet_mgr"
-	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/__test__/requires"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/tests/clients/applet_mgr"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/tests/requires"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -18,13 +17,12 @@ import (
 
 func TestProjectAPIs(t *testing.T) {
 	var (
-		ctx         = global.Context
+		ctx         = requires.Context()
 		client      = requires.AuthClient()
 		projectName = "testdemo"
 		projectID   types.SFID
 	)
 
-	defer requires.DropTempWasmDatabase(&projectID)
 	// close server first to release database connection
 	defer requires.Serve()()
 
