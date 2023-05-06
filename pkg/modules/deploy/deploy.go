@@ -203,7 +203,6 @@ func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.In
 				if sqlx.DBErr(err).IsNotFound() {
 					forUpdate = false
 					ins.InstanceID = idg.MustGenSFID()
-					ins.State = state
 					return nil
 				} else {
 					return status.DatabaseError.StatusErr().WithDesc(err.Error())
@@ -214,6 +213,7 @@ func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.In
 					fmt.Sprintf("database: %v arg: %v", ins.InstanceID, old[0]),
 				)
 			}
+			ins.State = state
 			forUpdate = true
 			return nil
 		},
