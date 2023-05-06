@@ -63,22 +63,24 @@ func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filen
 			own := &models.ResourceOwnership{
 				RelResource: models.RelResource{ResourceID: res.ResourceID},
 				RelAccount:  models.RelAccount{AccountID: acc},
-				ResourceOwnerInfo: models.ResourceOwnerInfo{
-					UploadedAt: types.Timestamp{Time: time.Now()},
-					Filename:   filename,
-				},
 			}
 			err = own.FetchByResourceIDAndAccountID(d)
-			if err != nil && !sqlx.DBErr(err).IsNotFound() {
+			if err != nil {
+				if sqlx.DBErr(err).IsNotFound() {
+					own.UploadedAt = types.Timestamp{Time: time.Now()}
+					own.Filename = filename
+					if err = own.Create(d); err != nil {
+						return status.DatabaseError.StatusErr().WithDesc(err.Error())
+					}
+				}
 				return status.DatabaseError.StatusErr().WithDesc(err.Error())
-			}
-			if err == nil {
+			} else {
+				own.Filename = filename
+				if err = own.UpdateByResourceIDAndAccountID(d); err != nil {
+					return status.DatabaseError.StatusErr().WithDesc(err.Error())
+				}
 				return nil
 			}
-			if err = own.Create(d); err != nil {
-				return status.DatabaseError.StatusErr().WithDesc(err.Error())
-			}
-			return nil
 		},
 	).Do()
 
