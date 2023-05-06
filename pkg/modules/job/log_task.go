@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
+	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-func NewWasmLogTask(ctx context.Context, logLevel, msg string) *WasmLogTask {
+func NewWasmLogTask(ctx context.Context, logLevel, logSrc, msg string) *WasmLogTask {
 	return &WasmLogTask{
 		wasmLog: &models.WasmLog{
 			RelWasmLog: models.RelWasmLog{WasmLogID: confid.MustSFIDGeneratorFromContext(ctx).MustGenSFID()},
@@ -20,9 +20,10 @@ func NewWasmLogTask(ctx context.Context, logLevel, msg string) *WasmLogTask {
 				ProjectName: types.MustProjectFromContext(ctx).ProjectName.Name,
 				AppletName:  types.MustAppletFromContext(ctx).Name,
 				InstanceID:  types.MustInstanceFromContext(ctx).InstanceID,
+				Src:         logSrc,
 				Level:       logLevel,
 				LogTime:     time.Now().UnixNano(),
-				Msg:         subStringWithLength(msg, consts.WasmLogMaxLength),
+				Msg:         subStringWithLength(msg, enums.WasmLogMaxLength),
 			},
 		},
 	}
