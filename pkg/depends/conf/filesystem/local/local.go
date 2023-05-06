@@ -15,10 +15,6 @@ type LocalFileSystem struct {
 }
 
 func (l *LocalFileSystem) Init() error {
-	return os.MkdirAll(l.Root, 0777)
-}
-
-func (l *LocalFileSystem) SetDefault() {
 	if l.Root == "" {
 		tmp := os.Getenv("TMPDIR")
 		if tmp == "" {
@@ -30,6 +26,10 @@ func (l *LocalFileSystem) SetDefault() {
 		}
 		l.Root = filepath.Join(tmp, serviceName)
 	}
+	return os.MkdirAll(l.Root, 0777)
+}
+
+func (l *LocalFileSystem) SetDefault() {
 	if l.FilesizeLimitBytes == 0 {
 		l.FilesizeLimitBytes = 1024 * 1024
 	}
