@@ -23,7 +23,6 @@ require (
 	github.com/tidwall/gjson v1.14.3
 	golang.org/x/mod v0.8.0
 	golang.org/x/net v0.8.0
-	golang.org/x/term v0.6.0
 	golang.org/x/text v0.8.0
 	golang.org/x/tools v0.6.0
 	google.golang.org/protobuf v1.28.1
@@ -41,11 +40,14 @@ require (
 
 require (
 	github.com/aws/aws-sdk-go v1.44.245
+	github.com/brianvoe/gofakeit/v6 v6.21.0
+	github.com/dchest/uniuri v0.0.0-20200228104902-7aecb25e1fe5
 	github.com/ethereum/go-ethereum v1.10.15
 	github.com/go-co-op/gocron v1.22.0
 	github.com/minio/minio-go/v7 v7.0.52
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/spruceid/siwe-go v0.2.0
+	github.com/stretchr/testify v1.8.2
 )
 
 require (
@@ -53,7 +55,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/btcsuite/btcd v0.20.1-beta // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/dchest/uniuri v0.0.0-20200228104902-7aecb25e1fe5 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
@@ -76,6 +78,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/openzipkin/zipkin-go v0.4.0 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.37.0 // indirect
