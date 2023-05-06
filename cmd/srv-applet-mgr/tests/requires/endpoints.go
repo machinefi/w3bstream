@@ -22,7 +22,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/retry"
 	"github.com/machinefi/w3bstream/pkg/depends/x/ptrx"
-	"github.com/machinefi/w3bstream/pkg/depends/x/stringsx"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -80,20 +79,16 @@ func Databases() {
 
 	var err error
 	if _dbMgr == nil {
-		if _dbMgrEp, _dbMgr, err = migrate(models.DB); err != nil {
+		if _, _dbMgr, err = migrate(models.DB); err != nil {
 			panic(err)
 		}
 	}
 	if _dbMonitor == nil {
-		if _dbMonitorEp, _dbMonitor, err = migrate(models.MonitorDB); err != nil {
+		if _, _dbMonitor, err = migrate(models.MonitorDB); err != nil {
 			panic(err)
 		}
 	}
-	if _dbWasm == nil {
-		if _dbWasmEp, _dbWasm, err = migrate(models.WasmDB); err != nil {
-			panic(err)
-		}
-	}
+	_dbWasmEp = &ep.Master
 }
 
 func Mqtt() {
@@ -143,17 +138,14 @@ func Context() context.Context {
 }
 
 var (
-	_server      *http.Server
-	_client      *client.Client
-	_broker      *mqtt.Broker
-	_dbMgr       sqlx.DBExecutor
-	_dbMonitor   sqlx.DBExecutor
-	_dbWasm      sqlx.DBExecutor
-	_dbMgrEp     *postgres.Endpoint
-	_dbMonitorEp *postgres.Endpoint
-	_dbWasmEp    *postgres.Endpoint
-	_injection   contextx.WithContext
-	_ctx         context.Context
+	_server    *http.Server
+	_client    *client.Client
+	_broker    *mqtt.Broker
+	_dbMgr     sqlx.DBExecutor
+	_dbMonitor sqlx.DBExecutor
+	_dbWasmEp  *base.Endpoint
+	_injection contextx.WithContext
+	_ctx       context.Context
 )
 
 func init() {
@@ -166,7 +158,7 @@ func init() {
 	jwt := &confjwt.Jwt{
 		Issuer:  "w3bstream_test",
 		ExpIn:   *base.AsDuration(time.Hour),
-		SignKey: stringsx.GenRandomVisibleString(16),
+		SignKey: "xxxx",
 	}
 
 	_injection = contextx.WithContextCompose(

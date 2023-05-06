@@ -1703,7 +1703,7 @@
         "tags": [
           "apis/deploy"
         ],
-        "operationId": "CreateInstance",
+        "operationId": "CreateAndStartInstance",
         "parameters": [
           {
             "name": "appletID",
@@ -1782,7 +1782,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!"
+              "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!",
+              "@StatusErr[UnknownDeployCommand][400999004][Unknown Deploy Command]!"
             ]
           },
           "401": {
@@ -3058,7 +3059,7 @@
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
-              "@StatusErr[ContractLogNotFound][404999014][Contract Log Not Found]!",
+              "@StatusErr[ChainHeightNotFound][404999016][Chain Height Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
@@ -8505,6 +8506,9 @@
           },
           {
             "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsResourceInfo"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsRelInstance"
           },
           {
             "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsInstanceInfo"

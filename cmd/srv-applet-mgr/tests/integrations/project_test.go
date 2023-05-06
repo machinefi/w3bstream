@@ -16,15 +16,14 @@ import (
 )
 
 func TestProjectAPIs(t *testing.T) {
+	defer requires.Serve()()
+
 	var (
 		ctx         = requires.Context()
 		client      = requires.AuthClient()
 		projectName = "testdemo"
 		projectID   types.SFID
 	)
-
-	// close server first to release database connection
-	defer requires.Serve()()
 
 	t.Logf("random a project name: %s", projectName)
 
