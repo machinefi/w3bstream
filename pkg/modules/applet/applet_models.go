@@ -57,6 +57,7 @@ type ListRsp struct {
 type Detail struct {
 	*models.Applet
 	models.ResourceInfo
+	models.RelInstance
 	*models.InstanceInfo
 }
 
@@ -67,7 +68,6 @@ type ListDetailRsp struct {
 
 type Info struct {
 	AppletName string                `json:"appletName"`
-	Deploy     datatypes.Bool        `json:"start"` // Deploy and start vm after created
 	WasmName   string                `json:"wasmName,omitempty"`
 	WasmMd5    string                `json:"wasmMd5,omitempty"`
 	WasmCache  *wasm.Cache           `json:"wasmCache,omitempty"`
@@ -148,6 +148,7 @@ func detail(app *models.Applet, ins *models.Instance, res *models.Resource) *Det
 	if ins != nil {
 		ins.State, _ = vm.GetInstanceState(ins.InstanceID)
 		ret.InstanceInfo = &ins.InstanceInfo
+		ret.RelInstance = ins.RelInstance
 	}
 
 	return ret

@@ -6,8 +6,8 @@ package enums
 type InstanceState uint8
 
 const (
-	INSTANCE_STATE_UNKNOWN  InstanceState = iota
-	INSTANCE_STATE__CREATED               // applet and resource is ready but not loaded
-	INSTANCE_STATE__STARTED               // ready to receive data
-	INSTANCE_STATE__STOPPED               // stopped to receive data
+	INSTANCE_STATE_UNKNOWN InstanceState = iota
+	_
+	INSTANCE_STATE__STARTED // ready to receive data
+	INSTANCE_STATE__STOPPED // stopped to receive data
 )

@@ -5,7 +5,6 @@ import (
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
@@ -183,11 +182,7 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 				r.WasmCache = wasm.DefaultCache()
 			}
 			rb := &deploy.CreateReq{Cache: r.WasmCache}
-			if r.Deploy == datatypes.TRUE {
-				ins, err = deploy.UpsertByCode(ctx, rb, raw, enums.INSTANCE_STATE__STARTED)
-			} else {
-				ins, err = deploy.Create(ctx, rb)
-			}
+			ins, err = deploy.UpsertByCode(ctx, rb, raw, enums.INSTANCE_STATE__STARTED)
 			return err
 		},
 	).Do()
@@ -245,9 +240,6 @@ func Update(ctx context.Context, r *UpdateReq) (*UpdateRsp, error) {
 		func(d sqlx.DBExecutor) error {
 			if r.File == nil {
 				return nil // instance state will not be changed
-			}
-			if r.Info.Deploy != datatypes.TRUE {
-				return nil
 			}
 			ins, err = deploy.GetByAppletSFID(ctx, app.AppletID)
 			if err != nil {
