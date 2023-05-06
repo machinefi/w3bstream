@@ -194,11 +194,7 @@ func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.In
 	)
 
 	app := types.MustAppletFromContext(ctx)
-	ins := &models.Instance{
-		// RelInstance:  models.RelInstance{InstanceID: id},
-		// RelApplet:    models.RelApplet{AppletID: app.AppletID},
-		// InstanceInfo: models.InstanceInfo{State: state},
-	}
+	ins := &models.Instance{}
 
 	err := sqlx.NewTasks(types.MustMgrDBExecutorFromContext(ctx)).With(
 		func(d sqlx.DBExecutor) error {
