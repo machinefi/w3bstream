@@ -685,7 +685,7 @@ http delete :8888/srv-applet-mgr/v0/deploy/data/$INSTANCEID -A bearer -a $TOK
 ### Post blockchain contract event log monitor
 
 ```sh
-echo '{"eventType": "DEFAULT", "chainID": 4690, "contractAddress": "${contractAddress}","blockStart": ${blockStart},"blockEnd": ${blockEnd},"topic0":"${topic0}"}' | http :8888/srv-applet-mgr/v0/monitor/contract_log/$PROJECTNAME -A bearer -a $TOK
+echo '{"eventType": "DEFAULT", "chainID": 4690, "contractAddress": "${contractAddress}","blockStart": ${blockStart},"blockEnd": ${blockEnd},"topic0":"${topic0}"}' | http :8888/srv-applet-mgr/v0/monitor/x/$PROJECTNAME/contract_log -A bearer -a $TOK
 ```
 
 output like
@@ -709,14 +709,14 @@ output like
 delete it
 
 ```sh
-export ContractlogID=${contractlogID}
-http delete :8888/srv-applet-mgr/v0/monitor/contract_log/$PROJECTNAME/$ContractlogID -A bearer -a $TOK
+export CONTRACTLOGID=${contractlogID}
+http delete :8888/srv-applet-mgr//v0/monitor/x/$PROJECTNAME/$CONTRACTLOGID -A bearer -a $TOK
 ```
 
 ### Post blockchain transaction monitor
 
 ```sh
-echo '{"eventType": "DEFAULT", "chainID": 4690, "txAddress": "${txAddress}"}' | http :8888/srv-applet-mgr/v0/monitor/chain_tx/$PROJECTNAME -A bearer -a $TOK
+echo '{"eventType": "DEFAULT", "chainID": 4690, "txAddress": "${txAddress}"}' | http :8888/srv-applet-mgr/v0/monitor/x/$PROJECTNAME/chain_tx -A bearer -a $TOK
 ```
 
 output like
@@ -736,14 +736,14 @@ output like
 delete it
 
 ```sh
-export ChaintxID=${chaintxID}
-http delete :8888/srv-applet-mgr/v0/monitor/chain_tx/$PROJECTNAME/$ChaintxID -A bearer -a $TOK
+export CHAINTXID=${chaintxID}
+http delete :8888/srv-applet-mgr/v0/monitor/x/$PROJECTNAME/chain_tx/$CHAINTXID -A bearer -a $TOK
 ```
 
 ### Post blockchain height monitor
 
 ```sh
-echo '{"eventType": "DEFAULT", "chainID": 4690, "height": ${height}}' | http :8888/srv-applet-mgr/v0/monitor/chain_height/$PROJECTNAME -A bearer -a $TOK
+echo '{"eventType": "DEFAULT", "chainID": 4690, "height": ${height}}' | http :8888/srv-applet-mgr/v0/monitor/x/$PROJECTNAME/chain_height -A bearer -a $TOK
 ```
 
 output like
@@ -763,8 +763,8 @@ output like
 delete it
 
 ```sh
-export ChainHeightID=${chainHeightID}
-http delete :8888/srv-applet-mgr/v0/monitor/chain_height/$PROJECTNAME/$ChainHeightID -A bearer -a $TOK
+export CHAINHEIGHTID=${chainHeightID}
+http delete :8888/srv-applet-mgr/v0/monitor/x/$PROJECTNAME/chain_height/$CHAINHEIGHTID -A bearer -a $TOK
 ```
 
 ### remove instance
