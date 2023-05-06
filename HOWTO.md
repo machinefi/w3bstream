@@ -380,7 +380,7 @@ http get :8888/srv-applet-mgr/v0/project/datalist -A bearer -a $TOK # fetch proj
 export WASMFILE=build/wasms/log.wasm
 export WASMNAME=log.wasm
 export APPLETNAME=log
-http --form post :8888/srv-applet-mgr/v0/applet/x/$PROJECTNAME file@$WASMFILE info='{"appletName":"'$APPLETNAME'","wasmName":"'$WASMNAME'","start":true}' -A bearer -a $TOK 
+http --form post :8888/srv-applet-mgr/v0/applet/x/$PROJECTNAME file@$WASMFILE info='{"appletName":"'$APPLETNAME'","wasmName":"'$WASMNAME'"}' -A bearer -a $TOK 
 ```
 
 output like
@@ -415,8 +415,6 @@ output like
 > strategy with `DEFAULT` event type and `start` handler will be created
 
 `info.appletName` defined the unique applet name under the project
-
-`info.deploy` if set as `true`, the applet will be created and start running.
 
 `info.wasmName` the resource filename
 
@@ -481,13 +479,11 @@ export DEPLOYCMD=START
 http put :8888/srv-applet-mgr/v0/deploy/$INSTANCEID/$DEPLOYCMD -A bearer -a $TOK
 ```
 
-deploy command enumerated in `START`, `HUNGUP` and `KILL`
+deploy command enumerated in `START` and `HUNGUP`
 
 `START` change the instance state to `STARTED`
 
 `HUNGUP` change the instance state to `STOPPED`
-
-`KILL` change the instance state to `CREATED`
 
 ### Update applet and redeploy instance
 

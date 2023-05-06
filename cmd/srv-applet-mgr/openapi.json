@@ -754,6 +754,7 @@
             },
             "x-status-errors": [
               "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[InvalidAppletContext][401999015][Invalid Applet]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -1106,6 +1107,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[InvalidAppletContext][401999015][Invalid Applet]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -1846,6 +1848,19 @@
               }
             }
           },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!"
+            ]
+          },
           "401": {
             "description": "",
             "content": {
@@ -1856,6 +1871,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[InvalidAppletContext][401999015][Invalid Applet]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -1906,8 +1922,12 @@
             "x-status-errors": [
               "@StatusErr[ConfigInitFailed][500999006][Config Init Failed]!",
               "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
+              "@StatusErr[CreateInstanceFailed][500999010][Create Instance Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[DatabaseError][500999002][Database Error]!"
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[FetchResourceFailed][500999005][Fetch Resource Failed]!",
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
@@ -2562,6 +2582,7 @@
             },
             "x-status-errors": [
               "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[InvalidAppletContext][401999015][Invalid Applet]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthPublisherID][401999011][Invalid Auth Publisher ID]!",
               "@StatusErr[InvalidAuthPublisherID][401999011][Invalid Auth Publisher ID]!",
@@ -6889,13 +6910,11 @@
         "type": "string",
         "enum": [
           "START",
-          "HUNGUP",
-          "KILL"
+          "HUNGUP"
         ],
         "x-enum-labels": [
           "start wasm vm",
-          "stop wasm vm",
-          "kill wasm vm (memory released)"
+          "stop wasm vm"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.DeployCmd",
         "x-id": "GithubComMachinefiW3BstreamPkgEnumsDeployCmd"
@@ -6903,12 +6922,10 @@
       "GithubComMachinefiW3BstreamPkgEnumsInstanceState": {
         "type": "string",
         "enum": [
-          "CREATED",
           "STARTED",
           "STOPPED"
         ],
         "x-enum-labels": [
-          "applet and resource is ready but not loaded",
           "ready to receive data",
           "stopped to receive data"
         ],
@@ -8314,19 +8331,7 @@
           "appletName": {
             "type": "string",
             "x-go-field-name": "AppletName",
-            "x-tag-json": "appletName,omitempty"
-          },
-          "start": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesBool"
-              },
-              {
-                "description": "Deploy and start vm after created",
-                "x-go-field-name": "Deploy",
-                "x-tag-json": "start"
-              }
-            ]
+            "x-tag-json": "appletName"
           },
           "strategies": {
             "type": "array",
@@ -8360,7 +8365,7 @@
           }
         },
         "required": [
-          "start"
+          "appletName"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.Info",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesAppletInfo"

@@ -2,6 +2,7 @@ package deploy
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -17,7 +18,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/resource"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
-	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
 func Init(ctx context.Context) error {
@@ -189,24 +189,33 @@ func Remove(ctx context.Context, r *CondArgs) error {
 // UpsertByCode upsert instance and its config, and deploy wasm if needed
 func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.InstanceState, old ...types.SFID) (*models.Instance, error) {
 	var (
-		id        types.SFID
+		idg       = confid.MustSFIDGeneratorFromContext(ctx)
 		forUpdate = false
 	)
 
-	if len(old) > 0 && old[0] != 0 {
-		forUpdate = true
-		id = old[0]
-	} else {
-		id = confid.MustSFIDGeneratorFromContext(ctx).MustGenSFID()
-	}
 	app := types.MustAppletFromContext(ctx)
-	ins := &models.Instance{
-		RelInstance:  models.RelInstance{InstanceID: id},
-		RelApplet:    models.RelApplet{AppletID: app.AppletID},
-		InstanceInfo: models.InstanceInfo{State: state},
-	}
+	ins := &models.Instance{}
 
 	err := sqlx.NewTasks(types.MustMgrDBExecutorFromContext(ctx)).With(
+		func(d sqlx.DBExecutor) error {
+			ins.AppletID = app.AppletID
+			if err := ins.FetchByAppletID(d); err != nil {
+				if sqlx.DBErr(err).IsNotFound() {
+					forUpdate = false
+					ins.InstanceID = idg.MustGenSFID()
+					return nil
+				} else {
+					return status.DatabaseError.StatusErr().WithDesc(err.Error())
+				}
+			}
+			if len(old) > 0 && old[0] != ins.InstanceID {
+				return status.InvalidAppletContext.StatusErr().WithDesc(
+					fmt.Sprintf("database: %v arg: %v", ins.InstanceID, old[0]),
+				)
+			}
+			forUpdate = true
+			return nil
+		},
 		func(d sqlx.DBExecutor) error {
 			if forUpdate {
 				if err := ins.UpdateByInstanceID(d); err != nil {
@@ -251,7 +260,7 @@ func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.In
 				return err
 			}
 			// TODO should below actions be in a critical section?
-			if err = vm.NewInstance(_ctx, code, id, state); err != nil {
+			if err = vm.NewInstance(_ctx, code, ins.InstanceID, state); err != nil {
 				return status.CreateInstanceFailed.StatusErr().WithDesc(err.Error())
 			}
 			ins.State, _ = vm.GetInstanceState(ins.InstanceID)
@@ -278,44 +287,6 @@ func Upsert(ctx context.Context, r *CreateReq, state enums.InstanceState, old ..
 	return UpsertByCode(ctx, r, code, state, old...)
 }
 
-func Create(ctx context.Context, r *CreateReq) (*models.Instance, error) {
-	var (
-		idg = confid.MustSFIDGeneratorFromContext(ctx)
-		app = types.MustAppletFromContext(ctx)
-		ins *models.Instance
-		err error
-	)
-
-	err = sqlx.NewTasks(types.MustMgrDBExecutorFromContext(ctx)).With(
-		func(d sqlx.DBExecutor) error {
-			ins = &models.Instance{
-				RelInstance:  models.RelInstance{InstanceID: idg.MustGenSFID()},
-				RelApplet:    models.RelApplet{AppletID: app.AppletID},
-				InstanceInfo: models.InstanceInfo{State: enums.INSTANCE_STATE__CREATED},
-			}
-			if err = ins.Create(d); err != nil {
-				if sqlx.DBErr(err).IsConflict() {
-					return status.MultiInstanceDeployed.StatusErr().
-						WithDesc(app.AppletID.String())
-				}
-				return status.DatabaseError.StatusErr().WithDesc(err.Error())
-			}
-			return nil
-		},
-		func(d sqlx.DBExecutor) error {
-			if r.Cache == nil {
-				r.Cache = wasm.DefaultCache()
-			}
-			_, err = config.Create(ctx, ins.InstanceID, r.Cache)
-			return nil
-		},
-	).Do()
-	if err != nil {
-		return nil, err
-	}
-	return ins, nil
-}
-
 func Deploy(ctx context.Context, cmd enums.DeployCmd) (err error) {
 	var m = types.MustInstanceFromContext(ctx)
 
@@ -324,8 +295,6 @@ func Deploy(ctx context.Context, cmd enums.DeployCmd) (err error) {
 		m.State = enums.INSTANCE_STATE__STOPPED
 	case enums.DEPLOY_CMD__START:
 		m.State = enums.INSTANCE_STATE__STARTED
-	case enums.DEPLOY_CMD__KILL:
-		m.State = enums.INSTANCE_STATE__CREATED
 	default:
 		return status.UnknownDeployCommand.StatusErr().
 			WithDesc(strconv.Itoa(int(cmd)))
@@ -348,8 +317,6 @@ func Deploy(ctx context.Context, cmd enums.DeployCmd) (err error) {
 				err = vm.StopInstance(ctx, m.InstanceID)
 			case enums.INSTANCE_STATE__STARTED:
 				err = vm.StartInstance(ctx, m.InstanceID)
-			case enums.INSTANCE_STATE__CREATED:
-				err = vm.DelInstance(ctx, m.InstanceID)
 			}
 			if err != nil {
 				// Warn

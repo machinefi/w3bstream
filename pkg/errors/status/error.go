@@ -69,6 +69,8 @@ const (
 	InvalidEventChannel
 	// @errTalk Invalid Event Token
 	InvalidEventToken
+	// @errTalk Invalid Applet
+	InvalidAppletContext
 )
 
 const (
