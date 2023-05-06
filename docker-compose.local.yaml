@@ -1,0 +1,76 @@
+version: "3.6"
+
+services:
+  w3bapp:
+    #image: ${WS_BACKEND_IMAGE:-ghcr.io/machinefi/w3bstream:main}
+    build: .
+    depends_on:
+      - "postgres"
+      - "mqtt_server"
+    container_name: w3bstream
+    working_dir: /w3bstream
+    restart: always
+    ports:
+      - "8888:8888"
+    environment:
+      SRV_APPLET_MGR__EthClient_Endpoints: '{"4689": "https://babel-api.mainnet.iotex.io", "4690": "https://babel-api.testnet.iotex.io", "1": "https://ethereum.iotex.one/v1/mainnet", "5": "https://ethereum.iotex.one/v1/goerli", "137": "https://polygon-rpc.com", "80001": "https://mumbai.polygonscan.com/"}'
+      SRV_APPLET_MGR__Jwt_ExpIn: ${JWT_EXPIN:-1h}
+      SRV_APPLET_MGR__Jwt_Issuer: ${JWT_ISSUER:-w3bstream}
+      SRV_APPLET_MGR__Postgres_Master: postgresql://${POSTGRES_USER:-w3badmin}:${POSTGRES_PASSWORD:-PaSsW0Rd}@postgres:5432/${POSTGRES_DB:-w3bstream}?sslmode=disable
+      SRV_APPLET_MGR__MonitorDB_Master: postgresql://${POSTGRES_USER:-w3badmin}:${POSTGRES_PASSWORD:-PaSsW0Rd}@postgres:5432/${POSTGRES_DB:-w3bstream}?sslmode=disable
+      SRV_APPLET_MGR__WasmDB_Master: postgresql://${POSTGRES_USER:-w3badmin}:${POSTGRES_PASSWORD:-PaSsW0Rd}@postgres:5432/${POSTGRES_DB:-w3bstream}?sslmode=disable
+      SRV_APPLET_MGR__MqttBroker_Server: mqtt://mqtt_server:1883
+      SRV_APPLET_MGR__Server_Port: "8888"
+      SRV_APPLET_MGR__ServerEvent_Port: "8889"
+    volumes:
+      - ${WS_WORKING_DIR:-.}/asserts:/w3bstream/asserts
+
+  mqtt_server:
+    image: eclipse-mosquitto:1.6.15
+    container_name: mosquitto
+    restart: always
+    ports:
+      - "1883:1883"
+    volumes:
+      - ${WS_WORKING_DIR:-.}/mqtt:/mosquitto/data
+
+  postgres:
+    image: postgres:13
+    restart: always
+    command:
+      [
+        "postgres",
+        "-cshared_preload_libraries=pg_stat_statements"
+      ]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-w3badmin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-PaSsW0Rd}
+      POSTGRES_DB: ${POSTGRES_DB:-w3bstream}
+    volumes:
+      - ${WS_WORKING_DIR:-.}/postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: 'redis:6.2'
+    restart: always
+    volumes:
+      - ${WS_WORKING_DIR:-.}/redisdb:/data
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-w3bredispasS}
+    command: redis-server --requirepass ${REDIS_PASSWORD:-w3bredispasS}
+    ports:
+      - '6379:6379'
+
+  prometheus:
+    image: imoocc/prometheus:latest
+    depends_on:
+      - "w3bapp"
+    user: root
+    command: --web.enable-lifecycle --config.file=/etc/prometheus/prometheus.yml
+    container_name: prometheus
+    restart: always
+    volumes:
+      - ${WS_WORKING_DIR:-.}/prometheus:/prometheus
+    ports:
+      - "9090:9090"

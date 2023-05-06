@@ -2,6 +2,7 @@ package deploy
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -188,24 +189,37 @@ func Remove(ctx context.Context, r *CondArgs) error {
 // UpsertByCode upsert instance and its config, and deploy wasm if needed
 func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.InstanceState, old ...types.SFID) (*models.Instance, error) {
 	var (
-		id        types.SFID
+		idg       = confid.MustSFIDGeneratorFromContext(ctx)
 		forUpdate = false
 	)
 
-	if len(old) > 0 && old[0] != 0 {
-		forUpdate = true
-		id = old[0]
-	} else {
-		id = confid.MustSFIDGeneratorFromContext(ctx).MustGenSFID()
-	}
 	app := types.MustAppletFromContext(ctx)
 	ins := &models.Instance{
-		RelInstance:  models.RelInstance{InstanceID: id},
-		RelApplet:    models.RelApplet{AppletID: app.AppletID},
-		InstanceInfo: models.InstanceInfo{State: state},
+		// RelInstance:  models.RelInstance{InstanceID: id},
+		// RelApplet:    models.RelApplet{AppletID: app.AppletID},
+		// InstanceInfo: models.InstanceInfo{State: state},
 	}
 
 	err := sqlx.NewTasks(types.MustMgrDBExecutorFromContext(ctx)).With(
+		func(d sqlx.DBExecutor) error {
+			ins.AppletID = app.AppletID
+			if err := ins.FetchByAppletID(d); err != nil {
+				if sqlx.DBErr(err).IsNotFound() {
+					forUpdate = false
+					ins.InstanceID = idg.MustGenSFID()
+					return nil
+				} else {
+					return status.DatabaseError.StatusErr().WithDesc(err.Error())
+				}
+			}
+			if len(old) > 0 && old[0] != ins.InstanceID {
+				return status.InvalidAppletContext.StatusErr().WithDesc(
+					fmt.Sprintf("database: %v arg: %v", ins.InstanceID, old[0]),
+				)
+			}
+			forUpdate = true
+			return nil
+		},
 		func(d sqlx.DBExecutor) error {
 			if forUpdate {
 				if err := ins.UpdateByInstanceID(d); err != nil {
@@ -250,7 +264,7 @@ func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.In
 				return err
 			}
 			// TODO should below actions be in a critical section?
-			if err = vm.NewInstance(_ctx, code, id, state); err != nil {
+			if err = vm.NewInstance(_ctx, code, ins.InstanceID, state); err != nil {
 				return status.CreateInstanceFailed.StatusErr().WithDesc(err.Error())
 			}
 			ins.State, _ = vm.GetInstanceState(ins.InstanceID)

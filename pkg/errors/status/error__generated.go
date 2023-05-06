@@ -75,6 +75,8 @@ func (v Error) Key() string {
 		return "InvalidEventChannel"
 	case InvalidEventToken:
 		return "InvalidEventToken"
+	case InvalidAppletContext:
+		return "InvalidAppletContext"
 	case Forbidden:
 		return "Forbidden"
 	case DisabledAccount:
@@ -229,6 +231,8 @@ func (v Error) Msg() string {
 		return "Invalid Event Channel"
 	case InvalidEventToken:
 		return "Invalid Event Token"
+	case InvalidAppletContext:
+		return "Invalid Applet"
 	case Forbidden:
 		return "forbidden"
 	case DisabledAccount:
@@ -382,6 +386,8 @@ func (v Error) CanBeTalk() bool {
 	case InvalidEventChannel:
 		return true
 	case InvalidEventToken:
+		return true
+	case InvalidAppletContext:
 		return true
 	case Forbidden:
 		return false
