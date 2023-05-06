@@ -710,7 +710,7 @@ delete it
 
 ```sh
 export CONTRACTLOGID=${contractlogID}
-http delete :8888/srv-applet-mgr/v0/monitor/x/$PROJECTNAME/$CONTRACTLOGID -A bearer -a $TOK
+http delete :8888/srv-applet-mgr/v0/monitor/x/$PROJECTNAME/contract_log/$CONTRACTLOGID -A bearer -a $TOK
 ```
 
 ### Post blockchain transaction monitor
