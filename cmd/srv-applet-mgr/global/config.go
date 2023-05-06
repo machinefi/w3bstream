@@ -7,6 +7,7 @@ import (
 
 	_ "github.com/machinefi/w3bstream/cmd/srv-applet-mgr/types"
 	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
+	base "github.com/machinefi/w3bstream/pkg/depends/base/types"
 	confapp "github.com/machinefi/w3bstream/pkg/depends/conf/app"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/amazonS3"
@@ -39,9 +40,10 @@ var (
 
 	proxy *client.Client // proxy client for forward mqtt event
 
-	db          = &confpostgres.Endpoint{Database: models.DB}
-	monitordb   = &confpostgres.Endpoint{Database: models.MonitorDB}
-	wasmdb      = &confpostgres.Endpoint{Database: models.WasmDB}
+	db        = &confpostgres.Endpoint{Database: models.DB}
+	monitordb = &confpostgres.Endpoint{Database: models.MonitorDB}
+	wasmdb    = &base.Endpoint{}
+
 	ServerMgr   = &confhttp.Server{}
 	ServerEvent = &confhttp.Server{} // serverEvent support event http transport
 
@@ -55,7 +57,7 @@ func init() {
 	config := &struct {
 		Postgres    *confpostgres.Endpoint
 		MonitorDB   *confpostgres.Endpoint
-		WasmDB      *confpostgres.Endpoint
+		WasmDB      *base.Endpoint
 		MqttBroker  *confmqtt.Broker
 		Redis       *confredis.Redis
 		Server      *confhttp.Server

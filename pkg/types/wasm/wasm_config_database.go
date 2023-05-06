@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/migration"
+	"github.com/machinefi/w3bstream/pkg/depends/x/misc/retry"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -59,7 +61,7 @@ func (t *Table) Build() *builder.Table {
 		tbl.AddCol(c.Build())
 	}
 	for _, k := range t.Keys {
-		tbl.AddKey(k.Build())
+		tbl.AddKey(k.Build(t.Name))
 	}
 	return tbl
 }
@@ -150,9 +152,21 @@ type Key struct {
 	Expr        string   `json:"expr,omitempty"`
 }
 
-func (k *Key) Build() *builder.Key {
+func (k *Key) Build(tblName string) *builder.Key {
+	names := []string{tblName}
+
+	if k.IsUnique && (k.Name == "primary" || strings.HasSuffix(k.Name, "pkey")) {
+		names = append(names, "primary")
+	} else if k.IsUnique {
+		names = append(names, "ui")
+	} else {
+		names = append(names, "i")
+	}
+	for _, colName := range k.ColumnNames {
+		names = append(names, colName)
+	}
 	return &builder.Key{
-		Name:     k.Name,
+		Name:     strings.Join(names, "_"),
 		IsUnique: k.IsUnique,
 		Method:   k.Method,
 		Def: builder.IndexDef{
@@ -161,6 +175,7 @@ func (k *Key) Build() *builder.Key {
 		},
 	}
 }
+
 func (d *Database) ConfigType() enums.ConfigType {
 	return enums.CONFIG_TYPE__PROJECT_DATABASE
 }
@@ -192,8 +207,18 @@ func (d *Database) WithDefaultSchema() (sqlx.DBExecutor, error) {
 func (d *Database) Init(ctx context.Context) (err error) {
 	// init database endpoint
 	d.Name = types.MustProjectFromContext(ctx).DatabaseName()
-	d.ep = types.MustWasmDBEndpointFromContext(ctx)
-	d.ep.Database = sqlx.NewDatabase(d.Name)
+
+	// clone config and init config
+	ep := *types.MustWasmDBEndpointFromContext(ctx)
+	ep.Base = d.Name
+
+	d.ep = &postgres.Endpoint{
+		Master:   ep,
+		Database: sqlx.NewDatabase(d.Name),
+		Retry:    retry.Default,
+	}
+	d.ep.SetDefault()
+
 	if d.schemas == nil {
 		d.schemas = make(map[string]*Schema)
 	}

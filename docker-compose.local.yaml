@@ -18,10 +18,11 @@ services:
       SRV_APPLET_MGR__Jwt_Issuer: ${JWT_ISSUER:-w3bstream}
       SRV_APPLET_MGR__Postgres_Master: postgresql://${POSTGRES_USER:-w3badmin}:${POSTGRES_PASSWORD:-PaSsW0Rd}@postgres:5432/${POSTGRES_DB:-w3bstream}?sslmode=disable
       SRV_APPLET_MGR__MonitorDB_Master: postgresql://${POSTGRES_USER:-w3badmin}:${POSTGRES_PASSWORD:-PaSsW0Rd}@postgres:5432/${POSTGRES_DB:-w3bstream}?sslmode=disable
-      SRV_APPLET_MGR__WasmDB_Master: postgresql://${POSTGRES_USER:-w3badmin}:${POSTGRES_PASSWORD:-PaSsW0Rd}@postgres:5432/${POSTGRES_DB:-w3bstream}?sslmode=disable
+      SRV_APPLET_MGR__WasmDB: postgresql://${POSTGRES_USER:-w3badmin}:${POSTGRES_PASSWORD:-PaSsW0Rd}@postgres:5432?sslmode=disable
       SRV_APPLET_MGR__MqttBroker_Server: mqtt://mqtt_server:1883
       SRV_APPLET_MGR__Server_Port: "8888"
       SRV_APPLET_MGR__ServerEvent_Port: "8889"
+      SRV_APPLET_MGR__LocalFS_Root: /w3bstream/assert
     volumes:
       - ${WS_WORKING_DIR:-.}/asserts:/w3bstream/asserts
 

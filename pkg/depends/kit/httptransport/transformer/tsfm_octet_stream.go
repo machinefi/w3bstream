@@ -1,6 +1,7 @@
 package transformer
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"mime/multipart"
@@ -33,6 +34,12 @@ func (t *OctetStream) EncodeTo(ctx context.Context, w io.Writer, v interface{}) 
 	case io.Reader:
 		httpx.MaybeWriteHeader(ctx, w, t.Names()[0], nil)
 		if _, err := io.Copy(w, x); err != nil {
+			return err
+		}
+	case bytes.Buffer:
+		// TODO draft for fix bytes.Buffer
+		httpx.MaybeWriteHeader(ctx, w, t.Names()[0], nil)
+		if _, err := io.Copy(w, &x); err != nil {
 			return err
 		}
 	case *multipart.FileHeader:

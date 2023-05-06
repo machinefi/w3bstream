@@ -63,9 +63,4 @@ SRV_APPLET_MGR__ServerEvent_Debug: "true"
 SRV_APPLET_MGR__ServerEvent_HealthCheck: http://:80/
 SRV_APPLET_MGR__ServerEvent_Port: "80"
 SRV_APPLET_MGR__ServerEvent_Spec: ./openapi.json
-SRV_APPLET_MGR__WasmDB_ConnMaxLifetime: 1h
-SRV_APPLET_MGR__WasmDB_Master: postgres://127.0.0.1:5432
-SRV_APPLET_MGR__WasmDB_PoolSize: "10"
-SRV_APPLET_MGR__WasmDB_Retry_Interval: 3s
-SRV_APPLET_MGR__WasmDB_Retry_Repeats: "3"
-SRV_APPLET_MGR__WasmDB_Slave: ""
+SRV_APPLET_MGR__WasmDB: ""
