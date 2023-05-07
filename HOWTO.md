@@ -248,8 +248,15 @@ autoincrement
 
 `schemas[i].tables[i].keys[i].columnNames` index related column names
 
-> if the key's name is `primary` or `pkey`, it defined as primary key of the
-> table.
+> NOTE:
+> if the key's name is `primary` or has suffix `pkey`, it defined as primary key
+> of the table.
+> the index name will be built by this pattern:
+> 1. non-primary index: `tableName_[i|ui]_[columnName1]_[columnName2]_...`. if
+     it is a unique index use `ui`, otherwise use `i` to split table name and
+     index defines.
+> 2. primary key: `tableName_primary`
+
 
 output like:
 
@@ -380,7 +387,7 @@ http get :8888/srv-applet-mgr/v0/project/datalist -A bearer -a $TOK # fetch proj
 export WASMFILE=build/wasms/log.wasm
 export WASMNAME=log.wasm
 export APPLETNAME=log
-http --form post :8888/srv-applet-mgr/v0/applet/x/$PROJECTNAME file@$WASMFILE info='{"appletName":"'$APPLETNAME'","wasmName":"'$WASMNAME'","start":true}' -A bearer -a $TOK 
+http --form post :8888/srv-applet-mgr/v0/applet/x/$PROJECTNAME file@$WASMFILE info='{"appletName":"'$APPLETNAME'","wasmName":"'$WASMNAME'"}' -A bearer -a $TOK 
 ```
 
 output like
@@ -415,8 +422,6 @@ output like
 > strategy with `DEFAULT` event type and `start` handler will be created
 
 `info.appletName` defined the unique applet name under the project
-
-`info.deploy` if set as `true`, the applet will be created and start running.
 
 `info.wasmName` the resource filename
 
@@ -481,13 +486,11 @@ export DEPLOYCMD=START
 http put :8888/srv-applet-mgr/v0/deploy/$INSTANCEID/$DEPLOYCMD -A bearer -a $TOK
 ```
 
-deploy command enumerated in `START`, `HUNGUP` and `KILL`
+deploy command enumerated in `START` and `HUNGUP`
 
 `START` change the instance state to `STARTED`
 
 `HUNGUP` change the instance state to `STOPPED`
-
-`KILL` change the instance state to `CREATED`
 
 ### Update applet and redeploy instance
 
@@ -656,6 +659,19 @@ server log like
 }
 ```
 
+the `pub_client` sends event message through mqtt broker using protobuf
+encoding. the event defined as follows
+
+| field name       | protobuf filed    | protobuf seq | datatype | requirement | comment                                                                            |
+|:-----------------|:------------------|:-------------|:---------|:------------|:-----------------------------------------------------------------------------------|
+| Header           | header            | 1            | object   | required    |                                                                                    |
+| Header.EventType | header.event_type | header.1     | string   | recommended | event type(user defined) for event routing, according to strategies created before |
+| Header.PubId     | header.pub_id     | header.2     | string   | recommended | publisher id, usually it is the device machine number, you register before         |
+| Header.Token     | header.token      | header.3     | string   | required    | publisher token. it contains the publisher id (or DID)                             |
+| Header.PubTime   | header.pub_time   | header.4     | int64    | recommended | message timestamp when published, use unix epoch timestamp (in UTC)                |
+| Header.EventId   | header.event_id   | header.5     | string   | recommended | event id is the unique identity of this message related with the publisher         |
+| Payload          | payload           | 2            | bytes    | -           | message payload                                                                    |
+
 ### Data cleanup
 
 Be careful.
@@ -676,7 +692,7 @@ http delete :8888/srv-applet-mgr/v0/deploy/data/$INSTANCEID -A bearer -a $TOK
 ### Post blockchain contract event log monitor
 
 ```sh
-echo '{"eventType": "DEFAULT", "chainID": 4690, "contractAddress": "${contractAddress}","blockStart": ${blockStart},"blockEnd": ${blockEnd},"topic0":"${topic0}"}' | http :8888/srv-applet-mgr/v0/monitor/contract_log/$PROJECTNAME -A bearer -a $TOK
+echo '{"eventType": "DEFAULT", "chainID": 4690, "contractAddress": "${contractAddress}","blockStart": ${blockStart},"blockEnd": ${blockEnd},"topic0":"${topic0}"}' | http :8888/srv-applet-mgr/v0/monitor/x/$PROJECTNAME/contract_log -A bearer -a $TOK
 ```
 
 output like
@@ -700,14 +716,14 @@ output like
 delete it
 
 ```sh
-export ContractlogID=${contractlogID}
-http delete :8888/srv-applet-mgr/v0/monitor/contract_log/$PROJECTNAME/$ContractlogID -A bearer -a $TOK
+export CONTRACTLOGID=${contractlogID}
+http delete :8888/srv-applet-mgr/v0/monitor/x/$PROJECTNAME/contract_log/$CONTRACTLOGID -A bearer -a $TOK
 ```
 
 ### Post blockchain transaction monitor
 
 ```sh
-echo '{"eventType": "DEFAULT", "chainID": 4690, "txAddress": "${txAddress}"}' | http :8888/srv-applet-mgr/v0/monitor/chain_tx/$PROJECTNAME -A bearer -a $TOK
+echo '{"eventType": "DEFAULT", "chainID": 4690, "txAddress": "${txAddress}"}' | http :8888/srv-applet-mgr/v0/monitor/x/$PROJECTNAME/chain_tx -A bearer -a $TOK
 ```
 
 output like
@@ -727,14 +743,14 @@ output like
 delete it
 
 ```sh
-export ChaintxID=${chaintxID}
-http delete :8888/srv-applet-mgr/v0/monitor/chain_tx/$PROJECTNAME/$ChaintxID -A bearer -a $TOK
+export CHAINTXID=${chaintxID}
+http delete :8888/srv-applet-mgr/v0/monitor/x/$PROJECTNAME/chain_tx/$CHAINTXID -A bearer -a $TOK
 ```
 
 ### Post blockchain height monitor
 
 ```sh
-echo '{"eventType": "DEFAULT", "chainID": 4690, "height": ${height}}' | http :8888/srv-applet-mgr/v0/monitor/chain_height/$PROJECTNAME -A bearer -a $TOK
+echo '{"eventType": "DEFAULT", "chainID": 4690, "height": ${height}}' | http :8888/srv-applet-mgr/v0/monitor/x/$PROJECTNAME/chain_height -A bearer -a $TOK
 ```
 
 output like
@@ -754,8 +770,8 @@ output like
 delete it
 
 ```sh
-export ChainHeightID=${chainHeightID}
-http delete :8888/srv-applet-mgr/v0/monitor/chain_height/$PROJECTNAME/$ChainHeightID -A bearer -a $TOK
+export CHAINHEIGHTID=${chainHeightID}
+http delete :8888/srv-applet-mgr/v0/monitor/x/$PROJECTNAME/chain_height/$CHAINHEIGHTID -A bearer -a $TOK
 ```
 
 ### remove instance

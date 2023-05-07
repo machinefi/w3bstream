@@ -5,7 +5,6 @@ import (
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
@@ -141,7 +140,11 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 		err error
 	)
 
-	res, raw, err = resource.Create(ctx, acc.AccountID, r.File, r.AppletName, r.WasmMd5)
+	filename := r.WasmName
+	if filename == "" {
+		filename = r.AppletName + ".wasm"
+	}
+	res, raw, err = resource.Create(ctx, acc.AccountID, r.File, filename, r.WasmMd5)
 	if err != nil {
 		return nil, err
 	}
@@ -179,11 +182,7 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 				r.WasmCache = wasm.DefaultCache()
 			}
 			rb := &deploy.CreateReq{Cache: r.WasmCache}
-			if r.Deploy == datatypes.TRUE {
-				ins, err = deploy.UpsertByCode(ctx, rb, raw, enums.INSTANCE_STATE__STARTED)
-			} else {
-				ins, err = deploy.Create(ctx, rb)
-			}
+			ins, err = deploy.UpsertByCode(ctx, rb, raw, enums.INSTANCE_STATE__STARTED)
 			return err
 		},
 	).Do()
@@ -214,6 +213,9 @@ func Update(ctx context.Context, r *UpdateReq) (*UpdateRsp, error) {
 	if r.File != nil {
 		acc := types.MustAccountFromContext(ctx)
 		filename, md5 := r.Info.WasmName, r.Info.WasmMd5
+		if filename == "" {
+			filename = r.AppletName + ".wasm"
+		}
 		res, raw, err = resource.Create(ctx, acc.AccountID, r.File, filename, md5)
 	}
 
@@ -238,9 +240,6 @@ func Update(ctx context.Context, r *UpdateReq) (*UpdateRsp, error) {
 		func(d sqlx.DBExecutor) error {
 			if r.File == nil {
 				return nil // instance state will not be changed
-			}
-			if r.Info.Deploy != datatypes.TRUE {
-				return nil
 			}
 			ins, err = deploy.GetByAppletSFID(ctx, app.AppletID)
 			if err != nil {

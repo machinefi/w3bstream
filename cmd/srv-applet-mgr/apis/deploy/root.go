@@ -9,7 +9,7 @@ import (
 var Root = kit.NewRouter(httptransport.Group("/deploy"))
 
 func init() {
-	Root.Register(kit.NewRouter(&CreateInstance{}))
+	Root.Register(kit.NewRouter(&CreateAndStartInstance{}))
 	Root.Register(kit.NewRouter(&GetInstanceByInstanceID{}))
 	Root.Register(kit.NewRouter(&GetInstanceByAppletID{}))
 	Root.Register(kit.NewRouter(&ControlInstance{}))

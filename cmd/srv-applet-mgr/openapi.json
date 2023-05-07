@@ -5,7 +5,33 @@
     "version": ""
   },
   "paths": {
-    "/": {
+    "/liveness": {
+      "get": {
+        "tags": [
+          "github.com/machinefi/w3bstream/pkg/depends/conf/http"
+        ],
+        "operationId": "Liveness",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "propertyNames": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/srv-applet-mgr": {
       "get": {
         "tags": [
           "github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/openapi"
@@ -51,33 +77,7 @@
         }
       }
     },
-    "/liveness": {
-      "get": {
-        "tags": [
-          "github.com/machinefi/w3bstream/pkg/depends/conf/http"
-        ],
-        "operationId": "Liveness",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "propertyNames": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v0/account/0": {
+    "/srv-applet-mgr/v0/account": {
       "put": {
         "tags": [
           "apis/account"
@@ -192,7 +192,7 @@
         }
       }
     },
-    "/v0/account/operatoraddr": {
+    "/srv-applet-mgr/v0/account/operatoraddr": {
       "get": {
         "tags": [
           "apis/account"
@@ -278,7 +278,7 @@
         }
       }
     },
-    "/v0/applet/data/{appletID}": {
+    "/srv-applet-mgr/v0/applet/data/{appletID}": {
       "delete": {
         "tags": [
           "apis/applet"
@@ -503,7 +503,7 @@
         }
       }
     },
-    "/v0/applet/x/{projectName}": {
+    "/srv-applet-mgr/v0/applet/x/{projectName}": {
       "delete": {
         "tags": [
           "apis/applet"
@@ -754,6 +754,7 @@
             },
             "x-status-errors": [
               "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[InvalidAppletContext][401999015][Invalid Applet]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -833,7 +834,7 @@
         }
       }
     },
-    "/v0/applet/x/{projectName}/datalist": {
+    "/srv-applet-mgr/v0/applet/x/{projectName}/datalist": {
       "get": {
         "tags": [
           "apis/applet"
@@ -1008,7 +1009,7 @@
         }
       }
     },
-    "/v0/applet/{appletID}": {
+    "/srv-applet-mgr/v0/applet/{appletID}": {
       "put": {
         "tags": [
           "apis/applet"
@@ -1106,6 +1107,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[InvalidAppletContext][401999015][Invalid Applet]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -1186,7 +1188,7 @@
         }
       }
     },
-    "/v0/cronjob": {
+    "/srv-applet-mgr/v0/cronjob": {
       "get": {
         "tags": [
           "apis/cronjob"
@@ -1343,7 +1345,7 @@
         }
       }
     },
-    "/v0/cronjob/data/{cronJobID}": {
+    "/srv-applet-mgr/v0/cronjob/data/{cronJobID}": {
       "delete": {
         "tags": [
           "apis/cronjob"
@@ -1442,7 +1444,7 @@
         }
       }
     },
-    "/v0/cronjob/{projectID}": {
+    "/srv-applet-mgr/v0/cronjob/{projectID}": {
       "post": {
         "tags": [
           "apis/cronjob"
@@ -1590,83 +1592,7 @@
         }
       }
     },
-    "/v0/debug": {
-      "get": {
-        "operationId": "",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInHeader",
-              "x-tag-name": "Authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInQuery",
-              "x-tag-name": "authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": ""
-          },
-          "401": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
-              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
-              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
-              "@StatusErr[InvalidToken][401999002][Invalid Token]!"
-            ]
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
-            ]
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[DatabaseError][500999002][Database Error]!"
-            ]
-          }
-        }
-      }
-    },
-    "/v0/deploy/applet/{appletID}": {
+    "/srv-applet-mgr/v0/deploy/applet/{appletID}": {
       "get": {
         "tags": [
           "apis/deploy"
@@ -1777,7 +1703,7 @@
         "tags": [
           "apis/deploy"
         ],
-        "operationId": "CreateInstance",
+        "operationId": "CreateAndStartInstance",
         "parameters": [
           {
             "name": "appletID",
@@ -1846,6 +1772,20 @@
               }
             }
           },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!",
+              "@StatusErr[UnknownDeployCommand][400999004][Unknown Deploy Command]!"
+            ]
+          },
           "401": {
             "description": "",
             "content": {
@@ -1856,6 +1796,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[InvalidAppletContext][401999015][Invalid Applet]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -1906,14 +1847,18 @@
             "x-status-errors": [
               "@StatusErr[ConfigInitFailed][500999006][Config Init Failed]!",
               "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
+              "@StatusErr[CreateInstanceFailed][500999010][Create Instance Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[DatabaseError][500999002][Database Error]!"
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[FetchResourceFailed][500999005][Fetch Resource Failed]!",
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }
       }
     },
-    "/v0/deploy/data/{instanceID}": {
+    "/srv-applet-mgr/v0/deploy/data/{instanceID}": {
       "delete": {
         "tags": [
           "apis/deploy"
@@ -2031,7 +1976,7 @@
         }
       }
     },
-    "/v0/deploy/instance/{instanceID}": {
+    "/srv-applet-mgr/v0/deploy/instance/{instanceID}": {
       "get": {
         "tags": [
           "apis/deploy"
@@ -2139,7 +2084,7 @@
         }
       }
     },
-    "/v0/deploy/x/{projectName}": {
+    "/srv-applet-mgr/v0/deploy/x/{projectName}": {
       "delete": {
         "tags": [
           "apis/deploy"
@@ -2289,7 +2234,7 @@
         }
       }
     },
-    "/v0/deploy/{instanceID}/{cmd}": {
+    "/srv-applet-mgr/v0/deploy/{instanceID}/{cmd}": {
       "put": {
         "tags": [
           "apis/deploy"
@@ -2432,7 +2377,7 @@
         }
       }
     },
-    "/v0/event/{channel}": {
+    "/srv-applet-mgr/v0/event/{channel}": {
       "post": {
         "tags": [
           "apis/event"
@@ -2562,6 +2507,7 @@
             },
             "x-status-errors": [
               "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[InvalidAppletContext][401999015][Invalid Applet]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthPublisherID][401999011][Invalid Auth Publisher ID]!",
               "@StatusErr[InvalidAuthPublisherID][401999011][Invalid Auth Publisher ID]!",
@@ -2689,7 +2635,7 @@
         }
       }
     },
-    "/v0/login": {
+    "/srv-applet-mgr/v0/login": {
       "put": {
         "tags": [
           "apis/login"
@@ -2781,7 +2727,7 @@
         }
       }
     },
-    "/v0/login/wallet": {
+    "/srv-applet-mgr/v0/login/wallet": {
       "put": {
         "tags": [
           "apis/login"
@@ -2886,7 +2832,7 @@
         }
       }
     },
-    "/v0/monitor/x/{projectName}/chain_height": {
+    "/srv-applet-mgr/v0/monitor/x/{projectName}/chain_height": {
       "post": {
         "tags": [
           "apis/monitor"
@@ -3021,7 +2967,7 @@
         }
       }
     },
-    "/v0/monitor/x/{projectName}/chain_height/{chainHeightID}": {
+    "/srv-applet-mgr/v0/monitor/x/{projectName}/chain_height/{chainHeightID}": {
       "delete": {
         "tags": [
           "apis/monitor"
@@ -3113,7 +3059,7 @@
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
-              "@StatusErr[ContractLogNotFound][404999014][Contract Log Not Found]!",
+              "@StatusErr[ChainHeightNotFound][404999016][Chain Height Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
@@ -3135,7 +3081,7 @@
         }
       }
     },
-    "/v0/monitor/x/{projectName}/chain_tx": {
+    "/srv-applet-mgr/v0/monitor/x/{projectName}/chain_tx": {
       "post": {
         "tags": [
           "apis/monitor"
@@ -3270,7 +3216,7 @@
         }
       }
     },
-    "/v0/monitor/x/{projectName}/chain_tx/{chainTxID}": {
+    "/srv-applet-mgr/v0/monitor/x/{projectName}/chain_tx/{chainTxID}": {
       "delete": {
         "tags": [
           "apis/monitor"
@@ -3384,7 +3330,7 @@
         }
       }
     },
-    "/v0/monitor/x/{projectName}/contract_log": {
+    "/srv-applet-mgr/v0/monitor/x/{projectName}/contract_log": {
       "post": {
         "tags": [
           "apis/monitor"
@@ -3519,7 +3465,7 @@
         }
       }
     },
-    "/v0/monitor/x/{projectName}/contract_log/{contractLogID}": {
+    "/srv-applet-mgr/v0/monitor/x/{projectName}/contract_log/{contractLogID}": {
       "delete": {
         "tags": [
           "apis/monitor"
@@ -3633,7 +3579,7 @@
         }
       }
     },
-    "/v0/project": {
+    "/srv-applet-mgr/v0/project": {
       "post": {
         "tags": [
           "apis/project"
@@ -3798,7 +3744,7 @@
         }
       }
     },
-    "/v0/project/datalist": {
+    "/srv-applet-mgr/v0/project/datalist": {
       "get": {
         "tags": [
           "apis/project"
@@ -3949,7 +3895,7 @@
         }
       }
     },
-    "/v0/project/detail_list": {
+    "/srv-applet-mgr/v0/project/detail_list": {
       "get": {
         "tags": [
           "apis/project"
@@ -4102,7 +4048,7 @@
         }
       }
     },
-    "/v0/project/x/{projectName}": {
+    "/srv-applet-mgr/v0/project/x/{projectName}": {
       "delete": {
         "tags": [
           "apis/project"
@@ -4217,7 +4163,7 @@
         }
       }
     },
-    "/v0/project/x/{projectName}/data": {
+    "/srv-applet-mgr/v0/project/x/{projectName}/data": {
       "get": {
         "tags": [
           "apis/project"
@@ -4334,7 +4280,7 @@
         }
       }
     },
-    "/v0/project_config/x/{projectName}": {
+    "/srv-applet-mgr/v0/project_config/x/{projectName}/PROJECT_DATABASE": {
       "get": {
         "tags": [
           "apis/project_config"
@@ -4382,7 +4328,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgTypesWasmConfiguration"
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgTypesWasmDatabase"
                 }
               }
             }
@@ -4587,7 +4533,274 @@
         }
       }
     },
-    "/v0/publisher/data/{publisherID}": {
+    "/srv-applet-mgr/v0/project_config/x/{projectName}/PROJECT_ENV": {
+      "get": {
+        "tags": [
+          "apis/project_config"
+        ],
+        "operationId": "GetProjectEnv",
+        "parameters": [
+          {
+            "name": "projectName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "projectName",
+              "x-go-field-name": "ProjectName",
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgTypesWasmEnv"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!"
+            ]
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[ConfigNotFound][404999003][Config Not Found]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "apis/project_config"
+        ],
+        "operationId": "CreateOrUpdateProjectEnv",
+        "parameters": [
+          {
+            "name": "projectName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "projectName",
+              "x-go-field-name": "ProjectName",
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgTypesWasmEnv"
+                  },
+                  {
+                    "x-go-field-name": "Env"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsConfig"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!"
+            ]
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+            ]
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[ConfigConflict][409999006][Config Conflict]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[ConfigInitFailed][500999006][Config Init Failed]!",
+              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
+    "/srv-applet-mgr/v0/publisher/data/{publisherID}": {
       "delete": {
         "tags": [
           "apis/publisher"
@@ -4792,7 +5005,7 @@
         }
       }
     },
-    "/v0/publisher/x/{projectName}": {
+    "/srv-applet-mgr/v0/publisher/x/{projectName}": {
       "delete": {
         "tags": [
           "apis/publisher"
@@ -5257,7 +5470,7 @@
         }
       }
     },
-    "/v0/publisher/x/{projectName}/{publisherID}": {
+    "/srv-applet-mgr/v0/publisher/x/{projectName}/{publisherID}": {
       "put": {
         "tags": [
           "apis/publisher"
@@ -5402,7 +5615,7 @@
         }
       }
     },
-    "/v0/register/admin": {
+    "/srv-applet-mgr/v0/register/admin": {
       "post": {
         "tags": [
           "apis/account"
@@ -5480,7 +5693,7 @@
         }
       }
     },
-    "/v0/resource": {
+    "/srv-applet-mgr/v0/resource": {
       "get": {
         "tags": [
           "apis/resource"
@@ -5697,7 +5910,7 @@
         }
       }
     },
-    "/v0/resource/{resourceID}": {
+    "/srv-applet-mgr/v0/resource/{resourceID}": {
       "delete": {
         "tags": [
           "apis/resource"
@@ -5794,7 +6007,7 @@
         }
       }
     },
-    "/v0/strategy/data/{strategyID}": {
+    "/srv-applet-mgr/v0/strategy/data/{strategyID}": {
       "delete": {
         "tags": [
           "apis/strategy"
@@ -5997,7 +6210,7 @@
         }
       }
     },
-    "/v0/strategy/x/{projectName}": {
+    "/srv-applet-mgr/v0/strategy/x/{projectName}": {
       "delete": {
         "tags": [
           "apis/strategy"
@@ -6277,7 +6490,7 @@
         }
       }
     },
-    "/v0/strategy/x/{projectName}/datalist": {
+    "/srv-applet-mgr/v0/strategy/x/{projectName}/datalist": {
       "get": {
         "tags": [
           "apis/strategy"
@@ -6457,7 +6670,7 @@
         }
       }
     },
-    "/v0/strategy/{strategyID}": {
+    "/srv-applet-mgr/v0/strategy/{strategyID}": {
       "put": {
         "tags": [
           "apis/strategy"
@@ -6889,13 +7102,11 @@
         "type": "string",
         "enum": [
           "START",
-          "HUNGUP",
-          "KILL"
+          "HUNGUP"
         ],
         "x-enum-labels": [
           "start wasm vm",
-          "stop wasm vm",
-          "kill wasm vm (memory released)"
+          "stop wasm vm"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.DeployCmd",
         "x-id": "GithubComMachinefiW3BstreamPkgEnumsDeployCmd"
@@ -6903,12 +7114,10 @@
       "GithubComMachinefiW3BstreamPkgEnumsInstanceState": {
         "type": "string",
         "enum": [
-          "CREATED",
           "STARTED",
           "STOPPED"
         ],
         "x-enum-labels": [
-          "applet and resource is ready but not loaded",
           "ready to receive data",
           "stopped to receive data"
         ],
@@ -8299,6 +8508,9 @@
             "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsResourceInfo"
           },
           {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsRelInstance"
+          },
+          {
             "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsInstanceInfo"
           },
           {
@@ -8314,19 +8526,7 @@
           "appletName": {
             "type": "string",
             "x-go-field-name": "AppletName",
-            "x-tag-json": "appletName,omitempty"
-          },
-          "start": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesBool"
-              },
-              {
-                "description": "Deploy and start vm after created",
-                "x-go-field-name": "Deploy",
-                "x-tag-json": "start"
-              }
-            ]
+            "x-tag-json": "appletName"
           },
           "strategies": {
             "type": "array",
@@ -8360,7 +8560,7 @@
           }
         },
         "required": [
-          "start"
+          "appletName"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.Info",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesAppletInfo"
@@ -9008,10 +9208,6 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/types/wasm.Column",
         "x-id": "GithubComMachinefiW3BstreamPkgTypesWasmColumn"
-      },
-      "GithubComMachinefiW3BstreamPkgTypesWasmConfiguration": {
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/types/wasm.Configuration",
-        "x-id": "GithubComMachinefiW3BstreamPkgTypesWasmConfiguration"
       },
       "GithubComMachinefiW3BstreamPkgTypesWasmConstrains": {
         "type": "object",
