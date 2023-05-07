@@ -2,8 +2,8 @@ version: "3.6"
 
 services:
   w3bapp:
-    image: ${WS_BACKEND_IMAGE:-ghcr.io/machinefi/w3bstream:main}
-      #build: .
+    #image: ${WS_BACKEND_IMAGE:-ghcr.io/machinefi/w3bstream:main}
+    build: .
     depends_on:
       - "postgres"
       - "mqtt_server"

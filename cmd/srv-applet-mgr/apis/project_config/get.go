@@ -8,6 +8,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
 type GetProjectSchema struct {
@@ -15,7 +16,7 @@ type GetProjectSchema struct {
 }
 
 func (r *GetProjectSchema) Path() string {
-	return "/" + enums.CONFIG_TYPE__PROJECT_DATABASE.String()
+	return "/PROJECT_DATABASE"
 }
 
 func (r *GetProjectSchema) Output(ctx context.Context) (interface{}, error) {
@@ -29,7 +30,7 @@ func (r *GetProjectSchema) Output(ctx context.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return scm, nil
+	return scm.(*wasm.Database), nil
 }
 
 type GetProjectEnv struct {
@@ -37,7 +38,7 @@ type GetProjectEnv struct {
 }
 
 func (r *GetProjectEnv) Path() string {
-	return "/" + enums.CONFIG_TYPE__PROJECT_ENV.String()
+	return "/PROJECT_ENV"
 }
 
 func (r *GetProjectEnv) Output(ctx context.Context) (interface{}, error) {
@@ -51,5 +52,5 @@ func (r *GetProjectEnv) Output(ctx context.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return env, nil
+	return env.(*wasm.Env), nil
 }

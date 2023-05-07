@@ -69,9 +69,10 @@ func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filen
 				if sqlx.DBErr(err).IsNotFound() {
 					own.UploadedAt = types.Timestamp{Time: time.Now()}
 					own.Filename = filename
-					if err = own.Create(d); err != nil {
+					if err := own.Create(d); err != nil {
 						return status.DatabaseError.StatusErr().WithDesc(err.Error())
 					}
+					return nil
 				}
 				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			} else {

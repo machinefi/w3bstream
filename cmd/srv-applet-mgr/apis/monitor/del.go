@@ -52,7 +52,7 @@ func (r *RemoveChainHeight) Path() string { return "/chain_height/:chainHeightID
 
 func (r *RemoveChainHeight) Output(ctx context.Context) (interface{}, error) {
 	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
-		WithContractLogBySFID(ctx, r.ChainHeightID)
+		WithChainHeightBySFID(ctx, r.ChainHeightID)
 	if err != nil {
 		return nil, err
 	}

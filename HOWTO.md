@@ -248,8 +248,15 @@ autoincrement
 
 `schemas[i].tables[i].keys[i].columnNames` index related column names
 
-> if the key's name is `primary` or `pkey`, it defined as primary key of the
-> table.
+> NOTE:
+> if the key's name is `primary` or has suffix `pkey`, it defined as primary key
+> of the table.
+> the index name will be built by this pattern:
+> 1. non-primary index: `tableName_[i|ui]_[columnName1]_[columnName2]_...`. if
+     it is a unique index use `ui`, otherwise use `i` to split table name and
+     index defines.
+> 2. primary key: `tableName_primary`
+
 
 output like:
 

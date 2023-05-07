@@ -13,8 +13,6 @@ type UpdatePasswordByAccountID struct {
 	account.UpdatePasswordReq `in:"body"`
 }
 
-func (r *UpdatePasswordByAccountID) Path() string { return "/:accountID" }
-
 func (r *UpdatePasswordByAccountID) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.MustCurrentAccountFromContext(ctx)
 	return nil, account.UpdateAccountPassword(ctx, ca.AccountID, &r.UpdatePasswordReq)

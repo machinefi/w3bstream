@@ -5,7 +5,6 @@ import (
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
-	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
@@ -17,7 +16,7 @@ type CreateProjectSchema struct {
 }
 
 func (r *CreateProjectSchema) Path() string {
-	return "/" + enums.CONFIG_TYPE__PROJECT_DATABASE.String()
+	return "/PROJECT_DATABASE"
 }
 
 func (r *CreateProjectSchema) Output(ctx context.Context) (interface{}, error) {
@@ -36,7 +35,7 @@ type CreateOrUpdateProjectEnv struct {
 }
 
 func (r *CreateOrUpdateProjectEnv) Path() string {
-	return "/" + enums.CONFIG_TYPE__PROJECT_ENV.String()
+	return "/PROJECT_ENV"
 }
 
 func (r *CreateOrUpdateProjectEnv) Output(ctx context.Context) (interface{}, error) {
