@@ -3,7 +3,6 @@ package deploy
 import (
 	"context"
 	"fmt"
-	"github.com/machinefi/w3bstream/pkg/modules/wasmlog"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -18,6 +17,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/modules/resource"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
+	"github.com/machinefi/w3bstream/pkg/modules/wasmlog"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 

@@ -2,6 +2,7 @@ package wasmlog
 
 import (
 	"context"
+
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
