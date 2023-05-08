@@ -37,10 +37,18 @@ func (c *Connector) Connect(ctx context.Context) (driver.Conn, error) {
 	conn, err := d.Open(c.dsn(c.DBName))
 	if err != nil {
 		if c.IsErrorUnknownDatabase(err) {
-			// for create databases
-			conn, err := d.Open(c.dsn(""))
-			if err != nil {
-				return nil, err
+			// try empty database (with default database named as username) and
+			// `postgres` database to connect endpoint for creating database
+			for _, databaseName := range []string{"", "postgres"} {
+				conn, err = d.Open(c.dsn(databaseName))
+				if err != nil {
+					if !c.IsErrorUnknownDatabase(err) {
+						return nil, err
+					} else {
+						continue
+					}
+				}
+				break
 			}
 			_, err = conn.(driver.ExecerContext).ExecContext(
 				context.Background(),
