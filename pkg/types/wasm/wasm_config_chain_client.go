@@ -73,6 +73,17 @@ func decodeEndpoints(in string) (ret map[uint32]string) {
 	return
 }
 
+func (c *ChainClient) SendTXWithPrivateKey(chainID uint32, toStr, valueStr, dataStr, pvk string) (string, error) {
+	if c == nil {
+		return "", nil
+	}
+	if pvk == "" {
+		return "", errors.New("private key is empty")
+	}
+	npvk := crypto.ToECDSAUnsafe(common.FromHex(pvk))
+	return c.sendTX(chainID, toStr, valueStr, dataStr, npvk)
+}
+
 func (c *ChainClient) SendTX(chainID uint32, toStr, valueStr, dataStr string) (string, error) {
 	if c == nil {
 		return "", nil
@@ -80,12 +91,16 @@ func (c *ChainClient) SendTX(chainID uint32, toStr, valueStr, dataStr string) (s
 	if c.pvk == nil {
 		return "", errors.New("private key is empty")
 	}
+	return c.sendTX(chainID, toStr, valueStr, dataStr, c.pvk)
+}
+
+func (c *ChainClient) sendTX(chainID uint32, toStr, valueStr, dataStr string, pvk *ecdsa.PrivateKey) (string, error) {
 	cli, err := c.getEthClient(chainID)
 	if err != nil {
 		return "", err
 	}
 	var (
-		sender = crypto.PubkeyToAddress(c.pvk.PublicKey)
+		sender = crypto.PubkeyToAddress(pvk.PublicKey)
 		to     = common.HexToAddress(toStr)
 	)
 	value, ok := new(big.Int).SetString(valueStr, 10)
@@ -133,7 +148,7 @@ func (c *ChainClient) SendTX(chainID uint32, toStr, valueStr, dataStr string) (s
 	if err != nil {
 		return "", err
 	}
-	signedTx, err := types.SignTx(tx, types.NewLondonSigner(chainid), c.pvk)
+	signedTx, err := types.SignTx(tx, types.NewLondonSigner(chainid), pvk)
 	if err != nil {
 		return "", err
 	}
