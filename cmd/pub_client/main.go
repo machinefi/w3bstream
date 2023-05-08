@@ -10,12 +10,12 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
-	"github.com/machinefi/w3bstream/pkg/modules/event"
 
 	confapp "github.com/machinefi/w3bstream/pkg/depends/conf/app"
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
+	"github.com/machinefi/w3bstream/pkg/modules/event"
 )
 
 var (
