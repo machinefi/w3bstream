@@ -22,7 +22,7 @@ services:
       SRV_APPLET_MGR__MqttBroker_Server: mqtt://mqtt_server:1883
       SRV_APPLET_MGR__Server_Port: "8888"
       SRV_APPLET_MGR__ServerEvent_Port: "8889"
-      SRV_APPLET_MGR__LocalFS_Root: /w3bstream/assert
+      SRV_APPLET_MGR__LocalFS_Root: /w3bstream/asserts
     volumes:
       - ${WS_WORKING_DIR:-.}/asserts:/w3bstream/asserts
 
