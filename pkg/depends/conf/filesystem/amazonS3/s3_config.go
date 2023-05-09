@@ -11,17 +11,20 @@ import (
 )
 
 type AmazonS3 struct {
-	Region          string `env:""`
-	AccessKeyID     string `env:""`
-	SecretAccessKey string `env:""`
-	SessionToken    string `env:""`
-	BucketName      string `env:""`
+	Endpoint         string `env:""`
+	Region           string `env:""`
+	AccessKeyID      string `env:""`
+	SecretAccessKey  string `env:""`
+	SessionToken     string `env:""`
+	BucketName       string `env:""`
+	S3ForcePathStyle bool   `env:""`
 
 	cli *s3.S3
 }
 
-func NewAmazonS3(regin, accessKeyID, secretAccessKey, sessionToken, bucketName string) *AmazonS3 {
+func NewAmazonS3(endpoint, regin, accessKeyID, secretAccessKey, sessionToken, bucketName string) *AmazonS3 {
 	s3 := &AmazonS3{
+		Endpoint:        endpoint,
 		Region:          regin,
 		AccessKeyID:     accessKeyID,
 		SecretAccessKey: secretAccessKey,
@@ -36,8 +39,10 @@ func NewAmazonS3(regin, accessKeyID, secretAccessKey, sessionToken, bucketName s
 
 func (s *AmazonS3) Init() error {
 	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String(s.Region),
-		Credentials: credentials.NewStaticCredentials(s.AccessKeyID, s.SecretAccessKey, s.SessionToken),
+		Endpoint:         aws.String(s.Endpoint),
+		Region:           aws.String(s.Region),
+		Credentials:      credentials.NewStaticCredentials(s.AccessKeyID, s.SecretAccessKey, s.SessionToken),
+		S3ForcePathStyle: aws.Bool(s.S3ForcePathStyle),
 	})
 	if err != nil {
 		return err
@@ -47,7 +52,8 @@ func (s *AmazonS3) Init() error {
 }
 
 func (s *AmazonS3) IsZero() bool {
-	return s.Region == "" ||
+	return s.Endpoint == "" ||
+		s.Region == "" ||
 		s.AccessKeyID == "" ||
 		s.SecretAccessKey == "" ||
 		s.BucketName == ""
