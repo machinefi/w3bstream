@@ -44,7 +44,7 @@ jobs:
           colima start
 
       - name: Test Go
-        run: go test ./...
+        run: make test
 
       - name: Set up QEMU
         #if: startsWith(matrix.os, 'macos-latest') != true
