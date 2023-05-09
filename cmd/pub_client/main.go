@@ -33,7 +33,7 @@ func init() {
 	)
 	App.Conf(broker)
 
-	flag.StringVar(&id, "id", "", "publish client id")
+	flag.StringVar(&cid, "id", "", "publish client id")
 	flag.StringVar(&topic, "topic", "", "publish topic")
 	flag.StringVar(&token, "token", "", "publish token")
 	flag.StringVar(&data, "data", "", "payload data")
@@ -42,18 +42,21 @@ func init() {
 }
 
 var (
-	id    string
-	data  string
-	topic string
-	token string
-	raw   []byte
-	seq   string
-	msg   *eventpb.Event
+	cid   string         // client id/pub id
+	data  string         // message payload
+	topic string         // mqtt topic
+	token string         // publisher token
+	seq   string         // message sequence
+	raw   []byte         // mqtt message
+	msg   *eventpb.Event // mqtt message (protobuf)
 )
 
 func init() {
 	if seq == "" {
 		seq = uuid.NewString()
+	}
+	if cid == "" {
+		cid = uuid.NewString()
 	}
 
 	var err error
@@ -63,6 +66,7 @@ func init() {
 			Token:   token,
 			PubTime: time.Now().UTC().UnixMicro(),
 			EventId: seq,
+			PubId:   cid,
 		},
 		Payload: []byte(data),
 	}
@@ -74,10 +78,7 @@ func init() {
 }
 
 func main() {
-	if id == "" {
-		id = uuid.NewString()
-	}
-	c, err := broker.Client(id)
+	c, err := broker.Client(cid)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -88,7 +89,7 @@ func main() {
 		return
 	}
 
-	rspChannel := path.Join(topic, seq)
+	rspChannel := path.Join(topic, cid)
 
 	err = c.WithTopic(rspChannel).Subscribe(func(cli mqtt.Client, msg mqtt.Message) {
 		rsp := &event.EventRsp{}

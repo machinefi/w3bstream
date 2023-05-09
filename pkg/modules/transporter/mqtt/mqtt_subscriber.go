@@ -12,7 +12,6 @@ import (
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
-	"github.com/machinefi/w3bstream/pkg/modules/event"
 	"github.com/machinefi/w3bstream/pkg/modules/transporter/proxy"
 )
 
@@ -46,7 +45,7 @@ func (s *subscriber) subscribing(ctx context.Context) error {
 			l.Error(errors.Wrap(err, "marshal rsp"))
 			return
 		}
-		topic := path.Join(s.topic, ret.(*event.EventRsp).EventID)
+		topic := path.Join(s.topic, ev.Header.GetPubId())
 		cli := s.cli.WithTopic(topic)
 		if err = cli.Publish(rsp); err != nil {
 			l.Error(errors.Wrap(err, "publish rsp"))
