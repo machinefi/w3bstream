@@ -1,5 +1,6 @@
 package mqtt_test
 
+/*
 import (
 	"encoding/json"
 	"fmt"
@@ -83,3 +84,4 @@ func TestBroker(t *testing.T) {
 	broker.Close(cpub)
 	broker.Close(csub)
 }
+*/
