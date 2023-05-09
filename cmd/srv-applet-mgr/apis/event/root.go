@@ -13,11 +13,14 @@ func init() {
 	Root.Register(kit.NewRouter(&HandleEvent{}))
 }
 
-var _receiveEventMtc = prometheus.NewCounterVec(prometheus.CounterOpts{
-	Name: "w3b_receive_event_metrics",
-	Help: "receive event counter metrics.",
-}, []string{"project", "publisher"})
+var _eventMtc = prometheus.NewCounterVec(
+	prometheus.CounterOpts{
+		Name: "inbound_events_metrics",
+		Help: "received events metrics.",
+	},
+	[]string{"account", "project", "publisher", "eventtype"},
+)
 
 func init() {
-	prometheus.MustRegister(_receiveEventMtc)
+	prometheus.MustRegister(_eventMtc)
 }
