@@ -1,6 +1,5 @@
 package mqtt_test
 
-/*
 import (
 	"encoding/json"
 	"fmt"
@@ -39,7 +38,7 @@ var (
 )
 
 func init() {
-	err := broker.Server.UnmarshalText([]byte("mqtt://broker.emqx.io:1883"))
+	err := broker.Server.UnmarshalText([]byte("mqtt://127.0.0.1:1883"))
 	if err != nil {
 		panic(err)
 	}
@@ -84,4 +83,3 @@ func TestBroker(t *testing.T) {
 	broker.Close(cpub)
 	broker.Close(csub)
 }
-*/
