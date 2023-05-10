@@ -67,20 +67,21 @@ var (
 
 func (ef *ExportFuncs) LinkABI(impt Import) error {
 	for name, ff := range map[string]interface{}{
-		"abort":            ef.Abort,
-		"trace":            ef.Trace,
-		"seed":             ef.Seed,
-		"ws_log":           ef.Log,
-		"ws_get_data":      ef.GetData,
-		"ws_set_data":      ef.SetData,
-		"ws_get_db":        ef.GetDB,
-		"ws_set_db":        ef.SetDB,
-		"ws_send_tx":       ef.SendTX,
-		"ws_call_contract": ef.CallContract,
-		"ws_set_sql_db":    ef.SetSQLDB,
-		"ws_get_sql_db":    ef.GetSQLDB,
-		"ws_get_env":       ef.GetEnv,
-		"ws_send_mqtt_msg": ef.SendMqttMsg,
+		"abort":                    ef.Abort,
+		"trace":                    ef.Trace,
+		"seed":                     ef.Seed,
+		"ws_log":                   ef.Log,
+		"ws_get_data":              ef.GetData,
+		"ws_set_data":              ef.SetData,
+		"ws_get_db":                ef.GetDB,
+		"ws_set_db":                ef.SetDB,
+		"ws_send_tx":               ef.SendTX,
+		"ws_send_tx_with_operator": ef.SendTXWithOperator,
+		"ws_call_contract":         ef.CallContract,
+		"ws_set_sql_db":            ef.SetSQLDB,
+		"ws_get_sql_db":            ef.GetSQLDB,
+		"ws_get_env":               ef.GetEnv,
+		"ws_send_mqtt_msg":         ef.SendMqttMsg,
 	} {
 		if err := impt("env", name, ff); err != nil {
 			return err
@@ -333,6 +334,29 @@ func (ef *ExportFuncs) SendTX(chainID int32, offset, size, vmAddrPtr, vmSizePtr 
 	}
 	ret := gjson.Parse(string(buf))
 	txHash, err := ef.cl.SendTX(uint32(chainID), ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String())
+	if err != nil {
+		ef.loggingAndPersDB(conflog.ErrorLevel, efSrc, err.Error())
+		return wasm.ResultStatusCode_Failed
+	}
+	if err := ef.rt.Copy([]byte(txHash), vmAddrPtr, vmSizePtr); err != nil {
+		ef.loggingAndPersDB(conflog.ErrorLevel, efSrc, err.Error())
+		return wasm.ResultStatusCode_Failed
+	}
+	return int32(wasm.ResultStatusCode_OK)
+}
+
+func (ef *ExportFuncs) SendTXWithOperator(chainID int32, offset, size, vmAddrPtr, vmSizePtr int32) int32 {
+	if ef.cl == nil {
+		ef.loggingAndPersDB(conflog.ErrorLevel, efSrc, errors.New("eth client doesn't exist").Error())
+		return wasm.ResultStatusCode_Failed
+	}
+	buf, err := ef.rt.Read(offset, size)
+	if err != nil {
+		ef.loggingAndPersDB(conflog.ErrorLevel, efSrc, err.Error())
+		return wasm.ResultStatusCode_Failed
+	}
+	ret := gjson.Parse(string(buf))
+	txHash, err := ef.cl.SendTXWithOperator(uint32(chainID), ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String(), ret.Get("operatorName").String())
 	if err != nil {
 		ef.loggingAndPersDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed

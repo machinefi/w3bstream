@@ -17,6 +17,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/tidwall/gjson"
 
+	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	wsTypes "github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -31,14 +33,14 @@ func init() {
 
 type ChainClient struct {
 	projectName string
-	pvk         *ecdsa.PrivateKey
 	endpoints   map[uint32]string
 	clientMap   map[uint32]*ethclient.Client
+	operators   map[string]*ecdsa.PrivateKey
 }
 
 // TODO impl ChainClient.Init
 
-func NewChainClient(ctx context.Context, pvk *string) *ChainClient {
+func NewChainClient(ctx context.Context, ops []models.Operator) *ChainClient {
 	c := &ChainClient{
 		projectName: wsTypes.MustProjectFromContext(ctx).Name,
 		clientMap:   make(map[uint32]*ethclient.Client, 0),
@@ -48,13 +50,19 @@ func NewChainClient(ctx context.Context, pvk *string) *ChainClient {
 	if !ok || ethcli == nil {
 		return c
 	}
-	if pvk != nil && len(*pvk) > 0 {
-		c.pvk = crypto.ToECDSAUnsafe(common.FromHex(*pvk))
-	}
 	if len(ethcli.Endpoints) > 0 {
 		c.endpoints = decodeEndpoints(ethcli.Endpoints)
 	}
+	c.operators = convOperators(ops)
 	return c
+}
+
+func convOperators(ops []models.Operator) map[string]*ecdsa.PrivateKey {
+	res := make(map[string]*ecdsa.PrivateKey, len(ops))
+	for _, op := range ops {
+		res[op.Name] = crypto.ToECDSAUnsafe(common.FromHex(op.PrivateKey))
+	}
+	return res
 }
 
 func decodeEndpoints(in string) (ret map[uint32]string) {
@@ -73,19 +81,29 @@ func decodeEndpoints(in string) (ret map[uint32]string) {
 	return
 }
 
-func (c *ChainClient) SendTX(chainID uint32, toStr, valueStr, dataStr string) (string, error) {
-	if c == nil {
-		return "", nil
-	}
-	if c.pvk == nil {
+func (c *ChainClient) SendTXWithOperator(chainID uint32, toStr, valueStr, dataStr, operatorName string) (string, error) {
+	pvk, ok := c.operators[operatorName]
+	if !ok {
 		return "", errors.New("private key is empty")
 	}
+	return c.sendTX(chainID, toStr, valueStr, dataStr, pvk)
+}
+
+func (c *ChainClient) SendTX(chainID uint32, toStr, valueStr, dataStr string) (string, error) {
+	pvk, ok := c.operators[operator.DefaultOperatorName]
+	if !ok {
+		return "", errors.New("private key is empty")
+	}
+	return c.sendTX(chainID, toStr, valueStr, dataStr, pvk)
+}
+
+func (c *ChainClient) sendTX(chainID uint32, toStr, valueStr, dataStr string, pvk *ecdsa.PrivateKey) (string, error) {
 	cli, err := c.getEthClient(chainID)
 	if err != nil {
 		return "", err
 	}
 	var (
-		sender = crypto.PubkeyToAddress(c.pvk.PublicKey)
+		sender = crypto.PubkeyToAddress(pvk.PublicKey)
 		to     = common.HexToAddress(toStr)
 	)
 	value, ok := new(big.Int).SetString(valueStr, 10)
@@ -133,7 +151,7 @@ func (c *ChainClient) SendTX(chainID uint32, toStr, valueStr, dataStr string) (s
 	if err != nil {
 		return "", err
 	}
-	signedTx, err := types.SignTx(tx, types.NewLondonSigner(chainid), c.pvk)
+	signedTx, err := types.SignTx(tx, types.NewLondonSigner(chainid), pvk)
 	if err != nil {
 		return "", err
 	}

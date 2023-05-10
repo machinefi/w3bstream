@@ -141,8 +141,8 @@
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
-              "@StatusErr[InvalidNewPassword][401999007][Invalid New Password]!",
-              "@StatusErr[InvalidOldPassword][401999006][Invalid Old Password]!",
+              "@StatusErr[InvalidNewPassword][401999008][Invalid New Password]!",
+              "@StatusErr[InvalidOldPassword][401999007][Invalid Old Password]!",
               "@StatusErr[InvalidToken][401999002][Invalid Token]!"
             ]
           },
@@ -259,7 +259,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[OperatorNotFound][404999019][Operator Not Found]!"
             ]
           },
           "500": {
@@ -272,6 +273,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
@@ -615,7 +617,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -753,8 +755,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
-              "@StatusErr[InvalidAppletContext][401999015][Invalid Applet]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
+              "@StatusErr[InvalidAppletContext][401999016][Invalid Applet]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -968,7 +970,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -1107,7 +1109,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InvalidAppletContext][401999015][Invalid Applet]!",
+              "@StatusErr[InvalidAppletContext][401999016][Invalid Applet]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -1796,7 +1798,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InvalidAppletContext][401999015][Invalid Applet]!",
+              "@StatusErr[InvalidAppletContext][401999016][Invalid Applet]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -2190,7 +2192,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -2506,23 +2508,23 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
-              "@StatusErr[InvalidAppletContext][401999015][Invalid Applet]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
+              "@StatusErr[InvalidAppletContext][401999016][Invalid Applet]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
-              "@StatusErr[InvalidAuthPublisherID][401999011][Invalid Auth Publisher ID]!",
-              "@StatusErr[InvalidAuthPublisherID][401999011][Invalid Auth Publisher ID]!",
+              "@StatusErr[InvalidAuthPublisherID][401999012][Invalid Auth Publisher ID]!",
+              "@StatusErr[InvalidAuthPublisherID][401999012][Invalid Auth Publisher ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
-              "@StatusErr[InvalidEthLoginMessage][401999010][Invalid Siwe Message]!",
-              "@StatusErr[InvalidEthLoginSignature][401999009][Invalid Siwe Signature]!",
-              "@StatusErr[InvalidEventChannel][401999013][Invalid Event Channel]!",
-              "@StatusErr[InvalidEventToken][401999014][Invalid Event Token]!",
-              "@StatusErr[InvalidNewPassword][401999007][Invalid New Password]!",
-              "@StatusErr[InvalidOldPassword][401999006][Invalid Old Password]!",
-              "@StatusErr[InvalidPassword][401999008][Invalid Password]!",
+              "@StatusErr[InvalidEthLoginMessage][401999011][Invalid Siwe Message]!",
+              "@StatusErr[InvalidEthLoginSignature][401999010][Invalid Siwe Signature]!",
+              "@StatusErr[InvalidEventChannel][401999014][Invalid Event Channel]!",
+              "@StatusErr[InvalidEventToken][401999015][Invalid Event Token]!",
+              "@StatusErr[InvalidNewPassword][401999008][Invalid New Password]!",
+              "@StatusErr[InvalidOldPassword][401999007][Invalid Old Password]!",
+              "@StatusErr[InvalidPassword][401999009][Invalid Password]!",
               "@StatusErr[InvalidToken][401999002][Invalid Token]!",
-              "@StatusErr[NoAdminPermission][401999005][No Admin Permission]!",
+              "@StatusErr[NoAdminPermission][401999006][No Admin Permission]!",
               "@StatusErr[NoProjectPermission][401999004][No Project Permission]!",
               "@StatusErr[Unauthorized][401999001][unauthorized]"
             ]
@@ -2679,7 +2681,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InvalidPassword][401999008][Invalid Password]!"
+              "@StatusErr[InvalidPassword][401999009][Invalid Password]!"
             ]
           },
           "403": {
@@ -2771,8 +2773,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InvalidEthLoginMessage][401999010][Invalid Siwe Message]!",
-              "@StatusErr[InvalidEthLoginSignature][401999009][Invalid Siwe Signature]!"
+              "@StatusErr[InvalidEthLoginMessage][401999011][Invalid Siwe Message]!",
+              "@StatusErr[InvalidEthLoginSignature][401999010][Invalid Siwe Signature]!"
             ]
           },
           "403": {
@@ -2812,7 +2814,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[AccountIdentityConflict][409999014][Account Identity Conflict]!"
+              "@StatusErr[AccountIdentityConflict][409999014][Account Identity Conflict]!",
+              "@StatusErr[OperatorConflict][409999017][Operator Conflict]!"
             ]
           },
           "500": {
@@ -2912,7 +2915,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -3039,7 +3042,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -3161,7 +3164,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -3288,7 +3291,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -3410,7 +3413,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -3537,7 +3540,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -3572,6 +3575,221 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
+    "/srv-applet-mgr/v0/operator/": {
+      "post": {
+        "tags": [
+          "apis/operator"
+        ],
+        "operationId": "CreateOperator",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesOperatorCreateReq"
+                  },
+                  {
+                    "x-go-field-name": "CreateReq"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsOperator"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
+            ]
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[OperatorConflict][409999017][Operator Conflict]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
+    "/srv-applet-mgr/v0/operator/data/{operatorID}": {
+      "delete": {
+        "tags": [
+          "apis/operator"
+        ],
+        "operationId": "RemoveOperator",
+        "parameters": [
+          {
+            "name": "operatorID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                },
+                {
+                  "x-go-field-name": "OperatorID",
+                  "x-tag-name": "operatorID"
+                }
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoOperatorPermission][401999005][No Operator Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[OperatorNotFound][404999019][Operator Not Found]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
@@ -3660,11 +3878,11 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
-              "@StatusErr[InvalidEventToken][401999014][Invalid Event Token]!",
+              "@StatusErr[InvalidEventToken][401999015][Invalid Event Token]!",
               "@StatusErr[InvalidToken][401999002][Invalid Token]!"
             ]
           },
@@ -4117,7 +4335,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -4239,7 +4457,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -4356,7 +4574,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -4477,7 +4695,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -4609,7 +4827,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -4743,7 +4961,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -5113,7 +5331,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -5295,7 +5513,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -5415,7 +5633,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -5560,7 +5778,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -5659,7 +5877,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[NoAdminPermission][401999005][No Admin Permission]!"
+              "@StatusErr[NoAdminPermission][401999006][No Admin Permission]!"
             ]
           },
           "409": {
@@ -5674,7 +5892,8 @@
             "x-status-errors": [
               "@StatusErr[AccountConflict][409999015][Account Conflict]!",
               "@StatusErr[AccountIdentityConflict][409999014][Account Identity Conflict]!",
-              "@StatusErr[AccountPasswordConflict][409999016][Account Password Conflict]!"
+              "@StatusErr[AccountPasswordConflict][409999016][Account Password Conflict]!",
+              "@StatusErr[OperatorConflict][409999017][Operator Conflict]!"
             ]
           },
           "500": {
@@ -6314,7 +6533,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -6433,7 +6652,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -6629,7 +6848,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999012][Current Account Absence]!",
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
@@ -7723,6 +7942,46 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.Meta",
         "x-id": "GithubComMachinefiW3BstreamPkgModelsMeta"
       },
+      "GithubComMachinefiW3BstreamPkgModelsOperator": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPrimaryID"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsRelAccount"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsRelOperator"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsOperatorInfo"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimesWithDeleted"
+          },
+          {
+            "type": "object",
+            "description": "Operator schema for blockchain operate information",
+            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.Operator",
+            "x-id": "GithubComMachinefiW3BstreamPkgModelsOperator"
+          }
+        ]
+      },
+      "GithubComMachinefiW3BstreamPkgModelsOperatorInfo": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "x-go-field-name": "Name",
+            "x-tag-json": "name"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.OperatorInfo",
+        "x-id": "GithubComMachinefiW3BstreamPkgModelsOperatorInfo"
+      },
       "GithubComMachinefiW3BstreamPkgModelsProject": {
         "allOf": [
           {
@@ -8020,6 +8279,27 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.RelInstance",
         "x-id": "GithubComMachinefiW3BstreamPkgModelsRelInstance"
+      },
+      "GithubComMachinefiW3BstreamPkgModelsRelOperator": {
+        "type": "object",
+        "properties": {
+          "operatorID": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+              },
+              {
+                "x-go-field-name": "OperatorID",
+                "x-tag-json": "operatorID"
+              }
+            ]
+          }
+        },
+        "required": [
+          "operatorID"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.RelOperator",
+        "x-id": "GithubComMachinefiW3BstreamPkgModelsRelOperator"
       },
       "GithubComMachinefiW3BstreamPkgModelsRelProject": {
         "type": "object",
@@ -8822,6 +9102,27 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/event.Result",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesEventResult"
+      },
+      "GithubComMachinefiW3BstreamPkgModulesOperatorCreateReq": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "x-go-field-name": "Name",
+            "x-tag-json": "name"
+          },
+          "privateKey": {
+            "type": "string",
+            "x-go-field-name": "PrivateKey",
+            "x-tag-json": "privateKey"
+          }
+        },
+        "required": [
+          "name",
+          "privateKey"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/operator.CreateReq",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesOperatorCreateReq"
       },
       "GithubComMachinefiW3BstreamPkgModulesProjectCreateReq": {
         "allOf": [
