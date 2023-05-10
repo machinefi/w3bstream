@@ -8,6 +8,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
+	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
@@ -64,11 +65,12 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		ctx = wasm.DefaultMQClient().WithContext(ctx)
 	}
 
-	acc := &models.Account{RelAccount: prj.RelAccount}
-	if err := acc.FetchByAccountID(d); err != nil {
-		return nil, err
-	}
-	ctx = wasm.WithChainClient(ctx, wasm.NewChainClient(ctx, &acc.OperatorPrivateKey))
+	operators, err := operator.List(parent, &operator.ListReq{
+		CondArgs: operator.CondArgs{
+			AccountID: prj.RelAccount.AccountID,
+		},
+	})
+	ctx = wasm.WithChainClient(ctx, wasm.NewChainClient(ctx, operators.Data))
 
 	ctx = wasm.WithLogger(ctx, types.MustLoggerFromContext(ctx).WithValues(
 		"@src", "wasm",

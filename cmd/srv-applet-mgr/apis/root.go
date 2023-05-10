@@ -9,6 +9,7 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/login"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/monitor"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/operator"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/project"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/project_config"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/publisher"
@@ -56,6 +57,7 @@ func init() {
 		auth.Register(monitor.Root)
 		auth.Register(cronjob.Root)
 		auth.Register(resource.Root)
+		auth.Register(operator.Root)
 	}
 
 	// root router register for event http transport

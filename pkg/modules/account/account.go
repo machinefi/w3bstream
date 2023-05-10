@@ -13,6 +13,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -45,10 +46,9 @@ func CreateAccountByUsername(ctx context.Context, r *CreateAccountByUsernameReq)
 			acc = &models.Account{
 				RelAccount: *rel,
 				AccountInfo: models.AccountInfo{
-					State:              enums.ACCOUNT_STATE__ENABLED,
-					Role:               r.Role,
-					Avatar:             r.AvatarURL,
-					OperatorPrivateKey: generateRandomPrivateKey(),
+					State:  enums.ACCOUNT_STATE__ENABLED,
+					Role:   r.Role,
+					Avatar: r.AvatarURL,
 				},
 			}
 			if err := acc.Create(db); err != nil {
@@ -95,6 +95,15 @@ func CreateAccountByUsername(ctx context.Context, r *CreateAccountByUsernameReq)
 				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			req := operator.CreateReq{
+				AccountID:  rel.AccountID,
+				Name:       operator.DefaultOperatorName,
+				PrivateKey: generateRandomPrivateKey(),
+			}
+			_, err := operator.Create(ctx, &req)
+			return err
 		},
 	).Do()
 

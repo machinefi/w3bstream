@@ -35,6 +35,7 @@ type (
 	CtxStrategy          struct{}
 	CtxPublisher         struct{}
 	CtxCronJob           struct{}
+	CtxOperator          struct{}
 	ContractLog          struct{}
 	ChainHeight          struct{}
 	ChainTx              struct{}
@@ -124,6 +125,27 @@ func CronJobFromContext(ctx context.Context) (*models.CronJob, bool) {
 
 func MustCronJobFromContext(ctx context.Context) *models.CronJob {
 	v, ok := CronJobFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithOperator(ctx context.Context, v *models.Operator) context.Context {
+	return contextx.WithValue(ctx, CtxOperator{}, v)
+}
+
+func WithOperatorContext(v *models.Operator) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxOperator{}, v)
+	}
+}
+
+func OperatorFromContext(ctx context.Context) (*models.Operator, bool) {
+	v, ok := ctx.Value(CtxOperator{}).(*models.Operator)
+	return v, ok
+}
+
+func MustOperatorFromContext(ctx context.Context) *models.Operator {
+	v, ok := OperatorFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

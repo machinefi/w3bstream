@@ -89,14 +89,14 @@ migrate: toolkit
 .PHONY: test
 test: test_depends
 	@go test -cover ./...
-	@docker stop mqtt_test postgres_test || true && docker container rm mqtt_test postgres_test || true
+	@docker stop mqtt_test postgres_test redis_test || true && docker container rm mqtt_test postgres_test redis_test || true
 
 .PHONY: test_depends
-test_depends: cleanup_test_depends postgres_test mqtt_test
+test_depends: cleanup_test_depends postgres_test mqtt_test redis_test
 
 .PHONY: cleanup_test_depends
 cleanup_test_depends:
-	@docker stop mqtt_test postgres_test || true && docker container rm mqtt_test postgres_test || true
+	@docker stop mqtt_test postgres_test redis_test || true && docker container rm mqtt_test postgres_test redis_test || true
 
 .PHONY: postgres_test
 postgres_test:
@@ -106,3 +106,6 @@ postgres_test:
 mqtt_test:
 	docker run --name mqtt_test -p 1883:1883 -d eclipse-mosquitto:1.6.15
 
+.PHONY: redis_test
+redis_test:
+	docker run --name redis_test -p 6739:6739 -d redis:6.2

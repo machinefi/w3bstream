@@ -9,14 +9,18 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/tests/clients/applet_mgr"
 	base "github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/local"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/http"
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	confjwt "github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/client"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/mq/mem_mq"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/migration"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
@@ -42,9 +46,28 @@ func Client(transports ...client.HttpTransport) *applet_mgr.Client {
 	return applet_mgr.NewClient(_client)
 }
 
+func ClientEvent(tsp ...client.HttpTransport) *applet_mgr.Client {
+	if _clientEvent == nil {
+		_clientEvent = &client.Client{
+			Protocol: "http",
+			Host:     "localhost",
+			Port:     uint16(_serverEvent.Port),
+			Timeout:  time.Hour,
+		}
+		_clientEvent.SetDefault()
+	}
+
+	_clientEvent.Transports = append(_clientEvent.Transports, tsp...)
+	return applet_mgr.NewClient(_clientEvent)
+}
+
 // AuthClient client with jwt token
-func AuthClient(transports ...client.HttpTransport) *applet_mgr.Client {
+func AuthClient() *applet_mgr.Client {
 	return Client(NewAuthPatchRT())
+}
+
+func AuthClientEvent(pubToken string) *applet_mgr.Client {
+	return ClientEvent(NewAuthPatchRtByToken(pubToken))
 }
 
 // Database executor for access database for testing
@@ -114,6 +137,7 @@ func Mqtt() {
 
 func Serve() (stop func()) {
 	go kit.Run(apis.RootMgr, _server.WithContextInjector(_injection))
+	go kit.Run(apis.RootEvent, _serverEvent.WithContextInjector(_injection))
 	time.Sleep(3 * time.Second)
 
 	return func() {
@@ -133,33 +157,66 @@ func Server() {
 	}
 }
 
+func ServerEvent() {
+	if _serverEvent == nil {
+		_serverEvent = &http.Server{
+			Port: 8889,
+		}
+		_serverEvent.SetDefault()
+	}
+}
+
+func Redis() {
+	if _redis == nil {
+		_redis = &redis.Redis{
+			Host:   "localhost",
+			Port:   6739,
+			Prefix: _name,
+		}
+		_redis.SetDefault()
+	}
+}
+
 func Context() context.Context {
 	return _ctx
 }
 
 var (
-	_server    *http.Server
-	_client    *client.Client
-	_broker    *mqtt.Broker
-	_dbMgr     sqlx.DBExecutor
-	_dbMonitor sqlx.DBExecutor
-	_dbWasmEp  *base.Endpoint
-	_injection contextx.WithContext
-	_ctx       context.Context
+	_server      *http.Server
+	_serverEvent *http.Server
+	_client      *client.Client
+	_clientEvent *client.Client
+	_broker      *mqtt.Broker
+	_dbMgr       sqlx.DBExecutor
+	_dbMonitor   sqlx.DBExecutor
+	_dbWasmEp    *base.Endpoint
+	_redis       *redis.Redis
+	_injection   contextx.WithContext
+	_ctx         context.Context
+	_name        = "integration-test"
 )
 
 func init() {
 	Databases()
 	Mqtt()
 	Server()
+	ServerEvent()
 	Client()
+	ClientEvent()
+	Redis()
 
 	std := conflog.Std()
 	jwt := &confjwt.Jwt{
-		Issuer:  "w3bstream_test",
+		Issuer:  _name,
 		ExpIn:   *base.AsDuration(time.Hour),
 		SignKey: "xxxx",
 	}
+
+	fs := &local.LocalFileSystem{Root: "/tmp"}
+	fs.SetDefault()
+
+	tasks := mem_mq.New(0)
+	worker := mq.NewTaskWorker(tasks, mq.WithWorkerCount(3), mq.WithChannel(_name))
 
 	_injection = contextx.WithContextCompose(
 		types.WithMgrDBExecutorContext(_dbMgr),
@@ -170,6 +227,11 @@ func init() {
 		conflog.WithLoggerContext(std),
 		confid.WithSFIDGeneratorContext(confid.MustNewSFIDGenerator()),
 		confjwt.WithConfContext(jwt),
+		types.WithFileSystemOpContext(fs),
+		types.WithRedisEndpointContext(_redis),
+		types.WithTaskWorkerContext(worker),
+		types.WithTaskBoardContext(mq.NewTaskBoard(tasks)),
+		types.WithETHClientConfigContext(nil),
 	)
 
 	_ctx = _injection(context.Background())

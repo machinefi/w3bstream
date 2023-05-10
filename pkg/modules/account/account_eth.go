@@ -12,6 +12,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/spruceid/siwe-go"
 )
@@ -67,7 +68,6 @@ func FetchOrCreateAccountByEthAddress(ctx context.Context, address types.EthAddr
 			} else {
 				acc.Role = enums.ACCOUNT_ROLE__DEVELOPER
 				acc.State = enums.ACCOUNT_STATE__ENABLED
-				acc.OperatorPrivateKey = generateRandomPrivateKey()
 				if err := acc.Create(db); err != nil {
 					return status.DatabaseError.StatusErr().WithDesc(err.Error())
 				}
@@ -88,6 +88,18 @@ func FetchOrCreateAccountByEthAddress(ctx context.Context, address types.EthAddr
 				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			if exists {
+				return nil
+			}
+			req := operator.CreateReq{
+				AccountID:  rel.AccountID,
+				Name:       operator.DefaultOperatorName,
+				PrivateKey: generateRandomPrivateKey(),
+			}
+			_, err := operator.Create(ctx, &req)
+			return err
 		},
 	).Do()
 

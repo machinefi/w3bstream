@@ -20,6 +20,15 @@ func NewAuthPatchRT() func(next http.RoundTripper) http.RoundTripper {
 	}
 }
 
+func NewAuthPatchRtByToken(token string) func(next http.RoundTripper) http.RoundTripper {
+	return func(next http.RoundTripper) http.RoundTripper {
+		return &AuthPatchRT{
+			tok:  token,
+			next: next,
+		}
+	}
+}
+
 type AuthPatchRT struct {
 	tok  string
 	next http.RoundTripper
@@ -30,7 +39,10 @@ func (rt *AuthPatchRT) RoundTrip(req *http.Request) (*http.Response, error) {
 	return rt.next.RoundTrip(req)
 }
 
-var tok string
+var (
+	tok       string
+	AccountID types.SFID
+)
 
 func init() {
 	m := &models.Account{}
@@ -56,4 +68,5 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	AccountID = m.AccountID
 }
