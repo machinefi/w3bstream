@@ -56,6 +56,33 @@ output like
 export TOK=${token}
 ```
 
+### Login/Signup with wallet address
+
+```shell
+export MESSAGE=...   # siwe serailized message
+export SIGNATURE=... # message signature
+echo '{"message":"'$MESSAGE'","signature":"'$SIGNATURE'"}' | http put :8888/srv-applet-mgr/v0/login/eth
+```
+
+output like:
+
+```json
+{
+  "accountID": "186912900253363206",
+  "accountRole": "DEVELOPER",
+  "expireAt": "2023-03-16T19:07:57.624481+08:00",
+  "issuer": "iotex-w3bstream",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJQYXlsb2FkIjoiMTg2OTEyOTAwMjUzMzYzMjA2IiwiaXNzIjoiaW90ZXgtdzNic3RyZWFtIiwiZXhwIjoxNjc4OTY0ODc3fQ.u7wLOBUeehHTURNY2L2d_F4u-dZ5sHnBBHZKujnpMRw"
+}
+```
+
+### Get Account's Operator Address
+
+```shell
+http get :8888/srv-applet-mgr/v0/account/operatoraddr -A bearer -a $TOK
+
+```
+
 ### Create your project with default config
 
 command
@@ -522,10 +549,10 @@ output like
 
 > the `token` responded is used for validating publisher when publishing event.
 
-## Review registered publisher
+### Review registered publisher
 
 ```sh
-http get :8888/srv-applet-mgr/v0/publisher/x/$PROJECTNAME -A bearer -a $TOK 
+http get :8888/srv-applet-mgr/v0/publisher/x/$PROJECTNAME -A bearer -a $TOK
 ```
 
 output like:
@@ -774,54 +801,3 @@ export CHAINHEIGHTID=${chainHeightID}
 http delete :8888/srv-applet-mgr/v0/monitor/x/$PROJECTNAME/chain_height/$CHAINHEIGHTID -A bearer -a $TOK
 ```
 
-### remove instance
-
-```shell
-export INSTANCEID=${instance_id}
-http put :8888/srv-applet-mgr/v0/deploy/$INSTANCEID/REMOVE -A bearer -a $TOK 
-```
-
-### remove applet
-
-> the instance will be stopped and removed
-
-```shell
-export APPLETID=${applet_id}
-http delete :8888/srv-applet-mgr/v0/applet/$APPLETID -A bearer -a $TOK
-```
-
-### remove project
-
-> the applets and the related instances included in this project will be stopped
-> and removed
-
-```shell
-export PROJECTNAME=${project_name}
-http delete :8888/srv-applet-mgr/v0/project/$PROJECTNAME -A bearer -a $TOK
-```
-
-### eth sigin/signup
-
-```shell
-export MESSAGE=...   # siwe serailized message
-export SIGNATURE=... # message signature
-echo '{"message":"'$MESSAGE'","signature":"'$SIGNATURE'"}' | http put :8888/srv-applet-mgr/v0/login/eth
-```
-
-output like:
-
-```json
-{
-  "accountID": "186912900253363206",
-  "accountRole": "DEVELOPER",
-  "expireAt": "2023-03-16T19:07:57.624481+08:00",
-  "issuer": "iotex-w3bstream",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJQYXlsb2FkIjoiMTg2OTEyOTAwMjUzMzYzMjA2IiwiaXNzIjoiaW90ZXgtdzNic3RyZWFtIiwiZXhwIjoxNjc4OTY0ODc3fQ.u7wLOBUeehHTURNY2L2d_F4u-dZ5sHnBBHZKujnpMRw"
-}
-```
-
-### Account's Operator Address
-
-```shell
-http get :8888/srv-applet-mgr/v0/account/operatoraddr -A bearer -a $TOK
-```
