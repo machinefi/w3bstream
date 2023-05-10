@@ -1,24 +1,43 @@
 package types
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 
+	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/validator/strfmt"
 	"github.com/machinefi/w3bstream/pkg/enums"
 )
 
 type UploadConfig struct {
-	Root          string `env:""`
-	FileSizeLimit int64  `env:""`
+	Root               string `env:""`
+	FilesizeLimitBytes int64  `env:""`
+	DiskReserveBytes   int64  `env:""`
+}
+
+func (c *UploadConfig) Init() error {
+	if c.Root == "" {
+		tmp := os.Getenv("TMPDIR")
+		if tmp == "" {
+			tmp = "/tmp"
+		}
+		serviceName := os.Getenv(consts.EnvProjectName)
+		if serviceName == "" {
+			serviceName = "service_tmp"
+		}
+		c.Root = filepath.Join(tmp, serviceName)
+	}
+	return os.MkdirAll(c.Root, 0777)
 }
 
 func (c *UploadConfig) SetDefault() {
-	if c.Root == "" {
-		c.Root = "./asserts"
+	if c.FilesizeLimitBytes == 0 {
+		c.FilesizeLimitBytes = 1024 * 1024
 	}
-	if c.FileSizeLimit == 0 {
-		c.FileSizeLimit = 100 * 1024 * 1024
+	if c.DiskReserveBytes == 0 {
+		c.DiskReserveBytes = 20 * 1024 * 1024
 	}
 }
 

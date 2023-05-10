@@ -63,6 +63,7 @@ func init() {
 		Server      *confhttp.Server
 		Jwt         *confjwt.Jwt
 		Logger      *conflog.Log
+		UploadConf  *types.UploadConfig
 		EthClient   *types.ETHClientConfig
 		WhiteList   *types.WhiteList
 		ServerEvent *confhttp.Server
@@ -78,6 +79,7 @@ func init() {
 		Server:      ServerMgr,
 		Jwt:         &confjwt.Jwt{},
 		Logger:      &conflog.Log{},
+		UploadConf:  &types.UploadConfig{},
 		EthClient:   &types.ETHClientConfig{},
 		WhiteList:   &types.WhiteList{},
 		ServerEvent: ServerEvent,
@@ -121,6 +123,7 @@ func init() {
 		types.WithRedisEndpointContext(config.Redis),
 		types.WithLoggerContext(std),
 		conflog.WithLoggerContext(std),
+		types.WithUploadConfigContext(config.UploadConf),
 		types.WithMqttBrokerContext(config.MqttBroker),
 		confid.WithSFIDGeneratorContext(confid.MustNewSFIDGenerator()),
 		confjwt.WithConfContext(config.Jwt),

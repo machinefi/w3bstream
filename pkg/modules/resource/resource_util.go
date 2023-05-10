@@ -11,7 +11,7 @@ import (
 
 	"github.com/shirou/gopsutil/v3/disk"
 
-	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/local"
+	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -32,7 +32,7 @@ func checkFilesize(f io.ReadSeekCloser, lmt int64) (err error, size int64) {
 	return nil, size
 }
 
-func checkFileMd5Sum(f io.Reader) (data []byte, sum string, err error) {
+func CheckFileMd5Sum(f io.ReadSeekCloser, md5Str string) (data []byte, sum string, err error) {
 	data, err = io.ReadAll(f)
 	if err != nil {
 		return
@@ -43,31 +43,26 @@ func checkFileMd5Sum(f io.Reader) (data []byte, sum string, err error) {
 		return
 	}
 
-	return data, fmt.Sprintf("%x", hash.Sum(nil)), nil
+	sum = fmt.Sprintf("%x", hash.Sum(nil))
+	if md5Str != "" && sum != md5Str {
+		err = status.UploadFileMd5Unmatched
+		return
+	}
+	return
 }
 
-func UploadFile(ctx context.Context, f io.ReadSeekCloser, md5 string) (path, sum string, data []byte, err error) {
+func UploadFile(ctx context.Context, data []byte, id types.SFID) (path string, err error) {
 	var (
-		fs          = types.MustFileSystemOpFromContext(ctx)
-		size        = int64(0)
-		limit       = int64(0)
-		diskReserve = int64(0)
-		root        = ""
+		fs         = types.MustFileSystemOpFromContext(ctx)
+		uploadConf = types.MustUploadConfigFromContext(ctx)
 	)
-	if v, ok := fs.(*local.LocalFileSystem); ok {
-		limit = v.FilesizeLimitBytes
-		diskReserve = v.DiskReserveBytes
-		root = v.Root
-	}
+
+	limit := uploadConf.FilesizeLimitBytes
+	diskReserve := uploadConf.DiskReserveBytes
+	root := uploadConf.Root
 
 	if limit > 0 {
-		if err, _ = checkFilesize(f, limit); err != nil {
-			if err != nil {
-				err = status.UploadFileFailed.StatusErr().WithDesc(err.Error())
-				return
-			}
-		}
-		if size > limit {
+		if int64(len(data)) > limit {
 			err = status.UploadFileSizeLimit
 			return
 		}
@@ -85,18 +80,7 @@ func UploadFile(ctx context.Context, f io.ReadSeekCloser, md5 string) (path, sum
 		}
 	}
 
-	data, sum, err = checkFileMd5Sum(f)
-	if err != nil {
-		err = status.MD5ChecksumFailed
-		return
-	}
-
-	if md5 != "" && sum != md5 {
-		err = status.UploadFileMd5Unmatched
-		return
-	}
-
-	path = sum
+	path = fmt.Sprintf("%s/%d", enums.ResourceGroup, id)
 	err = fs.Upload(path, data)
 	if err != nil {
 		err = status.UploadFileFailed.StatusErr().WithDesc(err.Error())
