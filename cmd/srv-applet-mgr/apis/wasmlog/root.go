@@ -8,5 +8,5 @@ import (
 var Root = kit.NewRouter(httptransport.Group("/wasmlog"))
 
 func init() {
-	Root.Register(kit.NewRouter(&RemoveWasmLog{}))
+	Root.Register(kit.NewRouter(&RemoveWasmLogByInstanceID{}))
 }

@@ -9,14 +9,14 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-type RemoveWasmLog struct {
+type RemoveWasmLogByInstanceID struct {
 	httpx.MethodDelete
 	InstanceID types.SFID `in:"path" name:"instanceID"`
 }
 
-func (r *RemoveWasmLog) Path() string { return "/:instanceID" }
+func (r *RemoveWasmLogByInstanceID) Path() string { return "/:instanceID" }
 
-func (r *RemoveWasmLog) Output(ctx context.Context) (interface{}, error) {
+func (r *RemoveWasmLogByInstanceID) Output(ctx context.Context) (interface{}, error) {
 	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
 		WithInstanceContextBySFID(ctx, r.InstanceID)
 	if err != nil {

@@ -386,7 +386,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[BatchRemoveAppletFailed][500999011][Batch Remove Applet Failed]!",
+              "@StatusErr[BatchRemoveWasmLogFailed][500999015][Batch Remove WasmLog Failed]!",
               "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
@@ -651,6 +651,7 @@
             },
             "x-status-errors": [
               "@StatusErr[BatchRemoveAppletFailed][500999011][Batch Remove Applet Failed]!",
+              "@StatusErr[BatchRemoveWasmLogFailed][500999015][Batch Remove WasmLog Failed]!",
               "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
@@ -1967,7 +1968,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[BatchRemoveAppletFailed][500999011][Batch Remove Applet Failed]!",
+              "@StatusErr[BatchRemoveWasmLogFailed][500999015][Batch Remove WasmLog Failed]!",
               "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
@@ -2225,7 +2226,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[BatchRemoveAppletFailed][500999011][Batch Remove Applet Failed]!",
+              "@StatusErr[BatchRemoveWasmLogFailed][500999015][Batch Remove WasmLog Failed]!",
               "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
@@ -4155,6 +4156,7 @@
             },
             "x-status-errors": [
               "@StatusErr[BatchRemoveAppletFailed][500999011][Batch Remove Applet Failed]!",
+              "@StatusErr[BatchRemoveWasmLogFailed][500999015][Batch Remove WasmLog Failed]!",
               "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
@@ -6807,7 +6809,7 @@
         "tags": [
           "apis/wasmlog"
         ],
-        "operationId": "RemoveWasmLog",
+        "operationId": "RemoveWasmLogByInstanceID",
         "parameters": [
           {
             "name": "instanceID",
@@ -6896,7 +6898,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[BatchRemoveAppletFailed][500999011][Batch Remove Applet Failed]!",
+              "@StatusErr[BatchRemoveWasmLogFailed][500999015][Batch Remove WasmLog Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]

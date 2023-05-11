@@ -54,7 +54,7 @@ func Remove(ctx context.Context, r *CondArgs) error {
 				}
 			}
 			if len(summary) > 0 {
-				return status.BatchRemoveAppletFailed.StatusErr().
+				return status.BatchRemoveWasmLogFailed.StatusErr().
 					AppendErrorFields(summary...)
 			}
 			return nil
