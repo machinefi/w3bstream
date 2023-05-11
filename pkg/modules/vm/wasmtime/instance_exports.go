@@ -347,22 +347,22 @@ func (ef *ExportFuncs) SendTX(chainID int32, offset, size, vmAddrPtr, vmSizePtr 
 
 func (ef *ExportFuncs) SendTXWithOperator(chainID int32, offset, size, vmAddrPtr, vmSizePtr int32) int32 {
 	if ef.cl == nil {
-		ef.loggingAndPersDB(conflog.ErrorLevel, efSrc, errors.New("eth client doesn't exist").Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, errors.New("eth client doesn't exist").Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	buf, err := ef.rt.Read(offset, size)
 	if err != nil {
-		ef.loggingAndPersDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	ret := gjson.Parse(string(buf))
 	txHash, err := ef.cl.SendTXWithOperator(uint32(chainID), ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String(), ret.Get("operatorName").String())
 	if err != nil {
-		ef.loggingAndPersDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	if err := ef.rt.Copy([]byte(txHash), vmAddrPtr, vmSizePtr); err != nil {
-		ef.loggingAndPersDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	return int32(wasm.ResultStatusCode_OK)
