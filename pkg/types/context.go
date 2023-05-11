@@ -42,6 +42,7 @@ type (
 	CtxStrategyResults   struct{}
 	CtxFileSystemOp      struct{}
 	CtxProxyClient       struct{}
+	CtxResourceOwnership struct{}
 )
 
 func WithStrategyResults(ctx context.Context, v []*StrategyResult) context.Context {
@@ -548,6 +549,27 @@ func ProxyClientFromContext(ctx context.Context) (*client.Client, bool) {
 
 func MustProxyClientFromContext(ctx context.Context) *client.Client {
 	v, ok := ProxyClientFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithResourceOwnership(ctx context.Context, o *models.ResourceOwnership) context.Context {
+	return contextx.WithValue(ctx, CtxResourceOwnership{}, o)
+}
+
+func WithResourceOwnershipContext(o *models.ResourceOwnership) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxResourceOwnership{}, o)
+	}
+}
+
+func ResourceOwnershipFromContext(ctx context.Context) (*models.ResourceOwnership, bool) {
+	v, ok := ctx.Value(CtxResourceOwnership{}).(*models.ResourceOwnership)
+	return v, ok
+}
+
+func MustResourceOwnershipFromContext(ctx context.Context) *models.ResourceOwnership {
+	v, ok := ResourceOwnershipFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
