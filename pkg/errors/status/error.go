@@ -49,6 +49,8 @@ const (
 	InvalidAuthAccountID
 	// @errTalk No Project Permission
 	NoProjectPermission
+	// @errTalk No Operator Permission
+	NoOperatorPermission
 	// @errTalk No Admin Permission
 	NoAdminPermission
 	// @errTalk Invalid Old Password
@@ -125,6 +127,8 @@ const (
 	AccountConflict
 	// @errTalk Account Password Conflict
 	AccountPasswordConflict
+	// @errTalk Operator Conflict
+	OperatorConflict
 )
 
 const (
@@ -177,4 +181,6 @@ const (
 	AccountNotFound
 	// @errTalk Account Password Not Found
 	AccountPasswordNotFound
+	// @errTalk Operator Not Found
+	OperatorNotFound
 )
