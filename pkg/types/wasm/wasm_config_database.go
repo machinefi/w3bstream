@@ -242,11 +242,6 @@ func (d *Database) Init(ctx context.Context) (err error) {
 		return err
 	}
 
-	// try to create database before migration
-	if _, err = d.ep.Exec(builder.Expr("CREATE DATABASE " + d.Name)); err != nil {
-		conflog.Std().Warn(err)
-	}
-
 	// init each schema
 	for _, s := range d.schemas {
 		ep := d.ep

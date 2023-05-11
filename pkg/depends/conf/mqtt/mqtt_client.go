@@ -21,28 +21,33 @@ type Client struct {
 func (c *Client) Cid() string { return c.cid }
 
 func (c *Client) WithTopic(topic string) *Client {
-	c.topic = topic
-	return c
+	c2 := *c
+	c2.topic = topic
+	return &c2
 }
 
 func (c *Client) WithQoS(qos QOS) *Client {
-	c.qos = qos
-	return c
+	c2 := *c
+	c2.qos = qos
+	return &c2
 }
 
 func (c *Client) WithSubTimeout(timeout time.Duration) *Client {
-	c.subTimeout = timeout
-	return c
+	c2 := *c
+	c2.subTimeout = timeout
+	return &c2
 }
 
 func (c *Client) WithConnTimeout(timeout time.Duration) *Client {
-	c.connTimeout = timeout
-	return c
+	c2 := *c
+	c2.connTimeout = timeout
+	return &c2
 }
 
 func (c *Client) WithRetain(retain bool) *Client {
-	c.retain = retain
-	return c
+	c2 := *c
+	c2.retain = retain
+	return &c2
 }
 
 func (c *Client) connect() error {
