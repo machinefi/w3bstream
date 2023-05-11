@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
-	"github.com/machinefi/w3bstream/pkg/enums"
 )
 
 type LocalFileSystem struct {
@@ -25,7 +24,7 @@ func (l *LocalFileSystem) Init() error {
 		}
 		l.Root = filepath.Join(tmp, serviceName)
 	}
-	return os.MkdirAll(filepath.Join(l.Root, enums.ResourceGroup), 0777)
+	return os.MkdirAll(filepath.Join(l.Root, os.Getenv(consts.EnvResourceGroup)), 0777)
 }
 
 func (l *LocalFileSystem) SetDefault() {}

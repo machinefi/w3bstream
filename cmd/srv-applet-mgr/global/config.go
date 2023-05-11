@@ -94,6 +94,12 @@ func init() {
 	}
 	_ = os.Setenv(consts.EnvProjectName, name)
 
+	group := os.Getenv(consts.EnvResourceGroup)
+	if group == "" {
+		group = "srv-applet-mgr"
+	}
+	_ = os.Setenv(consts.EnvResourceGroup, group)
+
 	tasks = mem_mq.New(0)
 	worker = mq.NewTaskWorker(tasks, mq.WithWorkerCount(3), mq.WithChannel(name))
 

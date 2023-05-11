@@ -5,13 +5,13 @@ import (
 	"context"
 	"crypto/md5"
 	"fmt"
+	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 	"io"
 	"os"
 	"path/filepath"
 
 	"github.com/shirou/gopsutil/v3/disk"
 
-	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -80,7 +80,7 @@ func UploadFile(ctx context.Context, data []byte, id types.SFID) (path string, e
 		}
 	}
 
-	path = fmt.Sprintf("%s/%d", enums.ResourceGroup, id)
+	path = fmt.Sprintf("%s/%d", os.Getenv(consts.EnvResourceGroup), id)
 	err = fs.Upload(path, data)
 	if err != nil {
 		err = status.UploadFileFailed.StatusErr().WithDesc(err.Error())
