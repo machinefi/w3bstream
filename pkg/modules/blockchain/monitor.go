@@ -79,6 +79,13 @@ func (l *monitor) sendEvent(ctx context.Context, data []byte, projectName string
 	ctx = types.WithProject(ctx, &models.Project{
 		ProjectName: models.ProjectName{Name: projectName}},
 	)
-	_, err := event.HandleEvent(ctx, eventType, data)
-	return err
+	ret, err := event.HandleEvent(ctx, eventType, data)
+	if err != nil {
+		return err
+	}
+	res := ret.([]*event.Result)
+	if len(res) > 0 && res[0].Error != "" {
+		return errors.New(res[0].Error)
+	}
+	return nil
 }
