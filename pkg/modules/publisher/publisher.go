@@ -171,9 +171,10 @@ func RemoveByProjectAndKey(ctx context.Context, prj types.SFID, key string) erro
 	).Do()
 }
 
-func Remove(ctx context.Context, acc *models.Account, prj *models.Project, r *CondArgs) error {
+func Remove(ctx context.Context, acc *models.Account, r *CondArgs) error {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	m := &models.Publisher{}
+	prj := types.MustProjectFromContext(ctx)
 
 	expr := builder.Delete().From(d.T(m), builder.Where(r.Condition()))
 

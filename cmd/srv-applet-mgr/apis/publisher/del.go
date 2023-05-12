@@ -38,7 +38,6 @@ func (r *BatchRemovePublisher) Output(ctx context.Context) (interface{}, error) 
 	if err != nil {
 		return nil, err
 	}
-	prj := types.MustProjectFromContext(ctx)
-	r.ProjectIDs = []types.SFID{prj.ProjectID}
-	return nil, publisher.Remove(ctx, &acc.Account, prj, &r.CondArgs)
+	r.ProjectIDs = []types.SFID{types.MustProjectFromContext(ctx).ProjectID}
+	return nil, publisher.Remove(ctx, &acc.Account, &r.CondArgs)
 }
