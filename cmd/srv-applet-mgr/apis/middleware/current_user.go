@@ -15,6 +15,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/blockchain"
 	"github.com/machinefi/w3bstream/pkg/modules/cronjob"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
+	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/modules/publisher"
 	"github.com/machinefi/w3bstream/pkg/modules/resource"
@@ -182,6 +183,17 @@ func (v *CurrentAccount) WithCronJobBySFID(ctx context.Context, id types.SFID) (
 	}
 	ctx = types.WithCronJob(ctx, cronJob)
 	return v.WithProjectContextBySFID(ctx, cronJob.ProjectID)
+}
+
+func (v *CurrentAccount) WithOperatorBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	op, err := operator.GetBySFID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if v.AccountID != op.AccountID {
+		return nil, status.NoOperatorPermission
+	}
+	return types.WithOperator(ctx, op), nil
 }
 
 func (v *CurrentAccount) WithContractLogBySFID(ctx context.Context, id types.SFID) (context.Context, error) {

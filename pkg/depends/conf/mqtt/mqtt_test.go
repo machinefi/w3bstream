@@ -54,11 +54,11 @@ func init() {
 func TestBroker(t *testing.T) {
 	cpub, err := broker.Client("pub")
 	NewWithT(t).Expect(err).To(BeNil())
-	cpub.WithTopic(topic).WithQoS(QOS__ONCE)
+	cpub = cpub.WithTopic(topic).WithQoS(QOS__ONCE)
 
 	csub, err := broker.Client("sub")
 	NewWithT(t).Expect(err).To(BeNil())
-	csub.WithTopic(topic).WithQoS(QOS__ONCE)
+	csub = csub.WithTopic(topic).WithQoS(QOS__ONCE)
 
 	go func() {
 		err = csub.Subscribe(func(cli mqtt.Client, msg mqtt.Message) {

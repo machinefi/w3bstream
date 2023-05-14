@@ -9,12 +9,14 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/login"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/monitor"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/operator"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/project"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/project_config"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/publisher"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/resource"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/strategy"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/version"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/wasmlog"
 	confhttp "github.com/machinefi/w3bstream/pkg/depends/conf/http"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
@@ -56,6 +58,8 @@ func init() {
 		auth.Register(monitor.Root)
 		auth.Register(cronjob.Root)
 		auth.Register(resource.Root)
+		auth.Register(wasmlog.Root)
+		auth.Register(operator.Root)
 	}
 
 	// root router register for event http transport
