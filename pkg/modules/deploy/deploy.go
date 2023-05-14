@@ -17,6 +17,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/modules/resource"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
+	"github.com/machinefi/w3bstream/pkg/modules/wasmlog"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -142,6 +143,9 @@ func RemoveBySFID(ctx context.Context, id types.SFID) error {
 				// Warn
 			}
 			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			return wasmlog.Remove(ctx, &wasmlog.CondArgs{InstanceID: m.InstanceID})
 		},
 	).Do()
 }

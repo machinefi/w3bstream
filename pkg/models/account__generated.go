@@ -41,7 +41,8 @@ func (*Account) TableDesc() []string {
 
 func (*Account) Comments() map[string]string {
 	return map[string]string{
-		"AccountID": "AccountID  account id",
+		"AccountID":          "AccountID  account id",
+		"OperatorPrivateKey": "Deprecated: pls use pkg/modules/operator",
 	}
 }
 
@@ -49,6 +50,9 @@ func (*Account) ColDesc() map[string][]string {
 	return map[string][]string{
 		"AccountID": []string{
 			"AccountID  account id",
+		},
+		"OperatorPrivateKey": []string{
+			"Deprecated: pls use pkg/modules/operator",
 		},
 	}
 }
