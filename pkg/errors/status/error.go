@@ -38,6 +38,8 @@ const (
 	MqttSubscribeFailed
 	// @errTalk MQTT Connect Failed
 	MqttConnectFailed
+	// @errTalk Batch Remove WasmLog Failed
+	BatchRemoveWasmLogFailed
 )
 
 const (
@@ -73,6 +75,8 @@ const (
 	InvalidEventToken
 	// @errTalk Invalid Applet
 	InvalidAppletContext
+	// @errTalk No Resource Permission
+	NoResourcePermission
 )
 
 const (
