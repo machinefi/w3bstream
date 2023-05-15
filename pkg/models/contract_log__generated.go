@@ -59,6 +59,8 @@ func (*ContractLog) PrimaryKey() []string {
 
 func (m *ContractLog) IndexFieldNames() []string {
 	return []string{
+		"BlockEnd",
+		"BlockStart",
 		"ChainID",
 		"ContractAddress",
 		"ContractLogID",
@@ -83,6 +85,8 @@ func (*ContractLog) UniqueIndexes() builder.Indexes {
 			"EventType",
 			"ChainID",
 			"ContractAddress",
+			"BlockStart",
+			"BlockEnd",
 			"Topic0",
 			"Topic1",
 			"Topic2",
@@ -317,7 +321,7 @@ func (m *ContractLog) FetchByContractLogID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *ContractLog) FetchByProjectNameAndEventTypeAndChainIDAndContractAddressAndTopic0AndTopic1AndTopic2AndTopic3AndUniq(db sqlx.DBExecutor) error {
+func (m *ContractLog) FetchByProjectNameAndEventTypeAndChainIDAndContractAddressAndBlockStartAndBlockEndAndTopic0AndTopic1AndTopic2AndTopic3AndUniq(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	err := db.QueryAndScan(
 		builder.Select(nil).
@@ -329,6 +333,8 @@ func (m *ContractLog) FetchByProjectNameAndEventTypeAndChainIDAndContractAddress
 						tbl.ColByFieldName("EventType").Eq(m.EventType),
 						tbl.ColByFieldName("ChainID").Eq(m.ChainID),
 						tbl.ColByFieldName("ContractAddress").Eq(m.ContractAddress),
+						tbl.ColByFieldName("BlockStart").Eq(m.BlockStart),
+						tbl.ColByFieldName("BlockEnd").Eq(m.BlockEnd),
 						tbl.ColByFieldName("Topic0").Eq(m.Topic0),
 						tbl.ColByFieldName("Topic1").Eq(m.Topic1),
 						tbl.ColByFieldName("Topic2").Eq(m.Topic2),
@@ -336,7 +342,7 @@ func (m *ContractLog) FetchByProjectNameAndEventTypeAndChainIDAndContractAddress
 						tbl.ColByFieldName("Uniq").Eq(m.Uniq),
 					),
 				),
-				builder.Comment("ContractLog.FetchByProjectNameAndEventTypeAndChainIDAndContractAddressAndTopic0AndTopic1AndTopic2AndTopic3AndUniq"),
+				builder.Comment("ContractLog.FetchByProjectNameAndEventTypeAndChainIDAndContractAddressAndBlockStartAndBlockEndAndTopic0AndTopic1AndTopic2AndTopic3AndUniq"),
 			),
 		m,
 	)
@@ -403,7 +409,7 @@ func (m *ContractLog) UpdateByContractLogID(db sqlx.DBExecutor, zeros ...string)
 	return m.UpdateByContractLogIDWithFVs(db, fvs)
 }
 
-func (m *ContractLog) UpdateByProjectNameAndEventTypeAndChainIDAndContractAddressAndTopic0AndTopic1AndTopic2AndTopic3AndUniqWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+func (m *ContractLog) UpdateByProjectNameAndEventTypeAndChainIDAndContractAddressAndBlockStartAndBlockEndAndTopic0AndTopic1AndTopic2AndTopic3AndUniqWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
 		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
@@ -417,13 +423,15 @@ func (m *ContractLog) UpdateByProjectNameAndEventTypeAndChainIDAndContractAddres
 					tbl.ColByFieldName("EventType").Eq(m.EventType),
 					tbl.ColByFieldName("ChainID").Eq(m.ChainID),
 					tbl.ColByFieldName("ContractAddress").Eq(m.ContractAddress),
+					tbl.ColByFieldName("BlockStart").Eq(m.BlockStart),
+					tbl.ColByFieldName("BlockEnd").Eq(m.BlockEnd),
 					tbl.ColByFieldName("Topic0").Eq(m.Topic0),
 					tbl.ColByFieldName("Topic1").Eq(m.Topic1),
 					tbl.ColByFieldName("Topic2").Eq(m.Topic2),
 					tbl.ColByFieldName("Topic3").Eq(m.Topic3),
 					tbl.ColByFieldName("Uniq").Eq(m.Uniq),
 				),
-				builder.Comment("ContractLog.UpdateByProjectNameAndEventTypeAndChainIDAndContractAddressAndTopic0AndTopic1AndTopic2AndTopic3AndUniqWithFVs"),
+				builder.Comment("ContractLog.UpdateByProjectNameAndEventTypeAndChainIDAndContractAddressAndBlockStartAndBlockEndAndTopic0AndTopic1AndTopic2AndTopic3AndUniqWithFVs"),
 			).
 			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
@@ -431,14 +439,14 @@ func (m *ContractLog) UpdateByProjectNameAndEventTypeAndChainIDAndContractAddres
 		return err
 	}
 	if affected, _ := res.RowsAffected(); affected == 0 {
-		return m.FetchByProjectNameAndEventTypeAndChainIDAndContractAddressAndTopic0AndTopic1AndTopic2AndTopic3AndUniq(db)
+		return m.FetchByProjectNameAndEventTypeAndChainIDAndContractAddressAndBlockStartAndBlockEndAndTopic0AndTopic1AndTopic2AndTopic3AndUniq(db)
 	}
 	return nil
 }
 
-func (m *ContractLog) UpdateByProjectNameAndEventTypeAndChainIDAndContractAddressAndTopic0AndTopic1AndTopic2AndTopic3AndUniq(db sqlx.DBExecutor, zeros ...string) error {
+func (m *ContractLog) UpdateByProjectNameAndEventTypeAndChainIDAndContractAddressAndBlockStartAndBlockEndAndTopic0AndTopic1AndTopic2AndTopic3AndUniq(db sqlx.DBExecutor, zeros ...string) error {
 	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
-	return m.UpdateByProjectNameAndEventTypeAndChainIDAndContractAddressAndTopic0AndTopic1AndTopic2AndTopic3AndUniqWithFVs(db, fvs)
+	return m.UpdateByProjectNameAndEventTypeAndChainIDAndContractAddressAndBlockStartAndBlockEndAndTopic0AndTopic1AndTopic2AndTopic3AndUniqWithFVs(db, fvs)
 }
 
 func (m *ContractLog) Delete(db sqlx.DBExecutor) error {
@@ -487,7 +495,7 @@ func (m *ContractLog) DeleteByContractLogID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *ContractLog) DeleteByProjectNameAndEventTypeAndChainIDAndContractAddressAndTopic0AndTopic1AndTopic2AndTopic3AndUniq(db sqlx.DBExecutor) error {
+func (m *ContractLog) DeleteByProjectNameAndEventTypeAndChainIDAndContractAddressAndBlockStartAndBlockEndAndTopic0AndTopic1AndTopic2AndTopic3AndUniq(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	_, err := db.Exec(
 		builder.Delete().
@@ -499,6 +507,8 @@ func (m *ContractLog) DeleteByProjectNameAndEventTypeAndChainIDAndContractAddres
 						tbl.ColByFieldName("EventType").Eq(m.EventType),
 						tbl.ColByFieldName("ChainID").Eq(m.ChainID),
 						tbl.ColByFieldName("ContractAddress").Eq(m.ContractAddress),
+						tbl.ColByFieldName("BlockStart").Eq(m.BlockStart),
+						tbl.ColByFieldName("BlockEnd").Eq(m.BlockEnd),
 						tbl.ColByFieldName("Topic0").Eq(m.Topic0),
 						tbl.ColByFieldName("Topic1").Eq(m.Topic1),
 						tbl.ColByFieldName("Topic2").Eq(m.Topic2),
@@ -506,7 +516,7 @@ func (m *ContractLog) DeleteByProjectNameAndEventTypeAndChainIDAndContractAddres
 						tbl.ColByFieldName("Uniq").Eq(m.Uniq),
 					),
 				),
-				builder.Comment("ContractLog.DeleteByProjectNameAndEventTypeAndChainIDAndContractAddressAndTopic0AndTopic1AndTopic2AndTopic3AndUniq"),
+				builder.Comment("ContractLog.DeleteByProjectNameAndEventTypeAndChainIDAndContractAddressAndBlockStartAndBlockEndAndTopic0AndTopic1AndTopic2AndTopic3AndUniq"),
 			),
 	)
 	return err

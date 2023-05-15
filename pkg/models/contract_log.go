@@ -8,7 +8,7 @@ import (
 // ContractLog database model contract log
 // @def primary                   ID
 // @def unique_index UI_contract_log_id   ContractLogID
-// @def unique_index UI_contract_log_uniq ProjectName EventType ChainID ContractAddress Topic0 Topic1 Topic2 Topic3 Uniq
+// @def unique_index UI_contract_log_uniq ProjectName EventType ChainID ContractAddress BlockStart BlockEnd Topic0 Topic1 Topic2 Topic3 Uniq
 //
 //go:generate toolkit gen model ContractLog --database MonitorDB
 type ContractLog struct {

@@ -7,6 +7,7 @@ import (
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
+	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -245,6 +246,15 @@ func FilterByProjectAndEvent(ctx context.Context, id types.SFID, tpe string) ([]
 	)
 	if err != nil {
 		return nil, err
+	}
+
+	if len(data) == 0 {
+		data, err = ListDetailByCond(ctx, &CondArgs{
+			ProjectID: id, EventTypes: []string{enums.EVENTTYPEDEFAULT}},
+		)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	results := make([]*types.StrategyResult, 0, len(data))

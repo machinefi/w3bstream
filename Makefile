@@ -92,7 +92,7 @@ test: test_depends
 	@docker stop mqtt_test postgres_test || true && docker container rm mqtt_test postgres_test || true
 
 .PHONY: test_depends
-test_depends: postgres_test mqtt_test
+test_depends: cleanup_test_depends postgres_test mqtt_test
 
 .PHONY: cleanup_test_depends
 cleanup_test_depends:
