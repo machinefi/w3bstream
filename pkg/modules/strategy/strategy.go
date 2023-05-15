@@ -18,6 +18,7 @@ func Update(ctx context.Context, id types.SFID, r *UpdateReq) (err error) {
 
 	return sqlx.NewTasks(types.MustMgrDBExecutorFromContext(ctx)).With(
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			m, _ = types.StrategyFromContext(ctx)
 			if m == nil || m.StrategyID != id {
 				m, err = GetBySFID(ctx, id)

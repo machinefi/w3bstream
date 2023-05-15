@@ -102,6 +102,7 @@ func CreateAccountByUsername(ctx context.Context, r *CreateAccountByUsernameReq)
 				Name:       operator.DefaultOperatorName,
 				PrivateKey: generateRandomPrivateKey(),
 			}
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			_, err := operator.Create(ctx, &req)
 			return err
 		},
