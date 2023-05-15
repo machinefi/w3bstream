@@ -5,13 +5,14 @@ import (
 	"context"
 	"crypto/md5"
 	"fmt"
-	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 	"io"
+	"mime/multipart"
 	"os"
 	"path/filepath"
 
 	"github.com/shirou/gopsutil/v3/disk"
 
+	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -32,11 +33,43 @@ func checkFilesize(f io.ReadSeekCloser, lmt int64) (err error, size int64) {
 	return nil, size
 }
 
-func CheckFileMd5Sum(f io.ReadSeekCloser, md5Str string) (data []byte, sum string, err error) {
+func CheckFileMd5SumAndGetData(ctx context.Context, fh *multipart.FileHeader, md5Str string) (data []byte, sum string, err error) {
+	uploadConf := types.MustUploadConfigFromContext(ctx)
+
+	limit := uploadConf.FilesizeLimitBytes
+	diskReserve := uploadConf.DiskReserveBytes
+
+	if diskReserve != 0 {
+		info, _err := disk.Usage(os.TempDir())
+		if _err != nil {
+			err = status.UploadFileFailed.StatusErr().WithDesc(_err.Error())
+			return
+		}
+		if info.Free < uint64(diskReserve) {
+			err = status.UploadFileDiskLimit
+			return
+		}
+	}
+
+	f, _err := fh.Open()
+	if _err != nil {
+		err = status.UploadFileFailed.StatusErr().WithDesc(_err.Error())
+		return
+	}
+	defer f.Close()
+
 	data, err = io.ReadAll(f)
 	if err != nil {
 		return
 	}
+
+	if limit > 0 {
+		if int64(len(data)) > limit {
+			err = status.UploadFileSizeLimit
+			return
+		}
+	}
+
 	hash := md5.New()
 	_, err = hash.Write(data)
 	if err != nil {
@@ -52,33 +85,7 @@ func CheckFileMd5Sum(f io.ReadSeekCloser, md5Str string) (data []byte, sum strin
 }
 
 func UploadFile(ctx context.Context, data []byte, id types.SFID) (path string, err error) {
-	var (
-		fs         = types.MustFileSystemOpFromContext(ctx)
-		uploadConf = types.MustUploadConfigFromContext(ctx)
-	)
-
-	limit := uploadConf.FilesizeLimitBytes
-	diskReserve := uploadConf.DiskReserveBytes
-	root := uploadConf.Root
-
-	if limit > 0 {
-		if int64(len(data)) > limit {
-			err = status.UploadFileSizeLimit
-			return
-		}
-	}
-
-	if root != "" && diskReserve != 0 {
-		info, _err := disk.Usage(root)
-		if _err != nil {
-			err = status.UploadFileFailed.StatusErr().WithDesc(_err.Error())
-			return
-		}
-		if info.Free < uint64(diskReserve) {
-			err = status.UploadFileDiskLimit
-			return
-		}
-	}
+	fs := types.MustFileSystemOpFromContext(ctx)
 
 	path = fmt.Sprintf("%s/%d", os.Getenv(consts.EnvResourceGroup), id)
 	err = fs.Upload(path, data)

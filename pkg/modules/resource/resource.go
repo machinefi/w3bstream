@@ -14,14 +14,7 @@ import (
 )
 
 func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filename, md5 string) (*models.Resource, []byte, error) {
-	f, err := fh.Open()
-	if err != nil {
-		err = status.UploadFileFailed.StatusErr().WithDesc(err.Error())
-		return nil, nil, err
-	}
-	defer f.Close()
-
-	data, sum, err := CheckFileMd5Sum(f, md5)
+	data, sum, err := CheckFileMd5SumAndGetData(ctx, fh, md5)
 	if err != nil {
 		return nil, nil, err
 	}
