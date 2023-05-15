@@ -21,7 +21,7 @@ func (env *Env) WithContext(ctx context.Context) context.Context {
 	return WithEnv(ctx, env)
 }
 
-func (env *Env) Key(k string) string { return env.prefix + "__" + k }
+func (env *Env) Key(k string) string { return env.prefix + k }
 
 func (env *Env) Get(k string) (v string, exists bool) {
 	return os.LookupEnv(env.Key(k))
@@ -40,7 +40,7 @@ func (env *Env) Init(ctx context.Context) (err error) {
 		if pair[0] == "" {
 			continue
 		}
-		if err = os.Setenv(env.prefix+pair[0], pair[1]); err != nil {
+		if err = os.Setenv(env.Key(pair[0]), pair[1]); err != nil {
 			return
 		}
 	}
@@ -49,7 +49,7 @@ func (env *Env) Init(ctx context.Context) (err error) {
 
 func (env *Env) Uninit(_ context.Context) error {
 	for _, pair := range env.Env {
-		_ = os.Unsetenv(env.prefix + pair[0])
+		_ = os.Unsetenv(env.Key(pair[0]))
 	}
 	return nil
 }
