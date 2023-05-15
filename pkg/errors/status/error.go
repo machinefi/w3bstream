@@ -75,6 +75,8 @@ const (
 	InvalidEventToken
 	// @errTalk Invalid Applet
 	InvalidAppletContext
+	// @errTalk No Resource Permission
+	NoResourcePermission
 )
 
 const (

@@ -13,6 +13,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/blockchain"
 	"github.com/machinefi/w3bstream/pkg/modules/cronjob"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
+	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -76,6 +77,9 @@ func main() {
 			},
 			func() {
 				cronjob.Run(global.Context)
+			},
+			func() {
+				operator.Migrate(global.Context)
 			},
 		)
 	})

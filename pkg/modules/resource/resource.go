@@ -14,14 +14,7 @@ import (
 )
 
 func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filename, md5 string) (*models.Resource, []byte, error) {
-	f, err := fh.Open()
-	if err != nil {
-		err = status.UploadFileFailed.StatusErr().WithDesc(err.Error())
-		return nil, nil, err
-	}
-	defer f.Close()
-
-	path, sum, data, err := UploadFile(ctx, f, md5)
+	data, sum, err := CheckFileMd5SumAndGetData(ctx, fh, md5)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -46,6 +39,10 @@ func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filen
 		func(d sqlx.DBExecutor) error {
 			if found {
 				return nil
+			}
+			path, err := UploadFile(ctx, data, id)
+			if err != nil {
+				return err
 			}
 			res = &models.Resource{
 				RelResource:  models.RelResource{ResourceID: id},
@@ -141,7 +138,7 @@ func GetContentByMd5(ctx context.Context, md5 string) (*models.Resource, []byte,
 
 func ReadContent(ctx context.Context, m *models.Resource) ([]byte, error) {
 	fs := types.MustFileSystemOpFromContext(ctx)
-	data, err := fs.Read(m.Md5)
+	data, err := fs.Read(m.Path)
 	if err != nil {
 		return nil, status.FetchResourceFailed.StatusErr().WithDesc(err.Error())
 	}
