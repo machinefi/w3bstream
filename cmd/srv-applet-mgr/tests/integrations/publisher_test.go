@@ -2,15 +2,15 @@ package integrations
 
 import (
 	"fmt"
-	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
-	"github.com/machinefi/w3bstream/pkg/modules/publisher"
-	"github.com/machinefi/w3bstream/pkg/types"
 	"testing"
 
 	. "github.com/onsi/gomega"
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/tests/clients/applet_mgr"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/tests/requires"
+	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	"github.com/machinefi/w3bstream/pkg/modules/publisher"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 func TestPublisherAPIs(t *testing.T) {
