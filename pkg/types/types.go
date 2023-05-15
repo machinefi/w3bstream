@@ -9,16 +9,16 @@ import (
 )
 
 type UploadConfig struct {
-	Root          string `env:""`
-	FileSizeLimit int64  `env:""`
+	FilesizeLimitBytes int64 `env:""`
+	DiskReserveBytes   int64 `env:""`
 }
 
 func (c *UploadConfig) SetDefault() {
-	if c.Root == "" {
-		c.Root = "./asserts"
+	if c.FilesizeLimitBytes == 0 {
+		c.FilesizeLimitBytes = 1024 * 1024
 	}
-	if c.FileSizeLimit == 0 {
-		c.FileSizeLimit = 100 * 1024 * 1024
+	if c.DiskReserveBytes == 0 {
+		c.DiskReserveBytes = 20 * 1024 * 1024
 	}
 }
 

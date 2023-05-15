@@ -168,12 +168,14 @@ func (v *CurrentAccount) WithPublisherBySFID(ctx context.Context, id types.SFID)
 }
 
 func (v *CurrentAccount) WithResourceOwnerContextBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
-	_, err := resource.GetOwnerByAccountAndSFID(ctx, v.AccountID, id)
+	ship, err := resource.GetOwnerByAccountAndSFID(ctx, v.AccountID, id)
 	if err != nil {
 		return nil, err
 	}
-	// TODO if needed add ownership context
-	return types.WithAccount(ctx, &v.Account), nil
+	if v.AccountID != ship.AccountID {
+		return nil, status.NoResourcePermission
+	}
+	return types.WithResourceOwnership(ctx, ship), nil
 }
 
 func (v *CurrentAccount) WithCronJobBySFID(ctx context.Context, id types.SFID) (context.Context, error) {

@@ -9,9 +9,7 @@ import (
 )
 
 type LocalFileSystem struct {
-	Root               string `env:""`
-	FilesizeLimitBytes int64  `env:""`
-	DiskReserveBytes   int64  `env:""`
+	Root string `env:""`
 }
 
 func (l *LocalFileSystem) Init() error {
@@ -26,26 +24,19 @@ func (l *LocalFileSystem) Init() error {
 		}
 		l.Root = filepath.Join(tmp, serviceName)
 	}
-	return os.MkdirAll(l.Root, 0777)
+	return os.MkdirAll(filepath.Join(l.Root, os.Getenv(consts.EnvResourceGroup)), 0777)
 }
 
-func (l *LocalFileSystem) SetDefault() {
-	if l.FilesizeLimitBytes == 0 {
-		l.FilesizeLimitBytes = 1024 * 1024
-	}
-	if l.DiskReserveBytes == 0 {
-		l.DiskReserveBytes = 20 * 1024 * 1024
-	}
-}
+func (l *LocalFileSystem) SetDefault() {}
 
 // Upload key full path with filename
-func (l *LocalFileSystem) Upload(md5 string, data []byte) error {
+func (l *LocalFileSystem) Upload(key string, data []byte) error {
 	var (
 		fw  io.WriteCloser
 		err error
 	)
 
-	path := filepath.Join(l.Root, md5)
+	path := filepath.Join(l.Root, key)
 	if isPathExists(path) {
 		return nil
 	}
@@ -62,12 +53,12 @@ func (l *LocalFileSystem) Upload(md5 string, data []byte) error {
 	return nil
 }
 
-func (l *LocalFileSystem) Read(md5 string) ([]byte, error) {
-	return os.ReadFile(l.path(md5))
+func (l *LocalFileSystem) Read(key string) ([]byte, error) {
+	return os.ReadFile(l.path(key))
 }
 
-func (l *LocalFileSystem) Delete(md5 string) error {
-	return os.Remove(l.path(md5))
+func (l *LocalFileSystem) Delete(key string) error {
+	return os.Remove(l.path(key))
 }
 
 func (l *LocalFileSystem) path(name string) string {
