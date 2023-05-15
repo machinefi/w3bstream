@@ -63,6 +63,7 @@ func init() {
 		Server      *confhttp.Server
 		Jwt         *confjwt.Jwt
 		Logger      *conflog.Log
+		UploadConf  *types.UploadConfig
 		EthClient   *types.ETHClientConfig
 		WhiteList   *types.WhiteList
 		ServerEvent *confhttp.Server
@@ -78,6 +79,7 @@ func init() {
 		Server:      ServerMgr,
 		Jwt:         &confjwt.Jwt{},
 		Logger:      &conflog.Log{},
+		UploadConf:  &types.UploadConfig{},
 		EthClient:   &types.ETHClientConfig{},
 		WhiteList:   &types.WhiteList{},
 		ServerEvent: ServerEvent,
@@ -91,6 +93,12 @@ func init() {
 		name = "srv-applet-mgr"
 	}
 	_ = os.Setenv(consts.EnvProjectName, name)
+
+	group := os.Getenv(consts.EnvResourceGroup)
+	if group == "" {
+		group = "srv-applet-mgr"
+	}
+	_ = os.Setenv(consts.EnvResourceGroup, group)
 
 	tasks = mem_mq.New(0)
 	worker = mq.NewTaskWorker(tasks, mq.WithWorkerCount(3), mq.WithChannel(name))
@@ -121,6 +129,7 @@ func init() {
 		types.WithRedisEndpointContext(config.Redis),
 		types.WithLoggerContext(std),
 		conflog.WithLoggerContext(std),
+		types.WithUploadConfigContext(config.UploadConf),
 		types.WithMqttBrokerContext(config.MqttBroker),
 		confid.WithSFIDGeneratorContext(confid.MustNewSFIDGenerator()),
 		confjwt.WithConfContext(config.Jwt),

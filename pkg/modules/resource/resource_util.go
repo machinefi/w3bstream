@@ -6,12 +6,13 @@ import (
 	"crypto/md5"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"os"
 	"path/filepath"
 
 	"github.com/shirou/gopsutil/v3/disk"
 
-	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/local"
+	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -32,49 +33,14 @@ func checkFilesize(f io.ReadSeekCloser, lmt int64) (err error, size int64) {
 	return nil, size
 }
 
-func checkFileMd5Sum(f io.Reader) (data []byte, sum string, err error) {
-	data, err = io.ReadAll(f)
-	if err != nil {
-		return
-	}
-	hash := md5.New()
-	_, err = hash.Write(data)
-	if err != nil {
-		return
-	}
+func CheckFileMd5SumAndGetData(ctx context.Context, fh *multipart.FileHeader, md5Str string) (data []byte, sum string, err error) {
+	uploadConf := types.MustUploadConfigFromContext(ctx)
 
-	return data, fmt.Sprintf("%x", hash.Sum(nil)), nil
-}
+	limit := uploadConf.FilesizeLimitBytes
+	diskReserve := uploadConf.DiskReserveBytes
 
-func UploadFile(ctx context.Context, f io.ReadSeekCloser, md5 string) (path, sum string, data []byte, err error) {
-	var (
-		fs          = types.MustFileSystemOpFromContext(ctx)
-		size        = int64(0)
-		limit       = int64(0)
-		diskReserve = int64(0)
-		root        = ""
-	)
-	if v, ok := fs.(*local.LocalFileSystem); ok {
-		limit = v.FilesizeLimitBytes
-		diskReserve = v.DiskReserveBytes
-		root = v.Root
-	}
-
-	if limit > 0 {
-		if err, _ = checkFilesize(f, limit); err != nil {
-			if err != nil {
-				err = status.UploadFileFailed.StatusErr().WithDesc(err.Error())
-				return
-			}
-		}
-		if size > limit {
-			err = status.UploadFileSizeLimit
-			return
-		}
-	}
-
-	if root != "" && diskReserve != 0 {
-		info, _err := disk.Usage(root)
+	if diskReserve != 0 {
+		info, _err := disk.Usage(os.TempDir())
 		if _err != nil {
 			err = status.UploadFileFailed.StatusErr().WithDesc(_err.Error())
 			return
@@ -85,18 +51,43 @@ func UploadFile(ctx context.Context, f io.ReadSeekCloser, md5 string) (path, sum
 		}
 	}
 
-	data, sum, err = checkFileMd5Sum(f)
+	f, _err := fh.Open()
+	if _err != nil {
+		err = status.UploadFileFailed.StatusErr().WithDesc(_err.Error())
+		return
+	}
+	defer f.Close()
+
+	data, err = io.ReadAll(f)
 	if err != nil {
-		err = status.MD5ChecksumFailed
 		return
 	}
 
-	if md5 != "" && sum != md5 {
+	if limit > 0 {
+		if int64(len(data)) > limit {
+			err = status.UploadFileSizeLimit
+			return
+		}
+	}
+
+	hash := md5.New()
+	_, err = hash.Write(data)
+	if err != nil {
+		return
+	}
+
+	sum = fmt.Sprintf("%x", hash.Sum(nil))
+	if md5Str != "" && sum != md5Str {
 		err = status.UploadFileMd5Unmatched
 		return
 	}
+	return
+}
 
-	path = sum
+func UploadFile(ctx context.Context, data []byte, id types.SFID) (path string, err error) {
+	fs := types.MustFileSystemOpFromContext(ctx)
+
+	path = fmt.Sprintf("%s/%d", os.Getenv(consts.EnvResourceGroup), id)
 	err = fs.Upload(path, data)
 	if err != nil {
 		err = status.UploadFileFailed.StatusErr().WithDesc(err.Error())
