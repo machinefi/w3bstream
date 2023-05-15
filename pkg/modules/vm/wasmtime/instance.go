@@ -19,8 +19,9 @@ import (
 )
 
 const (
-	maxUint           = ^uint32(0)
-	maxInt            = int(maxUint >> 1)
+	maxUint = ^uint32(0)
+	maxInt  = int(maxUint >> 1)
+	// TODO: add into config
 	maxMsgPerInstance = 5000
 )
 
