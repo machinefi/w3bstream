@@ -3,7 +3,7 @@ package wasmtime
 import (
 	"encoding/binary"
 
-	"github.com/bytecodealliance/wasmtime-go"
+	"github.com/bytecodealliance/wasmtime-go/v8"
 	"github.com/pkg/errors"
 )
 

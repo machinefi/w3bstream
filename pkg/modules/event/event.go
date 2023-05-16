@@ -4,9 +4,7 @@ import (
 	"context"
 	"errors"
 	"sync"
-	"time"
 
-	"github.com/machinefi/w3bstream/pkg/depends/x/misc/timer"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/strategy"
@@ -73,21 +71,14 @@ func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
 		wg.Add(1)
 		go func(v *types.StrategyResult) {
 			defer wg.Done()
-
-			cost := timer.Start()
-			select {
-			case <-time.After(time.Second * 5):
-			default:
-				rv := ins.HandleEvent(ctx, v.Handler, v.EventType, data)
-				results <- &Result{
-					AppletName:  v.AppletName,
-					InstanceID:  v.InstanceID,
-					Handler:     v.Handler,
-					ReturnValue: nil,
-					ReturnCode:  int(rv.Code),
-					Error:       rv.ErrMsg,
-				}
-				l.WithValues("cst", cost().Milliseconds()).Info("")
+			rv := ins.HandleEvent(ctx, v.Handler, v.EventType, data)
+			results <- &Result{
+				AppletName:  v.AppletName,
+				InstanceID:  v.InstanceID,
+				Handler:     v.Handler,
+				ReturnValue: nil,
+				ReturnCode:  int(rv.Code),
+				Error:       rv.ErrMsg,
 			}
 		}(v)
 	}

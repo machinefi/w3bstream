@@ -41,11 +41,13 @@ func RemoveBySFID(ctx context.Context, id types.SFID) error {
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			return strategy.Remove(ctx, &strategy.CondArgs{
 				AppletIDs: types.SFIDs{id},
 			})
 		},
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			return deploy.RemoveByAppletSFID(ctx, m.AppletID)
 		},
 	).Do()
@@ -69,6 +71,7 @@ func Remove(ctx context.Context, r *CondArgs) error {
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			summary := statusx.ErrorFields{}
 			for i := range lst {
 				v := &lst[i]
@@ -175,12 +178,14 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			return strategy.BatchCreate(ctx, r.BuildStrategies(ctx))
 		},
 		func(d sqlx.DBExecutor) error {
 			if r.WasmCache == nil {
 				r.WasmCache = wasm.DefaultCache()
 			}
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			rb := &deploy.CreateReq{Cache: r.WasmCache}
 			ins, err = deploy.UpsertByCode(ctx, rb, raw, enums.INSTANCE_STATE__STARTED)
 			return err
@@ -222,6 +227,7 @@ func Update(ctx context.Context, r *UpdateReq) (*UpdateRsp, error) {
 	err = sqlx.NewTasks(d).With(
 		// update strategy
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			sty = r.BuildStrategies(ctx)
 			if len(sty) == 0 {
 				return nil
@@ -238,6 +244,7 @@ func Update(ctx context.Context, r *UpdateReq) (*UpdateRsp, error) {
 		},
 		// update and deploy instance
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			if r.File == nil {
 				return nil // instance state will not be changed
 			}

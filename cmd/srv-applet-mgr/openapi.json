@@ -6134,6 +6134,114 @@
         }
       }
     },
+    "/srv-applet-mgr/v0/resource/data/{resourceID}": {
+      "get": {
+        "tags": [
+          "apis/resource"
+        ],
+        "summary": "DownloadResource download resource by resource id",
+        "operationId": "DownloadResource",
+        "parameters": [
+          {
+            "name": "resourceID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                },
+                {
+                  "x-go-field-name": "ResourceID",
+                  "x-tag-name": "resourceID"
+                }
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxAttachment"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoResourcePermission][401999016][No Resource Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!",
+              "@StatusErr[ResourcePermNotFound][404999010][Resource Perm Not Found]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[FetchResourceFailed][500999005][Fetch Resource Failed]!"
+            ]
+          }
+        }
+      }
+    },
     "/srv-applet-mgr/v0/resource/{resourceID}": {
       "delete": {
         "tags": [
@@ -6197,7 +6305,8 @@
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
-              "@StatusErr[InvalidToken][401999002][Invalid Token]!"
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoResourcePermission][401999016][No Resource Permission]!"
             ]
           },
           "404": {
@@ -7188,6 +7297,12 @@
         "format": "date-time",
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/base/types.Timestamp",
         "x-id": "GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp"
+      },
+      "GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxAttachment": {
+        "type": "string",
+        "format": "binary",
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx.Attachment",
+        "x-id": "GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxAttachment"
       },
       "GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesBool": {
         "type": "boolean",

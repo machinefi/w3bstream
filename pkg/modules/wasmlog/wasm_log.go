@@ -41,6 +41,7 @@ func Remove(ctx context.Context, r *CondArgs) error {
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			summary := statusx.ErrorFields{}
 			for i := range lst {
 				v := &lst[i]

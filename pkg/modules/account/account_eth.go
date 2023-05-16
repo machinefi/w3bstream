@@ -98,6 +98,7 @@ func FetchOrCreateAccountByEthAddress(ctx context.Context, address types.EthAddr
 				Name:       operator.DefaultOperatorName,
 				PrivateKey: generateRandomPrivateKey(),
 			}
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			_, err := operator.Create(ctx, &req)
 			return err
 		},

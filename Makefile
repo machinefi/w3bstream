@@ -88,7 +88,7 @@ migrate: toolkit
 
 .PHONY: test
 test: test_depends
-	@go test -cover ./...
+	@go test -cover -coverprofile=coverage.out ./...
 	@docker stop mqtt_test postgres_test || true && docker container rm mqtt_test postgres_test || true
 
 .PHONY: test_depends

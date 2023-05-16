@@ -136,6 +136,7 @@ func RemoveBySFID(ctx context.Context, id types.SFID) error {
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			return config.Remove(ctx, &config.CondArgs{RelIDs: []types.SFID{id}})
 		},
 		func(d sqlx.DBExecutor) error {
@@ -145,6 +146,7 @@ func RemoveBySFID(ctx context.Context, id types.SFID) error {
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			return wasmlog.Remove(ctx, &wasmlog.CondArgs{InstanceID: m.InstanceID})
 		},
 	).Do()
@@ -158,10 +160,12 @@ func RemoveByAppletSFID(ctx context.Context, id types.SFID) (err error) {
 
 	return sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			m, err = GetByAppletSFID(ctx, id)
 			return err
 		},
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			return RemoveBySFID(ctx, m.InstanceID)
 		},
 	).Do()
@@ -175,10 +179,12 @@ func Remove(ctx context.Context, r *CondArgs) error {
 
 	return sqlx.NewTasks(types.MustMgrDBExecutorFromContext(ctx)).With(
 		func(db sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, db)
 			lst, err = ListWithCond(ctx, r)
 			return err
 		},
 		func(db sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, db)
 			for i := range lst {
 				err = RemoveBySFID(ctx, lst[i].InstanceID)
 				if err != nil {
@@ -243,6 +249,7 @@ func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.In
 			return nil
 		},
 		func(db sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, db)
 			if r != nil && r.Cache != nil {
 				if err := config.Remove(ctx, &config.CondArgs{
 					RelIDs: []types.SFID{ins.InstanceID},

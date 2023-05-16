@@ -122,14 +122,13 @@ func (db *ObjectDB) PutObject(ctx context.Context, r io.Reader, meta *ObjectMeta
 	return err
 }
 
-func (db *ObjectDB) ReadObject(ctx context.Context, w io.Writer, grp string, oid uint64) error {
+func (db *ObjectDB) ReadObject(ctx context.Context, w io.Writer, meta *ObjectMeta) error {
 	c, err := db.Client()
 	if err != nil {
 		return err
 	}
-	key := (&ObjectMeta{Group: grp, ObjectID: oid}).Key()
 
-	object, err := c.GetObject(ctx, db.BucketName, key, DefaultGetObjectOptions)
+	object, err := c.GetObject(ctx, db.BucketName, meta.Key(), DefaultGetObjectOptions)
 	if err != nil {
 		return err
 	}
@@ -143,7 +142,7 @@ func (db *ObjectDB) ReadObject(ctx context.Context, w io.Writer, grp string, oid
 	return err
 }
 
-func (db *ObjectDB) PresignedPutObject(ctx context.Context, grp string, oid uint64, exp time.Duration) (string, error) {
+func (db *ObjectDB) PresignedPutObject(ctx context.Context, meta *ObjectMeta, exp time.Duration) (string, error) {
 	c, err := db.Client()
 	if err != nil {
 		return "", err
@@ -151,7 +150,7 @@ func (db *ObjectDB) PresignedPutObject(ctx context.Context, grp string, oid uint
 	address, err := c.PresignedPutObject(
 		ctx,
 		db.BucketName,
-		(&ObjectMeta{Group: grp, ObjectID: oid}).Key(),
+		meta.Key(),
 		exp,
 	)
 	if err != nil {
@@ -160,25 +159,22 @@ func (db *ObjectDB) PresignedPutObject(ctx context.Context, grp string, oid uint
 	return address.String(), nil
 }
 
-func (db *ObjectDB) DeleteObject(ctx context.Context, grp string, oid uint64) error {
+func (db *ObjectDB) DeleteObject(ctx context.Context, meta *ObjectMeta) error {
 	c, err := db.Client()
 	if err != nil {
 		return err
 	}
 
-	key := (&ObjectMeta{Group: grp, ObjectID: oid}).Key()
-
-	return c.RemoveObject(ctx, db.BucketName, key, DefaultRemoveObjectOptions)
+	return c.RemoveObject(ctx, db.BucketName, meta.Key(), DefaultRemoveObjectOptions)
 }
 
-func (db *ObjectDB) StatsObject(ctx context.Context, grp string, oid uint64) (*ObjectMeta, error) {
+func (db *ObjectDB) StatsObject(ctx context.Context, meta *ObjectMeta) (*ObjectMeta, error) {
 	c, err := db.Client()
 	if err != nil {
 		return nil, err
 	}
-	key := (&ObjectMeta{Group: grp, ObjectID: oid}).Key()
 
-	object, err := c.GetObject(ctx, db.BucketName, key, minio.GetObjectOptions{})
+	object, err := c.GetObject(ctx, db.BucketName, meta.Key(), minio.GetObjectOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -244,7 +240,7 @@ func (db *ObjectDB) Read(key string) ([]byte, error) {
 		return nil, err
 	}
 	buf := bytes.NewBuffer(nil)
-	err = db.ReadObject(context.Background(), buf, meta.Group, meta.ObjectID)
+	err = db.ReadObject(context.Background(), buf, meta)
 	if err != nil {
 		return nil, err
 	}
@@ -256,7 +252,7 @@ func (db *ObjectDB) Delete(key string) error {
 	if err != nil {
 		return err
 	}
-	return db.DeleteObject(context.Background(), meta.Group, meta.ObjectID)
+	return db.DeleteObject(context.Background(), meta)
 }
 
 var ErrInvalidObjectKey = errors.New("invalid object key")

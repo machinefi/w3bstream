@@ -135,6 +135,7 @@ func RemoveBySFID(ctx context.Context, acc *models.Account, prj *models.Project,
 
 	if err := sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			var err error
 			m, err = GetBySFID(ctx, id)
 			return err
@@ -158,6 +159,7 @@ func RemoveByProjectAndKey(ctx context.Context, prj types.SFID, key string) erro
 
 	return sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			var err error
 			m, err = GetByProjectAndKey(ctx, prj, key)
 			return err
@@ -229,6 +231,7 @@ func Update(ctx context.Context, r *UpdateReq) error {
 
 	return sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			var err error
 			m, err = GetBySFID(ctx, r.PublisherID)
 			return err
