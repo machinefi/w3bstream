@@ -25,17 +25,17 @@ type (
 )
 
 var (
-	_labels               = []string{"node", "account", "project", "customlabel"}
+	_labels               = []string{"account", "project", "customlabel"}
 	_customMetricsCounter = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "ws_wasm_custom_counter_metrics",
+			Name: "wasm_custom_counter_metrics",
 			Help: "custom counter metrics emitted from wasm vm",
 		},
 		_labels,
 	)
 	_customMetricsGauge = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Name: "ws_wasm_custom_gague_metrics",
+			Name: "wasm_custom_gague_metrics",
 			Help: "custom gague metrics emitted from wasm vm",
 		},
 		_labels,
@@ -54,9 +54,9 @@ type (
 	}
 )
 
-func NewCustomMetric(node string, account string, project string) Metrics {
+func NewCustomMetric(account string, project string) Metrics {
 	return &metrics{
-		preDefLabels: []string{node, account, project},
+		preDefLabels: []string{account, project},
 		counters:     sync.Map{},
 		gagues:       sync.Map{},
 	}
@@ -65,10 +65,11 @@ func NewCustomMetric(node string, account string, project string) Metrics {
 func (m *metrics) Counter(customLabel string) Counter {
 	value, exist := m.counters.Load(customLabel)
 	if !exist {
-		m.counters.Store(customLabel, &counter{
+		value = &counter{
 			labels:  append(m.preDefLabels[:], customLabel),
 			counter: _customMetricsCounter,
-		})
+		}
+		m.counters.Store(customLabel, value)
 	}
 	return value.(Counter)
 }
@@ -76,10 +77,11 @@ func (m *metrics) Counter(customLabel string) Counter {
 func (m *metrics) Gauge(customLabel string) Gauge {
 	value, exist := m.gagues.Load(customLabel)
 	if !exist {
-		m.gagues.Store(customLabel, &gauge{
+		value = &gauge{
 			labels: append(m.preDefLabels[:], customLabel),
 			gauge:  _customMetricsGauge,
-		})
+		}
+		m.gagues.Store(customLabel, value)
 	}
 	return value.(Gauge)
 }

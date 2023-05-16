@@ -472,7 +472,7 @@ func (ef *ExportFuncs) GetEventType(rid, vmAddrPtr, vmSizePtr int32) int32 {
 func (ef *ExportFuncs) StatCounterInc(labelAddr, labelSize int32) int32 {
 	buf, err := ef.rt.Read(labelAddr, labelSize)
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	ef.metrics.Counter(string(buf)).Inc()
@@ -482,7 +482,7 @@ func (ef *ExportFuncs) StatCounterInc(labelAddr, labelSize int32) int32 {
 func (ef *ExportFuncs) StatCounterAdd(labelAddr, labelSize int32, value float64) int32 {
 	buf, err := ef.rt.Read(labelAddr, labelSize)
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	ef.metrics.Counter(string(buf)).Add(value)
@@ -492,7 +492,7 @@ func (ef *ExportFuncs) StatCounterAdd(labelAddr, labelSize int32, value float64)
 func (ef *ExportFuncs) StatGaugeSet(labelAddr, labelSize int32, value float64) int32 {
 	buf, err := ef.rt.Read(labelAddr, labelSize)
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	ef.metrics.Gauge(string(buf)).Set(value)
