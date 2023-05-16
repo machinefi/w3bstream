@@ -30,6 +30,31 @@ containers
 docker-compose restart
 ```
 
+# Run W3bstream node from code
+
+If you are interested in diving into the code and run the node using a locally built docker, here is the steps of building the docker image from code.
+
+### Build docker image from code
+
+```bash
+make build_backend_image
+```
+
+### Run server in docker containers
+
+```bash
+ make run_docker
+ ```
+
+### Stop server running in docker containers
+ ```bash
+ make stop_docker
+ ```
+### Delete docker resources
+ ```bash
+ make drop_docker
+ ```
+
 # How to interact with W3bstream Node Using CLI
 
 ### Login (fetch auth token)

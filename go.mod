@@ -4,7 +4,6 @@ go 1.18
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
-	github.com/bytecodealliance/wasmtime-go v1.0.0
 	github.com/eclipse/paho.mqtt.golang v1.4.1
 	// github.com/ethereum/go-ethereum v1.11.4
 	github.com/fatih/color v1.13.0
@@ -41,12 +40,12 @@ require (
 
 require (
 	github.com/aws/aws-sdk-go v1.44.245
+	github.com/bytecodealliance/wasmtime-go/v8 v8.0.0
 	github.com/ethereum/go-ethereum v1.10.15
 	github.com/go-co-op/gocron v1.22.0
 	github.com/minio/minio-go/v7 v7.0.52
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/spruceid/siwe-go v0.2.0
-	google.golang.org/grpc v1.41.0
 )
 
 require (
@@ -94,7 +93,6 @@ require (
 	golang.org/x/crypto v0.7.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
-	google.golang.org/genproto v0.0.0-20200825200019-8632dd797987 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

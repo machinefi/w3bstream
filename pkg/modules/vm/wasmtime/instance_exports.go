@@ -17,6 +17,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/modules/job"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
+	custommetrics "github.com/machinefi/w3bstream/pkg/types/wasm/metrics"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/sql_util"
 )
 
@@ -28,16 +29,17 @@ type (
 	}
 
 	ExportFuncs struct {
-		rt  *Runtime
-		res *mapx.Map[uint32, []byte]
-		evs *mapx.Map[uint32, []byte]
-		env *wasm.Env
-		kvs wasm.KVStore
-		db  *wasm.Database
-		log conflog.Logger
-		cl  *wasm.ChainClient
-		ctx context.Context
-		mq  *wasm.MqttClient
+		rt      *Runtime
+		res     *mapx.Map[uint32, []byte]
+		evs     *mapx.Map[uint32, []byte]
+		env     *wasm.Env
+		kvs     wasm.KVStore
+		db      *wasm.Database
+		log     conflog.Logger
+		cl      *wasm.ChainClient
+		ctx     context.Context
+		mq      *wasm.MqttClient
+		metrics custommetrics.Metrics
 	}
 )
 
@@ -54,6 +56,7 @@ func NewExportFuncs(ctx context.Context, rt *Runtime) (*ExportFuncs, error) {
 	ef.env, _ = wasm.EnvFromContext(ctx)
 	ef.mq, _ = wasm.MQTTClientFromContext(ctx)
 	ef.rt = rt
+	ef.metrics, _ = wasm.CustomMetricsFromContext(ctx)
 
 	return ef, nil
 }
@@ -84,6 +87,16 @@ func (ef *ExportFuncs) LinkABI(impt Import) error {
 		"ws_send_mqtt_msg":         ef.SendMqttMsg,
 	} {
 		if err := impt("env", name, ff); err != nil {
+			return err
+		}
+	}
+
+	for name, ff := range map[string]interface{}{
+		"ws_counter_inc": ef.StatCounterInc,
+		"ws_counter_add": ef.StatCounterAdd,
+		"ws_gauge_set":   ef.StatGaugeSet,
+	} {
+		if err := impt("stat", name, ff); err != nil {
 			return err
 		}
 	}
@@ -453,6 +466,35 @@ func (ef *ExportFuncs) GetEventType(rid, vmAddrPtr, vmSizePtr int32) int32 {
 		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
+	return int32(wasm.ResultStatusCode_OK)
+}
 
+func (ef *ExportFuncs) StatCounterInc(labelAddr, labelSize int32) int32 {
+	buf, err := ef.rt.Read(labelAddr, labelSize)
+	if err != nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return wasm.ResultStatusCode_Failed
+	}
+	ef.metrics.Counter(string(buf)).Inc()
+	return int32(wasm.ResultStatusCode_OK)
+}
+
+func (ef *ExportFuncs) StatCounterAdd(labelAddr, labelSize int32, value float64) int32 {
+	buf, err := ef.rt.Read(labelAddr, labelSize)
+	if err != nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return wasm.ResultStatusCode_Failed
+	}
+	ef.metrics.Counter(string(buf)).Add(value)
+	return int32(wasm.ResultStatusCode_OK)
+}
+
+func (ef *ExportFuncs) StatGaugeSet(labelAddr, labelSize int32, value float64) int32 {
+	buf, err := ef.rt.Read(labelAddr, labelSize)
+	if err != nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return wasm.ResultStatusCode_Failed
+	}
+	ef.metrics.Gauge(string(buf)).Set(value)
 	return int32(wasm.ResultStatusCode_OK)
 }
