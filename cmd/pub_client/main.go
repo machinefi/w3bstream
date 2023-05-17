@@ -10,13 +10,13 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
-	"github.com/machinefi/w3bstream/pkg/depends/base/types"
-	"github.com/machinefi/w3bstream/pkg/depends/x/misc/retry"
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
+	"github.com/machinefi/w3bstream/pkg/depends/x/misc/retry"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
 )
 
@@ -86,8 +86,8 @@ func init() {
 			Password: types.Password(password),
 		},
 		Retry:     *retry.Default,
-		Timeout:   types.Duration(time.Second * 10),
-		Keepalive: types.Duration(time.Minute),
+		Timeout:   types.Duration(time.Second * time.Duration(wait)),
+		Keepalive: types.Duration(time.Second * time.Duration(wait)),
 		QoS:       confmqtt.QOS__ONCE,
 	}
 
