@@ -392,8 +392,7 @@
               "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -658,8 +657,7 @@
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -830,7 +828,6 @@
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]",
               "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
             ]
           }
@@ -1183,7 +1180,6 @@
               "@StatusErr[CreateInstanceFailed][500999010][Create Instance Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]",
               "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
             ]
           }
@@ -1853,8 +1849,7 @@
               "@StatusErr[CreateInstanceFailed][500999010][Create Instance Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[FetchResourceFailed][500999005][Fetch Resource Failed]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[FetchResourceFailed][500999005][Fetch Resource Failed]!"
             ]
           }
         }
@@ -1972,8 +1967,7 @@
               "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -2231,8 +2225,7 @@
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -2529,6 +2522,7 @@
               "@StatusErr[NoAdminPermission][401999006][No Admin Permission]!",
               "@StatusErr[NoOperatorPermission][401999005][No Operator Permission]!",
               "@StatusErr[NoProjectPermission][401999004][No Project Permission]!",
+              "@StatusErr[NoResourcePermission][401999017][No Resource Permission]!",
               "@StatusErr[Unauthorized][401999001][unauthorized]"
             ]
           },
@@ -2633,6 +2627,7 @@
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[FetchResourceFailed][500999005][Fetch Resource Failed]!",
               "@StatusErr[GenPublisherTokenFailed][500999009][Gen Publisher Token Failed]!",
+              "@StatusErr[GenTokenFailed][500999016][Gen Token Failed]!",
               "@StatusErr[InternalServerError][500999001][internal error]",
               "@StatusErr[MD5ChecksumFailed][500999012][Md5 Checksum Failed]!",
               "@StatusErr[MqttConnectFailed][500999014][MQTT Connect Failed]!",
@@ -2729,7 +2724,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[GenTokenFailed][500999016][Gen Token Failed]!"
             ]
           }
         }
@@ -2835,7 +2830,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[GenTokenFailed][500999016][Gen Token Failed]!"
             ]
           }
         }
@@ -4381,8 +4376,7 @@
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
