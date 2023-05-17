@@ -6,3 +6,4 @@ var
 /working_dir/
 /testutil/
 config.yml
+coverage.out
