@@ -24,7 +24,8 @@ func (r *ForwardRequest) Path() string {
 
 func Forward(ctx context.Context, channel string, ev *eventpb.Event) (interface{}, error) {
 	cli := types.MustProxyClientFromContext(ctx)
-	req := event.EventReq{
+
+	body := event.EventReq{
 		Channel:   channel,
 		EventType: ev.Header.GetEventType(),
 		EventID:   ev.Header.GetEventId(),
@@ -45,7 +46,8 @@ func Forward(ctx context.Context, channel string, ev *eventpb.Event) (interface{
 	}
 
 	rsp := &event.EventRsp{}
-	if _, err := cli.Do(ctx, &ForwardRequest{EventReq: req}, meta).Into(rsp); err != nil {
+	req := &ForwardRequest{EventReq: body}
+	if _, err := cli.Do(context.Background(), req, meta).Into(rsp); err != nil {
 		return nil, err
 	}
 	return rsp, nil
