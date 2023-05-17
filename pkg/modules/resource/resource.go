@@ -181,7 +181,7 @@ func List(ctx context.Context, r *ListReq) (*ListRsp, error) {
 			),
 		).From(
 			d.T(res),
-			builder.LeftJoin(d.T(own)).On(res.ColResourceID().Eq(own.ResourceID)),
+			builder.LeftJoin(d.T(own)).On(res.ColResourceID().Eq(own.ColResourceID())),
 			builder.Where(r.Condition()),
 		), &rsp.Data)
 	if err != nil {
