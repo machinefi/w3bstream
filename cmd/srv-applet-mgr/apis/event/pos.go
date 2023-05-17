@@ -7,6 +7,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 type HandleEvent struct {
@@ -31,14 +32,15 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 		}
 	)
 
-	// TODO @zhiwei add event matrix to proxy client transport
-	_receiveEventMtc.WithLabelValues(r.Channel, pub.Key).Inc()
-
 	ctx, err = pub.WithStrategiesByChanAndType(ctx, r.Channel, r.EventType)
 	if err != nil {
 		rsp.Error = statusx.FromErr(err).Key
 		return rsp, nil
 	}
+
+	prj := types.MustProjectFromContext(ctx)
+	_eventMtc.WithLabelValues(prj.AccountID.String(), prj.Name, pub.Key, r.EventType).Inc()
+
 	rsp.Results = event.OnEvent(ctx, r.Payload.Bytes())
 	return rsp, nil
 }

@@ -14,13 +14,16 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-var _registerPublisherMtc = prometheus.NewCounterVec(prometheus.CounterOpts{
-	Name: "w3b_register_publisher_metrics",
-	Help: "register publisher counter metrics.",
-}, []string{"project"})
+var _publisherMtc = prometheus.NewGaugeVec(
+	prometheus.GaugeOpts{
+		Name: "publishers_metrics",
+		Help: "registered publishers for the project.",
+	},
+	[]string{"account", "project"},
+)
 
 func init() {
-	prometheus.MustRegister(_registerPublisherMtc)
+	prometheus.MustRegister(_publisherMtc)
 }
 
 func GetBySFID(ctx context.Context, id types.SFID) (*models.Publisher, error) {
@@ -126,11 +129,11 @@ func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
 	return ret, nil
 }
 
-func RemoveBySFID(ctx context.Context, id types.SFID) error {
+func RemoveBySFID(ctx context.Context, acc *models.Account, prj *models.Project, id types.SFID) error {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	m := &models.Publisher{}
 
-	return sqlx.NewTasks(d).With(
+	if err := sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
 			ctx := types.WithMgrDBExecutor(ctx, d)
 			var err error
@@ -143,7 +146,11 @@ func RemoveBySFID(ctx context.Context, id types.SFID) error {
 			}
 			return nil
 		},
-	).Do()
+	).Do(); err != nil {
+		return err
+	}
+	_publisherMtc.WithLabelValues(acc.AccountID.String(), prj.Name).Dec()
+	return nil
 }
 
 func RemoveByProjectAndKey(ctx context.Context, prj types.SFID, key string) error {
@@ -166,21 +173,27 @@ func RemoveByProjectAndKey(ctx context.Context, prj types.SFID, key string) erro
 	).Do()
 }
 
-func Remove(ctx context.Context, r *CondArgs) error {
+func Remove(ctx context.Context, acc *models.Account, r *CondArgs) error {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	m := &models.Publisher{}
+	prj := types.MustProjectFromContext(ctx)
 
 	expr := builder.Delete().From(d.T(m), builder.Where(r.Condition()))
 
-	if _, err := d.Exec(expr); err != nil {
+	res, err := d.Exec(expr)
+	if err != nil {
 		return status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
+	numDeleted, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	_publisherMtc.WithLabelValues(acc.AccountID.String(), prj.Name).Sub(float64(numDeleted))
 	return nil
 }
 
-func Create(ctx context.Context, r *CreateReq) (*models.Publisher, error) {
+func Create(ctx context.Context, acc *models.Account, prj *models.Project, r *CreateReq) (*models.Publisher, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
-	prj := types.MustProjectFromContext(ctx)
 
 	id := confid.MustSFIDGeneratorFromContext(ctx).MustGenSFID()
 	token, err := confjwt.MustConfFromContext(ctx).GenerateTokenWithoutExpByPayload(id)
@@ -198,15 +211,13 @@ func Create(ctx context.Context, r *CreateReq) (*models.Publisher, error) {
 		},
 	}
 
-	// TODO move matrix to other place @zhiwei
-	_registerPublisherMtc.WithLabelValues(prj.Name).Inc()
-
 	if err = pub.Create(d); err != nil {
 		if sqlx.DBErr(err).IsConflict() {
 			return nil, status.PublisherConflict
 		}
 		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
+	_publisherMtc.WithLabelValues(acc.AccountID.String(), prj.Name).Inc()
 	return pub, nil
 }
 

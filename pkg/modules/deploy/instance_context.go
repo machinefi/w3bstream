@@ -13,6 +13,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/projectoperator"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
+	custommetrics "github.com/machinefi/w3bstream/pkg/types/wasm/metrics"
 )
 
 func WithInstanceRuntimeContext(parent context.Context) (context.Context, error) {
@@ -89,6 +90,8 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		"@prj", prj.Name,
 		"@app", app.Name,
 	))
+
+	ctx = wasm.WithCustomMetrics(ctx, custommetrics.NewCustomMetric(prj.AccountID.String(), prj.ProjectName.Name))
 
 	return ctx, nil
 }

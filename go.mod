@@ -4,7 +4,6 @@ go 1.18
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
-	github.com/bytecodealliance/wasmtime-go v1.0.0
 	github.com/eclipse/paho.mqtt.golang v1.4.1
 	// github.com/ethereum/go-ethereum v1.11.4
 	github.com/fatih/color v1.13.0
@@ -41,6 +40,7 @@ require (
 
 require (
 	github.com/aws/aws-sdk-go v1.44.245
+	github.com/bytecodealliance/wasmtime-go/v8 v8.0.0
 	github.com/ethereum/go-ethereum v1.10.15
 	github.com/go-co-op/gocron v1.22.0
 	github.com/minio/minio-go/v7 v7.0.52
