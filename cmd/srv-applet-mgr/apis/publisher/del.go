@@ -18,12 +18,12 @@ type RemovePublisher struct {
 func (r *RemovePublisher) Path() string { return "/data/:publisherID" }
 
 func (r *RemovePublisher) Output(ctx context.Context) (interface{}, error) {
-	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
-		WithPublisherBySFID(ctx, r.PublisherID)
+	acc := middleware.MustCurrentAccountFromContext(ctx)
+	ctx, err := acc.WithPublisherBySFID(ctx, r.PublisherID)
 	if err != nil {
 		return nil, err
 	}
-	return nil, publisher.RemoveBySFID(ctx, r.PublisherID)
+	return nil, publisher.RemoveBySFID(ctx, &acc.Account, types.MustProjectFromContext(ctx), r.PublisherID)
 }
 
 // Remove Publisher by Given Conditions
@@ -33,12 +33,11 @@ type BatchRemovePublisher struct {
 }
 
 func (r *BatchRemovePublisher) Output(ctx context.Context) (interface{}, error) {
-	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
-		WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
+	acc := middleware.MustCurrentAccountFromContext(ctx)
+	ctx, err := acc.WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
 	if err != nil {
 		return nil, err
 	}
 	r.ProjectIDs = []types.SFID{types.MustProjectFromContext(ctx).ProjectID}
-
-	return nil, publisher.Remove(ctx, &r.CondArgs)
+	return nil, publisher.Remove(ctx, &acc.Account, &r.CondArgs)
 }

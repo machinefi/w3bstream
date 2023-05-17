@@ -16,12 +16,12 @@ type CreatePublisher struct {
 }
 
 func (r *CreatePublisher) Output(ctx context.Context) (interface{}, error) {
-	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
-		WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
+	acc := middleware.MustCurrentAccountFromContext(ctx)
+	ctx, err := acc.WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
 	if err != nil {
 		return nil, err
 	}
 
-	r.ProjectID = types.MustProjectFromContext(ctx).ProjectID
-	return publisher.Create(ctx, &r.CreateReq)
+	prj := types.MustProjectFromContext(ctx)
+	return publisher.Create(ctx, &acc.Account, prj, &r.CreateReq)
 }

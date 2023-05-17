@@ -136,6 +136,7 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			if r.Env == nil {
 				r.Env = &wasm.Env{}
 			}
@@ -176,6 +177,7 @@ func RemoveBySFID(ctx context.Context, id types.SFID) (err error) {
 
 	return sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			if p, err = GetBySFID(ctx, id); err != nil {
 				return err
 			}
@@ -190,9 +192,11 @@ func RemoveBySFID(ctx context.Context, id types.SFID) (err error) {
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			return config.Remove(ctx, &config.CondArgs{RelIDs: []types.SFID{p.ProjectID}})
 		},
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			return applet.Remove(ctx, &applet.CondArgs{ProjectID: p.ProjectID})
 		},
 	).Do()
