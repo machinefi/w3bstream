@@ -392,8 +392,7 @@
               "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -658,8 +657,7 @@
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -830,8 +828,6 @@
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]",
-              "@StatusErr[MD5ChecksumFailed][500999012][Md5 Checksum Failed]!",
               "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
             ]
           }
@@ -1184,8 +1180,6 @@
               "@StatusErr[CreateInstanceFailed][500999010][Create Instance Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]",
-              "@StatusErr[MD5ChecksumFailed][500999012][Md5 Checksum Failed]!",
               "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
             ]
           }
@@ -1855,8 +1849,7 @@
               "@StatusErr[CreateInstanceFailed][500999010][Create Instance Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[FetchResourceFailed][500999005][Fetch Resource Failed]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[FetchResourceFailed][500999005][Fetch Resource Failed]!"
             ]
           }
         }
@@ -1974,8 +1967,7 @@
               "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -2233,8 +2225,7 @@
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -2529,7 +2520,9 @@
               "@StatusErr[InvalidPassword][401999009][Invalid Password]!",
               "@StatusErr[InvalidToken][401999002][Invalid Token]!",
               "@StatusErr[NoAdminPermission][401999006][No Admin Permission]!",
+              "@StatusErr[NoOperatorPermission][401999005][No Operator Permission]!",
               "@StatusErr[NoProjectPermission][401999004][No Project Permission]!",
+              "@StatusErr[NoResourcePermission][401999017][No Resource Permission]!",
               "@StatusErr[Unauthorized][401999001][unauthorized]"
             ]
           },
@@ -2575,6 +2568,7 @@
               "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
               "@StatusErr[InstanceNotRunning][404999012][Instance Not Running]!",
               "@StatusErr[NotFound][404999001][NotFound]!",
+              "@StatusErr[OperatorNotFound][404999019][Operator Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
               "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!",
               "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!",
@@ -2604,6 +2598,7 @@
               "@StatusErr[ContractLogConflict][409999011][Contract Log Conflict]!",
               "@StatusErr[CronJobConflict][409999010][Cron Job Conflict]!",
               "@StatusErr[MultiInstanceDeployed][409999008][Multi Instance Deployed]!",
+              "@StatusErr[OperatorConflict][409999017][Operator Conflict]!",
               "@StatusErr[ProjectNameConflict][409999002][Project Name Conflict]!",
               "@StatusErr[PublisherConflict][409999007][Publisher Conflict]!",
               "@StatusErr[ResourceConflict][409999003][Resource Conflict]!",
@@ -2622,6 +2617,7 @@
             },
             "x-status-errors": [
               "@StatusErr[BatchRemoveAppletFailed][500999011][Batch Remove Applet Failed]!",
+              "@StatusErr[BatchRemoveWasmLogFailed][500999015][Batch Remove WasmLog Failed]!",
               "@StatusErr[ConfigInitFailed][500999006][Config Init Failed]!",
               "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
@@ -2631,6 +2627,7 @@
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[FetchResourceFailed][500999005][Fetch Resource Failed]!",
               "@StatusErr[GenPublisherTokenFailed][500999009][Gen Publisher Token Failed]!",
+              "@StatusErr[GenTokenFailed][500999016][Gen Token Failed]!",
               "@StatusErr[InternalServerError][500999001][internal error]",
               "@StatusErr[MD5ChecksumFailed][500999012][Md5 Checksum Failed]!",
               "@StatusErr[MqttConnectFailed][500999014][MQTT Connect Failed]!",
@@ -2727,7 +2724,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[GenTokenFailed][500999016][Gen Token Failed]!"
             ]
           }
         }
@@ -2833,7 +2830,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[GenTokenFailed][500999016][Gen Token Failed]!"
             ]
           }
         }
@@ -4379,8 +4376,7 @@
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[InternalServerError][500999001][internal error]"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -6206,7 +6202,7 @@
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
               "@StatusErr[InvalidToken][401999002][Invalid Token]!",
-              "@StatusErr[NoResourcePermission][401999016][No Resource Permission]!"
+              "@StatusErr[NoResourcePermission][401999017][No Resource Permission]!"
             ]
           },
           "404": {
@@ -6306,7 +6302,7 @@
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
               "@StatusErr[InvalidToken][401999002][Invalid Token]!",
-              "@StatusErr[NoResourcePermission][401999016][No Resource Permission]!"
+              "@StatusErr[NoResourcePermission][401999017][No Resource Permission]!"
             ]
           },
           "404": {

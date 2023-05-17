@@ -100,9 +100,9 @@ cleanup_test_depends:
 
 .PHONY: postgres_test
 postgres_test:
-	docker run --name postgres_test -e POSTGRES_PASSWORD=test_passwd -e POSTGRES_USER=root -p 5432:5432 -d postgres:14-alpine
+	docker run --name postgres_test -e POSTGRES_PASSWORD=test_passwd -e POSTGRES_USER=root -p 15432:5432 -d postgres:14-alpine
 
 .PHONY: mqtt_test
 mqtt_test:
-	docker run --name mqtt_test -p 1883:1883 -d eclipse-mosquitto:1.6.15
+	docker run --name mqtt_test -p 11883:1883 -d eclipse-mosquitto:1.6.15
 

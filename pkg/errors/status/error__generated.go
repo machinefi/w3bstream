@@ -79,6 +79,8 @@ func (v Error) Key() string {
 		return "InvalidEventToken"
 	case InvalidAppletContext:
 		return "InvalidAppletContext"
+	case NoResourcePermission:
+		return "NoResourcePermission"
 	case Forbidden:
 		return "Forbidden"
 	case DisabledAccount:
@@ -195,6 +197,8 @@ func (v Error) Key() string {
 		return "MqttConnectFailed"
 	case BatchRemoveWasmLogFailed:
 		return "BatchRemoveWasmLogFailed"
+	case GenTokenFailed:
+		return "GenTokenFailed"
 	}
 	return "UNKNOWN"
 }
@@ -243,6 +247,8 @@ func (v Error) Msg() string {
 		return "Invalid Event Token"
 	case InvalidAppletContext:
 		return "Invalid Applet"
+	case NoResourcePermission:
+		return "No Resource Permission"
 	case Forbidden:
 		return "forbidden"
 	case DisabledAccount:
@@ -359,6 +365,8 @@ func (v Error) Msg() string {
 		return "MQTT Connect Failed"
 	case BatchRemoveWasmLogFailed:
 		return "Batch Remove WasmLog Failed"
+	case GenTokenFailed:
+		return "Gen Token Failed"
 	}
 	return "-"
 }
@@ -406,6 +414,8 @@ func (v Error) CanBeTalk() bool {
 	case InvalidEventToken:
 		return true
 	case InvalidAppletContext:
+		return true
+	case NoResourcePermission:
 		return true
 	case Forbidden:
 		return false
@@ -522,6 +532,8 @@ func (v Error) CanBeTalk() bool {
 	case MqttConnectFailed:
 		return true
 	case BatchRemoveWasmLogFailed:
+		return true
+	case GenTokenFailed:
 		return true
 	}
 	return false

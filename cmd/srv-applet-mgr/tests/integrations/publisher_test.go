@@ -14,12 +14,10 @@ import (
 )
 
 func TestPublisherAPIs(t *testing.T) {
-	defer requires.Serve()()
-
 	var (
 		ctx           = requires.Context()
 		client        = requires.AuthClient()
-		projectName   = "testdemo"
+		projectName   = "test_publisher"
 		publisherName = "testpublisher"
 		publisherKey  = confid.MustSFIDGeneratorFromContext(ctx).MustGenSFID().String()
 
