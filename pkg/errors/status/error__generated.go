@@ -79,6 +79,8 @@ func (v Error) Key() string {
 		return "InvalidEventToken"
 	case InvalidAppletContext:
 		return "InvalidAppletContext"
+	case NoResourcePermission:
+		return "NoResourcePermission"
 	case Forbidden:
 		return "Forbidden"
 	case DisabledAccount:
@@ -93,6 +95,8 @@ func (v Error) Key() string {
 		return "UploadFileDiskLimit"
 	case TopicAlreadySubscribed:
 		return "TopicAlreadySubscribed"
+	case OccupiedOperator:
+		return "OccupiedOperator"
 	case NotFound:
 		return "NotFound"
 	case ProjectNotFound:
@@ -131,6 +135,8 @@ func (v Error) Key() string {
 		return "AccountPasswordNotFound"
 	case OperatorNotFound:
 		return "OperatorNotFound"
+	case ProjectOperatorNotFound:
+		return "ProjectOperatorNotFound"
 	case Conflict:
 		return "Conflict"
 	case ProjectNameConflict:
@@ -165,6 +171,8 @@ func (v Error) Key() string {
 		return "AccountPasswordConflict"
 	case OperatorConflict:
 		return "OperatorConflict"
+	case ProjectOperatorConflict:
+		return "ProjectOperatorConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -243,6 +251,8 @@ func (v Error) Msg() string {
 		return "Invalid Event Token"
 	case InvalidAppletContext:
 		return "Invalid Applet"
+	case NoResourcePermission:
+		return "No Resource Permission"
 	case Forbidden:
 		return "forbidden"
 	case DisabledAccount:
@@ -257,6 +267,8 @@ func (v Error) Msg() string {
 		return "Upload File Disk Limit"
 	case TopicAlreadySubscribed:
 		return "Topic Already Subscribed"
+	case OccupiedOperator:
+		return "Occupied Operator"
 	case NotFound:
 		return "NotFound"
 	case ProjectNotFound:
@@ -295,6 +307,8 @@ func (v Error) Msg() string {
 		return "Account Password Not Found"
 	case OperatorNotFound:
 		return "Operator Not Found"
+	case ProjectOperatorNotFound:
+		return "Project Operator relationship Not Found"
 	case Conflict:
 		return "Conflict conflict error"
 	case ProjectNameConflict:
@@ -329,6 +343,8 @@ func (v Error) Msg() string {
 		return "Account Password Conflict"
 	case OperatorConflict:
 		return "Operator Conflict"
+	case ProjectOperatorConflict:
+		return "Project Operator relationship Conflict"
 	case InternalServerError:
 		return "internal error"
 	case DatabaseError:
@@ -407,6 +423,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case InvalidAppletContext:
 		return true
+	case NoResourcePermission:
+		return true
 	case Forbidden:
 		return false
 	case DisabledAccount:
@@ -420,6 +438,8 @@ func (v Error) CanBeTalk() bool {
 	case UploadFileDiskLimit:
 		return true
 	case TopicAlreadySubscribed:
+		return true
+	case OccupiedOperator:
 		return true
 	case NotFound:
 		return true
@@ -459,6 +479,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case OperatorNotFound:
 		return true
+	case ProjectOperatorNotFound:
+		return true
 	case Conflict:
 		return true
 	case ProjectNameConflict:
@@ -492,6 +514,8 @@ func (v Error) CanBeTalk() bool {
 	case AccountPasswordConflict:
 		return true
 	case OperatorConflict:
+		return true
+	case ProjectOperatorConflict:
 		return true
 	case InternalServerError:
 		return false

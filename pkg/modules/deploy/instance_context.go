@@ -4,11 +4,13 @@ import (
 	"context"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
+	"github.com/machinefi/w3bstream/pkg/modules/projectoperator"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
@@ -65,12 +67,22 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		ctx = wasm.DefaultMQClient().WithContext(ctx)
 	}
 
+	var projectOperator *models.ProjectOperator
+	projectOperator, err = projectoperator.GetByProject(parent, prj.ProjectID)
+	if err != nil && err != status.ProjectOperatorNotFound {
+		return nil, err
+	}
 	operators, err := operator.List(parent, &operator.ListReq{
 		CondArgs: operator.CondArgs{
 			AccountID: prj.RelAccount.AccountID,
 		},
+		Pager: datatypes.Pager{Size: -1},
 	})
-	ctx = wasm.WithChainClient(ctx, wasm.NewChainClient(ctx, operators.Data))
+	if err != nil {
+		return nil, err
+	}
+
+	ctx = wasm.WithChainClient(ctx, wasm.NewChainClient(ctx, operators.Data, projectOperator))
 
 	ctx = wasm.WithLogger(ctx, types.MustLoggerFromContext(ctx).WithValues(
 		"@src", "wasm",

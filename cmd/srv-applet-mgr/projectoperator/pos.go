@@ -1,35 +1,33 @@
-package operator
+package projectoperator
 
 import (
 	"context"
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
-	"github.com/machinefi/w3bstream/pkg/errors/status"
-	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/modules/projectoperator"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-type RemoveOperator struct {
-	httpx.MethodDelete
+type Create struct {
+	httpx.MethodPost
+	ProjectID  types.SFID `in:"path" name:"projectID"`
 	OperatorID types.SFID `in:"path" name:"operatorID"`
 }
 
-func (r *RemoveOperator) Path() string { return "/data/:operatorID" }
+func (r *Create) Path() string { return "/:projectID/:operatorID" }
 
-func (r *RemoveOperator) Output(ctx context.Context) (interface{}, error) {
+func (r *Create) Output(ctx context.Context) (interface{}, error) {
 	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
 		WithOperatorBySFID(ctx, r.OperatorID)
 	if err != nil {
 		return nil, err
 	}
-	exists, err := projectoperator.ListByOperator(ctx, r.OperatorID)
+	ctx, err = middleware.MustCurrentAccountFromContext(ctx).
+		WithProjectContextBySFID(ctx, r.ProjectID)
 	if err != nil {
 		return nil, err
 	}
-	if len(exists) > 0 {
-		return nil, status.OccupiedOperator
-	}
-	return nil, operator.RemoveBySFID(ctx, r.OperatorID)
+
+	return projectoperator.Create(ctx, r.ProjectID, r.OperatorID)
 }

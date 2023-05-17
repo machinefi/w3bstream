@@ -3,6 +3,7 @@ package operator
 import (
 	"context"
 
+	"github.com/ethereum/go-ethereum/crypto"
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
@@ -25,6 +26,14 @@ func GetBySFID(ctx context.Context, id types.SFID) (*models.Operator, error) {
 	return m, nil
 }
 
+func GetDetailBySFID(ctx context.Context, id types.SFID) (*Detail, error) {
+	o, err := GetBySFID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return convDetail(o)
+}
+
 func GetByAccountAndName(ctx context.Context, accountID types.SFID, name string) (*models.Operator, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	m := &models.Operator{
@@ -39,6 +48,14 @@ func GetByAccountAndName(ctx context.Context, accountID types.SFID, name string)
 		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
 	return m, nil
+}
+
+func GetDetailByAccountAndName(ctx context.Context, accountID types.SFID, name string) (*Detail, error) {
+	o, err := GetByAccountAndName(ctx, accountID, name)
+	if err != nil {
+		return nil, err
+	}
+	return convDetail(o)
 }
 
 func RemoveBySFID(ctx context.Context, id types.SFID) error {
@@ -81,9 +98,10 @@ func List(ctx context.Context, r *ListReq) (*ListRsp, error) {
 		err  error
 		ret  = &ListRsp{}
 		cond = r.Condition()
+		adds = r.Additions()
 	)
 
-	ret.Data, err = m.List(d, cond)
+	ret.Data, err = m.List(d, cond, adds...)
 	if err != nil {
 		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
@@ -92,4 +110,46 @@ func List(ctx context.Context, r *ListReq) (*ListRsp, error) {
 		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
 	return ret, nil
+}
+
+func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
+	var (
+		d = types.MustMgrDBExecutorFromContext(ctx)
+		m = &models.Operator{}
+
+		err  error
+		ret  = &ListDetailRsp{}
+		cond = r.Condition()
+		adds = r.Additions()
+	)
+
+	data, err := m.List(d, cond, adds...)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	for _, d := range data {
+		detail, err := convDetail(&d)
+		if err != nil {
+			return nil, err
+		}
+		ret.Data = append(ret.Data, *detail)
+	}
+
+	ret.Total, err = m.Count(d, cond)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return ret, nil
+}
+
+func convDetail(d *models.Operator) (*Detail, error) {
+	prvkey, err := crypto.HexToECDSA(d.PrivateKey)
+	if err != nil {
+		return nil, err
+	}
+	pubkey := crypto.PubkeyToAddress(prvkey.PublicKey)
+	return &Detail{
+		Operator: *d,
+		Address:  pubkey.Hex(),
+	}, nil
 }
