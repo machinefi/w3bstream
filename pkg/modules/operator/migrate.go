@@ -3,12 +3,12 @@ package operator
 import (
 	"context"
 
+	"github.com/pkg/errors"
+
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
-
-	"github.com/pkg/errors"
 )
 
 // will delete at next version

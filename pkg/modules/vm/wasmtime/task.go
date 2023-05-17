@@ -1,8 +1,6 @@
 package wasmtime
 
-import (
-	"context"
-)
+import "context"
 
 func newTask(ctx context.Context, fn string, eventType string, data []byte) *Task {
 	return &Task{

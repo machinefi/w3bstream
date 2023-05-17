@@ -187,7 +187,7 @@ func Remove(ctx context.Context, r *CondArgs) error {
 			if _, err = d.Exec(
 				builder.Delete().From(d.T(m), builder.Where(r.Condition())),
 			); err != nil {
-				return status.InternalServerError.StatusErr().WithDesc(err.Error())
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
 		},
