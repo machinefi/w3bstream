@@ -35,6 +35,7 @@ Thank you for your interest in contributing to our project! We welcome contribut
 `git push origin my-feature`
 2. Visit the original repository on GitHub and click on the "Compare & pull request" button.
 3. Provide a clear and concise title for your pull request, along with a detailed description of the changes you have made.
+`Title format: [FEAT/BUGFIX/ENH/DOC/TEST] (Component) Title`
 4. In the pull request description, reference the issue you created earlier using the issue number (e.g., "Fixes #123").
 5. Add appropriate tags to your pull request, such as 'fix bug', 'new feature', 'enhancement', or any other relevant tags that describe the nature of your changes.
 6. Explain the code changes and their purpose, providing any necessary context or technical details to help reviewers understand your code.
