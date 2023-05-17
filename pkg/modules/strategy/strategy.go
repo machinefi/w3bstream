@@ -7,6 +7,7 @@ import (
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
+	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -17,6 +18,7 @@ func Update(ctx context.Context, id types.SFID, r *UpdateReq) (err error) {
 
 	return sqlx.NewTasks(types.MustMgrDBExecutorFromContext(ctx)).With(
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			m, _ = types.StrategyFromContext(ctx)
 			if m == nil || m.StrategyID != id {
 				m, err = GetBySFID(ctx, id)
@@ -245,6 +247,15 @@ func FilterByProjectAndEvent(ctx context.Context, id types.SFID, tpe string) ([]
 	)
 	if err != nil {
 		return nil, err
+	}
+
+	if len(data) == 0 {
+		data, err = ListDetailByCond(ctx, &CondArgs{
+			ProjectID: id, EventTypes: []string{enums.EVENTTYPEDEFAULT}},
+		)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	results := make([]*types.StrategyResult, 0, len(data))

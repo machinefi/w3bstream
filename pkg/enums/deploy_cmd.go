@@ -8,6 +8,6 @@ const (
 	_
 	DEPLOY_CMD__START  // start wasm vm
 	DEPLOY_CMD__HUNGUP // stop wasm vm
-	DEPLOY_CMD__KILL   // kill wasm vm (memory released)
+	_
 	_
 )

@@ -2,7 +2,7 @@ version: "3.6"
 
 services:
   w3bapp:
-    image: ${WS_BACKEND_IMAGE:-ghcr.io/machinefi/w3bstream:main}
+    image: ${WS_BACKEND_IMAGE:-ghcr.io/machinefi/w3bstream:main} #build: .
     depends_on:
       - "postgres"
       - "mqtt_server"
@@ -11,15 +11,18 @@ services:
     restart: always
     ports:
       - "8888:8888"
+      - "8889:8889"
     environment:
       SRV_APPLET_MGR__EthClient_Endpoints: '{"4689": "https://babel-api.mainnet.iotex.io", "4690": "https://babel-api.testnet.iotex.io", "1": "https://ethereum.iotex.one/v1/mainnet", "5": "https://ethereum.iotex.one/v1/goerli", "137": "https://polygon-rpc.com", "80001": "https://mumbai.polygonscan.com/"}'
       SRV_APPLET_MGR__Jwt_ExpIn: ${JWT_EXPIN:-1h}
       SRV_APPLET_MGR__Jwt_Issuer: ${JWT_ISSUER:-w3bstream}
       SRV_APPLET_MGR__Postgres_Master: postgresql://${POSTGRES_USER:-w3badmin}:${POSTGRES_PASSWORD:-PaSsW0Rd}@postgres:5432/${POSTGRES_DB:-w3bstream}?sslmode=disable
       SRV_APPLET_MGR__MonitorDB_Master: postgresql://${POSTGRES_USER:-w3badmin}:${POSTGRES_PASSWORD:-PaSsW0Rd}@postgres:5432/${POSTGRES_DB:-w3bstream}?sslmode=disable
-      SRV_APPLET_MGR__WasmDB_Master: postgresql://${POSTGRES_USER:-w3badmin}:${POSTGRES_PASSWORD:-PaSsW0Rd}@postgres:5432/${POSTGRES_DB:-w3bstream}?sslmode=disable
+      SRV_APPLET_MGR__WasmDB: postgresql://${POSTGRES_USER:-w3badmin}:${POSTGRES_PASSWORD:-PaSsW0Rd}@postgres:5432?sslmode=disable
       SRV_APPLET_MGR__MqttBroker_Server: mqtt://mqtt_server:1883
       SRV_APPLET_MGR__Server_Port: "8888"
+      SRV_APPLET_MGR__ServerEvent_Port: "8889"
+      SRV_APPLET_MGR__LocalFS_Root: /w3bstream/asserts
     volumes:
       - ${WS_WORKING_DIR:-.}/asserts:/w3bstream/asserts
 
@@ -59,20 +62,6 @@ services:
     command: redis-server --requirepass ${REDIS_PASSWORD:-w3bredispasS}
     ports:
       - '6379:6379'
-
-  graphql-engine:
-    image: hasura/graphql-engine:v2.15.2
-    depends_on:
-      - "postgres"
-    restart: always
-    ports:
-      - "8080:8080"
-    environment:
-      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgresql://${POSTGRES_USER:-w3badmin}:${POSTGRES_PASSWORD:-PaSsW0Rd}@postgres:5432/${POSTGRES_DB:-w3bstream}
-      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
-      HASURA_GRAPHQL_DEV_MODE: "true"
-      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
-      HASURA_GRAPHQL_ADMIN_SECRET: ${ADMIN_SECRET:-w3baAdmiNsecrEtkey}
 
   prometheus:
     image: imoocc/prometheus:latest

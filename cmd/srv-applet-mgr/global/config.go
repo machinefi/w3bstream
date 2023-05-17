@@ -7,6 +7,7 @@ import (
 
 	_ "github.com/machinefi/w3bstream/cmd/srv-applet-mgr/types"
 	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
+	base "github.com/machinefi/w3bstream/pkg/depends/base/types"
 	confapp "github.com/machinefi/w3bstream/pkg/depends/conf/app"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/amazonS3"
@@ -39,11 +40,12 @@ var (
 
 	proxy *client.Client // proxy client for forward mqtt event
 
-	db          = &confpostgres.Endpoint{Database: models.DB}
-	monitordb   = &confpostgres.Endpoint{Database: models.MonitorDB}
-	wasmdb      = &confpostgres.Endpoint{Database: models.WasmDB}
-	server      = &confhttp.Server{}
-	serverEvent = &confhttp.Server{} // serverEvent support event http transport
+	db        = &confpostgres.Endpoint{Database: models.DB}
+	monitordb = &confpostgres.Endpoint{Database: models.MonitorDB}
+	wasmdb    = &base.Endpoint{}
+
+	ServerMgr   = &confhttp.Server{}
+	ServerEvent = &confhttp.Server{} // serverEvent support event http transport
 
 	fs  filesystem.FileSystemOp
 	std = conflog.Std().(conflog.LevelSetter).SetLevel(conflog.InfoLevel)
@@ -55,12 +57,13 @@ func init() {
 	config := &struct {
 		Postgres    *confpostgres.Endpoint
 		MonitorDB   *confpostgres.Endpoint
-		WasmDB      *confpostgres.Endpoint
+		WasmDB      *base.Endpoint
 		MqttBroker  *confmqtt.Broker
 		Redis       *confredis.Redis
 		Server      *confhttp.Server
 		Jwt         *confjwt.Jwt
 		Logger      *conflog.Log
+		UploadConf  *types.UploadConfig
 		EthClient   *types.ETHClientConfig
 		WhiteList   *types.WhiteList
 		ServerEvent *confhttp.Server
@@ -73,12 +76,13 @@ func init() {
 		WasmDB:      wasmdb,
 		MqttBroker:  &confmqtt.Broker{},
 		Redis:       &confredis.Redis{},
-		Server:      server,
+		Server:      ServerMgr,
 		Jwt:         &confjwt.Jwt{},
 		Logger:      &conflog.Log{},
+		UploadConf:  &types.UploadConfig{},
 		EthClient:   &types.ETHClientConfig{},
 		WhiteList:   &types.WhiteList{},
-		ServerEvent: serverEvent,
+		ServerEvent: ServerEvent,
 		FileSystem:  &types.FileSystem{},
 		AmazonS3:    &amazonS3.AmazonS3{},
 		LocalFS:     &local.LocalFileSystem{},
@@ -89,6 +93,12 @@ func init() {
 		name = "srv-applet-mgr"
 	}
 	_ = os.Setenv(consts.EnvProjectName, name)
+
+	group := os.Getenv(consts.EnvResourceGroup)
+	if group == "" {
+		group = "srv-applet-mgr"
+	}
+	_ = os.Setenv(consts.EnvResourceGroup, group)
 
 	tasks = mem_mq.New(0)
 	worker = mq.NewTaskWorker(tasks, mq.WithWorkerCount(3), mq.WithChannel(name))
@@ -109,7 +119,7 @@ func init() {
 
 	confhttp.RegisterCheckerBy(config, worker)
 
-	proxy = &client.Client{Port: uint16(serverEvent.Port), Timeout: 10 * time.Second}
+	proxy = &client.Client{Port: uint16(ServerEvent.Port), Timeout: 10 * time.Second}
 	proxy.SetDefault()
 
 	WithContext = contextx.WithContextCompose(
@@ -119,6 +129,7 @@ func init() {
 		types.WithRedisEndpointContext(config.Redis),
 		types.WithLoggerContext(std),
 		conflog.WithLoggerContext(std),
+		types.WithUploadConfigContext(config.UploadConf),
 		types.WithMqttBrokerContext(config.MqttBroker),
 		confid.WithSFIDGeneratorContext(confid.MustNewSFIDGenerator()),
 		confjwt.WithConfContext(config.Jwt),
@@ -132,11 +143,11 @@ func init() {
 	Context = WithContext(context.Background())
 }
 
-func Server() kit.Transport { return server.WithContextInjector(WithContext) }
+func Server() kit.Transport { return ServerMgr.WithContextInjector(WithContext) }
 
 func TaskServer() kit.Transport { return worker.WithContextInjector(WithContext) }
 
-func EventServer() kit.Transport { return serverEvent.WithContextInjector(WithContext) }
+func EventServer() kit.Transport { return ServerEvent.WithContextInjector(WithContext) }
 
 func Migrate() {
 	ctx, log := conflog.StdContext(context.Background())

@@ -38,6 +38,8 @@ const (
 	MqttSubscribeFailed
 	// @errTalk MQTT Connect Failed
 	MqttConnectFailed
+	// @errTalk Batch Remove WasmLog Failed
+	BatchRemoveWasmLogFailed
 )
 
 const (
@@ -49,6 +51,8 @@ const (
 	InvalidAuthAccountID
 	// @errTalk No Project Permission
 	NoProjectPermission
+	// @errTalk No Operator Permission
+	NoOperatorPermission
 	// @errTalk No Admin Permission
 	NoAdminPermission
 	// @errTalk Invalid Old Password
@@ -69,6 +73,10 @@ const (
 	InvalidEventChannel
 	// @errTalk Invalid Event Token
 	InvalidEventToken
+	// @errTalk Invalid Applet
+	InvalidAppletContext
+	// @errTalk No Resource Permission
+	NoResourcePermission
 )
 
 const (
@@ -121,6 +129,8 @@ const (
 	AccountConflict
 	// @errTalk Account Password Conflict
 	AccountPasswordConflict
+	// @errTalk Operator Conflict
+	OperatorConflict
 )
 
 const (
@@ -173,4 +183,6 @@ const (
 	AccountNotFound
 	// @errTalk Account Password Not Found
 	AccountPasswordNotFound
+	// @errTalk Operator Not Found
+	OperatorNotFound
 )

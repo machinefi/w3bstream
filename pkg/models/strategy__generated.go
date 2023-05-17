@@ -61,7 +61,6 @@ func (m *Strategy) IndexFieldNames() []string {
 	return []string{
 		"AppletID",
 		"EventType",
-		"Handler",
 		"ID",
 		"ProjectID",
 		"StrategyID",
@@ -74,7 +73,6 @@ func (*Strategy) UniqueIndexes() builder.Indexes {
 			"ProjectID",
 			"AppletID",
 			"EventType",
-			"Handler",
 			"DeletedAt",
 		},
 		"ui_strategy_id": []string{
@@ -238,7 +236,7 @@ func (m *Strategy) FetchByID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *Strategy) FetchByProjectIDAndAppletIDAndEventTypeAndHandler(db sqlx.DBExecutor) error {
+func (m *Strategy) FetchByProjectIDAndAppletIDAndEventType(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	err := db.QueryAndScan(
 		builder.Select(nil).
@@ -249,11 +247,10 @@ func (m *Strategy) FetchByProjectIDAndAppletIDAndEventTypeAndHandler(db sqlx.DBE
 						tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
 						tbl.ColByFieldName("AppletID").Eq(m.AppletID),
 						tbl.ColByFieldName("EventType").Eq(m.EventType),
-						tbl.ColByFieldName("Handler").Eq(m.Handler),
 						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
-				builder.Comment("Strategy.FetchByProjectIDAndAppletIDAndEventTypeAndHandler"),
+				builder.Comment("Strategy.FetchByProjectIDAndAppletIDAndEventType"),
 			),
 		m,
 	)
@@ -310,7 +307,7 @@ func (m *Strategy) UpdateByID(db sqlx.DBExecutor, zeros ...string) error {
 	return m.UpdateByIDWithFVs(db, fvs)
 }
 
-func (m *Strategy) UpdateByProjectIDAndAppletIDAndEventTypeAndHandlerWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+func (m *Strategy) UpdateByProjectIDAndAppletIDAndEventTypeWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
 		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
@@ -323,10 +320,9 @@ func (m *Strategy) UpdateByProjectIDAndAppletIDAndEventTypeAndHandlerWithFVs(db 
 					tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
 					tbl.ColByFieldName("AppletID").Eq(m.AppletID),
 					tbl.ColByFieldName("EventType").Eq(m.EventType),
-					tbl.ColByFieldName("Handler").Eq(m.Handler),
 					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
-				builder.Comment("Strategy.UpdateByProjectIDAndAppletIDAndEventTypeAndHandlerWithFVs"),
+				builder.Comment("Strategy.UpdateByProjectIDAndAppletIDAndEventTypeWithFVs"),
 			).
 			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
@@ -334,14 +330,14 @@ func (m *Strategy) UpdateByProjectIDAndAppletIDAndEventTypeAndHandlerWithFVs(db 
 		return err
 	}
 	if affected, _ := res.RowsAffected(); affected == 0 {
-		return m.FetchByProjectIDAndAppletIDAndEventTypeAndHandler(db)
+		return m.FetchByProjectIDAndAppletIDAndEventType(db)
 	}
 	return nil
 }
 
-func (m *Strategy) UpdateByProjectIDAndAppletIDAndEventTypeAndHandler(db sqlx.DBExecutor, zeros ...string) error {
+func (m *Strategy) UpdateByProjectIDAndAppletIDAndEventType(db sqlx.DBExecutor, zeros ...string) error {
 	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
-	return m.UpdateByProjectIDAndAppletIDAndEventTypeAndHandlerWithFVs(db, fvs)
+	return m.UpdateByProjectIDAndAppletIDAndEventTypeWithFVs(db, fvs)
 }
 
 func (m *Strategy) UpdateByStrategyIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
@@ -430,7 +426,7 @@ func (m *Strategy) SoftDeleteByID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *Strategy) DeleteByProjectIDAndAppletIDAndEventTypeAndHandler(db sqlx.DBExecutor) error {
+func (m *Strategy) DeleteByProjectIDAndAppletIDAndEventType(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	_, err := db.Exec(
 		builder.Delete().
@@ -441,17 +437,16 @@ func (m *Strategy) DeleteByProjectIDAndAppletIDAndEventTypeAndHandler(db sqlx.DB
 						tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
 						tbl.ColByFieldName("AppletID").Eq(m.AppletID),
 						tbl.ColByFieldName("EventType").Eq(m.EventType),
-						tbl.ColByFieldName("Handler").Eq(m.Handler),
 						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
-				builder.Comment("Strategy.DeleteByProjectIDAndAppletIDAndEventTypeAndHandler"),
+				builder.Comment("Strategy.DeleteByProjectIDAndAppletIDAndEventType"),
 			),
 	)
 	return err
 }
 
-func (m *Strategy) SoftDeleteByProjectIDAndAppletIDAndEventTypeAndHandler(db sqlx.DBExecutor) error {
+func (m *Strategy) SoftDeleteByProjectIDAndAppletIDAndEventType(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	fvs := builder.FieldValues{}
 
@@ -469,10 +464,9 @@ func (m *Strategy) SoftDeleteByProjectIDAndAppletIDAndEventTypeAndHandler(db sql
 					tbl.ColByFieldName("ProjectID").Eq(m.ProjectID),
 					tbl.ColByFieldName("AppletID").Eq(m.AppletID),
 					tbl.ColByFieldName("EventType").Eq(m.EventType),
-					tbl.ColByFieldName("Handler").Eq(m.Handler),
 					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
-				builder.Comment("Strategy.SoftDeleteByProjectIDAndAppletIDAndEventTypeAndHandler"),
+				builder.Comment("Strategy.SoftDeleteByProjectIDAndAppletIDAndEventType"),
 			).
 			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)

@@ -8,9 +8,8 @@ import (
 )
 
 type CreateReq struct {
-	ProjectID types.SFID `json:"-"`
-	Name      string     `json:"name"`
-	Key       string     `json:"key"`
+	Name string `json:"name"`
+	Key  string `json:"key"`
 }
 
 type UpdateReq struct {

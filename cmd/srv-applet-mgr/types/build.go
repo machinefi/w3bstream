@@ -14,6 +14,7 @@ var (
 	Feature   string
 	Version   string
 	Timestamp string
+	Group     string
 
 	BuildVersion string
 )
@@ -31,9 +32,13 @@ func init() {
 	if Timestamp == "" {
 		Timestamp = "unknown"
 	}
+	if Group == "" {
+		Group = "srv-applet-mgr"
+	}
 	_ = os.Setenv(consts.EnvProjectName, Name)
 	_ = os.Setenv(consts.EnvProjectFeat, Feature)
 	_ = os.Setenv(consts.EnvProjectVersion, Version)
+	_ = os.Setenv(consts.EnvResourceGroup, Group)
 
 	BuildVersion = fmt.Sprintf("%s@%s_%s", Feature, Version, Timestamp)
 

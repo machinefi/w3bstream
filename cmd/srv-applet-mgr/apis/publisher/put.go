@@ -24,7 +24,7 @@ func (r *UpdatePublisher) Output(ctx context.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	r.PublisherID = types.MustPublisherFromContext(ctx).PublisherID
+	r.UpdateReq.PublisherID = types.MustPublisherFromContext(ctx).PublisherID
 
 	return nil, publisher.Update(ctx, &r.UpdateReq)
 }

@@ -179,6 +179,7 @@ func Remove(ctx context.Context, r *CondArgs) error {
 
 	return sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			lst, err = List(ctx, r)
 			return err
 		},

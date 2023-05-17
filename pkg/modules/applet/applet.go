@@ -5,7 +5,6 @@ import (
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
@@ -42,11 +41,13 @@ func RemoveBySFID(ctx context.Context, id types.SFID) error {
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			return strategy.Remove(ctx, &strategy.CondArgs{
 				AppletIDs: types.SFIDs{id},
 			})
 		},
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			return deploy.RemoveByAppletSFID(ctx, m.AppletID)
 		},
 	).Do()
@@ -70,6 +71,7 @@ func Remove(ctx context.Context, r *CondArgs) error {
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			summary := statusx.ErrorFields{}
 			for i := range lst {
 				v := &lst[i]
@@ -141,7 +143,11 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 		err error
 	)
 
-	res, raw, err = resource.Create(ctx, acc.AccountID, r.File, r.AppletName, r.WasmMd5)
+	filename := r.WasmName
+	if filename == "" {
+		filename = r.AppletName + ".wasm"
+	}
+	res, raw, err = resource.Create(ctx, acc.AccountID, r.File, filename, r.WasmMd5)
 	if err != nil {
 		return nil, err
 	}
@@ -172,18 +178,16 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			return strategy.BatchCreate(ctx, r.BuildStrategies(ctx))
 		},
 		func(d sqlx.DBExecutor) error {
 			if r.WasmCache == nil {
 				r.WasmCache = wasm.DefaultCache()
 			}
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			rb := &deploy.CreateReq{Cache: r.WasmCache}
-			if r.Deploy == datatypes.TRUE {
-				ins, err = deploy.UpsertByCode(ctx, rb, raw, enums.INSTANCE_STATE__STARTED)
-			} else {
-				ins, err = deploy.Create(ctx, rb)
-			}
+			ins, err = deploy.UpsertByCode(ctx, rb, raw, enums.INSTANCE_STATE__STARTED)
 			return err
 		},
 	).Do()
@@ -214,12 +218,16 @@ func Update(ctx context.Context, r *UpdateReq) (*UpdateRsp, error) {
 	if r.File != nil {
 		acc := types.MustAccountFromContext(ctx)
 		filename, md5 := r.Info.WasmName, r.Info.WasmMd5
+		if filename == "" {
+			filename = r.AppletName + ".wasm"
+		}
 		res, raw, err = resource.Create(ctx, acc.AccountID, r.File, filename, md5)
 	}
 
 	err = sqlx.NewTasks(d).With(
 		// update strategy
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			sty = r.BuildStrategies(ctx)
 			if len(sty) == 0 {
 				return nil
@@ -236,11 +244,9 @@ func Update(ctx context.Context, r *UpdateReq) (*UpdateRsp, error) {
 		},
 		// update and deploy instance
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			if r.File == nil {
 				return nil // instance state will not be changed
-			}
-			if r.Info.Deploy != datatypes.TRUE {
-				return nil
 			}
 			ins, err = deploy.GetByAppletSFID(ctx, app.AppletID)
 			if err != nil {

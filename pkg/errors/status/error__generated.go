@@ -55,6 +55,8 @@ func (v Error) Key() string {
 		return "InvalidAuthAccountID"
 	case NoProjectPermission:
 		return "NoProjectPermission"
+	case NoOperatorPermission:
+		return "NoOperatorPermission"
 	case NoAdminPermission:
 		return "NoAdminPermission"
 	case InvalidOldPassword:
@@ -75,6 +77,8 @@ func (v Error) Key() string {
 		return "InvalidEventChannel"
 	case InvalidEventToken:
 		return "InvalidEventToken"
+	case InvalidAppletContext:
+		return "InvalidAppletContext"
 	case Forbidden:
 		return "Forbidden"
 	case DisabledAccount:
@@ -125,6 +129,8 @@ func (v Error) Key() string {
 		return "AccountNotFound"
 	case AccountPasswordNotFound:
 		return "AccountPasswordNotFound"
+	case OperatorNotFound:
+		return "OperatorNotFound"
 	case Conflict:
 		return "Conflict"
 	case ProjectNameConflict:
@@ -157,6 +163,8 @@ func (v Error) Key() string {
 		return "AccountConflict"
 	case AccountPasswordConflict:
 		return "AccountPasswordConflict"
+	case OperatorConflict:
+		return "OperatorConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -185,6 +193,8 @@ func (v Error) Key() string {
 		return "MqttSubscribeFailed"
 	case MqttConnectFailed:
 		return "MqttConnectFailed"
+	case BatchRemoveWasmLogFailed:
+		return "BatchRemoveWasmLogFailed"
 	}
 	return "UNKNOWN"
 }
@@ -209,6 +219,8 @@ func (v Error) Msg() string {
 		return "Invalid Auth Account ID"
 	case NoProjectPermission:
 		return "No Project Permission"
+	case NoOperatorPermission:
+		return "No Operator Permission"
 	case NoAdminPermission:
 		return "No Admin Permission"
 	case InvalidOldPassword:
@@ -229,6 +241,8 @@ func (v Error) Msg() string {
 		return "Invalid Event Channel"
 	case InvalidEventToken:
 		return "Invalid Event Token"
+	case InvalidAppletContext:
+		return "Invalid Applet"
 	case Forbidden:
 		return "forbidden"
 	case DisabledAccount:
@@ -279,6 +293,8 @@ func (v Error) Msg() string {
 		return "Account Not Found"
 	case AccountPasswordNotFound:
 		return "Account Password Not Found"
+	case OperatorNotFound:
+		return "Operator Not Found"
 	case Conflict:
 		return "Conflict conflict error"
 	case ProjectNameConflict:
@@ -311,6 +327,8 @@ func (v Error) Msg() string {
 		return "Account Conflict"
 	case AccountPasswordConflict:
 		return "Account Password Conflict"
+	case OperatorConflict:
+		return "Operator Conflict"
 	case InternalServerError:
 		return "internal error"
 	case DatabaseError:
@@ -339,6 +357,8 @@ func (v Error) Msg() string {
 		return "MQTT Subscribe Failed"
 	case MqttConnectFailed:
 		return "MQTT Connect Failed"
+	case BatchRemoveWasmLogFailed:
+		return "Batch Remove WasmLog Failed"
 	}
 	return "-"
 }
@@ -363,6 +383,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case NoProjectPermission:
 		return true
+	case NoOperatorPermission:
+		return true
 	case NoAdminPermission:
 		return true
 	case InvalidOldPassword:
@@ -382,6 +404,8 @@ func (v Error) CanBeTalk() bool {
 	case InvalidEventChannel:
 		return true
 	case InvalidEventToken:
+		return true
+	case InvalidAppletContext:
 		return true
 	case Forbidden:
 		return false
@@ -433,6 +457,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case AccountPasswordNotFound:
 		return true
+	case OperatorNotFound:
+		return true
 	case Conflict:
 		return true
 	case ProjectNameConflict:
@@ -465,6 +491,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case AccountPasswordConflict:
 		return true
+	case OperatorConflict:
+		return true
 	case InternalServerError:
 		return false
 	case DatabaseError:
@@ -492,6 +520,8 @@ func (v Error) CanBeTalk() bool {
 	case MqttSubscribeFailed:
 		return true
 	case MqttConnectFailed:
+		return true
+	case BatchRemoveWasmLogFailed:
 		return true
 	}
 	return false
