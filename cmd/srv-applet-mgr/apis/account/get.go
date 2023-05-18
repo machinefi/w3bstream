@@ -10,6 +10,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
 )
 
+// Deprecated use operator.ListOperator
 type GetOperatorAddr struct {
 	httpx.MethodGet
 	AccountOperatorName string `in:"query" name:"accountOperatorName,omitempty"` // account operator name
