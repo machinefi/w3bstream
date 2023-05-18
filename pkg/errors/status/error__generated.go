@@ -203,6 +203,8 @@ func (v Error) Key() string {
 		return "MqttConnectFailed"
 	case BatchRemoveWasmLogFailed:
 		return "BatchRemoveWasmLogFailed"
+	case GenTokenFailed:
+		return "GenTokenFailed"
 	}
 	return "UNKNOWN"
 }
@@ -375,6 +377,8 @@ func (v Error) Msg() string {
 		return "MQTT Connect Failed"
 	case BatchRemoveWasmLogFailed:
 		return "Batch Remove WasmLog Failed"
+	case GenTokenFailed:
+		return "Gen Token Failed"
 	}
 	return "-"
 }
@@ -546,6 +550,8 @@ func (v Error) CanBeTalk() bool {
 	case MqttConnectFailed:
 		return true
 	case BatchRemoveWasmLogFailed:
+		return true
+	case GenTokenFailed:
 		return true
 	}
 	return false

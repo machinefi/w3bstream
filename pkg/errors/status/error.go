@@ -40,6 +40,8 @@ const (
 	MqttConnectFailed
 	// @errTalk Batch Remove WasmLog Failed
 	BatchRemoveWasmLogFailed
+	// @errTalk Gen Token Failed
+	GenTokenFailed
 )
 
 const (

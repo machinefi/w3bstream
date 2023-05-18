@@ -47,7 +47,7 @@ func token(ctx context.Context, a *models.Account) (*account.LoginRsp, error) {
 
 	tok, err := j.GenerateTokenByPayload(a.AccountID)
 	if err != nil {
-		return nil, status.InternalServerError.StatusErr().WithDesc(err.Error())
+		return nil, status.GenTokenFailed.StatusErr().WithDesc(err.Error())
 	}
 
 	return &account.LoginRsp{
