@@ -155,8 +155,8 @@ func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
 		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
 
-	for _, d := range data {
-		detail, err := convDetail(&d)
+	for i := range data {
+		detail, err := convDetail(&data[i])
 		if err != nil {
 			return nil, err
 		}
