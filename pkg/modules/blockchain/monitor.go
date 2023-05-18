@@ -16,7 +16,7 @@ import (
 // TODO move to config
 const (
 	listInterval  = 3 * time.Second
-	blockInterval = 1000
+	blockInterval = 4000
 )
 
 func InitChainDB(ctx context.Context) error {
