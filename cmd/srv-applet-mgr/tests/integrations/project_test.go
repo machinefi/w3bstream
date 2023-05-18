@@ -16,12 +16,10 @@ import (
 )
 
 func TestProjectAPIs(t *testing.T) {
-	defer requires.Serve()()
-
 	var (
 		ctx         = requires.Context()
 		client      = requires.AuthClient()
-		projectName = "testdemo"
+		projectName = "test_project"
 		projectID   types.SFID
 	)
 

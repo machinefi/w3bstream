@@ -53,7 +53,7 @@ func Databases() {
 		Master: base.Endpoint{
 			Scheme:   "postgresql",
 			Hostname: "localhost",
-			Port:     5432,
+			Port:     15432,
 			Base:     "w3bstream",
 			Username: "root",
 			Password: "test_passwd",
@@ -99,7 +99,7 @@ func Mqtt() {
 		Server: base.Endpoint{
 			Scheme:   "mqtt",
 			Hostname: "localhost",
-			Port:     1883,
+			Port:     11883,
 		},
 		Retry: retry.Retry{
 			Repeats:  3,
@@ -126,7 +126,7 @@ func Serve() (stop func()) {
 func Server() {
 	if _server == nil {
 		_server = &http.Server{
-			Port:  8888,
+			Port:  18888,
 			Debug: ptrx.Ptr(true),
 		}
 		_server.SetDefault()
