@@ -9,15 +9,15 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-type Create struct {
+type CreateProjectOperator struct {
 	httpx.MethodPost
 	ProjectID  types.SFID `in:"path" name:"projectID"`
 	OperatorID types.SFID `in:"path" name:"operatorID"`
 }
 
-func (r *Create) Path() string { return "/:projectID/:operatorID" }
+func (r *CreateProjectOperator) Path() string { return "/:projectID/:operatorID" }
 
-func (r *Create) Output(ctx context.Context) (interface{}, error) {
+func (r *CreateProjectOperator) Output(ctx context.Context) (interface{}, error) {
 	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
 		WithOperatorBySFID(ctx, r.OperatorID)
 	if err != nil {

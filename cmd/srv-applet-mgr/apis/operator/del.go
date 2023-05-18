@@ -5,9 +5,7 @@ import (
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
-	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
-	"github.com/machinefi/w3bstream/pkg/modules/projectoperator"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -23,13 +21,6 @@ func (r *RemoveOperator) Output(ctx context.Context) (interface{}, error) {
 		WithOperatorBySFID(ctx, r.OperatorID)
 	if err != nil {
 		return nil, err
-	}
-	exists, err := projectoperator.ListByOperator(ctx, r.OperatorID)
-	if err != nil {
-		return nil, err
-	}
-	if len(exists) > 0 {
-		return nil, status.OccupiedOperator
 	}
 	return nil, operator.RemoveBySFID(ctx, r.OperatorID)
 }

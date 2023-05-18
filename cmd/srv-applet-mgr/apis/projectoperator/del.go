@@ -9,14 +9,14 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-type Remove struct {
+type RemoveProjectOperator struct {
 	httpx.MethodDelete
 	ProjectID types.SFID `in:"path" name:"projectID"`
 }
 
-func (r *Remove) Path() string { return "/:projectID" }
+func (r *RemoveProjectOperator) Path() string { return "/:projectID" }
 
-func (r *Remove) Output(ctx context.Context) (interface{}, error) {
+func (r *RemoveProjectOperator) Output(ctx context.Context) (interface{}, error) {
 	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
 		WithProjectContextBySFID(ctx, r.ProjectID)
 	if err != nil {

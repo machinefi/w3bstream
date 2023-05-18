@@ -66,15 +66,15 @@ func (m *ProjectOperator) IndexFieldNames() []string {
 
 func (*ProjectOperator) UniqueIndexes() builder.Indexes {
 	return builder.Indexes{
-		"ui_project_operator_id": []string{
+		"ui_project_id": []string{
 			"ProjectID",
 			"DeletedAt",
 		},
 	}
 }
 
-func (*ProjectOperator) UniqueIndexUIProjectOperatorID() string {
-	return "ui_project_operator_id"
+func (*ProjectOperator) UniqueIndexUIProjectID() string {
+	return "ui_project_id"
 }
 
 func (m *ProjectOperator) ColID() *builder.Column {

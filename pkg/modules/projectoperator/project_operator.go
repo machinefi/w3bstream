@@ -9,14 +9,14 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-func ListByOperator(ctx context.Context, operatorID types.SFID) ([]models.ProjectOperator, error) {
+func IsOperatorOccupied(ctx context.Context, operatorID types.SFID) (bool, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	m := &models.ProjectOperator{}
 	pos, err := m.List(d, m.ColOperatorID().Eq(operatorID))
 	if err != nil {
-		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+		return false, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
-	return pos, nil
+	return len(pos) > 0, nil
 }
 
 func GetByProject(ctx context.Context, projectID types.SFID) (*models.ProjectOperator, error) {

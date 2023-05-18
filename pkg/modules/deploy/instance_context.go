@@ -4,7 +4,6 @@ import (
 	"context"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -73,17 +72,12 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 	if err != nil && err != status.ProjectOperatorNotFound {
 		return nil, err
 	}
-	operators, err := operator.List(parent, &operator.ListReq{
-		CondArgs: operator.CondArgs{
-			AccountID: prj.RelAccount.AccountID,
-		},
-		Pager: datatypes.Pager{Size: -1},
-	})
+	operators, err := operator.ListByCond(parent, &operator.CondArgs{AccountID: prj.RelAccount.AccountID})
 	if err != nil {
 		return nil, err
 	}
 
-	ctx = wasm.WithChainClient(ctx, wasm.NewChainClient(ctx, operators.Data, projectOperator))
+	ctx = wasm.WithChainClient(ctx, wasm.NewChainClient(ctx, operators, projectOperator))
 
 	ctx = wasm.WithLogger(ctx, types.MustLoggerFromContext(ctx).WithValues(
 		"@src", "wasm",

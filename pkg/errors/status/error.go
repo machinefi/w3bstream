@@ -150,6 +150,8 @@ const (
 	UnknownDeployCommand
 	// @errTalk Invalid Cron Expressions
 	InvalidCronExpressions
+	// @errTalk Invalid Private Key
+	InvalidPrivateKey
 )
 
 const (

@@ -8,7 +8,7 @@ import (
 var Root = kit.NewRouter(httptransport.Group("/project_operator"))
 
 func init() {
-	Root.Register(kit.NewRouter(&Create{}))
-	Root.Register(kit.NewRouter(&Remove{}))
-	Root.Register(kit.NewRouter(&Get{}))
+	Root.Register(kit.NewRouter(&CreateProjectOperator{}))
+	Root.Register(kit.NewRouter(&RemoveProjectOperator{}))
+	Root.Register(kit.NewRouter(&GetProjectOperator{}))
 }

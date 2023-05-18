@@ -9,6 +9,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/projectoperator"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -63,6 +64,14 @@ func RemoveBySFID(ctx context.Context, id types.SFID) error {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	m := &models.Operator{RelOperator: models.RelOperator{OperatorID: id}}
 
+	occupied, err := projectoperator.IsOperatorOccupied(ctx, id)
+	if err != nil {
+		return err
+	}
+	if occupied {
+		return status.OccupiedOperator
+	}
+
 	if err := m.DeleteByOperatorID(d); err != nil {
 		return status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
@@ -72,9 +81,10 @@ func RemoveBySFID(ctx context.Context, id types.SFID) error {
 func Create(ctx context.Context, r *CreateReq) (*models.Operator, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	id := confid.MustSFIDGeneratorFromContext(ctx).MustGenSFID()
+	acc := types.MustAccountFromContext(ctx)
 
 	op := &models.Operator{
-		RelAccount:  models.RelAccount{AccountID: r.AccountID},
+		RelAccount:  models.RelAccount{AccountID: acc.AccountID},
 		RelOperator: models.RelOperator{OperatorID: id},
 		OperatorInfo: models.OperatorInfo{
 			Name:       r.Name,
@@ -89,6 +99,18 @@ func Create(ctx context.Context, r *CreateReq) (*models.Operator, error) {
 		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
 	return op, nil
+}
+
+func ListByCond(ctx context.Context, r *CondArgs) ([]models.Operator, error) {
+	var (
+		d = types.MustMgrDBExecutorFromContext(ctx)
+		m = &models.Operator{}
+	)
+	data, err := m.List(d, r.Condition())
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return data, nil
 }
 
 func List(ctx context.Context, r *ListReq) (*ListRsp, error) {
@@ -128,6 +150,11 @@ func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
 	if err != nil {
 		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
+	ret.Total, err = m.Count(d, cond)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+
 	for _, d := range data {
 		detail, err := convDetail(&d)
 		if err != nil {
@@ -136,10 +163,6 @@ func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
 		ret.Data = append(ret.Data, *detail)
 	}
 
-	ret.Total, err = m.Count(d, cond)
-	if err != nil {
-		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
-	}
 	return ret, nil
 }
 

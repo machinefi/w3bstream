@@ -11,14 +11,14 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-type Get struct {
+type GetProjectOperator struct {
 	httpx.MethodGet
 	ProjectID types.SFID `in:"path" name:"projectID"`
 }
 
-func (r *Get) Path() string { return "/data/:projectID" }
+func (r *GetProjectOperator) Path() string { return "/data/:projectID" }
 
-func (r *Get) Output(ctx context.Context) (interface{}, error) {
+func (r *GetProjectOperator) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.MustCurrentAccountFromContext(ctx)
 	ctx, err := ca.WithProjectContextBySFID(ctx, r.ProjectID)
 	if err != nil {

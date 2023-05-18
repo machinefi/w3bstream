@@ -98,11 +98,10 @@ func CreateAccountByUsername(ctx context.Context, r *CreateAccountByUsernameReq)
 		},
 		func(d sqlx.DBExecutor) error {
 			req := operator.CreateReq{
-				AccountID:  rel.AccountID,
 				Name:       operator.DefaultOperatorName,
 				PrivateKey: generateRandomPrivateKey(),
 			}
-			ctx := types.WithMgrDBExecutor(ctx, d)
+			ctx := types.WithAccount(types.WithMgrDBExecutor(ctx, d), acc)
 			_, err := operator.Create(ctx, &req)
 			return err
 		},

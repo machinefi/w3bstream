@@ -8,9 +8,8 @@ import (
 )
 
 type CreateReq struct {
-	AccountID  types.SFID `json:"-"`
-	Name       string     `json:"name"`
-	PrivateKey string     `json:"privateKey"`
+	Name       string `json:"name"`
+	PrivateKey string `json:"privateKey"`
 }
 
 type CondArgs struct {
