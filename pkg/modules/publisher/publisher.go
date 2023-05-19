@@ -3,28 +3,15 @@ package publisher
 import (
 	"context"
 
-	"github.com/prometheus/client_golang/prometheus"
-
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	confjwt "github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
-
-var _publisherMtc = prometheus.NewGaugeVec(
-	prometheus.GaugeOpts{
-		Name: "publishers_metrics",
-		Help: "registered publishers for the project.",
-	},
-	[]string{"account", "project"},
-)
-
-func init() {
-	prometheus.MustRegister(_publisherMtc)
-}
 
 func GetBySFID(ctx context.Context, id types.SFID) (*models.Publisher, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
@@ -149,7 +136,7 @@ func RemoveBySFID(ctx context.Context, acc *models.Account, prj *models.Project,
 	).Do(); err != nil {
 		return err
 	}
-	_publisherMtc.WithLabelValues(acc.AccountID.String(), prj.Name).Dec()
+	metrics.PublisherMtc.WithLabelValues(acc.AccountID.String(), prj.Name).Dec()
 	return nil
 }
 
@@ -188,7 +175,7 @@ func Remove(ctx context.Context, acc *models.Account, r *CondArgs) error {
 	if err != nil {
 		return err
 	}
-	_publisherMtc.WithLabelValues(acc.AccountID.String(), prj.Name).Sub(float64(numDeleted))
+	metrics.PublisherMtc.WithLabelValues(acc.AccountID.String(), prj.Name).Sub(float64(numDeleted))
 	return nil
 }
 
@@ -217,7 +204,7 @@ func Create(ctx context.Context, acc *models.Account, prj *models.Project, r *Cr
 		}
 		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
-	_publisherMtc.WithLabelValues(acc.AccountID.String(), prj.Name).Inc()
+	metrics.PublisherMtc.WithLabelValues(acc.AccountID.String(), prj.Name).Inc()
 	return pub, nil
 }
 
