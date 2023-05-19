@@ -4,10 +4,11 @@ import (
 	"context"
 	"crypto/md5"
 	"fmt"
-	"github.com/shirou/gopsutil/v3/disk"
 	"io"
 	"mime/multipart"
 	"os"
+
+	"github.com/shirou/gopsutil/v3/disk"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
