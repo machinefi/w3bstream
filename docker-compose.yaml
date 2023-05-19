@@ -6,6 +6,7 @@ services:
     depends_on:
       - "postgres"
       - "mqtt_server"
+      - "redis"
     container_name: w3bstream
     working_dir: /w3bstream
     restart: always

@@ -6,10 +6,11 @@ import (
 	"os"
 	"strings"
 
+	driverpostgres "github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/driver/postgres"
 	"github.com/pkg/errors"
 
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
-	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
+	confpostgres "github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/migration"
@@ -33,7 +34,7 @@ type Database struct {
 	// schemas reference of Schemas; key: schema name
 	schemas map[string]*Schema
 
-	ep *postgres.Endpoint // database endpoint
+	ep *confpostgres.Endpoint // database endpoint
 }
 
 type Schema struct {
@@ -206,13 +207,14 @@ func (d *Database) WithDefaultSchema() (sqlx.DBExecutor, error) {
 
 func (d *Database) Init(ctx context.Context) (err error) {
 	// init database endpoint
-	d.Name = types.MustProjectFromContext(ctx).DatabaseName()
+	prj := types.MustProjectFromContext(ctx)
+	d.Name = prj.DatabaseName()
 
 	// clone config and init config
 	ep := *types.MustWasmDBEndpointFromContext(ctx)
 	ep.Base = d.Name
 
-	d.ep = &postgres.Endpoint{
+	d.ep = &confpostgres.Endpoint{
 		Master:   ep,
 		Database: sqlx.NewDatabase(d.Name),
 		Retry:    retry.Default,
@@ -240,6 +242,16 @@ func (d *Database) Init(ctx context.Context) (err error) {
 
 	if err = d.ep.Init(); err != nil {
 		return err
+	}
+
+	// grant privileges
+	usename, passwd := prj.Privileges()
+	if err, _ = driverpostgres.CreateUserIfNotExists(d.ep, usename, passwd); err != nil {
+		return errors.Wrap(err, "create user")
+	}
+	domain := driverpostgres.PrivilegeDomainDatabase
+	if err = driverpostgres.GrantAllPrivileges(d.ep, domain, d.Name, usename); err != nil {
+		return errors.Wrap(err, "grant privilege")
 	}
 
 	// init each schema
