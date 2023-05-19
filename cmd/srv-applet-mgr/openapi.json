@@ -211,6 +211,16 @@
             }
           },
           {
+            "name": "accountOperatorName",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "account operator name",
+              "x-go-field-name": "AccountOperatorName",
+              "x-tag-name": "accountOperatorName,omitempty"
+            }
+          },
+          {
             "name": "authorization",
             "in": "query",
             "schema": {
