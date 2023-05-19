@@ -25,8 +25,8 @@ type RelRateLimit struct {
 }
 
 type RateLimitInfo struct {
-	Threshold int                    `db:"f_threshold"                    json:"threshold"`
-	CycleNum  int                    `db:"f_cycle_num"                    json:"cycleNum"`
+	Threshold int                    `db:"f_threshold"                     json:"threshold"`
+	CycleNum  int                    `db:"f_cycle_num"                     json:"cycleNum"`
 	CycleUnit enums.TrafficCycle     `db:"f_cycle_unit"                    json:"cycleUnit"`
 	ApiType   enums.RateLimitApiType `db:"f_api_type"                      json:"apiType"`
 }

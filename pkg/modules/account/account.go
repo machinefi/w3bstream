@@ -7,13 +7,13 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
-	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/depends/util"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -32,7 +32,6 @@ type CreateAccountByUsernameRsp struct {
 
 func CreateAccountByUsername(ctx context.Context, r *CreateAccountByUsernameReq) (*CreateAccountByUsernameRsp, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
 	g := confid.MustSFIDGeneratorFromContext(ctx)
 
 	rel := &models.RelAccount{AccountID: g.MustGenSFID()}
@@ -47,14 +46,16 @@ func CreateAccountByUsername(ctx context.Context, r *CreateAccountByUsernameReq)
 			acc = &models.Account{
 				RelAccount: *rel,
 				AccountInfo: models.AccountInfo{
-					State:              enums.ACCOUNT_STATE__ENABLED,
-					Role:               r.Role,
-					Avatar:             r.AvatarURL,
-					OperatorPrivateKey: generateRandomPrivateKey(),
+					State:  enums.ACCOUNT_STATE__ENABLED,
+					Role:   r.Role,
+					Avatar: r.AvatarURL,
 				},
 			}
 			if err := acc.Create(db); err != nil {
-				return status.CheckDatabaseError(err, "CreateAccount")
+				if sqlx.DBErr(err).IsConflict() {
+					return status.AccountConflict
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
 		},
@@ -67,7 +68,10 @@ func CreateAccountByUsername(ctx context.Context, r *CreateAccountByUsernameReq)
 					Source:     r.Source,
 				},
 			}).Create(db); err != nil {
-				return status.CheckDatabaseError(err, "CreateAccountIdentity")
+				if sqlx.DBErr(err).IsConflict() {
+					return status.AccountIdentityConflict
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
 		},
@@ -85,17 +89,26 @@ func CreateAccountByUsername(ctx context.Context, r *CreateAccountByUsernameReq)
 					),
 				},
 			}).Create(db); err != nil {
-				return status.CheckDatabaseError(err, "Create")
+				if sqlx.DBErr(err).IsConflict() {
+					return status.AccountPasswordConflict
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
 		},
+		func(d sqlx.DBExecutor) error {
+			req := operator.CreateReq{
+				AccountID:  rel.AccountID,
+				Name:       operator.DefaultOperatorName,
+				PrivateKey: generateRandomPrivateKey(),
+			}
+			ctx := types.WithMgrDBExecutor(ctx, d)
+			_, err := operator.Create(ctx, &req)
+			return err
+		},
 	).Do()
 
-	_, l = conflog.FromContext(ctx).Start(ctx, "CreateAccountByUsername")
-	defer l.End()
-
 	if err != nil {
-		l.Error(err)
 		return nil, err
 	}
 	return &CreateAccountByUsernameRsp{
@@ -111,7 +124,6 @@ type UpdatePasswordReq struct {
 
 func UpdateAccountPassword(ctx context.Context, accountID types.SFID, r *UpdatePasswordReq) error {
 	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
 
 	var (
 		rel = models.RelAccount{AccountID: accountID}
@@ -124,7 +136,10 @@ func UpdateAccountPassword(ctx context.Context, accountID types.SFID, r *UpdateP
 		func(db sqlx.DBExecutor) error {
 			acc = &models.Account{RelAccount: rel}
 			if err := acc.FetchByAccountID(db); err != nil {
-				return status.CheckDatabaseError(err, "FetchAccount")
+				if sqlx.DBErr(err).IsNotFound() {
+					return status.AccountNotFound
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			if acc.State != enums.ACCOUNT_STATE__ENABLED {
 				return status.DisabledAccount
@@ -139,7 +154,10 @@ func UpdateAccountPassword(ctx context.Context, accountID types.SFID, r *UpdateP
 				},
 			}
 			if err := aci.FetchByAccountIDAndType(db); err != nil {
-				return status.CheckDatabaseError(err, "FetchAccountIdentity")
+				if sqlx.DBErr(err).IsNotFound() {
+					return status.AccountIdentityNotFound
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
 		},
@@ -151,7 +169,10 @@ func UpdateAccountPassword(ctx context.Context, accountID types.SFID, r *UpdateP
 				},
 			}
 			if err := ap.FetchByAccountIDAndType(db); err != nil {
-				return status.CheckDatabaseError(err, "FetchAccountPassword")
+				if sqlx.DBErr(err).IsNotFound() {
+					return status.AccountPasswordNotFound
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			if ap.Password != util.HashOfAccountPassword(accountID.String(), r.OldPassword) {
 				return status.InvalidOldPassword
@@ -164,17 +185,13 @@ func UpdateAccountPassword(ctx context.Context, accountID types.SFID, r *UpdateP
 		func(db sqlx.DBExecutor) error {
 			ap.Password = util.HashOfAccountPassword(accountID.String(), r.Password)
 			if err := ap.UpdateByAccountIDAndType(db); err != nil {
-				return status.CheckDatabaseError(err, "UpdatePassword")
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
 		},
 	).Do()
 
-	_, l = l.Start(ctx, "UpdateAccountPassword")
-	defer l.End()
-
 	if err != nil {
-		l.Error(err)
 		return err
 	}
 	return nil
@@ -195,7 +212,6 @@ type LoginRsp struct {
 
 func ValidateLoginByUsername(ctx context.Context, r *LoginByUsernameReq) (*models.Account, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
 
 	var (
 		rel models.RelAccount
@@ -213,7 +229,10 @@ func ValidateLoginByUsername(ctx context.Context, r *LoginByUsernameReq) (*model
 				},
 			}
 			if err := aci.FetchByTypeAndIdentityID(db); err != nil {
-				return status.CheckDatabaseError(err, "FetchAccountIdentity")
+				if sqlx.DBErr(err).IsNotFound() {
+					return status.AccountIdentityNotFound
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			rel.AccountID = aci.AccountID
 			return nil
@@ -221,7 +240,10 @@ func ValidateLoginByUsername(ctx context.Context, r *LoginByUsernameReq) (*model
 		func(db sqlx.DBExecutor) error {
 			acc = &models.Account{RelAccount: rel}
 			if err := acc.FetchByAccountID(db); err != nil {
-				return status.CheckDatabaseError(err, "FetchAccount")
+				if sqlx.DBErr(err).IsNotFound() {
+					return status.AccountNotFound
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			if acc.State != enums.ACCOUNT_STATE__ENABLED {
 				return status.DisabledAccount
@@ -236,7 +258,10 @@ func ValidateLoginByUsername(ctx context.Context, r *LoginByUsernameReq) (*model
 				},
 			}
 			if err := ap.FetchByAccountIDAndType(db); err != nil {
-				return status.CheckDatabaseError(err, "FetchAccountPassword")
+				if sqlx.DBErr(err).IsNotFound() {
+					return status.AccountPasswordNotFound
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			if util.HashOfAccountPassword(acc.AccountID.String(), r.Password) != ap.Password {
 				return status.InvalidPassword
@@ -245,11 +270,7 @@ func ValidateLoginByUsername(ctx context.Context, r *LoginByUsernameReq) (*model
 		},
 	).Do()
 
-	_, l = l.Start(ctx, "ValidateAccountByLogin")
-	defer l.End()
-
 	if err != nil {
-		l.Error(err)
 		return nil, err
 	}
 	return acc, nil
@@ -257,24 +278,19 @@ func ValidateLoginByUsername(ctx context.Context, r *LoginByUsernameReq) (*model
 
 func GetAccountByAccountID(ctx context.Context, accountID types.SFID) (*models.Account, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-
 	m := &models.Account{RelAccount: models.RelAccount{AccountID: accountID}}
-	_, l = l.Start(ctx, "GetAccountByAccountID")
-	defer l.End()
 
 	err := m.FetchByAccountID(d)
 	if err != nil {
-		l.Error(err)
-		return nil, status.CheckDatabaseError(err, "FetchByAccountID")
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.AccountNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
 	return m, err
 }
 
 func CreateAdminIfNotExist(ctx context.Context) (string, error) {
-	_, l := conflog.FromContext(ctx).Start(ctx, "CreateAdminIfNotExist")
-	defer l.End()
-
 	ret, err := CreateAccountByUsername(ctx, &CreateAccountByUsernameReq{
 		Username: "admin",
 		Role:     enums.ACCOUNT_ROLE__ADMIN,
@@ -282,16 +298,12 @@ func CreateAdminIfNotExist(ctx context.Context) (string, error) {
 		Source:   enums.ACCOUNT_SOURCE__INIT,
 	})
 	if err != nil {
-		if sqlx.DBErr(err).IsConflict() {
-			l.Info("admin already exists, default password: `%s`", "iotex.W3B.admin")
+		key := statusx.FromErr(err).Key
+		if key == status.AccountConflict.Key() ||
+			key == status.AccountIdentityConflict.Key() {
 			return "", nil
-		} else if se, ok := err.(*statusx.StatusErr); ok && se.Code == status.Conflict.Code() {
-			l.Info("admin already exists, default password: `%s`", "iotex.W3B.admin")
-			return "", nil
-		} else {
-			l.Error(err)
-			return "", err
 		}
+		return "", err
 	}
 	return ret.Password, nil
 }

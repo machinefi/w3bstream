@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math/rand"
+	"strconv"
 	"strings"
 	"time"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/modules/job"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
+	custommetrics "github.com/machinefi/w3bstream/pkg/types/wasm/metrics"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/sql_util"
 )
 
@@ -27,21 +29,24 @@ type (
 	}
 
 	ExportFuncs struct {
-		rt  *Runtime
-		res *mapx.Map[uint32, []byte]
-		env *wasm.Env
-		kvs wasm.KVStore
-		db  wasm.SQLStore
-		log conflog.Logger
-		cl  *wasm.ChainClient
-		ctx context.Context
-		mq  *wasm.MqttClient
+		rt      *Runtime
+		res     *mapx.Map[uint32, []byte]
+		evs     *mapx.Map[uint32, []byte]
+		env     *wasm.Env
+		kvs     wasm.KVStore
+		db      *wasm.Database
+		log     conflog.Logger
+		cl      *wasm.ChainClient
+		ctx     context.Context
+		mq      *wasm.MqttClient
+		metrics custommetrics.Metrics
 	}
 )
 
 func NewExportFuncs(ctx context.Context, rt *Runtime) (*ExportFuncs, error) {
 	ef := &ExportFuncs{
 		res: wasm.MustRuntimeResourceFromContext(ctx),
+		evs: wasm.MustRuntimeEventTypesFromContext(ctx),
 		kvs: wasm.MustKVStoreFromContext(ctx),
 		log: wasm.MustLoggerFromContext(ctx),
 		ctx: ctx,
@@ -51,33 +56,47 @@ func NewExportFuncs(ctx context.Context, rt *Runtime) (*ExportFuncs, error) {
 	ef.env, _ = wasm.EnvFromContext(ctx)
 	ef.mq, _ = wasm.MQTTClientFromContext(ctx)
 	ef.rt = rt
+	ef.metrics, _ = wasm.CustomMetricsFromContext(ctx)
 
 	return ef, nil
 }
 
 var (
-	_     wasm.ABI = (*ExportFuncs)(nil)
-	_rand          = rand.New(rand.NewSource(time.Now().UnixNano()))
+	_       wasm.ABI = (*ExportFuncs)(nil)
+	_rand            = rand.New(rand.NewSource(time.Now().UnixNano()))
+	efSrc            = "wasmExportFunc"
+	codeSrc          = "wasmCode"
 )
 
 func (ef *ExportFuncs) LinkABI(impt Import) error {
 	for name, ff := range map[string]interface{}{
-		"abort":            ef.Abort,
-		"trace":            ef.Trace,
-		"seed":             ef.Seed,
-		"ws_log":           ef.Log,
-		"ws_get_data":      ef.GetData,
-		"ws_set_data":      ef.SetData,
-		"ws_get_db":        ef.GetDB,
-		"ws_set_db":        ef.SetDB,
-		"ws_send_tx":       ef.SendTX,
-		"ws_call_contract": ef.CallContract,
-		"ws_set_sql_db":    ef.SetSQLDB,
-		"ws_get_sql_db":    ef.GetSQLDB,
-		"ws_get_env":       ef.GetEnv,
-		"ws_send_mqtt":     ef.SendMQTT,
+		"abort":                    ef.Abort,
+		"trace":                    ef.Trace,
+		"seed":                     ef.Seed,
+		"ws_log":                   ef.Log,
+		"ws_get_data":              ef.GetData,
+		"ws_set_data":              ef.SetData,
+		"ws_get_db":                ef.GetDB,
+		"ws_set_db":                ef.SetDB,
+		"ws_send_tx":               ef.SendTX,
+		"ws_send_tx_with_operator": ef.SendTXWithOperator,
+		"ws_call_contract":         ef.CallContract,
+		"ws_set_sql_db":            ef.SetSQLDB,
+		"ws_get_sql_db":            ef.GetSQLDB,
+		"ws_get_env":               ef.GetEnv,
+		"ws_send_mqtt_msg":         ef.SendMqttMsg,
 	} {
 		if err := impt("env", name, ff); err != nil {
+			return err
+		}
+	}
+
+	for name, ff := range map[string]interface{}{
+		"ws_counter_inc": ef.StatCounterInc,
+		"ws_counter_add": ef.StatCounterAdd,
+		"ws_gauge_set":   ef.StatGaugeSet,
+	} {
+		if err := impt("stat", name, ff); err != nil {
 			return err
 		}
 	}
@@ -85,29 +104,35 @@ func (ef *ExportFuncs) LinkABI(impt Import) error {
 	return nil
 }
 
+func (ef *ExportFuncs) logAndPersistToDB(logLevel conflog.Level, logSrc, msg string) {
+	if len(logSrc) == 0 {
+		logSrc = efSrc
+	}
+	ef.log = ef.log.WithValues("@src", logSrc)
+	switch logLevel {
+	case conflog.TraceLevel:
+		ef.log.Trace(msg)
+	case conflog.DebugLevel:
+		ef.log.Debug(msg)
+	case conflog.InfoLevel:
+		ef.log.Info(msg)
+	case conflog.WarnLevel:
+		ef.log.Warn(errors.New(msg))
+	case conflog.ErrorLevel:
+		ef.log.Error(errors.New(msg))
+	default:
+		ef.log.Trace(msg)
+	}
+	job.Dispatch(ef.ctx, job.NewWasmLogTask(ef.ctx, logLevel.String(), logSrc, msg))
+}
+
 func (ef *ExportFuncs) Log(logLevel, ptr, size int32) int32 {
 	buf, err := ef.rt.Read(ptr, size)
 	if err != nil {
-		ef.log.Error(err)
-		job.Dispatch(ef.ctx, job.NewWasmLogTask(ef.ctx, conflog.ErrorLevel.String(), err.Error()))
+		ef.logAndPersistToDB(conflog.ErrorLevel, codeSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
-	switch conflog.Level(logLevel) {
-	case conflog.TraceLevel:
-		ef.log.Trace(string(buf))
-	case conflog.DebugLevel:
-		ef.log.Debug(string(buf))
-	case conflog.InfoLevel:
-		ef.log.Info(string(buf))
-	case conflog.WarnLevel:
-		ef.log.Warn(errors.New(string(buf)))
-	case conflog.ErrorLevel:
-		ef.log.Error(errors.New(string(buf)))
-	default:
-		job.Dispatch(ef.ctx, job.NewWasmLogTask(ef.ctx, conflog.TraceLevel.String(), string(buf)))
-		return int32(wasm.ResultStatusCode_OK)
-	}
-	job.Dispatch(ef.ctx, job.NewWasmLogTask(ef.ctx, conflog.Level(logLevel).String(), string(buf)))
+	ef.logAndPersistToDB(conflog.Level(logLevel), codeSrc, string(buf))
 	return int32(wasm.ResultStatusCode_OK)
 }
 
@@ -115,15 +140,15 @@ func (ef *ExportFuncs) Log(logLevel, ptr, size int32) int32 {
 func (ef *ExportFuncs) Abort(msgPtr int32, fileNamePtr int32, line int32, col int32) {
 	msg, err := ef.readString(msgPtr)
 	if err != nil {
-		ef.log.Error(errors.Wrap(err, "fail to decode arguments in env.abort"))
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, errors.Wrap(err, "fail to decode arguments in env.abort").Error())
 		return
 	}
 	fileName, err := ef.readString(fileNamePtr)
 	if err != nil {
-		ef.log.Error(errors.Wrap(err, "fail to decode arguments in env.abort"))
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, errors.Wrap(err, "fail to decode arguments in env.abort").Error())
 		return
 	}
-	ef.log.Error(errors.Errorf("abort: %s at %s:%d:%d", msg, fileName, line, col))
+	ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, errors.Errorf("abort: %s at %s:%d:%d", msg, fileName, line, col).Error())
 }
 
 func (ef *ExportFuncs) readString(ptr int32) (string, error) {
@@ -153,7 +178,7 @@ func (ef *ExportFuncs) readString(ptr int32) (string, error) {
 func (ef *ExportFuncs) Trace(msgPtr int32, _ int32, arr ...float64) {
 	msg, err := ef.readString(msgPtr)
 	if err != nil {
-		ef.log.Error(errors.Wrap(err, "fail to decode arguments in env.abort"))
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, errors.Wrap(err, "fail to decode arguments in env.abort").Error())
 		return
 	}
 
@@ -161,7 +186,7 @@ func (ef *ExportFuncs) Trace(msgPtr int32, _ int32, arr ...float64) {
 	if len(str) > 0 {
 		str = " " + str
 	}
-	ef.log.Info("trace: %s%s", msg, str)
+	ef.logAndPersistToDB(conflog.InfoLevel, efSrc, fmt.Sprintf("trace: %s%s", msg, str))
 }
 
 // Seed is reserved for imported func env.seed() which is auto-generated by assemblyScript
@@ -176,7 +201,7 @@ func (ef *ExportFuncs) GetData(rid, vmAddrPtr, vmSizePtr int32) int32 {
 	}
 
 	if err := ef.rt.Copy(data, vmAddrPtr, vmSizePtr); err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
 
@@ -187,7 +212,7 @@ func (ef *ExportFuncs) GetData(rid, vmAddrPtr, vmSizePtr int32) int32 {
 func (ef *ExportFuncs) SetData(rid, addr, size int32) int32 {
 	buf, err := ef.rt.Read(addr, size)
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
 	ef.res.Store(uint32(rid), buf)
@@ -197,7 +222,7 @@ func (ef *ExportFuncs) SetData(rid, addr, size int32) int32 {
 func (ef *ExportFuncs) GetDB(kAddr, kSize int32, vmAddrPtr, vmSizePtr int32) int32 {
 	key, err := ef.rt.Read(kAddr, kSize)
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return int32(wasm.ResultStatusCode_ResourceNotFound)
 	}
 
@@ -206,10 +231,10 @@ func (ef *ExportFuncs) GetDB(kAddr, kSize int32, vmAddrPtr, vmSizePtr int32) int
 		return int32(wasm.ResultStatusCode_ResourceNotFound)
 	}
 
-	ef.log.WithValues("key", string(key), "val", string(val)).Info("host.GetDB")
+	ef.logAndPersistToDB(conflog.InfoLevel, efSrc, fmt.Sprintf("host.GetDB %s:%s", string(key), strconv.Quote(string(val))))
 
 	if err := ef.rt.Copy(val, vmAddrPtr, vmSizePtr); err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
 
@@ -219,19 +244,20 @@ func (ef *ExportFuncs) GetDB(kAddr, kSize int32, vmAddrPtr, vmSizePtr int32) int
 func (ef *ExportFuncs) SetDB(kAddr, kSize, vAddr, vSize int32) int32 {
 	key, err := ef.rt.Read(kAddr, kSize)
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return int32(wasm.ResultStatusCode_ResourceNotFound)
 	}
 	val, err := ef.rt.Read(vAddr, vSize)
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return int32(wasm.ResultStatusCode_ResourceNotFound)
 	}
-	ef.log.WithValues("key", string(key), "val", string(val)).Info("host.SetDB")
+
+	ef.logAndPersistToDB(conflog.InfoLevel, efSrc, fmt.Sprintf("host.SetDB %s:%s", string(key), strconv.Quote(string(val))))
 
 	err = ef.kvs.Set(string(key), val)
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return int32(wasm.ResultStatusCode_Failed)
 	}
 	return int32(wasm.ResultStatusCode_OK)
@@ -243,19 +269,24 @@ func (ef *ExportFuncs) SetSQLDB(addr, size int32) int32 {
 	}
 	data, err := ef.rt.Read(addr, size)
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return int32(wasm.ResultStatusCode_ResourceNotFound)
 	}
 
 	prestate, params, err := sql_util.ParseQuery(data)
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 
-	_, err = ef.db.ExecContext(context.Background(), prestate, params...)
+	db, err := ef.db.WithDefaultSchema()
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return wasm.ResultStatusCode_Failed
+	}
+	_, err = db.ExecContext(context.Background(), prestate, params...)
+	if err != nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 
@@ -268,30 +299,35 @@ func (ef *ExportFuncs) GetSQLDB(addr, size int32, vmAddrPtr, vmSizePtr int32) in
 	}
 	data, err := ef.rt.Read(addr, size)
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return int32(wasm.ResultStatusCode_ResourceNotFound)
 	}
 
 	prestate, params, err := sql_util.ParseQuery(data)
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 
-	rows, err := ef.db.QueryContext(context.Background(), prestate, params...)
+	db, err := ef.db.WithDefaultSchema()
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return wasm.ResultStatusCode_Failed
+	}
+	rows, err := db.QueryContext(context.Background(), prestate, params...)
+	if err != nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 
 	ret, err := sql_util.JsonifyRows(rows)
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 
 	if err := ef.rt.Copy(ret, vmAddrPtr, vmSizePtr); err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
 
@@ -301,30 +337,53 @@ func (ef *ExportFuncs) GetSQLDB(addr, size int32, vmAddrPtr, vmSizePtr int32) in
 // TODO: make sendTX async, and add callback if possible
 func (ef *ExportFuncs) SendTX(chainID int32, offset, size, vmAddrPtr, vmSizePtr int32) int32 {
 	if ef.cl == nil {
-		ef.log.Error(errors.New("eth client doesn't exist"))
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, errors.New("eth client doesn't exist").Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	buf, err := ef.rt.Read(offset, size)
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	ret := gjson.Parse(string(buf))
 	txHash, err := ef.cl.SendTX(uint32(chainID), ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String())
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	if err := ef.rt.Copy([]byte(txHash), vmAddrPtr, vmSizePtr); err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	return int32(wasm.ResultStatusCode_OK)
 }
 
-func (ef *ExportFuncs) SendMQTT(topicAddr, topicSize, msgAddr, msgSize int32) int32 {
-	if ef.mq == nil {
-		ef.log.Error(errors.New("mq client doesn't exist"))
+func (ef *ExportFuncs) SendTXWithOperator(chainID int32, offset, size, vmAddrPtr, vmSizePtr int32) int32 {
+	if ef.cl == nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, errors.New("eth client doesn't exist").Error())
+		return wasm.ResultStatusCode_Failed
+	}
+	buf, err := ef.rt.Read(offset, size)
+	if err != nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return wasm.ResultStatusCode_Failed
+	}
+	ret := gjson.Parse(string(buf))
+	txHash, err := ef.cl.SendTXWithOperator(uint32(chainID), ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String(), ret.Get("operatorName").String())
+	if err != nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return wasm.ResultStatusCode_Failed
+	}
+	if err := ef.rt.Copy([]byte(txHash), vmAddrPtr, vmSizePtr); err != nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return wasm.ResultStatusCode_Failed
+	}
+	return int32(wasm.ResultStatusCode_OK)
+}
+
+func (ef *ExportFuncs) SendMqttMsg(topicAddr, topicSize, msgAddr, msgSize int32) int32 {
+	if ef.mq == nil || ef.mq.Client == nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, errors.New("mq client doesn't exist").Error())
 		return wasm.ResultStatusCode_Failed
 	}
 
@@ -336,17 +395,17 @@ func (ef *ExportFuncs) SendMQTT(topicAddr, topicSize, msgAddr, msgSize int32) in
 
 	topicBuf, err = ef.rt.Read(topicAddr, topicSize)
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	msgBuf, err = ef.rt.Read(msgAddr, msgSize)
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	err = ef.mq.WithTopic(string(topicBuf)).Publish(string(msgBuf))
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	return int32(wasm.ResultStatusCode_OK)
@@ -354,22 +413,22 @@ func (ef *ExportFuncs) SendMQTT(topicAddr, topicSize, msgAddr, msgSize int32) in
 
 func (ef *ExportFuncs) CallContract(chainID int32, offset, size int32, vmAddrPtr, vmSizePtr int32) int32 {
 	if ef.cl == nil {
-		ef.log.Error(errors.New("eth client doesn't exist"))
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, errors.New("eth client doesn't exist").Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	buf, err := ef.rt.Read(offset, size)
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	ret := gjson.Parse(string(buf))
 	data, err := ef.cl.CallContract(uint32(chainID), ret.Get("to").String(), ret.Get("data").String())
 	if err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	if err = ef.rt.Copy(data, vmAddrPtr, vmSizePtr); err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	return int32(wasm.ResultStatusCode_OK)
@@ -381,6 +440,7 @@ func (ef *ExportFuncs) GetEnv(kAddr, kSize int32, vmAddrPtr, vmSizePtr int32) in
 	}
 	key, err := ef.rt.Read(kAddr, kSize)
 	if err != nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
 
@@ -390,8 +450,51 @@ func (ef *ExportFuncs) GetEnv(kAddr, kSize int32, vmAddrPtr, vmSizePtr int32) in
 	}
 
 	if err = ef.rt.Copy([]byte(val), vmAddrPtr, vmSizePtr); err != nil {
-		ef.log.Error(err)
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
+	return int32(wasm.ResultStatusCode_OK)
+}
+
+func (ef *ExportFuncs) GetEventType(rid, vmAddrPtr, vmSizePtr int32) int32 {
+	data, ok := ef.res.Load(uint32(rid))
+	if !ok {
+		return int32(wasm.ResultStatusCode_ResourceNotFound)
+	}
+
+	if err := ef.rt.Copy(data, vmAddrPtr, vmSizePtr); err != nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
+	}
+	return int32(wasm.ResultStatusCode_OK)
+}
+
+func (ef *ExportFuncs) StatCounterInc(labelAddr, labelSize int32) int32 {
+	buf, err := ef.rt.Read(labelAddr, labelSize)
+	if err != nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return wasm.ResultStatusCode_Failed
+	}
+	ef.metrics.Counter(string(buf)).Inc()
+	return int32(wasm.ResultStatusCode_OK)
+}
+
+func (ef *ExportFuncs) StatCounterAdd(labelAddr, labelSize int32, value float64) int32 {
+	buf, err := ef.rt.Read(labelAddr, labelSize)
+	if err != nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return wasm.ResultStatusCode_Failed
+	}
+	ef.metrics.Counter(string(buf)).Add(value)
+	return int32(wasm.ResultStatusCode_OK)
+}
+
+func (ef *ExportFuncs) StatGaugeSet(labelAddr, labelSize int32, value float64) int32 {
+	buf, err := ef.rt.Read(labelAddr, labelSize)
+	if err != nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return wasm.ResultStatusCode_Failed
+	}
+	ef.metrics.Gauge(string(buf)).Set(value)
 	return int32(wasm.ResultStatusCode_OK)
 }

@@ -1,7 +1,10 @@
 package ratelimit
 
 import (
+	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
+	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
 )
 
@@ -9,35 +12,58 @@ type CreateReq struct {
 	models.RateLimitInfo
 }
 
-type UpdateReq = CreateReq
+type UpdateReq struct {
+	RateLimitID types.SFID `json:"-"`
+	models.RateLimitInfo
+}
 
 type CondArgs struct {
-	ProjectName types.SFID   `name:"-"`
-	AppletIDs   []types.SFID `in:"query" name:"appletID,omitempty"`
-	Names       []string     `in:"query" name:"names,omitempty"`
-	NameLike    string       `in:"query" name:"name,omitempty"`
-	LNameLike   string       `in:"query" name:"lName,omitempty"`
+	ProjectID types.SFID             `in:"query" name:"projectID,omitempty"`
+	ApiType   enums.RateLimitApiType `in:"query" name:"apiType,omitempty"`
 }
 
 func (r *CondArgs) Condition() builder.SqlCondition {
 	var (
-		m = &models.Applet{}
+		m = &models.TrafficRateLimit{}
 		c []builder.SqlCondition
 	)
 	if r.ProjectID != 0 {
 		c = append(c, m.ColProjectID().Eq(r.ProjectID))
 	}
-	if len(r.AppletIDs) > 0 {
-		c = append(c, m.ColAppletID().In(r.AppletIDs))
-	}
-	if len(r.Names) > 0 {
-		c = append(c, m.ColName().In(r.Names))
-	}
-	if r.NameLike != "" {
-		c = append(c, m.ColName().Like(r.NameLike))
-	}
-	if r.NameLike != "" {
-		c = append(c, m.ColName().LLike(r.LNameLike))
+	if r.ApiType != 0 {
+		c = append(c, m.ColApiType().In(r.ApiType))
 	}
 	return builder.And(c...)
+}
+
+type ListReq struct {
+	CondArgs
+	datatypes.Pager
+}
+
+func (r *ListReq) Additions() builder.Additions {
+	m := &models.TrafficRateLimit{}
+	return builder.Additions{
+		builder.OrderBy(
+			builder.DescOrder(m.ColUpdatedAt()),
+			builder.DescOrder(m.ColCreatedAt()),
+		),
+		r.Pager.Addition(),
+	}
+}
+
+type ListRsp struct {
+	Data  []models.TrafficRateLimit `json:"data"`
+	Total int64                     `json:"total"`
+}
+
+type Detail struct {
+	ProjectName string `json:"projectName" db:"f_project_name"`
+	models.TrafficRateLimit
+	datatypes.OperationTimes
+}
+
+type ListDetailRsp struct {
+	Total int64     `json:"total"`
+	Data  []*Detail `json:"data"`
 }

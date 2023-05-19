@@ -2,130 +2,149 @@ package event
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"sync"
 
 	"github.com/pkg/errors"
 
-	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/enums"
+	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
-	"github.com/machinefi/w3bstream/pkg/modules/publisher"
+	"github.com/machinefi/w3bstream/pkg/modules/ratelimit"
 	"github.com/machinefi/w3bstream/pkg/modules/strategy"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
-	"github.com/machinefi/w3bstream/pkg/types/wasm"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
 
-type HandleEventResult struct {
-	ProjectName string                   `json:"projectName"`
-	PubID       types.SFID               `json:"pubID,omitempty"`
-	PubName     string                   `json:"pubName,omitempty"`
-	EventID     string                   `json:"eventID"`
-	ErrMsg      string                   `json:"errMsg,omitempty"`
-	WasmResults []wasm.EventHandleResult `json:"wasmResults"`
+var Handler = func(ctx context.Context, data []byte) []*Result {
+	return OnEvent(ctx, data)
 }
 
-type HandleEventReq struct {
-	Events []eventpb.Event `json:"events"`
+// HandleEvent support other module call
+// TODO the full project info is not in context so query and set here. this impl
+// is for support other module, which is temporary.
+// And it will be deprecated when rpc/http is ready
+func HandleEvent(ctx context.Context, t string, data []byte) (interface{}, error) {
+	prj := &models.Project{ProjectName: models.ProjectName{
+		Name: types.MustProjectFromContext(ctx).Name,
+	}}
+
+	err := prj.FetchByName(types.MustMgrDBExecutorFromContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	strategies, err := strategy.FilterByProjectAndEvent(ctx, prj.ProjectID, t)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx = types.WithStrategyResults(ctx, strategies)
+	return OnEvent(ctx, data), nil
 }
 
-func OnEventReceived(ctx context.Context, projectName string, r *eventpb.Event) (ret *HandleEventResult, err error) {
-	l := types.MustLoggerFromContext(ctx)
-	rDB := kvdb.MustRedisDBKeyFromContext(ctx)
-
-	_, l = l.Start(ctx, "OnEventReceived")
-	defer l.End()
-
-	l = l.WithValues("project_name", projectName)
-
-	eventType := enums.EVENTTYPEDEFAULT
-	if r.Header != nil && len(r.Header.EventType) > 0 {
-		eventType = r.Header.EventType
-	}
-	l = l.WithValues("event_type", eventType)
-
-	ret = &HandleEventResult{
-		ProjectName: projectName,
-		EventID:     r.Header.EventId,
-	}
-
-	defer func() {
-		if err != nil {
-			ret.ErrMsg = err.Error()
-		}
-	}()
-
+func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
 	var (
-		pub      *models.Publisher
-		handlers []*strategy.InstanceHandler
+		l   = types.MustLoggerFromContext(ctx)
+		r   = types.MustStrategyResultsFromContext(ctx)
+		rDB = kvdb.MustRedisDBKeyFromContext(ctx)
+		prj = types.MustProjectFromContext(ctx)
+
+		results = make(chan *Result, len(r))
+
+		valByte []byte
 	)
 
-	if r.Header != nil && len(r.Header.PubId) > 0 {
-		pub, err = publisher.GetPublisherByPubKeyAndProjectName(ctx, r.Header.PubId, projectName)
-		if err != nil {
+	m, err := ratelimit.GetByProjectAndType(ctx, prj.ProjectID, enums.RATE_LIMIT_API_TYPE__EVENT)
+	if err != nil {
+		se, ok := statusx.IsStatusErr(err)
+		if !ok || !se.Is(status.TrafficRateLimitNotFound) {
+			ret = append(ret, &Result{
+				AppletName:  "",
+				InstanceID:  0,
+				Handler:     "",
+				ReturnValue: nil,
+				ReturnCode:  -1,
+				Error:       err.Error(),
+			})
 			return
 		}
-		ret.PubID, ret.PubName = pub.PublisherID, pub.Name
-		l.WithValues("pub_id", pub.PublisherID)
-	}
-
-	var valByte []byte
-	if valByte, err = rDB.IncrBy(projectName, []byte(strconv.Itoa(-1))); err != nil {
-		l.Error(err)
-		return
-	}
-	val, _ := strconv.Atoi(string(valByte))
-	if val < 0 {
-		err = errors.New(fmt.Sprintf("Traffic of %s ran out.", projectName))
 		l.Warn(err)
-		return
 	}
-
-	handlers, err = strategy.FindStrategyInstances(ctx, projectName, eventType)
-	if err != nil {
-		l.Error(err)
-		return
+	if m != nil {
+		if valByte, err = rDB.IncrBy(prj.Name, []byte(strconv.Itoa(-1))); err != nil {
+			l.Error(err)
+			ret = append(ret, &Result{
+				AppletName:  "",
+				InstanceID:  0,
+				Handler:     "",
+				ReturnValue: nil,
+				ReturnCode:  -1,
+				Error:       status.DatabaseError.StatusErr().WithDesc(err.Error()).Key,
+			})
+			return
+		}
+		val, _ := strconv.Atoi(string(valByte))
+		if val < 0 {
+			ret = append(ret, &Result{
+				AppletName:  "",
+				InstanceID:  0,
+				Handler:     "",
+				ReturnValue: nil,
+				ReturnCode:  -1,
+				Error:       status.RateLimitExceeded.Key(),
+			})
+			return
+		}
 	}
-
-	l.Info("matched strategies: %d", len(handlers))
-
-	res := make(chan *wasm.EventHandleResult, len(handlers))
 
 	wg := &sync.WaitGroup{}
-	for _, v := range handlers {
-		i := vm.GetConsumer(v.InstanceID)
-		if i == nil {
-			res <- &wasm.EventHandleResult{
-				InstanceID: v.InstanceID.String(),
-				Code:       -1,
-				ErrMsg:     "instance not found",
+	for _, v := range r {
+		l = l.WithValues(
+			"prj", v.ProjectName,
+			"app", v.AppletName,
+			"ins", v.InstanceID,
+			"hdl", v.Handler,
+			"tpe", v.EventType,
+		)
+		ins := vm.GetConsumer(v.InstanceID)
+		if ins == nil {
+			l.Warn(errors.New("instance not running"))
+			results <- &Result{
+				AppletName:  v.AppletName,
+				InstanceID:  v.InstanceID,
+				Handler:     v.Handler,
+				ReturnValue: nil,
+				ReturnCode:  -1,
+				Error:       status.InstanceNotRunning.Key(),
 			}
 			continue
 		}
 
 		wg.Add(1)
-		go func(v *strategy.InstanceHandler) {
-			res <- i.HandleEvent(ctx, v.Handler, []byte(r.Payload))
-			wg.Done()
+		go func(v *types.StrategyResult) {
+			defer wg.Done()
+			rv := ins.HandleEvent(ctx, v.Handler, v.EventType, data)
+			results <- &Result{
+				AppletName:  v.AppletName,
+				InstanceID:  v.InstanceID,
+				Handler:     v.Handler,
+				ReturnValue: nil,
+				ReturnCode:  int(rv.Code),
+				Error:       rv.ErrMsg,
+			}
 		}(v)
 	}
 	wg.Wait()
-	close(res)
+	close(results)
 
-	for v := range res {
-		ret.WasmResults = append(ret.WasmResults, *v)
+	for v := range results {
+		if v == nil {
+			continue
+		}
+		ret = append(ret, v)
 	}
-	return ret, nil
-}
-
-func HandleEvents(ctx context.Context, projectName string, r *HandleEventReq) []*HandleEventResult {
-	results := make([]*HandleEventResult, 0, len(r.Events))
-	for i := range r.Events {
-		ret, _ := OnEventReceived(ctx, projectName, &r.Events[i])
-		results = append(results, ret)
-	}
-	return results
+	return ret
 }

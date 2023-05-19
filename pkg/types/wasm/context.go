@@ -7,36 +7,38 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
+	custommetrics "github.com/machinefi/w3bstream/pkg/types/wasm/metrics"
 )
 
 type (
-	CtxSQLStore        struct{}
-	CtxKVStore         struct{}
-	CtxLogger          struct{}
-	CtxEnv             struct{}
-	CtxEnvPrefix       struct{}
-	CtxRedisPrefix     struct{}
-	CtxChainClient     struct{}
-	CtxRuntimeResource struct{}
-	CtxMqttClient      struct{}
+	CtxSQLStore          struct{}
+	CtxKVStore           struct{}
+	CtxLogger            struct{}
+	CtxEnv               struct{}
+	CtxRedisPrefix       struct{}
+	CtxChainClient       struct{}
+	CtxRuntimeResource   struct{}
+	CtxRuntimeEventTypes struct{}
+	CtxMqttClient        struct{}
+	CtxCustomMetrics     struct{}
 )
 
-func WithSQLStore(ctx context.Context, v SQLStore) context.Context {
+func WithSQLStore(ctx context.Context, v *Database) context.Context {
 	return contextx.WithValue(ctx, CtxSQLStore{}, v)
 }
 
-func WithSQLStoreContext(v SQLStore) contextx.WithContext {
+func WithSQLStoreContext(v *Database) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
 		return contextx.WithValue(ctx, CtxSQLStore{}, v)
 	}
 }
 
-func SQLStoreFromContext(ctx context.Context) (SQLStore, bool) {
-	v, ok := ctx.Value(CtxSQLStore{}).(SQLStore)
+func SQLStoreFromContext(ctx context.Context) (*Database, bool) {
+	v, ok := ctx.Value(CtxSQLStore{}).(*Database)
 	return v, ok
 }
 
-func MustSQLStoreFromContext(ctx context.Context) SQLStore {
+func MustSQLStoreFromContext(ctx context.Context) *Database {
 	v, ok := SQLStoreFromContext(ctx)
 	must.BeTrue(ok)
 	return v
@@ -105,27 +107,6 @@ func MustEnvFromContext(ctx context.Context) *Env {
 	return v
 }
 
-func WithEnvPrefix(ctx context.Context, v string) context.Context {
-	return contextx.WithValue(ctx, CtxEnvPrefix{}, v)
-}
-
-func WithEnvPrefixContext(v string) contextx.WithContext {
-	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, CtxEnvPrefix{}, v)
-	}
-}
-
-func EnvPrefixFromContext(ctx context.Context) (string, bool) {
-	v, ok := ctx.Value(CtxEnvPrefix{}).(string)
-	return v, ok
-}
-
-func MustEnvPrefixFromContext(ctx context.Context) string {
-	v, ok := EnvPrefixFromContext(ctx)
-	must.BeTrue(ok)
-	return v
-}
-
 func WithRedisPrefix(ctx context.Context, v string) context.Context {
 	return contextx.WithValue(ctx, CtxRedisPrefix{}, v)
 }
@@ -189,6 +170,27 @@ func MustRuntimeResourceFromContext(ctx context.Context) *mapx.Map[uint32, []byt
 	return v
 }
 
+func WithRuntimeEventTypes(ctx context.Context, v *mapx.Map[uint32, []byte]) context.Context {
+	return contextx.WithValue(ctx, CtxRuntimeEventTypes{}, v)
+}
+
+func WithRuntimeEventTypesContext(v *mapx.Map[uint32, []byte]) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxRuntimeEventTypes{}, v)
+	}
+}
+
+func RuntimeEventTypesFromContext(ctx context.Context) (*mapx.Map[uint32, []byte], bool) {
+	v, ok := ctx.Value(CtxRuntimeEventTypes{}).(*mapx.Map[uint32, []byte])
+	return v, ok
+}
+
+func MustRuntimeEventTypesFromContext(ctx context.Context) *mapx.Map[uint32, []byte] {
+	v, ok := RuntimeResourceFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
 func WithMQTTClient(ctx context.Context, mq *MqttClient) context.Context {
 	return contextx.WithValue(ctx, CtxMqttClient{}, mq)
 }
@@ -206,6 +208,27 @@ func MQTTClientFromContext(ctx context.Context) (*MqttClient, bool) {
 
 func MustMQTTClientFromContext(ctx context.Context) *MqttClient {
 	v, ok := MQTTClientFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithCustomMetrics(ctx context.Context, mt custommetrics.Metrics) context.Context {
+	return contextx.WithValue(ctx, CtxCustomMetrics{}, mt)
+}
+
+func WithCustomMetricsContext(mt custommetrics.Metrics) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxCustomMetrics{}, mt)
+	}
+}
+
+func CustomMetricsFromContext(ctx context.Context) (custommetrics.Metrics, bool) {
+	v, ok := ctx.Value(CtxCustomMetrics{}).(custommetrics.Metrics)
+	return v, ok
+}
+
+func MustCustomMetricsFromContext(ctx context.Context) custommetrics.Metrics {
+	v, ok := CustomMetricsFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

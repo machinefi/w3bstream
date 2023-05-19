@@ -2,6 +2,7 @@ package ratelimit
 
 import (
 	"context"
+
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/modules/ratelimit"
@@ -9,20 +10,15 @@ import (
 
 type CreateTrafficRateLimit struct {
 	httpx.MethodPost
-	ProjectName                         string `in:"path" name:"projectName"`
-	ratelimit.CreateTrafficRateLimitReq `in:"body"`
-}
-
-func (r *CreateTrafficRateLimit) Path() string {
-	return "/:projectName"
+	ratelimit.CreateReq `in:"body"`
 }
 
 func (r *CreateTrafficRateLimit) Output(ctx context.Context) (interface{}, error) {
-	a := middleware.CurrentAccountFromContext(ctx)
-	ctx, err := a.WithProjectContextByName(ctx, r.ProjectName)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
+	ctx, err := ca.WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
 	if err != nil {
 		return nil, err
 	}
 
-	return ratelimit.CreateRateLimit(ctx, &r.CreateTrafficRateLimitReq)
+	return ratelimit.Create(ctx, &r.CreateReq)
 }

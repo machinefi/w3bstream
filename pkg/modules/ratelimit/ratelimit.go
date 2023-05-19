@@ -2,33 +2,34 @@ package ratelimit
 
 import (
 	"context"
-	"fmt"
-	"strconv"
-	"time"
-
-	"github.com/go-co-op/gocron"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/job"
 	"github.com/machinefi/w3bstream/pkg/types"
-	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
 
-type CreateTrafficRateLimitReq struct {
-	models.RateLimitInfo
+func GetBySFID(ctx context.Context, id types.SFID) (*models.TrafficRateLimit, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.TrafficRateLimit{RelRateLimit: models.RelRateLimit{RateLimitID: id}}
+
+	if err := m.FetchByRateLimitID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.TrafficRateLimitNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return m, nil
 }
 
-func CreateRateLimit(ctx context.Context, r *CreateTrafficRateLimitReq) (*models.TrafficRateLimit, error) {
+func Create(ctx context.Context, r *CreateReq) (*models.TrafficRateLimit, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 	project := types.MustProjectFromContext(ctx)
-
-	_, l = l.Start(ctx, "CreateTrafficRateLimit")
-	defer l.End()
 
 	m := &models.TrafficRateLimit{
 		RelRateLimit: models.RelRateLimit{RateLimitID: idg.MustGenSFID()},
@@ -41,96 +42,120 @@ func CreateRateLimit(ctx context.Context, r *CreateTrafficRateLimitReq) (*models
 		},
 	}
 	if err := m.Create(d); err != nil {
-		l.Error(err)
-		return nil, err
+		if sqlx.DBErr(err).IsConflict() {
+			return nil, status.RateLimitConflict
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
 
-	//t := job.NewTrafficTask(*m)
-	//job.Dispatch(ctx, t)
-	//time.Sleep(3 * time.Second)
-
-	// TODO delete this, use TrafficTask.Scheduler
-	rDB := kvdb.MustRedisDBKeyFromContext(ctx)
-	prj := types.MustProjectFromContext(ctx)
-	schedulerJobs := types.MustSchedulerJobsFromContext(ctx)
-	s, ok := schedulerJobs.Jobs.Load(prj.Name)
-	if !ok || s == nil {
-		s := gocron.NewScheduler(time.UTC)
-		genSchedulerJob(prj.Name, m.RateLimitInfo, rDB, s)
-		s.StartImmediately()
-		s.StartAsync()
-		schedulerJobs.Jobs.Store(prj.Name, s)
-	} else {
-		s.Clear()
-		genSchedulerJob(prj.Name, m.RateLimitInfo, rDB, s)
-	}
+	t := job.NewTrafficTaskWithPrjName(project.Name, *m)
+	job.Dispatch(ctx, t)
 
 	return m, nil
 }
 
-func UpdateRateLimit(ctx context.Context, rateLimitID types.SFID, r *CreateTrafficRateLimitReq) (*models.TrafficRateLimit, error) {
+func Update(ctx context.Context, r *UpdateReq) (*models.TrafficRateLimit, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-	m := &models.TrafficRateLimit{RelRateLimit: models.RelRateLimit{RateLimitID: rateLimitID}}
-
-	_, l = l.Start(ctx, "UpdateTrafficRateLimit")
-	defer l.End()
+	project := types.MustProjectFromContext(ctx)
+	m := &models.TrafficRateLimit{RelRateLimit: models.RelRateLimit{RateLimitID: r.RateLimitID}}
 
 	err := sqlx.NewTasks(d).With(
-		func(db sqlx.DBExecutor) error {
-			return m.FetchByRateLimitID(d)
+		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
+			var err error
+			m, err = GetBySFID(ctx, r.RateLimitID)
+			return err
 		},
-		func(db sqlx.DBExecutor) error {
+		func(d sqlx.DBExecutor) error {
 			m.RateLimitInfo.Threshold = r.Threshold
 			m.RateLimitInfo.CycleNum = r.CycleNum
 			m.RateLimitInfo.CycleUnit = r.CycleUnit
 			m.RateLimitInfo.ApiType = r.ApiType
-			return m.UpdateByRateLimitID(d)
+			if err := m.UpdateByRateLimitID(d); err != nil {
+				if sqlx.DBErr(err).IsConflict() {
+					return status.RateLimitConflict
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
 		},
 	).Do()
 
 	if err != nil {
-		l.Error(err)
-		return nil, status.CheckDatabaseError(err, "UpdateTrafficRateLimit")
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
 
-	// TODO update window
+	t := job.NewTrafficTaskWithPrjName(project.Name, *m)
+	job.Dispatch(ctx, t)
 
 	return m, nil
 }
 
-func genSchedulerJob(projectName string, rateLimitInfo models.RateLimitInfo, rDB *kvdb.RedisDB, s *gocron.Scheduler) {
-	now := time.Now().UTC()
-	seconds := 0
-	switch rateLimitInfo.CycleUnit {
-	case enums.TRAFFIC_CYCLE__MINUTE:
-		nextMinute := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, now.Location())
-		s.Every(rateLimitInfo.CycleNum).Minutes().StartAt(nextMinute)
-		seconds = rateLimitInfo.CycleNum * 60
-	case enums.TRAFFIC_CYCLE__HOUR:
-		nextHour := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, now.Location())
-		s.Every(rateLimitInfo.CycleNum).Hours().StartAt(nextHour)
-		seconds = rateLimitInfo.CycleNum * 60 * 60
-	case enums.TRAFFIC_CYCLE__DAY:
-		nextDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-		s.Every(rateLimitInfo.CycleNum).Day().StartAt(nextDay)
-		seconds = rateLimitInfo.CycleNum * 60 * 60 * 24
-	case enums.TRAFFIC_CYCLE__MONTH:
-		nextMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
-		s.Every(rateLimitInfo.CycleNum).Day().StartAt(nextMonth)
-		seconds = rateLimitInfo.CycleNum * 60 * 60 * 24 * 31
-	case enums.TRAFFIC_CYCLE__YEAR:
-		nextYear := time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
-		s.Every(rateLimitInfo.CycleNum).Day().StartAt(nextYear)
-		seconds = rateLimitInfo.CycleNum * 60 * 60 * 24 * 31 * 366
+func ListByCond(ctx context.Context, r *CondArgs) (data []models.TrafficRateLimit, err error) {
+	var (
+		d = types.MustMgrDBExecutorFromContext(ctx)
+		m = &models.TrafficRateLimit{}
+	)
+	data, err = m.List(d, r.Condition())
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
-	s.Do(resetWindow, projectName, rateLimitInfo.Threshold, int64(seconds), rDB)
+	return data, nil
 }
 
-func resetWindow(projectName string, threshold int, exp int64, rDB *kvdb.RedisDB) {
-	err := rDB.SetKeyWithEX(projectName, []byte(strconv.Itoa(threshold)), exp)
+func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
+	var (
+		d = types.MustMgrDBExecutorFromContext(ctx)
+
+		rate = &models.TrafficRateLimit{}
+		prj  = types.MustProjectFromContext(ctx)
+		ret  = &ListDetailRsp{}
+		err  error
+
+		cond = r.Condition()
+		adds = r.Additions()
+	)
+
+	expr := builder.Select(builder.MultiWith(",",
+		builder.Alias(prj.ColName(), "f_project_name"),
+		rate.ColProjectID(),
+		rate.ColRateLimitID(),
+		rate.ColThreshold(),
+		rate.ColCycleNum(),
+		rate.ColCycleUnit(),
+		rate.ColApiType(),
+		rate.ColCreatedAt(),
+		rate.ColUpdatedAt(),
+	)).From(
+		d.T(rate),
+		append([]builder.Addition{
+			builder.LeftJoin(d.T(prj)).On(rate.ColProjectID().Eq(prj.ColProjectID())),
+			builder.Where(builder.And(cond, prj.ColDeletedAt().Neq(0))),
+		}, adds...)...,
+	)
+	err = d.QueryAndScan(expr, ret.Data)
 	if err != nil {
-		fmt.Println(err)
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
-	fmt.Println(strconv.Itoa(threshold) + "s" + time.Now().Format("2006-01-02 15:04:05"))
+	ret.Total, err = rate.Count(d, cond)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return ret, nil
+}
+
+func GetByProjectAndType(ctx context.Context, id types.SFID, apiType enums.RateLimitApiType) (*models.TrafficRateLimit, error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.TrafficRateLimit{
+		RelProject:    models.RelProject{ProjectID: id},
+		RateLimitInfo: models.RateLimitInfo{ApiType: apiType},
+	}
+
+	if err := m.FetchByProjectIDAndApiType(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.TrafficRateLimitNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return m, nil
 }

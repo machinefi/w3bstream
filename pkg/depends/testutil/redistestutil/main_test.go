@@ -1,20 +1,16 @@
 package redistestutil_test
 
 import (
-	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
 
-	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 	. "github.com/machinefi/w3bstream/pkg/depends/testutil/redistestutil"
 )
 
 func TestInit(t *testing.T) {
-	os.Setenv(consts.GoRuntimeEnv, consts.DevelopEnv)
-
 	NewWithT(t).Expect(Endpoint.Endpoint.String()).To(Equal("tcp://127.0.0.1:6379"))
-	NewWithT(t).Expect(Endpoint.Prefix).To(Equal("dev:test:"))
+	NewWithT(t).Expect(Endpoint.Prefix).To(Equal("prod:test:"))
 
 	NewWithT(t).Expect(Redis.Host).To(Equal("127.0.0.1"))
 	NewWithT(t).Expect(Redis.Port).To(Equal(6379))

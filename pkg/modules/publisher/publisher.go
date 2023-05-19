@@ -3,242 +3,249 @@ package publisher
 import (
 	"context"
 
-	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
-	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
+	confjwt "github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
-	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-type CreatePublisherReq struct {
-	Name string `json:"name"`
-	Key  string `json:"key"`
+var _publisherMtc = prometheus.NewGaugeVec(
+	prometheus.GaugeOpts{
+		Name: "publishers_metrics",
+		Help: "registered publishers for the project.",
+	},
+	[]string{"account", "project"},
+)
+
+func init() {
+	prometheus.MustRegister(_publisherMtc)
 }
 
-func CreatePublisher(ctx context.Context, projectID types.SFID, r *CreatePublisherReq) (*models.Publisher, error) {
+func GetBySFID(ctx context.Context, id types.SFID) (*models.Publisher, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-	j := jwt.MustConfFromContext(ctx)
-	idg := confid.MustSFIDGeneratorFromContext(ctx)
+	m := &models.Publisher{RelPublisher: models.RelPublisher{PublisherID: id}}
 
-	_, l = l.Start(ctx, "CreatePublisher")
-	defer l.End()
-
-	// TODO generate token, maybe use public key
-	publisherID := idg.MustGenSFID()
-	token, err := j.GenerateTokenByPayload(publisherID)
-	if err != nil {
-		l.Error(err)
-		return nil, status.InternalServerError.StatusErr().WithDesc(err.Error())
+	if err := m.FetchByPublisherID(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.PublisherNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
-
-	m := &models.Publisher{
-		RelProject:    models.RelProject{ProjectID: projectID},
-		RelPublisher:  models.RelPublisher{PublisherID: publisherID},
-		PublisherInfo: models.PublisherInfo{Name: r.Name, Key: r.Key, Token: token},
-	}
-	if err = m.Create(d); err != nil {
-		l.Error(err)
-		return nil, err
-	}
-
 	return m, nil
 }
 
-func GetPublisherByPublisherKey(ctx context.Context, publisherKey string) (*models.Publisher, error) {
+func GetByProjectAndKey(ctx context.Context, prj types.SFID, key string) (*models.Publisher, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
 	m := &models.Publisher{
-		PublisherInfo: models.PublisherInfo{Key: publisherKey},
+		RelProject:    models.RelProject{ProjectID: prj},
+		PublisherInfo: models.PublisherInfo{Key: key},
 	}
 
-	_, l = l.Start(ctx, "GetPublisherByPublisherKey")
-
-	if err := m.FetchByKey(d); err != nil {
-		l.Error(err)
-		return nil, status.CheckDatabaseError(err, "GetPublisherByPublisherKey")
+	if err := m.FetchByProjectIDAndKey(d); err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.PublisherNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
-
 	return m, nil
 }
 
-type ListPublisherReq struct {
-	projectID types.SFID
-	datatypes.Pager
-}
-
-func (r *ListPublisherReq) SetCurrentProject(prjID types.SFID) { r.projectID = prjID }
-
-func (r *ListPublisherReq) Condition() builder.SqlCondition {
-	m := &models.Publisher{}
-	return m.ColProjectID().Eq(r.projectID)
-}
-
-func (r *ListPublisherReq) Additions() builder.Additions { return nil }
-
-type InfoPublisher struct {
-	models.Publisher
-	ProjectName string `db:"f_project_name"`
-	datatypes.OperationTimes
-}
-
-type ListPublisherRsp struct {
-	Total int64           `json:"total"`
-	Data  []InfoPublisher `json:"data"`
-}
-
-func ListPublisher(ctx context.Context, r *ListPublisherReq) (*ListPublisherRsp, error) {
+func ListByCond(ctx context.Context, r *CondArgs) (data []models.Publisher, err error) {
 	var (
-		l = types.MustLoggerFromContext(ctx)
+		d = types.MustMgrDBExecutorFromContext(ctx)
+		m = &models.Publisher{}
+	)
+	data, err = m.List(d, r.Condition())
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return data, nil
+}
+
+func List(ctx context.Context, r *ListReq) (*ListRsp, error) {
+	var (
+		d = types.MustMgrDBExecutorFromContext(ctx)
+		m = &models.Publisher{}
+
+		ret = &ListRsp{}
+		err error
+
+		cond = r.Condition()
+		adds = r.Additions()
+	)
+
+	ret.Data, err = m.List(d, cond, adds...)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	ret.Total, err = m.Count(d, cond)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return ret, nil
+}
+
+func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
+	var (
 		d = types.MustMgrDBExecutorFromContext(ctx)
 
-		ret        = &ListPublisherRsp{}
-		err        error
-		cond       = r.Condition()
-		mPublisher = &models.Publisher{}
-		mProject   = &models.Project{}
+		pub = &models.Publisher{}
+		prj = types.MustProjectFromContext(ctx)
+		ret = &ListDetailRsp{}
+		err error
+
+		cond = r.Condition()
+		adds = r.Additions()
 	)
 
-	_, l = l.Start(ctx, "ListPublisher")
-	defer l.End()
-
-	ret.Total, err = mPublisher.Count(d, cond)
-	if err != nil {
-		return nil, status.CheckDatabaseError(err, "CountPublisher")
-	}
-
-	details := make([]InfoPublisher, 0)
-	err = d.QueryAndScan(
-		builder.Select(
-			builder.MultiWith(
-				",",
-				builder.Alias(mPublisher.ColProjectID(), "f_project_id"),
-				builder.Alias(mProject.ColName(), "f_project_name"),
-				builder.Alias(mPublisher.ColPublisherID(), "f_publisher_id"),
-				builder.Alias(mPublisher.ColName(), "f_name"),
-				builder.Alias(mPublisher.ColKey(), "f_key"),
-				builder.Alias(mPublisher.ColToken(), "f_token"),
-				builder.Alias(mPublisher.ColCreatedAt(), "f_created_at"),
-				builder.Alias(mPublisher.ColUpdatedAt(), "f_updated_at"),
-			),
-		).From(
-			d.T(mPublisher),
-			builder.LeftJoin(d.T(mProject)).
-				On(mPublisher.ColProjectID().Eq(mProject.ColProjectID())),
-			builder.Where(cond),
-			builder.OrderBy(
-				builder.DescOrder(mPublisher.ColCreatedAt()),
-				builder.AscOrder(mPublisher.ColName()),
-			),
-			r.Pager.Addition(),
-		),
-		&details,
+	expr := builder.Select(builder.MultiWith(",",
+		builder.Alias(prj.ColName(), "f_project_name"),
+		pub.ColProjectID(),
+		pub.ColPublisherID(),
+		pub.ColName(),
+		pub.ColKey(),
+		pub.ColCreatedAt(),
+		pub.ColUpdatedAt(),
+	)).From(
+		d.T(pub),
+		append([]builder.Addition{
+			builder.LeftJoin(d.T(prj)).On(pub.ColProjectID().Eq(prj.ColProjectID())),
+			builder.Where(builder.And(cond, prj.ColDeletedAt().Neq(0))),
+		}, adds...)...,
 	)
+	err = d.QueryAndScan(expr, ret.Data)
 	if err != nil {
-		l.Error(err)
-		return nil, status.CheckDatabaseError(err, "ListPublisher")
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
-
-	ret.Data = details
-	return ret, err
+	ret.Total, err = pub.Count(d, cond)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return ret, nil
 }
 
-type RemovePublisherReq struct {
-	ProjectName  string       `in:"path" name:"projectName"`
-	PublisherIDs []types.SFID `in:"query" name:"publisherID"`
+func RemoveBySFID(ctx context.Context, acc *models.Account, prj *models.Project, id types.SFID) error {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Publisher{}
+
+	if err := sqlx.NewTasks(d).With(
+		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
+			var err error
+			m, err = GetBySFID(ctx, id)
+			return err
+		},
+		func(d sqlx.DBExecutor) error {
+			if err := m.DeleteByPublisherID(d); err != nil {
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
+		},
+	).Do(); err != nil {
+		return err
+	}
+	_publisherMtc.WithLabelValues(acc.AccountID.String(), prj.Name).Dec()
+	return nil
 }
 
-func RemovePublisher(ctx context.Context, r *RemovePublisherReq) error {
-	var (
-		d          = types.MustMgrDBExecutorFromContext(ctx)
-		l          = types.MustLoggerFromContext(ctx)
-		mPublisher = &models.Publisher{}
-		err        error
-	)
-
-	_, l = l.Start(ctx, "RemovePublisher")
-	defer l.End()
+func RemoveByProjectAndKey(ctx context.Context, prj types.SFID, key string) error {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Publisher{}
 
 	return sqlx.NewTasks(d).With(
-		func(db sqlx.DBExecutor) error {
-			for _, id := range r.PublisherIDs {
-				mPublisher.PublisherID = id
-				if err = mPublisher.DeleteByPublisherID(d); err != nil {
-					l.Error(err)
-					return status.CheckDatabaseError(err, "DeleteByPublisherID")
-				}
+		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
+			var err error
+			m, err = GetByProjectAndKey(ctx, prj, key)
+			return err
+		},
+		func(d sqlx.DBExecutor) error {
+			if err := m.DeleteByProjectIDAndKey(d); err != nil {
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
 		},
 	).Do()
 }
 
-func UpdatePublisher(ctx context.Context, publisherID types.SFID, r *CreatePublisherReq) (err error) {
+func Remove(ctx context.Context, acc *models.Account, r *CondArgs) error {
 	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-	j := jwt.MustConfFromContext(ctx)
-	m := models.Publisher{RelPublisher: models.RelPublisher{PublisherID: publisherID}}
+	m := &models.Publisher{}
+	prj := types.MustProjectFromContext(ctx)
 
-	_, l = l.Start(ctx, "UpdatePublisher")
-	defer l.End()
+	expr := builder.Delete().From(d.T(m), builder.Where(r.Condition()))
 
-	// TODO generate token, maybe use public key
-	token, err := j.GenerateTokenByPayload(publisherID)
+	res, err := d.Exec(expr)
 	if err != nil {
-		l.Error(err)
-		return status.InternalServerError.StatusErr().WithDesc(err.Error())
+		return status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
-
-	err = sqlx.NewTasks(d).With(
-		func(db sqlx.DBExecutor) error {
-			return m.FetchByPublisherID(d)
-		},
-		func(db sqlx.DBExecutor) error {
-			m.PublisherInfo.Name = r.Name
-			m.PublisherInfo.Key = r.Key
-			m.PublisherInfo.Token = token
-			return m.UpdateByPublisherID(d)
-		},
-	).Do()
-
+	numDeleted, err := res.RowsAffected()
 	if err != nil {
-		l.Error(err)
-		return status.CheckDatabaseError(err, "UpdatePublisher")
+		return err
 	}
-
-	return
+	_publisherMtc.WithLabelValues(acc.AccountID.String(), prj.Name).Sub(float64(numDeleted))
+	return nil
 }
 
-func GetPublisherByPubKeyAndProjectName(ctx context.Context, pubKey, prjName string) (*models.Publisher, error) {
-	l := types.MustLoggerFromContext(ctx)
+func Create(ctx context.Context, acc *models.Account, prj *models.Project, r *CreateReq) (*models.Publisher, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 
-	_, l = l.Start(ctx, "GetPublisherByPubKeyAndProjectID")
-	defer l.End()
-
-	pub := &models.Publisher{PublisherInfo: models.PublisherInfo{Key: pubKey}}
-	if err := pub.FetchByKey(d); err != nil {
-		l.Error(err)
-		return nil, status.CheckDatabaseError(err, "GetPublisherByKey")
-	}
-
-	l = l.WithValues("pub_id", pub.PublisherID)
-	prj, err := project.GetProjectByProjectName(ctx, prjName)
+	id := confid.MustSFIDGeneratorFromContext(ctx).MustGenSFID()
+	token, err := confjwt.MustConfFromContext(ctx).GenerateTokenWithoutExpByPayload(id)
 	if err != nil {
-		l.Error(err)
-		return nil, err
+		return nil, status.GenPublisherTokenFailed.StatusErr().WithDesc(err.Error())
 	}
-	l = l.WithValues("project_id", prj.ProjectID)
 
-	if pub.ProjectID != prj.ProjectID {
-		l.Error(errors.New("no project permission"))
-		return nil, status.NoProjectPermission
+	pub := &models.Publisher{
+		RelProject:   models.RelProject{ProjectID: prj.ProjectID},
+		RelPublisher: models.RelPublisher{PublisherID: id},
+		PublisherInfo: models.PublisherInfo{
+			Name:  r.Name,
+			Key:   r.Key,
+			Token: token,
+		},
 	}
+
+	if err = pub.Create(d); err != nil {
+		if sqlx.DBErr(err).IsConflict() {
+			return nil, status.PublisherConflict
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	_publisherMtc.WithLabelValues(acc.AccountID.String(), prj.Name).Inc()
 	return pub, nil
+}
+
+func Update(ctx context.Context, r *UpdateReq) error {
+	var (
+		d = types.MustMgrDBExecutorFromContext(ctx)
+		m *models.Publisher
+	)
+
+	// TODO gen publisher token m.Token = "", or not ?
+
+	return sqlx.NewTasks(d).With(
+		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
+			var err error
+			m, err = GetBySFID(ctx, r.PublisherID)
+			return err
+		},
+		func(d sqlx.DBExecutor) error {
+			m.Key = r.Key
+			m.Name = r.Name
+			if err := m.UpdateByPublisherID(d); err != nil {
+				if sqlx.DBErr(err).IsConflict() {
+					return status.PublisherConflict
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
+		},
+	).Do()
 }

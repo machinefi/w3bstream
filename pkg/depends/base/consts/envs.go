@@ -4,6 +4,7 @@ const (
 	EnvProjectName    = "PRJ_NAME"
 	EnvProjectFeat    = "PRJ_FEAT"
 	EnvProjectVersion = "PRJ_VERSION"
+	EnvResourceGroup  = "RES_GROUP"
 )
 
 const (

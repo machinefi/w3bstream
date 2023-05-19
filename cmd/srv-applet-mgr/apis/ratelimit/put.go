@@ -2,30 +2,30 @@ package ratelimit
 
 import (
 	"context"
-	"github.com/machinefi/w3bstream/pkg/types"
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/modules/ratelimit"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 type UpdateTrafficRateLimit struct {
 	httpx.MethodPut
-	ProjectName                         string     `in:"path" name:"projectName"`
-	RateLimitID                         types.SFID `in:"path" name:"rateLimitID"`
-	ratelimit.CreateTrafficRateLimitReq `in:"body"`
+	RateLimitID         types.SFID `in:"path" name:"rateLimitID"`
+	ratelimit.UpdateReq `in:"body"`
 }
 
 func (r *UpdateTrafficRateLimit) Path() string {
-	return "/:projectName/:rateLimitID"
+	return "/:rateLimitID"
 }
 
 func (r *UpdateTrafficRateLimit) Output(ctx context.Context) (interface{}, error) {
-	a := middleware.CurrentAccountFromContext(ctx)
-	ctx, err := a.WithProjectContextByName(ctx, r.ProjectName)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
+	ctx, err := ca.WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
 	if err != nil {
 		return nil, err
 	}
 
-	return ratelimit.UpdateRateLimit(ctx, r.RateLimitID, &r.CreateTrafficRateLimitReq)
+	r.UpdateReq.RateLimitID = r.RateLimitID
+	return ratelimit.Update(ctx, &r.UpdateReq)
 }

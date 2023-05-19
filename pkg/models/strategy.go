@@ -9,7 +9,7 @@ import (
 // Strategy event route strategy
 // @def primary                       ID
 // @def unique_index UI_strategy_id   StrategyID
-// @def unique_index UI_prj_app_event ProjectID AppletID EventType Handler
+// @def unique_index UI_prj_app_event ProjectID AppletID EventType
 //
 //go:generate toolkit gen model Strategy --database DB
 type Strategy struct {

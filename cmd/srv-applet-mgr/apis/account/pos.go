@@ -18,7 +18,7 @@ type CreateAccountByUsernameAndPassword struct {
 func (r *CreateAccountByUsernameAndPassword) Path() string { return "/admin" }
 
 func (r *CreateAccountByUsernameAndPassword) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
 	if ca.Role != enums.ACCOUNT_ROLE__ADMIN {
 		return nil, status.NoAdminPermission
 	}

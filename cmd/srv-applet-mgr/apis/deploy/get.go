@@ -4,10 +4,9 @@ import (
 	"context"
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
-	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
-	"github.com/machinefi/w3bstream/pkg/modules/applet"
-	"github.com/machinefi/w3bstream/pkg/modules/deploy"
+	"github.com/machinefi/w3bstream/pkg/modules/vm"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 type GetInstanceByInstanceID struct {
@@ -20,12 +19,15 @@ func (r *GetInstanceByInstanceID) Path() string {
 }
 
 func (r *GetInstanceByInstanceID) Output(ctx context.Context) (interface{}, error) {
-	_, err := validateByInstance(ctx, r.InstanceID)
+	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
+		WithInstanceContextBySFID(ctx, r.InstanceID)
 	if err != nil {
 		return nil, err
 	}
 
-	return deploy.GetInstanceByInstanceID(ctx, r.InstanceID)
+	ins := types.MustInstanceFromContext(ctx)
+	ins.State, _ = vm.GetInstanceState(ins.InstanceID)
+	return ins, nil
 }
 
 type GetInstanceByAppletID struct {
@@ -38,16 +40,13 @@ func (r *GetInstanceByAppletID) Path() string {
 }
 
 func (r *GetInstanceByAppletID) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.CurrentAccountFromContext(ctx)
-
-	app, err := applet.GetAppletByAppletID(ctx, r.AppletID)
+	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
+		WithAppletContextBySFID(ctx, r.AppletID)
 	if err != nil {
 		return nil, err
 	}
 
-	if _, err = ca.ValidateProjectPerm(ctx, app.ProjectID); err != nil {
-		return nil, err
-	}
-
-	return deploy.GetInstanceByAppletID(ctx, r.AppletID)
+	ins := types.MustInstanceFromContext(ctx)
+	ins.State, _ = vm.GetInstanceState(ins.InstanceID)
+	return ins, nil
 }

@@ -26,6 +26,7 @@ var _ interface {
 type Connector struct {
 	Host       string
 	DBName     string
+	MustSchema string
 	Extra      string
 	Extensions []string
 }
@@ -36,10 +37,18 @@ func (c *Connector) Connect(ctx context.Context) (driver.Conn, error) {
 	conn, err := d.Open(c.dsn(c.DBName))
 	if err != nil {
 		if c.IsErrorUnknownDatabase(err) {
-			// for create databases
-			conn, err := d.Open(c.dsn(""))
-			if err != nil {
-				return nil, err
+			// try empty database (with default database named as username) and
+			// `postgres` database to connect endpoint for creating database
+			for _, databaseName := range []string{"", "postgres"} {
+				conn, err = d.Open(c.dsn(databaseName))
+				if err != nil {
+					if !c.IsErrorUnknownDatabase(err) {
+						return nil, err
+					} else {
+						continue
+					}
+				}
+				break
 			}
 			_, err = conn.(driver.ExecerContext).ExecContext(
 				context.Background(),
@@ -60,6 +69,17 @@ func (c *Connector) Connect(ctx context.Context) (driver.Conn, error) {
 		_, err = conn.(driver.ExecerContext).ExecContext(
 			context.Background(),
 			"CREATE EXTENSION IF NOT EXISTS "+ex+";",
+			nil,
+		)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if c.MustSchema != "" {
+		_, err = conn.(driver.ExecerContext).ExecContext(
+			context.Background(),
+			"SET SEARCH_PATH TO "+c.MustSchema+";",
 			nil,
 		)
 		if err != nil {
@@ -101,7 +121,6 @@ func (c *Connector) Migrate(ctx context.Context, db sqlx.DBExecutor) error {
 		if output != nil {
 			_, _ = io.WriteString(output, builder.ResolveExpr(expr).Query())
 			_, _ = io.WriteString(output, "\n")
-			return nil
 		}
 
 		_, err := db.Exec(expr)

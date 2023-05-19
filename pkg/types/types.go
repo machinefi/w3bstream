@@ -1,25 +1,37 @@
 package types
 
 import (
-	"github.com/go-co-op/gocron"
-	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"strings"
+
+	"github.com/go-co-op/gocron"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/validator/strfmt"
+	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
+	"github.com/machinefi/w3bstream/pkg/enums"
 )
 
 type UploadConfig struct {
-	Root          string `env:""`
-	FileSizeLimit int64  `env:""`
+	FilesizeLimitBytes int64 `env:""`
+	DiskReserveBytes   int64 `env:""`
 }
 
 func (c *UploadConfig) SetDefault() {
-	if c.Root == "" {
-		c.Root = "./asserts"
+	if c.FilesizeLimitBytes == 0 {
+		c.FilesizeLimitBytes = 1024 * 1024
 	}
-	if c.FileSizeLimit == 0 {
-		c.FileSizeLimit = 100 * 1024 * 1024
+	if c.DiskReserveBytes == 0 {
+		c.DiskReserveBytes = 20 * 1024 * 1024
+	}
+}
+
+type FileSystem struct {
+	Type enums.FileSystemMode `env:""`
+}
+
+func (f *FileSystem) SetDefault() {
+	if f.Type > enums.FILE_SYSTEM_MODE__S3 || f.Type <= 0 {
+		f.Type = enums.FILE_SYSTEM_MODE__LOCAL
 	}
 }
 
@@ -29,10 +41,14 @@ type ETHClientConfig struct {
 
 // aliases from base/types
 type (
-	SFID       = types.SFID
-	SFIDs      = types.SFIDs
-	EthAddress = types.EthAddress
-	Timestamp  = types.Timestamp
+	SFID                     = types.SFID
+	SFIDs                    = types.SFIDs
+	EthAddress               = types.EthAddress
+	Timestamp                = types.Timestamp
+	Initializer              = types.Initializer
+	ValidatedInitializer     = types.ValidatedInitializer
+	InitializerWith          = types.InitializerWith
+	ValidatedInitializerWith = types.ValidatedInitializerWith
 )
 
 type WhiteList []string
@@ -57,6 +73,15 @@ func (v *WhiteList) Validate(address string) bool {
 		}
 	}
 	return false
+}
+
+type StrategyResult struct {
+	ProjectName string     `json:"projectName" db:"f_prj_name"`
+	AppletID    types.SFID `json:"appletID"    db:"f_app_id"`
+	AppletName  string     `json:"appletName"  db:"f_app_name"`
+	InstanceID  types.SFID `json:"instanceID"  db:"f_ins_id"`
+	Handler     string     `json:"handler"     db:"f_hdl"`
+	EventType   string     `json:"eventType"   db:"f_evt"`
 }
 
 var SchedulerJobs = Schedulers{

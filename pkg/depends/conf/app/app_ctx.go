@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
 	"reflect"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -40,13 +42,13 @@ func New(setters ...OptSetter) *Ctx {
 		setter(c)
 	}
 	c.cmd = &cobra.Command{}
-	if feat, ok := os.LookupEnv(consts.EnvProjectFeat); ok {
+	if feat, ok := os.LookupEnv(consts.EnvProjectFeat); ok && feat != "" {
 		c.feat = feat
 	}
-	if version, ok := os.LookupEnv(consts.EnvProjectVersion); ok {
+	if version, ok := os.LookupEnv(consts.EnvProjectVersion); ok && version != "" {
 		c.version = version
 	}
-	if name, ok := os.LookupEnv(consts.EnvProjectName); ok {
+	if name, ok := os.LookupEnv(consts.EnvProjectName); ok && name != "" {
 		c.name = name
 	}
 	_ = os.Setenv(consts.EnvProjectName, c.name)
@@ -71,7 +73,7 @@ func (c *Ctx) Conf(configs ...interface{}) {
 	}
 
 	if key := os.Getenv(consts.GoRuntimeEnv); key == "" {
-		_ = os.Setenv(consts.GoRuntimeEnv, consts.DevelopEnv)
+		_ = os.Setenv(consts.GoRuntimeEnv, consts.ProduceEnv)
 	}
 
 	for _, v := range configs {
@@ -92,6 +94,14 @@ func (c *Ctx) Conf(configs ...interface{}) {
 		rv := reflect.ValueOf(v)
 		c.conf = append(c.conf, rv)
 
+		if zero, ok := v.(types.ZeroChecker); ok && zero.IsZero() {
+			t := reflect.Indirect(reflect.ValueOf(v)).Type()
+			log.Println(errors.Errorf(
+				"zero config: %s",
+				color.CyanString("[%s.%s]:", filepath.Base(t.PkgPath()), t.Name()),
+			))
+		}
+
 		switch conf := v.(type) {
 		case interface{ Init() }:
 			conf.Init()
@@ -108,12 +118,27 @@ func (c *Ctx) Conf(configs ...interface{}) {
 				if !value.CanInterface() {
 					continue
 				}
+				if value.Type().Kind() == reflect.Interface {
+					panic("interface type unsupported in config scanning")
+				}
+				fv := value.Interface()
+				ft := reflect.Indirect(reflect.ValueOf(fv)).Type()
+				if zero, ok := fv.(types.ZeroChecker); ok && zero.IsZero() {
+					log.Println(errors.Errorf(
+						"zero config: %s",
+						color.CyanString("[%s.%s]:", filepath.Base(ft.PkgPath()), ft.Name()),
+					))
+					continue
+				}
 				switch conf := value.Interface().(type) {
 				case interface{ Init() }:
 					conf.Init()
 				case interface{ Init() error }:
 					if err = conf.Init(); err != nil {
-						panic(errors.Errorf("conf init: %v", err))
+						panic(errors.Errorf("init failed %s %s",
+							color.CyanString("[%s.%s]:", filepath.Base(ft.PkgPath()), ft.Name()),
+							color.RedString("[%v]", err),
+						))
 					}
 				}
 			}

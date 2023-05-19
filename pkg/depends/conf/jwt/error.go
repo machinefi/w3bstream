@@ -11,6 +11,8 @@ func (Error) ServiceCode() int {
 
 const (
 	Unauthorized Error = http.StatusUnauthorized*1e6 + iota + 1
+	// @errTalk Invalid Token
 	InvalidToken
+	// @errTalk Invalid Claim
 	InvalidClaim
 )

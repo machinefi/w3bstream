@@ -12,6 +12,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/spruceid/siwe-go"
 )
@@ -42,7 +43,7 @@ func FetchOrCreateAccountByEthAddress(ctx context.Context, address types.EthAddr
 					exists = false
 					return nil
 				} else {
-					return status.CheckDatabaseError(err, "FetchAccountIdentity")
+					return status.DatabaseError.StatusErr().WithDesc(err.Error())
 				}
 			} else {
 				exists = true
@@ -55,7 +56,10 @@ func FetchOrCreateAccountByEthAddress(ctx context.Context, address types.EthAddr
 			acc = &models.Account{RelAccount: rel}
 			if exists {
 				if err := acc.FetchByAccountID(db); err != nil {
-					return status.CheckDatabaseError(err, "FetchAccount")
+					if sqlx.DBErr(err).IsNotFound() {
+						return status.AccountNotFound
+					}
+					return status.DatabaseError.StatusErr().WithDesc(err.Error())
 				}
 				if acc.State != enums.ACCOUNT_STATE__ENABLED {
 					return status.DisabledAccount
@@ -64,9 +68,8 @@ func FetchOrCreateAccountByEthAddress(ctx context.Context, address types.EthAddr
 			} else {
 				acc.Role = enums.ACCOUNT_ROLE__DEVELOPER
 				acc.State = enums.ACCOUNT_STATE__ENABLED
-				acc.OperatorPrivateKey = generateRandomPrivateKey()
 				if err := acc.Create(db); err != nil {
-					return status.CheckDatabaseError(err, "CreateAccount")
+					return status.DatabaseError.StatusErr().WithDesc(err.Error())
 				}
 				return nil
 			}
@@ -79,9 +82,25 @@ func FetchOrCreateAccountByEthAddress(ctx context.Context, address types.EthAddr
 			aci.RelAccount = rel
 			aci.Source = enums.ACCOUNT_SOURCE__SUBMIT
 			if err := aci.Create(db); err != nil {
-				return status.CheckDatabaseError(err, "CreateAccountIdentity")
+				if sqlx.DBErr(err).IsConflict() {
+					return status.AccountIdentityConflict
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			if exists {
+				return nil
+			}
+			req := operator.CreateReq{
+				AccountID:  rel.AccountID,
+				Name:       operator.DefaultOperatorName,
+				PrivateKey: generateRandomPrivateKey(),
+			}
+			ctx := types.WithMgrDBExecutor(ctx, d)
+			_, err := operator.Create(ctx, &req)
+			return err
 		},
 	).Do()
 

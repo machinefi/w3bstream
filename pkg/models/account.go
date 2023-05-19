@@ -7,10 +7,12 @@ import (
 )
 
 // Account w3bstream account
-// @def primary                  AccountID DeletedAt
+// @def primary                    ID
+// @def unique_index UI_account_id AccountID
 //
 //go:generate toolkit gen model Account --database DB
 type Account struct {
+	datatypes.PrimaryID
 	RelAccount
 	AccountInfo
 	datatypes.OperationTimesWithDeleted
@@ -26,5 +28,5 @@ type AccountInfo struct {
 	State              enums.AccountState `db:"f_state,default='1'" json:"state"`
 	Avatar             string             `db:"f_avatar,default=''" json:"avatar,omitempty"`
 	Meta               Meta               `db:"f_meta,default='{}'" json:"meta,omitempty"`
-	OperatorPrivateKey string             `db:"f_prvkey,default=''" json:"-"`
+	OperatorPrivateKey string             `db:"f_prvkey,default=''" json:"-"` // Deprecated: pls use pkg/modules/operator
 }

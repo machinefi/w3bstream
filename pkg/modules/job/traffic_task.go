@@ -16,12 +16,13 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
 
-func NewTrafficTask(traffic models.TrafficRateLimit) *TrafficTask {
-	return &TrafficTask{traffic: traffic}
+func NewTrafficTaskWithPrjName(projectName string, traffic models.TrafficRateLimit) *TrafficTask {
+	return &TrafficTask{projectName: projectName, traffic: traffic}
 }
 
 type TrafficTask struct {
-	traffic models.TrafficRateLimit
+	projectName string
+	traffic     models.TrafficRateLimit
 	mq.TaskState
 }
 
@@ -43,23 +44,21 @@ func (t *TrafficTask) Scheduler(ctx context.Context) {
 	rDB := kvdb.MustRedisDBKeyFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
 
-	// TODO project is null
-	prj := types.MustProjectFromContext(ctx)
 	schedulerJobs := types.MustSchedulerJobsFromContext(ctx)
 
 	_, l = l.Start(ctx, "trafficTaskScheduler")
 	defer l.End()
 
-	s, ok := schedulerJobs.Jobs.Load(prj.Name)
+	s, ok := schedulerJobs.Jobs.Load(t.projectName)
 	if !ok || s == nil {
 		s := gocron.NewScheduler(time.UTC)
-		genSchedulerJob(prj.Name, t.traffic.RateLimitInfo, l, rDB, s)
+		genSchedulerJob(t.projectName, t.traffic.RateLimitInfo, l, rDB, s)
 		s.StartImmediately()
 		s.StartAsync()
-		schedulerJobs.Jobs.Store(prj.Name, s)
+		schedulerJobs.Jobs.Store(t.projectName, s)
 	} else {
 		s.Clear()
-		genSchedulerJob(prj.Name, t.traffic.RateLimitInfo, l, rDB, s)
+		genSchedulerJob(t.projectName, t.traffic.RateLimitInfo, l, rDB, s)
 	}
 }
 
@@ -88,13 +87,14 @@ func genSchedulerJob(projectName string, rateLimitInfo models.RateLimitInfo, l l
 		s.Every(rateLimitInfo.CycleNum).Day().StartAt(nextYear)
 		seconds = rateLimitInfo.CycleNum * 60 * 60 * 24 * 31 * 366
 	}
-	s.Do(resetWindow, projectName, rateLimitInfo.Threshold, seconds, l, rDB)
+	s.Do(resetWindow, projectName, rateLimitInfo.Threshold, int64(seconds), l, rDB)
 }
 
-func resetWindow(projectName string, threshold int, exp int64, l log.Logger, rDB *kvdb.RedisDB) {
+func resetWindow(projectName string, threshold int, exp int64, l log.Logger, rDB *kvdb.RedisDB) error {
 	err := rDB.SetKeyWithEX(projectName, []byte(strconv.Itoa(threshold)), exp)
 	if err != nil {
 		l.Error(err)
+		return err
 	}
-	fmt.Println(strconv.Itoa(threshold) + "s" + time.Now().Format("2006-01-02 15:04:05"))
+	return nil
 }

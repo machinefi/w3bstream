@@ -3,10 +3,10 @@ name: Release
 on:
   push:
     tags:
-      - "v*"
+      - "v[0-9]+.[0-9]+.[0-9]+"
 
 jobs:
-  build:
+  release_job:
     name: Release
     runs-on: ${{ matrix.os }}
     strategy:
@@ -25,6 +25,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v2

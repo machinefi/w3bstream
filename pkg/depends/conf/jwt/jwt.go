@@ -17,13 +17,32 @@ type Jwt struct {
 
 func (c *Jwt) SetDefault() {}
 
-func (c *Jwt) Init() {}
+func (c *Jwt) Init() {
+	if c.ExpIn == 0 {
+		c.ExpIn = types.Duration(time.Hour)
+	}
+	if c.SignKey == "" {
+		c.SignKey = "xxxx" // stringsx.GenRandomVisibleString(16)
+	}
+}
 
 func (c *Jwt) GenerateTokenByPayload(payload interface{}) (string, error) {
 	claim := &Claims{
 		Payload: payload,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: &jwt.NumericDate{Time: time.Now().Add(c.ExpIn.Duration())},
+			ExpiresAt: c.getNumericDate(),
+			Issuer:    c.Issuer,
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
+	return token.SignedString([]byte(c.SignKey))
+}
+
+func (c *Jwt) GenerateTokenWithoutExpByPayload(payload interface{}) (string, error) {
+	claim := &Claims{
+		Payload: payload,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: nil,
 			Issuer:    c.Issuer,
 		},
 	}
@@ -50,6 +69,15 @@ func (c *Jwt) ParseToken(v string) (*Claims, error) {
 		return nil, InvalidClaim
 	}
 	return claim, nil
+}
+
+func (c *Jwt) getNumericDate() (numericDate *jwt.NumericDate) {
+	if c.ExpIn == 0 {
+		numericDate = nil
+	} else {
+		numericDate = &jwt.NumericDate{Time: time.Now().Add(c.ExpIn.Duration())}
+	}
+	return
 }
 
 type Claims struct {

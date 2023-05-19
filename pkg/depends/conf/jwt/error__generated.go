@@ -33,7 +33,6 @@ func (v Error) Code() int {
 		return with.ServiceCode() + int(v)
 	}
 	return int(v)
-
 }
 
 func (v Error) Key() string {
@@ -53,9 +52,9 @@ func (v Error) Msg() string {
 	case Unauthorized:
 		return ""
 	case InvalidToken:
-		return ""
+		return "Invalid Token"
 	case InvalidClaim:
-		return ""
+		return "Invalid Claim"
 	}
 	return "-"
 }
@@ -65,9 +64,9 @@ func (v Error) CanBeTalk() bool {
 	case Unauthorized:
 		return false
 	case InvalidToken:
-		return false
+		return true
 	case InvalidClaim:
-		return false
+		return true
 	}
 	return false
 }

@@ -116,6 +116,14 @@ func (*WasmLog) FieldInstanceID() string {
 	return "InstanceID"
 }
 
+func (m *WasmLog) ColSrc() *builder.Column {
+	return WasmLogTable.ColByFieldName(m.FieldSrc())
+}
+
+func (*WasmLog) FieldSrc() string {
+	return "Src"
+}
+
 func (m *WasmLog) ColLevel() *builder.Column {
 	return WasmLogTable.ColByFieldName(m.FieldLevel())
 }

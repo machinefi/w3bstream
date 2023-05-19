@@ -6,24 +6,39 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
+// RemoveApplet remove applet by applet id
 type RemoveApplet struct {
 	httpx.MethodDelete
-	applet.RemoveAppletReq
+	AppletID types.SFID `in:"path" name:"appletID"`
 }
 
-func (r *RemoveApplet) Path() string { return "/:appletID" }
+func (r *RemoveApplet) Path() string { return "/data/:appletID" }
 
 func (r *RemoveApplet) Output(ctx context.Context) (interface{}, error) {
-	a := middleware.CurrentAccountFromContext(ctx)
-	app, err := applet.GetAppletByAppletID(ctx, r.AppletID)
+	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
+		WithAppletContextBySFID(ctx, r.AppletID)
 	if err != nil {
 		return nil, err
 	}
-	if _, err := a.ValidateProjectPerm(ctx, app.ProjectID); err != nil {
+
+	return nil, applet.RemoveBySFID(ctx, r.AppletID)
+}
+
+// BatchRemoveApplet remove applets with condition under project permission
+type BatchRemoveApplet struct {
+	httpx.MethodDelete
+	applet.CondArgs
+}
+
+func (r *BatchRemoveApplet) Output(ctx context.Context) (interface{}, error) {
+	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
+		WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
+	if err != nil {
 		return nil, err
 	}
-
-	return nil, applet.RemoveApplet(ctx, &r.RemoveAppletReq)
+	r.ProjectID = types.MustProjectFromContext(ctx).ProjectID
+	return nil, applet.Remove(ctx, &r.CondArgs)
 }

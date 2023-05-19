@@ -1,6 +1,7 @@
 package types
 
 import (
+	"context"
 	"database/sql"
 	"database/sql/driver"
 	"encoding"
@@ -13,10 +14,11 @@ type (
 	String         interface{ String() string }
 	Named          interface{ Name() string }
 
-	DefaultSetter        interface{ SetDefault() }
-	Initializer          interface{ Init() }
-	ValidatedInitializer interface{ Init() error }
-	InitializerWith      interface{ Init(interface{}) }
+	DefaultSetter            interface{ SetDefault() }
+	Initializer              interface{ Init() }
+	ValidatedInitializer     interface{ Init() error }
+	InitializerWith          interface{ Init(context.Context) }
+	ValidatedInitializerWith interface{ Init(context.Context) error }
 
 	// Span defines a time duration
 	Span interface {

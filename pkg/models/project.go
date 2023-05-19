@@ -3,6 +3,7 @@ package models
 import (
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
+	_ "github.com/machinefi/w3bstream/pkg/depends/util/strfmt"
 	"github.com/machinefi/w3bstream/pkg/enums"
 )
 
@@ -26,10 +27,15 @@ type RelProject struct {
 }
 
 type ProjectName struct {
-	Name string `db:"f_name" json:"name"` // Name project name
+	Name string `db:"f_name" json:"name" validate:"@projectName"` // Name project name
 }
 
 type ProjectBase struct {
-	Version string         `db:"f_version,default=''" json:"version,omitempty"`  // Version project version
-	Proto   enums.Protocol `db:"f_proto,default='0'"  json:"protocol,omitempty"` // Proto project protocol for event publisher
+	Version     string         `db:"f_version,default=''" json:"version,omitempty"`  // Version project version
+	Proto       enums.Protocol `db:"f_proto,default='0'"  json:"protocol,omitempty"` // Proto project protocol for event publisher
+	Description string         `db:"f_description,default=''"    json:"description,omitempty"`
+}
+
+func (v *Project) DatabaseName() string {
+	return "w3b_" + v.ProjectID.String()
 }
