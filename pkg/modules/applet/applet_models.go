@@ -79,7 +79,7 @@ type CreateReq struct {
 	Info `name:"info"`
 }
 
-// BuildStrategies, must be built. if nil default strategy returned
+// BuildStrategies must be built. if nil default strategy returned
 func (r *CreateReq) BuildStrategies(ctx context.Context) []models.Strategy {
 	ids := confid.MustSFIDGeneratorFromContext(ctx).MustGenSFIDs(len(r.Strategies) + 1)
 	app := types.MustAppletFromContext(ctx)
