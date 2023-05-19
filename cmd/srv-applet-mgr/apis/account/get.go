@@ -10,15 +10,21 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
 )
 
+// Deprecated use operator.ListOperator
 type GetOperatorAddr struct {
 	httpx.MethodGet
+	AccountOperatorName string `in:"query" name:"accountOperatorName,omitempty"` // account operator name
 }
 
 func (r *GetOperatorAddr) Path() string { return "/operatoraddr" }
 
 func (r *GetOperatorAddr) Output(ctx context.Context) (interface{}, error) {
+	if r.AccountOperatorName == "" {
+		r.AccountOperatorName = operator.DefaultOperatorName
+	}
+
 	ca := middleware.MustCurrentAccountFromContext(ctx)
-	op, err := operator.GetByAccountAndName(ctx, ca.AccountID, operator.DefaultOperatorName)
+	op, err := operator.GetByAccountAndName(ctx, ca.AccountID, r.AccountOperatorName)
 	if err != nil {
 		return nil, err
 	}
