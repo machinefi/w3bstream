@@ -3,11 +3,12 @@ package postgres
 import (
 	"fmt"
 
+	"github.com/pkg/errors"
+
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/x/ptrx"
-	"github.com/pkg/errors"
 )
 
 func CreateUserIfNotExists(d sqlx.DBExecutor, usename, passwd string) (error, bool) {

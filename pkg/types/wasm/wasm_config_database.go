@@ -6,13 +6,13 @@ import (
 	"os"
 	"strings"
 
-	driverpostgres "github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/driver/postgres"
 	"github.com/pkg/errors"
 
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	confpostgres "github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
+	driverpostgres "github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/driver/postgres"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/migration"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/retry"
 	"github.com/machinefi/w3bstream/pkg/enums"

@@ -3,11 +3,12 @@ package postgres_test
 import (
 	"testing"
 
+	. "github.com/onsi/gomega"
+
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	confpostgres "github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/driver/postgres"
-	. "github.com/onsi/gomega"
 )
 
 var d *confpostgres.Endpoint
