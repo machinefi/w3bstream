@@ -251,3 +251,13 @@ func TestEthAddress(t *testing.T) {
 	cmp, err := addr.MarshalText()
 	NewWithT(t).Expect(cmp).To(Equal(bytes.ToLower(ori)))
 }
+
+func TestEcdsaPrvKey(t *testing.T) {
+	hexPrvKey, err := NewEcdsaPrvKey()
+	NewWithT(t).Expect(err).To(BeNil())
+	t.Log(hexPrvKey)
+
+	address, err := hexPrvKey.Address()
+	NewWithT(t).Expect(err).To(BeNil())
+	t.Log(address)
+}
