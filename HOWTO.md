@@ -694,7 +694,11 @@ output like
 ### Publish event through mqtt (use `pub_client` CLI)
 
 ```sh
-./pub_client -topic $TOPIC -token $PUBTOK -data $PAYLOAD
+export MQTT_HOST=localhost
+export MQTT_PORT=1883
+export MQTT_USERNAME=username
+export MQTT_PASSWORD=password
+./pub_client -topic $TOPIC -token $PUBTOK -data $PAYLOAD -host $MQTT_HOST -port $MQTT_PORT -usernmae $MQTT_USERNAME -password $MQTT_PASSWORD
 ```
 
 server log like
