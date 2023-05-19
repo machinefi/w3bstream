@@ -3,11 +3,14 @@ package wasm
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 
+	base "github.com/machinefi/w3bstream/pkg/depends/base/types"
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	confpostgres "github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
@@ -214,10 +217,17 @@ func (d *Database) Init(ctx context.Context) (err error) {
 	ep := *types.MustWasmDBEndpointFromContext(ctx)
 	ep.Base = d.Name
 
+	if ep.Param == nil {
+		ep.Param = make(url.Values)
+	}
+	ep.Param["sslmode"] = []string{"disable"}
+	ep.Param["application_name"] = []string{d.Name}
 	d.ep = &confpostgres.Endpoint{
-		Master:   ep,
-		Database: sqlx.NewDatabase(d.Name),
-		Retry:    retry.Default,
+		Master:          ep,
+		Database:        sqlx.NewDatabase(d.Name),
+		Retry:           retry.Default,
+		PoolSize:        2,
+		ConnMaxLifetime: *base.AsDuration(10 * time.Minute),
 	}
 	d.ep.SetDefault()
 
@@ -244,14 +254,24 @@ func (d *Database) Init(ctx context.Context) (err error) {
 		return err
 	}
 
-	// grant privileges
+	// create project database user and grant privileges
 	usename, passwd := prj.Privileges()
-	if err, _ = driverpostgres.CreateUserIfNotExists(d.ep, usename, passwd); err != nil {
-		return errors.Wrap(err, "create user")
-	}
-	domain := driverpostgres.PrivilegeDomainDatabase
-	if err = driverpostgres.GrantAllPrivileges(d.ep, domain, d.Name, usename); err != nil {
-		return errors.Wrap(err, "grant privilege")
+	for _, user := range []string{usename, usename + "_ext"} {
+		if err, _ = driverpostgres.CreateUserIfNotExists(d.ep, user, passwd); err != nil {
+			return errors.Wrap(err, "create user")
+		}
+		domain := driverpostgres.PrivilegeDomainDatabase
+		if err = driverpostgres.GrantAllPrivileges(d.ep, domain, d.Name, user); err != nil {
+			return errors.Wrap(err, "grant privilege")
+		}
+		conf, ok := types.WasmDBConfigFromContext(ctx)
+		if !ok {
+			conf = &types.WasmDBConfig{}
+			conf.SetDefault()
+		}
+		if err = driverpostgres.AlterUserConnectionLimit(d.ep, user, conf.MaxConnection); err != nil {
+			return errors.Wrap(err, "limit connection")
+		}
 	}
 
 	// init each schema

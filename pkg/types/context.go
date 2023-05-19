@@ -45,6 +45,7 @@ type (
 	CtxFileSystemOp      struct{}
 	CtxProxyClient       struct{}
 	CtxResourceOwnership struct{}
+	CtxWasmDBConfig      struct{} // CtxWasmDBConfig wasm database config
 )
 
 func WithStrategyResults(ctx context.Context, v []*StrategyResult) context.Context {
@@ -614,6 +615,27 @@ func UploadConfigFromContext(ctx context.Context) (*UploadConfig, bool) {
 
 func MustUploadConfigFromContext(ctx context.Context) *UploadConfig {
 	v, ok := UploadConfigFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithWasmDBConfig(ctx context.Context, v *WasmDBConfig) context.Context {
+	return contextx.WithValue(ctx, CtxWasmDBConfig{}, v)
+}
+
+func WithWasmDBConfigContext(v *WasmDBConfig) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxWasmDBConfig{}, v)
+	}
+}
+
+func WasmDBConfigFromContext(ctx context.Context) (*WasmDBConfig, bool) {
+	v, ok := ctx.Value(CtxWasmDBConfig{}).(*WasmDBConfig)
+	return v, ok
+}
+
+func MustWasmDBConfigFromContext(ctx context.Context) *WasmDBConfig {
+	v, ok := WasmDBConfigFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

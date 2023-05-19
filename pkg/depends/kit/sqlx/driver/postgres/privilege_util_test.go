@@ -76,3 +76,8 @@ func TestGrantAllPrivileges(t *testing.T) {
 	err := postgres.GrantAllPrivileges(d, postgres.PrivilegeDomainDatabase, "postgres", "root")
 	NewWithT(t).Expect(err).To(BeNil())
 }
+
+func TestAlterUserConnectionLimit(t *testing.T) {
+	err := postgres.AlterUserConnectionLimit(d, "root", 100)
+	NewWithT(t).Expect(err).To(BeNil())
+}

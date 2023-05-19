@@ -60,6 +60,13 @@ func GrantAllPrivileges(d sqlx.DBExecutor, on PrivilegeDomain, onName, usename s
 	return err
 }
 
+func AlterUserConnectionLimit(d sqlx.DBExecutor, usename string, lmt int) error {
+	_, err := d.Exec(builder.Expr(fmt.Sprintf(
+		"ALTER USER %s CONNECTION LIMIT %d", usename, lmt,
+	)))
+	return err
+}
+
 var (
 	ErrDropCurrentUser = errors.New("cannot drop current user")
 )
