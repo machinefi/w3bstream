@@ -47,6 +47,7 @@ type (
 	CtxResourceOwnership struct{}
 	CtxWasmDBConfig      struct{} // CtxWasmDBConfig wasm database config
 	CtxSchedulerJobs     struct{}
+	CtxTrafficLimit      struct{}
 )
 
 func WithStrategyResults(ctx context.Context, v []*StrategyResult) context.Context {
@@ -658,6 +659,28 @@ func SchedulerJobsFromContext(ctx context.Context) (*Schedulers, bool) {
 
 func MustSchedulerJobsFromContext(ctx context.Context) *Schedulers {
 	v, ok := SchedulerJobsFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithTrafficLimit(ctx context.Context, r *models.TrafficLimit) context.Context {
+	_r := *r
+	return contextx.WithValue(ctx, CtxTrafficLimit{}, &_r)
+}
+
+func WithTrafficLimitContext(r *models.TrafficLimit) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return WithTrafficLimit(ctx, r)
+	}
+}
+
+func TrafficLimitFromContext(ctx context.Context) (*models.TrafficLimit, bool) {
+	v, ok := ctx.Value(CtxTrafficLimit{}).(*models.TrafficLimit)
+	return v, ok
+}
+
+func MustTrafficLimitFromContext(ctx context.Context) *models.TrafficLimit {
+	v, ok := TrafficLimitFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

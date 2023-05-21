@@ -92,6 +92,25 @@ func Update(ctx context.Context, r *UpdateReq) (*models.TrafficLimit, error) {
 	return m, nil
 }
 
+func List(ctx context.Context, r *ListReq) (*ListRsp, error) {
+	var (
+		d       = types.MustMgrDBExecutorFromContext(ctx)
+		traffic = &models.TrafficLimit{}
+		ret     = &ListRsp{}
+		cond    = r.Condition()
+
+		err error
+	)
+
+	if ret.Data, err = traffic.List(d, cond, r.Addition()); err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	if ret.Total, err = traffic.Count(d, cond); err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return ret, nil
+}
+
 func ListByCond(ctx context.Context, r *CondArgs) (data []models.TrafficLimit, err error) {
 	var (
 		d = types.MustMgrDBExecutorFromContext(ctx)

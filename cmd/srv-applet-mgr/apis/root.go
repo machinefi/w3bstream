@@ -13,9 +13,9 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/project"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/project_config"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/publisher"
-	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/ratelimit"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/resource"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/strategy"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/traffic_limit"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/version"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/wasmlog"
 	confhttp "github.com/machinefi/w3bstream/pkg/depends/conf/http"
@@ -61,7 +61,7 @@ func init() {
 		auth.Register(resource.Root)
 		auth.Register(wasmlog.Root)
 		auth.Register(operator.Root)
-		auth.Register(ratelimit.Root)
+		auth.Register(traffic_limit.Root)
 	}
 
 	// root router register for event http transport

@@ -3,7 +3,6 @@ package event
 import (
 	"context"
 	"fmt"
-	"github.com/machinefi/w3bstream/pkg/modules/trafficlimit"
 	"strconv"
 	"sync"
 
@@ -14,6 +13,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/strategy"
+	"github.com/machinefi/w3bstream/pkg/modules/trafficlimit"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"

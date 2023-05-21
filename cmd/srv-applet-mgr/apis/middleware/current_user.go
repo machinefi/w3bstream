@@ -20,6 +20,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/publisher"
 	"github.com/machinefi/w3bstream/pkg/modules/resource"
 	"github.com/machinefi/w3bstream/pkg/modules/strategy"
+	"github.com/machinefi/w3bstream/pkg/modules/trafficlimit"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -223,4 +224,13 @@ func (v *CurrentAccount) WithChainTxBySFID(ctx context.Context, id types.SFID) (
 	}
 	ctx = types.WithChainTx(ctx, t)
 	return v.WithProjectContextByName(ctx, t.ProjectName)
+}
+
+func (v *CurrentAccount) WithTrafficLimitContextBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	traffic, err := trafficlimit.GetBySFID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	ctx = types.WithTrafficLimit(ctx, traffic)
+	return v.WithProjectContextBySFID(ctx, traffic.ProjectID)
 }

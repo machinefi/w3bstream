@@ -1,4 +1,4 @@
-package ratelimit
+package traffic_limit
 
 import (
 	"context"

@@ -2585,7 +2585,8 @@
               "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!",
               "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!",
               "@StatusErr[ResourcePermNotFound][404999010][Resource Perm Not Found]!",
-              "@StatusErr[StrategyNotFound][404999007][Strategy Not Found]!"
+              "@StatusErr[StrategyNotFound][404999007][Strategy Not Found]!",
+              "@StatusErr[TrafficLimitNotFound][404999020][Traffic Limit Not Found]!"
             ]
           },
           "409": {
@@ -2614,7 +2615,8 @@
               "@StatusErr[PublisherConflict][409999007][Publisher Conflict]!",
               "@StatusErr[ResourceConflict][409999003][Resource Conflict]!",
               "@StatusErr[ResourceOwnerConflict][409999004][Resource Owner Conflict]!",
-              "@StatusErr[StrategyConflict][409999005][Strategy Conflict]!"
+              "@StatusErr[StrategyConflict][409999005][Strategy Conflict]!",
+              "@StatusErr[TrafficLimitConflict][409999018][Traffic Limit Conflict]!"
             ]
           },
           "500": {
@@ -2643,6 +2645,9 @@
               "@StatusErr[MD5ChecksumFailed][500999012][Md5 Checksum Failed]!",
               "@StatusErr[MqttConnectFailed][500999014][MQTT Connect Failed]!",
               "@StatusErr[MqttSubscribeFailed][500999013][MQTT Subscribe Failed]!",
+              "@StatusErr[RateLimitKeyNotOk][500999018][RateLimit Key Not Ok]!",
+              "@StatusErr[RateLimitKeyNotOk][500999018][RateLimit Key Not Ok]!",
+              "@StatusErr[TrafficLimitExceeded][500999017][Traffic Limit Exceeded Failed]!",
               "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
             ]
           }
@@ -7139,6 +7144,544 @@
         }
       }
     },
+    "/srv-applet-mgr/v0/traffic/data/{trafficLimitID}": {
+      "get": {
+        "tags": [
+          "apis/traffic_limit"
+        ],
+        "operationId": "GetTrafficLimit",
+        "parameters": [
+          {
+            "name": "trafficLimitID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                },
+                {
+                  "x-go-field-name": "TrafficLimitID",
+                  "x-tag-name": "trafficLimitID"
+                }
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsTrafficLimit"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[TrafficLimitNotFound][404999020][Traffic Limit Not Found]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
+    "/srv-applet-mgr/v0/traffic/x/{projectName}": {
+      "post": {
+        "tags": [
+          "apis/traffic_limit"
+        ],
+        "operationId": "CreateTrafficLimit",
+        "parameters": [
+          {
+            "name": "projectName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "projectName",
+              "x-go-field-name": "ProjectName",
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesTrafficlimitCreateReq"
+                  },
+                  {
+                    "x-go-field-name": "CreateReq"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsTrafficLimit"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+            ]
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[TrafficLimitConflict][409999018][Traffic Limit Conflict]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
+    "/srv-applet-mgr/v0/traffic/x/{projectName}/datalist": {
+      "get": {
+        "tags": [
+          "apis/traffic_limit"
+        ],
+        "operationId": "ListTrafficLimit",
+        "parameters": [
+          {
+            "name": "projectName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "projectName",
+              "x-go-field-name": "ProjectName",
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "apiType",
+            "in": "query",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsTrafficLimitType"
+                },
+                {
+                  "x-go-field-name": "ApiType",
+                  "x-tag-name": "apiType,omitempty"
+                }
+              ]
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 9223372036854776000,
+              "minimum": 0,
+              "default": "0",
+              "x-go-field-name": "Offset",
+              "x-tag-name": "offset,omitempty",
+              "x-tag-validate": "@int64[0,]"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 9223372036854776000,
+              "minimum": -1,
+              "default": "10",
+              "x-go-field-name": "Size",
+              "x-tag-name": "size,omitempty",
+              "x-tag-validate": "@int64[-1,]"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesTrafficlimitListRsp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
+    "/srv-applet-mgr/v0/traffic/x/{projectName}/{trafficLimitID}": {
+      "put": {
+        "tags": [
+          "apis/traffic_limit"
+        ],
+        "operationId": "UpdateTrafficLimit",
+        "parameters": [
+          {
+            "name": "projectName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "projectName",
+              "x-go-field-name": "ProjectName",
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
+            }
+          },
+          {
+            "name": "trafficLimitID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                },
+                {
+                  "x-go-field-name": "TrafficLimitID",
+                  "x-tag-name": "trafficLimitID"
+                }
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesTrafficlimitUpdateReq"
+                  },
+                  {
+                    "x-go-field-name": "UpdateReq"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsTrafficLimit"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[TrafficLimitNotFound][404999020][Traffic Limit Not Found]!"
+            ]
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[TrafficLimitConflict][409999018][Traffic Limit Conflict]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
     "/srv-applet-mgr/v0/wasmlog/{instanceID}": {
       "delete": {
         "tags": [
@@ -7592,6 +8135,40 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.Protocol",
         "x-id": "GithubComMachinefiW3BstreamPkgEnumsProtocol"
+      },
+      "GithubComMachinefiW3BstreamPkgEnumsTrafficCycle": {
+        "type": "string",
+        "enum": [
+          "MINUTE",
+          "HOUR",
+          "DAY",
+          "WEEK",
+          "MONTH",
+          "YEAR"
+        ],
+        "x-enum-labels": [
+          "MINUTE",
+          "HOUR",
+          "DAY",
+          "WEEK",
+          "MONTH",
+          "YEAR"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.TrafficCycle",
+        "x-id": "GithubComMachinefiW3BstreamPkgEnumsTrafficCycle"
+      },
+      "GithubComMachinefiW3BstreamPkgEnumsTrafficLimitType": {
+        "type": "string",
+        "enum": [
+          "EVENT",
+          "BLOCKCHAIN"
+        ],
+        "x-enum-labels": [
+          "EVENT",
+          "BLOCKCHAIN"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.TrafficLimitType",
+        "x-id": "GithubComMachinefiW3BstreamPkgEnumsTrafficLimitType"
       },
       "GithubComMachinefiW3BstreamPkgEnumsWasmDBDatatype": {
         "type": "string",
@@ -8614,6 +9191,27 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.RelStrategy",
         "x-id": "GithubComMachinefiW3BstreamPkgModelsRelStrategy"
       },
+      "GithubComMachinefiW3BstreamPkgModelsRelTrafficLimit": {
+        "type": "object",
+        "properties": {
+          "trafficLimitID": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+              },
+              {
+                "x-go-field-name": "TrafficLimitID",
+                "x-tag-json": "trafficLimitID"
+              }
+            ]
+          }
+        },
+        "required": [
+          "trafficLimitID"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.RelTrafficLimit",
+        "x-id": "GithubComMachinefiW3BstreamPkgModelsRelTrafficLimit"
+      },
       "GithubComMachinefiW3BstreamPkgModelsResource": {
         "allOf": [
           {
@@ -8751,6 +9349,78 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.StrategyInfo",
         "x-id": "GithubComMachinefiW3BstreamPkgModelsStrategyInfo"
+      },
+      "GithubComMachinefiW3BstreamPkgModelsTrafficLimit": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPrimaryID"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsRelTrafficLimit"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsRelProject"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsTrafficLimitInfo"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimesWithDeleted"
+          },
+          {
+            "type": "object",
+            "description": "TrafficLimit traffic limit for each project",
+            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.TrafficLimit",
+            "x-id": "GithubComMachinefiW3BstreamPkgModelsTrafficLimit"
+          }
+        ]
+      },
+      "GithubComMachinefiW3BstreamPkgModelsTrafficLimitInfo": {
+        "type": "object",
+        "properties": {
+          "apiType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsTrafficLimitType"
+              },
+              {
+                "x-go-field-name": "ApiType",
+                "x-tag-json": "apiType"
+              }
+            ]
+          },
+          "cycleNum": {
+            "type": "integer",
+            "format": "int32",
+            "x-go-field-name": "CycleNum",
+            "x-tag-json": "cycleNum"
+          },
+          "cycleUnit": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsTrafficCycle"
+              },
+              {
+                "x-go-field-name": "CycleUnit",
+                "x-tag-json": "cycleUnit"
+              }
+            ]
+          },
+          "threshold": {
+            "type": "integer",
+            "format": "int32",
+            "x-go-field-name": "Threshold",
+            "x-tag-json": "threshold"
+          }
+        },
+        "required": [
+          "threshold",
+          "cycleNum",
+          "cycleUnit",
+          "apiType"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.TrafficLimitInfo",
+        "x-id": "GithubComMachinefiW3BstreamPkgModelsTrafficLimitInfo"
       },
       "GithubComMachinefiW3BstreamPkgModulesAccountCreateAccountByUsernameReq": {
         "type": "object",
@@ -9683,6 +10353,55 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/strategy.ListRsp",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesStrategyListRsp"
+      },
+      "GithubComMachinefiW3BstreamPkgModulesTrafficlimitCreateReq": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsTrafficLimitInfo"
+          },
+          {
+            "type": "object",
+            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/trafficlimit.CreateReq",
+            "x-id": "GithubComMachinefiW3BstreamPkgModulesTrafficlimitCreateReq"
+          }
+        ]
+      },
+      "GithubComMachinefiW3BstreamPkgModulesTrafficlimitListRsp": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsTrafficLimit"
+            },
+            "x-go-field-name": "Data",
+            "x-tag-json": "data"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "x-go-field-name": "Total",
+            "x-tag-json": "total"
+          }
+        },
+        "required": [
+          "data",
+          "total"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/trafficlimit.ListRsp",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesTrafficlimitListRsp"
+      },
+      "GithubComMachinefiW3BstreamPkgModulesTrafficlimitUpdateReq": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsTrafficLimitInfo"
+          },
+          {
+            "type": "object",
+            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/trafficlimit.UpdateReq",
+            "x-id": "GithubComMachinefiW3BstreamPkgModulesTrafficlimitUpdateReq"
+          }
+        ]
       },
       "GithubComMachinefiW3BstreamPkgTypesWasmCache": {
         "type": "object",

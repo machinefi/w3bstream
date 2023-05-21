@@ -1,12 +1,13 @@
 package types
 
 import (
-	"github.com/go-co-op/gocron"
-	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"strings"
+
+	"github.com/go-co-op/gocron"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/validator/strfmt"
+	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 )
 

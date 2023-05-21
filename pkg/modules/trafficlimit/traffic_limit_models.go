@@ -18,7 +18,7 @@ type UpdateReq struct {
 }
 
 type CondArgs struct {
-	ProjectID types.SFID             `in:"query" name:"projectID,omitempty"`
+	ProjectID types.SFID             `name:"-"`
 	ApiType   enums.TrafficLimitType `in:"query" name:"apiType,omitempty"`
 }
 
