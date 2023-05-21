@@ -83,6 +83,8 @@ const (
 	InvalidAppletContext
 	// @errTalk No Resource Permission
 	NoResourcePermission
+	// @errTalk No Traffic Limit Permission
+	NoTrafficLimitPermission
 )
 
 const (

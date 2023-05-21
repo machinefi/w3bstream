@@ -26,6 +26,11 @@ func (r *UpdateTrafficLimit) Output(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
+	ctx, err = ca.WithTrafficLimitContextBySFIDAndProjectName(ctx, r.TrafficLimitID)
+	if err != nil {
+		return nil, err
+	}
+
 	r.UpdateReq.TrafficLimitID = r.TrafficLimitID
 	return trafficlimit.Update(ctx, &r.UpdateReq)
 }

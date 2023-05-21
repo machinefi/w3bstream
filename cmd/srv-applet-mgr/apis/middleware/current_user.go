@@ -234,3 +234,15 @@ func (v *CurrentAccount) WithTrafficLimitContextBySFID(ctx context.Context, id t
 	ctx = types.WithTrafficLimit(ctx, traffic)
 	return v.WithProjectContextBySFID(ctx, traffic.ProjectID)
 }
+
+func (v *CurrentAccount) WithTrafficLimitContextBySFIDAndProjectName(ctx context.Context, id types.SFID) (context.Context, error) {
+	traffic, err := trafficlimit.GetBySFID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	project := types.MustProjectFromContext(ctx)
+	if traffic.ProjectID != project.ProjectID {
+		return nil, status.NoTrafficLimitPermission
+	}
+	return types.WithTrafficLimit(ctx, traffic), nil
+}
