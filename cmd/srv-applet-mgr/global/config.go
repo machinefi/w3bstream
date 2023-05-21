@@ -2,7 +2,6 @@ package global
 
 import (
 	"context"
-	confrate "github.com/machinefi/w3bstream/pkg/depends/conf/rate_limit"
 	"os"
 	"time"
 
@@ -19,6 +18,7 @@ import (
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	confpostgres "github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
+	confrate "github.com/machinefi/w3bstream/pkg/depends/conf/rate_limit"
 	confredis "github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/client"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
@@ -29,6 +29,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
 
 var (
@@ -146,6 +147,8 @@ func init() {
 		types.WithProxyClientContext(proxy),
 		types.WithWasmDBConfigContext(config.WasmDBConfig),
 		confrate.WithRateLimitKeyContext(config.RateLimit),
+		kvdb.WithRedisDBKeyContext(kvdb.NewRedisDB(config.Redis)),
+		types.WithSchedulerJobsContext(&types.SchedulerJobs),
 	)
 	Context = WithContext(context.Background())
 }

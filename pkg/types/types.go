@@ -1,6 +1,8 @@
 package types
 
 import (
+	"github.com/go-co-op/gocron"
+	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"strings"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
@@ -89,4 +91,12 @@ func (c *WasmDBConfig) SetDefault() {
 	if c.MaxConnection == 0 {
 		c.MaxConnection = 2
 	}
+}
+
+var SchedulerJobs = Schedulers{
+	Jobs: *mapx.New[string, *gocron.Scheduler](),
+}
+
+type Schedulers struct {
+	Jobs mapx.Map[string, *gocron.Scheduler]
 }

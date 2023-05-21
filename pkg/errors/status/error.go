@@ -42,6 +42,10 @@ const (
 	BatchRemoveWasmLogFailed
 	// @errTalk Gen Token Failed
 	GenTokenFailed
+	// @errTalk Traffic Limit Exceeded Failed
+	TrafficLimitExceeded
+	// @errTalk RateLimit Key Not Ok
+	RateLimitKeyNotOk
 )
 
 const (
@@ -133,6 +137,8 @@ const (
 	AccountPasswordConflict
 	// @errTalk Operator Conflict
 	OperatorConflict
+	// @errTalk Traffic Limit Conflict
+	TrafficLimitConflict
 )
 
 const (
@@ -187,4 +193,6 @@ const (
 	AccountPasswordNotFound
 	// @errTalk Operator Not Found
 	OperatorNotFound
+	// @errTalk Traffic Limit Not Found
+	TrafficLimitNotFound
 )

@@ -133,6 +133,8 @@ func (v Error) Key() string {
 		return "AccountPasswordNotFound"
 	case OperatorNotFound:
 		return "OperatorNotFound"
+	case TrafficLimitNotFound:
+		return "TrafficLimitNotFound"
 	case Conflict:
 		return "Conflict"
 	case ProjectNameConflict:
@@ -167,6 +169,8 @@ func (v Error) Key() string {
 		return "AccountPasswordConflict"
 	case OperatorConflict:
 		return "OperatorConflict"
+	case TrafficLimitConflict:
+		return "TrafficLimitConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -199,6 +203,10 @@ func (v Error) Key() string {
 		return "BatchRemoveWasmLogFailed"
 	case GenTokenFailed:
 		return "GenTokenFailed"
+	case TrafficLimitExceeded:
+		return "TrafficLimitExceeded"
+	case RateLimitKeyNotOk:
+		return "RateLimitKeyNotOk"
 	}
 	return "UNKNOWN"
 }
@@ -301,6 +309,8 @@ func (v Error) Msg() string {
 		return "Account Password Not Found"
 	case OperatorNotFound:
 		return "Operator Not Found"
+	case TrafficLimitNotFound:
+		return "Traffic Limit Not Found"
 	case Conflict:
 		return "Conflict conflict error"
 	case ProjectNameConflict:
@@ -335,6 +345,8 @@ func (v Error) Msg() string {
 		return "Account Password Conflict"
 	case OperatorConflict:
 		return "Operator Conflict"
+	case TrafficLimitConflict:
+		return "Traffic Limit Conflict"
 	case InternalServerError:
 		return "internal error"
 	case DatabaseError:
@@ -367,6 +379,10 @@ func (v Error) Msg() string {
 		return "Batch Remove WasmLog Failed"
 	case GenTokenFailed:
 		return "Gen Token Failed"
+	case TrafficLimitExceeded:
+		return "Traffic Limit Exceeded Failed"
+	case RateLimitKeyNotOk:
+		return "RateLimit Key Not Ok"
 	}
 	return "-"
 }
@@ -469,6 +485,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case OperatorNotFound:
 		return true
+	case TrafficLimitNotFound:
+		return true
 	case Conflict:
 		return true
 	case ProjectNameConflict:
@@ -503,6 +521,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case OperatorConflict:
 		return true
+	case TrafficLimitConflict:
+		return true
 	case InternalServerError:
 		return false
 	case DatabaseError:
@@ -534,6 +554,10 @@ func (v Error) CanBeTalk() bool {
 	case BatchRemoveWasmLogFailed:
 		return true
 	case GenTokenFailed:
+		return true
+	case TrafficLimitExceeded:
+		return true
+	case RateLimitKeyNotOk:
 		return true
 	}
 	return false

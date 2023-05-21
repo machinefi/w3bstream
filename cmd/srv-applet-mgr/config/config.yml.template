@@ -42,6 +42,8 @@ SRV_APPLET_MGR__Postgres_PoolSize: "10"
 SRV_APPLET_MGR__Postgres_Retry_Interval: 3s
 SRV_APPLET_MGR__Postgres_Retry_Repeats: "3"
 SRV_APPLET_MGR__Postgres_Slave: ""
+SRV_APPLET_MGR__RateLimit_Count: "0"
+SRV_APPLET_MGR__RateLimit_Duration: 0s
 SRV_APPLET_MGR__Redis_ConnectTimeout: 10s
 SRV_APPLET_MGR__Redis_DB: "1"
 SRV_APPLET_MGR__Redis_Host: 127.0.0.1
@@ -50,7 +52,7 @@ SRV_APPLET_MGR__Redis_MaxActive: "5"
 SRV_APPLET_MGR__Redis_MaxIdle: "3"
 SRV_APPLET_MGR__Redis_Password: ""
 SRV_APPLET_MGR__Redis_Port: "6379"
-SRV_APPLET_MGR__Redis_Prefix: 'prod:srv-applet-mgr:'
+SRV_APPLET_MGR__Redis_Prefix: 'dev:srv-applet-mgr:'
 SRV_APPLET_MGR__Redis_Protocol: tcp
 SRV_APPLET_MGR__Redis_ReadTimeout: 10s
 SRV_APPLET_MGR__Redis_Wait: "true"
