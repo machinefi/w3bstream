@@ -62,11 +62,19 @@ func Init(ctx context.Context) error {
 
 		if state := ins.State; state == enums.INSTANCE_STATE__STARTED ||
 			state == enums.INSTANCE_STATE__STOPPED {
-			ins, err = Upsert(ctx, nil, state, ins.InstanceID)
+			i, err := Upsert(ctx, nil, state, ins.InstanceID)
 			if err != nil {
-				l.Warn(err)
+				l.WithValues("ins", ins.InstanceID).Warn(err)
+				ins.State = enums.INSTANCE_STATE__STOPPED
+				if err = ins.UpdateByInstanceID(d); err != nil {
+					if sqlx.DBErr(err).IsConflict() {
+						l.Warn(status.MultiInstanceDeployed.StatusErr().
+							WithDesc(ins.AppletID.String()))
+					}
+					l.Warn(status.DatabaseError.StatusErr().WithDesc(err.Error()))
+				}
 			} else {
-				l.WithValues("state", ins.State)
+				l.WithValues("ins", i.InstanceID, "state", i.State).Info("init success")
 			}
 		}
 	}
