@@ -27,12 +27,10 @@ const (
 )
 
 type Instance struct {
-	ctx   context.Context
-	id    types.SFID
-	rt    *Runtime
-	state *atomic.Uint32
-
-	//state    wasm.InstanceState
+	ctx      context.Context
+	id       types.SFID
+	rt       *Runtime
+	state    *atomic.Uint32
 	res      *mapx.Map[uint32, []byte]
 	evs      *mapx.Map[uint32, []byte]
 	handlers map[string]*wasmtime.Func
@@ -102,7 +100,6 @@ func (i *Instance) setState(st wasm.InstanceState) {
 func (i *Instance) State() wasm.InstanceState { return wasm.InstanceState(i.state.Load()) }
 
 func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data []byte) *wasm.EventHandleResult {
-	fmt.Println("----------111")
 	if i.State() != enums.INSTANCE_STATE__STARTED {
 		return &wasm.EventHandleResult{
 			InstanceID: i.id.String(),
@@ -110,7 +107,6 @@ func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data [
 			ErrMsg:     "instance not running",
 		}
 	}
-	fmt.Println("----------222", i.state)
 
 	select {
 	case <-time.After(5 * time.Second):
