@@ -34,6 +34,11 @@ func (r *CondArgs) Condition() builder.SqlCondition {
 	return builder.And(cs...)
 }
 
+type ListReq struct {
+	CondArgs
+	datatypes.Pager
+}
+
 func (r *ListReq) Additions() builder.Additions {
 	m := &models.Operator{}
 	return builder.Additions{
@@ -43,11 +48,6 @@ func (r *ListReq) Additions() builder.Additions {
 		),
 		r.Pager.Addition(),
 	}
-}
-
-type ListReq struct {
-	CondArgs
-	datatypes.Pager
 }
 
 type ListRsp struct {

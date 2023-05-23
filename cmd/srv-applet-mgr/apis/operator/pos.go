@@ -16,8 +16,6 @@ type CreateOperator struct {
 	operator.CreateReq `in:"body"`
 }
 
-func (r *CreateOperator) Path() string { return "/" }
-
 func (r *CreateOperator) Output(ctx context.Context) (interface{}, error) {
 	ctx = middleware.MustCurrentAccountFromContext(ctx).WithAccount(ctx)
 
