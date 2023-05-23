@@ -23,6 +23,5 @@ func (r *CreateCronJob) Output(ctx context.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	r.CreateReq.ProjectID = types.MustProjectFromContext(ctx).ProjectID
 	return cronjob.Create(ctx, &r.CreateReq)
 }

@@ -3,7 +3,7 @@ package requires
 import (
 	"context"
 	"net/url"
-	"os"
+	"sync"
 	"time"
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis"
@@ -112,14 +112,27 @@ func Mqtt() {
 	}
 }
 
+var (
+	grp = &sync.WaitGroup{}
+	run = &sync.Once{}
+)
+
 func Serve() (stop func()) {
-	go kit.Run(apis.RootMgr, _server.WithContextInjector(_injection))
-	time.Sleep(3 * time.Second)
+	grp.Add(1)
+
+	run.Do(func() {
+		go func() {
+			go kit.Run(apis.RootMgr, _server.WithContextInjector(_injection))
+
+			time.Sleep(5 * time.Second)
+
+			grp.Wait()
+			_server.Shutdown()
+		}()
+	})
 
 	return func() {
-		p, _ := os.FindProcess(os.Getpid())
-		_ = p.Signal(os.Interrupt)
-		time.Sleep(3 * time.Second)
+		grp.Done()
 	}
 }
 

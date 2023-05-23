@@ -40,7 +40,7 @@ type ChainClient struct {
 
 // TODO impl ChainClient.Init
 
-func NewChainClient(ctx context.Context, ops []models.Operator) *ChainClient {
+func NewChainClient(ctx context.Context, ops []models.Operator, p *models.ProjectOperator) *ChainClient {
 	c := &ChainClient{
 		projectName: wsTypes.MustProjectFromContext(ctx).Name,
 		clientMap:   make(map[uint32]*ethclient.Client, 0),
@@ -53,15 +53,25 @@ func NewChainClient(ctx context.Context, ops []models.Operator) *ChainClient {
 	if len(ethcli.Endpoints) > 0 {
 		c.endpoints = decodeEndpoints(ethcli.Endpoints)
 	}
-	c.operators = convOperators(ops)
+	c.operators = convOperators(ops, p)
 	return c
 }
 
-func convOperators(ops []models.Operator) map[string]*ecdsa.PrivateKey {
+func convOperators(ops []models.Operator, p *models.ProjectOperator) map[string]*ecdsa.PrivateKey {
 	res := make(map[string]*ecdsa.PrivateKey, len(ops))
 	for _, op := range ops {
 		res[op.Name] = crypto.ToECDSAUnsafe(common.FromHex(op.PrivateKey))
 	}
+
+	if p != nil {
+		for _, op := range ops {
+			if op.OperatorID == p.OperatorID {
+				res[operator.DefaultOperatorName] = crypto.ToECDSAUnsafe(common.FromHex(op.PrivateKey))
+				break
+			}
+		}
+	}
+
 	return res
 }
 
