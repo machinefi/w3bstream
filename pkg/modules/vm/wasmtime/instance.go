@@ -109,6 +109,9 @@ func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data [
 			ErrMsg:     "fail to add the event to the VM",
 		}
 	case i.msgQueue <- newTask(ctx, fn, eventType, data):
+		eventID := types.MustEventIDFromContext(ctx)
+		log.FromContext(ctx).WithValues("eid", eventID).Debug("put task in queue.")
+
 		return &wasm.EventHandleResult{
 			InstanceID: i.id.String(),
 			Code:       wasm.ResultStatusCode_OK,
@@ -123,7 +126,11 @@ func (i *Instance) queueWorker() {
 		if !more {
 			return
 		}
+
+		log.FromContext(task.ctx).WithValues("eid", task.EventID).Debug("get task from queue.")
+
 		res := i.handle(task.ctx, task)
+		log.FromContext(task.ctx).WithValues("eid", task.EventID).Debug("event process completed.")
 		if len(res.ErrMsg) > 0 {
 			job.Dispatch(i.ctx, job.NewWasmLogTask(i.ctx, conflog.Level(log.ErrorLevel).String(), "vmTask", res.ErrMsg))
 		} else {
@@ -155,8 +162,11 @@ func (i *Instance) handle(ctx context.Context, task *Task) *wasm.EventHandleResu
 	}
 	defer i.rt.Deinstantiate()
 
+	l.WithValues("eid", task.EventID).Debug("call wasm runtime.")
+
 	// TODO support wasm return data(not only code) for HTTP responding
 	result, err := i.rt.Call(task.Handler, int32(rid))
+	l.WithValues("eid", task.EventID).Debug("call wasm runtime completed.")
 	if err != nil {
 		l.Error(err)
 		return &wasm.EventHandleResult{

@@ -3599,7 +3599,7 @@
         }
       }
     },
-    "/srv-applet-mgr/v0/operator/": {
+    "/srv-applet-mgr/v0/operator": {
       "post": {
         "tags": [
           "apis/operator"

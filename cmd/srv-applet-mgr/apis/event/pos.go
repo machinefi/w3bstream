@@ -41,6 +41,7 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 	prj := types.MustProjectFromContext(ctx)
 	_eventMtc.WithLabelValues(prj.AccountID.String(), prj.Name, pub.Key, r.EventType).Inc()
 
+	ctx = types.WithEventID(ctx, r.EventID)
 	rsp.Results = event.OnEvent(ctx, r.Payload.Bytes())
 	return rsp, nil
 }
