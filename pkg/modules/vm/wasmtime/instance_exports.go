@@ -105,6 +105,7 @@ func (ef *ExportFuncs) LinkABI(impt Import) error {
 }
 
 func (ef *ExportFuncs) logAndPersistToDB(logLevel conflog.Level, logSrc, msg string) {
+	ef.log.Debug(fmt.Sprintf("start invoke logAndPersistToDB with %s and %s", logLevel.String(), msg))
 	if len(logSrc) == 0 {
 		logSrc = efSrc
 	}
@@ -127,6 +128,7 @@ func (ef *ExportFuncs) logAndPersistToDB(logLevel conflog.Level, logSrc, msg str
 }
 
 func (ef *ExportFuncs) Log(logLevel, ptr, size int32) int32 {
+	ef.log.Debug("start invoke log")
 	buf, err := ef.rt.Read(ptr, size)
 	if err != nil {
 		ef.logAndPersistToDB(conflog.ErrorLevel, codeSrc, err.Error())

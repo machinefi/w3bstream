@@ -46,6 +46,7 @@ type (
 	CtxProxyClient       struct{}
 	CtxResourceOwnership struct{}
 	CtxWasmDBConfig      struct{} // CtxWasmDBConfig wasm database config
+	CtxEventID           struct{}
 )
 
 func WithStrategyResults(ctx context.Context, v []*StrategyResult) context.Context {
@@ -636,6 +637,27 @@ func WasmDBConfigFromContext(ctx context.Context) (*WasmDBConfig, bool) {
 
 func MustWasmDBConfigFromContext(ctx context.Context) *WasmDBConfig {
 	v, ok := WasmDBConfigFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithEventID(ctx context.Context, v string) context.Context {
+	return contextx.WithValue(ctx, CtxEventID{}, v)
+}
+
+func WithEventIDContext(v string) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxEventID{}, v)
+	}
+}
+
+func EventIDFromContext(ctx context.Context) (string, bool) {
+	v, ok := ctx.Value(CtxEventID{}).(string)
+	return v, ok
+}
+
+func MustEventIDFromContext(ctx context.Context) string {
+	v, ok := EventIDFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
