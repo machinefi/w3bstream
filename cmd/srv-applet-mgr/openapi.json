@@ -197,6 +197,7 @@
         "tags": [
           "apis/account"
         ],
+        "summary": "Deprecated use operator.ListOperator",
         "operationId": "GetOperatorAddr",
         "parameters": [
           {

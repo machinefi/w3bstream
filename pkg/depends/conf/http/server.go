@@ -91,3 +91,7 @@ func (s *Server) Serve(router *kit.Router) error {
 	}
 	return s.ht.Serve(router)
 }
+
+func (s *Server) Shutdown() {
+	_ = s.ht.Shutdown(context.Background())
+}

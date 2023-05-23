@@ -47,6 +47,8 @@ type HttpTransport struct {
 	CertFile    string
 	KeyFile     string
 	httpRouter  *httprouter.Router
+
+	srv *http.Server
 }
 
 type ServerModifier func(server *http.Server) error
@@ -86,22 +88,22 @@ func (t *HttpTransport) ServeContext(ctx context.Context, router *kit.Router) er
 
 	t.httpRouter = t.toHttpRouter(router)
 
-	srv := &http.Server{
+	t.srv = &http.Server{
 		Addr:    fmt.Sprintf(":%d", t.Port),
 		Handler: MiddlewareChain(t.Middlewares...)(t),
 	}
 
 	for i := range t.Modifiers {
-		if err := t.Modifiers[i](srv); err != nil {
+		if err := t.Modifiers[i](t.srv); err != nil {
 			logger.Fatal(err)
 		}
 	}
 
 	go func() {
-		outputln("%s listen on %s", t.ServiceMeta, srv.Addr)
+		outputln("%s listen on %s", t.ServiceMeta, t.srv.Addr)
 
 		if t.CertFile != "" && t.KeyFile != "" {
-			if err := srv.ListenAndServeTLS(t.CertFile, t.KeyFile); err != nil {
+			if err := t.srv.ListenAndServeTLS(t.CertFile, t.KeyFile); err != nil {
 				if err == http.ErrServerClosed {
 					logger.Error(err)
 				} else {
@@ -111,7 +113,7 @@ func (t *HttpTransport) ServeContext(ctx context.Context, router *kit.Router) er
 			return
 		}
 
-		if err := srv.ListenAndServe(); err != nil {
+		if err := t.srv.ListenAndServe(); err != nil {
 			if err == http.ErrServerClosed {
 				logger.Error(err)
 			} else {
@@ -131,7 +133,11 @@ func (t *HttpTransport) ServeContext(ctx context.Context, router *kit.Router) er
 
 	logger.Info("shutdowning in %s", timeout)
 
-	return srv.Shutdown(ctx)
+	return t.srv.Shutdown(ctx)
+}
+
+func (t *HttpTransport) Shutdown(ctx context.Context) error {
+	return t.srv.Shutdown(ctx)
 }
 
 func (t *HttpTransport) toHttpRouter(rt *kit.Router) *httprouter.Router {

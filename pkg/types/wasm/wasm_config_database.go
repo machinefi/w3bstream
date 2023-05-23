@@ -3,15 +3,19 @@ package wasm
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 
+	base "github.com/machinefi/w3bstream/pkg/depends/base/types"
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
-	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
+	confpostgres "github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
+	driverpostgres "github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/driver/postgres"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/migration"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/retry"
 	"github.com/machinefi/w3bstream/pkg/enums"
@@ -33,7 +37,7 @@ type Database struct {
 	// schemas reference of Schemas; key: schema name
 	schemas map[string]*Schema
 
-	ep *postgres.Endpoint // database endpoint
+	ep *confpostgres.Endpoint // database endpoint
 }
 
 type Schema struct {
@@ -206,16 +210,24 @@ func (d *Database) WithDefaultSchema() (sqlx.DBExecutor, error) {
 
 func (d *Database) Init(ctx context.Context) (err error) {
 	// init database endpoint
-	d.Name = types.MustProjectFromContext(ctx).DatabaseName()
+	prj := types.MustProjectFromContext(ctx)
+	d.Name = prj.DatabaseName()
 
 	// clone config and init config
 	ep := *types.MustWasmDBEndpointFromContext(ctx)
 	ep.Base = d.Name
 
-	d.ep = &postgres.Endpoint{
-		Master:   ep,
-		Database: sqlx.NewDatabase(d.Name),
-		Retry:    retry.Default,
+	if ep.Param == nil {
+		ep.Param = make(url.Values)
+	}
+	ep.Param["sslmode"] = []string{"disable"}
+	ep.Param["application_name"] = []string{d.Name}
+	d.ep = &confpostgres.Endpoint{
+		Master:          ep,
+		Database:        sqlx.NewDatabase(d.Name),
+		Retry:           retry.Default,
+		PoolSize:        2,
+		ConnMaxLifetime: *base.AsDuration(10 * time.Minute),
 	}
 	d.ep.SetDefault()
 
@@ -240,6 +252,26 @@ func (d *Database) Init(ctx context.Context) (err error) {
 
 	if err = d.ep.Init(); err != nil {
 		return err
+	}
+
+	// create project database user and grant privileges
+	usename, passwd := prj.Privileges()
+	for _, user := range []string{usename, usename + "_ext"} {
+		if err, _ = driverpostgres.CreateUserIfNotExists(d.ep, user, passwd); err != nil {
+			return errors.Wrap(err, "create user")
+		}
+		domain := driverpostgres.PrivilegeDomainDatabase
+		if err = driverpostgres.GrantAllPrivileges(d.ep, domain, d.Name, user); err != nil {
+			return errors.Wrap(err, "grant privilege")
+		}
+		conf, ok := types.WasmDBConfigFromContext(ctx)
+		if !ok {
+			conf = &types.WasmDBConfig{}
+			conf.SetDefault()
+		}
+		if err = driverpostgres.AlterUserConnectionLimit(d.ep, user, conf.MaxConnection); err != nil {
+			return errors.Wrap(err, "limit connection")
+		}
 	}
 
 	// init each schema
