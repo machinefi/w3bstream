@@ -94,7 +94,7 @@ func (i *Instance) Stop(ctx context.Context) error {
 }
 
 func (i *Instance) setState(st wasm.InstanceState) {
-	i.state.Store(uint32(enums.INSTANCE_STATE__STOPPED))
+	i.state.Store(uint32(st))
 }
 
 func (i *Instance) State() wasm.InstanceState { return wasm.InstanceState(i.state.Load()) }
