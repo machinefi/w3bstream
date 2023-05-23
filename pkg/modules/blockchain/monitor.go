@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -16,7 +17,7 @@ import (
 // TODO move to config
 const (
 	listInterval  = 3 * time.Second
-	blockInterval = 4000
+	blockInterval = 1000
 )
 
 func InitChainDB(ctx context.Context) error {
@@ -80,11 +81,13 @@ func (l *monitor) sendEvent(ctx context.Context, data []byte, projectName string
 		ProjectName: models.ProjectName{Name: projectName}},
 	)
 	ret, err := event.HandleEvent(ctx, eventType, data)
+	fmt.Println("---------monitor-event.HandleEvent-1", "ret", ret, "err", err)
 	if err != nil {
 		return err
 	}
 	res := ret.([]*event.Result)
 	for _, r := range res {
+		fmt.Println("-------------4444", *r)
 		if r.Error != "" {
 			return errors.New(r.Error)
 		}

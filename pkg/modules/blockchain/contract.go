@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 	"strings"
 	"time"
@@ -53,16 +54,20 @@ func (t *contract) do(ctx context.Context) {
 			l.WithValues("chainID", c.ChainID).Error(errors.Wrap(err, "get chain info failed"))
 			continue
 		}
+		fmt.Println("---------monitor-listChainAndSendEvent-1")
 		toBlock, err := t.listChainAndSendEvent(ctx, &c, b.Address)
+		fmt.Println("---------monitor-listChainAndSendEvent-2", "toBlock", toBlock, "error", err)
 		if err != nil {
 			l.Error(errors.Wrap(err, "list contractlog db failed"))
 			continue
 		}
+		fmt.Println("---------monitor-listChainAndSendEvent-3", "toBlock", toBlock, "error", err)
 
 		c.BlockCurrent = toBlock + 1
 		if c.BlockEnd > 0 && c.BlockCurrent >= c.BlockEnd {
 			c.Uniq = c.ContractLogID
 		}
+		fmt.Println("---------monitor-listChainAndSendEvent-4", "BlockCurrent", c.BlockCurrent)
 		if err := c.UpdateByID(d); err != nil {
 			l.Error(errors.Wrap(err, "update contractlog db failed"))
 		}
@@ -107,11 +112,13 @@ func (t *contract) listChainAndSendEvent(ctx context.Context, c *models.Contract
 		l.Error(err)
 		return 0, err
 	}
+	fmt.Println("-------find logs len", len(logs))
 	for _, log := range logs {
 		data, err := log.MarshalJSON()
 		if err != nil {
 			return 0, err
 		}
+		fmt.Println("-------find logs", string(data))
 		if err := t.sendEvent(ctx, data, c.ProjectName, c.EventType); err != nil {
 			return 0, err
 		}

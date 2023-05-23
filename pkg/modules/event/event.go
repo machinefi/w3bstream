@@ -3,6 +3,7 @@ package event
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/machinefi/w3bstream/pkg/errors/status"
@@ -72,6 +73,7 @@ func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
 		go func(v *types.StrategyResult) {
 			defer wg.Done()
 			rv := ins.HandleEvent(ctx, v.Handler, v.EventType, data)
+			fmt.Println("-------------333333", rv.ErrMsg)
 			results <- &Result{
 				AppletName:  v.AppletName,
 				InstanceID:  v.InstanceID,
