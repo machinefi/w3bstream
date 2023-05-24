@@ -2,8 +2,8 @@ FROM golang:1.19
 
 WORKDIR /go/bin
 
-COPY --no-cache ./build/srv-applet-mgr/srv-applet-mgr .
-COPY --no-cache ./build/srv-applet-mgr/openapi.json .
+COPY ./build/srv-applet-mgr/srv-applet-mgr .
+COPY ./build/srv-applet-mgr/openapi.json .
 EXPOSE 8888
 
 RUN echo $PATH
