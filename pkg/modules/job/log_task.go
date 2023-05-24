@@ -10,10 +10,12 @@ import (
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
 func NewWasmLogTask(ctx context.Context, logLevel, logSrc, msg string) *WasmLogTask {
-	return &WasmLogTask{
+	wasm.MustLoggerFromContext(ctx).Debug(fmt.Sprintf("new log task with %s-%s", logSrc, msg))
+	task := &WasmLogTask{
 		wasmLog: &models.WasmLog{
 			RelWasmLog: models.RelWasmLog{WasmLogID: confid.MustSFIDGeneratorFromContext(ctx).MustGenSFID()},
 			WasmLogInfo: models.WasmLogInfo{
@@ -27,6 +29,8 @@ func NewWasmLogTask(ctx context.Context, logLevel, logSrc, msg string) *WasmLogT
 			},
 		},
 	}
+	wasm.MustLoggerFromContext(ctx).Debug(fmt.Sprintf("log record is %v", task.wasmLog))
+	return task
 }
 
 type WasmLogTask struct {

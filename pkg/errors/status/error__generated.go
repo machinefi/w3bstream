@@ -47,6 +47,8 @@ func (v Error) Key() string {
 		return "UnknownDeployCommand"
 	case InvalidCronExpressions:
 		return "InvalidCronExpressions"
+	case InvalidPrivateKey:
+		return "InvalidPrivateKey"
 	case Unauthorized:
 		return "Unauthorized"
 	case InvalidAuthValue:
@@ -95,6 +97,8 @@ func (v Error) Key() string {
 		return "UploadFileDiskLimit"
 	case TopicAlreadySubscribed:
 		return "TopicAlreadySubscribed"
+	case OccupiedOperator:
+		return "OccupiedOperator"
 	case NotFound:
 		return "NotFound"
 	case ProjectNotFound:
@@ -133,6 +137,8 @@ func (v Error) Key() string {
 		return "AccountPasswordNotFound"
 	case OperatorNotFound:
 		return "OperatorNotFound"
+	case ProjectOperatorNotFound:
+		return "ProjectOperatorNotFound"
 	case Conflict:
 		return "Conflict"
 	case ProjectNameConflict:
@@ -167,6 +173,8 @@ func (v Error) Key() string {
 		return "AccountPasswordConflict"
 	case OperatorConflict:
 		return "OperatorConflict"
+	case ProjectOperatorConflict:
+		return "ProjectOperatorConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -215,6 +223,8 @@ func (v Error) Msg() string {
 		return "Unknown Deploy Command"
 	case InvalidCronExpressions:
 		return "Invalid Cron Expressions"
+	case InvalidPrivateKey:
+		return "Invalid Private Key"
 	case Unauthorized:
 		return "unauthorized"
 	case InvalidAuthValue:
@@ -263,6 +273,8 @@ func (v Error) Msg() string {
 		return "Upload File Disk Limit"
 	case TopicAlreadySubscribed:
 		return "Topic Already Subscribed"
+	case OccupiedOperator:
+		return "Occupied Operator"
 	case NotFound:
 		return "NotFound"
 	case ProjectNotFound:
@@ -301,6 +313,8 @@ func (v Error) Msg() string {
 		return "Account Password Not Found"
 	case OperatorNotFound:
 		return "Operator Not Found"
+	case ProjectOperatorNotFound:
+		return "Project Operator relationship Not Found"
 	case Conflict:
 		return "Conflict conflict error"
 	case ProjectNameConflict:
@@ -335,6 +349,8 @@ func (v Error) Msg() string {
 		return "Account Password Conflict"
 	case OperatorConflict:
 		return "Operator Conflict"
+	case ProjectOperatorConflict:
+		return "Project Operator relationship Conflict"
 	case InternalServerError:
 		return "internal error"
 	case DatabaseError:
@@ -382,6 +398,8 @@ func (v Error) CanBeTalk() bool {
 	case UnknownDeployCommand:
 		return true
 	case InvalidCronExpressions:
+		return true
+	case InvalidPrivateKey:
 		return true
 	case Unauthorized:
 		return false
@@ -431,6 +449,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case TopicAlreadySubscribed:
 		return true
+	case OccupiedOperator:
+		return true
 	case NotFound:
 		return true
 	case ProjectNotFound:
@@ -469,6 +489,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case OperatorNotFound:
 		return true
+	case ProjectOperatorNotFound:
+		return true
 	case Conflict:
 		return true
 	case ProjectNameConflict:
@@ -502,6 +524,8 @@ func (v Error) CanBeTalk() bool {
 	case AccountPasswordConflict:
 		return true
 	case OperatorConflict:
+		return true
+	case ProjectOperatorConflict:
 		return true
 	case InternalServerError:
 		return false
