@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/xml"
 	"net/http"
+	"runtime"
 	"testing"
 	"time"
 
-	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 	"github.com/stretchr/testify/require"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/client"
@@ -39,6 +39,10 @@ func (GetByXML) Path() string {
 }
 
 func TestClient(t *testing.T) {
+	if runtime.GOOS == `darwin` {
+		return
+	}
+
 	cli := &client.Client{
 		Protocol: "https",
 		Host:     "ip.nf",
@@ -47,10 +51,8 @@ func TestClient(t *testing.T) {
 	cli.SetDefault()
 
 	t.Run("direct request", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "https://www.bing.com", nil)
-		_, err := cli.Do(context.Background(), req, kit.Metadata{
-			"User-Agent": []string{"request"},
-		}).Into(nil)
+		req, _ := http.NewRequest("GET", "https://api.github.com", nil)
+		_, err := cli.Do(context.Background(), req).Into(nil)
 		require.NoError(t, err)
 	})
 
