@@ -830,3 +830,66 @@ export CHAINHEIGHTID=${chainHeightID}
 http delete :8888/srv-applet-mgr/v0/monitor/x/$PROJECTNAME/chain_height/$CHAINHEIGHTID -A bearer -a $TOK
 ```
 
+
+
+### Create operator
+
+```sh
+export OPERATORNAME=${operator_name}
+export PRIVATEKEY=${private_key}
+echo '{"name":"'$OPERATORNAME'","privateKey":"'$PRIVATEKEY'"}' | http post :8888/srv-applet-mgr/v0/operator -A bearer -a $TOK
+```
+
+output like
+
+```json
+{
+    "accountID": "9221139481037349891",
+    "createdAt": "2023-05-23T13:30:00.11819655Z",
+    "name": "myoperator",
+    "operatorID": "11278637725570052",
+    "updatedAt": "2023-05-23T13:30:00.118200425Z"
+}
+```
+
+list all operators
+```sh
+http get :8888/srv-applet-mgr/v0/operator/datalist -A bearer -a $TOK
+```
+
+delete it
+
+```sh
+export OPERATORID=${operatorID}
+http delete :8888/srv-applet-mgr/v0/operator/data/$OPERATORID -A bearer -a $TOK
+```
+
+
+### Create project operator
+
+```sh
+export PROJECTID=${project_id}
+http post :8888/srv-applet-mgr/v0/project_operator/$PROJECTID/$OPERATORID -A bearer -a $TOK
+```
+
+output like
+
+```json
+{
+    "createdAt": "2023-05-23T13:32:03.918223385Z",
+    "operatorID": "11278637725570052",
+    "projectID": "9221139481524034564",
+    "updatedAt": "2023-05-23T13:32:03.918233052Z"
+}
+```
+
+get project operator
+```sh
+http get :8888/srv-applet-mgr/v0/project_operator/data/$PROJECTID -A bearer -a $TOK
+```
+
+delete it
+
+```sh
+http delete :8888/srv-applet-mgr/v0/project_operator/$PROJECTID -A bearer -a $TOK
+```
