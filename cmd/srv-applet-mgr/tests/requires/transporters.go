@@ -6,9 +6,14 @@ import (
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/tests/clients/applet_mgr"
 	"github.com/machinefi/w3bstream/pkg/modules/account"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 func NewAuthPatchRT() func(next http.RoundTripper) http.RoundTripper {
+	return NewAuthPatchRTWithToken(tok)
+}
+
+func NewAuthPatchRTWithToken(tok string) func(next http.RoundTripper) http.RoundTripper {
 	return func(next http.RoundTripper) http.RoundTripper {
 		return &AuthPatchRT{
 			tok:  tok,
@@ -27,7 +32,10 @@ func (rt *AuthPatchRT) RoundTrip(req *http.Request) (*http.Response, error) {
 	return rt.next.RoundTrip(req)
 }
 
-var tok string
+var (
+	tok       string
+	AccountID types.SFID
+)
 
 func init() {
 	defer Serve()()
@@ -46,4 +54,5 @@ func init() {
 		panic(err)
 	}
 	tok = rsp.Token
+	AccountID = rsp.AccountID
 }

@@ -89,14 +89,18 @@ migrate: toolkit
 .PHONY: test
 test: test_depends
 	@go test -cover -coverprofile=coverage.out ./...
-	@docker stop mqtt_test postgres_test || true && docker container rm mqtt_test postgres_test || true
+	@docker stop mqtt_test postgres_test redis_test || true && docker container rm mqtt_test postgres_test redis_test || true
+
+bench: test_depends
+	@cd ./cmd/srv-applet-mgr/tests/integrations/ && go test event_benchmark_test.go -bench=.
+	@docker stop mqtt_test postgres_test redis_test || true && docker container rm mqtt_test postgres_test redis_test || true
 
 .PHONY: test_depends
-test_depends: cleanup_test_depends postgres_test mqtt_test
+test_depends: cleanup_test_depends postgres_test mqtt_test redis_test
 
 .PHONY: cleanup_test_depends
 cleanup_test_depends:
-	@docker stop mqtt_test postgres_test || true && docker container rm mqtt_test postgres_test || true
+	@docker stop mqtt_test postgres_test redis_test || true && docker container rm mqtt_test postgres_test redis_test || true
 
 .PHONY: postgres_test
 postgres_test:
@@ -105,4 +109,8 @@ postgres_test:
 .PHONY: mqtt_test
 mqtt_test:
 	docker run --name mqtt_test -p 11883:1883 -d eclipse-mosquitto:1.6.15
+
+.PHONY: redis_test
+redis_test:
+	docker run --name redis_test -p 16379:6379 -d redis:6.2
 
