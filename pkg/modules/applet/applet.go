@@ -242,6 +242,20 @@ func Update(ctx context.Context, r *UpdateReq) (*UpdateRsp, error) {
 			}
 			return nil
 		},
+		// update applet info
+		func(d sqlx.DBExecutor) error {
+			if r.Info.AppletName != "" {
+				app.Name = r.Info.AppletName
+			}
+			app.ResourceID = res.ResourceID
+			if err = app.UpdateByAppletID(d); err != nil {
+				if sqlx.DBErr(err).IsConflict() {
+					return status.AppletNameConflict
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
+		},
 		// update and deploy instance
 		func(d sqlx.DBExecutor) error {
 			ctx := types.WithMgrDBExecutor(ctx, d)
@@ -256,22 +270,8 @@ func Update(ctx context.Context, r *UpdateReq) (*UpdateRsp, error) {
 			if r.Info.WasmCache != nil {
 				rb = &deploy.CreateReq{Cache: r.Info.WasmCache}
 			}
-			ins, err = deploy.UpsertByCode(ctx, rb, raw, ins.State, ins.InstanceID)
+			ins, err = deploy.UpsertByCode(ctx, rb, raw, enums.INSTANCE_STATE__STARTED, ins.InstanceID)
 			return err
-		},
-		// update applet info
-		func(d sqlx.DBExecutor) error {
-			if r.Info.AppletName != "" {
-				app.Name = r.Info.AppletName
-			}
-			app.ResourceID = res.ResourceID
-			if err = app.UpdateByAppletID(d); err != nil {
-				if sqlx.DBErr(err).IsConflict() {
-					return status.AppletNameConflict
-				}
-				return status.DatabaseError.StatusErr().WithDesc(err.Error())
-			}
-			return nil
 		},
 	).Do()
 	if err != nil {
