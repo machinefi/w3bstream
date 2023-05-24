@@ -80,3 +80,13 @@ type StrategyResult struct {
 	Handler     string     `json:"handler"     db:"f_hdl"`
 	EventType   string     `json:"eventType"   db:"f_evt"`
 }
+
+type WasmDBConfig struct {
+	MaxConnection int
+}
+
+func (c *WasmDBConfig) SetDefault() {
+	if c.MaxConnection == 0 {
+		c.MaxConnection = 2
+	}
+}

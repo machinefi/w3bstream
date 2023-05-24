@@ -1,15 +1,16 @@
 package wasmtime
 
 import (
-	"bytes"
 	"context"
-	"encoding/binary"
+	"fmt"
+	"sync/atomic"
 	"time"
 
-	"github.com/bytecodealliance/wasmtime-go"
+	"github.com/bytecodealliance/wasmtime-go/v8"
 	"github.com/google/uuid"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/enums"
@@ -18,14 +19,23 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
+const (
+	maxUint = ^uint32(0)
+	maxInt  = int(maxUint >> 1)
+	// TODO: add into config
+	maxMsgPerInstance = 5000
+)
+
 type Instance struct {
+	ctx      context.Context
 	id       types.SFID
 	rt       *Runtime
-	state    wasm.InstanceState
+	state    *atomic.Uint32
 	res      *mapx.Map[uint32, []byte]
 	evs      *mapx.Map[uint32, []byte]
 	handlers map[string]*wasmtime.Func
 	kvs      wasm.KVStore
+	msgQueue chan *Task
 }
 
 func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte, st enums.InstanceState) (i *Instance, err error) {
@@ -47,16 +57,24 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte, st enums
 	if err := rt.Link(lk, code); err != nil {
 		return nil, err
 	}
+	state := &atomic.Uint32{}
+	state.Store(uint32(st))
 
-	return &Instance{
+	ins := &Instance{
+		ctx:      ctx,
 		rt:       rt,
 		id:       id,
-		state:    st,
+		state:    state,
 		res:      res,
 		evs:      evs,
 		handlers: make(map[string]*wasmtime.Func),
 		kvs:      wasm.MustKVStoreFromContext(ctx),
-	}, nil
+		msgQueue: make(chan *Task, maxMsgPerInstance),
+	}
+
+	go ins.queueWorker()
+
+	return ins, nil
 }
 
 var _ wasm.Instance = (*Instance)(nil)
@@ -65,20 +83,24 @@ func (i *Instance) ID() string { return i.id.String() }
 
 func (i *Instance) Start(ctx context.Context) error {
 	log.FromContext(ctx).WithValues("instance", i.ID()).Info("started")
-	i.state = enums.INSTANCE_STATE__STARTED
+	i.setState(enums.INSTANCE_STATE__STARTED)
 	return nil
 }
 
 func (i *Instance) Stop(ctx context.Context) error {
 	log.FromContext(ctx).WithValues("instance", i.ID()).Info("stopped")
-	i.state = enums.INSTANCE_STATE__STOPPED
+	i.setState(enums.INSTANCE_STATE__STOPPED)
 	return nil
 }
 
-func (i *Instance) State() wasm.InstanceState { return i.state }
+func (i *Instance) setState(st wasm.InstanceState) {
+	i.state.Store(uint32(st))
+}
+
+func (i *Instance) State() wasm.InstanceState { return wasm.InstanceState(i.state.Load()) }
 
 func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data []byte) *wasm.EventHandleResult {
-	if i.state != enums.INSTANCE_STATE__STARTED {
+	if i.State() != enums.INSTANCE_STATE__STARTED {
 		return &wasm.EventHandleResult{
 			InstanceID: i.id.String(),
 			Code:       wasm.ResultStatusCode_Failed,
@@ -86,18 +108,58 @@ func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data [
 		}
 	}
 
-	t := NewTask(i, fn, eventType, data)
-	job.Dispatch(ctx, t)
-	return t.Wait(time.Second * 5)
+	select {
+	case <-time.After(5 * time.Second):
+		return &wasm.EventHandleResult{
+			InstanceID: i.id.String(),
+			Code:       wasm.ResultStatusCode_Failed,
+			ErrMsg:     "fail to add the event to the VM",
+		}
+	case i.msgQueue <- newTask(ctx, fn, eventType, data):
+		eventID := types.MustEventIDFromContext(ctx)
+		log.FromContext(ctx).WithValues("eid", eventID).Debug("put task in queue.")
+
+		return &wasm.EventHandleResult{
+			InstanceID: i.id.String(),
+			Code:       wasm.ResultStatusCode_OK,
+			ErrMsg:     "",
+		}
+	}
 }
 
-func (i *Instance) Handle(ctx context.Context, t *Task) *wasm.EventHandleResult {
+func (i *Instance) queueWorker() {
+	for {
+		task, more := <-i.msgQueue
+		log.FromContext(task.ctx).WithValues("eid", task.EventID).Debug(
+			fmt.Sprintf("queue len is %d and more is %t", len(i.msgQueue), more))
+		if !more {
+			return
+		}
+
+		log.FromContext(task.ctx).WithValues("eid", task.EventID).Debug("get task from queue.")
+
+		res := i.handle(task.ctx, task)
+		log.FromContext(task.ctx).WithValues("eid", task.EventID).Debug("event process completed.")
+		if len(res.ErrMsg) > 0 {
+			job.Dispatch(i.ctx, job.NewWasmLogTask(i.ctx, conflog.Level(log.ErrorLevel).String(), "vmTask", res.ErrMsg))
+		} else {
+			job.Dispatch(i.ctx, job.NewWasmLogTask(
+				i.ctx,
+				conflog.Level(log.InfoLevel).String(),
+				"vmTask",
+				fmt.Sprintf("the event, whose eventtype is %s, is successfully handled by %s, ", task.EventType, task.Handler),
+			))
+		}
+	}
+}
+
+func (i *Instance) handle(ctx context.Context, task *Task) *wasm.EventHandleResult {
 	l := types.MustLoggerFromContext(ctx)
 
 	_, l = l.Start(ctx, "instance.Handle")
 	defer l.End()
 
-	rid := i.AddResource(ctx, []byte(t.EventType), t.Payload)
+	rid := i.AddResource(ctx, []byte(task.EventType), task.Payload)
 	defer i.RmvResource(ctx, rid)
 
 	if err := i.rt.Instantiate(); err != nil {
@@ -109,8 +171,11 @@ func (i *Instance) Handle(ctx context.Context, t *Task) *wasm.EventHandleResult 
 	}
 	defer i.rt.Deinstantiate()
 
+	l.WithValues("eid", task.EventID).Debug("call wasm runtime.")
+
 	// TODO support wasm return data(not only code) for HTTP responding
-	result, err := i.rt.Call(t.Handler, int32(rid))
+	result, err := i.rt.Call(task.Handler, int32(rid))
+	l.WithValues("eid", task.EventID).Debug("call wasm runtime completed.")
 	if err != nil {
 		l.Error(err)
 		return &wasm.EventHandleResult{
@@ -126,11 +191,8 @@ func (i *Instance) Handle(ctx context.Context, t *Task) *wasm.EventHandleResult 
 	}
 }
 
-const MaxUint = ^uint32(0)
-const MaxInt = int(MaxUint >> 1)
-
 func (i *Instance) AddResource(ctx context.Context, eventType, data []byte) uint32 {
-	var id = int32(uuid.New().ID() % uint32(MaxInt))
+	var id = int32(uuid.New().ID() % uint32(maxInt))
 	i.res.Store(uint32(id), data)
 	i.evs.Store(uint32(id), eventType)
 	return uint32(id)
@@ -143,12 +205,4 @@ func (i *Instance) GetResource(id uint32) ([]byte, bool) {
 func (i *Instance) RmvResource(ctx context.Context, id uint32) {
 	i.res.Remove(id)
 	i.evs.Remove(id)
-}
-
-func (i *Instance) Get(k string) int32 {
-	data, _ := i.kvs.Get(k)
-	var ret int32
-	buf := bytes.NewBuffer(data)
-	binary.Read(buf, binary.LittleEndian, &ret)
-	return ret
 }

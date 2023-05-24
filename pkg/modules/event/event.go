@@ -4,19 +4,15 @@ import (
 	"context"
 	"errors"
 	"sync"
-	"time"
 
-	"github.com/machinefi/w3bstream/pkg/depends/x/misc/timer"
+	"github.com/google/uuid"
+
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/strategy"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
-
-var Handler = func(ctx context.Context, data []byte) []*Result {
-	return OnEvent(ctx, data)
-}
 
 // HandleEvent support other module call
 // TODO the full project info is not in context so query and set here. this impl
@@ -38,12 +34,17 @@ func HandleEvent(ctx context.Context, t string, data []byte) (interface{}, error
 	}
 
 	ctx = types.WithStrategyResults(ctx, strategies)
+
+	eventID := uuid.NewString() + "_monitor"
+	ctx = types.WithEventID(ctx, eventID)
+
 	return OnEvent(ctx, data), nil
 }
 
 func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
 	l := types.MustLoggerFromContext(ctx)
 	r := types.MustStrategyResultsFromContext(ctx)
+	eventID := types.MustEventIDFromContext(ctx)
 
 	results := make(chan *Result, len(r))
 
@@ -73,21 +74,15 @@ func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
 		wg.Add(1)
 		go func(v *types.StrategyResult) {
 			defer wg.Done()
-
-			cost := timer.Start()
-			select {
-			case <-time.After(time.Second * 5):
-			default:
-				rv := ins.HandleEvent(ctx, v.Handler, v.EventType, data)
-				results <- &Result{
-					AppletName:  v.AppletName,
-					InstanceID:  v.InstanceID,
-					Handler:     v.Handler,
-					ReturnValue: nil,
-					ReturnCode:  int(rv.Code),
-					Error:       rv.ErrMsg,
-				}
-				l.WithValues("cst", cost().Milliseconds()).Info("")
+			l.WithValues("eid", eventID).Debug("instance start to process.")
+			rv := ins.HandleEvent(ctx, v.Handler, v.EventType, data)
+			results <- &Result{
+				AppletName:  v.AppletName,
+				InstanceID:  v.InstanceID,
+				Handler:     v.Handler,
+				ReturnValue: nil,
+				ReturnCode:  int(rv.Code),
+				Error:       rv.ErrMsg,
 			}
 		}(v)
 	}

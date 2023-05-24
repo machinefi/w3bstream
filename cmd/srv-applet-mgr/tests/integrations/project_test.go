@@ -21,7 +21,7 @@ func TestProjectAPIs(t *testing.T) {
 	var (
 		ctx         = requires.Context()
 		client      = requires.AuthClient()
-		projectName = "testdemo"
+		projectName = "test_project"
 		projectID   types.SFID
 	)
 

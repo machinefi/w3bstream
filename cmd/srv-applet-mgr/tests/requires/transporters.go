@@ -2,28 +2,16 @@ package requires
 
 import (
 	"net/http"
+	"time"
 
-	confjwt "github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
-	"github.com/machinefi/w3bstream/pkg/enums"
-	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/tests/clients/applet_mgr"
 	"github.com/machinefi/w3bstream/pkg/modules/account"
-	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 func NewAuthPatchRT() func(next http.RoundTripper) http.RoundTripper {
 	return func(next http.RoundTripper) http.RoundTripper {
 		return &AuthPatchRT{
 			tok:  tok,
-			next: next,
-		}
-	}
-}
-
-func NewAuthPatchRtByToken(token string) func(next http.RoundTripper) http.RoundTripper {
-	return func(next http.RoundTripper) http.RoundTripper {
-		return &AuthPatchRT{
-			tok:  token,
 			next: next,
 		}
 	}
@@ -39,34 +27,23 @@ func (rt *AuthPatchRT) RoundTrip(req *http.Request) (*http.Response, error) {
 	return rt.next.RoundTrip(req)
 }
 
-var (
-	tok       string
-	AccountID types.SFID
-)
+var tok string
 
 func init() {
-	m := &models.Account{}
-	d := types.MustMgrDBExecutorFromContext(_ctx)
-	j := confjwt.MustConfFromContext(_ctx)
+	defer Serve()()
+	time.Sleep(3 * time.Second)
 
 	_, err := account.CreateAdminIfNotExist(_ctx)
 	if err != nil {
 		panic(err)
 	}
+	req := &applet_mgr.LoginByUsername{}
+	req.LoginByUsernameReq.Username = "admin"
+	req.LoginByUsernameReq.Password = "iotex.W3B.admin"
 
-	err = d.QueryAndScan(
-		builder.Select(nil).From(
-			d.T(m),
-			builder.Where(m.ColRole().Eq(enums.ACCOUNT_ROLE__ADMIN)),
-			builder.Limit(1),
-		), m,
-	)
+	rsp, _, err := AuthClient().LoginByUsername(req)
 	if err != nil {
 		panic(err)
 	}
-	tok, err = j.GenerateTokenByPayload(m.AccountID)
-	if err != nil {
-		panic(err)
-	}
-	AccountID = m.AccountID
+	tok = rsp.Token
 }

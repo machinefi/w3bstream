@@ -179,6 +179,7 @@ func Remove(ctx context.Context, r *CondArgs) error {
 
 	return sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			lst, err = List(ctx, r)
 			return err
 		},
@@ -186,7 +187,7 @@ func Remove(ctx context.Context, r *CondArgs) error {
 			if _, err = d.Exec(
 				builder.Delete().From(d.T(m), builder.Where(r.Condition())),
 			); err != nil {
-				return status.InternalServerError.StatusErr().WithDesc(err.Error())
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
 		},

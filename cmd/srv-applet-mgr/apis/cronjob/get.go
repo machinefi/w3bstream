@@ -15,7 +15,7 @@ type ListCronJob struct {
 	cronjob.ListReq
 }
 
-func (r *CreateCronJob) ListCronJob() string { return "/:projectID" }
+func (r *ListCronJob) Path() string { return "/:projectID" }
 
 func (r *ListCronJob) Output(ctx context.Context) (interface{}, error) {
 	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
