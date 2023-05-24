@@ -49,8 +49,8 @@ jobs:
           brew install docker colima
           colima start
 
-      #- name: Test Go
-      #  run: make test
+      - name: Test Go
+        run: make test
 
       - name: Set up QEMU
         #if: startsWith(matrix.os, 'macos-latest') != true
