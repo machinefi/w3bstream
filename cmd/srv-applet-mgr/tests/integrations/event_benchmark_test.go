@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/tests/clients/applet_mgr"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/tests/requires"
 	client2 "github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/client"
