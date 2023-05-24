@@ -9,6 +9,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
+	"github.com/machinefi/w3bstream/pkg/modules/projectoperator"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 	custommetrics "github.com/machinefi/w3bstream/pkg/types/wasm/metrics"
@@ -66,12 +67,17 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		ctx = wasm.DefaultMQClient().WithContext(ctx)
 	}
 
-	operators, err := operator.List(parent, &operator.ListReq{
-		CondArgs: operator.CondArgs{
-			AccountID: prj.RelAccount.AccountID,
-		},
-	})
-	ctx = wasm.WithChainClient(ctx, wasm.NewChainClient(ctx, operators.Data))
+	var projectOperator *models.ProjectOperator
+	projectOperator, err = projectoperator.GetByProject(parent, prj.ProjectID)
+	if err != nil && err != status.ProjectOperatorNotFound {
+		return nil, err
+	}
+	operators, err := operator.ListByCond(parent, &operator.CondArgs{AccountID: prj.RelAccount.AccountID})
+	if err != nil {
+		return nil, err
+	}
+
+	ctx = wasm.WithChainClient(ctx, wasm.NewChainClient(ctx, operators, projectOperator))
 
 	ctx = wasm.WithLogger(ctx, types.MustLoggerFromContext(ctx).WithValues(
 		"@src", "wasm",

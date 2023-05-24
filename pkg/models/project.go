@@ -1,6 +1,9 @@
 package models
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	_ "github.com/machinefi/w3bstream/pkg/depends/util/strfmt"
@@ -36,6 +39,12 @@ type ProjectBase struct {
 	Description string         `db:"f_description,default=''"    json:"description,omitempty"`
 }
 
-func (v *Project) DatabaseName() string {
-	return "w3b_" + v.ProjectID.String()
+func (m Project) DatabaseName() string {
+	return "w3b_" + m.ProjectID.String()
+}
+
+func (m Project) Privileges() (usename, passwd string) {
+	usename = m.DatabaseName()
+	passwd = hex.EncodeToString(sha256.New().Sum([]byte(m.ProjectID.String())))
+	return
 }

@@ -96,6 +96,8 @@ const (
 	UploadFileDiskLimit
 	// @errTalk Topic Already Subscribed
 	TopicAlreadySubscribed
+	// @errTalk Occupied Operator
+	OccupiedOperator
 )
 
 const (
@@ -133,6 +135,8 @@ const (
 	AccountPasswordConflict
 	// @errTalk Operator Conflict
 	OperatorConflict
+	// @errTalk Project Operator relationship Conflict
+	ProjectOperatorConflict
 )
 
 const (
@@ -146,6 +150,8 @@ const (
 	UnknownDeployCommand
 	// @errTalk Invalid Cron Expressions
 	InvalidCronExpressions
+	// @errTalk Invalid Private Key
+	InvalidPrivateKey
 )
 
 const (
@@ -187,4 +193,6 @@ const (
 	AccountPasswordNotFound
 	// @errTalk Operator Not Found
 	OperatorNotFound
+	// @errTalk Project Operator relationship Not Found
+	ProjectOperatorNotFound
 )

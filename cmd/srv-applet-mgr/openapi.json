@@ -802,7 +802,8 @@
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
-              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[ProjectOperatorNotFound][404999020][Project Operator relationship Not Found]!"
             ]
           },
           "409": {
@@ -1155,6 +1156,7 @@
               "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
               "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[ProjectOperatorNotFound][404999020][Project Operator relationship Not Found]!",
               "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
             ]
           },
@@ -1197,7 +1199,106 @@
         }
       }
     },
-    "/srv-applet-mgr/v0/cronjob": {
+    "/srv-applet-mgr/v0/cronjob/data/{cronJobID}": {
+      "delete": {
+        "tags": [
+          "apis/cronjob"
+        ],
+        "operationId": "RemoveCronJob",
+        "parameters": [
+          {
+            "name": "cronJobID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                },
+                {
+                  "x-go-field-name": "CronJobID",
+                  "x-tag-name": "cronJobID"
+                }
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[CronJobNotFound][404999011][Cron Job Not Found]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
+    "/srv-applet-mgr/v0/cronjob/{projectID}": {
       "get": {
         "tags": [
           "apis/cronjob"
@@ -1352,108 +1453,7 @@
             ]
           }
         }
-      }
-    },
-    "/srv-applet-mgr/v0/cronjob/data/{cronJobID}": {
-      "delete": {
-        "tags": [
-          "apis/cronjob"
-        ],
-        "operationId": "RemoveCronJob",
-        "parameters": [
-          {
-            "name": "cronJobID",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-                },
-                {
-                  "x-go-field-name": "CronJobID",
-                  "x-tag-name": "cronJobID"
-                }
-              ]
-            }
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInHeader",
-              "x-tag-name": "Authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInQuery",
-              "x-tag-name": "authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": ""
-          },
-          "401": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
-              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
-              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
-              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
-              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
-            ]
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
-              "@StatusErr[CronJobNotFound][404999011][Cron Job Not Found]!",
-              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
-            ]
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[DatabaseError][500999002][Database Error]!"
-            ]
-          }
-        }
-      }
-    },
-    "/srv-applet-mgr/v0/cronjob/{projectID}": {
+      },
       "post": {
         "tags": [
           "apis/cronjob"
@@ -1827,6 +1827,7 @@
               "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
               "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[ProjectOperatorNotFound][404999020][Project Operator relationship Not Found]!",
               "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
             ]
           },
@@ -2501,6 +2502,7 @@
               "@StatusErr[DeprecatedProject][400999003][Deprecated Project]!",
               "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!",
               "@StatusErr[InvalidCronExpressions][400999005][Invalid Cron Expressions]!",
+              "@StatusErr[InvalidPrivateKey][400999006][Invalid Private Key]!",
               "@StatusErr[UnknownDeployCommand][400999004][Unknown Deploy Command]!"
             ]
           },
@@ -2549,6 +2551,7 @@
             "x-status-errors": [
               "@StatusErr[DisabledAccount][403999002][Disabled Account]!",
               "@StatusErr[Forbidden][403999001][forbidden]",
+              "@StatusErr[OccupiedOperator][403999008][Occupied Operator]!",
               "@StatusErr[TopicAlreadySubscribed][403999007][Topic Already Subscribed]!",
               "@StatusErr[UploadFileDiskLimit][403999006][Upload File Disk Limit]!",
               "@StatusErr[UploadFileMd5Unmatched][403999005][Upload File Md5 Unmatched]!",
@@ -2581,6 +2584,7 @@
               "@StatusErr[NotFound][404999001][NotFound]!",
               "@StatusErr[OperatorNotFound][404999019][Operator Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[ProjectOperatorNotFound][404999020][Project Operator relationship Not Found]!",
               "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!",
               "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!",
               "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!",
@@ -2611,6 +2615,7 @@
               "@StatusErr[MultiInstanceDeployed][409999008][Multi Instance Deployed]!",
               "@StatusErr[OperatorConflict][409999017][Operator Conflict]!",
               "@StatusErr[ProjectNameConflict][409999002][Project Name Conflict]!",
+              "@StatusErr[ProjectOperatorConflict][409999018][Project Operator relationship Conflict]!",
               "@StatusErr[PublisherConflict][409999007][Publisher Conflict]!",
               "@StatusErr[ResourceConflict][409999003][Resource Conflict]!",
               "@StatusErr[ResourceOwnerConflict][409999004][Resource Owner Conflict]!",
@@ -3594,7 +3599,7 @@
         }
       }
     },
-    "/srv-applet-mgr/v0/operator/": {
+    "/srv-applet-mgr/v0/operator": {
       "post": {
         "tags": [
           "apis/operator"
@@ -3651,6 +3656,19 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidPrivateKey][400999006][Invalid Private Key]!"
+            ]
           },
           "401": {
             "description": "",
@@ -3778,6 +3796,19 @@
               "@StatusErr[NoOperatorPermission][401999005][No Operator Permission]!"
             ]
           },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[OccupiedOperator][403999008][Occupied Operator]!"
+            ]
+          },
           "404": {
             "description": "",
             "content": {
@@ -3790,6 +3821,121 @@
             "x-status-errors": [
               "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[OperatorNotFound][404999019][Operator Not Found]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
+    "/srv-applet-mgr/v0/operator/datalist": {
+      "get": {
+        "tags": [
+          "apis/operator"
+        ],
+        "operationId": "ListOperator",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 9223372036854776000,
+              "minimum": 0,
+              "default": "0",
+              "x-go-field-name": "Offset",
+              "x-tag-name": "offset,omitempty",
+              "x-tag-validate": "@int64[0,]"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 9223372036854776000,
+              "minimum": -1,
+              "default": "10",
+              "x-go-field-name": "Size",
+              "x-tag-name": "size,omitempty",
+              "x-tag-validate": "@int64[-1,]"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesOperatorListDetailRsp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
             ]
           },
           "500": {
@@ -5023,6 +5169,347 @@
               "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
+    "/srv-applet-mgr/v0/project_operator/data/{projectID}": {
+      "get": {
+        "tags": [
+          "apis/projectoperator"
+        ],
+        "operationId": "GetProjectOperator",
+        "parameters": [
+          {
+            "name": "projectID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                },
+                {
+                  "x-go-field-name": "ProjectID",
+                  "x-tag-name": "projectID"
+                }
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesOperatorDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[OperatorNotFound][404999019][Operator Not Found]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[ProjectOperatorNotFound][404999020][Project Operator relationship Not Found]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
+    "/srv-applet-mgr/v0/project_operator/{projectID}": {
+      "delete": {
+        "tags": [
+          "apis/projectoperator"
+        ],
+        "operationId": "RemoveProjectOperator",
+        "parameters": [
+          {
+            "name": "projectID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                },
+                {
+                  "x-go-field-name": "ProjectID",
+                  "x-tag-name": "projectID"
+                }
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
+    "/srv-applet-mgr/v0/project_operator/{projectID}/{operatorID}": {
+      "post": {
+        "tags": [
+          "apis/projectoperator"
+        ],
+        "operationId": "CreateProjectOperator",
+        "parameters": [
+          {
+            "name": "operatorID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                },
+                {
+                  "x-go-field-name": "OperatorID",
+                  "x-tag-name": "operatorID"
+                }
+              ]
+            }
+          },
+          {
+            "name": "projectID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                },
+                {
+                  "x-go-field-name": "ProjectID",
+                  "x-tag-name": "projectID"
+                }
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsProjectOperator"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoOperatorPermission][401999005][No Operator Permission]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[OperatorNotFound][404999019][Operator Not Found]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+            ]
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[ProjectOperatorConflict][409999018][Project Operator relationship Conflict]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
@@ -8287,6 +8774,28 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.ProjectName",
         "x-id": "GithubComMachinefiW3BstreamPkgModelsProjectName"
       },
+      "GithubComMachinefiW3BstreamPkgModelsProjectOperator": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPrimaryID"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsRelProject"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsRelOperator"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimesWithDeleted"
+          },
+          {
+            "type": "object",
+            "description": "ProjectOperator schema for project operator relationship",
+            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.ProjectOperator",
+            "x-id": "GithubComMachinefiW3BstreamPkgModelsProjectOperator"
+          }
+        ]
+      },
       "GithubComMachinefiW3BstreamPkgModelsPublisher": {
         "allOf": [
           {
@@ -9352,6 +9861,53 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/operator.CreateReq",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesOperatorCreateReq"
+      },
+      "GithubComMachinefiW3BstreamPkgModulesOperatorDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsOperator"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "address": {
+                "type": "string",
+                "x-go-field-name": "Address",
+                "x-tag-json": "address"
+              }
+            },
+            "required": [
+              "address"
+            ],
+            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/operator.Detail",
+            "x-id": "GithubComMachinefiW3BstreamPkgModulesOperatorDetail"
+          }
+        ]
+      },
+      "GithubComMachinefiW3BstreamPkgModulesOperatorListDetailRsp": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesOperatorDetail"
+            },
+            "x-go-field-name": "Data",
+            "x-tag-json": "data"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "x-go-field-name": "Total",
+            "x-tag-json": "total"
+          }
+        },
+        "required": [
+          "data",
+          "total"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/operator.ListDetailRsp",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesOperatorListDetailRsp"
       },
       "GithubComMachinefiW3BstreamPkgModulesProjectCreateReq": {
         "allOf": [
