@@ -3,17 +3,22 @@ package operator
 import (
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/models"
 )
 
 type CreateReq struct {
-	AccountID  types.SFID `json:"-"`
-	Name       string     `json:"name"`
-	PrivateKey string     `json:"privateKey"`
+	Name       string `json:"name"`
+	PrivateKey string `json:"privateKey"`
 }
 
 type CondArgs struct {
 	AccountID types.SFID `name:"-"`
+}
+
+type Detail struct {
+	models.Operator
+	Address string `json:"address"`
 }
 
 func (r *CondArgs) Condition() builder.SqlCondition {
@@ -31,9 +36,26 @@ func (r *CondArgs) Condition() builder.SqlCondition {
 
 type ListReq struct {
 	CondArgs
+	datatypes.Pager
+}
+
+func (r *ListReq) Additions() builder.Additions {
+	m := &models.Operator{}
+	return builder.Additions{
+		builder.OrderBy(
+			builder.DescOrder(m.ColUpdatedAt()),
+			builder.DescOrder(m.ColCreatedAt()),
+		),
+		r.Pager.Addition(),
+	}
 }
 
 type ListRsp struct {
 	Data  []models.Operator `json:"data"`
 	Total int64             `json:"total"`
+}
+
+type ListDetailRsp struct {
+	Data  []Detail `json:"data"`
+	Total int64    `json:"total"`
 }

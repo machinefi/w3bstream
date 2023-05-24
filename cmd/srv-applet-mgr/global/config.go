@@ -48,7 +48,7 @@ var (
 	ServerEvent = &confhttp.Server{} // serverEvent support event http transport
 
 	fs  filesystem.FileSystemOp
-	std = conflog.Std().(conflog.LevelSetter).SetLevel(conflog.InfoLevel)
+	std = conflog.Std().(conflog.LevelSetter).SetLevel(conflog.DebugLevel)
 )
 
 func init() {

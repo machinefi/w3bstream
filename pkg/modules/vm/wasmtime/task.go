@@ -1,10 +1,15 @@
 package wasmtime
 
-import "context"
+import (
+	"context"
+
+	"github.com/machinefi/w3bstream/pkg/types"
+)
 
 func newTask(ctx context.Context, fn string, eventType string, data []byte) *Task {
 	return &Task{
 		ctx:       ctx,
+		EventID:   types.MustEventIDFromContext(ctx),
 		EventType: eventType,
 		Handler:   fn,
 		Payload:   data,

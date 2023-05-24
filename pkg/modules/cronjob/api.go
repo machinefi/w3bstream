@@ -16,7 +16,6 @@ import (
 )
 
 type CreateReq struct {
-	ProjectID types.SFID `json:"-"`
 	models.CronJobInfo
 }
 
@@ -91,6 +90,7 @@ func List(ctx context.Context, r *ListReq) (*ListRsp, error) {
 func Create(ctx context.Context, r *CreateReq) (*models.CronJob, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
+	prj := types.MustProjectFromContext(ctx)
 
 	if _, err := cron.ParseStandard(r.CronExpressions); err != nil {
 		return nil, status.InvalidCronExpressions.StatusErr().WithDesc(err.Error())
@@ -100,7 +100,7 @@ func Create(ctx context.Context, r *CreateReq) (*models.CronJob, error) {
 	n.EventType = getEventType(n.EventType)
 	m := &models.CronJob{
 		RelCronJob:  models.RelCronJob{CronJobID: idg.MustGenSFID()},
-		RelProject:  models.RelProject{ProjectID: r.ProjectID},
+		RelProject:  models.RelProject{ProjectID: prj.ProjectID},
 		CronJobInfo: n.CronJobInfo,
 	}
 	if err := m.Create(d); err != nil {
