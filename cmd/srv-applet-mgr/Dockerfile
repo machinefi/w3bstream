@@ -1,52 +1,32 @@
-# env
-## ARG DOCKER_REGISTRY=#{TODO}
-## FROM ${DOCKER_REGISTRY}/#{TODO path to golang basic image} AS build-env
-FROM golang:alpine AS build-env
+# maybe use private hub?
+#ARG DOCKER_REGISTRY=hub.docker.com
+#ARG GO_VERSION=1.19
+FROM golang:1.19 AS builder
 
-RUN go version
-RUN apk --no-cache add git
-RUN apk --no-cache add openssh-client
-RUN apk --no-cache add make
-RUN apk --no-cache add ca-certificates
+# setup private pkg if needs
+#ARG GITHUB_CI_TOKEN
+#ARG GITHUB_HOST=github.com
+#ARG GOPROXY=https://goproxy.cn,direct
+#ENV GONOSUMDB=${GITHUB_HOST}/*
+#ARG GOPRIVATE=${GITHUB_HOST}
+#RUN git config --global url.https://github-ci-token:${GITHUB_CI_TOKEN}@${GITHUB_HOST}/.insteadOf https://${GITHUB_HOST}/
 
-# add and start postgresql
-RUN apk --no-cache add postgresql
-ENV PG_DATA_DIR=/var/lib/postgresql/data
-ENV PG_CFG_FILE=/var/lib/postgresql/data/postgresql.conf
-CMD su postgres && mkdir ${PG_DATA_DIR} && chmod 0700 ${PG_DATA_DIR}
-CMD su postgres && initdb -D ${PG_DATA_DIR}
-RUN echo 'unix_socket_directories = /tmp' >> ${PG_CFG_FILE}
-CMD su postgres && pg_ctl start -D ${PG_DATA_DIR}
-
-# setup private depends
-ARG REPO_ACESS_TOKEN=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
-ARG REPO_HOST=github.com
-ARG REPO_ORGNIZE=machinefi
-ARG REPO_NAME=w3bstream
-ARG REPO_URL=${REPO_HOST}:${REPO_ORGNIZE}/${REPO_NAME}
-# RUN git config --global url."git@${REPO_HOST}:".insteadOf "https://${REPO_ORGNIZE}:${REPO_ACESS_TOKEN}@${REPO_HOST}/"
-# RUN git config --global url."ssh://git@${REPO_HOST}:".insteadOf "https://${REPO_ORGNIZE}:${REPO_ACESS_TOKEN}@${REPO_HOST}/"
-ARG REPO=https://${REPO_ORGNIZE}:${REPO_ACESS_TOKEN}@${REPO_HOST}/${REPO_ORGNIZE}/${REPO_NAME}.git
-RUN echo ${REPO}
+# FROM build-env AS builder
 
 WORKDIR /go/src
-RUN git clone ${REPO}
+COPY ./ ./
 
-WORKDIR /go/src/w3bstream
-ENV GOPRIVATE=github.com/machinefi/Bumblebee
-RUN cd cmd/srv-applet-mgr && go build -mod vendor
-RUN mkdir -pv build
-RUN cp -r cmd/srv-applet-mgr/config build/
-RUN mv cmd/srv-applet-mgr/srv-applet-mgr build/
+# build
+#ARG COMMIT_SHA
+RUN make build
 
+# runtime
+FROM golang:1.19 AS runtime
+
+COPY --from=builder /go/src/build/srv-applet-mgr/srv-applet-mgr /go/bin/srv-applet-mgr
+COPY --from=builder /go/src/build/srv-applet-mgr/openapi.json /go/bin/openapi.json
 EXPOSE 8888
 
-ARG PROJECT_NAME
-ARG PROJECT_VERSION
-ENV GOENV=DEV PROJECT_NAME=${PROJECT_NAME} PROJECT_VERSION=${PROJECT_VERSION}
-
-WORKDIR /go/src/w3bstream/build
-
-# ENTRYPOINT ["echo hello"]
-
-
+WORKDIR /go/bin
+RUN echo $PATH
+ENTRYPOINT ["/go/bin/srv-applet-mgr"]

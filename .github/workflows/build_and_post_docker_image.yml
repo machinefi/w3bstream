@@ -37,7 +37,7 @@ jobs:
           go-version: 1.19
 
       - name: Build Go
-        run: go build -v ./...
+        run: make build
 
       # Docker is not installed by default on macos base image for license reason : https://github.com/actions/runner-images/issues/17
       - name: Setup Docker and Colima
@@ -74,7 +74,7 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: ./cmd/srv-applet-mgr/Dockerfile.dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
