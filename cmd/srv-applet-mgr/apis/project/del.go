@@ -23,13 +23,12 @@ func (r *RemoveProject) Output(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 	// TODO @zhiran  move this to bff request
+	// TODO: del op should be BASE among async modules
 	if err := blockchain.RemoveMonitor(ctx, name); err != nil {
 		return nil, err
 	}
 
-	if err := metrics.RemoveMetrics(ctx, acc.AccountID.String(), name); err != nil {
-		return nil, err
-	}
+	metrics.RemoveMetrics(ctx, acc.AccountID.String(), name)
 
 	v := types.MustProjectFromContext(ctx)
 	return nil, project.RemoveBySFID(ctx, v.ProjectID)
