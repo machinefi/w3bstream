@@ -46,7 +46,7 @@ func init() {
 	prometheus.MustRegister(BlockChainTxMtc)
 }
 
-func RemoveMetrics(ctx context.Context, account string, project string) {
+func RemoveMetrics(ctx context.Context, account string, project string) error {
 	EventMtc.DeletePartialMatch(prometheus.Labels{"account": account, "project": project})
 	PublisherMtc.DeletePartialMatch(prometheus.Labels{"account": account, "project": project})
 	BlockChainTxMtc.DeletePartialMatch(prometheus.Labels{"project": project})
@@ -56,6 +56,7 @@ func RemoveMetrics(ctx context.Context, account string, project string) {
 		// the metrics server isn't essential for the core service
 		l.Warn(err)
 	}
+	return nil
 }
 
 func eraseDataInServer(ctx context.Context, account string, project string) error {
