@@ -86,6 +86,3 @@ jobs:
           no-cache: true
             # cache-from: gha
             # cache-to: type=gha,mode=max
-        run: |
-          pwd
-          ls -al .
