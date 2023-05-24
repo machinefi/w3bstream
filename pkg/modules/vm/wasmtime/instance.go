@@ -123,6 +123,8 @@ func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data [
 func (i *Instance) queueWorker() {
 	for {
 		task, more := <-i.msgQueue
+		log.FromContext(task.ctx).WithValues("eid", task.EventID).Debug(
+			fmt.Sprintf("queue len is %d and more is %t", len(i.msgQueue), more))
 		if !more {
 			return
 		}
