@@ -18,7 +18,7 @@ jobs:
           - os: windows-latest
             artifact_name: pub_client-windows-amd64.exe
             applet_mgr_name: srv-applet-mgr-windows-amd64
-          - os: macos-latest
+          - os: macos-latest-x1
             artifact_name: pub_client-darwin-amd64
             applet_mgr_name: srv-applet-mgr-darwin-amd64
 

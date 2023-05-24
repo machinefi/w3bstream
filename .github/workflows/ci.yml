@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest-x1]
     permissions:
       contents: read
       packages: write
@@ -38,7 +38,7 @@ jobs:
 
       # Docker is not installed by default on macos base image for license reason : https://github.com/actions/runner-images/issues/17
       - name: Setup Docker and Colima
-        if: startsWith(matrix.os, 'macos-latest') == true
+        if: startsWith(matrix.os, 'macos-latest-x1') == true
         run: |
           brew install docker colima
           colima start
