@@ -77,7 +77,7 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@v4
         with:
-          context: ./cmd/srv-applet-mgr/
+          context: .
           file: ./cmd/srv-applet-mgr/Dockerfile.lite
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
@@ -86,3 +86,6 @@ jobs:
           no-cache: true
             # cache-from: gha
             # cache-to: type=gha,mode=max
+        run: |
+          pwd
+          ls -al .
