@@ -39,9 +39,7 @@ jobs:
       # Docker is not installed by default on macos base image for license reason : https://github.com/actions/runner-images/issues/17
       - name: Setup Docker and Colima
         if: startsWith(matrix.os, 'macos-latest') == true
-        run: |
-          brew install docker colima
-          colima start
+        run: brew install docker # brew install docker colima && colima start
 
       - name: Test Go
         #run: go test ./...
