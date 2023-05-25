@@ -192,8 +192,10 @@ func Remove(ctx context.Context, acc *models.Account, r *CondArgs) error {
 	return nil
 }
 
-func Create(ctx context.Context, acc *models.Account, prj *models.Project, r *CreateReq) (*models.Publisher, error) {
+func Create(ctx context.Context, r *CreateReq) (*models.Publisher, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
+	prj := types.MustProjectFromContext(ctx)
+	acc := types.MustAccountFromContext(ctx)
 
 	id := confid.MustSFIDGeneratorFromContext(ctx).MustGenSFID()
 	token, err := confjwt.MustConfFromContext(ctx).GenerateTokenWithoutExpByPayload(id)
