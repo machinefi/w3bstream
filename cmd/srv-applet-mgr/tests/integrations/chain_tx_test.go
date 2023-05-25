@@ -79,8 +79,8 @@ func TestChainTxAPIs(t *testing.T) {
 
 				// check chain tx is removed
 				{
-					_, err := blockchain.GetContractLogBySFID(ctx, chainTxID)
-					requires.CheckError(t, err, status.ContractLogNotFound)
+					_, err := blockchain.GetChainTxBySFID(ctx, chainTxID)
+					requires.CheckError(t, err, status.ChainTxNotFound)
 				}
 
 				// remove project
