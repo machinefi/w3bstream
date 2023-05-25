@@ -18,6 +18,7 @@ import (
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	confpostgres "github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
+	confrate "github.com/machinefi/w3bstream/pkg/depends/conf/rate_limit"
 	confredis "github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/client"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
@@ -71,6 +72,7 @@ func init() {
 		AmazonS3     *amazonS3.AmazonS3
 		LocalFS      *local.LocalFileSystem
 		WasmDBConfig *types.WasmDBConfig
+		RateLimit    *confrate.RateLimit
 	}{
 		Postgres:     db,
 		MonitorDB:    monitordb,
@@ -88,6 +90,7 @@ func init() {
 		AmazonS3:     &amazonS3.AmazonS3{},
 		LocalFS:      &local.LocalFileSystem{},
 		WasmDBConfig: &types.WasmDBConfig{},
+		RateLimit:    &confrate.RateLimit{},
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
@@ -142,6 +145,7 @@ func init() {
 		types.WithFileSystemOpContext(fs),
 		types.WithProxyClientContext(proxy),
 		types.WithWasmDBConfigContext(config.WasmDBConfig),
+		confrate.WithRateLimitKeyContext(config.RateLimit),
 	)
 	Context = WithContext(context.Background())
 }

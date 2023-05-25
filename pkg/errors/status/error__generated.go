@@ -207,6 +207,8 @@ func (v Error) Key() string {
 		return "BatchRemoveWasmLogFailed"
 	case GenTokenFailed:
 		return "GenTokenFailed"
+	case RateLimitKeyNotOk:
+		return "RateLimitKeyNotOk"
 	}
 	return "UNKNOWN"
 }
@@ -383,6 +385,8 @@ func (v Error) Msg() string {
 		return "Batch Remove WasmLog Failed"
 	case GenTokenFailed:
 		return "Gen Token Failed"
+	case RateLimitKeyNotOk:
+		return "RateLimit Key Not Ok"
 	}
 	return "-"
 }
@@ -558,6 +562,8 @@ func (v Error) CanBeTalk() bool {
 	case BatchRemoveWasmLogFailed:
 		return true
 	case GenTokenFailed:
+		return true
+	case RateLimitKeyNotOk:
 		return true
 	}
 	return false

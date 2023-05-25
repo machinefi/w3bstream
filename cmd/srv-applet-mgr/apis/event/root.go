@@ -3,11 +3,12 @@ package event
 import (
 	"github.com/prometheus/client_golang/prometheus"
 
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 )
 
-var Root = kit.NewRouter(httptransport.Group("/event"))
+var Root = kit.NewRouter(httptransport.Group("/event"), &middleware.ReqRateLimit{})
 
 func init() {
 	Root.Register(kit.NewRouter(&HandleEvent{}))
