@@ -55,39 +55,41 @@ func init() {
 	// TODO config struct should be defined outside this method and impl it's Init() interface{}
 	// TODO split this init too long
 	config := &struct {
-		Postgres     *confpostgres.Endpoint
-		MonitorDB    *confpostgres.Endpoint
-		WasmDB       *base.Endpoint
-		MqttBroker   *confmqtt.Broker
-		Redis        *confredis.Redis
-		Server       *confhttp.Server
-		Jwt          *confjwt.Jwt
-		Logger       *conflog.Log
-		UploadConf   *types.UploadConfig
-		EthClient    *types.ETHClientConfig
-		WhiteList    *types.WhiteList
-		ServerEvent  *confhttp.Server
-		FileSystem   *types.FileSystem
-		AmazonS3     *amazonS3.AmazonS3
-		LocalFS      *local.LocalFileSystem
-		WasmDBConfig *types.WasmDBConfig
+		Postgres      *confpostgres.Endpoint
+		MonitorDB     *confpostgres.Endpoint
+		WasmDB        *base.Endpoint
+		MqttBroker    *confmqtt.Broker
+		Redis         *confredis.Redis
+		Server        *confhttp.Server
+		Jwt           *confjwt.Jwt
+		Logger        *conflog.Log
+		UploadConf    *types.UploadConfig
+		EthClient     *types.ETHClientConfig
+		WhiteList     *types.WhiteList
+		ServerEvent   *confhttp.Server
+		FileSystem    *types.FileSystem
+		AmazonS3      *amazonS3.AmazonS3
+		LocalFS       *local.LocalFileSystem
+		WasmDBConfig  *types.WasmDBConfig
+		MetricsCenter *types.MetricsCenterConfig
 	}{
-		Postgres:     db,
-		MonitorDB:    monitordb,
-		WasmDB:       wasmdb,
-		MqttBroker:   &confmqtt.Broker{},
-		Redis:        &confredis.Redis{},
-		Server:       ServerMgr,
-		Jwt:          &confjwt.Jwt{},
-		Logger:       &conflog.Log{},
-		UploadConf:   &types.UploadConfig{},
-		EthClient:    &types.ETHClientConfig{},
-		WhiteList:    &types.WhiteList{},
-		ServerEvent:  ServerEvent,
-		FileSystem:   &types.FileSystem{},
-		AmazonS3:     &amazonS3.AmazonS3{},
-		LocalFS:      &local.LocalFileSystem{},
-		WasmDBConfig: &types.WasmDBConfig{},
+		Postgres:      db,
+		MonitorDB:     monitordb,
+		WasmDB:        wasmdb,
+		MqttBroker:    &confmqtt.Broker{},
+		Redis:         &confredis.Redis{},
+		Server:        ServerMgr,
+		Jwt:           &confjwt.Jwt{},
+		Logger:        &conflog.Log{},
+		UploadConf:    &types.UploadConfig{},
+		EthClient:     &types.ETHClientConfig{},
+		WhiteList:     &types.WhiteList{},
+		ServerEvent:   ServerEvent,
+		FileSystem:    &types.FileSystem{},
+		AmazonS3:      &amazonS3.AmazonS3{},
+		LocalFS:       &local.LocalFileSystem{},
+		WasmDBConfig:  &types.WasmDBConfig{},
+		MetricsCenter: &types.MetricsCenterConfig{},
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
@@ -142,6 +144,7 @@ func init() {
 		types.WithFileSystemOpContext(fs),
 		types.WithProxyClientContext(proxy),
 		types.WithWasmDBConfigContext(config.WasmDBConfig),
+		types.WithMetricsCenterConfigContext(config.MetricsCenter),
 	)
 	Context = WithContext(context.Background())
 }
