@@ -31,6 +31,12 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
+      - name: Setup Docker and Colima
+        if: startsWith(matrix.os, 'macos-latest') == true
+        run: |
+          brew install docker colima
+          colima start
+
       - name: Set up QEMU
         #if: startsWith(matrix.os, 'macos-latest') != true
         uses: docker/setup-qemu-action@v2
