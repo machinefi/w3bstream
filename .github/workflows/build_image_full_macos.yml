@@ -1,4 +1,4 @@
-name: build_image_amd64
+name: build_image_arm64
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [macos-latest]
     permissions:
       contents: read
       packages: write
@@ -30,6 +30,12 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
+
+      - name: Setup Docker and Colima
+        if: startsWith(matrix.os, 'macos-latest') == true
+        run: |
+          brew install docker colima
+          colima start
 
       - name: Set up QEMU
         #if: startsWith(matrix.os, 'macos-latest') != true
@@ -58,7 +64,7 @@ jobs:
         with:
           context: .
           file: ./cmd/srv-applet-mgr/Dockerfile
-          platforms: linux/amd64
+          platforms: linux/arm64,linux/amd64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
