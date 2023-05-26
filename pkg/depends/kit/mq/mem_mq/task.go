@@ -32,9 +32,9 @@ var _ mq.TaskManager = (*TaskManager)(nil)
 
 func (tm *TaskManager) Push(ch string, t mq.Task) error {
 	tm.rwm.Lock()
-	defer tm.rwm.Unlock()
 
 	tm.m[key(ch, t.ID())] = tm.l.PushBack(t)
+	tm.rwm.Unlock()
 	tm.sig <- struct{}{}
 	return nil
 }
