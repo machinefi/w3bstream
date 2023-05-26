@@ -2,7 +2,8 @@ version: "3.6"
 
 services:
   w3bapp:
-    build: .
+    build:
+      dockerfile: ./cmd/srv-applet-mgr/Dockerfile
     depends_on:
       - "postgres"
       - "mqtt_server"

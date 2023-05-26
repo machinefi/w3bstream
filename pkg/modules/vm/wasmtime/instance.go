@@ -3,6 +3,7 @@ package wasmtime
 import (
 	"context"
 	"fmt"
+	"sync/atomic"
 	"time"
 
 	"github.com/bytecodealliance/wasmtime-go/v8"
@@ -29,7 +30,7 @@ type Instance struct {
 	ctx      context.Context
 	id       types.SFID
 	rt       *Runtime
-	state    wasm.InstanceState
+	state    *atomic.Uint32
 	res      *mapx.Map[uint32, []byte]
 	evs      *mapx.Map[uint32, []byte]
 	handlers map[string]*wasmtime.Func
@@ -56,12 +57,14 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte, st enums
 	if err := rt.Link(lk, code); err != nil {
 		return nil, err
 	}
+	state := &atomic.Uint32{}
+	state.Store(uint32(st))
 
 	ins := &Instance{
 		ctx:      ctx,
 		rt:       rt,
 		id:       id,
-		state:    st,
+		state:    state,
 		res:      res,
 		evs:      evs,
 		handlers: make(map[string]*wasmtime.Func),
@@ -80,20 +83,24 @@ func (i *Instance) ID() string { return i.id.String() }
 
 func (i *Instance) Start(ctx context.Context) error {
 	log.FromContext(ctx).WithValues("instance", i.ID()).Info("started")
-	i.state = enums.INSTANCE_STATE__STARTED
+	i.setState(enums.INSTANCE_STATE__STARTED)
 	return nil
 }
 
 func (i *Instance) Stop(ctx context.Context) error {
 	log.FromContext(ctx).WithValues("instance", i.ID()).Info("stopped")
-	i.state = enums.INSTANCE_STATE__STOPPED
+	i.setState(enums.INSTANCE_STATE__STOPPED)
 	return nil
 }
 
-func (i *Instance) State() wasm.InstanceState { return i.state }
+func (i *Instance) setState(st wasm.InstanceState) {
+	i.state.Store(uint32(st))
+}
+
+func (i *Instance) State() wasm.InstanceState { return wasm.InstanceState(i.state.Load()) }
 
 func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data []byte) *wasm.EventHandleResult {
-	if i.state != enums.INSTANCE_STATE__STARTED {
+	if i.State() != enums.INSTANCE_STATE__STARTED {
 		return &wasm.EventHandleResult{
 			InstanceID: i.id.String(),
 			Code:       wasm.ResultStatusCode_Failed,
