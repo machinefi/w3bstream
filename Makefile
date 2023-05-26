@@ -44,8 +44,8 @@ clean:
 ## docker build entries
 
 .PHONY: build_image
-build_image: srv_applet_mgr
-	@docker build -f cmd/srv-applet-mgr/Dockerfile.dockerfile -t ${WS_BACKEND_IMAGE} .
+build_image:
+	@docker build -f cmd/srv-applet-mgr/Dockerfile -t ${WS_BACKEND_IMAGE} .
 
 # run server in docker containers
 .PHONY: run_docker
