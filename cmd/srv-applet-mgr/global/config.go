@@ -72,6 +72,7 @@ func init() {
 		LocalFS       *local.LocalFileSystem
 		WasmDBConfig  *types.WasmDBConfig
 		MetricsCenter *types.MetricsCenterConfig
+		RobotNotifier *types.RobotNotifierConfig
 	}{
 		Postgres:      db,
 		MonitorDB:     monitordb,
@@ -90,6 +91,7 @@ func init() {
 		LocalFS:       &local.LocalFileSystem{},
 		WasmDBConfig:  &types.WasmDBConfig{},
 		MetricsCenter: &types.MetricsCenterConfig{},
+		RobotNotifier: &types.RobotNotifierConfig{},
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
@@ -121,6 +123,10 @@ func init() {
 		fs = config.LocalFS
 	}
 
+	if config.RobotNotifier.IsZero() {
+		config.RobotNotifier = nil
+	}
+
 	confhttp.RegisterCheckerBy(config, worker)
 
 	proxy = &client.Client{Port: uint16(ServerEvent.Port), Timeout: 10 * time.Second}
@@ -145,6 +151,7 @@ func init() {
 		types.WithProxyClientContext(proxy),
 		types.WithWasmDBConfigContext(config.WasmDBConfig),
 		types.WithMetricsCenterConfigContext(config.MetricsCenter),
+		types.WithRobotNotifierConfigContext(config.RobotNotifier),
 	)
 	Context = WithContext(context.Background())
 }
