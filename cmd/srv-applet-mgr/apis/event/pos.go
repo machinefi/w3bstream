@@ -7,6 +7,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
+	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -39,7 +40,7 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 	}
 
 	prj := types.MustProjectFromContext(ctx)
-	_eventMtc.WithLabelValues(prj.AccountID.String(), prj.Name, pub.Key, r.EventType).Inc()
+	metrics.EventMtc.WithLabelValues(prj.AccountID.String(), prj.Name, pub.Key, r.EventType).Inc()
 
 	ctx = types.WithEventID(ctx, r.EventID)
 	rsp.Results = event.OnEvent(ctx, r.Payload.Bytes())

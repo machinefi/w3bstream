@@ -2,42 +2,40 @@ DOCKER_COMPOSE_FILE = ./docker-compose.yaml
 WS_BACKEND_IMAGE = $(USER)/w3bstream:main
 WS_WORKING_DIR=$(shell pwd)/working_dir
 
-.DEFAULT_GOAL := build
+.DEFAULT_GOAL := all
 
 ## cmd build entries
 
+## update and download go module dependency
 .PHONY: update
 update:
 	@go mod tidy
 	@go mod download
 
+## toolkit for code generation
 .PHONY: toolkit
 toolkit:
 	@go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/...@toolkit-patch-0.0.3
 	@echo installed `which toolkit`
 
+## build cmd/srv-applet-mgr
 .PHONY: srv_applet_mgr
 srv_applet_mgr:
 	@toolkit fmt
 	@cd cmd/srv-applet-mgr && make --no-print-directory
 	@echo srv-applet-mgr is built to "\033[31m ./build/srv-applet-mgr/... \033[0m"
 
-.PHONY: srv_applet_mgr_lite
-srv_applet_mgr_lite:
-	@cd cmd/srv-applet-mgr && make lite --no-print-directory
-	@echo srv-applet-mgr is built to "\033[31m ./build/srv-applet-mgr/... \033[0m"
-
-
+## build cmd/pub_client
 .PHONY: pub_client
 pub_client:
 	@cd cmd/pub_client && make --no-print-directory
 	@echo pub_client is built to "\033[31m ./build/pub_client/... \033[0m"
 
-.PHONY: build
-build: update test toolkit srv_applet_mgr pub_client
+.PHONY: all
+all: build test
 
-.PHONY: build_lite
-build_lite: update srv_applet_mgr_lite
+.PHONY: build
+build: update toolkit srv_applet_mgr pub_client
 
 .PHONY: clean
 clean:
@@ -45,12 +43,9 @@ clean:
 
 ## docker build entries
 
-.PHONY: build_docker_images
-build_docker_images: build_backend_image
-
-.PHONY: build_backend_image
-build_backend_image: update
-	@docker build -f Dockerfile -t ${WS_BACKEND_IMAGE} .
+.PHONY: build_image
+build_image: srv_applet_mgr
+	@docker build -f cmd/srv-applet-mgr/Dockerfile.dockerfile -t ${WS_BACKEND_IMAGE} .
 
 # run server in docker containers
 .PHONY: run_docker
@@ -89,14 +84,18 @@ migrate: toolkit
 .PHONY: test
 test: test_depends
 	@go test -cover -coverprofile=coverage.out ./...
-	@docker stop mqtt_test postgres_test || true && docker container rm mqtt_test postgres_test || true
+	@docker stop mqtt_test postgres_test redis_test || true && docker container rm mqtt_test postgres_test redis_test || true
+
+bench: test_depends
+	@cd ./cmd/srv-applet-mgr/tests/integrations/ && go test event_benchmark_test.go -bench=.
+	@docker stop mqtt_test postgres_test redis_test || true && docker container rm mqtt_test postgres_test redis_test || true
 
 .PHONY: test_depends
-test_depends: cleanup_test_depends postgres_test mqtt_test
+test_depends: cleanup_test_depends postgres_test mqtt_test redis_test
 
 .PHONY: cleanup_test_depends
 cleanup_test_depends:
-	@docker stop mqtt_test postgres_test || true && docker container rm mqtt_test postgres_test || true
+	@docker stop mqtt_test postgres_test redis_test || true && docker container rm mqtt_test postgres_test redis_test || true
 
 .PHONY: postgres_test
 postgres_test:
@@ -105,4 +104,8 @@ postgres_test:
 .PHONY: mqtt_test
 mqtt_test:
 	docker run --name mqtt_test -p 11883:1883 -d eclipse-mosquitto:1.6.15
+
+.PHONY: redis_test
+redis_test:
+	docker run --name redis_test -p 16379:6379 -d redis:6.2
 

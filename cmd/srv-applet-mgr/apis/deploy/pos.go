@@ -27,6 +27,10 @@ func (r *CreateAndStartInstance) Output(ctx context.Context) (interface{}, error
 	if err != nil {
 		return nil, err
 	}
+	ctx, err = ca.WithResourceContextBySFID(ctx, r.AppletID)
+	if err != nil {
+		return nil, err
+	}
 
 	if ins, ok := types.InstanceFromContext(ctx); ok {
 		if err := deploy.Deploy(ctx, enums.DEPLOY_CMD__START); err != nil {
