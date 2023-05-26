@@ -1,4 +1,4 @@
-name: build_and_post_docker_image
+name: build_image_amd64
 
 on:
   push:
