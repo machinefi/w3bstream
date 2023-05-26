@@ -385,8 +385,7 @@
               "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
               "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
-              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
-              "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "500": {
@@ -495,8 +494,7 @@
               "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
               "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
-              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
-              "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "500": {
@@ -1156,8 +1154,7 @@
               "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
               "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
-              "@StatusErr[ProjectOperatorNotFound][404999020][Project Operator relationship Not Found]!",
-              "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
+              "@StatusErr[ProjectOperatorNotFound][404999020][Project Operator relationship Not Found]!"
             ]
           },
           "409": {
@@ -1688,8 +1685,7 @@
               "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
               "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
-              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
-              "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "500": {
@@ -7282,8 +7278,7 @@
               "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
               "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
-              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
-              "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!"
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "409": {
