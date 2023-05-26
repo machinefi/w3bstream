@@ -15,7 +15,8 @@ update:
 ## toolkit for code generation
 .PHONY: toolkit
 toolkit:
-	@go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/...@toolkit-patch-0.0.3
+	@cd pkg/depends/gen/cmd
+	@go install ./...
 	@echo installed `which toolkit`
 
 ## build cmd/srv-applet-mgr
