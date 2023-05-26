@@ -90,7 +90,7 @@ func (v *CurrentAccount) WithProjectContextBySFID(ctx context.Context, id types.
 	return types.WithProject(ctx, prj), nil
 }
 
-// WithAppletContextBySFID With full contexts by applet SFID
+// WithAppletContextBySFID With applet contexts by applet SFID
 func (v *CurrentAccount) WithAppletContextBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
 	app, err := applet.GetBySFID(ctx, id)
 	if err != nil {
@@ -113,12 +113,16 @@ func (v *CurrentAccount) WithAppletContextBySFID(ctx context.Context, id types.S
 		ctx = types.WithInstance(ctx, ins)
 	}
 
-	res, err := resource.GetBySFID(ctx, app.ResourceID)
+	return ctx, nil
+}
+
+func (v *CurrentAccount) WithResourceContextBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	resource, err := resource.GetBySFID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	return types.WithResource(ctx, res), nil
+	return types.WithResource(ctx, resource), nil
 }
 
 // WithInstanceContextBySFID With full contexts by instance SFID

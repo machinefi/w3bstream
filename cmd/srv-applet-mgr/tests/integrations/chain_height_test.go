@@ -13,26 +13,24 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-func TestContractLogAPIs(t *testing.T) {
+func TestChainHeightAPIs(t *testing.T) {
 	var (
 		ctx           = requires.Context()
 		client        = requires.AuthClient()
 		projectName   = "test_project"
-		contractLogID types.SFID
-		baseReq       = applet_mgr.CreateContractLog{}
+		chainHeightID types.SFID
+		baseReq       = applet_mgr.CreateChainHeight{}
 	)
 
 	baseReq.ProjectName = projectName
-	baseReq.CreateContractLogReq.BlockStart = 20299310
-	baseReq.CreateContractLogReq.ChainID = 4690
-	baseReq.CreateContractLogReq.EventType = "DEFAULT"
-	baseReq.CreateContractLogReq.ContractAddress = "0x1AA325E5144f763a520867c56FC77cC1411430d0"
-	baseReq.CreateContractLogReq.Topic0 = "0x9ffdf0136249d99680088653555755221714868b4f7ca1ff7d8523e3bef1dc4a"
+	baseReq.CreateChainHeightReq.ChainID = 4690
+	baseReq.CreateChainHeightReq.EventType = "DEFAULT"
+	baseReq.CreateChainHeightReq.Height = 1000
 
 	t.Logf("random a project name: %s", projectName)
 
-	t.Run("ContractLog", func(t *testing.T) {
-		t.Run("#CreateContractLog", func(t *testing.T) {
+	t.Run("ChainHeight", func(t *testing.T) {
+		t.Run("#CreateChainHeight", func(t *testing.T) {
 			t.Run("#Success", func(t *testing.T) {
 
 				// create project without user defined config(database/env)
@@ -52,35 +50,35 @@ func TestContractLogAPIs(t *testing.T) {
 					NewWithT(t).Expect(err).To(BeNil())
 				}
 
-				// create contract log monitor
+				// create chain height monitor
 				{
 					req := baseReq
-					rsp, _, err := client.CreateContractLog(&req)
+					rsp, _, err := client.CreateChainHeight(&req)
 
 					NewWithT(t).Expect(err).To(BeNil())
-					contractLogID = rsp.ContractLogID
+					chainHeightID = rsp.ChainHeightID
 				}
 
-				// check contract log is created
+				// check chain height is created
 				{
-					_, err := blockchain.GetContractLogBySFID(ctx, contractLogID)
+					_, err := blockchain.GetChainHeightBySFID(ctx, chainHeightID)
 					NewWithT(t).Expect(err).To(BeNil())
 				}
 
-				// remove contract log
+				// remove chain height
 				{
-					req := &applet_mgr.RemoveContractLog{
+					req := &applet_mgr.RemoveChainHeight{
 						ProjectName:   projectName,
-						ContractLogID: contractLogID,
+						ChainHeightID: chainHeightID,
 					}
-					_, err := client.RemoveContractLog(req)
+					_, err := client.RemoveChainHeight(req)
 					NewWithT(t).Expect(err).To(BeNil())
 				}
 
-				// check contract log is removed
+				// check chain height is removed
 				{
-					_, err := blockchain.GetContractLogBySFID(ctx, contractLogID)
-					requires.CheckError(t, err, status.ContractLogNotFound)
+					_, err := blockchain.GetChainHeightBySFID(ctx, chainHeightID)
+					requires.CheckError(t, err, status.ChainHeightNotFound)
 				}
 
 				// remove project
@@ -90,23 +88,13 @@ func TestContractLogAPIs(t *testing.T) {
 					NewWithT(t).Expect(err).To(BeNil())
 				}
 			})
-			t.Run("#InvalidContractLogParam", func(t *testing.T) {
-				// contract address is empty
+			t.Run("#InvalidChainHeightParam", func(t *testing.T) {
+				// chain height is empty
 				{
 					req := baseReq
-					req.CreateContractLogReq.ContractAddress = ""
+					req.CreateChainHeightReq.Height = 0
 
-					_, _, err := client.CreateContractLog(&req)
-					requires.CheckError(t, err, &statusx.StatusErr{
-						Key: "badRequest",
-					})
-				}
-
-				// block start is empty
-				{
-					req := baseReq
-					req.CreateContractLogReq.BlockStart = 0
-					_, _, err := client.CreateContractLog(&req)
+					_, _, err := client.CreateChainHeight(&req)
 					requires.CheckError(t, err, &statusx.StatusErr{
 						Key: "badRequest",
 					})
@@ -115,8 +103,8 @@ func TestContractLogAPIs(t *testing.T) {
 				// chain id is empty
 				{
 					req := baseReq
-					req.CreateContractLogReq.ChainID = 0
-					_, _, err := client.CreateContractLog(&req)
+					req.CreateChainHeightReq.ChainID = 0
+					_, _, err := client.CreateChainHeight(&req)
 					requires.CheckError(t, err, &statusx.StatusErr{
 						Key: "badRequest",
 					})
