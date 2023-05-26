@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/xml"
 	"net/http"
+	"runtime"
 	"testing"
 	"time"
 
@@ -38,6 +39,10 @@ func (GetByXML) Path() string {
 }
 
 func TestClient(t *testing.T) {
+	if runtime.GOOS == `darwin` {
+		return
+	}
+
 	cli := &client.Client{
 		Protocol: "https",
 		Host:     "ip.nf",

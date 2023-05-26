@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"os"
 	"path"
 	"time"
 
@@ -38,7 +39,7 @@ func init() {
 	flag.StringVar(&cid, "id", "", "publish client id")
 	flag.StringVar(&topic, "topic", "", "publish topic")
 	flag.StringVar(&token, "token", "", "publish token")
-	flag.StringVar(&data, "data", "", "payload data")
+	flag.StringVar(&data, "data", "", "payload data, read file pls use '@PATH'")
 	flag.StringVar(&seq, "seq", "", "message sequence")
 	flag.StringVar(&host, "host", "localhost", "mqtt broker host")
 	flag.IntVar(&port, "port", 1883, "mqtt broker port")
@@ -98,6 +99,14 @@ func init() {
 
 	var err error
 
+	pl := []byte(data)
+	if len(data) > 0 && data[0] == '@' {
+		pl, err = os.ReadFile(data[1:])
+		if err != nil {
+			panic(errors.Wrap(err, "read file: "+data[1:]))
+		}
+	}
+
 	msg = &eventpb.Event{
 		Header: &eventpb.Header{
 			Token:   token,
@@ -105,7 +114,7 @@ func init() {
 			EventId: seq,
 			PubId:   cid,
 		},
-		Payload: []byte(data),
+		Payload: pl,
 	}
 
 	raw, err = proto.Marshal(msg)

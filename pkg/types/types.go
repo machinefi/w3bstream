@@ -101,3 +101,7 @@ var SchedulerJobs = Schedulers{
 type Schedulers struct {
 	Jobs mapx.Map[string, *gocron.Scheduler]
 }
+
+type MetricsCenterConfig struct {
+	Endpoint string `env:""`
+}

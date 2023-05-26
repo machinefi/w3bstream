@@ -12,6 +12,7 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/operator"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/project"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/project_config"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/projectoperator"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/publisher"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/resource"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/strategy"
@@ -62,6 +63,7 @@ func init() {
 		auth.Register(wasmlog.Root)
 		auth.Register(operator.Root)
 		auth.Register(traffic_limit.Root)
+		auth.Register(projectoperator.Root)
 	}
 
 	// root router register for event http transport

@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
@@ -18,10 +19,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
-
-var Handler = func(ctx context.Context, data []byte) []*Result {
-	return OnEvent(ctx, data)
-}
 
 // HandleEvent support other module call
 // TODO the full project info is not in context so query and set here. this impl
@@ -43,15 +40,20 @@ func HandleEvent(ctx context.Context, t string, data []byte) (interface{}, error
 	}
 
 	ctx = types.WithStrategyResults(ctx, strategies)
+
+	eventID := uuid.NewString() + "_monitor"
+	ctx = types.WithEventID(ctx, eventID)
+
 	return OnEvent(ctx, data), nil
 }
 
 func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
 	var (
-		l   = types.MustLoggerFromContext(ctx)
-		r   = types.MustStrategyResultsFromContext(ctx)
-		rDB = kvdb.MustRedisDBKeyFromContext(ctx)
-		prj = types.MustProjectFromContext(ctx)
+		l       = types.MustLoggerFromContext(ctx)
+		r       = types.MustStrategyResultsFromContext(ctx)
+		rDB     = kvdb.MustRedisDBKeyFromContext(ctx)
+		prj     = types.MustProjectFromContext(ctx)
+		eventID = types.MustEventIDFromContext(ctx)
 
 		results = make(chan *Result, len(r))
 
@@ -127,6 +129,7 @@ func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
 		wg.Add(1)
 		go func(v *types.StrategyResult) {
 			defer wg.Done()
+			l.WithValues("eid", eventID).Debug("instance start to process.")
 			rv := ins.HandleEvent(ctx, v.Handler, v.EventType, data)
 			results <- &Result{
 				AppletName:  v.AppletName,

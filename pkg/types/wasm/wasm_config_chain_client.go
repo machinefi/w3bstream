@@ -14,22 +14,13 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/tidwall/gjson"
 
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	wsTypes "github.com/machinefi/w3bstream/pkg/types"
 )
-
-var _blockChainTxMtc = prometheus.NewCounterVec(prometheus.CounterOpts{
-	Name: "w3b_blockchain_tx_metrics",
-	Help: "blockchain transaction counter metrics.",
-}, []string{"project", "chainID"})
-
-func init() {
-	prometheus.MustRegister(_blockChainTxMtc)
-}
 
 type ChainClient struct {
 	projectName string
@@ -40,7 +31,7 @@ type ChainClient struct {
 
 // TODO impl ChainClient.Init
 
-func NewChainClient(ctx context.Context, ops []models.Operator) *ChainClient {
+func NewChainClient(ctx context.Context, ops []models.Operator, p *models.ProjectOperator) *ChainClient {
 	c := &ChainClient{
 		projectName: wsTypes.MustProjectFromContext(ctx).Name,
 		clientMap:   make(map[uint32]*ethclient.Client, 0),
@@ -53,15 +44,25 @@ func NewChainClient(ctx context.Context, ops []models.Operator) *ChainClient {
 	if len(ethcli.Endpoints) > 0 {
 		c.endpoints = decodeEndpoints(ethcli.Endpoints)
 	}
-	c.operators = convOperators(ops)
+	c.operators = convOperators(ops, p)
 	return c
 }
 
-func convOperators(ops []models.Operator) map[string]*ecdsa.PrivateKey {
+func convOperators(ops []models.Operator, p *models.ProjectOperator) map[string]*ecdsa.PrivateKey {
 	res := make(map[string]*ecdsa.PrivateKey, len(ops))
 	for _, op := range ops {
 		res[op.Name] = crypto.ToECDSAUnsafe(common.FromHex(op.PrivateKey))
 	}
+
+	if p != nil {
+		for _, op := range ops {
+			if op.OperatorID == p.OperatorID {
+				res[operator.DefaultOperatorName] = crypto.ToECDSAUnsafe(common.FromHex(op.PrivateKey))
+				break
+			}
+		}
+	}
+
 	return res
 }
 
@@ -156,7 +157,7 @@ func (c *ChainClient) sendTX(chainID uint32, toStr, valueStr, dataStr string, pv
 		return "", err
 	}
 
-	_blockChainTxMtc.WithLabelValues(c.projectName, strconv.Itoa(int(chainID))).Inc()
+	metrics.BlockChainTxMtc.WithLabelValues(c.projectName, strconv.Itoa(int(chainID))).Inc()
 
 	err = cli.SendTransaction(context.Background(), signedTx)
 	if err != nil {
@@ -200,7 +201,7 @@ func (c *ChainClient) CallContract(chainID uint32, toStr, dataStr string) ([]byt
 		Data: data,
 	}
 
-	_blockChainTxMtc.WithLabelValues(c.projectName, strconv.Itoa(int(chainID))).Inc()
+	metrics.BlockChainTxMtc.WithLabelValues(c.projectName, strconv.Itoa(int(chainID))).Inc()
 
 	return cli.CallContract(context.Background(), msg, nil)
 }

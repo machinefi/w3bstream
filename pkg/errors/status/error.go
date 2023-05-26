@@ -102,6 +102,8 @@ const (
 	UploadFileDiskLimit
 	// @errTalk Topic Already Subscribed
 	TopicAlreadySubscribed
+	// @errTalk Occupied Operator
+	OccupiedOperator
 )
 
 const (
@@ -141,6 +143,8 @@ const (
 	OperatorConflict
 	// @errTalk Traffic Limit Conflict
 	TrafficLimitConflict
+	// @errTalk Project Operator relationship Conflict
+	ProjectOperatorConflict
 )
 
 const (
@@ -154,6 +158,8 @@ const (
 	UnknownDeployCommand
 	// @errTalk Invalid Cron Expressions
 	InvalidCronExpressions
+	// @errTalk Invalid Private Key
+	InvalidPrivateKey
 )
 
 const (
@@ -197,4 +203,6 @@ const (
 	OperatorNotFound
 	// @errTalk Traffic Limit Not Found
 	TrafficLimitNotFound
+	// @errTalk Project Operator relationship Not Found
+	ProjectOperatorNotFound
 )

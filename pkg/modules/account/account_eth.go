@@ -94,11 +94,10 @@ func FetchOrCreateAccountByEthAddress(ctx context.Context, address types.EthAddr
 				return nil
 			}
 			req := operator.CreateReq{
-				AccountID:  rel.AccountID,
 				Name:       operator.DefaultOperatorName,
 				PrivateKey: generateRandomPrivateKey(),
 			}
-			ctx := types.WithMgrDBExecutor(ctx, d)
+			ctx := types.WithAccount(types.WithMgrDBExecutor(ctx, d), acc)
 			_, err := operator.Create(ctx, &req)
 			return err
 		},
