@@ -1,4 +1,4 @@
-name: build_image_arm64
+name: build_image_linux_arm64
 
 on:
   push:

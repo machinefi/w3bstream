@@ -1,4 +1,4 @@
-name: build_image_arm64
+name: build_image_macos_arm64_amd64
 
 on:
   push:
