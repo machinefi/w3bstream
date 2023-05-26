@@ -7,8 +7,9 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/prometheus/client_golang/prometheus"
+
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 const (

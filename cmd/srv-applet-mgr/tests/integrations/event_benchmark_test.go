@@ -32,8 +32,6 @@ var (
 )
 
 func required() func() {
-	stopServe := requires.Serve()
-
 	var (
 		client    = requires.AuthClient()
 		projectID types.SFID
@@ -97,7 +95,6 @@ func required() func() {
 	))
 
 	return func() {
-		stopServe()
 		if projectID != 0 {
 			_, _ = client.RemoveProject(&applet_mgr.RemoveProject{
 				ProjectName: projectNameEventBench,

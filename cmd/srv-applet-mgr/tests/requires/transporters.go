@@ -2,9 +2,11 @@ package requires
 
 import (
 	"net/http"
-	"time"
 
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/tests/clients/applet_mgr"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
+	"github.com/machinefi/w3bstream/pkg/depends/x/misc/retry"
 	"github.com/machinefi/w3bstream/pkg/modules/account"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -38,9 +40,24 @@ var (
 )
 
 func init() {
-	defer Serve()()
-	time.Sleep(3 * time.Second)
+	go kit.Run(apis.RootMgr, _server.WithContextInjector(_injection))
+	go kit.Run(apis.RootEvent, _serverEvent.WithContextInjector(_injection))
 
+	err := retry.Do(retry.Default, func() error {
+		if _, _, err := Client().Liveness(); err != nil {
+			return err
+		}
+		if _, _, err := ClientEvent().Liveness(); err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		panic(err)
+	}
+}
+
+func init() {
 	_, err := account.CreateAdminIfNotExist(_ctx)
 	if err != nil {
 		panic(err)

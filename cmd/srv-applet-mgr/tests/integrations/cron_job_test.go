@@ -14,8 +14,6 @@ import (
 )
 
 func TestCronJobAPIs(t *testing.T) {
-	defer requires.Serve()()
-
 	var (
 		ctx         = requires.Context()
 		client      = requires.AuthClient()

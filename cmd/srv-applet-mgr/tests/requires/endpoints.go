@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"net/url"
 	"reflect"
-	"sync"
 	"time"
 
-	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/tests/clients/applet_mgr"
 	base "github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/local"
@@ -20,7 +18,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/client"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq/mem_mq"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
@@ -66,11 +63,6 @@ func ClientEvent(transports ...client.HttpTransport) *applet_mgr.Client {
 	}
 	_clientEvent.Transports = append(_clientEvent.Transports, transports...)
 	return applet_mgr.NewClient(_clientEvent)
-}
-
-// AuthClientEvent client with jwt token
-func AuthClientEvent(transports ...client.HttpTransport) *applet_mgr.Client {
-	return ClientEvent(NewAuthPatchRT())
 }
 
 // Database executor for access database for testing
@@ -135,32 +127,6 @@ func Mqtt() {
 	_broker.SetDefault()
 	if err := _broker.Init(); err != nil {
 		panic(err)
-	}
-}
-
-var (
-	grp = &sync.WaitGroup{}
-	run = &sync.Once{}
-)
-
-func Serve() (stop func()) {
-	grp.Add(1)
-
-	run.Do(func() {
-		go func() {
-			go kit.Run(apis.RootMgr, _server.WithContextInjector(_injection))
-			go kit.Run(apis.RootEvent, _serverEvent.WithContextInjector(_injection))
-
-			time.Sleep(20 * time.Second)
-
-			grp.Wait()
-			_server.Shutdown()
-		}()
-	})
-	time.Sleep(3 * time.Second)
-
-	return func() {
-		grp.Done()
 	}
 }
 

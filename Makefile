@@ -2,7 +2,7 @@ DOCKER_COMPOSE_FILE = ./docker-compose.yaml
 WS_BACKEND_IMAGE = $(USER)/w3bstream:main
 WS_WORKING_DIR=$(shell pwd)/working_dir
 
-.DEFAULT_GOAL := build
+.DEFAULT_GOAL := all
 
 ## cmd build entries
 
@@ -30,6 +30,9 @@ srv_applet_mgr:
 pub_client:
 	@cd cmd/pub_client && make --no-print-directory
 	@echo pub_client is built to "\033[31m ./build/pub_client/... \033[0m"
+
+.PHONY: all
+all: build test
 
 .PHONY: build
 build: update toolkit srv_applet_mgr pub_client
