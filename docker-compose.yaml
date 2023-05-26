@@ -25,6 +25,7 @@ services:
       SRV_APPLET_MGR__MonitorDB_PoolSize: 5
       SRV_APPLET_MGR__WasmDB: postgresql://${POSTGRES_USER:-w3badmin}:${POSTGRES_PASSWORD:-PaSsW0Rd}@postgres:5432
       SRV_APPLET_MGR__MqttBroker_Server: mqtt://mqtt_server:1883
+      SRV_APPLET_MGR__MetricsCenter_Endpoint: http://prometheus:9090
       SRV_APPLET_MGR__Server_Port: "8888"
       SRV_APPLET_MGR__ServerEvent_Port: "8889"
       SRV_APPLET_MGR__LocalFS_Root: /w3bstream/asserts
@@ -69,14 +70,14 @@ services:
       - '6379:6379'
 
   prometheus:
-    image: imoocc/prometheus:latest
+    image: prom/prometheus:latest
     depends_on:
       - "w3bapp"
     user: root
-    command: --web.enable-lifecycle --config.file=/etc/prometheus/prometheus.yml
+    command: --web.enable-lifecycle --web.enable-admin-api --config.file=/etc/prometheus/prometheus.yml
     container_name: prometheus
     restart: always
     volumes:
-      - ${WS_WORKING_DIR:-.}/prometheus:/prometheus
+      - ./build/var/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
