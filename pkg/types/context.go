@@ -17,36 +17,37 @@ import (
 )
 
 type (
-	CtxMgrDBExecutor     struct{} // CtxMgrDBExecutor sqlx.DBExecutor
-	CtxMonitorDBExecutor struct{} // CtxMonitorDBExecutor sqlx.DBExecutor
-	CtxWasmDBEndpoint    struct{} // CtxWasmDBEndpoint sqlx.DBExecutor
-	CtxLogger            struct{} // CtxLogger log.Logger
-	CtxMqttBroker        struct{} // CtxMqttBroker mqtt.Broker
-	CtxRedisEndpoint     struct{} // CtxRedisEndpoint redis.Redis
-	CtxUploadConfig      struct{} // CtxUploadConfig UploadConfig
-	CtxTaskWorker        struct{}
-	CtxTaskBoard         struct{}
-	CtxProject           struct{}
-	CtxApplet            struct{}
-	CtxResource          struct{}
-	CtxInstance          struct{}
-	CtxEthClient         struct{} // CtxEthClient ETHClientConfig
-	CtxWhiteList         struct{}
-	CtxFileSystem        struct{}
-	CtxStrategy          struct{}
-	CtxPublisher         struct{}
-	CtxCronJob           struct{}
-	CtxOperator          struct{}
-	ContractLog          struct{}
-	ChainHeight          struct{}
-	ChainTx              struct{}
-	CtxAccount           struct{}
-	CtxStrategyResults   struct{}
-	CtxFileSystemOp      struct{}
-	CtxProxyClient       struct{}
-	CtxResourceOwnership struct{}
-	CtxWasmDBConfig      struct{} // CtxWasmDBConfig wasm database config
-	CtxEventID           struct{}
+	CtxMgrDBExecutor       struct{} // CtxMgrDBExecutor sqlx.DBExecutor
+	CtxMonitorDBExecutor   struct{} // CtxMonitorDBExecutor sqlx.DBExecutor
+	CtxWasmDBEndpoint      struct{} // CtxWasmDBEndpoint sqlx.DBExecutor
+	CtxLogger              struct{} // CtxLogger log.Logger
+	CtxMqttBroker          struct{} // CtxMqttBroker mqtt.Broker
+	CtxRedisEndpoint       struct{} // CtxRedisEndpoint redis.Redis
+	CtxUploadConfig        struct{} // CtxUploadConfig UploadConfig
+	CtxTaskWorker          struct{}
+	CtxTaskBoard           struct{}
+	CtxProject             struct{}
+	CtxApplet              struct{}
+	CtxResource            struct{}
+	CtxInstance            struct{}
+	CtxEthClient           struct{} // CtxEthClient ETHClientConfig
+	CtxWhiteList           struct{}
+	CtxFileSystem          struct{}
+	CtxStrategy            struct{}
+	CtxPublisher           struct{}
+	CtxCronJob             struct{}
+	CtxOperator            struct{}
+	ContractLog            struct{}
+	ChainHeight            struct{}
+	ChainTx                struct{}
+	CtxAccount             struct{}
+	CtxStrategyResults     struct{}
+	CtxFileSystemOp        struct{}
+	CtxProxyClient         struct{}
+	CtxResourceOwnership   struct{}
+	CtxWasmDBConfig        struct{} // CtxWasmDBConfig wasm database config
+	CtxEventID             struct{}
+	CtxMetricsCenterConfig struct{}
 )
 
 func WithStrategyResults(ctx context.Context, v []*StrategyResult) context.Context {
@@ -658,6 +659,27 @@ func EventIDFromContext(ctx context.Context) (string, bool) {
 
 func MustEventIDFromContext(ctx context.Context) string {
 	v, ok := EventIDFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithMetricsCenterConfig(ctx context.Context, v *MetricsCenterConfig) context.Context {
+	return contextx.WithValue(ctx, CtxMetricsCenterConfig{}, v)
+}
+
+func WithMetricsCenterConfigContext(v *MetricsCenterConfig) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxMetricsCenterConfig{}, v)
+	}
+}
+
+func MetricsCenterConfigFromContext(ctx context.Context) (*MetricsCenterConfig, bool) {
+	v, ok := ctx.Value(CtxMetricsCenterConfig{}).(*MetricsCenterConfig)
+	return v, ok
+}
+
+func MustMetricsCenterConfigFromContext(ctx context.Context) *MetricsCenterConfig {
+	v, ok := MetricsCenterConfigFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

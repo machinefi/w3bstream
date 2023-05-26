@@ -90,3 +90,7 @@ func (c *WasmDBConfig) SetDefault() {
 		c.MaxConnection = 2
 	}
 }
+
+type MetricsCenterConfig struct {
+	Endpoint string `env:""`
+}

@@ -11,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/metax"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq/worker"
@@ -132,6 +133,8 @@ func (w *TaskWorker) proc(ctx context.Context) (err error) {
 		t  Task
 		se error // shadowed
 	)
+	l := log.FromContext(ctx)
+	l.Debug("task worker starts processing a new task")
 	t, err = w.mgr.Pop(w.Channel)
 	if err != nil {
 		return err
@@ -139,6 +142,7 @@ func (w *TaskWorker) proc(ctx context.Context) (err error) {
 	if t == nil {
 		return nil
 	}
+	l.Debug("get task %s", t.ID())
 
 	defer func() {
 		if e := recover(); e != nil {
@@ -150,6 +154,7 @@ func (w *TaskWorker) proc(ctx context.Context) (err error) {
 		} else {
 			t.SetState(TASK_STATE__SUCCEEDED)
 		}
+		l.Debug("finish task %s with state %s", t.ID(), t.State())
 
 		if w.OnFinished != nil {
 			w.OnFinished(ctx, t)
@@ -175,9 +180,9 @@ func (w *TaskWorker) proc(ctx context.Context) (err error) {
 	meta := metax.ParseMeta(t.ID())
 	meta.Add("task", w.Channel+"#"+t.Subject())
 
+	l.Debug("call op.Output for task %s", t.ID())
 	if _, se = op.Output(metax.ContextWithMeta(ctx, meta)); se != nil {
 		err = se
-		return
 	}
 	return
 }
