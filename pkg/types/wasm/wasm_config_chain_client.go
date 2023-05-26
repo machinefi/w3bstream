@@ -14,22 +14,13 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/tidwall/gjson"
 
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	wsTypes "github.com/machinefi/w3bstream/pkg/types"
 )
-
-var _blockChainTxMtc = prometheus.NewCounterVec(prometheus.CounterOpts{
-	Name: "w3b_blockchain_tx_metrics",
-	Help: "blockchain transaction counter metrics.",
-}, []string{"project", "chainID"})
-
-func init() {
-	prometheus.MustRegister(_blockChainTxMtc)
-}
 
 type ChainClient struct {
 	projectName string
@@ -166,7 +157,7 @@ func (c *ChainClient) sendTX(chainID uint32, toStr, valueStr, dataStr string, pv
 		return "", err
 	}
 
-	_blockChainTxMtc.WithLabelValues(c.projectName, strconv.Itoa(int(chainID))).Inc()
+	metrics.BlockChainTxMtc.WithLabelValues(c.projectName, strconv.Itoa(int(chainID))).Inc()
 
 	err = cli.SendTransaction(context.Background(), signedTx)
 	if err != nil {
@@ -210,7 +201,7 @@ func (c *ChainClient) CallContract(chainID uint32, toStr, dataStr string) ([]byt
 		Data: data,
 	}
 
-	_blockChainTxMtc.WithLabelValues(c.projectName, strconv.Itoa(int(chainID))).Inc()
+	metrics.BlockChainTxMtc.WithLabelValues(c.projectName, strconv.Itoa(int(chainID))).Inc()
 
 	return cli.CallContract(context.Background(), msg, nil)
 }
