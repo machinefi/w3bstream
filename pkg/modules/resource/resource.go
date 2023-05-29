@@ -136,6 +136,25 @@ func GetContentByMd5(ctx context.Context, md5 string) (*models.Resource, []byte,
 	return res, data, nil
 }
 
+func GetDownloadUrlBySFID(ctx context.Context, id types.SFID) (*DownLoadResourceRsp, error) {
+	fs := types.MustFileSystemOpFromContext(ctx)
+	ship := types.MustResourceOwnershipFromContext(ctx)
+
+	res, err := GetBySFID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	url, err := fs.DownloadUrl(res.Path)
+	if err != nil {
+		return nil, err
+	}
+
+	return &DownLoadResourceRsp{
+		FileName: ship.Filename,
+		Url:      url,
+	}, nil
+}
+
 func ReadContent(ctx context.Context, m *models.Resource) ([]byte, error) {
 	fs := types.MustFileSystemOpFromContext(ctx)
 	data, err := fs.Read(m.Path)

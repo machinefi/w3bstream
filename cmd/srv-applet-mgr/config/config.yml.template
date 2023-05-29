@@ -6,6 +6,7 @@ SRV_APPLET_MGR__AmazonS3_Region: ""
 SRV_APPLET_MGR__AmazonS3_S3ForcePathStyle: "false"
 SRV_APPLET_MGR__AmazonS3_SecretAccessKey: ""
 SRV_APPLET_MGR__AmazonS3_SessionToken: ""
+SRV_APPLET_MGR__AmazonS3_UrlExpire: 10m
 SRV_APPLET_MGR__EthClient_Endpoints: ""
 SRV_APPLET_MGR__FileSystem_Type: LOCAL
 SRV_APPLET_MGR__Jwt_ExpIn: 0s
