@@ -69,10 +69,14 @@ func CheckFileMd5SumAndGetData(ctx context.Context, fh *multipart.FileHeader, md
 }
 
 func UploadFile(ctx context.Context, data []byte, id types.SFID) (path string, err error) {
+	return UploadFileWithMD5(ctx, data, "", id)
+}
+
+func UploadFileWithMD5(ctx context.Context, data []byte, md5 string, id types.SFID) (path string, err error) {
 	fs := types.MustFileSystemOpFromContext(ctx)
 
 	path = fmt.Sprintf("%s/%d", os.Getenv(consts.EnvResourceGroup), id)
-	err = fs.Upload(path, data)
+	err = fs.UploadWithMD5(path, md5, data)
 	if err != nil {
 		err = status.UploadFileFailed.StatusErr().WithDesc(err.Error())
 		return

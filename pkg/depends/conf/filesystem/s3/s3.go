@@ -14,6 +14,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/machinefi/w3bstream/pkg/depends/util"
 )
 
 type S3Endpoint interface {
@@ -122,6 +123,19 @@ func (db *ObjectDB) PutObject(ctx context.Context, r io.Reader, meta *ObjectMeta
 	return err
 }
 
+func (db *ObjectDB) GetObjectMD5(ctx context.Context, meta *ObjectMeta) (string, error) {
+	c, err := db.Client()
+	if err != nil {
+		return "", err
+	}
+
+	objectInfo, err := c.StatObject(ctx, db.BucketName, meta.Key(), minio.StatObjectOptions{})
+	if err != nil {
+		return "", err
+	}
+	return objectInfo.ETag, err
+}
+
 func (db *ObjectDB) ReadObject(ctx context.Context, w io.Writer, meta *ObjectMeta) error {
 	c, err := db.Client()
 	if err != nil {
@@ -227,14 +241,38 @@ func (db *ObjectDB) ListObjectByGroup(ctx context.Context, grp string) ([]*Objec
 }
 
 func (db *ObjectDB) Upload(key string, content []byte) error {
+	return db.UploadWithMD5(key, "", content)
+}
+
+func (db *ObjectDB) UploadWithMD5(key, md5 string, content []byte) error {
 	meta, err := ParseObjectMetaFromKey(key)
 	if err != nil {
 		return err
 	}
-	return db.PutObject(context.Background(), bytes.NewBuffer(content), meta)
+
+	err = db.PutObject(context.Background(), bytes.NewBuffer(content), meta)
+	if err != nil {
+		return err
+	}
+
+	if md5 != "" {
+		sum, err := db.GetObjectMD5(context.Background(), meta)
+		if err != nil {
+			return nil
+		}
+		if sum != md5 {
+			return errors.New("md5 not match")
+		}
+	}
+
+	return err
 }
 
 func (db *ObjectDB) Read(key string) ([]byte, error) {
+	return db.ReadWithMD5(key, "")
+}
+
+func (db *ObjectDB) ReadWithMD5(key, md5 string) ([]byte, error) {
 	meta, err := ParseObjectMetaFromKey(key)
 	if err != nil {
 		return nil, err
@@ -244,7 +282,19 @@ func (db *ObjectDB) Read(key string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return buf.Bytes(), err
+
+	data := buf.Bytes()
+	if md5 != "" {
+		sum, err := util.ByteMD5(data)
+		if err != nil {
+			return nil, err
+		}
+		if sum != md5 {
+			return nil, errors.New("md5 not match")
+		}
+	}
+
+	return data, err
 }
 
 func (db *ObjectDB) Delete(key string) error {

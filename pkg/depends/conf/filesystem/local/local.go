@@ -5,7 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/pkg/errors"
+
 	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
+	"github.com/machinefi/w3bstream/pkg/depends/util"
 )
 
 type LocalFileSystem struct {
@@ -31,6 +34,10 @@ func (l *LocalFileSystem) SetDefault() {}
 
 // Upload key full path with filename
 func (l *LocalFileSystem) Upload(key string, data []byte) error {
+	return l.UploadWithMD5(key, "", data)
+}
+
+func (l *LocalFileSystem) UploadWithMD5(key, md5 string, data []byte) error {
 	var (
 		fw  io.WriteCloser
 		err error
@@ -50,11 +57,40 @@ func (l *LocalFileSystem) Upload(key string, data []byte) error {
 		return err
 	}
 
+	if md5 != "" {
+		sum, err := util.FileMD5(path)
+		if err != nil {
+			return err
+		}
+		if sum != md5 {
+			return errors.New("md5 not match")
+		}
+	}
+
 	return nil
 }
 
 func (l *LocalFileSystem) Read(key string) ([]byte, error) {
-	return os.ReadFile(l.path(key))
+	return l.ReadWithMD5(key, "")
+}
+
+func (l *LocalFileSystem) ReadWithMD5(key, md5 string) ([]byte, error) {
+	data, err := os.ReadFile(l.path(key))
+	if err != nil {
+		return nil, err
+	}
+
+	if md5 != "" {
+		sum, err := util.ByteMD5(data)
+		if err != nil {
+			return nil, err
+		}
+		if sum != md5 {
+			return nil, errors.New("md5 not match")
+		}
+	}
+
+	return data, err
 }
 
 func (l *LocalFileSystem) Delete(key string) error {
