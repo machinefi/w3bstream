@@ -104,29 +104,21 @@ func TestAppletAPIs(t *testing.T) {
 					NewWithT(t).Expect(rsp.Name).To(Equal(projectName))
 				}
 
-				// wasm file is empty
-				{
-					req := &applet_mgr.CreateApplet{
-						ProjectName: projectName,
-					}
-					req.CreateReq.Info = applet_mgr.GithubComMachinefiW3BstreamPkgModulesAppletInfo{
-						AppletName: "log",
-						WasmName:   "log.wasm",
-					}
-
-					_, _, err := client.CreateApplet(req)
-					requires.CheckError(t, err, &statusx.StatusErr{
-						Key: "UploadFileFailed",
-					})
-				}
-
 				// applet name is empty
 				{
+					cwd, err := os.Getwd()
+					NewWithT(t).Expect(err).To(BeNil())
+
+					filename := path.Join(cwd, "../testdata/log.wasm")
 					req := &applet_mgr.CreateApplet{
 						ProjectName: projectName,
 					}
+					req.CreateReq.File = transformer.MustNewFileHeader("file", filename, bytes.NewBuffer(code))
+					req.CreateReq.Info = applet_mgr.GithubComMachinefiW3BstreamPkgModulesAppletInfo{
+						WasmName: "log.wasm",
+					}
 
-					_, _, err := client.CreateApplet(req)
+					_, _, err = client.CreateApplet(req)
 					requires.CheckError(t, err, &statusx.StatusErr{
 						Key: "badRequest",
 					})
