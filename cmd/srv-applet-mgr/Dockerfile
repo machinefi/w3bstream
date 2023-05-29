@@ -21,12 +21,11 @@ COPY ./ ./
 RUN make build
 
 # runtime
-FROM golang:1.19 AS runtime
+FROM scratch AS runtime
 
 COPY --from=builder /go/src/build/srv-applet-mgr/srv-applet-mgr /go/bin/srv-applet-mgr
 COPY --from=builder /go/src/build/srv-applet-mgr/openapi.json /go/bin/openapi.json
 EXPOSE 8888
 
 WORKDIR /go/bin
-RUN echo $PATH
 ENTRYPOINT ["/go/bin/srv-applet-mgr"]
