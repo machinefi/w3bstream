@@ -1,4 +1,4 @@
-name: ci
+name: ci_macos
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [macos-latest]
     permissions:
       contents: read
       packages: write
@@ -44,7 +44,6 @@ jobs:
           colima start
 
       - name: Test Go
-        #run: go test ./...
         run: make test
 
       #- name: Set up QEMU
