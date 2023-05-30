@@ -1,4 +1,4 @@
-name: build_and_post_docker_image
+name: build_image_macos_arm64_amd64
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [macos-latest]
     permissions:
       contents: read
       packages: write
@@ -31,23 +31,11 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
-      - name: Setup Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.19
-
-      - name: Build Go
-        run: make build
-
-      # Docker is not installed by default on macos base image for license reason : https://github.com/actions/runner-images/issues/17
       - name: Setup Docker and Colima
         if: startsWith(matrix.os, 'macos-latest') == true
         run: |
           brew install docker colima
           colima start
-
-      - name: Test Go
-        run: make test
 
       - name: Set up QEMU
         #if: startsWith(matrix.os, 'macos-latest') != true
@@ -75,8 +63,8 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./cmd/srv-applet-mgr/Dockerfile.lite
-          platforms: linux/amd64,linux/arm64
+          file: ./cmd/srv-applet-mgr/Dockerfile
+          platforms: linux/arm64,linux/amd64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

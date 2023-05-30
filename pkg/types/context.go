@@ -48,6 +48,7 @@ type (
 	CtxWasmDBConfig        struct{} // CtxWasmDBConfig wasm database config
 	CtxEventID             struct{}
 	CtxMetricsCenterConfig struct{}
+	CtxRobotNotifierConfig struct{} // CtxRobotNotifierConfig for notify service level message to maintainers.
 )
 
 func WithStrategyResults(ctx context.Context, v []*StrategyResult) context.Context {
@@ -680,6 +681,27 @@ func MetricsCenterConfigFromContext(ctx context.Context) (*MetricsCenterConfig, 
 
 func MustMetricsCenterConfigFromContext(ctx context.Context) *MetricsCenterConfig {
 	v, ok := MetricsCenterConfigFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithRobotNotifierConfig(ctx context.Context, v *RobotNotifierConfig) context.Context {
+	return contextx.WithValue(ctx, CtxRobotNotifierConfig{}, v)
+}
+
+func WithRobotNotifierConfigContext(v *RobotNotifierConfig) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxRobotNotifierConfig{}, v)
+	}
+}
+
+func RobotNotifierConfigFromContext(ctx context.Context) (*RobotNotifierConfig, bool) {
+	v, ok := ctx.Value(CtxRobotNotifierConfig{}).(*RobotNotifierConfig)
+	return v, ok
+}
+
+func MustRobotNotifierConfigFromContext(ctx context.Context) *RobotNotifierConfig {
+	v, ok := RobotNotifierConfigFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
