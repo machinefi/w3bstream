@@ -13,18 +13,18 @@ update:
 
 ## build all targets to ./build/
 .PHONY: targets
-targets:
+targets: update
 	@cd cmd && for target in * ; \
 	do \
+		echo "\033[32mbuilding $$target ... \033[0m" ; \
 		if [ -d $$target ] && [ -e $$target/Makefile ]; then \
-			cd $$target && echo "\033[32mbuilding $$target ... \033[0m" ; \
-			make target; \
+			cd $$target; \
+			make target --no-print-directory; \
 			cd ..; \
-			echo "\033[31mdone!\033[0m"; \
 		else \
-			echo "\033[32mno target entry in $$target ... \033[0m" ; \
-			echo "\033[31mdone!\033[0m"; \
-		fi \
+			echo "\033[31mno entry\033[0m" ; \
+		fi; \
+		echo "\033[32mdone!\033[0m\n"; \
 	done
 
 ## build all docker images
@@ -46,8 +46,7 @@ images:
 ## toolkit for code generation
 .PHONY: toolkit
 toolkit:
-	@cd pkg/depends/gen/cmd
-	@go install ./...
+	@go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/...@toolkit-patch-0.0.3
 	@echo installed `which toolkit`
 
 .PHONY: all
@@ -81,7 +80,7 @@ run_docker: docker_env
 	@docker-compose -p w3bstream -f ${DOCKER_COMPOSE_FILE} up -d
 
 .PHONY: run_docker_local
-run_docker: docker_env
+run_docker_local: docker_env
 	@export DOCKER_COMPOSE_FILE=./docker-compose.local.yaml
 	@docker-compose -p w3bstream -f ${DOCKER_COMPOSE_FILE} up -d
 
@@ -108,6 +107,10 @@ generate: toolkit
 	@cd pkg/errors              && go generate ./...
 	@cd pkg/errors              && go generate ./...
 	@cd pkg/depends/util/strfmt && go generate ./...
+
+.PHONY: precommit
+precommit: toolkit targets test
+	@toolkit fmt
 
 ## to migrate database models, if model defines changed, make this entry
 .PHONY: migrate
@@ -141,4 +144,3 @@ mqtt_test:
 .PHONY: redis_test
 redis_test:
 	docker run --name redis_test -p 16379:6379 -d redis:6.2
-
