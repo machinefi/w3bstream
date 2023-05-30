@@ -45,7 +45,7 @@ Entries in root/cmd/Makefile:
 ## Env Format
 
 ```
-[SERVICENAME]__[GROUPED_CONFIG]_[CONFIG_NAME] = [CONFIG_VALUE]
+[SERVICE_NAME]__[CONFIG_GROUP]_[CONFIG_ELEMENT] = [CONFIG_VALUE]
 ```
 
 eg: 

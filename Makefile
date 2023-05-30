@@ -1,4 +1,3 @@
-DOCKER_COMPOSE_FILE = ./docker-compose.yaml
 WS_BACKEND_IMAGE = $(USER)/w3bstream:main
 WS_WORKING_DIR=$(shell pwd)/working_dir
 
@@ -12,6 +11,38 @@ update:
 	@go mod tidy
 	@go mod download
 
+## build all targets to ./build/
+.PHONY: targets
+targets:
+	@cd cmd && for target in * ; \
+	do \
+		if [ -d $$target ] && [ -e $$target/Makefile ]; then \
+			cd $$target && echo "\033[32mbuilding $$target ... \033[0m" ; \
+			make target; \
+			cd ..; \
+			echo "\033[31mdone!\033[0m"; \
+		else \
+			echo "\033[32mno target entry in $$target ... \033[0m" ; \
+			echo "\033[31mdone!\033[0m"; \
+		fi \
+	done
+
+## build all docker images
+.PHONY: images
+images:
+	@cd cmd && for target in * ; \
+	do \
+		echo "\033[32mbuilding $$target docker image ... \033[0m" ; \
+		if [ -d $$target ] && [ -e $$target/Dockerfile ]; then \
+			cd $$target; \
+			make image --no-print-directory || true; \
+			cd ..; \
+		else \
+			echo "\033[31mno entry\033[0m" ; \
+		fi; \
+		echo "\033[32mdone!\033[0m\n"; \
+	done
+
 ## toolkit for code generation
 .PHONY: toolkit
 toolkit:
@@ -19,39 +50,40 @@ toolkit:
 	@go install ./...
 	@echo installed `which toolkit`
 
-## build cmd/srv-applet-mgr
-.PHONY: srv_applet_mgr
-srv_applet_mgr:
-	@toolkit fmt
-	@cd cmd/srv-applet-mgr && make --no-print-directory
-	@echo srv-applet-mgr is built to "\033[31m ./build/srv-applet-mgr/... \033[0m"
-
-## build cmd/pub_client
-.PHONY: pub_client
-pub_client:
-	@cd cmd/pub_client && make --no-print-directory
-	@echo pub_client is built to "\033[31m ./build/pub_client/... \033[0m"
-
 .PHONY: all
-all: build test
-
-.PHONY: build
-build: update toolkit srv_applet_mgr pub_client
+all: update targets test images
 
 .PHONY: clean
 clean:
-	@rm -rf ./build/config ./build/pub_client ./build/srv-applet-mgr
-
-## docker build entries
-
-.PHONY: build_image
-build_image:
-	@docker build -f cmd/srv-applet-mgr/Dockerfile -t ${WS_BACKEND_IMAGE} .
+	@cd cmd && for target in * ; \
+	do \
+		echo "\033[32mcleaning $$target ... \033[0m" ; \
+		if [ -d $$target ] && [ -e $$target/Makefile ]; then \
+			cd $$target; \
+			make clean --no-print-directory || true; \
+			cd ..; \
+		else \
+			echo "\033[31mno entry\033[0m" ; \
+		fi; \
+		echo "\033[32mdone!\033[0m\n" ; \
+	done
 
 # run server in docker containers
+.PHONY: docker_env
+docker_env:
+	@export WS_WORKING_DIR=${WS_WORKING_DIR}
+	@export WS_BACKEND_IMAGE=${WS_BACKEND_IMAGE}
+	@export WS_STUDIO_IMAGE=${WS_STUDIO_IMAGE}
+
 .PHONY: run_docker
-run_docker:
-	@WS_WORKING_DIR=${WS_WORKING_DIR} WS_BACKEND_IMAGE=${WS_BACKEND_IMAGE} WS_STUDIO_IMAGE=${WS_STUDIO_IMAGE} docker-compose -p w3bstream -f ${DOCKER_COMPOSE_FILE} up -d
+run_docker: docker_env
+	@export DOCKER_COMPOSE_FILE=./docker-compose.yaml
+	@docker-compose -p w3bstream -f ${DOCKER_COMPOSE_FILE} up -d
+
+.PHONY: run_docker_local
+run_docker: docker_env
+	@export DOCKER_COMPOSE_FILE=./docker-compose.local.yaml
+	@docker-compose -p w3bstream -f ${DOCKER_COMPOSE_FILE} up -d
 
 # stop server running in docker containers
 .PHONY: stop_docker
