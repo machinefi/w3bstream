@@ -17,8 +17,8 @@ type RemoveResource struct {
 func (r *RemoveResource) Path() string { return "/:resourceID" }
 
 func (r *RemoveResource) Output(ctx context.Context) (interface{}, error) {
-	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
-		WithResourceOwnerContextBySFID(ctx, r.ResourceID)
+	acc := middleware.MustCurrentAccountFromContext(ctx)
+	ctx, err := acc.WithResourceOwnerContextBySFID(acc.WithAccount(ctx), r.ResourceID)
 	if err != nil {
 		return nil, err
 	}
