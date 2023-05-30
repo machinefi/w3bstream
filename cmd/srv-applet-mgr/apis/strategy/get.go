@@ -40,6 +40,7 @@ func (r *ListStrategy) Output(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
+	r.ListReq.ProjectID = types.MustProjectFromContext(ctx).ProjectID
 	return strategy.List(ctx, &r.ListReq)
 }
 
