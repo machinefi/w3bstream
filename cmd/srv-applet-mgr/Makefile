@@ -14,12 +14,7 @@ debug:
 	@echo ${BUILD_TIME}
 	@echo ${BUILD_ROOT}
 
-.PHONY: toolkit
-toolkit:
-	@go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/...@toolkit-patch-0.0.3
-	@echo installed `which toolkit`
-
-.PHONY: toolkit
+.PHONY: openapi
 openapi: toolkit
 	@go generate .
 
@@ -34,7 +29,7 @@ build: clean
 	@cp -r openapi.json ${BUILD_ROOT}/openapi.json
 
 .PHONY: target
-target: openapi build
+target: build
 
 .PHONY: run
 run: build
