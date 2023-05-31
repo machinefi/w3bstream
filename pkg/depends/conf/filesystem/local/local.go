@@ -5,8 +5,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pkg/errors"
-
 	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 )
 
@@ -61,10 +59,6 @@ func (l *LocalFileSystem) Read(key string) ([]byte, error) {
 
 func (l *LocalFileSystem) Delete(key string) error {
 	return os.Remove(l.path(key))
-}
-
-func (l *LocalFileSystem) DownloadUrl(key string) (string, error) {
-	return "", errors.New("local file system not support download url")
 }
 
 func (l *LocalFileSystem) path(name string) string {

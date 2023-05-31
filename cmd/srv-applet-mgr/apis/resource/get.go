@@ -35,14 +35,14 @@ func (r *DownloadResource) Output(ctx context.Context) (interface{}, error) {
 	return file, nil
 }
 
-type DownloadResourceUrl struct {
+type GetDownloadResourceUrl struct {
 	httpx.MethodGet
 	ResourceID types.SFID `in:"path" name:"resourceID"`
 }
 
-func (r *DownloadResourceUrl) Path() string { return "/url/:resourceID" }
+func (r *GetDownloadResourceUrl) Path() string { return "/url/:resourceID" }
 
-func (r *DownloadResourceUrl) Output(ctx context.Context) (interface{}, error) {
+func (r *GetDownloadResourceUrl) Output(ctx context.Context) (interface{}, error) {
 	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
 		WithResourceOwnerContextBySFID(ctx, r.ResourceID)
 	if err != nil {

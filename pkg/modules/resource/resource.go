@@ -5,6 +5,9 @@ import (
 	"mime/multipart"
 	"time"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/amazonS3"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/local"
+	s3db "github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/s3"
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
@@ -137,14 +140,29 @@ func GetContentByMd5(ctx context.Context, md5 string) (*models.Resource, []byte,
 }
 
 func GetDownloadUrlBySFID(ctx context.Context, id types.SFID) (*DownLoadResourceRsp, error) {
-	fs := types.MustFileSystemOpFromContext(ctx)
-	ship := types.MustResourceOwnershipFromContext(ctx)
+	var (
+		fs   = types.MustFileSystemOpFromContext(ctx)
+		ship = types.MustResourceOwnershipFromContext(ctx)
 
-	res, err := GetBySFID(ctx, id)
+		res *models.Resource
+		url string
+		err error
+	)
+
+	res, err = GetBySFID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	url, err := fs.DownloadUrl(res.Path)
+
+	switch v := fs.(type) {
+	case *local.LocalFileSystem:
+		err = status.NotSupportOperator
+	case *amazonS3.AmazonS3:
+		url, err = v.DownloadUrl(res.Path)
+	case *s3db.ObjectDB:
+		url, err = v.DownloadUrl(res.Path)
+	}
+
 	if err != nil {
 		return nil, err
 	}
