@@ -272,9 +272,8 @@ func WithMonitorDBExecutorContext(v sqlx.DBExecutor) contextx.WithContext {
 }
 
 func MonitorDBExecutorFromContext(ctx context.Context) (sqlx.DBExecutor, bool) {
-	v := ctx.Value(CtxMonitorDBExecutor{})
-	v1, ok := v.(sqlx.DBExecutor)
-	return v1, ok
+	v, ok := ctx.Value(CtxMonitorDBExecutor{}).(sqlx.DBExecutor)
+	return v, ok
 }
 
 func MustMonitorDBExecutorFromContext(ctx context.Context) sqlx.DBExecutor {
