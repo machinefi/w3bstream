@@ -156,7 +156,7 @@ func GetDownloadUrlBySFID(ctx context.Context, id types.SFID) (*DownLoadResource
 
 	switch v := fs.(type) {
 	case *local.LocalFileSystem:
-		err = status.NotSupportOperator
+		err = status.UnsupportedFSOperator
 	case *amazonS3.AmazonS3:
 		url, err = v.DownloadUrl(res.Path)
 	case *s3db.ObjectDB:
