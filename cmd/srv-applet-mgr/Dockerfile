@@ -16,15 +16,21 @@ FROM golang:1.19 AS builder
 WORKDIR /go/src
 COPY ./ ./
 
+RUN apt install make
+
 # build
 #ARG COMMIT_SHA
 RUN cd ./cmd/srv-applet-mgr && make target
+RUN mkdir -p build/srv-applet-mgr/lib
+RUN ldd build/srv-applet-mgr/srv-applet-mgr | tr -s '[:blank:]' '\n' | grep '^/' | xargs -I % sh -c 'cp % build/srv-applet-mgr/lib/'
+RUN ldd `which go` | tr -s '[:blank:]' '\n' | grep '^/' | xargs -I % sh -c 'cp % build/srv-applet-mgr/lib/'
 
 # runtime
-FROM golang:1.19 AS runtime
+FROM scratch AS runtime
 
 COPY --from=builder /go/src/build/srv-applet-mgr/srv-applet-mgr /go/bin/srv-applet-mgr
 COPY --from=builder /go/src/build/srv-applet-mgr/openapi.json /go/bin/openapi.json
+COPY --from=builder /go/src/build/lib /
 EXPOSE 8888
 
 WORKDIR /go/bin

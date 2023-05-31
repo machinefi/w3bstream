@@ -20,7 +20,7 @@ openapi: toolkit
 
 .PHONY: build
 build: clean
-	@go build -ldflags "-X ${VERSION_PATH}.Name=srv-applet-mgr\
+	@go build -ldflags "-s -w -X ${VERSION_PATH}.Name=srv-applet-mgr\
  -X ${VERSION_PATH}.Feature=${FEATURE}\
  -X ${VERSION_PATH}.Version=${VERSION}\
  -X ${VERSION_PATH}.Timestamp=${BUILD_TIME}"
