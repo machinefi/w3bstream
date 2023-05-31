@@ -40,6 +40,7 @@ func init() {
 	flag.Parse()
 }
 
+// ssss
 var (
 	cid      string         // client id/pub id
 	data     string         // message payload
