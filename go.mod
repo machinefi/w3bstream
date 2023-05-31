@@ -43,6 +43,7 @@ require (
 	github.com/bytecodealliance/wasmtime-go/v8 v8.0.0
 	github.com/ethereum/go-ethereum v1.10.15
 	github.com/go-co-op/gocron v1.22.0
+	github.com/golang/mock v1.4.4
 	github.com/minio/minio-go/v7 v7.0.52
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/robfig/cron/v3 v3.0.1
