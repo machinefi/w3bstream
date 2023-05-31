@@ -1,3 +1,4 @@
+DOCKER_COMPOSE_FILE=./docker-compose.yaml
 WS_BACKEND_IMAGE = $(USER)/w3bstream:main
 WS_WORKING_DIR=$(shell pwd)/working_dir
 
@@ -67,22 +68,11 @@ clean:
 		echo "\033[32mdone!\033[0m\n" ; \
 	done
 
+
 # run server in docker containers
-.PHONY: docker_env
-docker_env:
-	@export WS_WORKING_DIR=${WS_WORKING_DIR}
-	@export WS_BACKEND_IMAGE=${WS_BACKEND_IMAGE}
-	@export WS_STUDIO_IMAGE=${WS_STUDIO_IMAGE}
-
 .PHONY: run_docker
-run_docker: docker_env
-	@export DOCKER_COMPOSE_FILE=./docker-compose.yaml
-	@docker-compose -p w3bstream -f ${DOCKER_COMPOSE_FILE} up -d
-
-.PHONY: run_docker_local
-run_docker_local: docker_env
-	@export DOCKER_COMPOSE_FILE=./docker-compose.local.yaml
-	@docker-compose -p w3bstream -f ${DOCKER_COMPOSE_FILE} up -d
+run_docker:
+	@WS_WORKING_DIR=${WS_WORKING_DIR} WS_BACKEND_IMAGE=${WS_BACKEND_IMAGE} WS_STUDIO_IMAGE=${WS_STUDIO_IMAGE} docker-compose -p w3bstream -f ${DOCKER_COMPOSE_FILE} up -d
 
 # stop server running in docker containers
 .PHONY: stop_docker
