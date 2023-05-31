@@ -10,10 +10,6 @@ repos:
 
   - repo: local
     hooks:
-      # - id: toolkit
-      #   name: toolkit
-      #   entry: go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/...@toolkit-patch-0.0.3
-      #   language: golang
       - id: make_pre_commit
         name: make_pre_commit
         entry: make precommit
