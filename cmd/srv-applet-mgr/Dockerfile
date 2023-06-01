@@ -18,7 +18,7 @@ COPY ./ ./
 
 # build
 #ARG COMMIT_SHA
-RUN make build
+RUN cd ./cmd/srv-applet-mgr && make target
 
 # runtime
 FROM golang:1.19 AS runtime
@@ -28,5 +28,4 @@ COPY --from=builder /go/src/build/srv-applet-mgr/openapi.json /go/bin/openapi.js
 EXPOSE 8888
 
 WORKDIR /go/bin
-RUN echo $PATH
 ENTRYPOINT ["/go/bin/srv-applet-mgr"]

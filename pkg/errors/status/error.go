@@ -98,6 +98,8 @@ const (
 	TopicAlreadySubscribed
 	// @errTalk Occupied Operator
 	OccupiedOperator
+	// @errTalk Unsupported FileSystem Operator
+	UnsupportedFSOperator
 )
 
 const (
