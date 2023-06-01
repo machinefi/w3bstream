@@ -12,9 +12,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
+	"github.com/machinefi/w3bstream/pkg/depends/util"
 )
 
 type AmazonS3 struct {
@@ -63,22 +64,28 @@ func (s *AmazonS3) Name() string {
 }
 
 func (s *AmazonS3) Upload(key string, data []byte) error {
-	return s.UploadWithMD5(key, "", data)
+	return s.UploadWithChecksum(key, "", "", data)
 }
 
-func (s *AmazonS3) UploadWithMD5(key, md5 string, data []byte) error {
+func (s *AmazonS3) UploadWithChecksum(key, sum, algorithm string, data []byte) error {
 	putObjectInput := &s3.PutObjectInput{
 		Bucket: aws.String(s.BucketName),
 		Key:    aws.String(key),
 		Body:   bytes.NewReader(data),
 	}
 
-	if md5 != "" {
-		md5Bytes, err := hex.DecodeString(md5)
+	if sum != "" && algorithm != "" {
+		sumBytes, err := hex.DecodeString(sum)
 		if err != nil {
 			return err
 		}
-		putObjectInput.SetContentMD5(base64.StdEncoding.EncodeToString(md5Bytes))
+		switch algorithm {
+		case util.Md5Algorithm:
+			putObjectInput.SetContentMD5(base64.StdEncoding.EncodeToString(sumBytes))
+		case util.Sha256Algorithm:
+			putObjectInput.SetChecksumAlgorithm(util.Sha256Algorithm)
+			putObjectInput.SetChecksumSHA256(base64.StdEncoding.EncodeToString(sumBytes))
+		}
 	}
 
 	_, err := s.cli.PutObject(putObjectInput)
@@ -86,10 +93,10 @@ func (s *AmazonS3) UploadWithMD5(key, md5 string, data []byte) error {
 }
 
 func (s *AmazonS3) Read(key string) ([]byte, error) {
-	return s.ReadWithMD5(key, "")
+	return s.ReadWithChecksum(key, "", "")
 }
 
-func (s *AmazonS3) ReadWithMD5(key, md5 string) ([]byte, error) {
+func (s *AmazonS3) ReadWithChecksum(key, sum, algorithm string) ([]byte, error) {
 	resp, err := s.cli.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(s.BucketName),
 		Key:    aws.String(key),
@@ -99,10 +106,16 @@ func (s *AmazonS3) ReadWithMD5(key, md5 string) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 
-	if md5 != "" {
-		sum := strings.Trim(*resp.ETag, "\"")
-		if sum != md5 {
-			return nil, errors.New("md5 not match")
+	if sum != "" && algorithm != "" {
+		var targetSum string
+		switch algorithm {
+		case util.Md5Algorithm:
+			targetSum = strings.Trim(*resp.ETag, "\"")
+		case util.Sha256Algorithm:
+			targetSum = *resp.ChecksumSHA256
+		}
+		if sum != targetSum {
+			return nil, filesystem.ErrChecksumNotMatch
 		}
 	}
 

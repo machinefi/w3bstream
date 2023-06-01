@@ -5,9 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pkg/errors"
-
 	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
 	"github.com/machinefi/w3bstream/pkg/depends/util"
 )
 
@@ -34,10 +33,10 @@ func (l *LocalFileSystem) SetDefault() {}
 
 // Upload key full path with filename
 func (l *LocalFileSystem) Upload(key string, data []byte) error {
-	return l.UploadWithMD5(key, "", data)
+	return l.UploadWithChecksum(key, "", "", data)
 }
 
-func (l *LocalFileSystem) UploadWithMD5(key, md5 string, data []byte) error {
+func (l *LocalFileSystem) UploadWithChecksum(key, sum, algorithm string, data []byte) error {
 	var (
 		fw  io.WriteCloser
 		err error
@@ -57,13 +56,13 @@ func (l *LocalFileSystem) UploadWithMD5(key, md5 string, data []byte) error {
 		return err
 	}
 
-	if md5 != "" {
-		sum, err := util.FileMD5(path)
+	if sum != "" && algorithm != "" {
+		targetSum, err := util.ChecksumByFile(path, algorithm)
 		if err != nil {
 			return err
 		}
-		if sum != md5 {
-			return errors.New("md5 not match")
+		if sum != targetSum {
+			return filesystem.ErrChecksumNotMatch
 		}
 	}
 
@@ -71,22 +70,19 @@ func (l *LocalFileSystem) UploadWithMD5(key, md5 string, data []byte) error {
 }
 
 func (l *LocalFileSystem) Read(key string) ([]byte, error) {
-	return l.ReadWithMD5(key, "")
+	return l.ReadWithChecksum(key, "", "")
 }
 
-func (l *LocalFileSystem) ReadWithMD5(key, md5 string) ([]byte, error) {
+func (l *LocalFileSystem) ReadWithChecksum(key, sum, algorithm string) ([]byte, error) {
 	data, err := os.ReadFile(l.path(key))
 	if err != nil {
 		return nil, err
 	}
 
-	if md5 != "" {
-		sum, err := util.ByteMD5(data)
-		if err != nil {
-			return nil, err
-		}
-		if sum != md5 {
-			return nil, errors.New("md5 not match")
+	if sum != "" && algorithm != "" {
+		targetSum := util.Checksum(data, algorithm)
+		if sum != targetSum {
+			return nil, filesystem.ErrChecksumNotMatch
 		}
 	}
 

@@ -14,6 +14,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
 	"github.com/machinefi/w3bstream/pkg/depends/util"
 )
 
@@ -130,7 +131,8 @@ func (db *ObjectDB) PutObject(ctx context.Context, r io.Reader, meta *ObjectMeta
 	return err
 }
 
-func (db *ObjectDB) GetObjectMD5(ctx context.Context, meta *ObjectMeta) (string, error) {
+func (db *ObjectDB) GetObjectChecksumByAlgorithm(ctx context.Context, meta *ObjectMeta, algorithm string) (string, error) {
+	var sum string
 	c, err := db.Client()
 	if err != nil {
 		return "", err
@@ -140,7 +142,13 @@ func (db *ObjectDB) GetObjectMD5(ctx context.Context, meta *ObjectMeta) (string,
 	if err != nil {
 		return "", err
 	}
-	return objectInfo.ETag, err
+	switch algorithm {
+	case util.Md5Algorithm:
+		sum = objectInfo.ETag
+	case util.Sha256Algorithm:
+		sum = objectInfo.ChecksumSHA256
+	}
+	return sum, err
 }
 
 func (db *ObjectDB) ReadObject(ctx context.Context, w io.Writer, meta *ObjectMeta) error {
@@ -248,10 +256,10 @@ func (db *ObjectDB) ListObjectByGroup(ctx context.Context, grp string) ([]*Objec
 }
 
 func (db *ObjectDB) Upload(key string, content []byte) error {
-	return db.UploadWithMD5(key, "", content)
+	return db.UploadWithChecksum(key, "", "", content)
 }
 
-func (db *ObjectDB) UploadWithMD5(key, md5 string, content []byte) error {
+func (db *ObjectDB) UploadWithChecksum(key, sum, algorithm string, content []byte) error {
 	meta, err := ParseObjectMetaFromKey(key)
 	if err != nil {
 		return err
@@ -262,13 +270,13 @@ func (db *ObjectDB) UploadWithMD5(key, md5 string, content []byte) error {
 		return err
 	}
 
-	if md5 != "" {
-		sum, err := db.GetObjectMD5(context.Background(), meta)
+	if sum != "" && algorithm != "" {
+		targetSum, err := db.GetObjectChecksumByAlgorithm(context.Background(), meta, algorithm)
 		if err != nil {
 			return nil
 		}
-		if sum != md5 {
-			return errors.New("md5 not match")
+		if sum != targetSum {
+			return filesystem.ErrChecksumNotMatch
 		}
 	}
 
@@ -276,10 +284,10 @@ func (db *ObjectDB) UploadWithMD5(key, md5 string, content []byte) error {
 }
 
 func (db *ObjectDB) Read(key string) ([]byte, error) {
-	return db.ReadWithMD5(key, "")
+	return db.ReadWithChecksum(key, "", "")
 }
 
-func (db *ObjectDB) ReadWithMD5(key, md5 string) ([]byte, error) {
+func (db *ObjectDB) ReadWithChecksum(key, sum, algorithm string) ([]byte, error) {
 	meta, err := ParseObjectMetaFromKey(key)
 	if err != nil {
 		return nil, err
@@ -291,13 +299,10 @@ func (db *ObjectDB) ReadWithMD5(key, md5 string) ([]byte, error) {
 	}
 
 	data := buf.Bytes()
-	if md5 != "" {
-		sum, err := util.ByteMD5(data)
-		if err != nil {
-			return nil, err
-		}
-		if sum != md5 {
-			return nil, errors.New("md5 not match")
+	if sum != "" && algorithm != "" {
+		targetSum := util.Checksum(data, algorithm)
+		if sum != targetSum {
+			return nil, filesystem.ErrChecksumNotMatch
 		}
 	}
 
