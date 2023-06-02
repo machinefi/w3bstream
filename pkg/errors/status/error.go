@@ -79,6 +79,8 @@ const (
 	InvalidAppletContext
 	// @errTalk No Resource Permission
 	NoResourcePermission
+	// @errTalk No Traffic Limit Permission
+	NoTrafficLimitPermission
 )
 
 const (
@@ -137,6 +139,8 @@ const (
 	AccountPasswordConflict
 	// @errTalk Operator Conflict
 	OperatorConflict
+	// @errTalk Traffic Limit Conflict
+	TrafficLimitConflict
 	// @errTalk Project Operator relationship Conflict
 	ProjectOperatorConflict
 )
@@ -195,6 +199,8 @@ const (
 	AccountPasswordNotFound
 	// @errTalk Operator Not Found
 	OperatorNotFound
+	// @errTalk Traffic Limit Not Found
+	TrafficLimitNotFound
 	// @errTalk Project Operator relationship Not Found
 	ProjectOperatorNotFound
 )

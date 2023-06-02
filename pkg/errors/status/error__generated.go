@@ -83,6 +83,8 @@ func (v Error) Key() string {
 		return "InvalidAppletContext"
 	case NoResourcePermission:
 		return "NoResourcePermission"
+	case NoTrafficLimitPermission:
+		return "NoTrafficLimitPermission"
 	case Forbidden:
 		return "Forbidden"
 	case DisabledAccount:
@@ -139,6 +141,8 @@ func (v Error) Key() string {
 		return "AccountPasswordNotFound"
 	case OperatorNotFound:
 		return "OperatorNotFound"
+	case TrafficLimitNotFound:
+		return "TrafficLimitNotFound"
 	case ProjectOperatorNotFound:
 		return "ProjectOperatorNotFound"
 	case Conflict:
@@ -175,6 +179,8 @@ func (v Error) Key() string {
 		return "AccountPasswordConflict"
 	case OperatorConflict:
 		return "OperatorConflict"
+	case TrafficLimitConflict:
+		return "TrafficLimitConflict"
 	case ProjectOperatorConflict:
 		return "ProjectOperatorConflict"
 	case InternalServerError:
@@ -261,6 +267,8 @@ func (v Error) Msg() string {
 		return "Invalid Applet"
 	case NoResourcePermission:
 		return "No Resource Permission"
+	case NoTrafficLimitPermission:
+		return "No Traffic Limit Permission"
 	case Forbidden:
 		return "forbidden"
 	case DisabledAccount:
@@ -317,6 +325,8 @@ func (v Error) Msg() string {
 		return "Account Password Not Found"
 	case OperatorNotFound:
 		return "Operator Not Found"
+	case TrafficLimitNotFound:
+		return "Traffic Limit Not Found"
 	case ProjectOperatorNotFound:
 		return "Project Operator relationship Not Found"
 	case Conflict:
@@ -353,6 +363,8 @@ func (v Error) Msg() string {
 		return "Account Password Conflict"
 	case OperatorConflict:
 		return "Operator Conflict"
+	case TrafficLimitConflict:
+		return "Traffic Limit Conflict"
 	case ProjectOperatorConflict:
 		return "Project Operator relationship Conflict"
 	case InternalServerError:
@@ -439,6 +451,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case NoResourcePermission:
 		return true
+	case NoTrafficLimitPermission:
+		return true
 	case Forbidden:
 		return false
 	case DisabledAccount:
@@ -495,6 +509,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case OperatorNotFound:
 		return true
+	case TrafficLimitNotFound:
+		return true
 	case ProjectOperatorNotFound:
 		return true
 	case Conflict:
@@ -530,6 +546,8 @@ func (v Error) CanBeTalk() bool {
 	case AccountPasswordConflict:
 		return true
 	case OperatorConflict:
+		return true
+	case TrafficLimitConflict:
 		return true
 	case ProjectOperatorConflict:
 		return true
