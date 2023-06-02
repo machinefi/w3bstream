@@ -7,6 +7,7 @@ import (
 	"bytes"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/enums"
@@ -16,6 +17,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/cronjob"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
+	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/modules/publisher"
 	"github.com/machinefi/w3bstream/pkg/modules/resource"
@@ -36,6 +38,8 @@ type CurrentPublisher struct {
 type GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID = types.SFID
 
 type GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp = types.Timestamp
+
+type GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxAttachment = httpx.Attachment
 
 type GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesBool = datatypes.Bool
 
@@ -164,6 +168,16 @@ type GithubComMachinefiW3BstreamPkgModelsInstanceInfo = models.InstanceInfo
 
 type GithubComMachinefiW3BstreamPkgModelsMeta = models.Meta
 
+type GithubComMachinefiW3BstreamPkgModelsOperator struct {
+	GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPrimaryID
+	GithubComMachinefiW3BstreamPkgModelsRelAccount
+	GithubComMachinefiW3BstreamPkgModelsRelOperator
+	GithubComMachinefiW3BstreamPkgModelsOperatorInfo
+	GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimesWithDeleted
+}
+
+type GithubComMachinefiW3BstreamPkgModelsOperatorInfo = models.OperatorInfo
+
 type GithubComMachinefiW3BstreamPkgModelsProject struct {
 	GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPrimaryID
 	GithubComMachinefiW3BstreamPkgModelsRelProject
@@ -176,6 +190,13 @@ type GithubComMachinefiW3BstreamPkgModelsProject struct {
 type GithubComMachinefiW3BstreamPkgModelsProjectBase = models.ProjectBase
 
 type GithubComMachinefiW3BstreamPkgModelsProjectName = models.ProjectName
+
+type GithubComMachinefiW3BstreamPkgModelsProjectOperator struct {
+	GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPrimaryID
+	GithubComMachinefiW3BstreamPkgModelsRelProject
+	GithubComMachinefiW3BstreamPkgModelsRelOperator
+	GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimesWithDeleted
+}
 
 type GithubComMachinefiW3BstreamPkgModelsPublisher struct {
 	GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPrimaryID
@@ -202,6 +223,8 @@ type GithubComMachinefiW3BstreamPkgModelsRelContractLog = models.RelContractLog
 type GithubComMachinefiW3BstreamPkgModelsRelCronJob = models.RelCronJob
 
 type GithubComMachinefiW3BstreamPkgModelsRelInstance = models.RelInstance
+
+type GithubComMachinefiW3BstreamPkgModelsRelOperator = models.RelOperator
 
 type GithubComMachinefiW3BstreamPkgModelsRelProject = models.RelProject
 
@@ -260,6 +283,7 @@ type GithubComMachinefiW3BstreamPkgModulesAppletCreateRsp struct {
 type GithubComMachinefiW3BstreamPkgModulesAppletDetail struct {
 	GithubComMachinefiW3BstreamPkgModelsApplet
 	GithubComMachinefiW3BstreamPkgModelsResourceInfo
+	GithubComMachinefiW3BstreamPkgModelsRelInstance
 	GithubComMachinefiW3BstreamPkgModelsInstanceInfo
 }
 
@@ -292,6 +316,15 @@ type GithubComMachinefiW3BstreamPkgModulesDeployCreateReq = deploy.CreateReq
 type GithubComMachinefiW3BstreamPkgModulesEventEventRsp = event.EventRsp
 
 type GithubComMachinefiW3BstreamPkgModulesEventResult = event.Result
+
+type GithubComMachinefiW3BstreamPkgModulesOperatorCreateReq = operator.CreateReq
+
+type GithubComMachinefiW3BstreamPkgModulesOperatorDetail struct {
+	GithubComMachinefiW3BstreamPkgModelsOperator
+	Address string `json:"address"`
+}
+
+type GithubComMachinefiW3BstreamPkgModulesOperatorListDetailRsp = operator.ListDetailRsp
 
 type GithubComMachinefiW3BstreamPkgModulesProjectCreateReq struct {
 	GithubComMachinefiW3BstreamPkgModelsProjectName
