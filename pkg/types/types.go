@@ -1,6 +1,10 @@
 package types
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
+	"fmt"
 	"strings"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
@@ -93,4 +97,34 @@ func (c *WasmDBConfig) SetDefault() {
 
 type MetricsCenterConfig struct {
 	Endpoint string `env:""`
+}
+
+type RobotNotifierConfig struct {
+	Vendor string   `env:""` // Vendor robot vendor eg: `Lark` `Wechat Work` `DingTalk`
+	Env    string   `env:""` // Env Service env, eg: dev-staging, prod
+	URL    string   `env:""` // URL webhook url
+	Secret string   `env:""` // Secret message secret
+	PINs   []string `env:""` // PINs pin someone
+
+	SignFn func(int64) (string, error) `env:"-"`
+}
+
+func (c *RobotNotifierConfig) IsZero() bool { return c == nil || c.URL == "" }
+
+func (c *RobotNotifierConfig) Init() {
+	if c.Secret != "" {
+		c.SignFn = func(ts int64) (string, error) {
+			payload := fmt.Sprintf("%v", ts) + "\n" + c.Secret
+
+			var data []byte
+			h := hmac.New(sha256.New, []byte(payload))
+			_, err := h.Write(data)
+			if err != nil {
+				return "", err
+			}
+
+			signature := base64.StdEncoding.EncodeToString(h.Sum(nil))
+			return signature, nil
+		}
+	}
 }

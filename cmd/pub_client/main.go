@@ -24,18 +24,9 @@ import (
 var (
 	broker *confmqtt.Broker
 	logger = conflog.Std()
-
-	// App *confapp.Ctx
 )
 
 func init() {
-	// App = confapp.New(
-	// 	confapp.WithName("mock-mqtt-client"),
-	// 	confapp.WithLogger(logger),
-	// 	confapp.WithRoot("."),
-	// )
-	// App.Conf(broker)
-
 	flag.StringVar(&cid, "id", "", "publish client id")
 	flag.StringVar(&topic, "topic", "", "publish topic")
 	flag.StringVar(&token, "token", "", "publish token")

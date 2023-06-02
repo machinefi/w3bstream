@@ -1,4 +1,4 @@
-DOCKER_COMPOSE_FILE = ./docker-compose.yaml
+DOCKER_COMPOSE_FILE=./docker-compose.yaml
 WS_BACKEND_IMAGE = $(USER)/w3bstream:main
 WS_WORKING_DIR=$(shell pwd)/working_dir
 
@@ -12,41 +12,62 @@ update:
 	@go mod tidy
 	@go mod download
 
+## build all targets to ./build/
+.PHONY: targets
+targets: update
+	@cd cmd && for target in * ; \
+	do \
+		echo "\033[32mbuilding $$target ... \033[0m" ; \
+		if [ -d $$target ] && [ -e $$target/Makefile ]; then \
+			cd $$target; \
+			make target --no-print-directory; \
+			cd ..; \
+		else \
+			echo "\033[31mno entry\033[0m" ; \
+		fi; \
+		echo "\033[32mdone!\033[0m\n"; \
+	done
+
+## build all docker images
+.PHONY: images
+images:
+	@cd cmd && for target in * ; \
+	do \
+		echo "\033[32mbuilding $$target docker image ... \033[0m" ; \
+		if [ -d $$target ] && [ -e $$target/Dockerfile ]; then \
+			cd $$target; \
+			make image --no-print-directory || true; \
+			cd ..; \
+		else \
+			echo "\033[31mno entry\033[0m" ; \
+		fi; \
+		echo "\033[32mdone!\033[0m\n"; \
+	done
+
 ## toolkit for code generation
 .PHONY: toolkit
 toolkit:
-	@cd pkg/depends/gen/cmd
-	@go install ./...
+	@go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/...@toolkit-patch-0.0.3
 	@echo installed `which toolkit`
 
-## build cmd/srv-applet-mgr
-.PHONY: srv_applet_mgr
-srv_applet_mgr:
-	@toolkit fmt
-	@cd cmd/srv-applet-mgr && make --no-print-directory
-	@echo srv-applet-mgr is built to "\033[31m ./build/srv-applet-mgr/... \033[0m"
-
-## build cmd/pub_client
-.PHONY: pub_client
-pub_client:
-	@cd cmd/pub_client && make --no-print-directory
-	@echo pub_client is built to "\033[31m ./build/pub_client/... \033[0m"
-
 .PHONY: all
-all: build test
-
-.PHONY: build
-build: update toolkit srv_applet_mgr pub_client
+all: update targets test images
 
 .PHONY: clean
 clean:
-	@rm -rf ./build/config ./build/pub_client ./build/srv-applet-mgr
+	@cd cmd && for target in * ; \
+	do \
+		echo "\033[32mcleaning $$target ... \033[0m" ; \
+		if [ -d $$target ] && [ -e $$target/Makefile ]; then \
+			cd $$target; \
+			make clean --no-print-directory || true; \
+			cd ..; \
+		else \
+			echo "\033[31mno entry\033[0m" ; \
+		fi; \
+		echo "\033[32mdone!\033[0m\n" ; \
+	done
 
-## docker build entries
-
-.PHONY: build_image
-build_image:
-	@docker build -f cmd/srv-applet-mgr/Dockerfile -t ${WS_BACKEND_IMAGE} .
 
 # run server in docker containers
 .PHONY: run_docker
@@ -76,6 +97,10 @@ generate: toolkit
 	@cd pkg/errors              && go generate ./...
 	@cd pkg/errors              && go generate ./...
 	@cd pkg/depends/util/strfmt && go generate ./...
+
+.PHONY: precommit
+precommit: toolkit targets test
+	@toolkit fmt
 
 ## to migrate database models, if model defines changed, make this entry
 .PHONY: migrate
@@ -109,4 +134,3 @@ mqtt_test:
 .PHONY: redis_test
 redis_test:
 	docker run --name redis_test -p 16379:6379 -d redis:6.2
-

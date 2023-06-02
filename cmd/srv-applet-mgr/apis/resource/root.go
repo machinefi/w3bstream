@@ -11,4 +11,5 @@ func init() {
 	Root.Register(kit.NewRouter(&ListResources{}))
 	Root.Register(kit.NewRouter(&RemoveResource{}))
 	Root.Register(kit.NewRouter(&DownloadResource{}))
+	Root.Register(kit.NewRouter(&GetDownloadResourceUrl{}))
 }
