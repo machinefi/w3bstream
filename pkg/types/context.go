@@ -46,6 +46,8 @@ type (
 	CtxProxyClient         struct{}
 	CtxResourceOwnership   struct{}
 	CtxWasmDBConfig        struct{} // CtxWasmDBConfig wasm database config
+	CtxSchedulerJobs       struct{}
+	CtxTrafficLimit        struct{}
 	CtxEventID             struct{}
 	CtxMetricsCenterConfig struct{}
 	CtxRobotNotifierConfig struct{} // CtxRobotNotifierConfig for notify service level message to maintainers.
@@ -643,6 +645,27 @@ func MustWasmDBConfigFromContext(ctx context.Context) *WasmDBConfig {
 	return v
 }
 
+func WithSchedulerJobs(ctx context.Context, v *Schedulers) context.Context {
+	return contextx.WithValue(ctx, CtxSchedulerJobs{}, v)
+}
+
+func WithSchedulerJobsContext(v *Schedulers) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxSchedulerJobs{}, v)
+	}
+}
+
+func SchedulerJobsFromContext(ctx context.Context) (*Schedulers, bool) {
+	v, ok := ctx.Value(CtxSchedulerJobs{}).(*Schedulers)
+	return v, ok
+}
+
+func MustSchedulerJobsFromContext(ctx context.Context) *Schedulers {
+	v, ok := SchedulerJobsFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
 func WithEventID(ctx context.Context, v string) context.Context {
 	return contextx.WithValue(ctx, CtxEventID{}, v)
 }
@@ -660,6 +683,28 @@ func EventIDFromContext(ctx context.Context) (string, bool) {
 
 func MustEventIDFromContext(ctx context.Context) string {
 	v, ok := EventIDFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithTrafficLimit(ctx context.Context, r *models.TrafficLimit) context.Context {
+	_r := *r
+	return contextx.WithValue(ctx, CtxTrafficLimit{}, &_r)
+}
+
+func WithTrafficLimitContext(r *models.TrafficLimit) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return WithTrafficLimit(ctx, r)
+	}
+}
+
+func TrafficLimitFromContext(ctx context.Context) (*models.TrafficLimit, bool) {
+	v, ok := ctx.Value(CtxTrafficLimit{}).(*models.TrafficLimit)
+	return v, ok
+}
+
+func MustTrafficLimitFromContext(ctx context.Context) *models.TrafficLimit {
+	v, ok := TrafficLimitFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
