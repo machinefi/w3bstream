@@ -44,6 +44,8 @@ SRV_APPLET_MGR__Postgres_PoolSize: "10"
 SRV_APPLET_MGR__Postgres_Retry_Interval: 3s
 SRV_APPLET_MGR__Postgres_Retry_Repeats: "3"
 SRV_APPLET_MGR__Postgres_Slave: ""
+SRV_APPLET_MGR__RateLimit_Count: "0"
+SRV_APPLET_MGR__RateLimit_Duration: 0s
 SRV_APPLET_MGR__Redis_ConnectTimeout: 10s
 SRV_APPLET_MGR__Redis_DB: "1"
 SRV_APPLET_MGR__Redis_Host: 127.0.0.1

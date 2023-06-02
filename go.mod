@@ -48,10 +48,13 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/spruceid/siwe-go v0.2.0
 	github.com/stretchr/testify v1.8.2
+	go.uber.org/ratelimit v0.2.0
+	google.golang.org/grpc v1.41.0
 )
 
 require (
 	github.com/StackExchange/wmi v0.0.0-20180116203802-5d049714c4a6 // indirect
+	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/btcsuite/btcd v0.20.1-beta // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
