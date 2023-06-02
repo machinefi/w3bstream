@@ -42,8 +42,6 @@ const (
 	BatchRemoveWasmLogFailed
 	// @errTalk Gen Token Failed
 	GenTokenFailed
-	// @errTalk RateLimit Key Not Ok
-	RateLimitKeyNotOk
 )
 
 const (
