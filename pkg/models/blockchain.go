@@ -2,6 +2,8 @@ package models
 
 import "github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 
+// TODO will delete after caller migrate to http api
+
 // Blockchain database model blockchain
 // @def primary                   ID
 // @def unique_index UI_chain_id ChainID
