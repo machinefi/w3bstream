@@ -2,16 +2,22 @@ package event
 
 import (
 	"context"
-	"errors"
+	"fmt"
+	"strconv"
 	"sync"
 
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
+	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/strategy"
+	"github.com/machinefi/w3bstream/pkg/modules/trafficlimit"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
 
 // HandleEvent support other module call
@@ -42,11 +48,60 @@ func HandleEvent(ctx context.Context, t string, data []byte) (interface{}, error
 }
 
 func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
-	l := types.MustLoggerFromContext(ctx)
-	r := types.MustStrategyResultsFromContext(ctx)
-	eventID := types.MustEventIDFromContext(ctx)
+	var (
+		l       = types.MustLoggerFromContext(ctx)
+		r       = types.MustStrategyResultsFromContext(ctx)
+		rDB     = kvdb.MustRedisDBKeyFromContext(ctx)
+		prj     = types.MustProjectFromContext(ctx)
+		eventID = types.MustEventIDFromContext(ctx)
 
-	results := make(chan *Result, len(r))
+		results = make(chan *Result, len(r))
+
+		valByte []byte
+	)
+
+	m, err := trafficlimit.GetByProjectAndType(ctx, prj.ProjectID, enums.TRAFFIC_LIMIT_TYPE__EVENT)
+	if err != nil {
+		se, ok := statusx.IsStatusErr(err)
+		if !ok || !se.Is(status.TrafficLimitNotFound) {
+			ret = append(ret, &Result{
+				AppletName:  "",
+				InstanceID:  0,
+				Handler:     "",
+				ReturnValue: nil,
+				ReturnCode:  -1,
+				Error:       err.Error(),
+			})
+			return
+		}
+		l.Warn(err)
+	}
+	if m != nil {
+		if valByte, err = rDB.IncrBy(fmt.Sprintf("%s::%s", prj.Name, m.ApiType.String()), []byte(strconv.Itoa(-1))); err != nil {
+			l.Error(err)
+			ret = append(ret, &Result{
+				AppletName:  "",
+				InstanceID:  0,
+				Handler:     "",
+				ReturnValue: nil,
+				ReturnCode:  -1,
+				Error:       status.DatabaseError.StatusErr().WithDesc(err.Error()).Key,
+			})
+			return
+		}
+		val, _ := strconv.Atoi(string(valByte))
+		if val < 0 {
+			ret = append(ret, &Result{
+				AppletName:  "",
+				InstanceID:  0,
+				Handler:     "",
+				ReturnValue: nil,
+				ReturnCode:  -1,
+				Error:       status.TrafficLimitExceeded.Key(),
+			})
+			return
+		}
+	}
 
 	wg := &sync.WaitGroup{}
 	for _, v := range r {

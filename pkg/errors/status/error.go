@@ -42,6 +42,8 @@ const (
 	BatchRemoveWasmLogFailed
 	// @errTalk Gen Token Failed
 	GenTokenFailed
+	// @errTalk Traffic Limit Exceeded Failed
+	TrafficLimitExceeded
 )
 
 const (
