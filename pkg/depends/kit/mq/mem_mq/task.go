@@ -2,7 +2,11 @@ package mem_mq
 
 import (
 	"container/list"
+	"fmt"
 	"sync"
+	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
 )
@@ -32,11 +36,18 @@ var _ mq.TaskManager = (*TaskManager)(nil)
 
 func (tm *TaskManager) Push(ch string, t mq.Task) error {
 	tm.rwm.Lock()
-
 	tm.m[key(ch, t.ID())] = tm.l.PushBack(t)
 	tm.rwm.Unlock()
-	tm.sig <- struct{}{}
-	return nil
+
+	select {
+	case tm.sig <- struct{}{}:
+		return nil
+	case <-time.After(time.Second):
+		return errors.Wrap(
+			mq.ErrPushTaskTimeout,
+			fmt.Sprintf("len: %d capacity: %d", len(tm.sig), tm.lmt),
+		)
+	}
 }
 
 func (tm *TaskManager) Pop(ch string) (mq.Task, error) {

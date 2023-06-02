@@ -5,6 +5,9 @@ import (
 	"mime/multipart"
 	"time"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/amazonS3"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/local"
+	s3db "github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/s3"
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
@@ -134,6 +137,40 @@ func GetContentByMd5(ctx context.Context, md5 string) (*models.Resource, []byte,
 		return nil, nil, err
 	}
 	return res, data, nil
+}
+
+func GetDownloadUrlBySFID(ctx context.Context, id types.SFID) (*DownLoadResourceRsp, error) {
+	var (
+		fs   = types.MustFileSystemOpFromContext(ctx)
+		ship = types.MustResourceOwnershipFromContext(ctx)
+
+		res *models.Resource
+		url string
+		err error
+	)
+
+	res, err = GetBySFID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	switch v := fs.(type) {
+	case *local.LocalFileSystem:
+		err = status.UnsupportedFSOperator
+	case *amazonS3.AmazonS3:
+		url, err = v.DownloadUrl(res.Path)
+	case *s3db.ObjectDB:
+		url, err = v.DownloadUrl(res.Path)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &DownLoadResourceRsp{
+		FileName: ship.Filename,
+		Url:      url,
+	}, nil
 }
 
 func ReadContent(ctx context.Context, m *models.Resource) ([]byte, error) {

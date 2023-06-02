@@ -34,7 +34,7 @@ jobs:
           go-version: 1.19
 
       - name: Build Go
-        run: go build -v ./...
+        run: make targets
 
       # Docker is not installed by default on macos base image for license reason : https://github.com/actions/runner-images/issues/17
       - name: Setup Docker and Colima

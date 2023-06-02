@@ -71,3 +71,8 @@ type ListRsp struct {
 	Data  []*ResourceInfo `json:"data"`
 	Total int64           `json:"total"`
 }
+
+type DownLoadResourceRsp struct {
+	FileName string `json:"fileName"`
+	Url      string `json:"url"`
+}
