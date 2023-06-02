@@ -6,7 +6,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 )
 
-var Root = kit.NewRouter(httptransport.Group("/event"), &middleware.ReqRateLimit{})
+var Root = kit.NewRouter(httptransport.Group("/event"), &middleware.EventReqRateLimit{})
 
 func init() {
 	Root.Register(kit.NewRouter(&HandleEvent{}))
