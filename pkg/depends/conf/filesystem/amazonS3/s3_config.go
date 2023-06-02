@@ -3,6 +3,7 @@ package amazonS3
 import (
 	"bytes"
 	"io"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -19,6 +20,7 @@ type AmazonS3 struct {
 	SecretAccessKey  types.Password `env:""`
 	SessionToken     string         `env:""`
 	BucketName       string         `env:""`
+	UrlExpire        types.Duration `env:""`
 	S3ForcePathStyle bool           `env:""`
 
 	cli *s3.S3
@@ -36,6 +38,12 @@ func (s *AmazonS3) Init() error {
 	}
 	s.cli = s3.New(sess)
 	return nil
+}
+
+func (s *AmazonS3) SetDefault() {
+	if s.UrlExpire == 0 {
+		s.UrlExpire = types.Duration(10 * time.Minute)
+	}
 }
 
 func (s *AmazonS3) IsZero() bool {
@@ -78,4 +86,12 @@ func (s *AmazonS3) Delete(key string) error {
 		Key:    aws.String(key),
 	})
 	return err
+}
+
+func (s *AmazonS3) DownloadUrl(key string) (string, error) {
+	req, _ := s.cli.GetObjectRequest(&s3.GetObjectInput{
+		Bucket: aws.String(s.BucketName),
+		Key:    aws.String(key),
+	})
+	return req.Presign(s.UrlExpire.Duration())
 }

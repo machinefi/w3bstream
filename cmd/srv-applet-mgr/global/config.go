@@ -49,7 +49,7 @@ var (
 	ServerEvent = &confhttp.Server{} // serverEvent support event http transport
 
 	fs  filesystem.FileSystemOp
-	std = conflog.Std().(conflog.LevelSetter).SetLevel(conflog.DebugLevel)
+	std = conflog.Std().(conflog.LevelSetter).SetLevel(conflog.InfoLevel)
 )
 
 func init() {
@@ -74,6 +74,7 @@ func init() {
 		WasmDBConfig  *types.WasmDBConfig
 		RateLimit     *confrate.RateLimit
 		MetricsCenter *types.MetricsCenterConfig
+		RobotNotifier *types.RobotNotifierConfig
 	}{
 		Postgres:      db,
 		MonitorDB:     monitordb,
@@ -93,6 +94,7 @@ func init() {
 		WasmDBConfig:  &types.WasmDBConfig{},
 		RateLimit:     &confrate.RateLimit{},
 		MetricsCenter: &types.MetricsCenterConfig{},
+		RobotNotifier: &types.RobotNotifierConfig{},
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
@@ -124,6 +126,10 @@ func init() {
 		fs = config.LocalFS
 	}
 
+	if config.RobotNotifier.IsZero() {
+		config.RobotNotifier = nil
+	}
+
 	confhttp.RegisterCheckerBy(config, worker)
 
 	proxy = &client.Client{Port: uint16(ServerEvent.Port), Timeout: 10 * time.Second}
@@ -149,6 +155,7 @@ func init() {
 		types.WithWasmDBConfigContext(config.WasmDBConfig),
 		confrate.WithRateLimitKeyContext(config.RateLimit),
 		types.WithMetricsCenterConfigContext(config.MetricsCenter),
+		types.WithRobotNotifierConfigContext(config.RobotNotifier),
 	)
 	Context = WithContext(context.Background())
 }

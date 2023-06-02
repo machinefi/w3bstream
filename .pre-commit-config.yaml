@@ -1,6 +1,16 @@
+fail_fast: false
+
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
-    -   id: detect-private-key
-    -   id: detect-aws-credentials
+      - id: detect-private-key
+      - id: check-merge-conflict
+      - id: check-added-large-files
+
+  - repo: local
+    hooks:
+      - id: make_pre_commit
+        name: make_pre_commit
+        entry: make precommit
+        language: golang

@@ -99,6 +99,8 @@ func (v Error) Key() string {
 		return "TopicAlreadySubscribed"
 	case OccupiedOperator:
 		return "OccupiedOperator"
+	case UnsupportedFSOperator:
+		return "UnsupportedFSOperator"
 	case NotFound:
 		return "NotFound"
 	case ProjectNotFound:
@@ -275,6 +277,8 @@ func (v Error) Msg() string {
 		return "Topic Already Subscribed"
 	case OccupiedOperator:
 		return "Occupied Operator"
+	case UnsupportedFSOperator:
+		return "Unsupported FileSystem Operator"
 	case NotFound:
 		return "NotFound"
 	case ProjectNotFound:
@@ -450,6 +454,8 @@ func (v Error) CanBeTalk() bool {
 	case TopicAlreadySubscribed:
 		return true
 	case OccupiedOperator:
+		return true
+	case UnsupportedFSOperator:
 		return true
 	case NotFound:
 		return true

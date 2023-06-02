@@ -1,18 +1,31 @@
-.DEFAULT_GOAL := build
+.DEFAULT_GOAL := target
 
-REMOTE=$(shell git remote -v | head -n 1 | awk -F" " '{ print $$2 }')
-BRANCH=$(shell git branch | grep '*' | awk '{ print $$2; }')
-COMMIT_ID=$(shell git rev-parse --short HEAD)
-COMMIT_AUTHOR=$(shell git log | head -n 2 | grep Author | awk -F "[<>]" '{ print $$2;  }')
+VERSION=$(shell git describe --tags --always)
+FEATURE=$(shell git branch | grep '*' | awk '{ print $$2; }')
+BUILD_TIME=$(shell date +%Y%m%d%H%M%S)
+VERSION_PATH=github.com/machinefi/w3bstream/cmd/srv-applet-mgr/types
+BUILD_ROOT=../../build/pub_client
+
+.PHONY: debug
+debug:
+	@echo ${FEATURE}
+	@echo ${VERSION}
+	@echo ${BUILD_TIME}
+	@echo ${BUILD_ROOT}
 
 .PHONY: build
-build:
-	@go build -ldflags "-s -w -X ./global.ServiceInfo=${REMOTE}..${BRANCH}..${COMMIT_ID}..${COMMIT_AUTHOR}" -o pub_client
-	@rm -rf build
-	@mkdir -p build
-	@mv pub_client build/
-	@cp -r config build/
-	@rm -rf ../../build/pub_client
-	@mkdir -p ../../build
-	@mv build ../../build/pub_client
+build: clean
+	@go build -ldflags "-X ${VERSION_PATH}.Name=pub_client\
+ -X ${VERSION_PATH}.Feature=${FEATURE}\
+ -X ${VERSION_PATH}.Version=${VERSION}\
+ -X ${VERSION_PATH}.Timestamp=${BUILD_TIME}"
+	@mkdir -p ${BUILD_ROOT}
+	@mv pub_client ${BUILD_ROOT}/pub_client
 
+.PHONY: clean
+clean:
+	@rm -rf ${BUILD_ROOT}/pub_client
+	@rm -rf ${BUILD_ROOT}/config
+
+.PHONY: target
+target: build

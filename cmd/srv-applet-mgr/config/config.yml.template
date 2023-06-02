@@ -6,6 +6,7 @@ SRV_APPLET_MGR__AmazonS3_Region: ""
 SRV_APPLET_MGR__AmazonS3_S3ForcePathStyle: "false"
 SRV_APPLET_MGR__AmazonS3_SecretAccessKey: ""
 SRV_APPLET_MGR__AmazonS3_SessionToken: ""
+SRV_APPLET_MGR__AmazonS3_UrlExpire: 10m
 SRV_APPLET_MGR__EthClient_Endpoints: ""
 SRV_APPLET_MGR__FileSystem_Type: LOCAL
 SRV_APPLET_MGR__Jwt_ExpIn: 0s
@@ -58,6 +59,10 @@ SRV_APPLET_MGR__Redis_Protocol: tcp
 SRV_APPLET_MGR__Redis_ReadTimeout: 10s
 SRV_APPLET_MGR__Redis_Wait: "true"
 SRV_APPLET_MGR__Redis_WriteTimeout: 10s
+SRV_APPLET_MGR__RobotNotifier_Env: ""
+SRV_APPLET_MGR__RobotNotifier_Secret: ""
+SRV_APPLET_MGR__RobotNotifier_URL: ""
+SRV_APPLET_MGR__RobotNotifier_Vendor: ""
 SRV_APPLET_MGR__Server_Debug: "true"
 SRV_APPLET_MGR__Server_HealthCheck: http://:80/
 SRV_APPLET_MGR__Server_Port: "80"

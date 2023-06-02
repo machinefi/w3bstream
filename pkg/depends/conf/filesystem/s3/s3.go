@@ -33,7 +33,14 @@ type ObjectDB struct {
 	SecretAccessKey types.Password
 	BucketName      string
 	Secure          bool
+	UrlExpire       types.Duration
 	Presigned       PresignedFn `env:"-"`
+}
+
+func (db *ObjectDB) SetDefault() {
+	if db.UrlExpire == 0 {
+		db.UrlExpire = types.Duration(10 * time.Minute)
+	}
 }
 
 func (db *ObjectDB) LivenessCheck() map[string]string {
@@ -253,6 +260,18 @@ func (db *ObjectDB) Delete(key string) error {
 		return err
 	}
 	return db.DeleteObject(context.Background(), meta)
+}
+
+func (db *ObjectDB) DownloadUrl(key string) (string, error) {
+	meta, err := ParseObjectMetaFromKey(key)
+	if err != nil {
+		return "", err
+	}
+	u, err := db.ProtectURL(context.Background(), meta, db.UrlExpire.Duration())
+	if err != nil {
+		return "", err
+	}
+	return u.String(), err
 }
 
 var ErrInvalidObjectKey = errors.New("invalid object key")
