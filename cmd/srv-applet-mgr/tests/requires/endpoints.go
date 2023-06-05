@@ -218,7 +218,7 @@ func init() {
 		types.WithRedisEndpointContext(_redis),
 		types.WithTaskWorkerContext(_workers),
 		types.WithTaskBoardContext(mq.NewTaskBoard(_tasks)),
-		types.WithETHClientConfigContext(_ethClients), // can be nil
+		types.WithETHClientConfigContext(_ethClients),
 	)
 
 	_ctx = _injection(context.Background())
