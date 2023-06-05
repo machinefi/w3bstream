@@ -5,11 +5,13 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/validator/strfmt"
 	"github.com/machinefi/w3bstream/pkg/enums"
+	"github.com/tidwall/gjson"
 )
 
 type UploadConfig struct {
@@ -37,7 +39,23 @@ func (f *FileSystem) SetDefault() {
 }
 
 type ETHClientConfig struct {
-	Endpoints string `env:""`
+	Endpoints string            `env:""`
+	Clients   map[uint32]string `env:"-"`
+}
+
+func (c *ETHClientConfig) Init() {
+	c.Clients = make(map[uint32]string)
+	if !gjson.Valid(c.Endpoints) {
+		return
+	}
+	for k, v := range gjson.Parse(c.Endpoints).Map() {
+		chainID, err := strconv.Atoi(k)
+		if err != nil {
+			continue
+		}
+		url := v.String()
+		c.Clients[uint32(chainID)] = url
+	}
 }
 
 // aliases from base/types

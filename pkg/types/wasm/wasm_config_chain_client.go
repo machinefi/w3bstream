@@ -14,7 +14,6 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
-	"github.com/tidwall/gjson"
 
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/metrics"
@@ -35,15 +34,10 @@ func NewChainClient(ctx context.Context, ops []models.Operator, p *models.Projec
 	c := &ChainClient{
 		projectName: wsTypes.MustProjectFromContext(ctx).Name,
 		clientMap:   make(map[uint32]*ethclient.Client, 0),
-		endpoints:   make(map[uint32]string),
 	}
-	ethcli, ok := wsTypes.ETHClientConfigFromContext(ctx)
-	if !ok || ethcli == nil {
-		return c
-	}
-	if len(ethcli.Endpoints) > 0 {
-		c.endpoints = decodeEndpoints(ethcli.Endpoints)
-	}
+	ethcli := wsTypes.MustETHClientConfigFromContext(ctx)
+	c.endpoints = ethcli.Clients
+
 	c.operators = convOperators(ops, p)
 	return c
 }
@@ -64,22 +58,6 @@ func convOperators(ops []models.Operator, p *models.ProjectOperator) map[string]
 	}
 
 	return res
-}
-
-func decodeEndpoints(in string) (ret map[uint32]string) {
-	ret = make(map[uint32]string)
-	if !gjson.Valid(in) {
-		return
-	}
-	for k, v := range gjson.Parse(in).Map() {
-		chainID, err := strconv.Atoi(k)
-		if err != nil {
-			continue
-		}
-		url := v.String()
-		ret[uint32(chainID)] = url
-	}
-	return
 }
 
 func (c *ChainClient) SendTXWithOperator(chainID uint32, toStr, valueStr, dataStr, operatorName string) (string, error) {
