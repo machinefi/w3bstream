@@ -35,6 +35,7 @@ func (*Blockchain) TableName() string {
 
 func (*Blockchain) TableDesc() []string {
 	return []string{
+		"TODO will delete after caller migrate to http api",
 		"Blockchain database model blockchain",
 	}
 }
