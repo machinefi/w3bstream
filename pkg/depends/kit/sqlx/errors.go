@@ -28,8 +28,8 @@ func (e *SqlError) Error() string {
 type sqlErrType string
 
 var (
-	sqlErrTypeNotFound sqlErrType = "NotFound"
-	sqlErrTypeConflict sqlErrType = "Conflict"
+	SqlErrTypeNotFound sqlErrType = "NotFound"
+	SqlErrTypeConflict sqlErrType = "Conflict"
 )
 
 var DuplicateEntryErrNumber uint16 = 1062
@@ -65,14 +65,14 @@ func (r dbErr) WithConflict(err error) *dbErr {
 
 func (r *dbErr) IsNotFound() bool {
 	if sqlErr, ok := UnwrapAll(r.err).(*SqlError); ok {
-		return sqlErr.Type == sqlErrTypeNotFound
+		return sqlErr.Type == SqlErrTypeNotFound
 	}
 	return false
 }
 
 func (r *dbErr) IsConflict() bool {
 	if sqlErr, ok := UnwrapAll(r.err).(*SqlError); ok {
-		return sqlErr.Type == sqlErrTypeConflict
+		return sqlErr.Type == SqlErrTypeConflict
 	}
 	return false
 }
@@ -83,11 +83,11 @@ func (r *dbErr) Err() error {
 	}
 	if e, ok := UnwrapAll(r.err).(*SqlError); ok {
 		switch e.Type {
-		case sqlErrTypeNotFound:
+		case SqlErrTypeNotFound:
 			if r.errNotFound != nil {
 				return r.errNotFound
 			}
-		case sqlErrTypeConflict:
+		case SqlErrTypeConflict:
 			if r.errConflict != nil {
 				return r.errConflict
 			}
