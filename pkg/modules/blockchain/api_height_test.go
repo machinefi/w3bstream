@@ -22,22 +22,27 @@ func TestChainHeight(t *testing.T) {
 	defer ctrl.Finish()
 
 	var (
-		db  = mock.NewMockDBExecutor(ctrl)
+		db         = mock.NewMockDBExecutor(ctrl)
+		ethClients = &types.ETHClientConfig{
+			Clients: map[uint32]string{4690: "https://babel-api.testnet.iotex.io"},
+		}
 		ctx = contextx.WithContextCompose(
 			types.WithMonitorDBExecutorContext(db),
 			confid.WithSFIDGeneratorContext(confid.MustNewSFIDGenerator()),
+			types.WithETHClientConfigContext(ethClients),
 		)(context.Background())
 		req = CreateChainHeightReq{
-			ProjectName:     "test_project",
-			ChainHeightInfo: models.ChainHeightInfo{},
+			ProjectName: "test_project",
+			ChainHeightInfo: models.ChainHeightInfo{
+				ChainID: 4690,
+			},
 		}
 	)
 
 	t.Run("Create", func(t *testing.T) {
 
 		t.Run("#Success", func(t *testing.T) {
-			db.EXPECT().T(gomock.Any()).Return(&builder.Table{}).AnyTimes()
-			db.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(nil)
+			db.EXPECT().T(gomock.Any()).Return(&builder.Table{})
 			db.EXPECT().Exec(gomock.Any()).Return(nil, nil)
 
 			_, err := CreateChainHeight(ctx, &req)
@@ -45,16 +50,14 @@ func TestChainHeight(t *testing.T) {
 		})
 
 		t.Run("#ChainIDNotExist", func(t *testing.T) {
-			db.EXPECT().T(gomock.Any()).Return(&builder.Table{}).AnyTimes()
-			db.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(sqlx.NewSqlError(sqlx.SqlErrTypeNotFound, ""))
-
+			req := req
+			req.ChainID = 1
 			_, err := CreateChainHeight(ctx, &req)
 			NewWithT(t).Expect(err).To(Equal(status.BlockchainNotFound))
 		})
 
 		t.Run("#ChainHeightConflict", func(t *testing.T) {
-			db.EXPECT().T(gomock.Any()).Return(&builder.Table{}).AnyTimes()
-			db.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(nil)
+			db.EXPECT().T(gomock.Any()).Return(&builder.Table{})
 			db.EXPECT().Exec(gomock.Any()).Return(nil, sqlx.NewSqlError(sqlx.SqlErrTypeConflict, ""))
 
 			_, err := CreateChainHeight(ctx, &req)
@@ -65,7 +68,7 @@ func TestChainHeight(t *testing.T) {
 	t.Run("Get", func(t *testing.T) {
 
 		t.Run("#Success", func(t *testing.T) {
-			db.EXPECT().T(gomock.Any()).Return(&builder.Table{}).AnyTimes()
+			db.EXPECT().T(gomock.Any()).Return(&builder.Table{})
 			db.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(nil)
 
 			_, err := GetChainHeightBySFID(ctx, 1)
@@ -73,7 +76,7 @@ func TestChainHeight(t *testing.T) {
 		})
 
 		t.Run("#ChainHeightNotFound", func(t *testing.T) {
-			db.EXPECT().T(gomock.Any()).Return(&builder.Table{}).AnyTimes()
+			db.EXPECT().T(gomock.Any()).Return(&builder.Table{})
 			db.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(sqlx.NewSqlError(sqlx.SqlErrTypeNotFound, ""))
 
 			_, err := GetChainHeightBySFID(ctx, 1)
@@ -84,7 +87,7 @@ func TestChainHeight(t *testing.T) {
 	t.Run("Remove", func(t *testing.T) {
 
 		t.Run("#Success", func(t *testing.T) {
-			db.EXPECT().T(gomock.Any()).Return(&builder.Table{}).AnyTimes()
+			db.EXPECT().T(gomock.Any()).Return(&builder.Table{})
 			db.EXPECT().Exec(gomock.Any()).Return(nil, nil)
 
 			err := RemoveChainHeightBySFID(ctx, 1)
