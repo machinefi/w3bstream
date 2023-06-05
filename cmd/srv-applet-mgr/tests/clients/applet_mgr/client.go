@@ -18,29 +18,34 @@ type Interface interface {
 	BatchRemoveStrategy(req *BatchRemoveStrategy, metas ...kit.Metadata) (kit.Metadata, error)
 	ControlInstance(req *ControlInstance, metas ...kit.Metadata) (kit.Metadata, error)
 	CreateAccountByUsernameAndPassword(req *CreateAccountByUsernameAndPassword, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccountCreateAccountByUsernameRsp, kit.Metadata, error)
+	CreateAndStartInstance(req *CreateAndStartInstance, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsInstance, kit.Metadata, error)
 	CreateApplet(req *CreateApplet, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAppletCreateRsp, kit.Metadata, error)
 	CreateChainHeight(req *CreateChainHeight, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsChainHeight, kit.Metadata, error)
 	CreateChainTx(req *CreateChainTx, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsChainTx, kit.Metadata, error)
 	CreateContractLog(req *CreateContractLog, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsContractLog, kit.Metadata, error)
 	CreateCronJob(req *CreateCronJob, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsCronJob, kit.Metadata, error)
-	CreateInstance(req *CreateInstance, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsInstance, kit.Metadata, error)
+	CreateOperator(req *CreateOperator, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsOperator, kit.Metadata, error)
 	CreateOrUpdateProjectEnv(req *CreateOrUpdateProjectEnv, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsConfig, kit.Metadata, error)
 	CreateProject(req *CreateProject, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesProjectCreateRsp, kit.Metadata, error)
+	CreateProjectOperator(req *CreateProjectOperator, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsProjectOperator, kit.Metadata, error)
 	CreateProjectSchema(req *CreateProjectSchema, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsConfig, kit.Metadata, error)
 	CreatePublisher(req *CreatePublisher, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsPublisher, kit.Metadata, error)
 	CreateStrategy(req *CreateStrategy, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsStrategy, kit.Metadata, error)
+	DownloadResource(req *DownloadResource, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxAttachment, kit.Metadata, error)
 	GetApplet(req *GetApplet, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsApplet, kit.Metadata, error)
 	GetInstanceByAppletID(req *GetInstanceByAppletID, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsInstance, kit.Metadata, error)
 	GetInstanceByInstanceID(req *GetInstanceByInstanceID, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsInstance, kit.Metadata, error)
 	GetOperatorAddr(req *GetOperatorAddr, metas ...kit.Metadata) (*string, kit.Metadata, error)
 	GetProject(req *GetProject, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsProject, kit.Metadata, error)
 	GetProjectEnv(req *GetProjectEnv, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgTypesWasmEnv, kit.Metadata, error)
+	GetProjectOperator(req *GetProjectOperator, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesOperatorDetail, kit.Metadata, error)
 	GetProjectSchema(req *GetProjectSchema, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgTypesWasmDatabase, kit.Metadata, error)
 	GetPublisher(req *GetPublisher, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsPublisher, kit.Metadata, error)
 	GetStrategy(req *GetStrategy, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsStrategy, kit.Metadata, error)
 	HandleEvent(req *HandleEvent, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesEventEventRsp, kit.Metadata, error)
 	ListApplet(req *ListApplet, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAppletListRsp, kit.Metadata, error)
 	ListCronJob(req *ListCronJob, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesCronjobListRsp, kit.Metadata, error)
+	ListOperator(req *ListOperator, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesOperatorListDetailRsp, kit.Metadata, error)
 	ListProject(req *ListProject, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesProjectListRsp, kit.Metadata, error)
 	ListProjectDetail(req *ListProjectDetail, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesProjectListDetailRsp, kit.Metadata, error)
 	ListPublisher(req *ListPublisher, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesPublisherListRsp, kit.Metadata, error)
@@ -55,10 +60,13 @@ type Interface interface {
 	RemoveContractLog(req *RemoveContractLog, metas ...kit.Metadata) (kit.Metadata, error)
 	RemoveCronJob(req *RemoveCronJob, metas ...kit.Metadata) (kit.Metadata, error)
 	RemoveInstance(req *RemoveInstance, metas ...kit.Metadata) (kit.Metadata, error)
+	RemoveOperator(req *RemoveOperator, metas ...kit.Metadata) (kit.Metadata, error)
 	RemoveProject(req *RemoveProject, metas ...kit.Metadata) (kit.Metadata, error)
+	RemoveProjectOperator(req *RemoveProjectOperator, metas ...kit.Metadata) (kit.Metadata, error)
 	RemovePublisher(req *RemovePublisher, metas ...kit.Metadata) (kit.Metadata, error)
 	RemoveResource(req *RemoveResource, metas ...kit.Metadata) (kit.Metadata, error)
 	RemoveStrategy(req *RemoveStrategy, metas ...kit.Metadata) (kit.Metadata, error)
+	RemoveWasmLogByInstanceID(req *RemoveWasmLogByInstanceID, metas ...kit.Metadata) (kit.Metadata, error)
 	UpdateApplet(req *UpdateApplet, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAppletCreateRsp, kit.Metadata, error)
 	UpdatePasswordByAccountID(req *UpdatePasswordByAccountID, metas ...kit.Metadata) (kit.Metadata, error)
 	UpdatePublisher(req *UpdatePublisher, metas ...kit.Metadata) (kit.Metadata, error)
@@ -114,6 +122,10 @@ func (c *Client) CreateAccountByUsernameAndPassword(req *CreateAccountByUsername
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
+func (c *Client) CreateAndStartInstance(req *CreateAndStartInstance, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsInstance, kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
 func (c *Client) CreateApplet(req *CreateApplet, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAppletCreateRsp, kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
@@ -134,7 +146,7 @@ func (c *Client) CreateCronJob(req *CreateCronJob, metas ...kit.Metadata) (*Gith
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
-func (c *Client) CreateInstance(req *CreateInstance, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsInstance, kit.Metadata, error) {
+func (c *Client) CreateOperator(req *CreateOperator, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsOperator, kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
@@ -143,6 +155,10 @@ func (c *Client) CreateOrUpdateProjectEnv(req *CreateOrUpdateProjectEnv, metas .
 }
 
 func (c *Client) CreateProject(req *CreateProject, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesProjectCreateRsp, kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
+func (c *Client) CreateProjectOperator(req *CreateProjectOperator, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsProjectOperator, kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
@@ -155,6 +171,10 @@ func (c *Client) CreatePublisher(req *CreatePublisher, metas ...kit.Metadata) (*
 }
 
 func (c *Client) CreateStrategy(req *CreateStrategy, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsStrategy, kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
+func (c *Client) DownloadResource(req *DownloadResource, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxAttachment, kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
@@ -182,6 +202,10 @@ func (c *Client) GetProjectEnv(req *GetProjectEnv, metas ...kit.Metadata) (*Gith
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
+func (c *Client) GetProjectOperator(req *GetProjectOperator, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesOperatorDetail, kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
 func (c *Client) GetProjectSchema(req *GetProjectSchema, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgTypesWasmDatabase, kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
@@ -203,6 +227,10 @@ func (c *Client) ListApplet(req *ListApplet, metas ...kit.Metadata) (*GithubComM
 }
 
 func (c *Client) ListCronJob(req *ListCronJob, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesCronjobListRsp, kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
+func (c *Client) ListOperator(req *ListOperator, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesOperatorListDetailRsp, kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
@@ -262,7 +290,15 @@ func (c *Client) RemoveInstance(req *RemoveInstance, metas ...kit.Metadata) (kit
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
+func (c *Client) RemoveOperator(req *RemoveOperator, metas ...kit.Metadata) (kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
 func (c *Client) RemoveProject(req *RemoveProject, metas ...kit.Metadata) (kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
+func (c *Client) RemoveProjectOperator(req *RemoveProjectOperator, metas ...kit.Metadata) (kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
@@ -275,6 +311,10 @@ func (c *Client) RemoveResource(req *RemoveResource, metas ...kit.Metadata) (kit
 }
 
 func (c *Client) RemoveStrategy(req *RemoveStrategy, metas ...kit.Metadata) (kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
+func (c *Client) RemoveWasmLogByInstanceID(req *RemoveWasmLogByInstanceID, metas ...kit.Metadata) (kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
