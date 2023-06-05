@@ -159,7 +159,7 @@ func (d *DB) Exec(e builder.SqlExpr) (sql.Result, error) {
 	res, err := d.ExecContext(d.Context(), ex.Query(), ex.Args()...)
 	if err != nil {
 		if d.dialect.IsErrorConflict(err) {
-			return nil, NewSqlError(sqlErrTypeConflict, err.Error())
+			return nil, NewSqlError(SqlErrTypeConflict, err.Error())
 		}
 		return nil, err
 	}
