@@ -50,7 +50,6 @@ require (
 	github.com/spruceid/siwe-go v0.2.0
 	github.com/stretchr/testify v1.8.2
 	go.uber.org/ratelimit v0.2.0
-	google.golang.org/grpc v1.41.0
 )
 
 require (
