@@ -120,20 +120,12 @@ func (*TrafficLimit) FieldThreshold() string {
 	return "Threshold"
 }
 
-func (m *TrafficLimit) ColCycleNum() *builder.Column {
-	return TrafficLimitTable.ColByFieldName(m.FieldCycleNum())
+func (m *TrafficLimit) ColDuration() *builder.Column {
+	return TrafficLimitTable.ColByFieldName(m.FieldDuration())
 }
 
-func (*TrafficLimit) FieldCycleNum() string {
-	return "CycleNum"
-}
-
-func (m *TrafficLimit) ColCycleUnit() *builder.Column {
-	return TrafficLimitTable.ColByFieldName(m.FieldCycleUnit())
-}
-
-func (*TrafficLimit) FieldCycleUnit() string {
-	return "CycleUnit"
+func (*TrafficLimit) FieldDuration() string {
+	return "Duration"
 }
 
 func (m *TrafficLimit) ColApiType() *builder.Column {

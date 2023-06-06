@@ -8,10 +8,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/tidwall/gjson"
+
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/validator/strfmt"
 	"github.com/machinefi/w3bstream/pkg/enums"
-	"github.com/tidwall/gjson"
 )
 
 type UploadConfig struct {
