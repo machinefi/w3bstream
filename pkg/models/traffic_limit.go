@@ -26,7 +26,6 @@ type RelTrafficLimit struct {
 
 type TrafficLimitInfo struct {
 	Threshold int                    `db:"f_threshold"                     json:"threshold"`
-	CycleNum  int                    `db:"f_cycle_num"                     json:"cycleNum"`
-	CycleUnit enums.TrafficCycle     `db:"f_cycle_unit"                    json:"cycleUnit"`
+	Duration  types.Duration         `db:"f_duration"                      json:"duration"`
 	ApiType   enums.TrafficLimitType `db:"f_api_type"                      json:"apiType"`
 }

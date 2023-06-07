@@ -34,7 +34,7 @@ type ScanIterator = scanner.ScanIterator
 func Scan(ctx context.Context, rows *sql.Rows, v interface{}) error {
 	if err := scanner.Scan(ctx, rows, v); err != nil {
 		if err == scanner.RecordNotFound {
-			return NewSqlError(sqlErrTypeNotFound, "record is not found")
+			return NewSqlError(SqlErrTypeNotFound, "record is not found")
 		}
 		return err
 	}
