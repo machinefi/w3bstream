@@ -101,6 +101,7 @@ generate: toolkit
 .PHONY: precommit
 precommit: toolkit targets test
 	@toolkit fmt
+	@git add -u
 
 ## to migrate database models, if model defines changed, make this entry
 .PHONY: migrate
