@@ -27,57 +27,51 @@ func TestResourceAPIs(t *testing.T) {
 
 	t.Logf("random a project name: %s, use this name create a project and an applet.", projectName)
 
-	t.Run("PrepareProject", func(t *testing.T) {
-		t.Run("#CreateProject", func(t *testing.T) {
-			t.Run("#Success", func(t *testing.T) {
+	{
+		req := &applet_mgr.CreateProject{}
+		req.CreateReq.Name = projectName
 
-				// create project without user defined config(database/env)
-				{
-					req := &applet_mgr.CreateProject{}
-					req.CreateReq.Name = projectName
+		_, _, err := client.CreateProject(req)
+		if err != nil {
+			panic(err)
+		}
+	}
 
-					rsp, _, err := client.CreateProject(req)
+	{
+		cwd, err := os.Getwd()
+		filename := path.Join(cwd, "../testdata/log.wasm")
+		appletName := "testApplet"
+		wasmName := "test.log"
 
-					NewWithT(t).Expect(err).To(BeNil())
-					NewWithT(t).Expect(rsp.Name).To(Equal(projectName))
-				}
-			})
-		})
-		t.Run("#CreateApplet", func(t *testing.T) {
-			t.Run("#Success", func(t *testing.T) {
+		req := &applet_mgr.CreateApplet{ProjectName: projectName}
+		req.CreateReq.File = transformer.MustNewFileHeader("file", filename, bytes.NewBuffer(code))
+		req.CreateReq.Info = applet.Info{
+			AppletName: appletName,
+			WasmName:   wasmName,
+		}
 
-				{
-					cwd, err := os.Getwd()
-					NewWithT(t).Expect(err).To(BeNil())
+		rsp, _, err := client.CreateApplet(req)
+		if err != nil {
+			panic(err)
+		}
+		appletID = rsp.AppletID
+	}
 
-					filename := path.Join(cwd, "../testdata/log.wasm")
-					appletName := "testApplet"
-					wasmName := "test.log"
+	{
+		applet, err := applet.GetBySFID(ctx, appletID)
+		if err != nil {
+			panic(err)
+		}
+		resourceID = applet.ResourceID
+	}
 
-					req := &applet_mgr.CreateApplet{ProjectName: projectName}
-					req.CreateReq.File = transformer.MustNewFileHeader("file", filename, bytes.NewBuffer(code))
-					req.CreateReq.Info = applet.Info{
-						AppletName: appletName,
-						WasmName:   wasmName,
-					}
-
-					rsp, _, err := client.CreateApplet(req)
-
-					NewWithT(t).Expect(err).To(BeNil())
-					appletID = rsp.AppletID
-				}
-			})
-		})
-		t.Run("#GetResourceID", func(t *testing.T) {
-			t.Run("#Success", func(t *testing.T) {
-
-				applet, err := applet.GetBySFID(ctx, appletID)
-				NewWithT(t).Expect(err).To(BeNil())
-				resourceID = applet.ResourceID
-
-			})
-		})
-	})
+	defer func() {
+		req := &applet_mgr.RemoveProject{ProjectName: projectName}
+		_, err := client.RemoveProject(req)
+		if err != nil {
+			panic(err)
+		}
+	}()
 
 	t.Logf("start test resource api.")
 
@@ -103,21 +97,6 @@ func TestResourceAPIs(t *testing.T) {
 				{
 					req := &applet_mgr.RemoveResource{ResourceID: resourceID}
 					_, err := client.RemoveResource(req)
-					NewWithT(t).Expect(err).To(BeNil())
-				}
-			})
-		})
-	})
-
-	// clear project info
-	t.Run("ClearProject", func(t *testing.T) {
-		t.Run("#DeleteProject", func(t *testing.T) {
-			t.Run("#Success", func(t *testing.T) {
-
-				// remove project
-				{
-					req := &applet_mgr.RemoveProject{ProjectName: projectName}
-					_, err := client.RemoveProject(req)
 					NewWithT(t).Expect(err).To(BeNil())
 				}
 			})

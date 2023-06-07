@@ -17,7 +17,7 @@ func TestPublisherAPIs(t *testing.T) {
 	var (
 		ctx           = requires.Context()
 		client        = requires.AuthClient()
-		projectName   = "test_publisher"
+		projectName   = "test_publisher_project"
 		publisherName = "testpublisher"
 		publisherKey  = confid.MustSFIDGeneratorFromContext(ctx).MustGenSFID().String()
 
@@ -26,24 +26,23 @@ func TestPublisherAPIs(t *testing.T) {
 
 	t.Logf("random a project name: %s, use this name create a project.", projectName)
 
-	t.Run("Project", func(t *testing.T) {
-		t.Run("#CreateProject", func(t *testing.T) {
-			t.Run("#Success", func(t *testing.T) {
+	{
+		req := &applet_mgr.CreateProject{}
+		req.CreateReq.Name = projectName
 
-				// create project without user defined config(database/env)
-				{
-					req := &applet_mgr.CreateProject{}
-					req.CreateReq.Name = projectName
+		_, _, err := client.CreateProject(req)
+		if err != nil {
+			panic(err)
+		}
+	}
 
-					rsp, _, err := client.CreateProject(req)
-
-					NewWithT(t).Expect(err).To(BeNil())
-					NewWithT(t).Expect(rsp.Name).To(Equal(projectName))
-					//projectID = rsp.ProjectID
-				}
-			})
-		})
-	})
+	defer func() {
+		req := &applet_mgr.RemoveProject{ProjectName: projectName}
+		_, err := client.RemoveProject(req)
+		if err != nil {
+			panic(err)
+		}
+	}()
 
 	t.Logf("random a publisher name and publisehr key: %s - %s, then create a pulbisher .",
 		publisherName, publisherKey)
@@ -141,20 +140,4 @@ func TestPublisherAPIs(t *testing.T) {
 			})
 		})
 	})
-
-	// clear project info
-	t.Run("Project", func(t *testing.T) {
-		t.Run("#DeleteProject", func(t *testing.T) {
-			t.Run("#Success", func(t *testing.T) {
-
-				// remove project
-				{
-					req := &applet_mgr.RemoveProject{ProjectName: projectName}
-					_, err := client.RemoveProject(req)
-					NewWithT(t).Expect(err).To(BeNil())
-				}
-			})
-		})
-	})
-
 }

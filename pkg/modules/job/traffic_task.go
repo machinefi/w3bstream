@@ -58,16 +58,16 @@ func genSchedulerJob(projectKey string, rateLimitInfo models.TrafficLimitInfo, r
 	seconds := rateLimitInfo.Duration.Duration().Seconds()
 	if seconds >= 24*time.Hour.Seconds() {
 		nextDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-		s.Every(seconds).Second().StartAt(nextDay)
+		s.Every(int(seconds)).Second().StartAt(nextDay)
 	} else if seconds >= time.Hour.Seconds() {
 		nextHour := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, now.Location())
-		s.Every(seconds).Second().StartAt(nextHour)
+		s.Every(int(seconds)).Second().StartAt(nextHour)
 	} else if seconds >= time.Minute.Seconds() {
 		nextMinute := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, now.Location())
-		s.Every(seconds).Second().StartAt(nextMinute)
+		s.Every(int(seconds)).Second().StartAt(nextMinute)
 	} else {
 		nextSecond := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second(), 0, now.Location())
-		s.Every(seconds).Second().StartAt(nextSecond)
+		s.Every(int(seconds)).Second().StartAt(nextSecond)
 	}
 
 	//switch rateLimitInfo.CycleUnit {
