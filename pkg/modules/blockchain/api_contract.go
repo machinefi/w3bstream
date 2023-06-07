@@ -19,7 +19,7 @@ func CreateContractLog(ctx context.Context, r *CreateContractLogReq) (*models.Co
 	d := types.MustMonitorDBExecutorFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 
-	if err := checkChainID(d, r.ChainID); err != nil {
+	if err := checkChainID(ctx, r.ChainID); err != nil {
 		return nil, err
 	}
 
@@ -43,13 +43,10 @@ func CreateContractLog(ctx context.Context, r *CreateContractLogReq) (*models.Co
 	return m, nil
 }
 
-func checkChainID(d sqlx.DBExecutor, id uint64) error {
-	b := &models.Blockchain{RelBlockchain: models.RelBlockchain{ChainID: id}}
-	if err := b.FetchByChainID(d); err != nil {
-		if sqlx.DBErr(err).IsNotFound() {
-			return status.BlockchainNotFound
-		}
-		return status.DatabaseError.StatusErr().WithDesc(err.Error())
+func checkChainID(ctx context.Context, id uint64) error {
+	ethcli := types.MustETHClientConfigFromContext(ctx)
+	if _, ok := ethcli.Clients[uint32(id)]; !ok {
+		return status.BlockchainNotFound
 	}
 	return nil
 }

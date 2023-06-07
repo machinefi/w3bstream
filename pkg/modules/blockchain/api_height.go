@@ -20,7 +20,7 @@ func CreateChainHeight(ctx context.Context, r *CreateChainHeightReq) (*models.Ch
 	d := types.MustMonitorDBExecutorFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 
-	if err := checkChainID(d, r.ChainID); err != nil {
+	if err := checkChainID(ctx, r.ChainID); err != nil {
 		return nil, err
 	}
 
