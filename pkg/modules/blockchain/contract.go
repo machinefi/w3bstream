@@ -34,6 +34,7 @@ func (t *contract) run(ctx context.Context) {
 func (t *contract) do(ctx context.Context) {
 	d := types.MustMonitorDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
+	ethcli := types.MustETHClientConfigFromContext(ctx)
 	m := &models.ContractLog{}
 
 	_, l = l.Start(ctx, "contract.run")
@@ -48,12 +49,12 @@ func (t *contract) do(ctx context.Context) {
 		return
 	}
 	for _, c := range cs {
-		b := &models.Blockchain{RelBlockchain: models.RelBlockchain{ChainID: c.ChainID}}
-		if err := b.FetchByChainID(d); err != nil {
-			l.WithValues("chainID", c.ChainID).Error(errors.Wrap(err, "get chain info failed"))
+		chainAddress, ok := ethcli.Clients[uint32(c.ChainID)]
+		if !ok {
+			l.WithValues("chainID", c.ChainID).Error(errors.New("blockchain not exist"))
 			continue
 		}
-		toBlock, err := t.listChainAndSendEvent(ctx, &c, b.Address)
+		toBlock, err := t.listChainAndSendEvent(ctx, &c, chainAddress)
 		if err != nil {
 			l.Error(errors.Wrap(err, "list contractlog db failed"))
 			continue

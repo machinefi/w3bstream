@@ -9,7 +9,6 @@ import (
 	"github.com/go-co-op/gocron"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
-	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
@@ -56,29 +55,43 @@ func (t *TrafficTask) Scheduler(ctx context.Context) {
 
 func genSchedulerJob(projectKey string, rateLimitInfo models.TrafficLimitInfo, rDB *kvdb.RedisDB, s *gocron.Scheduler) {
 	now := time.Now().UTC()
-	seconds := 0
-	switch rateLimitInfo.CycleUnit {
-	case enums.TRAFFIC_CYCLE__MINUTE:
-		nextMinute := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, now.Location())
-		s.Every(rateLimitInfo.CycleNum).Minutes().StartAt(nextMinute)
-		seconds = rateLimitInfo.CycleNum * 60
-	case enums.TRAFFIC_CYCLE__HOUR:
-		nextHour := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, now.Location())
-		s.Every(rateLimitInfo.CycleNum).Hours().StartAt(nextHour)
-		seconds = rateLimitInfo.CycleNum * 60 * 60
-	case enums.TRAFFIC_CYCLE__DAY:
+	seconds := rateLimitInfo.Duration.Duration().Seconds()
+	if seconds >= 24*time.Hour.Seconds() {
 		nextDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-		s.Every(rateLimitInfo.CycleNum).Day().StartAt(nextDay)
-		seconds = rateLimitInfo.CycleNum * 60 * 60 * 24
-	case enums.TRAFFIC_CYCLE__MONTH:
-		nextMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
-		s.Every(rateLimitInfo.CycleNum).Day().StartAt(nextMonth)
-		seconds = rateLimitInfo.CycleNum * 60 * 60 * 24 * 31
-	case enums.TRAFFIC_CYCLE__YEAR:
-		nextYear := time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
-		s.Every(rateLimitInfo.CycleNum).Day().StartAt(nextYear)
-		seconds = rateLimitInfo.CycleNum * 60 * 60 * 24 * 31 * 366
+		s.Every(seconds).Second().StartAt(nextDay)
+	} else if seconds >= time.Hour.Seconds() {
+		nextHour := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, now.Location())
+		s.Every(seconds).Second().StartAt(nextHour)
+	} else if seconds >= time.Minute.Seconds() {
+		nextMinute := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, now.Location())
+		s.Every(seconds).Second().StartAt(nextMinute)
+	} else {
+		nextSecond := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second(), 0, now.Location())
+		s.Every(seconds).Second().StartAt(nextSecond)
 	}
+
+	//switch rateLimitInfo.CycleUnit {
+	//case enums.TRAFFIC_CYCLE__MINUTE:
+	//	nextMinute := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, now.Location())
+	//	s.Every(rateLimitInfo.CycleNum).Minutes().StartAt(nextMinute)
+	//	seconds = rateLimitInfo.CycleNum * 60
+	//case enums.TRAFFIC_CYCLE__HOUR:
+	//	nextHour := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, now.Location())
+	//	s.Every(rateLimitInfo.CycleNum).Hours().StartAt(nextHour)
+	//	seconds = rateLimitInfo.CycleNum * 60 * 60
+	//case enums.TRAFFIC_CYCLE__DAY:
+	//	nextDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	//	s.Every(rateLimitInfo.CycleNum).Day().StartAt(nextDay)
+	//	seconds = rateLimitInfo.CycleNum * 60 * 60 * 24
+	//case enums.TRAFFIC_CYCLE__MONTH:
+	//	nextMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	//	s.Every(rateLimitInfo.CycleNum).Day().StartAt(nextMonth)
+	//	seconds = rateLimitInfo.CycleNum * 60 * 60 * 24 * 31
+	//case enums.TRAFFIC_CYCLE__YEAR:
+	//	nextYear := time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
+	//	s.Every(rateLimitInfo.CycleNum).Day().StartAt(nextYear)
+	//	seconds = rateLimitInfo.CycleNum * 60 * 60 * 24 * 31 * 366
+	//}
 	s.Do(resetWindow, projectKey, rateLimitInfo.Threshold, int64(seconds), rDB)
 }
 

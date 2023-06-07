@@ -199,6 +199,10 @@ func init() {
 
 	_tasks := mem_mq.New(0)
 	_workers := mq.NewTaskWorker(_tasks, mq.WithWorkerCount(3), mq.WithChannel("apis_tests"))
+	_ethClients := &types.ETHClientConfig{
+		Endpoints: `{"4689": "https://babel-api.mainnet.iotex.io", "4690": "https://babel-api.testnet.iotex.io"}`,
+	}
+	_ethClients.Init()
 
 	_injection = contextx.WithContextCompose(
 		types.WithMgrDBExecutorContext(_dbMgr),
@@ -214,7 +218,7 @@ func init() {
 		types.WithRedisEndpointContext(_redis),
 		types.WithTaskWorkerContext(_workers),
 		types.WithTaskBoardContext(mq.NewTaskBoard(_tasks)),
-		types.WithETHClientConfigContext(nil), // can be nil
+		types.WithETHClientConfigContext(_ethClients),
 	)
 
 	_ctx = _injection(context.Background())

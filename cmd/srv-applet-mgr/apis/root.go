@@ -3,6 +3,7 @@ package apis
 import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/account"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/applet"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/configuration"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/cronjob"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/deploy"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/event"
@@ -47,6 +48,7 @@ func init() {
 
 		v0.Register(login.Root)
 		v0.Register(account.RegisterRoot)
+		v0.Register(configuration.Root)
 		v0.Register(auth)
 
 		auth.Register(account.Root)
