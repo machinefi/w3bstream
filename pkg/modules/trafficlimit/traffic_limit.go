@@ -37,8 +37,7 @@ func Create(ctx context.Context, r *CreateReq) (*models.TrafficLimit, error) {
 		RelProject:      models.RelProject{ProjectID: project.ProjectID},
 		TrafficLimitInfo: models.TrafficLimitInfo{
 			Threshold: r.Threshold,
-			CycleNum:  r.CycleNum,
-			CycleUnit: r.CycleUnit,
+			Duration:  r.Duration,
 			ApiType:   r.ApiType,
 		},
 	}
@@ -69,8 +68,7 @@ func Update(ctx context.Context, r *UpdateReq) (*models.TrafficLimit, error) {
 		},
 		func(d sqlx.DBExecutor) error {
 			m.TrafficLimitInfo.Threshold = r.Threshold
-			m.TrafficLimitInfo.CycleNum = r.CycleNum
-			m.TrafficLimitInfo.CycleUnit = r.CycleUnit
+			m.TrafficLimitInfo.Duration = r.Duration
 			m.TrafficLimitInfo.ApiType = r.ApiType
 			if err := m.UpdateByTrafficLimitID(d); err != nil {
 				if sqlx.DBErr(err).IsConflict() {
@@ -141,8 +139,7 @@ func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
 		rate.ColProjectID(),
 		rate.ColTrafficLimitID(),
 		rate.ColThreshold(),
-		rate.ColCycleNum(),
-		rate.ColCycleUnit(),
+		rate.ColDuration(),
 		rate.ColApiType(),
 		rate.ColCreatedAt(),
 		rate.ColUpdatedAt(),
