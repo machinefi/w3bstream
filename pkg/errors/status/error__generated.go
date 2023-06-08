@@ -83,6 +83,10 @@ func (v Error) Key() string {
 		return "InvalidAppletContext"
 	case NoResourcePermission:
 		return "NoResourcePermission"
+	case InvalidAccountAccessKey:
+		return "InvalidAccountAccessKey"
+	case AccountAccessKeyExpired:
+		return "AccountAccessKeyExpired"
 	case Forbidden:
 		return "Forbidden"
 	case DisabledAccount:
@@ -141,6 +145,8 @@ func (v Error) Key() string {
 		return "OperatorNotFound"
 	case ProjectOperatorNotFound:
 		return "ProjectOperatorNotFound"
+	case AccountKeyNotFound:
+		return "AccountKeyNotFound"
 	case Conflict:
 		return "Conflict"
 	case ProjectNameConflict:
@@ -177,6 +183,8 @@ func (v Error) Key() string {
 		return "OperatorConflict"
 	case ProjectOperatorConflict:
 		return "ProjectOperatorConflict"
+	case AccountKeyNameConflict:
+		return "AccountKeyNameConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -261,6 +269,10 @@ func (v Error) Msg() string {
 		return "Invalid Applet"
 	case NoResourcePermission:
 		return "No Resource Permission"
+	case InvalidAccountAccessKey:
+		return "Invalid Account Access Key"
+	case AccountAccessKeyExpired:
+		return "Account Access Key Expired"
 	case Forbidden:
 		return "forbidden"
 	case DisabledAccount:
@@ -319,6 +331,8 @@ func (v Error) Msg() string {
 		return "Operator Not Found"
 	case ProjectOperatorNotFound:
 		return "Project Operator relationship Not Found"
+	case AccountKeyNotFound:
+		return "Account Key Not Found"
 	case Conflict:
 		return "Conflict conflict error"
 	case ProjectNameConflict:
@@ -355,6 +369,8 @@ func (v Error) Msg() string {
 		return "Operator Conflict"
 	case ProjectOperatorConflict:
 		return "Project Operator relationship Conflict"
+	case AccountKeyNameConflict:
+		return "Account Key Name Conflict"
 	case InternalServerError:
 		return "internal error"
 	case DatabaseError:
@@ -439,6 +455,10 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case NoResourcePermission:
 		return true
+	case InvalidAccountAccessKey:
+		return true
+	case AccountAccessKeyExpired:
+		return true
 	case Forbidden:
 		return false
 	case DisabledAccount:
@@ -497,6 +517,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case ProjectOperatorNotFound:
 		return true
+	case AccountKeyNotFound:
+		return true
 	case Conflict:
 		return true
 	case ProjectNameConflict:
@@ -532,6 +554,8 @@ func (v Error) CanBeTalk() bool {
 	case OperatorConflict:
 		return true
 	case ProjectOperatorConflict:
+		return true
+	case AccountKeyNameConflict:
 		return true
 	case InternalServerError:
 		return false

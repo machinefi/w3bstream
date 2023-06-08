@@ -16,6 +16,12 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 )
 
+type ContextController interface {
+	Name() string
+	Context() context.Context
+	WithContext(context.Context) ContextController
+}
+
 type (
 	CtxMgrDBExecutor       struct{} // CtxMgrDBExecutor sqlx.DBExecutor
 	CtxMonitorDBExecutor   struct{} // CtxMonitorDBExecutor sqlx.DBExecutor

@@ -10,7 +10,8 @@ repos:
 
   - repo: local
     hooks:
-      - id: make_pre_commit
-        name: make_pre_commit
-        entry: make precommit
-        language: golang
+      - id: make-pre-commit
+        name: 'make pre commit'
+        entry: make precommit -f
+        language: 'system'
+        files: 'Makefile'
