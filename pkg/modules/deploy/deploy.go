@@ -16,6 +16,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/modules/resource"
+	"github.com/machinefi/w3bstream/pkg/modules/trafficlimit"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/modules/wasmlog"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -57,11 +58,14 @@ func Init(ctx context.Context) error {
 			continue
 		}
 		if valByte == nil {
+			// TODO get balance from db
 			err = rDB.SetKeyWithEX(projectKey,
 				[]byte(strconv.Itoa(traffic.Threshold)), 31622400)
 		}
-		//t := job.NewTrafficTaskWithPrjKey(projectKey, *traffic)
-		//job.Dispatch(ctx, t)
+		err = trafficlimit.RestartScheduler(ctx, projectKey, &traffic.TrafficLimitInfo)
+		if err != nil {
+			l.Error(err)
+		}
 	}
 
 	list, err := ins.List(d, nil)
