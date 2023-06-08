@@ -42,6 +42,10 @@ const (
 	BatchRemoveWasmLogFailed
 	// @errTalk Gen Token Failed
 	GenTokenFailed
+	// @errTalk Create Traffic Scheduler Failed
+	CreateTrafficSchedulerFailed
+	// @errTalk Update Traffic Scheduler Failed
+	UpdateTrafficSchedulerFailed
 )
 
 const (
