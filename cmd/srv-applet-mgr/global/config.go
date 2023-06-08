@@ -156,7 +156,6 @@ func init() {
 		types.WithWasmDBConfigContext(config.WasmDBConfig),
 		confrate.WithRateLimitKeyContext(config.RateLimit),
 		kvdb.WithRedisDBKeyContext(kvdb.NewRedisDB(config.Redis)),
-		types.WithSchedulerJobsContext(&types.SchedulerJobs),
 		types.WithMetricsCenterConfigContext(config.MetricsCenter),
 		types.WithRobotNotifierConfigContext(config.RobotNotifier),
 	)
