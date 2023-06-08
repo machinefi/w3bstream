@@ -12,6 +12,7 @@ repos:
     hooks:
       - id: make-pre-commit
         name: 'make pre commit'
-        entry: make precommit -f
+        entry: make precommit
         language: 'system'
-        files: 'Makefile'
+        pass_filenames: false
+        verbose: true
