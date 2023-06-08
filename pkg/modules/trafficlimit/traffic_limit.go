@@ -10,7 +10,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
-	"github.com/machinefi/w3bstream/pkg/modules/job"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -41,15 +40,27 @@ func Create(ctx context.Context, r *CreateReq) (*models.TrafficLimit, error) {
 			ApiType:   r.ApiType,
 		},
 	}
-	if err := m.Create(d); err != nil {
-		if sqlx.DBErr(err).IsConflict() {
-			return nil, status.TrafficLimitConflict
-		}
+
+	err := sqlx.NewTasks(d).With(
+		func(db sqlx.DBExecutor) error {
+			if err := m.Create(d); err != nil {
+				if sqlx.DBErr(err).IsConflict() {
+					return status.TrafficLimitConflict
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
+		},
+		func(db sqlx.DBExecutor) error {
+			if err := CreateScheduler(ctx, fmt.Sprintf("%s::%s", project.Name, r.ApiType.String()), &m.TrafficLimitInfo); err != nil {
+				return status.CreateTrafficSchedulerFailed
+			}
+			return nil
+		},
+	).Do()
+	if err != nil {
 		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
-
-	t := job.NewTrafficTaskWithPrjKey(fmt.Sprintf("%s::%s", project.Name, r.ApiType.String()), *m)
-	job.Dispatch(ctx, t)
 
 	return m, nil
 }
@@ -78,14 +89,16 @@ func Update(ctx context.Context, r *UpdateReq) (*models.TrafficLimit, error) {
 			}
 			return nil
 		},
+		func(d sqlx.DBExecutor) error {
+			if err := UpdateScheduler(ctx, fmt.Sprintf("%s::%s", project.Name, r.ApiType.String()), &m.TrafficLimitInfo); err != nil {
+				return status.UpdateTrafficSchedulerFailed
+			}
+			return nil
+		},
 	).Do()
-
 	if err != nil {
 		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
-
-	t := job.NewTrafficTaskWithPrjKey(fmt.Sprintf("%s::%s", project.Name, r.ApiType.String()), *m)
-	job.Dispatch(ctx, t)
 
 	return m, nil
 }

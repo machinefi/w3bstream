@@ -217,6 +217,10 @@ func (v Error) Key() string {
 		return "GenTokenFailed"
 	case TrafficLimitExceeded:
 		return "TrafficLimitExceeded"
+	case CreateTrafficSchedulerFailed:
+		return "CreateTrafficSchedulerFailed"
+	case UpdateTrafficSchedulerFailed:
+		return "UpdateTrafficSchedulerFailed"
 	}
 	return "UNKNOWN"
 }
@@ -403,6 +407,10 @@ func (v Error) Msg() string {
 		return "Gen Token Failed"
 	case TrafficLimitExceeded:
 		return "Traffic Limit Exceeded Failed"
+	case CreateTrafficSchedulerFailed:
+		return "Create Traffic Scheduler Failed"
+	case UpdateTrafficSchedulerFailed:
+		return "Update Traffic Scheduler Failed"
 	}
 	return "-"
 }
@@ -588,6 +596,10 @@ func (v Error) CanBeTalk() bool {
 	case GenTokenFailed:
 		return true
 	case TrafficLimitExceeded:
+		return true
+	case CreateTrafficSchedulerFailed:
+		return true
+	case UpdateTrafficSchedulerFailed:
 		return true
 	}
 	return false

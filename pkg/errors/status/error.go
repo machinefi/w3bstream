@@ -44,6 +44,10 @@ const (
 	GenTokenFailed
 	// @errTalk Traffic Limit Exceeded Failed
 	TrafficLimitExceeded
+	// @errTalk Create Traffic Scheduler Failed
+	CreateTrafficSchedulerFailed
+	// @errTalk Update Traffic Scheduler Failed
+	UpdateTrafficSchedulerFailed
 )
 
 const (

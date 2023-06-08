@@ -15,7 +15,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
-	"github.com/machinefi/w3bstream/pkg/modules/job"
 	"github.com/machinefi/w3bstream/pkg/modules/resource"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/modules/wasmlog"
@@ -61,8 +60,8 @@ func Init(ctx context.Context) error {
 			err = rDB.SetKeyWithEX(projectKey,
 				[]byte(strconv.Itoa(traffic.Threshold)), 31622400)
 		}
-		t := job.NewTrafficTaskWithPrjKey(projectKey, *traffic)
-		job.Dispatch(ctx, t)
+		//t := job.NewTrafficTaskWithPrjKey(projectKey, *traffic)
+		//job.Dispatch(ctx, t)
 	}
 
 	list, err := ins.List(d, nil)

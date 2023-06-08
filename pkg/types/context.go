@@ -46,7 +46,6 @@ type (
 	CtxProxyClient         struct{}
 	CtxResourceOwnership   struct{}
 	CtxWasmDBConfig        struct{} // CtxWasmDBConfig wasm database config
-	CtxSchedulerJobs       struct{}
 	CtxTrafficLimit        struct{}
 	CtxEventID             struct{}
 	CtxMetricsCenterConfig struct{}
@@ -641,27 +640,6 @@ func WasmDBConfigFromContext(ctx context.Context) (*WasmDBConfig, bool) {
 
 func MustWasmDBConfigFromContext(ctx context.Context) *WasmDBConfig {
 	v, ok := WasmDBConfigFromContext(ctx)
-	must.BeTrue(ok)
-	return v
-}
-
-func WithSchedulerJobs(ctx context.Context, v *Schedulers) context.Context {
-	return contextx.WithValue(ctx, CtxSchedulerJobs{}, v)
-}
-
-func WithSchedulerJobsContext(v *Schedulers) contextx.WithContext {
-	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, CtxSchedulerJobs{}, v)
-	}
-}
-
-func SchedulerJobsFromContext(ctx context.Context) (*Schedulers, bool) {
-	v, ok := ctx.Value(CtxSchedulerJobs{}).(*Schedulers)
-	return v, ok
-}
-
-func MustSchedulerJobsFromContext(ctx context.Context) *Schedulers {
-	v, ok := SchedulerJobsFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
