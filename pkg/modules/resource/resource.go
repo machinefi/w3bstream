@@ -9,8 +9,10 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/local"
 	s3db "github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/s3"
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -22,7 +24,6 @@ func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filen
 		return nil, nil, err
 	}
 
-	id := confid.MustNewSFIDGenerator().MustGenSFID()
 	res := &models.Resource{}
 	found := false
 
@@ -40,16 +41,29 @@ func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filen
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			if found {
+			if found && res.Status == datatypes.TRUE {
 				return nil
 			}
+			if found && res.Status == datatypes.FALSE {
+				_, err := UploadFile(ctx, data, res.ResourceID)
+				if err != nil {
+					return err
+				}
+				res.Status = datatypes.BooleanValue(true)
+				if err = res.UpdateByResourceID(d); err != nil {
+					return status.DatabaseError.StatusErr().WithDesc(err.Error())
+				}
+				return nil
+			}
+
+			id := confid.MustNewSFIDGenerator().MustGenSFID()
 			path, err := UploadFile(ctx, data, id)
 			if err != nil {
 				return err
 			}
 			res = &models.Resource{
 				RelResource:  models.RelResource{ResourceID: id},
-				ResourceInfo: models.ResourceInfo{Path: path, Md5: sum},
+				ResourceInfo: models.ResourceInfo{Path: path, Md5: sum, Status: datatypes.BooleanValue(true)},
 			}
 			if err = res.Create(d); err != nil {
 				if sqlx.DBErr(err).IsConflict() {
@@ -122,6 +136,10 @@ func GetContentBySFID(ctx context.Context, id types.SFID) (*models.Resource, []b
 	}
 	data, err := ReadContent(ctx, res)
 	if err != nil {
+		res.Status = datatypes.BooleanValue(false)
+		if err := res.UpdateByResourceID(types.MustMgrDBExecutorFromContext(ctx)); err != nil {
+			conflog.Std().Error(err)
+		}
 		return nil, nil, err
 	}
 	return res, data, nil
@@ -134,6 +152,10 @@ func GetContentByMd5(ctx context.Context, md5 string) (*models.Resource, []byte,
 	}
 	data, err := ReadContent(ctx, res)
 	if err != nil {
+		res.Status = datatypes.BooleanValue(false)
+		if err := res.UpdateByResourceID(types.MustMgrDBExecutorFromContext(ctx)); err != nil {
+			conflog.Std().Error(err)
+		}
 		return nil, nil, err
 	}
 	return res, data, nil
