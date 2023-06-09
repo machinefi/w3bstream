@@ -246,7 +246,7 @@ func (v *CurrentAccount) WithTrafficLimitContextBySFIDAndProjectName(ctx context
 	}
 	project := types.MustProjectFromContext(ctx)
 	if traffic.ProjectID != project.ProjectID {
-		return nil, status.NoTrafficLimitPermission
+		return nil, status.NoProjectPermission
 	}
 	return types.WithTrafficLimit(ctx, traffic), nil
 }
