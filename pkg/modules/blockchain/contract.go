@@ -97,8 +97,8 @@ func (t *contract) getListChainGroups(ctx context.Context, cs []models.ContractL
 	_, l = l.Start(ctx, "contract.getListChainGroups")
 	defer l.End()
 
-	us := t.classifyContractLog(cs)
-	t.pruneListerUnits(us)
+	us := t.groupContractLog(cs)
+	t.pruneListChainGroups(us)
 	if err := t.setToBlock(ctx, us); err != nil {
 		return nil, err
 	}
@@ -106,16 +106,16 @@ func (t *contract) getListChainGroups(ctx context.Context, cs []models.ContractL
 }
 
 // projectName + chainID -> contractLog list
-func (t *contract) classifyContractLog(cs []models.ContractLog) []*listChainGroup {
-	class := make(map[string][]*models.ContractLog)
+func (t *contract) groupContractLog(cs []models.ContractLog) []*listChainGroup {
+	groups := make(map[string][]*models.ContractLog)
 
 	for i := range cs {
 		key := fmt.Sprintf("%s_%d", cs[i].ProjectName, cs[i].ChainID)
-		class[key] = append(class[key], &cs[i])
+		groups[key] = append(groups[key], &cs[i])
 	}
 
 	ret := []*listChainGroup{}
-	for _, cs := range class {
+	for _, cs := range groups {
 		ret = append(ret, &listChainGroup{
 			cs: cs,
 		})
@@ -123,37 +123,37 @@ func (t *contract) classifyContractLog(cs []models.ContractLog) []*listChainGrou
 	return ret
 }
 
-func (t *contract) pruneListerUnits(us []*listChainGroup) {
-	for _, u := range us {
-		sort.SliceStable(u.cs, func(i, j int) bool {
-			return u.cs[i].BlockCurrent < u.cs[j].BlockCurrent
+func (t *contract) pruneListChainGroups(gs []*listChainGroup) {
+	for _, g := range gs {
+		sort.SliceStable(g.cs, func(i, j int) bool {
+			return g.cs[i].BlockCurrent < g.cs[j].BlockCurrent
 		})
 
-		if u.cs[0].BlockCurrent == u.cs[len(u.cs)-1].BlockCurrent {
+		if g.cs[0].BlockCurrent == g.cs[len(g.cs)-1].BlockCurrent {
 			continue
 		}
-		for i := range u.cs {
+		for i := range g.cs {
 			if i == 0 {
 				continue
 			}
-			if u.cs[i].BlockCurrent != u.cs[i-1].BlockCurrent {
-				u.toBlock = u.cs[i].BlockCurrent - 1
-				u.cs = u.cs[:i]
+			if g.cs[i].BlockCurrent != g.cs[i-1].BlockCurrent {
+				g.toBlock = g.cs[i].BlockCurrent - 1
+				g.cs = g.cs[:i]
 				break
 			}
 		}
 	}
 }
 
-func (t *contract) setToBlock(ctx context.Context, us []*listChainGroup) error {
+func (t *contract) setToBlock(ctx context.Context, gs []*listChainGroup) error {
 	l := types.MustLoggerFromContext(ctx)
 	ethcli := types.MustETHClientConfigFromContext(ctx)
 
 	_, l = l.Start(ctx, "contract.setToBlock")
 	defer l.End()
 
-	for _, u := range us {
-		c := u.cs[0]
+	for _, g := range gs {
+		c := g.cs[0]
 
 		chainAddress, ok := ethcli.Clients[uint32(c.ChainID)]
 		if !ok {
@@ -177,16 +177,16 @@ func (t *contract) setToBlock(ctx context.Context, us []*listChainGroup) error {
 		if to > currHeight {
 			to = currHeight
 		}
-		for _, c := range u.cs {
+		for _, c := range g.cs {
 			if c.BlockEnd > 0 && to > c.BlockEnd {
 				to = c.BlockEnd
 			}
 		}
-		if u.toBlock == 0 {
-			u.toBlock = to
+		if g.toBlock == 0 {
+			g.toBlock = to
 		}
-		if u.toBlock > to {
-			u.toBlock = to
+		if g.toBlock > to {
+			g.toBlock = to
 		}
 	}
 	return nil
