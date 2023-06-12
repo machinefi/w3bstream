@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math/big"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum"
@@ -238,8 +237,9 @@ func (t *contract) listChainAndSendEvent(ctx context.Context, g *listChainGroup)
 		return 0, err
 	}
 	for i := range logs {
-		c, err := t.getExpectedContractLog(&logs[i], mas, mts)
-		if err != nil {
+		cs := t.getExpectedContractLogs(&logs[i], mas, mts)
+		if len(cs) == 0 {
+			err := errors.New("cannot find expected contract log")
 			l.Error(err)
 			return 0, err
 		}
@@ -248,32 +248,36 @@ func (t *contract) listChainAndSendEvent(ctx context.Context, g *listChainGroup)
 		if err != nil {
 			return 0, err
 		}
-		if err := t.sendEvent(ctx, data, c.ProjectName, c.EventType); err != nil {
-			return 0, err
+		for _, c := range cs {
+			if err := t.sendEvent(ctx, data, c.ProjectName, c.EventType); err != nil {
+				return 0, err
+			}
 		}
 	}
 	return to, nil
 }
 
-func (t *contract) getExpectedContractLog(log *ethtypes.Log, mas map[*models.ContractLog]common.Address, mts map[*models.ContractLog][]common.Hash) (*models.ContractLog, error) {
-	logTopics := make(map[string]bool)
-	for _, l := range log.Topics {
-		logTopics[l.String()] = true
-	}
+func (t *contract) getExpectedContractLogs(log *ethtypes.Log, mas map[*models.ContractLog]common.Address, mts map[*models.ContractLog][]*common.Hash) []*models.ContractLog {
+	res := []*models.ContractLog{}
 
-	for c, as := range mas {
-		if bytes.Equal(as.Bytes(), log.Address.Bytes()) {
+	for c, addr := range mas {
+		if bytes.Equal(addr.Bytes(), log.Address.Bytes()) {
 			ts := mts[c]
-			for _, t := range ts {
-				if _, ok := logTopics[t.String()]; !ok {
-					goto Next
+
+			for i, contractLogTopic := range ts {
+				if contractLogTopic == nil {
+					continue
 				}
+				if len(log.Topics) > i && bytes.Equal(log.Topics[i].Bytes(), contractLogTopic.Bytes()) {
+					continue
+				}
+				goto Next
 			}
-			return c, nil
+			res = append(res, c)
 		}
 	Next:
 	}
-	return nil, errors.New("cannot find expected contract log")
+	return res
 }
 
 func (t *contract) getAddresses(cs []*models.ContractLog) ([]common.Address, map[*models.ContractLog]common.Address) {
@@ -287,25 +291,35 @@ func (t *contract) getAddresses(cs []*models.ContractLog) ([]common.Address, map
 	return as, mas
 }
 
-func (t *contract) getTopic(cs []*models.ContractLog) ([][]common.Hash, map[*models.ContractLog][]common.Hash) {
+func (t *contract) getTopic(cs []*models.ContractLog) ([][]common.Hash, map[*models.ContractLog][]*common.Hash) {
 	res := make([][]common.Hash, 4)
-	mres := make(map[*models.ContractLog][]common.Hash)
+	mres := make(map[*models.ContractLog][]*common.Hash)
 
 	for _, c := range cs {
-		t0 := t.parseTopic(c.Topic0)
-		t1 := t.parseTopic(c.Topic1)
-		t2 := t.parseTopic(c.Topic2)
-		t3 := t.parseTopic(c.Topic3)
+		h0 := t.parseTopic(c.Topic0)
+		mres[c] = append(mres[c], h0)
+		if h0 != nil {
+			res[0] = append(res[0], *h0)
+		}
 
-		res[0] = append(res[0], t0...)
-		res[1] = append(res[1], t1...)
-		res[2] = append(res[2], t2...)
-		res[3] = append(res[3], t3...)
+		h1 := t.parseTopic(c.Topic1)
+		mres[c] = append(mres[c], h1)
+		if h1 != nil {
+			res[1] = append(res[1], *h1)
+		}
 
-		mres[c] = append(mres[c], t0...)
-		mres[c] = append(mres[c], t1...)
-		mres[c] = append(mres[c], t2...)
-		mres[c] = append(mres[c], t3...)
+		h2 := t.parseTopic(c.Topic2)
+		mres[c] = append(mres[c], h2)
+		if h2 != nil {
+			res[2] = append(res[2], *h2)
+		}
+
+		h3 := t.parseTopic(c.Topic3)
+		mres[c] = append(mres[c], h3)
+		if h3 != nil {
+			res[3] = append(res[3], *h3)
+		}
+
 	}
 
 	if len(res[3]) == 0 {
@@ -323,15 +337,10 @@ func (t *contract) getTopic(cs []*models.ContractLog) ([][]common.Hash, map[*mod
 	return res, mres
 }
 
-func (t *contract) parseTopic(ts string) []common.Hash {
-	res := make([]common.Hash, 0)
-	if ts == "" {
-		return res
+func (t *contract) parseTopic(tStr string) *common.Hash {
+	if tStr == "" {
+		return nil
 	}
-	ss := strings.Split(ts, ",")
-	for _, s := range ss {
-		h := common.HexToHash(s)
-		res = append(res, h)
-	}
-	return res
+	h := common.HexToHash(tStr)
+	return &h
 }
