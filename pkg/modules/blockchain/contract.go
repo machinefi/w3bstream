@@ -27,7 +27,8 @@ type contract struct {
 	blockInterval uint64
 }
 
-type listerUnit struct {
+// a group of models.ContractLog, will list the chain and update current height togither
+type listChainGroup struct {
 	toBlock uint64
 	cs      []*models.ContractLog
 }
@@ -58,14 +59,14 @@ func (t *contract) do(ctx context.Context) {
 		return
 	}
 
-	us, err := t.getListerUnits(ctx, cs)
+	gs, err := t.getListChainGroups(ctx, cs)
 	if err != nil {
 		l.Error(errors.Wrap(err, "get lister units failed"))
 		return
 	}
 
-	for _, u := range us {
-		toBlock, err := t.listChainAndSendEvent(ctx, u)
+	for _, g := range gs {
+		toBlock, err := t.listChainAndSendEvent(ctx, g)
 		if err != nil {
 			l.Error(errors.Wrap(err, "list chain and send event failed"))
 			continue
@@ -73,7 +74,7 @@ func (t *contract) do(ctx context.Context) {
 
 		if err := sqlx.NewTasks(d).With(
 			func(d sqlx.DBExecutor) error {
-				for _, c := range u.cs {
+				for _, c := range g.cs {
 					c.BlockCurrent = toBlock + 1
 					if c.BlockEnd > 0 && c.BlockCurrent >= c.BlockEnd {
 						c.Uniq = c.ContractLogID
@@ -90,10 +91,10 @@ func (t *contract) do(ctx context.Context) {
 	}
 }
 
-func (t *contract) getListerUnits(ctx context.Context, cs []models.ContractLog) ([]*listerUnit, error) {
+func (t *contract) getListChainGroups(ctx context.Context, cs []models.ContractLog) ([]*listChainGroup, error) {
 	l := types.MustLoggerFromContext(ctx)
 
-	_, l = l.Start(ctx, "contract.getListerUnits")
+	_, l = l.Start(ctx, "contract.getListChainGroups")
 	defer l.End()
 
 	us := t.classifyContractLog(cs)
@@ -105,7 +106,7 @@ func (t *contract) getListerUnits(ctx context.Context, cs []models.ContractLog) 
 }
 
 // projectName + chainID -> contractLog list
-func (t *contract) classifyContractLog(cs []models.ContractLog) []*listerUnit {
+func (t *contract) classifyContractLog(cs []models.ContractLog) []*listChainGroup {
 	class := make(map[string][]*models.ContractLog)
 
 	for i := range cs {
@@ -113,16 +114,16 @@ func (t *contract) classifyContractLog(cs []models.ContractLog) []*listerUnit {
 		class[key] = append(class[key], &cs[i])
 	}
 
-	ret := []*listerUnit{}
+	ret := []*listChainGroup{}
 	for _, cs := range class {
-		ret = append(ret, &listerUnit{
+		ret = append(ret, &listChainGroup{
 			cs: cs,
 		})
 	}
 	return ret
 }
 
-func (t *contract) pruneListerUnits(us []*listerUnit) {
+func (t *contract) pruneListerUnits(us []*listChainGroup) {
 	for _, u := range us {
 		sort.SliceStable(u.cs, func(i, j int) bool {
 			return u.cs[i].BlockCurrent < u.cs[j].BlockCurrent
@@ -144,7 +145,7 @@ func (t *contract) pruneListerUnits(us []*listerUnit) {
 	}
 }
 
-func (t *contract) setToBlock(ctx context.Context, us []*listerUnit) error {
+func (t *contract) setToBlock(ctx context.Context, us []*listChainGroup) error {
 	l := types.MustLoggerFromContext(ctx)
 	ethcli := types.MustETHClientConfigFromContext(ctx)
 
@@ -191,14 +192,14 @@ func (t *contract) setToBlock(ctx context.Context, us []*listerUnit) error {
 	return nil
 }
 
-func (t *contract) listChainAndSendEvent(ctx context.Context, u *listerUnit) (uint64, error) {
+func (t *contract) listChainAndSendEvent(ctx context.Context, g *listChainGroup) (uint64, error) {
 	l := types.MustLoggerFromContext(ctx)
 	ethcli := types.MustETHClientConfigFromContext(ctx)
 
 	_, l = l.Start(ctx, "contract.listChainAndSendEvent")
 	defer l.End()
 
-	c := u.cs[0]
+	c := g.cs[0]
 
 	l = l.WithValues("chainID", c.ChainID, "projectName", c.ProjectName)
 
@@ -215,7 +216,7 @@ func (t *contract) listChainAndSendEvent(ctx context.Context, u *listerUnit) (ui
 		return 0, err
 	}
 
-	from, to := c.BlockCurrent, u.toBlock
+	from, to := c.BlockCurrent, g.toBlock
 
 	if from > to {
 		l.WithValues("from block", from, "to block", to).Debug("no new block")
@@ -223,8 +224,8 @@ func (t *contract) listChainAndSendEvent(ctx context.Context, u *listerUnit) (ui
 	}
 	l.WithValues("from block", from, "to block", to).Debug("find new block")
 
-	as, mas := t.getAddresses(u.cs)
-	ts, mts := t.getTopic(u.cs)
+	as, mas := t.getAddresses(g.cs)
+	ts, mts := t.getTopic(g.cs)
 	query := ethereum.FilterQuery{
 		FromBlock: big.NewInt(int64(from)),
 		ToBlock:   big.NewInt(int64(to)),
