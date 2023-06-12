@@ -16,57 +16,22 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/modules/resource"
-	"github.com/machinefi/w3bstream/pkg/modules/trafficlimit"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/modules/wasmlog"
 	"github.com/machinefi/w3bstream/pkg/types"
-	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
 
 func Init(ctx context.Context) error {
 	var (
-		d   = types.MustMgrDBExecutorFromContext(ctx)
-		rDB = kvdb.MustRedisDBKeyFromContext(ctx)
+		d = types.MustMgrDBExecutorFromContext(ctx)
 
-		ins     = &models.Instance{}
-		traffic = &models.TrafficLimit{}
-		prj     *models.Project
-		app     *models.Applet
-		res     *models.Resource
+		ins = &models.Instance{}
+		app *models.Applet
+		res *models.Resource
 	)
 
 	_, l := types.MustLoggerFromContext(ctx).Start(ctx, "deploy.Init")
 	defer l.End()
-
-	trafficList, err := traffic.List(d, nil)
-	if err != nil {
-		l.Error(err)
-		return err
-	}
-	for i := range trafficList {
-		traffic = &trafficList[i]
-		prj = &models.Project{RelProject: models.RelProject{ProjectID: traffic.ProjectID}}
-		err = prj.FetchByProjectID(d)
-		if err != nil {
-			l.Warn(err)
-			continue
-		}
-		projectKey := fmt.Sprintf("%s::%s", prj.Name, traffic.ApiType.String())
-		valByte, err := rDB.GetKey(projectKey)
-		if err != nil {
-			l.Warn(err)
-			continue
-		}
-		if valByte == nil {
-			// TODO get balance from db
-			err = rDB.SetKeyWithEX(projectKey,
-				[]byte(strconv.Itoa(traffic.Threshold)), 31622400)
-		}
-		err = trafficlimit.RestartScheduler(ctx, projectKey, &traffic.TrafficLimitInfo)
-		if err != nil {
-			l.Error(err)
-		}
-	}
 
 	list, err := ins.List(d, nil)
 	if err != nil {

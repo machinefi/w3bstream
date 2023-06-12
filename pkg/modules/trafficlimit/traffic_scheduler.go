@@ -2,7 +2,6 @@ package trafficlimit
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -145,7 +144,5 @@ func resetWindow(projectKey string, threshold int, exp int64, rDB *kvdb.RedisDB)
 	if err != nil {
 		return err
 	}
-	// TODO del
-	fmt.Println(projectKey + " - " + strconv.Itoa(threshold) + "s" + time.Now().Format("2006-01-02 15:04:05"))
 	return nil
 }

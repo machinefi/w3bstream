@@ -3,6 +3,7 @@ package trafficlimit
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
@@ -11,7 +12,52 @@ import (
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
+
+func Init(ctx context.Context) error {
+	var (
+		d   = types.MustMgrDBExecutorFromContext(ctx)
+		rDB = kvdb.MustRedisDBKeyFromContext(ctx)
+
+		traffic = &models.TrafficLimit{}
+		prj     *models.Project
+	)
+
+	_, l := types.MustLoggerFromContext(ctx).Start(ctx, "trafficLimit.Init")
+	defer l.End()
+
+	trafficList, err := traffic.List(d, nil)
+	if err != nil {
+		l.Error(err)
+		return err
+	}
+	for i := range trafficList {
+		traffic = &trafficList[i]
+		prj = &models.Project{RelProject: models.RelProject{ProjectID: traffic.ProjectID}}
+		err = prj.FetchByProjectID(d)
+		if err != nil {
+			l.Warn(err)
+			continue
+		}
+		projectKey := fmt.Sprintf("%s::%s", prj.Name, traffic.ApiType.String())
+		valByte, err := rDB.GetKey(projectKey)
+		if err != nil {
+			l.Warn(err)
+			continue
+		}
+		if valByte == nil {
+			// TODO get balance from db
+			err = rDB.SetKeyWithEX(projectKey,
+				[]byte(strconv.Itoa(traffic.Threshold)), 31622400)
+		}
+		err = RestartScheduler(ctx, projectKey, &traffic.TrafficLimitInfo)
+		if err != nil {
+			l.Error(err)
+		}
+	}
+	return nil
+}
 
 func GetBySFID(ctx context.Context, id types.SFID) (*models.TrafficLimit, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)

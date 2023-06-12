@@ -15,6 +15,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
+	"github.com/machinefi/w3bstream/pkg/modules/trafficlimit"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -43,6 +44,11 @@ func main() {
 			},
 			func() {
 				if err := deploy.Init(global.Context); err != nil {
+					panic(err)
+				}
+			},
+			func() {
+				if err := trafficlimit.Init(global.Context); err != nil {
 					panic(err)
 				}
 			},
