@@ -143,6 +143,8 @@ func (v Error) Key() string {
 		return "AccountPasswordNotFound"
 	case OperatorNotFound:
 		return "OperatorNotFound"
+	case TrafficLimitNotFound:
+		return "TrafficLimitNotFound"
 	case ProjectOperatorNotFound:
 		return "ProjectOperatorNotFound"
 	case AccountKeyNotFound:
@@ -181,6 +183,8 @@ func (v Error) Key() string {
 		return "AccountPasswordConflict"
 	case OperatorConflict:
 		return "OperatorConflict"
+	case TrafficLimitConflict:
+		return "TrafficLimitConflict"
 	case ProjectOperatorConflict:
 		return "ProjectOperatorConflict"
 	case AccountKeyNameConflict:
@@ -217,6 +221,10 @@ func (v Error) Key() string {
 		return "BatchRemoveWasmLogFailed"
 	case GenTokenFailed:
 		return "GenTokenFailed"
+	case CreateTrafficSchedulerFailed:
+		return "CreateTrafficSchedulerFailed"
+	case UpdateTrafficSchedulerFailed:
+		return "UpdateTrafficSchedulerFailed"
 	}
 	return "UNKNOWN"
 }
@@ -329,6 +337,8 @@ func (v Error) Msg() string {
 		return "Account Password Not Found"
 	case OperatorNotFound:
 		return "Operator Not Found"
+	case TrafficLimitNotFound:
+		return "Traffic Limit Not Found"
 	case ProjectOperatorNotFound:
 		return "Project Operator relationship Not Found"
 	case AccountKeyNotFound:
@@ -367,6 +377,8 @@ func (v Error) Msg() string {
 		return "Account Password Conflict"
 	case OperatorConflict:
 		return "Operator Conflict"
+	case TrafficLimitConflict:
+		return "Traffic Limit Conflict"
 	case ProjectOperatorConflict:
 		return "Project Operator relationship Conflict"
 	case AccountKeyNameConflict:
@@ -403,6 +415,10 @@ func (v Error) Msg() string {
 		return "Batch Remove WasmLog Failed"
 	case GenTokenFailed:
 		return "Gen Token Failed"
+	case CreateTrafficSchedulerFailed:
+		return "Create Traffic Scheduler Failed"
+	case UpdateTrafficSchedulerFailed:
+		return "Update Traffic Scheduler Failed"
 	}
 	return "-"
 }
@@ -515,6 +531,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case OperatorNotFound:
 		return true
+	case TrafficLimitNotFound:
+		return true
 	case ProjectOperatorNotFound:
 		return true
 	case AccountKeyNotFound:
@@ -553,6 +571,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case OperatorConflict:
 		return true
+	case TrafficLimitConflict:
+		return true
 	case ProjectOperatorConflict:
 		return true
 	case AccountKeyNameConflict:
@@ -588,6 +608,10 @@ func (v Error) CanBeTalk() bool {
 	case BatchRemoveWasmLogFailed:
 		return true
 	case GenTokenFailed:
+		return true
+	case CreateTrafficSchedulerFailed:
+		return true
+	case UpdateTrafficSchedulerFailed:
 		return true
 	}
 	return false

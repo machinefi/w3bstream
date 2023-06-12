@@ -42,6 +42,10 @@ const (
 	BatchRemoveWasmLogFailed
 	// @errTalk Gen Token Failed
 	GenTokenFailed
+	// @errTalk Create Traffic Scheduler Failed
+	CreateTrafficSchedulerFailed
+	// @errTalk Update Traffic Scheduler Failed
+	UpdateTrafficSchedulerFailed
 )
 
 const (
@@ -141,6 +145,8 @@ const (
 	AccountPasswordConflict
 	// @errTalk Operator Conflict
 	OperatorConflict
+	// @errTalk Traffic Limit Conflict
+	TrafficLimitConflict
 	// @errTalk Project Operator relationship Conflict
 	ProjectOperatorConflict
 	// @errTalk Account Key Name Conflict
@@ -201,6 +207,8 @@ const (
 	AccountPasswordNotFound
 	// @errTalk Operator Not Found
 	OperatorNotFound
+	// @errTalk Traffic Limit Not Found
+	TrafficLimitNotFound
 	// @errTalk Project Operator relationship Not Found
 	ProjectOperatorNotFound
 	// @errTalk Account Key Not Found
