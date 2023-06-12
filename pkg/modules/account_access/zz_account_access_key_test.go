@@ -15,7 +15,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/account_access"
-	"github.com/machinefi/w3bstream/pkg/test/mock/mock_sqlx"
+	"github.com/machinefi/w3bstream/pkg/test/mock_depends_kit_sqlx"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -129,6 +129,40 @@ func TestAccountAccessKey(t *testing.T) {
 				NewWithT(t).Expect(ok).To(BeTrue())
 				NewWithT(t).Expect(se.Key).To(Equal(status.DatabaseError.Key()))
 			})
+		})
+	})
+
+	t.Run("Validate", func(t *testing.T) {
+		t.Run("#Success", func(t *testing.T) {
+			// _db, _mock, _ := sqlmock.New()
+
+			// _mock.ExpectQuery().WillReturnRows()
+
+			// id := idg.MustGenSFID()
+
+			// _, key, ts := account_access.GenAccessKey(id)
+
+			// m := &models.AccountAccessKey{
+			// 	RelAccount: models.RelAccount{AccountID: id},
+			// 	AccountAccessKeyInfo: models.AccountAccessKeyInfo{
+			// 		Name:      "test_gen_key",
+			// 		AccessKey: key,
+			// 		ExpiredAt: base.Timestamp{Time: ts.Add(time.Hour).UTC()},
+			// 	},
+			// }
+
+			// d.EXPECT().Exec(gomock.Any()).Return(nil, nil)
+
+			// d.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(nil, m)
+
+			// idAny, err, canBeValidated := account_access.Validate(ctx, key)
+
+			// NewWithT(t).Expect(err).To(BeNil())
+			// NewWithT(t).Expect(canBeValidated).To(BeTrue())
+
+			// idVal, ok := idAny.(types.SFID)
+			// NewWithT(t).Expect(ok).To(BeTrue())
+			// NewWithT(t).Expect(idVal).To(Equal(id))
 		})
 	})
 }
