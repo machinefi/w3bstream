@@ -43,6 +43,17 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 	metrics.EventMtc.WithLabelValues(prj.AccountID.String(), prj.Name, pub.Key, r.EventType).Inc()
 
 	ctx = types.WithEventID(ctx, r.EventID)
+	if err := event.TrafficLimitEvent(ctx); err != nil {
+		rsp.Results = append([]*event.Result{}, &event.Result{
+			AppletName:  "",
+			InstanceID:  0,
+			Handler:     "",
+			ReturnValue: nil,
+			ReturnCode:  -1,
+			Error:       err.Error(),
+		})
+		return rsp, nil
+	}
 	rsp.Results = event.OnEvent(ctx, r.Payload.Bytes())
 	return rsp, nil
 }

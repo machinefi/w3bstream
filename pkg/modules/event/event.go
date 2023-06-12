@@ -44,18 +44,26 @@ func HandleEvent(ctx context.Context, t string, data []byte) (interface{}, error
 	eventID := uuid.NewString() + "_monitor"
 	ctx = types.WithEventID(ctx, eventID)
 
+	if err := TrafficLimitEvent(ctx); err != nil {
+		results := append([]*Result{}, &Result{
+			AppletName:  "",
+			InstanceID:  0,
+			Handler:     "",
+			ReturnValue: nil,
+			ReturnCode:  -1,
+			Error:       err.Error(),
+		})
+		return results, nil
+	}
+
 	return OnEvent(ctx, data), nil
 }
 
-func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
+func TrafficLimitEvent(ctx context.Context) error {
 	var (
-		l       = types.MustLoggerFromContext(ctx)
-		r       = types.MustStrategyResultsFromContext(ctx)
-		rDB     = kvdb.MustRedisDBKeyFromContext(ctx)
-		prj     = types.MustProjectFromContext(ctx)
-		eventID = types.MustEventIDFromContext(ctx)
-
-		results = make(chan *Result, len(r))
+		l   = types.MustLoggerFromContext(ctx)
+		rDB = kvdb.MustRedisDBKeyFromContext(ctx)
+		prj = types.MustProjectFromContext(ctx)
 
 		valByte []byte
 	)
@@ -64,44 +72,31 @@ func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
 	if err != nil {
 		se, ok := statusx.IsStatusErr(err)
 		if !ok || !se.Is(status.TrafficLimitNotFound) {
-			ret = append(ret, &Result{
-				AppletName:  "",
-				InstanceID:  0,
-				Handler:     "",
-				ReturnValue: nil,
-				ReturnCode:  -1,
-				Error:       err.Error(),
-			})
-			return
+			return err
 		}
 		l.Warn(err)
 	}
 	if m != nil {
 		if valByte, err = rDB.IncrBy(fmt.Sprintf("%s::%s", prj.Name, m.ApiType.String()), []byte(strconv.Itoa(-1))); err != nil {
 			l.Error(err)
-			ret = append(ret, &Result{
-				AppletName:  "",
-				InstanceID:  0,
-				Handler:     "",
-				ReturnValue: nil,
-				ReturnCode:  -1,
-				Error:       status.DatabaseError.StatusErr().WithDesc(err.Error()).Key,
-			})
-			return
+			return status.DatabaseError.StatusErr().WithDesc(err.Error())
 		}
 		val, _ := strconv.Atoi(string(valByte))
 		if val < 0 {
-			ret = append(ret, &Result{
-				AppletName:  "",
-				InstanceID:  0,
-				Handler:     "",
-				ReturnValue: nil,
-				ReturnCode:  -1,
-				Error:       status.TrafficLimitExceededFailed.Key(),
-			})
-			return
+			return status.TrafficLimitExceededFailed
 		}
 	}
+	return nil
+}
+
+func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
+	var (
+		l       = types.MustLoggerFromContext(ctx)
+		r       = types.MustStrategyResultsFromContext(ctx)
+		eventID = types.MustEventIDFromContext(ctx)
+
+		results = make(chan *Result, len(r))
+	)
 
 	wg := &sync.WaitGroup{}
 	for _, v := range r {
