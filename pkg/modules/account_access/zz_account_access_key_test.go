@@ -2,13 +2,17 @@ package account_access_test
 
 import (
 	"context"
+	"reflect"
 	"testing"
 	"time"
 
+	"github.com/agiledragon/gomonkey/v2"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/gomega"
 
+	base "github.com/machinefi/w3bstream/pkg/depends/base/types"
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
@@ -134,35 +138,36 @@ func TestAccountAccessKey(t *testing.T) {
 
 	t.Run("Validate", func(t *testing.T) {
 		t.Run("#Success", func(t *testing.T) {
-			// _db, _mock, _ := sqlmock.New()
+			id := idg.MustGenSFID()
+			rand, key, ts := account_access.GenAccessKey(id)
 
-			// _mock.ExpectQuery().WillReturnRows()
+			m := &models.AccountAccessKey{
+				RelAccount: models.RelAccount{AccountID: id},
+				AccountAccessKeyInfo: models.AccountAccessKeyInfo{
+					Name:      "test_gen_key",
+					AccessKey: rand,
+					ExpiredAt: base.Timestamp{Time: ts.Add(time.Hour).UTC()},
+				},
+			}
 
-			// id := idg.MustGenSFID()
+			patches := gomonkey.ApplyMethod(
+				reflect.TypeOf(&models.AccountAccessKey{}),
+				"FetchByAccessKey",
+				func(receiver *models.AccountAccessKey, d sqlx.DBExecutor) error {
+					*receiver = *m
+					return nil
+				},
+			)
+			defer patches.Reset()
 
-			// _, key, ts := account_access.GenAccessKey(id)
+			idAny, err, canBeValidated := account_access.Validate(ctx, key)
 
-			// m := &models.AccountAccessKey{
-			// 	RelAccount: models.RelAccount{AccountID: id},
-			// 	AccountAccessKeyInfo: models.AccountAccessKeyInfo{
-			// 		Name:      "test_gen_key",
-			// 		AccessKey: key,
-			// 		ExpiredAt: base.Timestamp{Time: ts.Add(time.Hour).UTC()},
-			// 	},
-			// }
+			NewWithT(t).Expect(err).To(BeNil())
+			NewWithT(t).Expect(canBeValidated).To(BeTrue())
 
-			// d.EXPECT().Exec(gomock.Any()).Return(nil, nil)
-
-			// d.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(nil, m)
-
-			// idAny, err, canBeValidated := account_access.Validate(ctx, key)
-
-			// NewWithT(t).Expect(err).To(BeNil())
-			// NewWithT(t).Expect(canBeValidated).To(BeTrue())
-
-			// idVal, ok := idAny.(types.SFID)
-			// NewWithT(t).Expect(ok).To(BeTrue())
-			// NewWithT(t).Expect(idVal).To(Equal(id))
+			idVal, ok := idAny.(types.SFID)
+			NewWithT(t).Expect(ok).To(BeTrue())
+			NewWithT(t).Expect(idVal).To(Equal(id))
 		})
 	})
 }
