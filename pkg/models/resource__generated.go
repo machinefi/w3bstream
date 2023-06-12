@@ -122,12 +122,12 @@ func (*Resource) FieldMd5() string {
 	return "Md5"
 }
 
-func (m *Resource) ColStatus() *builder.Column {
-	return ResourceTable.ColByFieldName(m.FieldStatus())
+func (m *Resource) ColAvailable() *builder.Column {
+	return ResourceTable.ColByFieldName(m.FieldAvailable())
 }
 
-func (*Resource) FieldStatus() string {
-	return "Status"
+func (*Resource) FieldAvailable() string {
+	return "Available"
 }
 
 func (m *Resource) ColCreatedAt() *builder.Column {

@@ -23,7 +23,7 @@ type RelResource struct {
 }
 
 type ResourceInfo struct {
-	Path   string         `db:"f_path,default=''"             json:"path"` // Path rel path
-	Md5    string         `db:"f_md5"                         json:"md5"`
-	Status datatypes.Bool `db:"f_status,default='1'"          json:"status"`
+	Path      string         `db:"f_path,default=''"             json:"path"` // Path rel path
+	Md5       string         `db:"f_md5"                         json:"md5"`
+	Available datatypes.Bool `db:"f_available,default='1'"       json:"available"`
 }

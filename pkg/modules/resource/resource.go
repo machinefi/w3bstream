@@ -41,15 +41,15 @@ func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filen
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			if found && res.Status == datatypes.TRUE {
+			if found && res.Available == datatypes.TRUE {
 				return nil
 			}
-			if found && res.Status == datatypes.FALSE {
+			if found && res.Available == datatypes.FALSE {
 				_, err := UploadFile(ctx, data, res.ResourceID)
 				if err != nil {
 					return err
 				}
-				res.Status = datatypes.BooleanValue(true)
+				res.Available = datatypes.BooleanValue(true)
 				if err = res.UpdateByResourceID(d); err != nil {
 					return status.DatabaseError.StatusErr().WithDesc(err.Error())
 				}
@@ -63,7 +63,7 @@ func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filen
 			}
 			res = &models.Resource{
 				RelResource:  models.RelResource{ResourceID: id},
-				ResourceInfo: models.ResourceInfo{Path: path, Md5: sum, Status: datatypes.BooleanValue(true)},
+				ResourceInfo: models.ResourceInfo{Path: path, Md5: sum, Available: datatypes.BooleanValue(true)},
 			}
 			if err = res.Create(d); err != nil {
 				if sqlx.DBErr(err).IsConflict() {
@@ -136,7 +136,7 @@ func GetContentBySFID(ctx context.Context, id types.SFID) (*models.Resource, []b
 	}
 	data, err := ReadContent(ctx, res)
 	if err != nil {
-		res.Status = datatypes.BooleanValue(false)
+		res.Available = datatypes.BooleanValue(false)
 		if err := res.UpdateByResourceID(types.MustMgrDBExecutorFromContext(ctx)); err != nil {
 			conflog.Std().Error(err)
 		}
@@ -152,7 +152,7 @@ func GetContentByMd5(ctx context.Context, md5 string) (*models.Resource, []byte,
 	}
 	data, err := ReadContent(ctx, res)
 	if err != nil {
-		res.Status = datatypes.BooleanValue(false)
+		res.Available = datatypes.BooleanValue(false)
 		if err := res.UpdateByResourceID(types.MustMgrDBExecutorFromContext(ctx)); err != nil {
 			conflog.Std().Error(err)
 		}
