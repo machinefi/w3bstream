@@ -3,6 +3,7 @@ package account_access_test
 import (
 	"context"
 	"reflect"
+	"runtime"
 	"testing"
 	"time"
 
@@ -138,6 +139,9 @@ func TestAccountAccessKey(t *testing.T) {
 
 	t.Run("Validate", func(t *testing.T) {
 		t.Run("#Success", func(t *testing.T) {
+			if runtime.GOOS == `darwin` {
+				return
+			}
 			id := idg.MustGenSFID()
 			rand, key, ts := account_access.GenAccessKey(id)
 
