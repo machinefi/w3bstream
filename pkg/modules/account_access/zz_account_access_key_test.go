@@ -2,8 +2,10 @@ package account_access_test
 
 import (
 	"context"
+	"encoding/base64"
 	"reflect"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 
@@ -20,7 +22,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/account_access"
-	"github.com/machinefi/w3bstream/pkg/test/mock_depends_kit_sqlx"
+	mock_sqlx "github.com/machinefi/w3bstream/pkg/test/mock_depends_kit_sqlx"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -36,7 +38,50 @@ func TestGenAndParseAccessKey(t *testing.T) {
 	NewWithT(t).Expect(id).To(Equal(_id))
 	NewWithT(t).Expect(ts.Equal(_ts)).To(BeTrue())
 
-	t.Logf(key)
+	cases := []*struct {
+		name string
+		key  string
+		err  error
+	}{
+		{
+			name: "#InvalidPartedCountOrPrefix",
+			key:  "w3b_key_fmt_error",
+			err:  account_access.ErrMsgAccessKeyInvalidPartCountOrPrefix,
+		},
+		{
+			name: "#Base64DecodeFailed",
+			key:  "w3b_YWJjZA=====",
+			err:  account_access.ErrMsgAccessKeyBase64Decode,
+		},
+		{
+			name: "#InvalidPartedCount",
+			key:  "w3b_" + base64.StdEncoding.EncodeToString([]byte("1_xxx")),
+			err:  account_access.ErrMsgAccessKeyInvalidPartCount,
+		},
+		{
+			name: "#InvalidAccountID",
+			key:  "w3b_" + base64.StdEncoding.EncodeToString([]byte("a_xxx_xxx")),
+			err:  account_access.ErrMsgAccessKeyInvalidAccountID,
+		},
+		{
+			name: "#InvalidTimestamp",
+			key:  "w3b_" + base64.StdEncoding.EncodeToString([]byte("100_xxx_xxx")),
+			err:  account_access.ErrMsgAccessKeyInvalidTimestamp,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			_, _, _, err := account_access.ParseAccessKey(c.key)
+			NewWithT(t).Expect(err).NotTo(BeNil())
+
+			se, ok := statusx.IsStatusErr(err)
+			NewWithT(t).Expect(ok).To(BeTrue())
+			NewWithT(t).Expect(se.Key).To(Equal(status.InvalidAccountAccessKey.Key()))
+			NewWithT(t).Expect(strings.Contains(se.Desc, c.err.Error())).To(BeTrue())
+		})
+	}
+
 }
 
 func TestTimeParseAndFormat(t *testing.T) {
@@ -68,18 +113,28 @@ func TestAccountAccessKey(t *testing.T) {
 		types.WithAccountContext(acc),
 	)(context.Background())
 
+	d.EXPECT().T(gomock.Any()).Return(&builder.Table{}).AnyTimes()
+
 	t.Run("Create", func(t *testing.T) {
 		t.Run("#Success", func(t *testing.T) {
-			d.EXPECT().T(gomock.Any()).Return(&builder.Table{})
-			d.EXPECT().Exec(gomock.Any()).Return(nil, nil)
+			t.Run("#NoExpiration", func(t *testing.T) {
+				d.EXPECT().Exec(gomock.Any()).Return(nil, nil).MaxTimes(1)
 
-			_, err := account_access.Create(ctx, &account_access.CreateReq{})
-			NewWithT(t).Expect(err).To(BeNil())
+				_, err := account_access.Create(ctx, &account_access.CreateReq{})
+				NewWithT(t).Expect(err).To(BeNil())
+			})
+			t.Run("#HasExpiration", func(t *testing.T) {
+				d.EXPECT().Exec(gomock.Any()).Return(nil, nil).MaxTimes(1)
+
+				_, err := account_access.Create(ctx, &account_access.CreateReq{
+					ExpirationDays: 1,
+				})
+				NewWithT(t).Expect(err).To(BeNil())
+			})
 		})
 		t.Run("#Failed", func(t *testing.T) {
 			t.Run("#AccountKeyNameConflict", func(t *testing.T) {
-				d.EXPECT().T(gomock.Any()).Return(&builder.Table{})
-				d.EXPECT().Exec(gomock.Any()).Return(nil, mock_sqlx.ErrConflict)
+				d.EXPECT().Exec(gomock.Any()).Return(nil, mock_sqlx.ErrConflict).MaxTimes(1)
 
 				_, err := account_access.Create(ctx, &account_access.CreateReq{})
 				NewWithT(t).Expect(err).NotTo(BeNil())
@@ -89,8 +144,7 @@ func TestAccountAccessKey(t *testing.T) {
 				NewWithT(t).Expect(se.Key).To(Equal(status.AccountKeyNameConflict.Key()))
 			})
 			t.Run("#DatabaseError", func(t *testing.T) {
-				d.EXPECT().T(gomock.Any()).Return(&builder.Table{})
-				d.EXPECT().Exec(gomock.Any()).Return(nil, mock_sqlx.ErrDatabase)
+				d.EXPECT().Exec(gomock.Any()).Return(nil, mock_sqlx.ErrDatabase).MaxTimes(1)
 
 				_, err := account_access.Create(ctx, &account_access.CreateReq{})
 				NewWithT(t).Expect(err).NotTo(BeNil())
@@ -104,8 +158,7 @@ func TestAccountAccessKey(t *testing.T) {
 
 	t.Run("DeleteByName", func(t *testing.T) {
 		t.Run("#Success", func(t *testing.T) {
-			d.EXPECT().T(gomock.Any()).Return(&builder.Table{})
-			d.EXPECT().Exec(gomock.Any()).Return(nil, nil)
+			d.EXPECT().Exec(gomock.Any()).Return(nil, nil).MaxTimes(1)
 
 			err := account_access.DeleteByName(ctx, "any_name")
 			NewWithT(t).Expect(err).To(BeNil())
@@ -113,8 +166,7 @@ func TestAccountAccessKey(t *testing.T) {
 
 		t.Run("#Failed", func(t *testing.T) {
 			t.Run("#AccountKeyNotFound", func(t *testing.T) {
-				d.EXPECT().T(gomock.Any()).Return(&builder.Table{})
-				d.EXPECT().Exec(gomock.Any()).Return(nil, mock_sqlx.ErrNotFound)
+				d.EXPECT().Exec(gomock.Any()).Return(nil, mock_sqlx.ErrNotFound).MaxTimes(1)
 
 				err := account_access.DeleteByName(ctx, "any")
 				NewWithT(t).Expect(err).NotTo(BeNil())
@@ -124,8 +176,7 @@ func TestAccountAccessKey(t *testing.T) {
 				NewWithT(t).Expect(se.Key).To(Equal(status.AccountKeyNotFound.Key()))
 			})
 			t.Run("#DatabaseError", func(t *testing.T) {
-				d.EXPECT().T(gomock.Any()).Return(&builder.Table{})
-				d.EXPECT().Exec(gomock.Any()).Return(nil, mock_sqlx.ErrDatabase)
+				d.EXPECT().Exec(gomock.Any()).Return(nil, mock_sqlx.ErrDatabase).MaxTimes(1)
 
 				err := account_access.DeleteByName(ctx, "any")
 				NewWithT(t).Expect(err).NotTo(BeNil())
@@ -138,22 +189,22 @@ func TestAccountAccessKey(t *testing.T) {
 	})
 
 	t.Run("Validate", func(t *testing.T) {
+		id := idg.MustGenSFID()
+		rand, key, ts := account_access.GenAccessKey(id)
+
+		m := &models.AccountAccessKey{
+			RelAccount: models.RelAccount{AccountID: id},
+			AccountAccessKeyInfo: models.AccountAccessKeyInfo{
+				Name:      "test_gen_key",
+				AccessKey: rand,
+				ExpiredAt: base.Timestamp{Time: ts.Add(time.Hour).UTC()},
+			},
+		}
+
 		t.Run("#Success", func(t *testing.T) {
 			if runtime.GOOS == `darwin` {
 				return
 			}
-			id := idg.MustGenSFID()
-			rand, key, ts := account_access.GenAccessKey(id)
-
-			m := &models.AccountAccessKey{
-				RelAccount: models.RelAccount{AccountID: id},
-				AccountAccessKeyInfo: models.AccountAccessKeyInfo{
-					Name:      "test_gen_key",
-					AccessKey: rand,
-					ExpiredAt: base.Timestamp{Time: ts.Add(time.Hour).UTC()},
-				},
-			}
-
 			patches := gomonkey.ApplyMethod(
 				reflect.TypeOf(&models.AccountAccessKey{}),
 				"FetchByAccessKey",
@@ -172,6 +223,84 @@ func TestAccountAccessKey(t *testing.T) {
 			idVal, ok := idAny.(types.SFID)
 			NewWithT(t).Expect(ok).To(BeTrue())
 			NewWithT(t).Expect(idVal).To(Equal(id))
+		})
+		t.Run("#Failed", func(t *testing.T) {
+			t.Run("#NotW3bValidateKey", func(t *testing.T) {
+				_, _, canBeValidated := account_access.Validate(ctx, "not_w3b_key")
+				NewWithT(t).Expect(canBeValidated).To(BeFalse())
+			})
+			t.Run("#ParseAccessKeyFailed", func(t *testing.T) {
+				_, err, _ := account_access.Validate(ctx, "w3b_key_fmt_error")
+				NewWithT(t).Expect(err).NotTo(BeNil())
+			})
+			t.Run("#AccountKeyNotFound", func(t *testing.T) {
+				d.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(mock_sqlx.ErrNotFound).MaxTimes(1)
+
+				_, err, _ := account_access.Validate(ctx, key)
+				NewWithT(t).Expect(err).NotTo(BeNil())
+
+				se, ok := statusx.IsStatusErr(err)
+				NewWithT(t).Expect(ok).To(BeTrue())
+				NewWithT(t).Expect(se.Key).To(Equal(status.AccountKeyNotFound.Key()))
+			})
+			t.Run("#DatabaseError", func(t *testing.T) {
+				d.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(mock_sqlx.ErrDatabase).MaxTimes(1)
+
+				_, err, _ := account_access.Validate(ctx, key)
+				NewWithT(t).Expect(err).NotTo(BeNil())
+
+				se, ok := statusx.IsStatusErr(err)
+				NewWithT(t).Expect(ok).To(BeTrue())
+				NewWithT(t).Expect(se.Key).To(Equal(status.DatabaseError.Key()))
+			})
+			t.Run("#AccountIDNotMatch", func(t *testing.T) {
+				if runtime.GOOS == `darwin` {
+					return
+				}
+
+				m2 := *m
+				m2.AccountID = 0
+				patches := gomonkey.ApplyMethod(
+					reflect.TypeOf(&models.AccountAccessKey{}),
+					"FetchByAccessKey",
+					func(receiver *models.AccountAccessKey, d sqlx.DBExecutor) error {
+						*receiver = m2
+						return nil
+					},
+				)
+				defer patches.Reset()
+
+				_, err, _ := account_access.Validate(ctx, key)
+				NewWithT(t).Expect(err).NotTo(BeNil())
+
+				se, ok := statusx.IsStatusErr(err)
+				NewWithT(t).Expect(ok).To(BeTrue())
+				NewWithT(t).Expect(se.Key).To(Equal(status.InvalidAccountAccessKey.Key()))
+			})
+			t.Run("#AccountAccessKeyExpired", func(t *testing.T) {
+				if runtime.GOOS == `darwin` {
+					return
+				}
+
+				m2 := *m
+				m2.ExpiredAt = types.Timestamp{Time: time.Now().UTC().Add(-time.Hour)}
+				patches := gomonkey.ApplyMethod(
+					reflect.TypeOf(&models.AccountAccessKey{}),
+					"FetchByAccessKey",
+					func(receiver *models.AccountAccessKey, d sqlx.DBExecutor) error {
+						*receiver = m2
+						return nil
+					},
+				)
+				defer patches.Reset()
+
+				_, err, _ := account_access.Validate(ctx, key)
+				NewWithT(t).Expect(err).NotTo(BeNil())
+
+				se, ok := statusx.IsStatusErr(err)
+				NewWithT(t).Expect(ok).To(BeTrue())
+				NewWithT(t).Expect(se.Key).To(Equal(status.AccountAccessKeyExpired.Key()))
+			})
 		})
 	})
 }

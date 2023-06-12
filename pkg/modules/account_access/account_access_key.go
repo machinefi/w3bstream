@@ -117,7 +117,15 @@ func GenAccessKey(id types.SFID) (rand, key string, ts time.Time) {
 	return
 }
 
-// ParseAccessKey
+var (
+	ErrMsgAccessKeyInvalidPartCountOrPrefix = errors.New("invalid part count or prefix")
+	ErrMsgAccessKeyBase64Decode             = errors.New("base64 decode")
+	ErrMsgAccessKeyInvalidPartCount         = errors.New("invalid part count of contents")
+	ErrMsgAccessKeyInvalidAccountID         = errors.New("invalid account id")
+	ErrMsgAccessKeyInvalidTimestamp         = errors.New("invalid timestamp")
+)
+
+// ParseAccessKey parse access key
 func ParseAccessKey(key string) (id types.SFID, rand string, ts time.Time, err error) {
 	defer func() {
 		if err != nil {
@@ -125,33 +133,33 @@ func ParseAccessKey(key string) (id types.SFID, rand string, ts time.Time, err e
 		}
 	}()
 
-	parts := strings.SplitN(key, "_", 2)
+	parts := strings.Split(key, "_")
 	if len(parts) != 2 || parts[0] != "w3b" {
-		err = errors.New("invalid part count or prefix")
+		err = ErrMsgAccessKeyInvalidPartCountOrPrefix
 		return
 	}
 	var raw []byte
 	raw, err = base64.StdEncoding.DecodeString(parts[1])
 	if err != nil {
-		err = errors.Wrap(err, "base64 decode")
+		err = errors.Wrap(err, ErrMsgAccessKeyBase64Decode.Error())
 		return
 	}
 
-	contents := bytes.SplitN(raw, []byte("_"), 3)
+	contents := bytes.Split(raw, []byte("_"))
 	if len(contents) != 3 {
-		err = errors.Wrap(err, "invalid part count of contents")
+		err = ErrMsgAccessKeyInvalidPartCount
 		return
 	}
 
 	if err = id.UnmarshalText(contents[0]); err != nil {
-		err = errors.Wrap(err, "invalid account id")
+		err = errors.Wrap(err, ErrMsgAccessKeyInvalidAccountID.Error())
 		return
 	}
 	rand = string(contents[1])
 
 	ts, err = time.ParseInLocation(time.RFC3339Nano, string(contents[2]), time.Local)
 	if err != nil {
-		err = errors.Wrap(err, "invalid timestamp")
+		err = errors.Wrap(err, ErrMsgAccessKeyInvalidTimestamp.Error())
 		return
 	}
 	return
