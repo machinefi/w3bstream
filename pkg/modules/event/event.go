@@ -97,7 +97,7 @@ func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
 				Handler:     "",
 				ReturnValue: nil,
 				ReturnCode:  -1,
-				Error:       status.TrafficLimitExceeded.Key(),
+				Error:       status.TrafficLimitExceededFailed.Key(),
 			})
 			return
 		}
