@@ -2,6 +2,7 @@ package trafficlimit
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -76,6 +77,7 @@ func Create(ctx context.Context, r *CreateReq) (*models.TrafficLimit, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 	project := types.MustProjectFromContext(ctx)
+	rDB := kvdb.MustRedisDBKeyFromContext(ctx)
 
 	m := &models.TrafficLimit{
 		RelTrafficLimit: models.RelTrafficLimit{TrafficLimitID: idg.MustGenSFID()},
@@ -103,6 +105,18 @@ func Create(ctx context.Context, r *CreateReq) (*models.TrafficLimit, error) {
 			}
 			return nil
 		},
+		func(db sqlx.DBExecutor) error {
+			trafficKey := fmt.Sprintf("%s::%s", m.ProjectID, m.ApiType.String())
+			valByte, err := json.Marshal(m)
+			if err != nil {
+				return err
+			}
+			err = rDB.SetKey(trafficKey, valByte)
+			if err != nil {
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
+		},
 	).Do()
 	if err != nil {
 		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
@@ -114,6 +128,7 @@ func Create(ctx context.Context, r *CreateReq) (*models.TrafficLimit, error) {
 func Update(ctx context.Context, r *UpdateReq) (*models.TrafficLimit, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	project := types.MustProjectFromContext(ctx)
+	rDB := kvdb.MustRedisDBKeyFromContext(ctx)
 	m := &models.TrafficLimit{RelTrafficLimit: models.RelTrafficLimit{TrafficLimitID: r.TrafficLimitID}}
 
 	err := sqlx.NewTasks(d).With(
@@ -138,6 +153,18 @@ func Update(ctx context.Context, r *UpdateReq) (*models.TrafficLimit, error) {
 		func(d sqlx.DBExecutor) error {
 			if err := UpdateScheduler(ctx, fmt.Sprintf("%s::%s", project.Name, r.ApiType.String()), &m.TrafficLimitInfo); err != nil {
 				return status.UpdateTrafficSchedulerFailed
+			}
+			return nil
+		},
+		func(db sqlx.DBExecutor) error {
+			trafficKey := fmt.Sprintf("%s::%s", m.ProjectID, m.ApiType.String())
+			valByte, err := json.Marshal(m)
+			if err != nil {
+				return err
+			}
+			err = rDB.SetKey(trafficKey, valByte)
+			if err != nil {
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
 		},
@@ -220,7 +247,7 @@ func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
 	return ret, nil
 }
 
-func GetByProjectAndType(ctx context.Context, id types.SFID, apiType enums.TrafficLimitType) (*models.TrafficLimit, error) {
+func GetByProjectAndTypeMustDB(ctx context.Context, id types.SFID, apiType enums.TrafficLimitType) (*models.TrafficLimit, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	m := &models.TrafficLimit{
 		RelProject:       models.RelProject{ProjectID: id},
@@ -234,4 +261,42 @@ func GetByProjectAndType(ctx context.Context, id types.SFID, apiType enums.Traff
 		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
 	return m, nil
+}
+
+func GetByProjectAndType(ctx context.Context, id types.SFID, apiType enums.TrafficLimitType) (*models.TrafficLimit, error) {
+	_, l := types.MustLoggerFromContext(ctx).Start(ctx, "trafficLimit.GetByProjectAndType")
+	defer l.End()
+
+	var (
+		rDB        = kvdb.MustRedisDBKeyFromContext(ctx)
+		trafficKey = fmt.Sprintf("%s::%s", id, apiType.String())
+
+		valByte []byte
+		traffic *models.TrafficLimit
+		err     error
+	)
+
+	valByte, err = rDB.GetKey(trafficKey)
+	if err != nil || valByte == nil {
+		l.Warn(err)
+		traffic, err = GetByProjectAndTypeMustDB(ctx, id, apiType)
+		if err != nil {
+			return nil, err
+		}
+		valByte, err = json.Marshal(traffic)
+		if err == nil {
+			err = rDB.SetKey(trafficKey, valByte)
+		}
+		if err != nil {
+			l.Warn(err)
+		}
+
+		return traffic, nil
+	}
+
+	err = json.Unmarshal(valByte, &traffic)
+	if err != nil {
+		return nil, err
+	}
+	return traffic, nil
 }
