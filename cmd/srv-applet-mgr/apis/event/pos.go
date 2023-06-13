@@ -6,8 +6,10 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
+	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
 	"github.com/machinefi/w3bstream/pkg/modules/metrics"
+	"github.com/machinefi/w3bstream/pkg/modules/trafficlimit"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -40,7 +42,7 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 	prj := types.MustProjectFromContext(ctx)
 	metrics.EventMtc.WithLabelValues(prj.AccountID.String(), prj.Name, pub.Key, r.EventType).Inc()
 
-	if err := event.TrafficLimitEvent(ctx); err != nil {
+	if err := trafficlimit.TrafficLimit(ctx, enums.TRAFFIC_LIMIT_TYPE__EVENT); err != nil {
 		rsp.Results = append([]*event.Result{}, &event.Result{
 			AppletName:  "",
 			InstanceID:  0,

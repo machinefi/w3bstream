@@ -9,6 +9,7 @@ import (
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -299,4 +300,34 @@ func GetByProjectAndType(ctx context.Context, id types.SFID, apiType enums.Traff
 		return nil, err
 	}
 	return traffic, nil
+}
+
+func TrafficLimit(ctx context.Context, apiType enums.TrafficLimitType) error {
+	var (
+		l   = types.MustLoggerFromContext(ctx)
+		rDB = kvdb.MustRedisDBKeyFromContext(ctx)
+		prj = types.MustProjectFromContext(ctx)
+
+		valByte []byte
+	)
+
+	m, err := GetByProjectAndType(ctx, prj.ProjectID, apiType)
+	if err != nil {
+		se, ok := statusx.IsStatusErr(err)
+		if !ok || !se.Is(status.TrafficLimitNotFound) {
+			return err
+		}
+		l.Warn(err)
+	}
+	if m != nil {
+		if valByte, err = rDB.IncrBy(fmt.Sprintf("%s::%s", prj.Name, m.ApiType.String()), []byte(strconv.Itoa(-1))); err != nil {
+			l.Error(err)
+			return status.DatabaseError.StatusErr().WithDesc(err.Error())
+		}
+		val, _ := strconv.Atoi(string(valByte))
+		if val < 0 {
+			return status.TrafficLimitExceededFailed
+		}
+	}
+	return nil
 }

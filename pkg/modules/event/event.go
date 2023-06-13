@@ -2,14 +2,11 @@ package event
 
 import (
 	"context"
-	"fmt"
-	"strconv"
 	"sync"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
-	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -17,7 +14,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/trafficlimit"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
-	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
 
 // HandleEvent support other module call
@@ -34,17 +30,10 @@ func HandleEvent(ctx context.Context, t string, data []byte) (interface{}, error
 		return nil, err
 	}
 
-	strategies, err := strategy.FilterByProjectAndEvent(ctx, prj.ProjectID, t)
-	if err != nil {
-		return nil, err
-	}
-
-	ctx = types.WithStrategyResults(ctx, strategies)
-
 	eventID := uuid.NewString() + "_monitor"
 	ctx = types.WithEventID(ctx, eventID)
 
-	if err := TrafficLimitEvent(ctx); err != nil {
+	if err := trafficlimit.TrafficLimit(ctx, enums.TRAFFIC_LIMIT_TYPE__EVENT); err != nil {
 		results := append([]*Result{}, &Result{
 			AppletName:  "",
 			InstanceID:  0,
@@ -56,37 +45,14 @@ func HandleEvent(ctx context.Context, t string, data []byte) (interface{}, error
 		return results, nil
 	}
 
-	return OnEvent(ctx, data), nil
-}
-
-func TrafficLimitEvent(ctx context.Context) error {
-	var (
-		l   = types.MustLoggerFromContext(ctx)
-		rDB = kvdb.MustRedisDBKeyFromContext(ctx)
-		prj = types.MustProjectFromContext(ctx)
-
-		valByte []byte
-	)
-
-	m, err := trafficlimit.GetByProjectAndType(ctx, prj.ProjectID, enums.TRAFFIC_LIMIT_TYPE__EVENT)
+	strategies, err := strategy.FilterByProjectAndEvent(ctx, prj.ProjectID, t)
 	if err != nil {
-		se, ok := statusx.IsStatusErr(err)
-		if !ok || !se.Is(status.TrafficLimitNotFound) {
-			return err
-		}
-		l.Warn(err)
+		return nil, err
 	}
-	if m != nil {
-		if valByte, err = rDB.IncrBy(fmt.Sprintf("%s::%s", prj.Name, m.ApiType.String()), []byte(strconv.Itoa(-1))); err != nil {
-			l.Error(err)
-			return status.DatabaseError.StatusErr().WithDesc(err.Error())
-		}
-		val, _ := strconv.Atoi(string(valByte))
-		if val < 0 {
-			return status.TrafficLimitExceededFailed
-		}
-	}
-	return nil
+
+	ctx = types.WithStrategyResults(ctx, strategies)
+
+	return OnEvent(ctx, data), nil
 }
 
 func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
