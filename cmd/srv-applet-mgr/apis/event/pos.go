@@ -33,16 +33,13 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 		}
 	)
 
-	ctx, err = pub.WithStrategiesByChanAndType(ctx, r.Channel, r.EventType)
-	if err != nil {
-		rsp.Error = statusx.FromErr(err).Key
-		return rsp, nil
+	if ctx, err = pub.WithProjectContext(ctx); err != nil {
+		return nil, err
 	}
 
 	prj := types.MustProjectFromContext(ctx)
 	metrics.EventMtc.WithLabelValues(prj.AccountID.String(), prj.Name, pub.Key, r.EventType).Inc()
 
-	ctx = types.WithEventID(ctx, r.EventID)
 	if err := event.TrafficLimitEvent(ctx); err != nil {
 		rsp.Results = append([]*event.Result{}, &event.Result{
 			AppletName:  "",
@@ -54,6 +51,14 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 		})
 		return rsp, nil
 	}
+
+	ctx, err = pub.WithStrategiesByChanAndType(ctx, r.Channel, r.EventType)
+	if err != nil {
+		rsp.Error = statusx.FromErr(err).Key
+		return rsp, nil
+	}
+
+	ctx = types.WithEventID(ctx, r.EventID)
 	rsp.Results = event.OnEvent(ctx, r.Payload.Bytes())
 	return rsp, nil
 }

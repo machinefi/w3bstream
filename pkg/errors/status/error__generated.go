@@ -83,8 +83,6 @@ func (v Error) Key() string {
 		return "InvalidAppletContext"
 	case NoResourcePermission:
 		return "NoResourcePermission"
-	case NoTrafficLimitPermission:
-		return "NoTrafficLimitPermission"
 	case Forbidden:
 		return "Forbidden"
 	case DisabledAccount:
@@ -273,8 +271,6 @@ func (v Error) Msg() string {
 		return "Invalid Applet"
 	case NoResourcePermission:
 		return "No Resource Permission"
-	case NoTrafficLimitPermission:
-		return "No Traffic Limit Permission"
 	case Forbidden:
 		return "forbidden"
 	case DisabledAccount:
@@ -462,8 +458,6 @@ func (v Error) CanBeTalk() bool {
 	case InvalidAppletContext:
 		return true
 	case NoResourcePermission:
-		return true
-	case NoTrafficLimitPermission:
 		return true
 	case Forbidden:
 		return false

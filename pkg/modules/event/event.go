@@ -44,18 +44,6 @@ func HandleEvent(ctx context.Context, t string, data []byte) (interface{}, error
 	eventID := uuid.NewString() + "_monitor"
 	ctx = types.WithEventID(ctx, eventID)
 
-	if err := TrafficLimitEvent(ctx); err != nil {
-		results := append([]*Result{}, &Result{
-			AppletName:  "",
-			InstanceID:  0,
-			Handler:     "",
-			ReturnValue: nil,
-			ReturnCode:  -1,
-			Error:       err.Error(),
-		})
-		return results, nil
-	}
-
 	return OnEvent(ctx, data), nil
 }
 
