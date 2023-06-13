@@ -39,6 +39,7 @@ require (
 )
 
 require (
+	github.com/agiledragon/gomonkey/v2 v2.10.1
 	github.com/aws/aws-sdk-go v1.44.245
 	github.com/bytecodealliance/wasmtime-go/v8 v8.0.0
 	github.com/ethereum/go-ethereum v1.10.15

@@ -2,72 +2,182 @@ package storage_test
 
 import (
 	"os"
+	"runtime"
+	"strconv"
 	"testing"
 
+	"github.com/agiledragon/gomonkey/v2"
+	"github.com/golang/mock/gomock"
 	. "github.com/onsi/gomega"
+	"github.com/shirou/gopsutil/v3/disk"
 
+	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/storage"
+	mock_conf_storage "github.com/machinefi/w3bstream/pkg/test/mock_depends_conf_storage"
 )
 
-func TestStorage_Init(t *testing.T) {
-	cases := []struct {
-		conf                  *storage.Storage
-		expectedInitErr       error
-		setOperations         func(c *storage.Storage)
-		expectedErrAfterSetOp error
-	}{
-		{
-			conf: &storage.Storage{
-				Type: storage.STORAGE_TYPE__S3,
-				S3:   &storage.S3{},
-			},
-			expectedInitErr: storage.ErrMissingConfigS3,
-			setOperations: func(conf *storage.Storage) {
-				conf.S3 = &storage.S3{
-					Endpoint:        "http://1.1.1.1",
-					Region:          "us",
-					AccessKeyID:     "111",
-					SecretAccessKey: "222",
-					SessionToken:    "",
-					BucketName:      "endpoint_test",
-				}
-			},
-		}, {
-			conf: &storage.Storage{
-				Type:    storage.STORAGE_TYPE__FILESYSTEM,
-				LocalFs: &storage.LocalFs{},
-			},
-		}, {
-			conf: &storage.Storage{
-				Type: storage.STORAGE_TYPE__IPFS,
-			},
-			expectedInitErr: storage.ErrMissingConfigIPFS,
-		}, {
-			conf: &storage.Storage{
-				Type: storage.StorageType(100),
-			},
-			expectedInitErr: storage.ErrUnsupprtedStorageType,
-		},
-	}
+func TestStorage(t *testing.T) {
+	c := gomock.NewController(t)
+	defer c.Finish()
 
-	for _, c := range cases {
-		t.Run(c.conf.Type.String(), func(t *testing.T) {
-			c.conf.SetDefault()
-			NewWithT(t).Expect(c.conf.DiskReserve).To(Equal(int64(20 * 1024 * 1024)))
+	t.Run("IsZero", func(t *testing.T) {
+		s := &storage.Storage{Typ: storage.STORAGE_TYPE_UNKNOWN}
+		NewWithT(t).Expect(s.IsZero()).To(BeTrue())
 
-			err := c.conf.Init()
-			if err != nil {
-				NewWithT(t).Expect(err.Error()).To(Equal(c.expectedInitErr.Error()))
+		s = &storage.Storage{
+			Typ: storage.STORAGE_TYPE__S3,
+			S3:  &storage.S3{},
+		}
+		NewWithT(t).Expect(s.IsZero()).To(BeFalse())
+	})
+
+	t.Run("SetDefault", func(t *testing.T) {
+		s := &storage.Storage{Typ: storage.STORAGE_TYPE_UNKNOWN}
+		s.SetDefault()
+		NewWithT(t).Expect(s.Typ).To(Equal(storage.STORAGE_TYPE__FILESYSTEM))
+
+		s = &storage.Storage{}
+		s.SetDefault()
+		NewWithT(t).Expect(s.FilesizeLimit).To(Equal(int64(1024 * 1024)))
+		NewWithT(t).Expect(s.DiskReserve).To(Equal(int64(20 * 1024 * 1024)))
+
+		s = &storage.Storage{
+			FilesizeLimit: 100,
+			DiskReserve:   100,
+		}
+		s.SetDefault()
+		NewWithT(t).Expect(s.FilesizeLimit).To(Equal(int64(100)))
+		NewWithT(t).Expect(s.DiskReserve).To(Equal(int64(100)))
+	})
+
+	t.Run("Init", func(t *testing.T) {
+		t.Run("#InitTempDir", func(t *testing.T) {
+			s := &storage.Storage{LocalFs: &storage.LocalFs{}}
+			cases := []*struct {
+				preFn  func()
+				expect string
+			}{
+				{
+					preFn: func() {
+						_ = os.Unsetenv("TMPDIR")
+						_ = os.Unsetenv(consts.EnvProjectName)
+					},
+					expect: "/tmp/service",
+				},
+				{
+					preFn: func() {
+						_ = os.Setenv("TMPDIR", "/test_tmp")
+						_ = os.Setenv(consts.EnvProjectName, "test_storage")
+					},
+					expect: "/test_tmp/test_storage",
+				},
 			}
 
-			if c.setOperations != nil {
-				c.setOperations(c.conf)
-				if err = c.conf.Init(); err != nil {
-					NewWithT(t).Expect(err).To(Equal(c.expectedErrAfterSetOp))
-				}
+			for _, cc := range cases {
+				cc.preFn()
+				err := s.Init()
+				NewWithT(t).Expect(err).To(BeNil())
+				NewWithT(t).Expect(s.TempDir).To(Equal(os.Getenv("TMPDIR")))
 			}
-
-			NewWithT(t).Expect(os.Getenv("TMPDIR")).To(Equal(c.conf.TempDir))
 		})
-	}
+
+		t.Run("#InitTypeAndOp", func(t *testing.T) {
+			cases := []*struct {
+				conf   *storage.Storage
+				expect error
+			}{{
+				conf:   &storage.Storage{},
+				expect: storage.ErrMissingConfigFS,
+			}, {
+				conf:   &storage.Storage{LocalFs: &storage.LocalFs{}},
+				expect: nil,
+			}, {
+				conf:   &storage.Storage{Typ: storage.STORAGE_TYPE__S3},
+				expect: storage.ErrMissingConfigS3,
+			}, {
+				conf: &storage.Storage{
+					Typ: storage.STORAGE_TYPE__S3,
+					S3: &storage.S3{
+						Endpoint:        "http://demo.s3.org",
+						Region:          "us",
+						AccessKeyID:     "1",
+						SecretAccessKey: "1",
+						BucketName:      "test_bucket",
+					},
+				},
+				expect: nil,
+			}, {
+				conf:   &storage.Storage{Typ: storage.STORAGE_TYPE__IPFS},
+				expect: storage.ErrMissingConfigIPFS,
+			}, {
+				conf:   &storage.Storage{Typ: storage.StorageType(100)},
+				expect: storage.ErrUnsupprtedStorageType,
+			}}
+
+			for idx, cc := range cases {
+				t.Run("#"+strconv.Itoa(idx), func(t *testing.T) {
+					err := cc.conf.Init()
+					if cc.expect == nil {
+						NewWithT(t).Expect(err).To(BeNil())
+					} else {
+						NewWithT(t).Expect(err).To(Equal(cc.expect))
+					}
+				})
+			}
+		})
+
+		t.Run("#Upload", func(t *testing.T) {
+			cc := &storage.Storage{TempDir: "/tmp"}
+			op := mock_conf_storage.NewMockStorageOperations(c)
+
+			t.Run("#Success", func(t *testing.T) {
+				op.EXPECT().Upload(gomock.Any(), gomock.Any()).Return(nil).MaxTimes(1)
+				cc.WithOperation(op)
+
+				err := cc.Upload("any", []byte("any"))
+				NewWithT(t).Expect(err).To(BeNil())
+			})
+
+			t.Run("#Failed", func(t *testing.T) {
+				t.Run("#EmptyContent", func(t *testing.T) {
+					err := cc.Upload("any", []byte(""))
+					NewWithT(t).Expect(err).To(Equal(storage.ErrEmptyContent))
+				})
+				t.Run("#FileSizeLimit", func(t *testing.T) {
+					cc.FilesizeLimit = 4
+					err := cc.Upload("any", []byte("12345"))
+					NewWithT(t).Expect(err).To(Equal(storage.ErrContentSizeExceeded))
+				})
+				t.Run("#FileSizeLimit", func(t *testing.T) {
+					if runtime.GOOS == `darwin` {
+						return
+					}
+					cc.FilesizeLimit = 0
+					cc.DiskReserve = 100
+
+					patches := gomonkey.ApplyFunc(
+						disk.Usage,
+						func(_ string) (*disk.UsageStat, error) {
+							return &disk.UsageStat{Free: 1}, nil
+						},
+					)
+					defer patches.Reset()
+
+					err := cc.Upload("any", []byte("any"))
+					NewWithT(t).Expect(err).To(Equal(storage.ErrDiskReservationLimit))
+				})
+			})
+		})
+	})
 }
+
+/*
+
+	cc.WithOperation(op)
+
+	op.EXPECT().Upload(gomock.Any(), gomock.Any()).Return(errors.New("")).MaxTimes(1)
+	NewWithT()
+
+	op.EXPECT().Upload(gomock.Any(), gomock.Any()).Return(errors.New("")).MaxTimes(1)
+
+*/

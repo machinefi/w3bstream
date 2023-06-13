@@ -28,8 +28,12 @@ type StorageOperations interface {
 	Delete(key string) error
 }
 
+type StorageOperationsWithValidation interface {
+	Validate(data []byte, sum string, chk ...HmacAlgType) bool
+}
+
 type Storage struct {
-	Type            StorageType
+	Typ             StorageType
 	FilesizeLimit   int64
 	DiskReserve     int64
 	PromiscuousMode bool // PromiscuousMode if support multi storage type
@@ -44,12 +48,12 @@ type Storage struct {
 func (s *Storage) Name() string { return "Storage" }
 
 func (s *Storage) IsZero() bool {
-	return s.Type == STORAGE_TYPE_UNKNOWN || s.S3 == nil && s.LocalFs == nil
+	return s.Typ == STORAGE_TYPE_UNKNOWN || s.S3 == nil && s.LocalFs == nil
 }
 
 func (s *Storage) SetDefault() {
-	if s.Type == STORAGE_TYPE_UNKNOWN {
-		s.Type = STORAGE_TYPE__FILESYSTEM
+	if s.Typ == STORAGE_TYPE_UNKNOWN {
+		s.Typ = STORAGE_TYPE__FILESYSTEM
 	}
 	if s.FilesizeLimit == 0 {
 		s.FilesizeLimit = 1024 * 1024
@@ -70,18 +74,19 @@ func (s *Storage) Init() error {
 			service = "service"
 		}
 		s.TempDir = filepath.Join(tmp, service)
-		// overwrite default 'TMPDIR'
-		if err := os.Setenv("TMPDIR", s.TempDir); err != nil {
-			return err
-		}
+	}
+	// overwrite default 'TMPDIR'
+	if err := os.Setenv("TMPDIR", s.TempDir); err != nil {
+		return err
 	}
 
-	switch s.Type {
+	switch s.Typ {
 	case STORAGE_TYPE_UNKNOWN, STORAGE_TYPE__FILESYSTEM:
 		if s.LocalFs == nil {
 			return ErrMissingConfigFS
 		}
 		s.op = s.LocalFs
+		s.Typ = STORAGE_TYPE__FILESYSTEM
 	case STORAGE_TYPE__S3:
 		if s.S3 == nil || s.S3.IsZero() {
 			return ErrMissingConfigS3
@@ -106,6 +111,10 @@ func (s *Storage) Init() error {
 	return nil
 }
 
+func (s *Storage) WithOperation(op StorageOperations) {
+	s.op = op
+}
+
 func (s *Storage) Upload(key string, content []byte, chk ...HmacAlgType) error {
 	size := int64(len(content))
 	if size == 0 {
@@ -121,10 +130,17 @@ func (s *Storage) Upload(key string, content []byte, chk ...HmacAlgType) error {
 		free = int64(stat.Free) - size
 	}
 
-	if s.DiskReserve != 0 && s.Type == STORAGE_TYPE__FILESYSTEM && free < s.DiskReserve {
+	if s.DiskReserve != 0 && s.Typ == STORAGE_TYPE__FILESYSTEM && free < s.DiskReserve {
 		return ErrDiskReservationLimit
 	}
-	return s.op.Upload(key, content, chk...)
+
+	if err = s.op.Upload(key, content, chk...); err != nil {
+		return err
+	}
+	if s.Typ == STORAGE_TYPE__S3 {
+		_ = os.RemoveAll(s.TempDir)
+	}
+	return nil
 }
 
 func (s *Storage) Read(key string, chk ...HmacAlgType) ([]byte, []byte, error) {
@@ -134,3 +150,18 @@ func (s *Storage) Read(key string, chk ...HmacAlgType) ([]byte, []byte, error) {
 func (s *Storage) Delete(key string) error {
 	return s.op.Delete(key)
 }
+
+func (s *Storage) Validate(data []byte, sum string, chk ...HmacAlgType) bool {
+	if len(data) == 0 || len(sum) == 0 {
+		return true
+	}
+
+	t := HMAC_ALG_TYPE__MD5
+	if len(chk) > 0 && chk[0] != 0 {
+		t = chk[0]
+	}
+
+	return sum == t.HexSum(nil, data)
+}
+
+func (s *Storage) Type() StorageType { return s.op.Type() }
