@@ -130,7 +130,7 @@ func (s *Storage) Upload(key string, content []byte, chk ...HmacAlgType) error {
 		free = int64(stat.Free) - size
 	}
 
-	if s.DiskReserve != 0 && s.Typ == STORAGE_TYPE__FILESYSTEM && free < s.DiskReserve {
+	if s.DiskReserve != 0 && s.Type() == STORAGE_TYPE__FILESYSTEM && free < s.DiskReserve {
 		return ErrDiskReservationLimit
 	}
 

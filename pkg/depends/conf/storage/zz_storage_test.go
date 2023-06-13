@@ -152,6 +152,10 @@ func TestStorage(t *testing.T) {
 					if runtime.GOOS == `darwin` {
 						return
 					}
+					op.EXPECT().Upload(gomock.Any(), gomock.Any()).Return(nil).MaxTimes(1)
+					op.EXPECT().Type().Return(storage.STORAGE_TYPE__FILESYSTEM).MaxTimes(1)
+					cc.WithOperation(op)
+
 					cc.FilesizeLimit = 0
 					cc.DiskReserve = 100
 
