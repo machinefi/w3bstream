@@ -29,6 +29,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
 
 var (
@@ -154,6 +155,7 @@ func init() {
 		types.WithProxyClientContext(proxy),
 		types.WithWasmDBConfigContext(config.WasmDBConfig),
 		confrate.WithRateLimitKeyContext(config.RateLimit),
+		kvdb.WithRedisDBKeyContext(kvdb.NewRedisDB(config.Redis)),
 		types.WithMetricsCenterConfigContext(config.MetricsCenter),
 		types.WithRobotNotifierConfigContext(config.RobotNotifier),
 	)
