@@ -18,6 +18,10 @@ SRV_APPLET_MGR__Logger_Level: debug
 SRV_APPLET_MGR__Logger_Name: srv-applet-mgr
 SRV_APPLET_MGR__Logger_Output: ALWAYS
 SRV_APPLET_MGR__Logger_ReportCaller: "false"
+SRV_APPLET_MGR__MetricsCenter_ClickHouseAddr: ""
+SRV_APPLET_MGR__MetricsCenter_ClickHouseDB: ""
+SRV_APPLET_MGR__MetricsCenter_ClickHousePassword: ""
+SRV_APPLET_MGR__MetricsCenter_ClickHouseUser: ""
 SRV_APPLET_MGR__MetricsCenter_Endpoint: ""
 SRV_APPLET_MGR__MonitorDB_ConnMaxLifetime: 1h
 SRV_APPLET_MGR__MonitorDB_Master: postgres://127.0.0.1:5432
