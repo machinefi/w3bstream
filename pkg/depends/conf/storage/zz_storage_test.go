@@ -1,7 +1,10 @@
 package storage_test
 
 import (
+	"bytes"
+	"io"
 	"os"
+	"reflect"
 	"runtime"
 	"strconv"
 	"testing"
@@ -10,6 +13,7 @@ import (
 	"github.com/agiledragon/gomonkey/v2"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
@@ -18,7 +22,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/storage"
-	"github.com/machinefi/w3bstream/pkg/test/mock_depends_conf_storage"
+	mock_conf_storage "github.com/machinefi/w3bstream/pkg/test/mock_depends_conf_storage"
 )
 
 func TestStorage(t *testing.T) {
@@ -234,21 +238,21 @@ func TestStorage(t *testing.T) {
 }
 
 func TestS3(t *testing.T) {
-	conf := &storage.S3{
-		Endpoint:        "s3://sincos-test",
-		Region:          "us-east-2",
-		AccessKeyID:     "xx",
-		SecretAccessKey: "xx",
-		BucketName:      "sincos-test",
-	}
 	t.Run("IsZero", func(t *testing.T) {
 		var (
-			valued = &(*conf)
-			empty  = &storage.S3{}
+			valued = &storage.S3{
+				Endpoint:        "s3://sincos-test",
+				Region:          "us-east-2",
+				AccessKeyID:     "xx",
+				SecretAccessKey: "xx",
+				BucketName:      "sincos-test",
+			}
+			empty = &storage.S3{}
 		)
 		NewWithT(t).Expect(valued.IsZero()).To(BeFalse())
 		NewWithT(t).Expect(empty.IsZero()).To(BeTrue())
 	})
+
 	t.Run("SetDefault", func(t *testing.T) {
 		var (
 			dftExpiration = types.Duration(10 * time.Minute)
@@ -261,7 +265,18 @@ func TestS3(t *testing.T) {
 		conf.SetDefault()
 		NewWithT(t).Expect(conf.UrlExpire).To(Equal(dftExpiration / 2))
 	})
+
 	t.Run("Init", func(t *testing.T) {
+		t.Run("#Success", func(t *testing.T) {
+			conf := &storage.S3{
+				Endpoint:   "",
+				Region:     "us-east-2",
+				BucketName: "test",
+			}
+			err := conf.Init()
+			NewWithT(t).Expect(err).To(BeNil())
+		})
+
 		t.Run("#Failed", func(t *testing.T) {
 			t.Run("#NewSessionFailed", func(t *testing.T) {
 				if runtime.GOOS == `darwin` {
@@ -270,17 +285,108 @@ func TestS3(t *testing.T) {
 				patcher := gomonkey.ApplyFunc(
 					session.NewSession,
 					func(...*aws.Config) (*session.Session, error) {
-						return &session.Session{}, errors.New("")
+						return nil, errors.New("")
 					},
 				)
 				defer patcher.Reset()
 
+				conf := &storage.S3{}
 				err := conf.Init()
 				NewWithT(t).Expect(err).NotTo(BeNil())
 			})
 		})
 	})
-	t.Run("Upload", func(t *testing.T) {})
-	t.Run("Read", func(t *testing.T) {})
+
+	var (
+		// ep = &storage.S3{}
+		ep = &storage.S3{
+			Endpoint:         "s3.us-west-1.amazonaws.com",
+			Region:           "us-west-1",
+			AccessKeyID:      "AKIAVJEGDD6ZONM3RO6V",
+			SecretAccessKey:  "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",
+			BucketName:       "machinefi-w3bstream-devnet-staging",
+			S3ForcePathStyle: true,
+		}
+		key       = "unit_test_key"
+		data      = []byte("unit_test_data")
+		sumMd5    = storage.HMAC_ALG_TYPE__MD5.Sum(data)
+		sumSha1   = storage.HMAC_ALG_TYPE__SHA1.Sum(data)
+		sumSha256 = storage.HMAC_ALG_TYPE__SHA256.Sum(data)
+	)
+
+	t.Run("Upload", func(t *testing.T) {
+		t.Run("#Success", func(t *testing.T) {
+			patch := gomonkey.ApplyMethod(
+				reflect.TypeOf(&s3.S3{}),
+				"PutObject",
+				func(receiver *s3.S3, input *s3.PutObjectInput) (*s3.PutObjectOutput, error) {
+					return nil, nil
+				},
+			)
+			defer patch.Reset()
+
+			t.Run("#WithoutSumCheck", func(t *testing.T) {
+				err := ep.Upload(key, data)
+				NewWithT(t).Expect(err).To(BeNil())
+			})
+			t.Run("#WithMd5SumCheck", func(t *testing.T) {
+				err := ep.Upload(key, data, storage.HMAC_ALG_TYPE__MD5)
+				NewWithT(t).Expect(err).To(BeNil())
+			})
+			t.Run("#WithSHA1SumCheck", func(t *testing.T) {
+				err := ep.Upload(key, data, storage.HMAC_ALG_TYPE__SHA1)
+				NewWithT(t).Expect(err).To(BeNil())
+			})
+			t.Run("#WithSHA256SumCheck", func(t *testing.T) {
+				err := ep.Upload(key, data, storage.HMAC_ALG_TYPE__SHA256)
+				NewWithT(t).Expect(err).To(BeNil())
+			})
+		})
+		t.Run("#Failed", func(t *testing.T) {
+			patch := gomonkey.ApplyMethod(
+				reflect.TypeOf(&s3.S3{}),
+				"PutObject",
+				func(receiver *s3.S3, input *s3.PutObjectInput) (*s3.PutObjectOutput, error) {
+					return nil, errors.New("")
+				},
+			)
+			defer patch.Reset()
+			err := ep.Upload(key, data)
+			NewWithT(t).Expect(err).NotTo(BeNil())
+		})
+	})
+	t.Run("Read", func(t *testing.T) {
+		t.Run("#Success", func(t *testing.T) {
+			patch := gomonkey.ApplyMethod(
+				reflect.TypeOf(&s3.S3{}),
+				"GetObject",
+				func(recv *s3.S3, input *s3.GetObjectInput) (*s3.GetObjectOutput, error) {
+					return &s3.GetObjectOutput{
+						Body: io.NopCloser(bytes.NewBuffer(data)),
+					}, nil
+				},
+			)
+			defer patch.Reset()
+
+			cases := []*struct {
+				chk []storage.HmacAlgType
+				sum []byte
+			}{
+				{chk: nil, sum: sumMd5},
+				{chk: []storage.HmacAlgType{storage.HMAC_ALG_TYPE__MD5}, sum: sumMd5},
+				{chk: []storage.HmacAlgType{storage.HMAC_ALG_TYPE__SHA1}, sum: sumSha1},
+				{chk: []storage.HmacAlgType{storage.HMAC_ALG_TYPE__SHA256}, sum: sumSha256},
+			}
+
+			for _, c := range cases {
+				content, sum, err := ep.Read(key, c.chk...)
+				NewWithT(t).Expect(err).To(BeNil())
+				NewWithT(t).Expect(bytes.Equal(content, data)).To(BeTrue())
+				NewWithT(t).Expect(bytes.Equal(sum, c.sum)).To(BeTrue())
+			}
+		})
+		t.Run("#Failed", func(t *testing.T) {
+		})
+	})
 	t.Run("Delete", func(t *testing.T) {})
 }

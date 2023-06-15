@@ -72,13 +72,16 @@ func (s *S3) Upload(key string, data []byte, chk ...HmacAlgType) error {
 		t = chk[0]
 	}
 
-	sum := t.Base64Sum(nil, data)
+	sum := t.Base64Sum(data)
 	switch t {
 	case HMAC_ALG_TYPE__MD5:
 		input.SetContentMD5(sum)
-	case HMAC_ALG_TYPE__SHA1, HMAC_ALG_TYPE__SHA256:
+	case HMAC_ALG_TYPE__SHA1:
 		input.SetChecksumAlgorithm(t.Type())
-		input.SetChecksumAlgorithm(sum)
+		input.SetChecksumSHA1(sum)
+	case HMAC_ALG_TYPE__SHA256:
+		input.SetChecksumAlgorithm(t.Type())
+		input.SetChecksumSHA256(sum)
 	}
 
 	_, err := s.cli.PutObject(input)
@@ -100,10 +103,11 @@ func (s *S3) Read(key string, chk ...HmacAlgType) (data []byte, sum []byte, err 
 		return
 	}
 
+	t := HMAC_ALG_TYPE__MD5
 	if len(chk) > 0 && chk[0] != 0 {
-		t := chk[0]
-		sum = t.Sum(data)
+		t = chk[0]
 	}
+	sum = t.Sum(data)
 
 	return
 }

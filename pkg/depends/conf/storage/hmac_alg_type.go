@@ -37,7 +37,7 @@ func (v HmacAlgType) HexSum(content []byte) string {
 	return hex.EncodeToString(v.Sum(content))
 }
 
-func (v HmacAlgType) Base64Sum(key, content []byte) string {
+func (v HmacAlgType) Base64Sum(content []byte) string {
 	return base64.StdEncoding.EncodeToString(v.Sum(content))
 }
 
