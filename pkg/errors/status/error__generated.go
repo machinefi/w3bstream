@@ -221,6 +221,8 @@ func (v Error) Key() string {
 		return "BatchRemoveWasmLogFailed"
 	case GenTokenFailed:
 		return "GenTokenFailed"
+	case TrafficLimitExceededFailed:
+		return "TrafficLimitExceededFailed"
 	case CreateTrafficSchedulerFailed:
 		return "CreateTrafficSchedulerFailed"
 	case UpdateTrafficSchedulerFailed:
@@ -415,6 +417,8 @@ func (v Error) Msg() string {
 		return "Batch Remove WasmLog Failed"
 	case GenTokenFailed:
 		return "Gen Token Failed"
+	case TrafficLimitExceededFailed:
+		return "Traffic Limit Exceeded Failed"
 	case CreateTrafficSchedulerFailed:
 		return "Create Traffic Scheduler Failed"
 	case UpdateTrafficSchedulerFailed:
@@ -608,6 +612,8 @@ func (v Error) CanBeTalk() bool {
 	case BatchRemoveWasmLogFailed:
 		return true
 	case GenTokenFailed:
+		return true
+	case TrafficLimitExceededFailed:
 		return true
 	case CreateTrafficSchedulerFailed:
 		return true

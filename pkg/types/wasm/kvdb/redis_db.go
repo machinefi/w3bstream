@@ -42,15 +42,6 @@ func (r *RedisDB) Set(key string, value []byte) error {
 	return nil
 }
 
-func (r *RedisDB) SetKeyWithEX(key string, value []byte, exp int64) error {
-	var args []interface{}
-	args = append(args, r.db.Key(key), exp, string(value))
-	if _, err := r.db.Exec(&confredis.Cmd{Name: "SETEX", Args: args}); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (r *RedisDB) IncrBy(key string, value []byte) ([]byte, error) {
 	var args []interface{}
 	count, _ := strconv.Atoi(string(value))
@@ -66,6 +57,7 @@ func (r *RedisDB) IncrBy(key string, value []byte) ([]byte, error) {
 	return []byte(strconv.FormatInt(val, 10)), nil
 }
 
+// GetKey GET key
 func (r *RedisDB) GetKey(key string) ([]byte, error) {
 	var args []interface{}
 	args = append(args, r.db.Key(key))
@@ -78,6 +70,25 @@ func (r *RedisDB) GetKey(key string) ([]byte, error) {
 		return nil, err
 	}
 	return val, nil
+}
+
+// SetKey SET key value
+func (r *RedisDB) SetKey(key string, value []byte) error {
+	var args []interface{}
+	args = append(args, r.db.Key(key), string(value))
+	if _, err := r.db.Exec(&confredis.Cmd{Name: "SET", Args: args}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *RedisDB) SetKeyWithEX(key string, value []byte, exp int64) error {
+	var args []interface{}
+	args = append(args, r.db.Key(key), exp, string(value))
+	if _, err := r.db.Exec(&confredis.Cmd{Name: "SETEX", Args: args}); err != nil {
+		return err
+	}
+	return nil
 }
 
 type redisDBKey struct{}

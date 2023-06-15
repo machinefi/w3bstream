@@ -2,7 +2,6 @@ package trafficlimit
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -14,24 +13,16 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
 
-func genScheduler(trafficScheduler *TrafficScheduler) (*TrafficScheduler, error) {
-	trafficScheduler.rDB = kvdb.MustRedisDBKeyFromContext(trafficScheduler.ctx)
-	trafficScheduler.sch = gocron.NewScheduler(time.UTC)
-	trafficScheduler.genSchedulerJob()
-	trafficSchedulers.Store(trafficScheduler.projectKey, trafficScheduler)
-	if err := trafficScheduler.Do(); err != nil {
-		return nil, err
-	}
-	return trafficScheduler, nil
-}
-
 func CreateScheduler(ctx context.Context, projectKey string, trafficInfo *models.TrafficLimitInfo) error {
-	ts, err := genScheduler(&TrafficScheduler{
-		ctx:         ctx,
+	ts := &TrafficScheduler{
 		projectKey:  projectKey,
 		trafficInfo: trafficInfo,
-	})
-	if err != nil {
+		sch:         gocron.NewScheduler(time.UTC),
+		rDB:         kvdb.MustRedisDBKeyFromContext(ctx),
+	}
+	ts.createSchedulerJob()
+	trafficSchedulers.Store(projectKey, ts)
+	if err := ts.Do(); err != nil {
 		return err
 	}
 
@@ -40,33 +31,44 @@ func CreateScheduler(ctx context.Context, projectKey string, trafficInfo *models
 }
 
 func UpdateScheduler(ctx context.Context, projectKey string, trafficInfo *models.TrafficLimitInfo) error {
+	var startTime time.Time
+
 	ts, ok := trafficSchedulers.Load(projectKey)
 	if ok && ts != nil {
+		_, startTime = ts.sch.NextRun()
 		ts.Stop()
 		trafficSchedulers.Remove(projectKey)
 	}
 
-	ts, err := genScheduler(&TrafficScheduler{
-		ctx:         ctx,
+	ts = &TrafficScheduler{
 		projectKey:  projectKey,
 		trafficInfo: trafficInfo,
-	})
-	if err != nil {
+		sch:         gocron.NewScheduler(time.UTC),
+		rDB:         kvdb.MustRedisDBKeyFromContext(ctx),
+	}
+	ts.updateSchedulerJob(startTime)
+	trafficSchedulers.Store(projectKey, ts)
+	if err := ts.Do(); err != nil {
 		return err
 	}
+
 	ts.Start()
 	return nil
 }
 
 func RestartScheduler(ctx context.Context, projectKey string, trafficInfo *models.TrafficLimitInfo) error {
-	ts, err := genScheduler(&TrafficScheduler{
-		ctx:         ctx,
+	ts := &TrafficScheduler{
 		projectKey:  projectKey,
 		trafficInfo: trafficInfo,
-	})
-	if err != nil {
+		sch:         gocron.NewScheduler(time.UTC),
+		rDB:         kvdb.MustRedisDBKeyFromContext(ctx),
+	}
+	ts.createSchedulerJob()
+	trafficSchedulers.Store(projectKey, ts)
+	if err := ts.Do(); err != nil {
 		return err
 	}
+
 	ts.Start()
 	return nil
 }
@@ -94,18 +96,7 @@ type TrafficScheduler struct {
 	rDB         *kvdb.RedisDB
 }
 
-func NewTrafficScheduler(ctx context.Context, projectKey string, trafficInfo *models.TrafficLimitInfo) *TrafficScheduler {
-	ts := &TrafficScheduler{
-		projectKey:  projectKey,
-		trafficInfo: trafficInfo,
-	}
-	ts.rDB = kvdb.MustRedisDBKeyFromContext(ctx)
-	ts.sch = gocron.NewScheduler(time.UTC)
-	ts.genSchedulerJob()
-	return ts
-}
-
-func (ts *TrafficScheduler) genSchedulerJob() {
+func (ts *TrafficScheduler) createSchedulerJob() {
 	now := time.Now().UTC()
 	seconds := ts.trafficInfo.Duration.Duration().Seconds()
 	if seconds >= 24*time.Hour.Seconds() {
@@ -121,6 +112,10 @@ func (ts *TrafficScheduler) genSchedulerJob() {
 		nextSecond := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second(), 0, now.Location())
 		ts.sch.Every(int(seconds)).Second().StartAt(nextSecond)
 	}
+}
+
+func (ts *TrafficScheduler) updateSchedulerJob(startTime time.Time) {
+	ts.sch.Every(int(ts.trafficInfo.Duration.Duration().Seconds())).Second().StartAt(startTime)
 }
 
 func (ts *TrafficScheduler) StartNow() {
@@ -149,7 +144,5 @@ func resetWindow(projectKey string, threshold int, exp int64, rDB *kvdb.RedisDB)
 	if err != nil {
 		return err
 	}
-	// TODO del
-	fmt.Println(projectKey + " - " + strconv.Itoa(threshold) + "s" + time.Now().Format("2006-01-02 15:04:05"))
 	return nil
 }

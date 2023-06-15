@@ -2,14 +2,16 @@ package event
 
 import (
 	"context"
-	"errors"
 	"sync"
 
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/strategy"
+	"github.com/machinefi/w3bstream/pkg/modules/trafficlimit"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -28,6 +30,21 @@ func HandleEvent(ctx context.Context, t string, data []byte) (interface{}, error
 		return nil, err
 	}
 
+	eventID := uuid.NewString() + "_monitor"
+	ctx = types.WithEventID(ctx, eventID)
+
+	if err := trafficlimit.TrafficLimit(ctx, enums.TRAFFIC_LIMIT_TYPE__EVENT); err != nil {
+		results := append([]*Result{}, &Result{
+			AppletName:  "",
+			InstanceID:  0,
+			Handler:     "",
+			ReturnValue: nil,
+			ReturnCode:  -1,
+			Error:       err.Error(),
+		})
+		return results, nil
+	}
+
 	strategies, err := strategy.FilterByProjectAndEvent(ctx, prj.ProjectID, t)
 	if err != nil {
 		return nil, err
@@ -35,18 +52,17 @@ func HandleEvent(ctx context.Context, t string, data []byte) (interface{}, error
 
 	ctx = types.WithStrategyResults(ctx, strategies)
 
-	eventID := uuid.NewString() + "_monitor"
-	ctx = types.WithEventID(ctx, eventID)
-
 	return OnEvent(ctx, data), nil
 }
 
 func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
-	l := types.MustLoggerFromContext(ctx)
-	r := types.MustStrategyResultsFromContext(ctx)
-	eventID := types.MustEventIDFromContext(ctx)
+	var (
+		l       = types.MustLoggerFromContext(ctx)
+		r       = types.MustStrategyResultsFromContext(ctx)
+		eventID = types.MustEventIDFromContext(ctx)
 
-	results := make(chan *Result, len(r))
+		results = make(chan *Result, len(r))
+	)
 
 	wg := &sync.WaitGroup{}
 	for _, v := range r {

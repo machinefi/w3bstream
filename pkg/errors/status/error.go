@@ -42,6 +42,8 @@ const (
 	BatchRemoveWasmLogFailed
 	// @errTalk Gen Token Failed
 	GenTokenFailed
+	// @errTalk Traffic Limit Exceeded Failed
+	TrafficLimitExceededFailed
 	// @errTalk Create Traffic Scheduler Failed
 	CreateTrafficSchedulerFailed
 	// @errTalk Update Traffic Scheduler Failed
