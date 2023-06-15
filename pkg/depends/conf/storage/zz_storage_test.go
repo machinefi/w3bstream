@@ -302,9 +302,6 @@ func TestS3(t *testing.T) {
 		ep   = &storage.S3{}
 		key  = "unit_test_key"
 		data = []byte("unit_test_data")
-		_    = storage.HMAC_ALG_TYPE__MD5.Sum(data)
-		_    = storage.HMAC_ALG_TYPE__SHA1.Sum(data)
-		_    = storage.HMAC_ALG_TYPE__SHA256.Sum(data)
 	)
 
 	t.Run("Upload", func(t *testing.T) {
