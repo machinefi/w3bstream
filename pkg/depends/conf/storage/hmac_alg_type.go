@@ -1,12 +1,11 @@
 package storage
 
 import (
-	"crypto/hmac"
 	"crypto/md5"
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/base64"
-	"fmt"
+	"encoding/hex"
 	"strings"
 )
 
@@ -20,28 +19,26 @@ const (
 	HMAC_ALG_TYPE__SHA256
 )
 
-func (v HmacAlgType) Sum(key, content []byte) []byte {
-	var hashFn = md5.New
+func (v HmacAlgType) Sum(content []byte) []byte {
 	switch v {
-	case HMAC_ALG_TYPE__MD5:
-		hashFn = md5.New
 	case HMAC_ALG_TYPE__SHA1:
-		hashFn = sha1.New
+		sum := sha1.Sum(content)
+		return sum[:]
 	case HMAC_ALG_TYPE__SHA256:
-		hashFn = sha256.New
+		sum := sha256.Sum256(content)
+		return sum[:]
+	default:
+		sum := md5.Sum(content)
+		return sum[:]
 	}
-
-	h := hmac.New(hashFn, key)
-	h.Write(content)
-	return h.Sum(nil)
 }
 
-func (v HmacAlgType) HexSum(key, content []byte) string {
-	return fmt.Sprintf("%x", v.Sum(key, content))
+func (v HmacAlgType) HexSum(content []byte) string {
+	return hex.EncodeToString(v.Sum(content))
 }
 
 func (v HmacAlgType) Base64Sum(key, content []byte) string {
-	return base64.StdEncoding.EncodeToString(v.Sum(key, content))
+	return base64.StdEncoding.EncodeToString(v.Sum(content))
 }
 
 func (v HmacAlgType) Type() string { return strings.ToLower(v.String()) }

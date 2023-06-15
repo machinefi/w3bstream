@@ -161,7 +161,7 @@ func (s *Storage) Validate(data []byte, sum string, chk ...HmacAlgType) bool {
 		t = chk[0]
 	}
 
-	return sum == t.HexSum(nil, data)
+	return sum == t.HexSum(data)
 }
 
 func (s *Storage) Type() StorageType { return s.op.Type() }

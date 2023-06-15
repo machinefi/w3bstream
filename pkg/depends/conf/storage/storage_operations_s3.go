@@ -102,7 +102,7 @@ func (s *S3) Read(key string, chk ...HmacAlgType) (data []byte, sum []byte, err 
 
 	if len(chk) > 0 && chk[0] != 0 {
 		t := chk[0]
-		sum = t.Sum(nil, data)
+		sum = t.Sum(data)
 	}
 
 	return
