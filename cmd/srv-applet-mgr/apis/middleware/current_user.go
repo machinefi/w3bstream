@@ -64,7 +64,7 @@ type CurrentAccount struct {
 	models.Account
 }
 
-func (v *CurrentAccount) MustRole(role enums.AccountRole) (*CurrentAccount, bool) {
+func (v *CurrentAccount) CheckRole(role enums.AccountRole) (*CurrentAccount, bool) {
 	if v.Role == role {
 		return v, true
 	}

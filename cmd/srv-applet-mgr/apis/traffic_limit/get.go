@@ -19,7 +19,7 @@ type ListTrafficLimit struct {
 func (r *ListTrafficLimit) Path() string { return "/datalist" }
 
 func (r *ListTrafficLimit) Output(ctx context.Context) (interface{}, error) {
-	ca, ok := middleware.MustCurrentAccountFromContext(ctx).MustRole(enums.ACCOUNT_ROLE__ADMIN)
+	ca, ok := middleware.MustCurrentAccountFromContext(ctx).CheckRole(enums.ACCOUNT_ROLE__ADMIN)
 	if !ok {
 		return nil, status.NoAdminPermission
 	}
@@ -41,7 +41,7 @@ type GetTrafficLimit struct {
 func (r *GetTrafficLimit) Path() string { return "/data/:trafficLimitID" }
 
 func (r *GetTrafficLimit) Output(ctx context.Context) (interface{}, error) {
-	ca, ok := middleware.MustCurrentAccountFromContext(ctx).MustRole(enums.ACCOUNT_ROLE__ADMIN)
+	ca, ok := middleware.MustCurrentAccountFromContext(ctx).CheckRole(enums.ACCOUNT_ROLE__ADMIN)
 	if !ok {
 		return nil, status.NoAdminPermission
 	}
