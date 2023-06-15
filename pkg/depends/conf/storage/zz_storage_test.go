@@ -299,12 +299,12 @@ func TestS3(t *testing.T) {
 	})
 
 	var (
-		ep        = &storage.S3{}
-		key       = "unit_test_key"
-		data      = []byte("unit_test_data")
-		sumMd5    = storage.HMAC_ALG_TYPE__MD5.Sum(data)
-		sumSha1   = storage.HMAC_ALG_TYPE__SHA1.Sum(data)
-		sumSha256 = storage.HMAC_ALG_TYPE__SHA256.Sum(data)
+		ep   = &storage.S3{}
+		key  = "unit_test_key"
+		data = []byte("unit_test_data")
+		_    = storage.HMAC_ALG_TYPE__MD5.Sum(data)
+		_    = storage.HMAC_ALG_TYPE__SHA1.Sum(data)
+		_    = storage.HMAC_ALG_TYPE__SHA256.Sum(data)
 	)
 
 	t.Run("Upload", func(t *testing.T) {
@@ -376,10 +376,10 @@ func TestS3(t *testing.T) {
 				chk  []storage.HmacAlgType
 				sum  []byte
 			}{
-				{name: "#NoParam", chk: nil, sum: sumMd5},
-				{name: "#HmacMD5", chk: []storage.HmacAlgType{storage.HMAC_ALG_TYPE__MD5}, sum: sumMd5},
-				{name: "#HamcSHA1", chk: []storage.HmacAlgType{storage.HMAC_ALG_TYPE__SHA1}, sum: sumSha1},
-				{name: "#HamcSHA256", chk: []storage.HmacAlgType{storage.HMAC_ALG_TYPE__SHA256}, sum: sumSha256},
+				{name: "#NoParam", chk: nil, sum: storage.HMAC_ALG_TYPE__MD5.Sum(data)},
+				{name: "#HmacMD5", chk: []storage.HmacAlgType{storage.HMAC_ALG_TYPE__MD5}, sum: storage.HMAC_ALG_TYPE__MD5.Sum(data)},
+				{name: "#HamcSHA1", chk: []storage.HmacAlgType{storage.HMAC_ALG_TYPE__SHA1}, sum: storage.HMAC_ALG_TYPE__SHA1.Sum(data)},
+				{name: "#HamcSHA256", chk: []storage.HmacAlgType{storage.HMAC_ALG_TYPE__SHA256}, sum: storage.HMAC_ALG_TYPE__SHA256.Sum(data)},
 			}
 
 			for _, c := range cases {
