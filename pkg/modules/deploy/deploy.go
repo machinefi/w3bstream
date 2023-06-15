@@ -23,7 +23,8 @@ import (
 
 func Init(ctx context.Context) error {
 	var (
-		d   = types.MustMgrDBExecutorFromContext(ctx)
+		d = types.MustMgrDBExecutorFromContext(ctx)
+
 		ins = &models.Instance{}
 		app *models.Applet
 		res *models.Resource
@@ -34,6 +35,7 @@ func Init(ctx context.Context) error {
 
 	list, err := ins.List(d, nil)
 	if err != nil {
+		l.Error(err)
 		return err
 	}
 	for i := range list {
