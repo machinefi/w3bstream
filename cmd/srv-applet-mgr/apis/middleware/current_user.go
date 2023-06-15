@@ -128,12 +128,12 @@ func (v *CurrentAccount) WithAppletContextBySFID(ctx context.Context, id types.S
 }
 
 func (v *CurrentAccount) WithResourceContextBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
-	resource, err := resource.GetBySFID(ctx, id)
+	res, err := resource.GetBySFID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	return types.WithResource(ctx, resource), nil
+	return types.WithResource(ctx, res), nil
 }
 
 // WithInstanceContextBySFID With full contexts by instance SFID
