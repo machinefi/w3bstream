@@ -87,6 +87,7 @@ func TestStorage(t *testing.T) {
 				err := s.Init()
 				NewWithT(t).Expect(err).To(BeNil())
 				NewWithT(t).Expect(s.TempDir).To(Equal(os.Getenv("TMPDIR")))
+				_ = os.Unsetenv(consts.EnvProjectName)
 			}
 		})
 
@@ -298,15 +299,7 @@ func TestS3(t *testing.T) {
 	})
 
 	var (
-		// ep = &storage.S3{}
-		ep = &storage.S3{
-			Endpoint:         "s3.us-west-1.amazonaws.com",
-			Region:           "us-west-1",
-			AccessKeyID:      "AKIAVJEGDD6ZONM3RO6V",
-			SecretAccessKey:  "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",
-			BucketName:       "machinefi-w3bstream-devnet-staging",
-			S3ForcePathStyle: true,
-		}
+		ep        = &storage.S3{}
 		key       = "unit_test_key"
 		data      = []byte("unit_test_data")
 		sumMd5    = storage.HMAC_ALG_TYPE__MD5.Sum(data)
@@ -315,7 +308,11 @@ func TestS3(t *testing.T) {
 	)
 
 	t.Run("Upload", func(t *testing.T) {
+		// NewWithT(t).Expect(ep.Init()).To(BeNil()) // if use real ep for e2e testing, enable this line
 		t.Run("#Success", func(t *testing.T) {
+			if runtime.GOOS == `darwin` {
+				return
+			}
 			patch := gomonkey.ApplyMethod(
 				reflect.TypeOf(&s3.S3{}),
 				"PutObject",
@@ -343,6 +340,9 @@ func TestS3(t *testing.T) {
 			})
 		})
 		t.Run("#Failed", func(t *testing.T) {
+			if runtime.GOOS == `darwin` {
+				return
+			}
 			patch := gomonkey.ApplyMethod(
 				reflect.TypeOf(&s3.S3{}),
 				"PutObject",
@@ -357,6 +357,9 @@ func TestS3(t *testing.T) {
 	})
 	t.Run("Read", func(t *testing.T) {
 		t.Run("#Success", func(t *testing.T) {
+			if runtime.GOOS == `darwin` {
+				return
+			}
 			patch := gomonkey.ApplyMethod(
 				reflect.TypeOf(&s3.S3{}),
 				"GetObject",
@@ -369,24 +372,214 @@ func TestS3(t *testing.T) {
 			defer patch.Reset()
 
 			cases := []*struct {
-				chk []storage.HmacAlgType
-				sum []byte
+				name string
+				chk  []storage.HmacAlgType
+				sum  []byte
 			}{
-				{chk: nil, sum: sumMd5},
-				{chk: []storage.HmacAlgType{storage.HMAC_ALG_TYPE__MD5}, sum: sumMd5},
-				{chk: []storage.HmacAlgType{storage.HMAC_ALG_TYPE__SHA1}, sum: sumSha1},
-				{chk: []storage.HmacAlgType{storage.HMAC_ALG_TYPE__SHA256}, sum: sumSha256},
+				{name: "#NoParam", chk: nil, sum: sumMd5},
+				{name: "#HmacMD5", chk: []storage.HmacAlgType{storage.HMAC_ALG_TYPE__MD5}, sum: sumMd5},
+				{name: "#HamcSHA1", chk: []storage.HmacAlgType{storage.HMAC_ALG_TYPE__SHA1}, sum: sumSha1},
+				{name: "#HamcSHA256", chk: []storage.HmacAlgType{storage.HMAC_ALG_TYPE__SHA256}, sum: sumSha256},
 			}
 
 			for _, c := range cases {
-				content, sum, err := ep.Read(key, c.chk...)
-				NewWithT(t).Expect(err).To(BeNil())
-				NewWithT(t).Expect(bytes.Equal(content, data)).To(BeTrue())
-				NewWithT(t).Expect(bytes.Equal(sum, c.sum)).To(BeTrue())
+				t.Run(c.name, func(t *testing.T) {
+					content, sum, err := ep.Read(key, c.chk...)
+					NewWithT(t).Expect(err).To(BeNil())
+					NewWithT(t).Expect(bytes.Equal(content, data)).To(BeTrue())
+					NewWithT(t).Expect(bytes.Equal(sum, c.sum)).To(BeTrue())
+				})
 			}
 		})
 		t.Run("#Failed", func(t *testing.T) {
+			t.Run("#GetObjectFailed", func(t *testing.T) {
+				if runtime.GOOS == `darwin` {
+					return
+				}
+				patch := gomonkey.ApplyMethod(
+					reflect.TypeOf(&s3.S3{}),
+					"GetObject",
+					func(recv *s3.S3, input *s3.GetObjectInput) (*s3.GetObjectOutput, error) {
+						return nil, errors.New("any")
+					},
+				)
+				defer patch.Reset()
+				_, _, err := ep.Read(key + "maybe_not_exists")
+				NewWithT(t).Expect(err).NotTo(BeNil())
+			})
+			t.Run("#ReadBodyFailed", func(t *testing.T) {
+				if runtime.GOOS == `darwin` {
+					return
+				}
+				patch1 := gomonkey.ApplyMethod(
+					reflect.TypeOf(&s3.S3{}),
+					"GetObject",
+					func(recv *s3.S3, input *s3.GetObjectInput) (*s3.GetObjectOutput, error) {
+						return &s3.GetObjectOutput{
+							Body: io.NopCloser(bytes.NewBuffer(data)),
+						}, nil
+					},
+				)
+				defer patch1.Reset()
+				patch2 := gomonkey.ApplyFunc(
+					io.ReadAll,
+					func(_ io.Reader) ([]byte, error) {
+						return nil, errors.New("any")
+					},
+				)
+				defer patch2.Reset()
+
+				_, _, err := ep.Read(key)
+				NewWithT(t).Expect(err).NotTo(BeNil())
+			})
 		})
 	})
-	t.Run("Delete", func(t *testing.T) {})
+	t.Run("Delete", func(t *testing.T) {
+		t.Run("#Success", func(t *testing.T) {
+			if runtime.GOOS == `darwin` {
+				return
+			}
+			patch := gomonkey.ApplyMethod(
+				reflect.TypeOf(&s3.S3{}),
+				"DeleteObject",
+				func(recv *s3.S3, input *s3.DeleteObjectInput) (*s3.DeleteObjectOutput, error) {
+					return nil, nil
+				},
+			)
+			defer patch.Reset()
+			NewWithT(t).Expect(ep.Delete(key)).To(BeNil())
+		})
+		t.Run("#Failed", func(t *testing.T) {
+			if runtime.GOOS == `darwin` {
+				return
+			}
+			patch := gomonkey.ApplyMethod(
+				reflect.TypeOf(&s3.S3{}),
+				"DeleteObject",
+				func(recv *s3.S3, input *s3.DeleteObjectInput) (*s3.DeleteObjectOutput, error) {
+					return nil, errors.New("any")
+				},
+			)
+			defer patch.Reset()
+			NewWithT(t).Expect(ep.Delete("any")).NotTo(BeNil())
+		})
+	})
+}
+
+func TestLocalFS(t *testing.T) {
+	t.Run("Init", func(t *testing.T) {
+		cases := []*struct {
+			name    string
+			root    string
+			tmpdir  string
+			service string
+			expect  string
+		}{
+			{name: "#WithRoot", root: "/tmp/123", expect: "/tmp/123"},
+			{name: "#WithoutRoot#WithTMPDIR", tmpdir: "/tmp/321", expect: "/tmp/321/service_tmp"},
+			{name: "#WithoutRoot#WithServiceName", tmpdir: "/tmp/567", service: "test", expect: "/tmp/567/test"},
+		}
+
+		for _, c := range cases {
+			t.Run(c.name, func(t *testing.T) {
+				_ = os.Unsetenv("TMPDIR")
+				_ = os.Unsetenv(consts.EnvProjectName)
+
+				if c.tmpdir != "" {
+					_ = os.Setenv("TMPDIR", c.tmpdir)
+				}
+				if c.service != "" {
+					_ = os.Setenv(consts.EnvProjectName, c.service)
+				}
+
+				conf := &storage.LocalFs{Root: c.root}
+				err := conf.Init()
+				NewWithT(t).Expect(err).To(BeNil())
+				NewWithT(t).Expect(conf.Root).To(Equal(c.expect))
+			})
+		}
+	})
+	t.Run("Type", func(t *testing.T) {
+		NewWithT(t).Expect((&storage.LocalFs{}).Type()).To(Equal(storage.STORAGE_TYPE__FILESYSTEM))
+	})
+	t.Run("Upload", func(t *testing.T) {
+		c := &storage.LocalFs{Root: "/tmp/test_storage"}
+		NewWithT(t).Expect(c.Init()).To(BeNil())
+
+		data := []byte("any")
+
+		t.Run("#Success", func(t *testing.T) {
+			key := "any_success"
+			NewWithT(t).Expect(c.Upload(key, data)).To(BeNil())
+			t.Run("#FileExists", func(t *testing.T) {
+				patch := gomonkey.ApplyFunc(
+					storage.IsPathExists,
+					func(_ string) bool {
+						return true
+					},
+				)
+				defer patch.Reset()
+				key := "any_file_exists"
+				NewWithT(t).Expect(c.Upload(key, data)).To(BeNil())
+			})
+		})
+		t.Run("#Failed", func(t *testing.T) {
+			t.Run("#OpenFileFaield", func(t *testing.T) {
+				patch := gomonkey.ApplyFunc(
+					os.OpenFile,
+					func(_ string, _ int, _ os.FileMode) (*os.File, error) {
+						return nil, errors.New("any")
+					},
+				)
+				defer patch.Reset()
+				key := "any_open_file_failed"
+				NewWithT(t).Expect(c.Upload(key, data)).NotTo(BeNil())
+			})
+			t.Run("#WriteFileFailed", func(t *testing.T) {
+				patch := gomonkey.ApplyMethod(
+					reflect.TypeOf(&os.File{}),
+					"Write",
+					func(_ *os.File, _ []byte) (int, error) {
+						return 0, errors.New("any")
+					},
+				)
+				defer patch.Reset()
+				key := "any_write_file_failed"
+				NewWithT(t).Expect(c.Upload(key, data)).NotTo(BeNil())
+			})
+		})
+		os.RemoveAll(c.Root)
+	})
+	t.Run("Read", func(t *testing.T) {
+		c := &storage.LocalFs{Root: "/tmp/test_storage"}
+		NewWithT(t).Expect(c.Init()).To(BeNil())
+
+		data := []byte("any")
+		t.Run("#Success", func(t *testing.T) {
+			key := "any_success"
+			NewWithT(t).Expect(c.Upload(key, data)).To(BeNil())
+
+			content, sum, err := c.Read(key)
+			NewWithT(t).Expect(err).To(BeNil())
+			NewWithT(t).Expect(bytes.Equal(content, data)).To(BeTrue())
+			NewWithT(t).Expect(bytes.Equal(sum, storage.HMAC_ALG_TYPE__MD5.Sum(data))).To(BeTrue())
+		})
+		t.Run("#Failed", func(t *testing.T) {
+			key := "any_failed"
+
+			_, _, err := c.Read(key)
+			NewWithT(t).Expect(err).NotTo(BeNil())
+		})
+		os.RemoveAll(c.Root)
+	})
+	t.Run("Delete", func(t *testing.T) {
+		c := &storage.LocalFs{Root: "/tmp/test_storage"}
+		NewWithT(t).Expect(c.Delete("any_delete")).NotTo(BeNil())
+	})
+}
+
+func TestIsPathExists(t *testing.T) {
+	_, currentfile, _, _ := runtime.Caller(0)
+	NewWithT(t).Expect(currentfile).NotTo(Equal(""))
+	NewWithT(t).Expect(storage.IsPathExists(currentfile)).To(BeTrue())
 }

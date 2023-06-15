@@ -39,7 +39,7 @@ func (l *LocalFs) Upload(key string, data []byte, chk ...HmacAlgType) error {
 	)
 
 	path := filepath.Join(l.Root, key)
-	if isPathExists(path) {
+	if IsPathExists(path) {
 		return nil
 	}
 
@@ -55,24 +55,24 @@ func (l *LocalFs) Upload(key string, data []byte, chk ...HmacAlgType) error {
 	return nil
 }
 
-func (l *LocalFs) Read(key string, _ ...HmacAlgType) (data []byte, sum []byte, err error) {
-	data, err = os.ReadFile(l.path(key))
+func (l *LocalFs) Read(key string, chk ...HmacAlgType) (data []byte, sum []byte, err error) {
+	data, err = os.ReadFile(filepath.Join(l.Root, key))
 	if err != nil {
 		return
 	}
-
+	t := HMAC_ALG_TYPE__MD5
+	if len(chk) > 0 && chk[0] != 0 {
+		t = chk[0]
+	}
+	sum = t.Sum(data)
 	return
 }
 
 func (l *LocalFs) Delete(key string) error {
-	return os.Remove(l.path(key))
+	return os.Remove(filepath.Join(l.Root, key))
 }
 
-func (l *LocalFs) path(name string) string {
-	return filepath.Join(l.Root, name)
-}
-
-func isPathExists(path string) bool {
+func IsPathExists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
 }
