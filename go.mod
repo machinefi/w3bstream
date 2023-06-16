@@ -43,7 +43,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.245
 	github.com/bytecodealliance/wasmtime-go/v8 v8.0.0
 	github.com/go-co-op/gocron v1.22.0
-	github.com/golang/mock v1.4.4
+	github.com/golang/mock v1.6.0
 	github.com/minio/minio-go/v7 v7.0.52
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/robfig/cron/v3 v3.0.1
