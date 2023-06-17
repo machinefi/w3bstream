@@ -2868,7 +2868,7 @@
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[CreateChannelFailed][500999004][Create Message Channel Failed]!",
               "@StatusErr[CreateInstanceFailed][500999010][Create Instance Failed]!",
-              "@StatusErr[CreateTrafficSchedulerFailed][500999017][Create Traffic Scheduler Failed]!",
+              "@StatusErr[CreateTrafficSchedulerFailed][500999018][Create Traffic Scheduler Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[FetchResourceFailed][500999005][Fetch Resource Failed]!",
@@ -2878,7 +2878,8 @@
               "@StatusErr[MD5ChecksumFailed][500999012][Md5 Checksum Failed]!",
               "@StatusErr[MqttConnectFailed][500999014][MQTT Connect Failed]!",
               "@StatusErr[MqttSubscribeFailed][500999013][MQTT Subscribe Failed]!",
-              "@StatusErr[UpdateTrafficSchedulerFailed][500999018][Update Traffic Scheduler Failed]!",
+              "@StatusErr[TrafficLimitExceededFailed][500999017][Traffic Limit Exceeded Failed]!",
+              "@StatusErr[UpdateTrafficSchedulerFailed][500999019][Update Traffic Scheduler Failed]!",
               "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
             ]
           }
@@ -8207,7 +8208,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CreateTrafficSchedulerFailed][500999017][Create Traffic Scheduler Failed]!",
+              "@StatusErr[CreateTrafficSchedulerFailed][500999018][Create Traffic Scheduler Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!"
@@ -8509,7 +8510,7 @@
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[UpdateTrafficSchedulerFailed][500999018][Update Traffic Scheduler Failed]!"
+              "@StatusErr[UpdateTrafficSchedulerFailed][500999019][Update Traffic Scheduler Failed]!"
             ]
           }
         }
