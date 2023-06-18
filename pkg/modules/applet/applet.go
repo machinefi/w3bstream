@@ -128,8 +128,12 @@ func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
 
 	for i := range lst.Data {
 		app := &lst.Data[i]
-		ins, _ = deploy.GetByAppletSFID(ctx, app.AppletID)
-		res, _ = resource.GetBySFID(ctx, app.ResourceID)
+		if ins, _ = deploy.GetByAppletSFID(ctx, app.AppletID); ins == nil {
+			continue
+		}
+		if res, err = resource.GetBySFID(ctx, app.ResourceID); err != nil {
+			return nil, err
+		}
 		ret.Data = append(ret.Data, detail(app, ins, res))
 	}
 	return ret, nil
@@ -222,6 +226,9 @@ func Update(ctx context.Context, r *UpdateReq) (*UpdateRsp, error) {
 			filename = r.AppletName + ".wasm"
 		}
 		res, raw, err = resource.Create(ctx, acc.AccountID, r.File, filename, md5)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	err = sqlx.NewTasks(d).With(
@@ -244,10 +251,15 @@ func Update(ctx context.Context, r *UpdateReq) (*UpdateRsp, error) {
 		},
 		// update applet info
 		func(d sqlx.DBExecutor) error {
+			if r.Info.AppletName == "" && res == nil {
+				return nil
+			}
 			if r.Info.AppletName != "" {
 				app.Name = r.Info.AppletName
 			}
-			app.ResourceID = res.ResourceID
+			if res != nil {
+				app.ResourceID = res.ResourceID
+			}
 			if err = app.UpdateByAppletID(d); err != nil {
 				if sqlx.DBErr(err).IsConflict() {
 					return status.AppletNameConflict
