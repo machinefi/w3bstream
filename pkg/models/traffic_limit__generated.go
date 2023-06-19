@@ -136,6 +136,14 @@ func (*TrafficLimit) FieldApiType() string {
 	return "ApiType"
 }
 
+func (m *TrafficLimit) ColStartAt() *builder.Column {
+	return TrafficLimitTable.ColByFieldName(m.FieldStartAt())
+}
+
+func (*TrafficLimit) FieldStartAt() string {
+	return "StartAt"
+}
+
 func (m *TrafficLimit) ColCreatedAt() *builder.Column {
 	return TrafficLimitTable.ColByFieldName(m.FieldCreatedAt())
 }

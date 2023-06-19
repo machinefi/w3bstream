@@ -8,10 +8,33 @@ import (
 	"github.com/go-co-op/gocron"
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
+
+func GetStartAt(projectKey string, duration types.Duration) (startAt time.Time) {
+	ts, ok := trafficSchedulers.Load(projectKey)
+	if ok && ts != nil {
+		_, startAt = ts.sch.NextRun()
+		return
+	}
+
+	now := time.Now().UTC()
+	seconds := duration.Duration().Seconds()
+
+	if seconds >= 24*time.Hour.Seconds() {
+		startAt = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	} else if seconds >= time.Hour.Seconds() {
+		startAt = time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, now.Location())
+	} else if seconds >= time.Minute.Seconds() {
+		startAt = time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, now.Location())
+	} else {
+		startAt = time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second(), 0, now.Location())
+	}
+	return
+}
 
 func CreateScheduler(ctx context.Context, projectKey string, trafficInfo *models.TrafficLimitInfo) error {
 	ts := &TrafficScheduler{
@@ -20,7 +43,7 @@ func CreateScheduler(ctx context.Context, projectKey string, trafficInfo *models
 		sch:         gocron.NewScheduler(time.UTC),
 		rDB:         kvdb.MustRedisDBKeyFromContext(ctx),
 	}
-	ts.createSchedulerJob()
+	ts.settingSchedulerJob(ts.trafficInfo.StartAt.Time)
 	trafficSchedulers.Store(projectKey, ts)
 	if err := ts.Do(); err != nil {
 		return err
@@ -31,11 +54,8 @@ func CreateScheduler(ctx context.Context, projectKey string, trafficInfo *models
 }
 
 func UpdateScheduler(ctx context.Context, projectKey string, trafficInfo *models.TrafficLimitInfo) error {
-	var startTime time.Time
-
 	ts, ok := trafficSchedulers.Load(projectKey)
 	if ok && ts != nil {
-		_, startTime = ts.sch.NextRun()
 		ts.Stop()
 		trafficSchedulers.Remove(projectKey)
 	}
@@ -46,7 +66,7 @@ func UpdateScheduler(ctx context.Context, projectKey string, trafficInfo *models
 		sch:         gocron.NewScheduler(time.UTC),
 		rDB:         kvdb.MustRedisDBKeyFromContext(ctx),
 	}
-	ts.updateSchedulerJob(startTime)
+	ts.settingSchedulerJob(ts.trafficInfo.StartAt.Time)
 	trafficSchedulers.Store(projectKey, ts)
 	if err := ts.Do(); err != nil {
 		return err
@@ -63,7 +83,7 @@ func RestartScheduler(ctx context.Context, projectKey string, trafficInfo *model
 		sch:         gocron.NewScheduler(time.UTC),
 		rDB:         kvdb.MustRedisDBKeyFromContext(ctx),
 	}
-	ts.createSchedulerJob()
+	ts.settingSchedulerJob(ts.trafficInfo.StartAt.Time)
 	trafficSchedulers.Store(projectKey, ts)
 	if err := ts.Do(); err != nil {
 		return err
@@ -96,25 +116,7 @@ type TrafficScheduler struct {
 	rDB         *kvdb.RedisDB
 }
 
-func (ts *TrafficScheduler) createSchedulerJob() {
-	now := time.Now().UTC()
-	seconds := ts.trafficInfo.Duration.Duration().Seconds()
-	if seconds >= 24*time.Hour.Seconds() {
-		nextDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-		ts.sch.Every(int(seconds)).Second().StartAt(nextDay)
-	} else if seconds >= time.Hour.Seconds() {
-		nextHour := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, now.Location())
-		ts.sch.Every(int(seconds)).Second().StartAt(nextHour)
-	} else if seconds >= time.Minute.Seconds() {
-		nextMinute := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, now.Location())
-		ts.sch.Every(int(seconds)).Second().StartAt(nextMinute)
-	} else {
-		nextSecond := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second(), 0, now.Location())
-		ts.sch.Every(int(seconds)).Second().StartAt(nextSecond)
-	}
-}
-
-func (ts *TrafficScheduler) updateSchedulerJob(startTime time.Time) {
+func (ts *TrafficScheduler) settingSchedulerJob(startTime time.Time) {
 	ts.sch.Every(int(ts.trafficInfo.Duration.Duration().Seconds())).Second().StartAt(startTime)
 }
 

@@ -75,10 +75,14 @@ func GetBySFID(ctx context.Context, id types.SFID) (*models.TrafficLimit, error)
 }
 
 func Create(ctx context.Context, r *CreateReq) (*models.TrafficLimit, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	idg := confid.MustSFIDGeneratorFromContext(ctx)
-	project := types.MustProjectFromContext(ctx)
-	rDB := kvdb.MustRedisDBKeyFromContext(ctx)
+	var (
+		d       = types.MustMgrDBExecutorFromContext(ctx)
+		idg     = confid.MustSFIDGeneratorFromContext(ctx)
+		project = types.MustProjectFromContext(ctx)
+		rDB     = kvdb.MustRedisDBKeyFromContext(ctx)
+
+		projectKey = fmt.Sprintf("%s::%s", project.Name, r.ApiType.String())
+	)
 
 	m := &models.TrafficLimit{
 		RelTrafficLimit: models.RelTrafficLimit{TrafficLimitID: idg.MustGenSFID()},
@@ -87,6 +91,7 @@ func Create(ctx context.Context, r *CreateReq) (*models.TrafficLimit, error) {
 			Threshold: r.Threshold,
 			Duration:  r.Duration,
 			ApiType:   r.ApiType,
+			StartAt:   types.Timestamp{Time: GetStartAt(projectKey, r.Duration)},
 		},
 	}
 
@@ -101,7 +106,7 @@ func Create(ctx context.Context, r *CreateReq) (*models.TrafficLimit, error) {
 			return nil
 		},
 		func(db sqlx.DBExecutor) error {
-			if err := CreateScheduler(ctx, fmt.Sprintf("%s::%s", project.Name, r.ApiType.String()), &m.TrafficLimitInfo); err != nil {
+			if err := CreateScheduler(ctx, projectKey, &m.TrafficLimitInfo); err != nil {
 				return status.CreateTrafficSchedulerFailed
 			}
 			return nil
@@ -127,11 +132,14 @@ func Create(ctx context.Context, r *CreateReq) (*models.TrafficLimit, error) {
 }
 
 func Update(ctx context.Context, r *UpdateReq) (*models.TrafficLimit, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	project := types.MustProjectFromContext(ctx)
-	rDB := kvdb.MustRedisDBKeyFromContext(ctx)
-	m := &models.TrafficLimit{RelTrafficLimit: models.RelTrafficLimit{TrafficLimitID: r.TrafficLimitID}}
+	var (
+		d       = types.MustMgrDBExecutorFromContext(ctx)
+		project = types.MustProjectFromContext(ctx)
+		rDB     = kvdb.MustRedisDBKeyFromContext(ctx)
+		m       = &models.TrafficLimit{RelTrafficLimit: models.RelTrafficLimit{TrafficLimitID: r.TrafficLimitID}}
 
+		projectKey string
+	)
 	err := sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
 			ctx := types.WithMgrDBExecutor(ctx, d)
@@ -140,9 +148,11 @@ func Update(ctx context.Context, r *UpdateReq) (*models.TrafficLimit, error) {
 			return err
 		},
 		func(d sqlx.DBExecutor) error {
+			projectKey = fmt.Sprintf("%s::%s", project.Name, m.ApiType.String())
+
 			m.TrafficLimitInfo.Threshold = r.Threshold
 			m.TrafficLimitInfo.Duration = r.Duration
-			m.TrafficLimitInfo.ApiType = r.ApiType
+			m.TrafficLimitInfo.StartAt = types.Timestamp{Time: GetStartAt(projectKey, r.Duration)}
 			if err := m.UpdateByTrafficLimitID(d); err != nil {
 				if sqlx.DBErr(err).IsConflict() {
 					return status.TrafficLimitConflict
@@ -152,7 +162,7 @@ func Update(ctx context.Context, r *UpdateReq) (*models.TrafficLimit, error) {
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			if err := UpdateScheduler(ctx, fmt.Sprintf("%s::%s", project.Name, r.ApiType.String()), &m.TrafficLimitInfo); err != nil {
+			if err := UpdateScheduler(ctx, projectKey, &m.TrafficLimitInfo); err != nil {
 				return status.UpdateTrafficSchedulerFailed
 			}
 			return nil

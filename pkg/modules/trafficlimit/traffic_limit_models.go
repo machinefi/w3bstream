@@ -9,12 +9,15 @@ import (
 )
 
 type CreateReq struct {
-	models.TrafficLimitInfo
+	Threshold int                    `json:"threshold"`
+	Duration  types.Duration         `json:"duration"`
+	ApiType   enums.TrafficLimitType `json:"apiType"`
 }
 
 type UpdateReq struct {
-	TrafficLimitID types.SFID `json:"-"`
-	models.TrafficLimitInfo
+	TrafficLimitID types.SFID     `json:"-"`
+	Threshold      int            `json:"threshold"`
+	Duration       types.Duration `json:"duration"`
 }
 
 type CondArgs struct {
