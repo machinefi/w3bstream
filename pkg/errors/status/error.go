@@ -85,6 +85,10 @@ const (
 	InvalidAppletContext
 	// @errTalk No Resource Permission
 	NoResourcePermission
+	// @errTalk Invalid Account Access Key
+	InvalidAccountAccessKey
+	// @errTalk Account Access Key Expired
+	AccountAccessKeyExpired
 )
 
 const (
@@ -147,6 +151,8 @@ const (
 	TrafficLimitConflict
 	// @errTalk Project Operator relationship Conflict
 	ProjectOperatorConflict
+	// @errTalk Account Key Name Conflict
+	AccountKeyNameConflict
 )
 
 const (
@@ -207,4 +213,6 @@ const (
 	TrafficLimitNotFound
 	// @errTalk Project Operator relationship Not Found
 	ProjectOperatorNotFound
+	// @errTalk Account Key Not Found
+	AccountKeyNotFound
 )
