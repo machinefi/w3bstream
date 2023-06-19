@@ -44,12 +44,6 @@ images:
 		echo "\033[32mdone!\033[0m\n"; \
 	done
 
-## toolkit for code generation
-.PHONY: toolkit
-toolkit:
-	@go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/...@toolkit-patch-0.0.3
-	@echo installed `which toolkit`
-
 .PHONY: all
 all: update targets test images
 
@@ -90,17 +84,29 @@ restart_docker: drop_docker run_docker
 
 ## developing stage entries
 
+## toolkit for code generation
+.PHONY: toolkit
+toolkit:
+	@go install github.com/machinefi/w3bstream/pkg/depends/gen/cmd/...@toolkit-patch-0.0.3
+	@echo installed `which toolkit`
+
+## gomock for generating mock code
+.PHONY: gomock
+gomock:
+	@go install github.com/golang/mock/mockgen@v1.6.0
+
 .PHONY: generate
-generate: toolkit
+generate: toolkit gomock
 	@cd pkg/models              && go generate ./...
 	@cd pkg/enums               && go generate ./...
 	@cd pkg/errors              && go generate ./...
-	@cd pkg/errors              && go generate ./...
 	@cd pkg/depends/util/strfmt && go generate ./...
+	@cd pkg/test                && go generate ./...
 
 .PHONY: precommit
 precommit: toolkit targets test
 	@toolkit fmt
+	@cd cmd/srv-applet-mgr && make openapi --no-print-directory
 	@git add -u
 
 ## to migrate database models, if model defines changed, make this entry

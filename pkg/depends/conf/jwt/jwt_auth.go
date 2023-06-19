@@ -28,9 +28,9 @@ func (r Auth) Output(ctx context.Context) (pl interface{}, err error) {
 		av = r.AuthInHeader
 	}
 	tok := strings.TrimSpace(strings.Replace(av, "Bearer", " ", 1))
-	if BuiltInTokenFn != nil {
-		if pl, ok = BuiltInTokenFn(tok); ok {
-			return pl, nil
+	if BuiltInTokenValidateFn != nil {
+		if pl, err, ok = BuiltInTokenValidateFn(ctx, tok); ok {
+			return pl, err
 		}
 	}
 
@@ -39,7 +39,7 @@ func (r Auth) Output(ctx context.Context) (pl interface{}, err error) {
 		return nil, err
 	}
 
-	if WithPermissionFn != nil && !WithPermissionFn(claims) {
+	if WithPermissionFn != nil && !WithPermissionFn(claims.Payload) {
 		return nil, ErrNoPermission
 	}
 
@@ -77,14 +77,14 @@ var (
 	ErrNoPermission    = errors.New("no permission")
 )
 
-var BuiltInTokenFn func(string) (interface{}, bool)
+var BuiltInTokenValidateFn func(context.Context, string) (interface{}, error, bool)
 
-func SetBuiltInTokenFn(f func(string) (interface{}, bool)) {
-	BuiltInTokenFn = f
+func SetBuiltInTokenFn(f func(context.Context, string) (interface{}, error, bool)) {
+	BuiltInTokenValidateFn = f
 }
 
-var WithPermissionFn func(*Claims) bool
+var WithPermissionFn func(interface{}) bool
 
-func SetWithPermissionFn(f func(*Claims) bool) {
+func SetWithPermissionFn(f func(interface{}) bool) {
 	WithPermissionFn = f
 }
