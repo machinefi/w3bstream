@@ -229,6 +229,9 @@ func Update(ctx context.Context, r *UpdateReq) error {
 			m.Key = r.Key
 			m.Name = r.Name
 			if err := m.UpdateByPublisherID(d); err != nil {
+				if sqlx.DBErr(err).IsConflict() {
+					return status.PublisherConflict
+				}
 				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
