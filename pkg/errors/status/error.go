@@ -168,6 +168,8 @@ const (
 	InvalidCronExpressions
 	// @errTalk Invalid Private Key
 	InvalidPrivateKey
+	// @errTalk Unknown Deploy Command
+	UnknownMonitorCommand
 )
 
 const (

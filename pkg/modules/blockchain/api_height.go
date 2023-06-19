@@ -5,6 +5,7 @@ import (
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -26,6 +27,7 @@ func CreateChainHeight(ctx context.Context, r *CreateChainHeightReq) (*models.Ch
 
 	n := *r
 	n.EventType = getEventType(n.EventType)
+	n.Paused = getPaused(n.Paused)
 	m := &models.ChainHeight{
 		RelChainHeight: models.RelChainHeight{ChainHeightID: idg.MustGenSFID()},
 		ChainHeightData: models.ChainHeightData{
@@ -62,6 +64,26 @@ func RemoveChainHeightBySFID(ctx context.Context, id types.SFID) error {
 
 	m := &models.ChainHeight{RelChainHeight: models.RelChainHeight{ChainHeightID: id}}
 	if err := m.DeleteByChainHeightID(d); err != nil {
+		return status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return nil
+}
+
+func UpdateChainHeightPausedBySFIDs(ctx context.Context, ids []types.SFID, s datatypes.Bool) error {
+	d := types.MustMonitorDBExecutorFromContext(ctx)
+	m := &models.ChainHeight{
+		ChainHeightData: models.ChainHeightData{
+			ChainHeightInfo: models.ChainHeightInfo{
+				Paused: s,
+			},
+		},
+	}
+
+	tbl := d.T(m)
+	fvs := builder.FieldValueFromStructByNoneZero(m)
+	expr := builder.Update(tbl).Where(m.ColChainHeightID().In(ids)).Set(tbl.AssignmentsByFieldValues(fvs)...)
+
+	if _, err := d.Exec(expr); err != nil {
 		return status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
 	return nil

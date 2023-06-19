@@ -2725,7 +2725,8 @@
               "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!",
               "@StatusErr[InvalidCronExpressions][400999005][Invalid Cron Expressions]!",
               "@StatusErr[InvalidPrivateKey][400999006][Invalid Private Key]!",
-              "@StatusErr[UnknownDeployCommand][400999004][Unknown Deploy Command]!"
+              "@StatusErr[UnknownDeployCommand][400999004][Unknown Deploy Command]!",
+              "@StatusErr[UnknownMonitorCommand][400999007][Unknown Deploy Command]!"
             ]
           },
           "401": {
@@ -2868,7 +2869,7 @@
               "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
               "@StatusErr[CreateChannelFailed][500999004][Create Message Channel Failed]!",
               "@StatusErr[CreateInstanceFailed][500999010][Create Instance Failed]!",
-              "@StatusErr[CreateTrafficSchedulerFailed][500999017][Create Traffic Scheduler Failed]!",
+              "@StatusErr[CreateTrafficSchedulerFailed][500999018][Create Traffic Scheduler Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[FetchResourceFailed][500999005][Fetch Resource Failed]!",
@@ -2878,7 +2879,8 @@
               "@StatusErr[MD5ChecksumFailed][500999012][Md5 Checksum Failed]!",
               "@StatusErr[MqttConnectFailed][500999014][MQTT Connect Failed]!",
               "@StatusErr[MqttSubscribeFailed][500999013][MQTT Subscribe Failed]!",
-              "@StatusErr[UpdateTrafficSchedulerFailed][500999018][Update Traffic Scheduler Failed]!",
+              "@StatusErr[TrafficLimitExceededFailed][500999017][Traffic Limit Exceeded Failed]!",
+              "@StatusErr[UpdateTrafficSchedulerFailed][500999019][Update Traffic Scheduler Failed]!",
               "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
             ]
           }
@@ -3332,6 +3334,151 @@
         }
       }
     },
+    "/srv-applet-mgr/v0/monitor/x/{projectName}/chain_height/{cmd}": {
+      "put": {
+        "tags": [
+          "apis/monitor"
+        ],
+        "operationId": "ControlChainHeight",
+        "parameters": [
+          {
+            "name": "cmd",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsMonitorCmd"
+                },
+                {
+                  "x-go-field-name": "Cmd",
+                  "x-tag-name": "cmd"
+                }
+              ]
+            }
+          },
+          {
+            "name": "projectName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "projectName",
+              "x-go-field-name": "ProjectName",
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesBlockchainUpdateMonitorReq"
+                  },
+                  {
+                    "x-go-field-name": "UpdateMonitorReq"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[BadRequest][400999001][BadRequest]!",
+              "@StatusErr[UnknownMonitorCommand][400999007][Unknown Deploy Command]!"
+            ]
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[ChainHeightNotFound][404999016][Chain Height Not Found]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
     "/srv-applet-mgr/v0/monitor/x/{projectName}/chain_tx": {
       "post": {
         "tags": [
@@ -3581,6 +3728,151 @@
         }
       }
     },
+    "/srv-applet-mgr/v0/monitor/x/{projectName}/chain_tx/{cmd}": {
+      "put": {
+        "tags": [
+          "apis/monitor"
+        ],
+        "operationId": "ControlChainTx",
+        "parameters": [
+          {
+            "name": "cmd",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsMonitorCmd"
+                },
+                {
+                  "x-go-field-name": "Cmd",
+                  "x-tag-name": "cmd"
+                }
+              ]
+            }
+          },
+          {
+            "name": "projectName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "projectName",
+              "x-go-field-name": "ProjectName",
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesBlockchainUpdateMonitorReq"
+                  },
+                  {
+                    "x-go-field-name": "UpdateMonitorReq"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[BadRequest][400999001][BadRequest]!",
+              "@StatusErr[UnknownMonitorCommand][400999007][Unknown Deploy Command]!"
+            ]
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[ChainTxNotFound][404999015][Chain Tx Not Found]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
     "/srv-applet-mgr/v0/monitor/x/{projectName}/contract_log": {
       "post": {
         "tags": [
@@ -3696,6 +3988,151 @@
             },
             "x-status-errors": [
               "@StatusErr[ContractLogConflict][409999011][Contract Log Conflict]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
+    "/srv-applet-mgr/v0/monitor/x/{projectName}/contract_log/{cmd}": {
+      "put": {
+        "tags": [
+          "apis/monitor"
+        ],
+        "operationId": "ControlContractLog",
+        "parameters": [
+          {
+            "name": "cmd",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsMonitorCmd"
+                },
+                {
+                  "x-go-field-name": "Cmd",
+                  "x-tag-name": "cmd"
+                }
+              ]
+            }
+          },
+          {
+            "name": "projectName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "projectName",
+              "x-go-field-name": "ProjectName",
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesBlockchainUpdateMonitorReq"
+                  },
+                  {
+                    "x-go-field-name": "UpdateMonitorReq"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[BadRequest][400999001][BadRequest]!",
+              "@StatusErr[UnknownMonitorCommand][400999007][Unknown Deploy Command]!"
+            ]
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[ContractLogNotFound][404999014][Contract Log Not Found]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "500": {
@@ -8207,7 +8644,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CreateTrafficSchedulerFailed][500999017][Create Traffic Scheduler Failed]!",
+              "@StatusErr[CreateTrafficSchedulerFailed][500999018][Create Traffic Scheduler Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!"
@@ -8509,7 +8946,7 @@
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[UpdateTrafficSchedulerFailed][500999018][Update Traffic Scheduler Failed]!"
+              "@StatusErr[UpdateTrafficSchedulerFailed][500999019][Update Traffic Scheduler Failed]!"
             ]
           }
         }
@@ -8968,6 +9405,19 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.InstanceState",
         "x-id": "GithubComMachinefiW3BstreamPkgEnumsInstanceState"
       },
+      "GithubComMachinefiW3BstreamPkgEnumsMonitorCmd": {
+        "type": "string",
+        "enum": [
+          "START",
+          "PAUSE"
+        ],
+        "x-enum-labels": [
+          "START",
+          "PAUSE"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.MonitorCmd",
+        "x-id": "GithubComMachinefiW3BstreamPkgEnumsMonitorCmd"
+      },
       "GithubComMachinefiW3BstreamPkgEnumsProtocol": {
         "type": "string",
         "enum": [
@@ -9288,6 +9738,17 @@
             "format": "uint64",
             "x-go-field-name": "Height",
             "x-tag-json": "height"
+          },
+          "paused": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesBool"
+              },
+              {
+                "x-go-field-name": "Paused",
+                "x-tag-json": "paused,omitempty"
+              }
+            ]
           }
         },
         "required": [
@@ -9354,6 +9815,17 @@
             "type": "string",
             "x-go-field-name": "EventType",
             "x-tag-json": "eventType,omitempty"
+          },
+          "paused": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesBool"
+              },
+              {
+                "x-go-field-name": "Paused",
+                "x-tag-json": "paused,omitempty"
+              }
+            ]
           },
           "txAddress": {
             "type": "string",
@@ -9503,6 +9975,17 @@
             "type": "string",
             "x-go-field-name": "EventType",
             "x-tag-json": "eventType,omitempty"
+          },
+          "paused": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesBool"
+              },
+              {
+                "x-go-field-name": "Paused",
+                "x-tag-json": "paused,omitempty"
+              }
+            ]
           },
           "topic0": {
             "type": "string",
@@ -10764,6 +11247,24 @@
             "x-id": "GithubComMachinefiW3BstreamPkgModulesBlockchainCreateContractLogReq"
           }
         ]
+      },
+      "GithubComMachinefiW3BstreamPkgModulesBlockchainUpdateMonitorReq": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+            },
+            "x-go-field-name": "IDs",
+            "x-tag-json": "ids"
+          }
+        },
+        "required": [
+          "ids"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/blockchain.UpdateMonitorReq",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesBlockchainUpdateMonitorReq"
       },
       "GithubComMachinefiW3BstreamPkgModulesCronjobCreateReq": {
         "allOf": [

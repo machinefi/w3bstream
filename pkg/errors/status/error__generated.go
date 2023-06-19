@@ -49,6 +49,8 @@ func (v Error) Key() string {
 		return "InvalidCronExpressions"
 	case InvalidPrivateKey:
 		return "InvalidPrivateKey"
+	case UnknownMonitorCommand:
+		return "UnknownMonitorCommand"
 	case Unauthorized:
 		return "Unauthorized"
 	case InvalidAuthValue:
@@ -245,6 +247,8 @@ func (v Error) Msg() string {
 		return "Invalid Cron Expressions"
 	case InvalidPrivateKey:
 		return "Invalid Private Key"
+	case UnknownMonitorCommand:
+		return "Unknown Deploy Command"
 	case Unauthorized:
 		return "unauthorized"
 	case InvalidAuthValue:
@@ -440,6 +444,8 @@ func (v Error) CanBeTalk() bool {
 	case InvalidCronExpressions:
 		return true
 	case InvalidPrivateKey:
+		return true
+	case UnknownMonitorCommand:
 		return true
 	case Unauthorized:
 		return false

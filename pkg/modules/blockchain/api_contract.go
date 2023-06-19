@@ -5,6 +5,8 @@ import (
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -26,6 +28,7 @@ func CreateContractLog(ctx context.Context, r *CreateContractLogReq) (*models.Co
 	n := *r
 	n.BlockCurrent = n.BlockStart
 	n.EventType = getEventType(n.EventType)
+	n.Paused = getPaused(n.Paused)
 	m := &models.ContractLog{
 		RelContractLog: models.RelContractLog{ContractLogID: idg.MustGenSFID()},
 		ContractLogData: models.ContractLogData{
@@ -69,6 +72,26 @@ func RemoveContractLogBySFID(ctx context.Context, id types.SFID) error {
 
 	m := &models.ContractLog{RelContractLog: models.RelContractLog{ContractLogID: id}}
 	if err := m.DeleteByContractLogID(d); err != nil {
+		return status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return nil
+}
+
+func UpdateContractLogPausedBySFIDs(ctx context.Context, ids []types.SFID, s datatypes.Bool) error {
+	d := types.MustMonitorDBExecutorFromContext(ctx)
+	m := &models.ContractLog{
+		ContractLogData: models.ContractLogData{
+			ContractLogInfo: models.ContractLogInfo{
+				Paused: s,
+			},
+		},
+	}
+
+	tbl := d.T(m)
+	fvs := builder.FieldValueFromStructByNoneZero(m)
+	expr := builder.Update(tbl).Where(m.ColContractLogID().In(ids)).Set(tbl.AssignmentsByFieldValues(fvs)...)
+
+	if _, err := d.Exec(expr); err != nil {
 		return status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
 	return nil

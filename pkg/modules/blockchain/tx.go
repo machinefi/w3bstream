@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -37,7 +38,7 @@ func (t *tx) do(ctx context.Context) {
 	_, l = l.Start(ctx, "tx.run")
 	defer l.End()
 
-	cs, err := m.List(d, m.ColFinished().Eq(datatypes.FALSE))
+	cs, err := m.List(d, builder.And(m.ColFinished().Eq(datatypes.FALSE), m.ColPaused().Eq(datatypes.FALSE)))
 	if err != nil {
 		l.Error(errors.Wrap(err, "list chain tx db failed"))
 		return
