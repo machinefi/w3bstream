@@ -77,6 +77,212 @@
         }
       }
     },
+    "/srv-applet-mgr/v0/access_key": {
+      "delete": {
+        "tags": [
+          "apis/account_access"
+        ],
+        "operationId": "DeleteAccountAccessKeyByName",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-go-field-name": "Name",
+              "x-tag-name": "name"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountKeyNotFound][404999022][Account Key Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "apis/account_access"
+        ],
+        "operationId": "CreateAccountAccessKey",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAccountAccessCreateReq"
+                  },
+                  {
+                    "x-go-field-name": "CreateReq"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsAccountAccessKey"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
+            ]
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountKeyNameConflict][409999020][Account Key Name Conflict]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
     "/srv-applet-mgr/v0/account": {
       "put": {
         "tags": [
@@ -2532,7 +2738,9 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccountAccessKeyExpired][401999019][Account Access Key Expired]!",
               "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
+              "@StatusErr[InvalidAccountAccessKey][401999018][Invalid Account Access Key]!",
               "@StatusErr[InvalidAppletContext][401999016][Invalid Applet]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthPublisherID][401999012][Invalid Auth Publisher ID]!",
@@ -2552,7 +2760,6 @@
               "@StatusErr[NoOperatorPermission][401999005][No Operator Permission]!",
               "@StatusErr[NoProjectPermission][401999004][No Project Permission]!",
               "@StatusErr[NoResourcePermission][401999017][No Resource Permission]!",
-              "@StatusErr[NoTrafficLimitPermission][401999018][No Traffic Limit Permission]!",
               "@StatusErr[Unauthorized][401999001][unauthorized]"
             ]
           },
@@ -2588,6 +2795,7 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountKeyNotFound][404999022][Account Key Not Found]!",
               "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[AccountPasswordNotFound][404999018][Account Password Not Found]!",
               "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
@@ -2623,6 +2831,7 @@
             "x-status-errors": [
               "@StatusErr[AccountConflict][409999015][Account Conflict]!",
               "@StatusErr[AccountIdentityConflict][409999014][Account Identity Conflict]!",
+              "@StatusErr[AccountKeyNameConflict][409999020][Account Key Name Conflict]!",
               "@StatusErr[AccountPasswordConflict][409999016][Account Password Conflict]!",
               "@StatusErr[AppletNameConflict][409999009][Applet Name Conflict]!",
               "@StatusErr[ChainHeightConflict][409999013][Chain Height Conflict]!",
@@ -8255,8 +8464,7 @@
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
               "@StatusErr[InvalidToken][401999002][Invalid Token]!",
-              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!",
-              "@StatusErr[NoTrafficLimitPermission][401999018][No Traffic Limit Permission]!"
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
             ]
           },
           "404": {
@@ -8869,6 +9077,61 @@
             "x-id": "GithubComMachinefiW3BstreamPkgModelsAccount"
           }
         ]
+      },
+      "GithubComMachinefiW3BstreamPkgModelsAccountAccessKey": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPrimaryID"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsRelAccount"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModelsAccountAccessKeyInfo"
+          },
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimesWithDeleted"
+          },
+          {
+            "type": "object",
+            "description": "AccountAPIKey account api access key",
+            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.AccountAccessKey",
+            "x-id": "GithubComMachinefiW3BstreamPkgModelsAccountAccessKey"
+          }
+        ]
+      },
+      "GithubComMachinefiW3BstreamPkgModelsAccountAccessKeyInfo": {
+        "type": "object",
+        "properties": {
+          "accessKey": {
+            "type": "string",
+            "x-go-field-name": "AccessKey",
+            "x-tag-json": "accessKey"
+          },
+          "expiredAt": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp"
+              },
+              {
+                "x-go-field-name": "ExpiredAt",
+                "x-tag-json": "expiredAt"
+              }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "x-go-field-name": "Name",
+            "x-tag-json": "name"
+          }
+        },
+        "required": [
+          "name",
+          "accessKey",
+          "expiredAt"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.AccountAccessKeyInfo",
+        "x-id": "GithubComMachinefiW3BstreamPkgModelsAccountAccessKeyInfo"
       },
       "GithubComMachinefiW3BstreamPkgModelsAccountInfo": {
         "type": "object",
@@ -10060,6 +10323,36 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.TrafficLimitInfo",
         "x-id": "GithubComMachinefiW3BstreamPkgModelsTrafficLimitInfo"
+      },
+      "GithubComMachinefiW3BstreamPkgModulesAccountAccessCreateReq": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Description access token description",
+            "x-go-field-name": "Description",
+            "x-tag-json": "description"
+          },
+          "expirationDays": {
+            "type": "integer",
+            "format": "int32",
+            "description": "ExpirationDays access token valid in ExpirationDays, if 0 means token will not be expired.",
+            "x-go-field-name": "ExpirationDays",
+            "x-tag-json": "expirationDays,omitempty"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name access token name",
+            "x-go-field-name": "Name",
+            "x-tag-json": "name"
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/account_access.CreateReq",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesAccountAccessCreateReq"
       },
       "GithubComMachinefiW3BstreamPkgModulesAccountCreateAccountByUsernameReq": {
         "type": "object",
