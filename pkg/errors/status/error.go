@@ -168,6 +168,8 @@ const (
 	InvalidCronExpressions
 	// @errTalk Invalid Private Key
 	InvalidPrivateKey
+	// @errTalk Invalid Delete Condition
+	InvalidDeleteCondition
 )
 
 const (
