@@ -8047,6 +8047,7 @@
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
               "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoAdminPermission][401999006][No Admin Permission]!",
               "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
             ]
           },
@@ -8167,6 +8168,7 @@
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
               "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoAdminPermission][401999006][No Admin Permission]!",
               "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
             ]
           },
@@ -8328,6 +8330,7 @@
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
               "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoAdminPermission][401999006][No Admin Permission]!",
               "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
             ]
           },
@@ -8465,6 +8468,7 @@
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
               "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoAdminPermission][401999006][No Admin Permission]!",
               "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
             ]
           },
