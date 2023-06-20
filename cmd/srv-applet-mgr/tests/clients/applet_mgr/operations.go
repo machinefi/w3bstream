@@ -138,6 +138,35 @@ func (o *BatchRemoveStrategy) Invoke(cli kit.Client, metas ...kit.Metadata) (kit
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
+type BatchRemoveTrafficLimit struct {
+	ProjectName  string                                              `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                              `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	ApiType      GithubComMachinefiW3BstreamPkgEnumsTrafficLimitType `in:"query" name:"apiType,omitempty"`
+	AuthInQuery  string                                              `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+}
+
+func (o *BatchRemoveTrafficLimit) Path() string {
+	return "/srv-applet-mgr/v0/traffic/x/:projectName"
+}
+
+func (o *BatchRemoveTrafficLimit) Method() string {
+	return "DELETE"
+}
+
+func (o *BatchRemoveTrafficLimit) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.BatchRemoveTrafficLimit")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *BatchRemoveTrafficLimit) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
+	meta, err := cli.Do(ctx, o, metas...).Into(nil)
+	return meta, err
+}
+
+func (o *BatchRemoveTrafficLimit) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
 type ControlInstance struct {
 	Cmd          GithubComMachinefiW3BstreamPkgEnumsDeployCmd       `in:"path" name:"cmd"`
 	InstanceID   GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"instanceID"`
@@ -164,6 +193,44 @@ func (o *ControlInstance) InvokeContext(ctx context.Context, cli kit.Client, met
 }
 
 func (o *ControlInstance) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
+type CreateAccountAccessKey struct {
+	AuthInHeader string                                                      `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                                      `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	CreateReq    GithubComMachinefiW3BstreamPkgModulesAccountAccessCreateReq `in:"body"`
+}
+
+func (o *CreateAccountAccessKey) Path() string {
+	return "/srv-applet-mgr/v0/access_key"
+}
+
+func (o *CreateAccountAccessKey) Method() string {
+	return "POST"
+}
+
+// @StatusErr[AccountKeyNameConflict][409999020][Account Key Name Conflict]!
+// @StatusErr[AccountNotFound][404999017][Account Not Found]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
+// @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
+// @StatusErr[InvalidClaim][401999003][Invalid Claim]!
+// @StatusErr[InvalidToken][401999002][Invalid Token]!
+
+func (o *CreateAccountAccessKey) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.CreateAccountAccessKey")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *CreateAccountAccessKey) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsAccountAccessKey, kit.Metadata, error) {
+	rsp := new(GithubComMachinefiW3BstreamPkgModelsAccountAccessKey)
+	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
+	return rsp, meta, err
+}
+
+func (o *CreateAccountAccessKey) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsAccountAccessKey, kit.Metadata, error) {
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
@@ -236,7 +303,7 @@ func (o *CreateAndStartInstance) Method() string {
 // @StatusErr[MultiInstanceDeployed][409999008][Multi Instance Deployed]!
 // @StatusErr[NoProjectPermission][401999004][No Project Permission]!
 // @StatusErr[ProjectNotFound][404999002][Project Not Found]!
-// @StatusErr[ProjectOperatorNotFound][404999020][Project Operator relationship Not Found]!
+// @StatusErr[ProjectOperatorNotFound][404999021][Project Operator relationship Not Found]!
 // @StatusErr[ResourceNotFound][404999004][Resource Not Found]!
 // @StatusErr[UnknownDeployCommand][400999004][Unknown Deploy Command]!
 
@@ -291,7 +358,7 @@ func (o *CreateApplet) Method() string {
 // @StatusErr[MultiInstanceDeployed][409999008][Multi Instance Deployed]!
 // @StatusErr[NoProjectPermission][401999004][No Project Permission]!
 // @StatusErr[ProjectNotFound][404999002][Project Not Found]!
-// @StatusErr[ProjectOperatorNotFound][404999020][Project Operator relationship Not Found]!
+// @StatusErr[ProjectOperatorNotFound][404999021][Project Operator relationship Not Found]!
 // @StatusErr[ResourceConflict][409999003][Resource Conflict]!
 // @StatusErr[StrategyConflict][409999005][Strategy Conflict]!
 // @StatusErr[UploadFileDiskLimit][403999006][Upload File Disk Limit]!
@@ -654,7 +721,7 @@ func (o *CreateProjectOperator) Method() string {
 // @StatusErr[NoProjectPermission][401999004][No Project Permission]!
 // @StatusErr[OperatorNotFound][404999019][Operator Not Found]!
 // @StatusErr[ProjectNotFound][404999002][Project Not Found]!
-// @StatusErr[ProjectOperatorConflict][409999018][Project Operator relationship Conflict]!
+// @StatusErr[ProjectOperatorConflict][409999019][Project Operator relationship Conflict]!
 
 func (o *CreateProjectOperator) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
 	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.CreateProjectOperator")
@@ -808,6 +875,80 @@ func (o *CreateStrategy) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubC
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
+type CreateTrafficLimit struct {
+	ProjectName  string                                                     `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                                     `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                                     `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	CreateReq    GithubComMachinefiW3BstreamPkgModulesTrafficlimitCreateReq `in:"body"`
+}
+
+func (o *CreateTrafficLimit) Path() string {
+	return "/srv-applet-mgr/v0/traffic/x/:projectName"
+}
+
+func (o *CreateTrafficLimit) Method() string {
+	return "POST"
+}
+
+// @StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!
+// @StatusErr[AccountNotFound][404999017][Account Not Found]!
+// @StatusErr[CreateTrafficSchedulerFailed][500999018][Create Traffic Scheduler Failed]!
+// @StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
+// @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
+// @StatusErr[InvalidClaim][401999003][Invalid Claim]!
+// @StatusErr[InvalidToken][401999002][Invalid Token]!
+// @StatusErr[NoAdminPermission][401999006][No Admin Permission]!
+// @StatusErr[NoProjectPermission][401999004][No Project Permission]!
+// @StatusErr[ProjectNotFound][404999002][Project Not Found]!
+// @StatusErr[TrafficLimitConflict][409999018][Traffic Limit Conflict]!
+
+func (o *CreateTrafficLimit) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.CreateTrafficLimit")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *CreateTrafficLimit) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsTrafficLimit, kit.Metadata, error) {
+	rsp := new(GithubComMachinefiW3BstreamPkgModelsTrafficLimit)
+	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
+	return rsp, meta, err
+}
+
+func (o *CreateTrafficLimit) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsTrafficLimit, kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
+type DeleteAccountAccessKeyByName struct {
+	Name         string `in:"path" name:"name"`
+	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+}
+
+func (o *DeleteAccountAccessKeyByName) Path() string {
+	return "/srv-applet-mgr/v0/access_key"
+}
+
+func (o *DeleteAccountAccessKeyByName) Method() string {
+	return "DELETE"
+}
+
+func (o *DeleteAccountAccessKeyByName) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.DeleteAccountAccessKeyByName")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *DeleteAccountAccessKeyByName) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
+	meta, err := cli.Do(ctx, o, metas...).Into(nil)
+	return meta, err
+}
+
+func (o *DeleteAccountAccessKeyByName) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
 type DownloadResource struct {
 	ResourceID   GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"resourceID"`
 	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
@@ -849,6 +990,32 @@ func (o *DownloadResource) Invoke(cli kit.Client, metas ...kit.Metadata) (*Githu
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
+type EthClient struct {
+}
+
+func (o *EthClient) Path() string {
+	return "/srv-applet-mgr/v0/configuration/eth_client"
+}
+
+func (o *EthClient) Method() string {
+	return "GET"
+}
+
+func (o *EthClient) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.EthClient")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *EthClient) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*EthClientRsp, kit.Metadata, error) {
+	rsp := new(EthClientRsp)
+	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
+	return rsp, meta, err
+}
+
+func (o *EthClient) Invoke(cli kit.Client, metas ...kit.Metadata) (*EthClientRsp, kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
 type GetApplet struct {
 	AppletID     GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"appletID"`
 	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
@@ -887,6 +1054,47 @@ func (o *GetApplet) InvokeContext(ctx context.Context, cli kit.Client, metas ...
 }
 
 func (o *GetApplet) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsApplet, kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
+type GetDownloadResourceUrl struct {
+	ResourceID   GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"resourceID"`
+	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+}
+
+func (o *GetDownloadResourceUrl) Path() string {
+	return "/srv-applet-mgr/v0/resource/url/:resourceID"
+}
+
+func (o *GetDownloadResourceUrl) Method() string {
+	return "GET"
+}
+
+// @StatusErr[AccountNotFound][404999017][Account Not Found]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
+// @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
+// @StatusErr[InvalidClaim][401999003][Invalid Claim]!
+// @StatusErr[InvalidToken][401999002][Invalid Token]!
+// @StatusErr[NoResourcePermission][401999017][No Resource Permission]!
+// @StatusErr[ResourceNotFound][404999004][Resource Not Found]!
+// @StatusErr[ResourcePermNotFound][404999010][Resource Perm Not Found]!
+// @StatusErr[UnsupportedFSOperator][403999009][Unsupported FileSystem Operator]!
+
+func (o *GetDownloadResourceUrl) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.GetDownloadResourceUrl")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *GetDownloadResourceUrl) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesResourceDownLoadResourceRsp, kit.Metadata, error) {
+	rsp := new(GithubComMachinefiW3BstreamPkgModulesResourceDownLoadResourceRsp)
+	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
+	return rsp, meta, err
+}
+
+func (o *GetDownloadResourceUrl) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesResourceDownLoadResourceRsp, kit.Metadata, error) {
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
@@ -1124,7 +1332,7 @@ func (o *GetProjectOperator) Method() string {
 // @StatusErr[NoProjectPermission][401999004][No Project Permission]!
 // @StatusErr[OperatorNotFound][404999019][Operator Not Found]!
 // @StatusErr[ProjectNotFound][404999002][Project Not Found]!
-// @StatusErr[ProjectOperatorNotFound][404999020][Project Operator relationship Not Found]!
+// @StatusErr[ProjectOperatorNotFound][404999021][Project Operator relationship Not Found]!
 
 func (o *GetProjectOperator) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
 	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.GetProjectOperator")
@@ -1266,6 +1474,47 @@ func (o *GetStrategy) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComM
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
+type GetTrafficLimit struct {
+	TrafficLimitID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"trafficLimitID"`
+	AuthInHeader   string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery    string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+}
+
+func (o *GetTrafficLimit) Path() string {
+	return "/srv-applet-mgr/v0/traffic/data/:trafficLimitID"
+}
+
+func (o *GetTrafficLimit) Method() string {
+	return "GET"
+}
+
+// @StatusErr[AccountNotFound][404999017][Account Not Found]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
+// @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
+// @StatusErr[InvalidClaim][401999003][Invalid Claim]!
+// @StatusErr[InvalidToken][401999002][Invalid Token]!
+// @StatusErr[NoAdminPermission][401999006][No Admin Permission]!
+// @StatusErr[NoProjectPermission][401999004][No Project Permission]!
+// @StatusErr[ProjectNotFound][404999002][Project Not Found]!
+// @StatusErr[TrafficLimitNotFound][404999020][Traffic Limit Not Found]!
+
+func (o *GetTrafficLimit) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.GetTrafficLimit")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *GetTrafficLimit) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsTrafficLimit, kit.Metadata, error) {
+	rsp := new(GithubComMachinefiW3BstreamPkgModelsTrafficLimit)
+	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
+	return rsp, meta, err
+}
+
+func (o *GetTrafficLimit) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsTrafficLimit, kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
 type HandleEvent struct {
 	// Channel message channel named (intact project name)
 	Channel      string `in:"path" name:"channel"`
@@ -1289,9 +1538,12 @@ func (o *HandleEvent) Method() string {
 	return "POST"
 }
 
+// @StatusErr[AccountAccessKeyExpired][401999019][Account Access Key Expired]!
 // @StatusErr[AccountConflict][409999015][Account Conflict]!
 // @StatusErr[AccountIdentityConflict][409999014][Account Identity Conflict]!
 // @StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!
+// @StatusErr[AccountKeyNameConflict][409999020][Account Key Name Conflict]!
+// @StatusErr[AccountKeyNotFound][404999022][Account Key Not Found]!
 // @StatusErr[AccountNotFound][404999017][Account Not Found]!
 // @StatusErr[AccountPasswordConflict][409999016][Account Password Conflict]!
 // @StatusErr[AccountPasswordNotFound][404999018][Account Password Not Found]!
@@ -1315,6 +1567,7 @@ func (o *HandleEvent) Method() string {
 // @StatusErr[ContractLogNotFound][404999014][Contract Log Not Found]!
 // @StatusErr[CreateChannelFailed][500999004][Create Message Channel Failed]!
 // @StatusErr[CreateInstanceFailed][500999010][Create Instance Failed]!
+// @StatusErr[CreateTrafficSchedulerFailed][500999018][Create Traffic Scheduler Failed]!
 // @StatusErr[CronJobConflict][409999010][Cron Job Conflict]!
 // @StatusErr[CronJobNotFound][404999011][Cron Job Not Found]!
 // @StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!
@@ -1329,6 +1582,7 @@ func (o *HandleEvent) Method() string {
 // @StatusErr[InstanceNotFound][404999006][Instance Not Found]!
 // @StatusErr[InstanceNotRunning][404999012][Instance Not Running]!
 // @StatusErr[InternalServerError][500999001][internal error]
+// @StatusErr[InvalidAccountAccessKey][401999018][Invalid Account Access Key]!
 // @StatusErr[InvalidAppletContext][401999016][Invalid Applet]!
 // @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
 // @StatusErr[InvalidAuthPublisherID][401999012][Invalid Auth Publisher ID]!
@@ -1338,6 +1592,7 @@ func (o *HandleEvent) Method() string {
 // @StatusErr[InvalidClaim][401999003][Invalid Claim]!
 // @StatusErr[InvalidConfigType][400999002][Invalid Config Type]!
 // @StatusErr[InvalidCronExpressions][400999005][Invalid Cron Expressions]!
+// @StatusErr[InvalidDeleteCondition][400999007][Invalid Delete Condition]!
 // @StatusErr[InvalidEthLoginMessage][401999011][Invalid Siwe Message]!
 // @StatusErr[InvalidEthLoginSignature][401999010][Invalid Siwe Signature]!
 // @StatusErr[InvalidEventChannel][401999014][Invalid Event Channel]!
@@ -1361,8 +1616,8 @@ func (o *HandleEvent) Method() string {
 // @StatusErr[OperatorNotFound][404999019][Operator Not Found]!
 // @StatusErr[ProjectNameConflict][409999002][Project Name Conflict]!
 // @StatusErr[ProjectNotFound][404999002][Project Not Found]!
-// @StatusErr[ProjectOperatorConflict][409999018][Project Operator relationship Conflict]!
-// @StatusErr[ProjectOperatorNotFound][404999020][Project Operator relationship Not Found]!
+// @StatusErr[ProjectOperatorConflict][409999019][Project Operator relationship Conflict]!
+// @StatusErr[ProjectOperatorNotFound][404999021][Project Operator relationship Not Found]!
 // @StatusErr[PublisherConflict][409999007][Publisher Conflict]!
 // @StatusErr[PublisherNotFound][404999008][Publisher Not Found]!
 // @StatusErr[PublisherNotFound][404999008][Publisher Not Found]!
@@ -1373,8 +1628,13 @@ func (o *HandleEvent) Method() string {
 // @StatusErr[StrategyConflict][409999005][Strategy Conflict]!
 // @StatusErr[StrategyNotFound][404999007][Strategy Not Found]!
 // @StatusErr[TopicAlreadySubscribed][403999007][Topic Already Subscribed]!
+// @StatusErr[TrafficLimitConflict][409999018][Traffic Limit Conflict]!
+// @StatusErr[TrafficLimitExceededFailed][500999017][Traffic Limit Exceeded Failed]!
+// @StatusErr[TrafficLimitNotFound][404999020][Traffic Limit Not Found]!
 // @StatusErr[Unauthorized][401999001][unauthorized]
 // @StatusErr[UnknownDeployCommand][400999004][Unknown Deploy Command]!
+// @StatusErr[UnsupportedFSOperator][403999009][Unsupported FileSystem Operator]!
+// @StatusErr[UpdateTrafficSchedulerFailed][500999019][Update Traffic Scheduler Failed]!
 // @StatusErr[UploadFileDiskLimit][403999006][Upload File Disk Limit]!
 // @StatusErr[UploadFileFailed][500999003][Upload File Failed]!
 // @StatusErr[UploadFileMd5Unmatched][403999005][Upload File Md5 Unmatched]!
@@ -1749,6 +2009,52 @@ func (o *ListStrategy) InvokeContext(ctx context.Context, cli kit.Client, metas 
 }
 
 func (o *ListStrategy) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesStrategyListRsp, kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
+type ListTrafficLimit struct {
+	ProjectName  string                                              `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                              `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	ApiType      GithubComMachinefiW3BstreamPkgEnumsTrafficLimitType `in:"query" name:"apiType,omitempty"`
+	AuthInQuery  string                                              `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	Offset       int64                                               `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
+	Size         int64                                               `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
+}
+
+func (o *ListTrafficLimit) Path() string {
+	return "/srv-applet-mgr/v0/traffic/x/:projectName/datalist"
+}
+
+func (o *ListTrafficLimit) Method() string {
+	return "GET"
+}
+
+// @StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!
+// @StatusErr[AccountNotFound][404999017][Account Not Found]!
+// @StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
+// @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
+// @StatusErr[InvalidClaim][401999003][Invalid Claim]!
+// @StatusErr[InvalidToken][401999002][Invalid Token]!
+// @StatusErr[NoAdminPermission][401999006][No Admin Permission]!
+// @StatusErr[NoProjectPermission][401999004][No Project Permission]!
+// @StatusErr[ProjectNotFound][404999002][Project Not Found]!
+
+func (o *ListTrafficLimit) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.ListTrafficLimit")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *ListTrafficLimit) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesTrafficlimitListRsp, kit.Metadata, error) {
+	rsp := new(GithubComMachinefiW3BstreamPkgModulesTrafficlimitListRsp)
+	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
+	return rsp, meta, err
+}
+
+func (o *ListTrafficLimit) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesTrafficlimitListRsp, kit.Metadata, error) {
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
@@ -2189,6 +2495,35 @@ func (o *RemoveStrategy) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Meta
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
+type RemoveTrafficLimit struct {
+	ProjectName    string                                             `in:"path" name:"projectName" validate:"@projectName"`
+	TrafficLimitID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"trafficLimitID"`
+	AuthInHeader   string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery    string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+}
+
+func (o *RemoveTrafficLimit) Path() string {
+	return "/srv-applet-mgr/v0/traffic/x/:projectName/data/:trafficLimitID"
+}
+
+func (o *RemoveTrafficLimit) Method() string {
+	return "DELETE"
+}
+
+func (o *RemoveTrafficLimit) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.RemoveTrafficLimit")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *RemoveTrafficLimit) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
+	meta, err := cli.Do(ctx, o, metas...).Into(nil)
+	return meta, err
+}
+
+func (o *RemoveTrafficLimit) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
 type RemoveWasmLogByInstanceID struct {
 	InstanceID   GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"instanceID"`
 	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
@@ -2252,7 +2587,7 @@ func (o *UpdateApplet) Method() string {
 // @StatusErr[MultiInstanceDeployed][409999008][Multi Instance Deployed]!
 // @StatusErr[NoProjectPermission][401999004][No Project Permission]!
 // @StatusErr[ProjectNotFound][404999002][Project Not Found]!
-// @StatusErr[ProjectOperatorNotFound][404999020][Project Operator relationship Not Found]!
+// @StatusErr[ProjectOperatorNotFound][404999021][Project Operator relationship Not Found]!
 // @StatusErr[ResourceConflict][409999003][Resource Conflict]!
 // @StatusErr[StrategyConflict][409999005][Strategy Conflict]!
 // @StatusErr[UploadFileDiskLimit][403999006][Upload File Disk Limit]!
@@ -2359,6 +2694,54 @@ func (o *UpdateStrategy) InvokeContext(ctx context.Context, cli kit.Client, meta
 }
 
 func (o *UpdateStrategy) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
+type UpdateTrafficLimit struct {
+	ProjectName    string                                                     `in:"path" name:"projectName" validate:"@projectName"`
+	TrafficLimitID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID         `in:"path" name:"trafficLimitID"`
+	AuthInHeader   string                                                     `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery    string                                                     `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	UpdateReq      GithubComMachinefiW3BstreamPkgModulesTrafficlimitUpdateReq `in:"body"`
+}
+
+func (o *UpdateTrafficLimit) Path() string {
+	return "/srv-applet-mgr/v0/traffic/x/:projectName/:trafficLimitID"
+}
+
+func (o *UpdateTrafficLimit) Method() string {
+	return "PUT"
+}
+
+// @StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!
+// @StatusErr[AccountNotFound][404999017][Account Not Found]!
+// @StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
+// @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
+// @StatusErr[InvalidClaim][401999003][Invalid Claim]!
+// @StatusErr[InvalidToken][401999002][Invalid Token]!
+// @StatusErr[NoAdminPermission][401999006][No Admin Permission]!
+// @StatusErr[NoProjectPermission][401999004][No Project Permission]!
+// @StatusErr[ProjectNotFound][404999002][Project Not Found]!
+// @StatusErr[TrafficLimitConflict][409999018][Traffic Limit Conflict]!
+// @StatusErr[TrafficLimitNotFound][404999020][Traffic Limit Not Found]!
+// @StatusErr[UpdateTrafficSchedulerFailed][500999019][Update Traffic Scheduler Failed]!
+
+func (o *UpdateTrafficLimit) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.UpdateTrafficLimit")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *UpdateTrafficLimit) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsTrafficLimit, kit.Metadata, error) {
+	rsp := new(GithubComMachinefiW3BstreamPkgModelsTrafficLimit)
+	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
+	return rsp, meta, err
+}
+
+func (o *UpdateTrafficLimit) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsTrafficLimit, kit.Metadata, error) {
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 

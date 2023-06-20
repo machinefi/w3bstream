@@ -27,6 +27,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/ptrx"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
 
 // Client for request APIs
@@ -216,6 +217,7 @@ func init() {
 		types.WithUploadConfigContext(_uploadConfig),
 		types.WithFileSystemOpContext(_fsop),
 		types.WithRedisEndpointContext(_redis),
+		kvdb.WithRedisDBKeyContext(kvdb.NewRedisDB(_redis)),
 		types.WithTaskWorkerContext(_workers),
 		types.WithTaskBoardContext(mq.NewTaskBoard(_tasks)),
 		types.WithETHClientConfigContext(_ethClients),
