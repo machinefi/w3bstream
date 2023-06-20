@@ -5,6 +5,8 @@ import (
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/enums"
+	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/modules/trafficlimit"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -17,7 +19,11 @@ type ListTrafficLimit struct {
 func (r *ListTrafficLimit) Path() string { return "/datalist" }
 
 func (r *ListTrafficLimit) Output(ctx context.Context) (interface{}, error) {
-	ca := middleware.MustCurrentAccountFromContext(ctx)
+	ca, ok := middleware.MustCurrentAccountFromContext(ctx).CheckRole(enums.ACCOUNT_ROLE__ADMIN)
+	if !ok {
+		return nil, status.NoAdminPermission
+	}
+
 	ctx, err := ca.WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
 	if err != nil {
 		return nil, err
@@ -35,8 +41,12 @@ type GetTrafficLimit struct {
 func (r *GetTrafficLimit) Path() string { return "/data/:trafficLimitID" }
 
 func (r *GetTrafficLimit) Output(ctx context.Context) (interface{}, error) {
-	ctx, err := middleware.MustCurrentAccountFromContext(ctx).
-		WithTrafficLimitContextBySFID(ctx, r.TrafficLimitID)
+	ca, ok := middleware.MustCurrentAccountFromContext(ctx).CheckRole(enums.ACCOUNT_ROLE__ADMIN)
+	if !ok {
+		return nil, status.NoAdminPermission
+	}
+
+	ctx, err := ca.WithTrafficLimitContextBySFID(ctx, r.TrafficLimitID)
 	if err != nil {
 		return nil, err
 	}
