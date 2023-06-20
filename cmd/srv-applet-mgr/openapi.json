@@ -2722,7 +2722,10 @@
             "x-status-errors": [
               "@StatusErr[BadRequest][400999001][BadRequest]!",
               "@StatusErr[DeprecatedProject][400999003][Deprecated Project]!",
+              "@StatusErr[InvalidChainHeightIDs][400999010][Invalid Chain Height IDs]!",
+              "@StatusErr[InvalidChainTxIDs][400999009][Invalid Chain Tx IDs]!",
               "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!",
+              "@StatusErr[InvalidContractLogIDs][400999008][Invalid Contract Log IDs]!",
               "@StatusErr[InvalidCronExpressions][400999005][Invalid Cron Expressions]!",
               "@StatusErr[InvalidPrivateKey][400999006][Invalid Private Key]!",
               "@StatusErr[UnknownDeployCommand][400999004][Unknown Deploy Command]!",
