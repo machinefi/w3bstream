@@ -90,7 +90,7 @@ func BatchUpdateChainTxPausedBySFIDs(ctx context.Context, ids []types.SFID, s da
 
 	expr := builder.Update(d.T(m)).Set(
 		m.ColPaused().ValueBy(s),
-		m.ColUpdatedAt().ValueBy(time.Now()),
+		m.ColUpdatedAt().ValueBy(types.Timestamp{Time: time.Now()}),
 	).Where(m.ColChainTxID().In(ids))
 
 	if _, err := d.Exec(expr); err != nil {
