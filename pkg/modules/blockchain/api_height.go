@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"context"
+	"time"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
@@ -25,16 +26,13 @@ func CreateChainHeight(ctx context.Context, r *CreateChainHeightReq) (*models.Ch
 		return nil, err
 	}
 
-	n := *r
-	n.EventType = getEventType(n.EventType)
-	n.Paused = getPaused(n.Paused)
 	m := &models.ChainHeight{
 		RelChainHeight: models.RelChainHeight{ChainHeightID: idg.MustGenSFID()},
 		ChainHeightData: models.ChainHeightData{
 			ProjectName:     r.ProjectName,
 			Uniq:            chainUniqFlag,
 			Finished:        datatypes.FALSE,
-			ChainHeightInfo: n.ChainHeightInfo,
+			ChainHeightInfo: r.ChainHeightInfo,
 		},
 	}
 	if err := m.Create(d); err != nil {
@@ -59,6 +57,17 @@ func GetChainHeightBySFID(ctx context.Context, id types.SFID) (*models.ChainHeig
 	return m, nil
 }
 
+func ListChainHeightBySFIDs(ctx context.Context, ids []types.SFID) ([]models.ChainHeight, error) {
+	d := types.MustMonitorDBExecutorFromContext(ctx)
+	m := &models.ChainHeight{}
+
+	data, err := m.List(d, m.ColChainHeightID().In(ids))
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return data, nil
+}
+
 func RemoveChainHeightBySFID(ctx context.Context, id types.SFID) error {
 	d := types.MustMonitorDBExecutorFromContext(ctx)
 
@@ -69,7 +78,7 @@ func RemoveChainHeightBySFID(ctx context.Context, id types.SFID) error {
 	return nil
 }
 
-func UpdateChainHeightPausedBySFIDs(ctx context.Context, ids []types.SFID, s datatypes.Bool) error {
+func BatchUpdateChainHeightPausedBySFIDs(ctx context.Context, ids []types.SFID, s datatypes.Bool) error {
 	d := types.MustMonitorDBExecutorFromContext(ctx)
 	m := &models.ChainHeight{
 		ChainHeightData: models.ChainHeightData{
@@ -79,9 +88,10 @@ func UpdateChainHeightPausedBySFIDs(ctx context.Context, ids []types.SFID, s dat
 		},
 	}
 
-	tbl := d.T(m)
-	fvs := builder.FieldValueFromStructByNoneZero(m)
-	expr := builder.Update(tbl).Where(m.ColChainHeightID().In(ids)).Set(tbl.AssignmentsByFieldValues(fvs)...)
+	expr := builder.Update(d.T(m)).Set(
+		m.ColPaused().ValueBy(s),
+		m.ColUpdatedAt().ValueBy(time.Now()),
+	).Where(m.ColChainHeightID().In(ids))
 
 	if _, err := d.Exec(expr); err != nil {
 		return status.DatabaseError.StatusErr().WithDesc(err.Error())

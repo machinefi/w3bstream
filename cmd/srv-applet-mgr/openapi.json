@@ -3399,10 +3399,10 @@
               "schema": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesBlockchainUpdateMonitorReq"
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesBlockchainBatchUpdateMonitorReq"
                   },
                   {
-                    "x-go-field-name": "UpdateMonitorReq"
+                    "x-go-field-name": "BatchUpdateMonitorReq"
                   }
                 ]
               }
@@ -3423,7 +3423,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[BadRequest][400999001][BadRequest]!",
+              "@StatusErr[InvalidChainHeightIDs][400999010][Invalid Chain Height IDs]!",
               "@StatusErr[UnknownMonitorCommand][400999007][Unknown Deploy Command]!"
             ]
           },
@@ -3456,9 +3456,7 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
-              "@StatusErr[ChainHeightNotFound][404999016][Chain Height Not Found]!",
-              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
             ]
           },
           "500": {
@@ -3793,10 +3791,10 @@
               "schema": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesBlockchainUpdateMonitorReq"
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesBlockchainBatchUpdateMonitorReq"
                   },
                   {
-                    "x-go-field-name": "UpdateMonitorReq"
+                    "x-go-field-name": "BatchUpdateMonitorReq"
                   }
                 ]
               }
@@ -3817,7 +3815,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[BadRequest][400999001][BadRequest]!",
+              "@StatusErr[InvalidChainTxIDs][400999009][Invalid Chain Tx IDs]!",
               "@StatusErr[UnknownMonitorCommand][400999007][Unknown Deploy Command]!"
             ]
           },
@@ -3850,9 +3848,7 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
-              "@StatusErr[ChainTxNotFound][404999015][Chain Tx Not Found]!",
-              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
             ]
           },
           "500": {
@@ -4073,10 +4069,10 @@
               "schema": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesBlockchainUpdateMonitorReq"
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesBlockchainBatchUpdateMonitorReq"
                   },
                   {
-                    "x-go-field-name": "UpdateMonitorReq"
+                    "x-go-field-name": "BatchUpdateMonitorReq"
                   }
                 ]
               }
@@ -4097,7 +4093,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[BadRequest][400999001][BadRequest]!",
+              "@StatusErr[InvalidContractLogIDs][400999008][Invalid Contract Log IDs]!",
               "@StatusErr[UnknownMonitorCommand][400999007][Unknown Deploy Command]!"
             ]
           },
@@ -4130,9 +4126,7 @@
             },
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
-              "@StatusErr[ContractLogNotFound][404999014][Contract Log Not Found]!",
-              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
             ]
           },
           "500": {
@@ -9731,7 +9725,7 @@
           "eventType": {
             "type": "string",
             "x-go-field-name": "EventType",
-            "x-tag-json": "eventType,omitempty"
+            "x-tag-json": "eventType,omitempty,default='MONITOR_DEFAULT'"
           },
           "height": {
             "type": "integer",
@@ -9746,7 +9740,7 @@
               },
               {
                 "x-go-field-name": "Paused",
-                "x-tag-json": "paused,omitempty"
+                "x-tag-json": "paused,omitempty,default='false'"
               }
             ]
           }
@@ -9814,7 +9808,7 @@
           "eventType": {
             "type": "string",
             "x-go-field-name": "EventType",
-            "x-tag-json": "eventType,omitempty"
+            "x-tag-json": "eventType,omitempty,default='MONITOR_DEFAULT'"
           },
           "paused": {
             "allOf": [
@@ -9823,7 +9817,7 @@
               },
               {
                 "x-go-field-name": "Paused",
-                "x-tag-json": "paused,omitempty"
+                "x-tag-json": "paused,omitempty,default='false'"
               }
             ]
           },
@@ -9974,7 +9968,7 @@
           "eventType": {
             "type": "string",
             "x-go-field-name": "EventType",
-            "x-tag-json": "eventType,omitempty"
+            "x-tag-json": "eventType,omitempty,default='MONITOR_DEFAULT'"
           },
           "paused": {
             "allOf": [
@@ -9983,7 +9977,7 @@
               },
               {
                 "x-go-field-name": "Paused",
-                "x-tag-json": "paused,omitempty"
+                "x-tag-json": "paused,omitempty,default='false'"
               }
             ]
           },
@@ -11212,6 +11206,24 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/applet.UpdateReq",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesAppletUpdateReq"
       },
+      "GithubComMachinefiW3BstreamPkgModulesBlockchainBatchUpdateMonitorReq": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+            },
+            "x-go-field-name": "IDs",
+            "x-tag-json": "ids"
+          }
+        },
+        "required": [
+          "ids"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/blockchain.BatchUpdateMonitorReq",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesBlockchainBatchUpdateMonitorReq"
+      },
       "GithubComMachinefiW3BstreamPkgModulesBlockchainCreateChainHeightReq": {
         "allOf": [
           {
@@ -11247,24 +11259,6 @@
             "x-id": "GithubComMachinefiW3BstreamPkgModulesBlockchainCreateContractLogReq"
           }
         ]
-      },
-      "GithubComMachinefiW3BstreamPkgModulesBlockchainUpdateMonitorReq": {
-        "type": "object",
-        "properties": {
-          "ids": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
-            },
-            "x-go-field-name": "IDs",
-            "x-tag-json": "ids"
-          }
-        },
-        "required": [
-          "ids"
-        ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/blockchain.UpdateMonitorReq",
-        "x-id": "GithubComMachinefiW3BstreamPkgModulesBlockchainUpdateMonitorReq"
       },
       "GithubComMachinefiW3BstreamPkgModulesCronjobCreateReq": {
         "allOf": [

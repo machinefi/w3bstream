@@ -5,8 +5,6 @@ import (
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
-	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -14,7 +12,7 @@ import (
 
 const chainUniqFlag = 0
 
-type UpdateMonitorReq struct {
+type BatchUpdateMonitorReq struct {
 	IDs []types.SFID `json:"ids"`
 }
 
@@ -50,18 +48,4 @@ func RemoveMonitor(ctx context.Context, projectName string) error {
 			return nil
 		},
 	).Do()
-}
-
-func getEventType(eventType string) string {
-	if eventType == "" {
-		return enums.MONITOR_EVENTTYPEDEFAULT
-	}
-	return eventType
-}
-
-func getPaused(i datatypes.Bool) datatypes.Bool {
-	if i == datatypes.TRUE {
-		return datatypes.TRUE
-	}
-	return datatypes.FALSE
 }

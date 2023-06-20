@@ -29,7 +29,7 @@ type ContractLogData struct {
 }
 
 type ContractLogInfo struct {
-	EventType       string         `db:"f_event_type"                   json:"eventType,omitempty"`
+	EventType       string         `db:"f_event_type"                   json:"eventType,omitempty,default='MONITOR_DEFAULT'"`
 	ChainID         uint64         `db:"f_chain_id"                     json:"chainID"`
 	ContractAddress string         `db:"f_contract_address"             json:"contractAddress"`
 	BlockStart      uint64         `db:"f_block_start"                  json:"blockStart"`
@@ -39,5 +39,5 @@ type ContractLogInfo struct {
 	Topic1          string         `db:"f_topic1,default=''"            json:"topic1,omitempty"`
 	Topic2          string         `db:"f_topic2,default=''"            json:"topic2,omitempty"`
 	Topic3          string         `db:"f_topic3,default=''"            json:"topic3,omitempty"`
-	Paused          datatypes.Bool `db:"f_paused,default='2'"           json:"paused,omitempty"`
+	Paused          datatypes.Bool `db:"f_paused,default='2'"           json:"paused,omitempty,default='false'"`
 }

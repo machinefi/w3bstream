@@ -170,6 +170,12 @@ const (
 	InvalidPrivateKey
 	// @errTalk Unknown Deploy Command
 	UnknownMonitorCommand
+	// @errTalk Invalid Contract Log IDs
+	InvalidContractLogIDs
+	// @errTalk Invalid Chain Tx IDs
+	InvalidChainTxIDs
+	// @errTalk Invalid Chain Height IDs
+	InvalidChainHeightIDs
 )
 
 const (
