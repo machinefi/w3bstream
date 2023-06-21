@@ -5,13 +5,16 @@ import (
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
-	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 const chainUniqFlag = 0
+
+type BatchUpdateMonitorReq struct {
+	IDs []types.SFID `json:"ids"`
+}
 
 func RemoveMonitor(ctx context.Context, projectName string) error {
 	d := types.MustMonitorDBExecutorFromContext(ctx)
@@ -45,11 +48,4 @@ func RemoveMonitor(ctx context.Context, projectName string) error {
 			return nil
 		},
 	).Do()
-}
-
-func getEventType(eventType string) string {
-	if eventType == "" {
-		return enums.MONITOR_EVENTTYPEDEFAULT
-	}
-	return eventType
 }

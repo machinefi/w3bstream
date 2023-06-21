@@ -49,6 +49,14 @@ func (v Error) Key() string {
 		return "InvalidCronExpressions"
 	case InvalidPrivateKey:
 		return "InvalidPrivateKey"
+	case UnknownMonitorCommand:
+		return "UnknownMonitorCommand"
+	case InvalidContractLogIDs:
+		return "InvalidContractLogIDs"
+	case InvalidChainTxIDs:
+		return "InvalidChainTxIDs"
+	case InvalidChainHeightIDs:
+		return "InvalidChainHeightIDs"
 	case Unauthorized:
 		return "Unauthorized"
 	case InvalidAuthValue:
@@ -245,6 +253,14 @@ func (v Error) Msg() string {
 		return "Invalid Cron Expressions"
 	case InvalidPrivateKey:
 		return "Invalid Private Key"
+	case UnknownMonitorCommand:
+		return "Unknown Deploy Command"
+	case InvalidContractLogIDs:
+		return "Invalid Contract Log IDs"
+	case InvalidChainTxIDs:
+		return "Invalid Chain Tx IDs"
+	case InvalidChainHeightIDs:
+		return "Invalid Chain Height IDs"
 	case Unauthorized:
 		return "unauthorized"
 	case InvalidAuthValue:
@@ -440,6 +456,14 @@ func (v Error) CanBeTalk() bool {
 	case InvalidCronExpressions:
 		return true
 	case InvalidPrivateKey:
+		return true
+	case UnknownMonitorCommand:
+		return true
+	case InvalidContractLogIDs:
+		return true
+	case InvalidChainTxIDs:
+		return true
+	case InvalidChainHeightIDs:
 		return true
 	case Unauthorized:
 		return false
