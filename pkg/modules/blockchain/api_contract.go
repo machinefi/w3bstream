@@ -2,9 +2,12 @@ package blockchain
 
 import (
 	"context"
+	"time"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -23,15 +26,13 @@ func CreateContractLog(ctx context.Context, r *CreateContractLogReq) (*models.Co
 		return nil, err
 	}
 
-	n := *r
-	n.BlockCurrent = n.BlockStart
-	n.EventType = getEventType(n.EventType)
+	r.BlockCurrent = r.BlockStart
 	m := &models.ContractLog{
 		RelContractLog: models.RelContractLog{ContractLogID: idg.MustGenSFID()},
 		ContractLogData: models.ContractLogData{
 			ProjectName:     r.ProjectName,
 			Uniq:            chainUniqFlag,
-			ContractLogInfo: n.ContractLogInfo,
+			ContractLogInfo: r.ContractLogInfo,
 		},
 	}
 	if err := m.Create(d); err != nil {
@@ -64,11 +65,43 @@ func GetContractLogBySFID(ctx context.Context, id types.SFID) (*models.ContractL
 	return m, nil
 }
 
+func ListContractLogBySFIDs(ctx context.Context, ids []types.SFID) ([]models.ContractLog, error) {
+	d := types.MustMonitorDBExecutorFromContext(ctx)
+	m := &models.ContractLog{}
+
+	data, err := m.List(d, m.ColContractLogID().In(ids))
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return data, nil
+}
+
 func RemoveContractLogBySFID(ctx context.Context, id types.SFID) error {
 	d := types.MustMonitorDBExecutorFromContext(ctx)
 
 	m := &models.ContractLog{RelContractLog: models.RelContractLog{ContractLogID: id}}
 	if err := m.DeleteByContractLogID(d); err != nil {
+		return status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return nil
+}
+
+func BatchUpdateContractLogPausedBySFIDs(ctx context.Context, ids []types.SFID, s datatypes.Bool) error {
+	d := types.MustMonitorDBExecutorFromContext(ctx)
+	m := &models.ContractLog{
+		ContractLogData: models.ContractLogData{
+			ContractLogInfo: models.ContractLogInfo{
+				Paused: s,
+			},
+		},
+	}
+
+	expr := builder.Update(d.T(m)).Set(
+		m.ColPaused().ValueBy(s),
+		m.ColUpdatedAt().ValueBy(types.Timestamp{Time: time.Now()}),
+	).Where(m.ColContractLogID().In(ids))
+
+	if _, err := d.Exec(expr); err != nil {
 		return status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
 	return nil
