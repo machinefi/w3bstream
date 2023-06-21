@@ -39,9 +39,6 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	prj := types.MustProjectFromContext(ctx)
-	metrics.EventMtc.WithLabelValues(prj.AccountID.String(), prj.Name, pub.Key, r.EventType).Inc()
-
 	if err := trafficlimit.TrafficLimit(ctx, enums.TRAFFIC_LIMIT_TYPE__EVENT); err != nil {
 		rsp.Results = append([]*event.Result{}, &event.Result{
 			AppletName:  "",
