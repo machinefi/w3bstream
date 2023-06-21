@@ -8,6 +8,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
+	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/account"
@@ -63,6 +64,13 @@ type CurrentAccount struct {
 	models.Account
 }
 
+func (v *CurrentAccount) CheckRole(role enums.AccountRole) (*CurrentAccount, bool) {
+	if v.Role == role {
+		return v, true
+	}
+	return nil, false
+}
+
 func (v *CurrentAccount) WithAccount(ctx context.Context) context.Context {
 	return types.WithAccount(ctx, &v.Account)
 }
@@ -73,10 +81,11 @@ func (v *CurrentAccount) WithProjectContextByName(ctx context.Context, name stri
 	if err != nil {
 		return nil, err
 	}
-	if v.AccountID != prj.AccountID {
-		return nil, status.NoProjectPermission
+	if v.Role == enums.ACCOUNT_ROLE__ADMIN || v.AccountID == prj.AccountID {
+		return types.WithProject(ctx, prj), nil
 	}
-	return types.WithProject(ctx, prj), nil
+
+	return nil, status.NoProjectPermission
 }
 
 // WithProjectContextBySFID With project context by project SFID
@@ -85,10 +94,11 @@ func (v *CurrentAccount) WithProjectContextBySFID(ctx context.Context, id types.
 	if err != nil {
 		return nil, err
 	}
-	if v.AccountID != prj.AccountID {
-		return nil, status.NoProjectPermission
+	if v.Role == enums.ACCOUNT_ROLE__ADMIN || v.AccountID == prj.AccountID {
+		return types.WithProject(ctx, prj), nil
 	}
-	return types.WithProject(ctx, prj), nil
+
+	return nil, status.NoProjectPermission
 }
 
 // WithAppletContextBySFID With applet contexts by applet SFID
@@ -177,10 +187,11 @@ func (v *CurrentAccount) WithResourceOwnerContextBySFID(ctx context.Context, id 
 	if err != nil {
 		return nil, err
 	}
-	if v.AccountID != ship.AccountID {
-		return nil, status.NoResourcePermission
+	if v.Role == enums.ACCOUNT_ROLE__ADMIN || v.AccountID == ship.AccountID {
+		return types.WithResourceOwnership(ctx, ship), nil
 	}
-	return types.WithResourceOwnership(ctx, ship), nil
+
+	return nil, status.NoResourcePermission
 }
 
 func (v *CurrentAccount) WithCronJobBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
@@ -245,8 +256,9 @@ func (v *CurrentAccount) WithTrafficLimitContextBySFIDAndProjectName(ctx context
 		return nil, err
 	}
 	project := types.MustProjectFromContext(ctx)
-	if traffic.ProjectID != project.ProjectID {
-		return nil, status.NoProjectPermission
+	if v.Role == enums.ACCOUNT_ROLE__ADMIN || traffic.ProjectID == project.ProjectID {
+		return types.WithTrafficLimit(ctx, traffic), nil
 	}
-	return types.WithTrafficLimit(ctx, traffic), nil
+
+	return nil, status.NoProjectPermission
 }

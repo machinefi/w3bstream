@@ -64,6 +64,20 @@ func GetDetail(ctx context.Context, prj *models.Project) (*Detail, error) {
 	}, nil
 }
 
+func ListByCond(ctx context.Context, r *CondArgs) ([]models.Project, error) {
+	var (
+		d    = types.MustMgrDBExecutorFromContext(ctx)
+		prj  = &models.Project{}
+		cond = r.Condition()
+	)
+
+	data, err := prj.List(d, cond)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return data, nil
+}
+
 func List(ctx context.Context, r *ListReq) (*ListRsp, error) {
 	var (
 		err  error
