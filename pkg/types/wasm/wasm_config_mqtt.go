@@ -20,20 +20,19 @@ func (m *MqttClient) ConfigType() enums.ConfigType {
 	return enums.CONFIG_TYPE__PROJECT_MQTT
 }
 
-// TODO impl MqttClient.Init
+func (m *MqttClient) Init(ctx context.Context) error {
+	if m.Client != nil {
+		return nil
+	}
+	var (
+		err error
+		brk = types.MustMqttBrokerFromContext(ctx)
+		prj = types.MustProjectFromContext(ctx)
+	)
+	m.Client, err = brk.Client(prj.Name)
+	return err
+}
 
 func (m *MqttClient) WithContext(ctx context.Context) context.Context {
-	mq := types.MustMqttBrokerFromContext(ctx)
-	log := types.MustLoggerFromContext(ctx)
-	projectName := types.MustProjectFromContext(ctx).ProjectName.Name
-	cli, err := mq.Client(projectName)
-	if err != nil {
-		log.Error(err)
-		return ctx
-	}
-	client := &MqttClient{
-		cli,
-	}
-
-	return WithMQTTClient(ctx, client)
+	return WithMQTTClient(ctx, m)
 }

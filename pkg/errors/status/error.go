@@ -176,6 +176,8 @@ const (
 	InvalidChainTxIDs
 	// @errTalk Invalid Chain Height IDs
 	InvalidChainHeightIDs
+	// @errTalk Invalid VM State
+	InvalidVMState
 )
 
 const (

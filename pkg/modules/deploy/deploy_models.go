@@ -39,13 +39,6 @@ func (r *CondArgs) Condition() builder.SqlCondition {
 			c = append(c, m.ColAppletID().In(r.AppletIDs))
 		}
 	}
-	if len(r.AppletIDs) > 0 {
-		if len(r.AppletIDs) == 1 {
-			c = append(c, m.ColAppletID().Eq(r.AppletIDs[0]))
-		} else {
-			c = append(c, m.ColAppletID().In(r.AppletIDs))
-		}
-	}
 	if len(r.States) > 0 {
 		if len(r.States) == 1 {
 			c = append(c, m.ColState().Eq(r.States[0]))
