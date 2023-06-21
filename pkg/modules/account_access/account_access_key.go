@@ -22,11 +22,11 @@ func init() {
 	jwt.SetBuiltInTokenFn(Validate)
 }
 
-func Create(ctx context.Context, r *CreateReq) (*models.AccountAccessKey, error) {
+func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	acc := types.MustAccountFromContext(ctx)
 
-	rand, _, ts := GenAccessKey(acc.AccountID)
+	rand, key, ts := GenAccessKey(acc.AccountID)
 
 	exp := time.Time{}
 	if r.ExpirationDays > 0 {
@@ -36,9 +36,10 @@ func Create(ctx context.Context, r *CreateReq) (*models.AccountAccessKey, error)
 	m := &models.AccountAccessKey{
 		RelAccount: models.RelAccount{AccountID: acc.AccountID},
 		AccountAccessKeyInfo: models.AccountAccessKeyInfo{
-			Name:      r.Name,
-			AccessKey: rand,
-			ExpiredAt: types.Timestamp{Time: exp},
+			Name:        r.Name,
+			AccessKey:   rand,
+			ExpiredAt:   types.Timestamp{Time: exp},
+			Description: r.Desc,
 		},
 		OperationTimesWithDeleted: datatypes.OperationTimesWithDeleted{
 			OperationTimes: datatypes.OperationTimes{
@@ -53,7 +54,16 @@ func Create(ctx context.Context, r *CreateReq) (*models.AccountAccessKey, error)
 		}
 		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
-	return m, nil
+	rsp := &CreateRsp{
+		Name:      r.Name,
+		AccessKey: key,
+		ExpiredAt: &types.Timestamp{Time: exp},
+		Desc:      r.Desc,
+	}
+	if rsp.ExpiredAt.IsZero() {
+		rsp.ExpiredAt = nil
+	}
+	return rsp, nil
 }
 
 func DeleteByName(ctx context.Context, name string) error {
@@ -78,7 +88,7 @@ func Validate(ctx context.Context, key string) (interface{}, error, bool) {
 	if !strings.HasPrefix(key, "w3b_") {
 		return nil, nil, false
 	}
-	id, rand, _, err := ParseAccessKey(key)
+	id, rand, ts, err := ParseAccessKey(key)
 	if err != nil {
 		return nil, err, true
 	}
@@ -100,7 +110,11 @@ func Validate(ctx context.Context, key string) (interface{}, error, bool) {
 		return nil, status.InvalidAccountAccessKey, true
 	}
 
-	if time.Now().After(m.ExpiredAt.Time) {
+	if ts.UTC().Second() != m.CreatedAt.UTC().Second() {
+		return nil, status.InvalidAccountAccessKey, true
+	}
+
+	if !m.ExpiredAt.IsZero() && time.Now().After(m.ExpiredAt.Time) {
 		return nil, status.AccountAccessKeyExpired, true
 	}
 
