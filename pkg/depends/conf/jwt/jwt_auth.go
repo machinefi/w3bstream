@@ -6,7 +6,6 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
 )
@@ -29,29 +28,26 @@ func (r Auth) Output(ctx context.Context) (pl interface{}, err error) {
 		av = r.AuthInHeader
 	}
 	tok := strings.TrimSpace(strings.Replace(av, "Bearer", " ", 1))
+
+	ok = false
 	if BuiltInTokenValidateFn != nil {
-		if pl, err, ok = BuiltInTokenValidateFn(ctx, tok); ok {
-			switch v := pl.(type) {
-			case string:
-				return v, err
-			case types.String:
-				return v.String(), err
-			default:
-				return "", ErrInvalidBuiltinFnPayload
-			}
+		pl, err, ok = BuiltInTokenValidateFn(ctx, tok)
+	}
+	if !ok {
+		var claims *Claims
+		if claims, err = jwt.ParseToken(tok); err == nil {
+			pl = claims.Payload
 		}
 	}
 
-	claims, err := jwt.ParseToken(tok)
 	if err != nil {
 		return nil, err
 	}
 
-	if WithPermissionFn != nil && !WithPermissionFn(claims.Payload) {
+	if WithPermissionFn != nil && !WithPermissionFn(pl) {
 		return nil, ErrNoPermission
 	}
 
-	pl = claims.Payload
 	return
 }
 
@@ -81,9 +77,8 @@ func AuthFromContext(ctx context.Context) interface{} {
 }
 
 var (
-	ErrEmptyJwtContext         = errors.New("empty jwt context")
-	ErrNoPermission            = errors.New("no permission")
-	ErrInvalidBuiltinFnPayload = errors.New("invalid builtinFn payload")
+	ErrEmptyJwtContext = errors.New("empty jwt context")
+	ErrNoPermission    = errors.New("no permission")
 )
 
 var BuiltInTokenValidateFn func(context.Context, string) (interface{}, error, bool)
