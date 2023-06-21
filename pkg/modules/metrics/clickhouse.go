@@ -34,11 +34,7 @@ var (
 
 func Init(ctx context.Context) {
 	cfg, existed := types.MetricsCenterConfigFromContext(ctx)
-	if !existed ||
-		len(cfg.ClickHouseAddr) == 0 ||
-		len(cfg.ClickHouseDB) == 0 ||
-		len(cfg.ClickHouseUser) == 0 ||
-		len(cfg.ClickHousePassword) == 0 {
+	if !existed || !validateCfg(cfg) {
 		log.Println("fail to get the config of metrics center")
 		return
 	}
@@ -48,6 +44,13 @@ func Init(ctx context.Context) {
 		cfg.ClickHouseUser,
 		cfg.ClickHousePassword,
 	})
+}
+
+func validateCfg(cfg *types.MetricsCenterConfig) bool {
+	return len(cfg.ClickHouseAddr) > 0 &&
+		len(cfg.ClickHouseDB) > 0 &&
+		len(cfg.ClickHouseUser) > 0 &&
+		len(cfg.ClickHousePassword) > 0
 }
 
 func newClickhouseClient(cfg *config) *ClickhouseClient {
