@@ -59,6 +59,8 @@ func (v Error) Key() string {
 		return "InvalidChainTxIDs"
 	case InvalidChainHeightIDs:
 		return "InvalidChainHeightIDs"
+	case InvalidVMState:
+		return "InvalidVMState"
 	case Unauthorized:
 		return "Unauthorized"
 	case InvalidAuthValue:
@@ -265,6 +267,8 @@ func (v Error) Msg() string {
 		return "Invalid Chain Tx IDs"
 	case InvalidChainHeightIDs:
 		return "Invalid Chain Height IDs"
+	case InvalidVMState:
+		return "Invalid VM State"
 	case Unauthorized:
 		return "unauthorized"
 	case InvalidAuthValue:
@@ -470,6 +474,8 @@ func (v Error) CanBeTalk() bool {
 	case InvalidChainTxIDs:
 		return true
 	case InvalidChainHeightIDs:
+		return true
+	case InvalidVMState:
 		return true
 	case Unauthorized:
 		return false

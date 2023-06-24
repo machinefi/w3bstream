@@ -959,7 +959,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!"
+              "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!",
+              "@StatusErr[InvalidVMState][400999012][Invalid VM State]!"
             ]
           },
           "401": {
@@ -1312,7 +1313,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!"
+              "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!",
+              "@StatusErr[InvalidVMState][400999012][Invalid VM State]!"
             ]
           },
           "401": {
@@ -2016,6 +2018,7 @@
             },
             "x-status-errors": [
               "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!",
+              "@StatusErr[InvalidVMState][400999012][Invalid VM State]!",
               "@StatusErr[UnknownDeployCommand][400999004][Unknown Deploy Command]!"
             ]
           },
@@ -2731,6 +2734,7 @@
               "@StatusErr[InvalidCronExpressions][400999005][Invalid Cron Expressions]!",
               "@StatusErr[InvalidDeleteCondition][400999007][Invalid Delete Condition]!",
               "@StatusErr[InvalidPrivateKey][400999006][Invalid Private Key]!",
+              "@StatusErr[InvalidVMState][400999012][Invalid VM State]!",
               "@StatusErr[UnknownDeployCommand][400999004][Unknown Deploy Command]!",
               "@StatusErr[UnknownMonitorCommand][400999008][Unknown Deploy Command]!"
             ]
