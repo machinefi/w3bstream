@@ -16,6 +16,7 @@ import (
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -49,9 +50,12 @@ func (t *contract) do(ctx context.Context) {
 	_, l = l.Start(ctx, "contract.run")
 	defer l.End()
 
-	cs, err := m.List(d, builder.Or(
-		m.ColBlockCurrent().Lt(m.ColBlockEnd()),
-		m.ColBlockEnd().Eq(0),
+	cs, err := m.List(d, builder.And(
+		builder.Or(
+			m.ColBlockCurrent().Lt(m.ColBlockEnd()),
+			m.ColBlockEnd().Eq(0),
+		),
+		m.ColPaused().Eq(datatypes.FALSE),
 	))
 	if err != nil {
 		l.Error(errors.Wrap(err, "list contractlog db failed"))

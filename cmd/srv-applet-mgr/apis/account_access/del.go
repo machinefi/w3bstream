@@ -13,6 +13,8 @@ type DeleteAccountAccessKeyByName struct {
 	Name string `in:"path" name:"name"`
 }
 
+func (r *DeleteAccountAccessKeyByName) Path() string { return "/:name" }
+
 func (r *DeleteAccountAccessKeyByName) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.MustCurrentAccountFromContext(ctx)
 	return nil, account_access.DeleteByName(ca.WithAccount(ctx), r.Name)

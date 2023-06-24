@@ -216,6 +216,14 @@ func (*ContractLog) FieldTopic3() string {
 	return "Topic3"
 }
 
+func (m *ContractLog) ColPaused() *builder.Column {
+	return ContractLogTable.ColByFieldName(m.FieldPaused())
+}
+
+func (*ContractLog) FieldPaused() string {
+	return "Paused"
+}
+
 func (m *ContractLog) ColCreatedAt() *builder.Column {
 	return ContractLogTable.ColByFieldName(m.FieldCreatedAt())
 }

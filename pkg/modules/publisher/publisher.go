@@ -136,7 +136,7 @@ func RemoveBySFID(ctx context.Context, acc *models.Account, prj *models.Project,
 	).Do(); err != nil {
 		return err
 	}
-	metrics.PublisherMtc.WithLabelValues(acc.AccountID.String(), prj.Name).Dec()
+	metrics.PublisherMetricsDec(ctx, acc.AccountID.String(), prj.Name)
 	return nil
 }
 
@@ -175,7 +175,9 @@ func Remove(ctx context.Context, acc *models.Account, r *CondArgs) error {
 	if err != nil {
 		return err
 	}
-	metrics.PublisherMtc.WithLabelValues(acc.AccountID.String(), prj.Name).Sub(float64(numDeleted))
+	for i := 0; i < int(numDeleted); i++ {
+		metrics.PublisherMetricsDec(ctx, acc.AccountID.String(), prj.Name)
+	}
 	return nil
 }
 
@@ -206,7 +208,7 @@ func Create(ctx context.Context, r *CreateReq) (*models.Publisher, error) {
 		}
 		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
-	metrics.PublisherMtc.WithLabelValues(acc.AccountID.String(), prj.Name).Inc()
+	metrics.PublisherMetricsInc(ctx, acc.AccountID.String(), prj.Name)
 	return pub, nil
 }
 
