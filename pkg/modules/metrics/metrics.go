@@ -19,7 +19,7 @@ const (
 )
 
 var (
-	EventMtc = prometheus.NewCounterVec(
+	eventMtc = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: _eventMtcName,
 			Help: "received events metrics.",
@@ -27,7 +27,7 @@ var (
 		[]string{"account", "project", "publisher", "eventtype"},
 	)
 
-	PublisherMtc = prometheus.NewGaugeVec(
+	publisherMtc = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: _publisherMtcName,
 			Help: "registered publishers for the project.",
@@ -42,20 +42,66 @@ var (
 )
 
 func init() {
-	prometheus.MustRegister(EventMtc)
-	prometheus.MustRegister(PublisherMtc)
+	prometheus.MustRegister(eventMtc)
+	prometheus.MustRegister(publisherMtc)
 	prometheus.MustRegister(BlockChainTxMtc)
 }
 
 func RemoveMetrics(ctx context.Context, account string, project string) {
-	EventMtc.DeletePartialMatch(prometheus.Labels{"account": account, "project": project})
-	PublisherMtc.DeletePartialMatch(prometheus.Labels{"account": account, "project": project})
+	eventMtc.DeletePartialMatch(prometheus.Labels{"account": account, "project": project})
+	publisherMtc.DeletePartialMatch(prometheus.Labels{"account": account, "project": project})
 	BlockChainTxMtc.DeletePartialMatch(prometheus.Labels{"project": project})
 
+	// erase data in metrics server
 	if err := eraseDataInServer(ctx, account, project); err != nil {
 		l := types.MustLoggerFromContext(ctx)
 		// the metrics server isn't essential for the core service
 		l.Warn(err)
+	}
+	if clickhouseCLI != nil {
+		if err := clickhouseCLI.Insert(fmt.Sprintf(`DELETE FROM ws_metrics.inbound_events_metrics WHERE (
+			account = '%s') AND (project = '%s')`, account, project)); err != nil {
+			l := types.MustLoggerFromContext(ctx)
+			l.Warn(err)
+		}
+		if err := clickhouseCLI.Insert(fmt.Sprintf(`DELETE FROM ws_metrics.publishers_metrics WHERE (
+				account = '%s') AND (project = '%s')`, account, project)); err != nil {
+			l := types.MustLoggerFromContext(ctx)
+			l.Warn(err)
+		}
+	}
+}
+
+func EventMetricsInc(ctx context.Context, account, project, publisher, eventtype string) {
+	eventMtc.WithLabelValues(account, project, publisher, eventtype).Inc()
+	if clickhouseCLI != nil {
+		if err := clickhouseCLI.Insert(fmt.Sprintf(`INSERT INTO ws_metrics.inbound_events_metrics VALUES (
+			now(), '%s', '%s', '%s', '%s', %d)`, account, project, publisher, eventtype, 1)); err != nil {
+			l := types.MustLoggerFromContext(ctx)
+			l.Error(err)
+		}
+	}
+}
+
+func PublisherMetricsInc(ctx context.Context, account, project string) {
+	publisherMtc.WithLabelValues(account, project).Inc()
+	if clickhouseCLI != nil {
+		if err := clickhouseCLI.Insert(fmt.Sprintf(`INSERT INTO ws_metrics.publishers_metrics VALUES (
+		now(), '%s', '%s', %d)`, account, project, 1)); err != nil {
+			l := types.MustLoggerFromContext(ctx)
+			l.Error(err)
+		}
+	}
+}
+
+func PublisherMetricsDec(ctx context.Context, account, project string) {
+	publisherMtc.WithLabelValues(account, project).Dec()
+	if clickhouseCLI != nil {
+		if err := clickhouseCLI.Insert(fmt.Sprintf(`INSERT INTO ws_metrics.publishers_metrics VALUES (
+		now(), '%s', '%s', %d)`, account, project, -1)); err != nil {
+			l := types.MustLoggerFromContext(ctx)
+			l.Error(err)
+		}
 	}
 }
 

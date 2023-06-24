@@ -17,6 +17,7 @@ import (
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
@@ -191,6 +192,9 @@ func TestAccountAccessKey(t *testing.T) {
 	t.Run("Validate", func(t *testing.T) {
 		id := idg.MustGenSFID()
 		rand, key, ts := account_access.GenAccessKey(id)
+		t.Logf("rand: %s", rand)
+		t.Logf("key: %s", key)
+		t.Logf("ts: %v", ts)
 
 		m := &models.AccountAccessKey{
 			RelAccount: models.RelAccount{AccountID: id},
@@ -198,6 +202,11 @@ func TestAccountAccessKey(t *testing.T) {
 				Name:      "test_gen_key",
 				AccessKey: rand,
 				ExpiredAt: base.Timestamp{Time: ts.Add(time.Hour).UTC()},
+			},
+			OperationTimesWithDeleted: datatypes.OperationTimesWithDeleted{
+				OperationTimes: datatypes.OperationTimes{
+					CreatedAt: base.Timestamp{Time: ts},
+				},
 			},
 		}
 
@@ -217,8 +226,9 @@ func TestAccountAccessKey(t *testing.T) {
 
 			idAny, err, canBeValidated := account_access.Validate(ctx, key)
 
-			NewWithT(t).Expect(err).To(BeNil())
 			NewWithT(t).Expect(canBeValidated).To(BeTrue())
+			t.Log(err)
+			NewWithT(t).Expect(err).To(BeNil())
 
 			idVal, ok := idAny.(types.SFID)
 			NewWithT(t).Expect(ok).To(BeTrue())

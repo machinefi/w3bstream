@@ -139,6 +139,14 @@ func (*AccountAccessKey) FieldExpiredAt() string {
 	return "ExpiredAt"
 }
 
+func (m *AccountAccessKey) ColDescription() *builder.Column {
+	return AccountAccessKeyTable.ColByFieldName(m.FieldDescription())
+}
+
+func (*AccountAccessKey) FieldDescription() string {
+	return "Description"
+}
+
 func (m *AccountAccessKey) ColCreatedAt() *builder.Column {
 	return AccountAccessKeyTable.ColByFieldName(m.FieldCreatedAt())
 }

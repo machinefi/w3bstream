@@ -30,7 +30,8 @@ type ChainTxData struct {
 }
 
 type ChainTxInfo struct {
-	EventType string `db:"f_event_type"                   json:"eventType,omitempty"`
-	ChainID   uint64 `db:"f_chain_id"                     json:"chainID"`
-	TxAddress string `db:"f_tx_address"                   json:"txAddress"`
+	EventType string         `db:"f_event_type"                   json:"eventType,omitempty,default='MONITOR_DEFAULT'"`
+	ChainID   uint64         `db:"f_chain_id"                     json:"chainID"`
+	TxAddress string         `db:"f_tx_address"                   json:"txAddress"`
+	Paused    datatypes.Bool `db:"f_paused,default='2'"           json:"paused,omitempty,default='false'"`
 }
