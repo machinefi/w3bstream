@@ -893,3 +893,30 @@ delete it
 ```sh
 http delete :8888/srv-applet-mgr/v0/project_operator/$PROJECTID -A bearer -a $TOK
 ```
+
+## Create Account Access Key
+
+```sh
+export KEY_NAME=key_name
+export KEY_DESC=desc
+export KEY_EXPRIRATION_DAYS=30 # if expiration days is 0, this key will be not expired.
+echo '{"name":"'$KEY_NAME'", "expirationDays": $KEY_EXPRIRATION_DAYS, "desc": "'$KEY_DESC'"}' | http post :8888/srv-applet-mgr/v0/access_key -A bearer -a $TOK
+```
+
+output like
+
+```json
+{
+    "accessKey": "w3b_xxxx",
+    "desc": "desc",
+    "expiredAt": "2023-07-21T08:13:08.592213Z",
+    "name": "key_name"
+}
+```
+
+## Delete Access Key
+
+```sh
+export KEY_NAME=key_name
+http delete :8888/srv-applet-mgr/v0/access_key/$KEY_NAME -A bearer -a $TOK
+```
