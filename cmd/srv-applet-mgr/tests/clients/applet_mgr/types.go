@@ -13,6 +13,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/account"
+	"github.com/machinefi/w3bstream/pkg/modules/account_access"
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
 	"github.com/machinefi/w3bstream/pkg/modules/cronjob"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
@@ -22,6 +23,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/publisher"
 	"github.com/machinefi/w3bstream/pkg/modules/resource"
 	"github.com/machinefi/w3bstream/pkg/modules/strategy"
+	"github.com/machinefi/w3bstream/pkg/modules/trafficlimit"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
@@ -34,6 +36,12 @@ type CurrentAccount struct {
 type CurrentPublisher struct {
 	GithubComMachinefiW3BstreamPkgModelsPublisher
 }
+
+type EthClientRsp struct {
+	Clients string `json:"clients"`
+}
+
+type GithubComMachinefiW3BstreamPkgDependsBaseTypesDuration = types.Duration
 
 type GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID = types.SFID
 
@@ -71,6 +79,8 @@ type GithubComMachinefiW3BstreamPkgEnumsInstanceState = enums.InstanceState
 
 type GithubComMachinefiW3BstreamPkgEnumsProtocol = enums.Protocol
 
+type GithubComMachinefiW3BstreamPkgEnumsTrafficLimitType = enums.TrafficLimitType
+
 type GithubComMachinefiW3BstreamPkgEnumsWasmDBDatatype = enums.WasmDBDatatype
 
 type GithubComMachinefiW3BstreamPkgEnumsWasmDBDialect = enums.WasmDBDialect
@@ -81,6 +91,15 @@ type GithubComMachinefiW3BstreamPkgModelsAccount struct {
 	GithubComMachinefiW3BstreamPkgModelsAccountInfo
 	GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimesWithDeleted
 }
+
+type GithubComMachinefiW3BstreamPkgModelsAccountAccessKey struct {
+	GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPrimaryID
+	GithubComMachinefiW3BstreamPkgModelsRelAccount
+	GithubComMachinefiW3BstreamPkgModelsAccountAccessKeyInfo
+	GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimesWithDeleted
+}
+
+type GithubComMachinefiW3BstreamPkgModelsAccountAccessKeyInfo = models.AccountAccessKeyInfo
 
 type GithubComMachinefiW3BstreamPkgModelsAccountInfo = models.AccountInfo
 
@@ -234,6 +253,8 @@ type GithubComMachinefiW3BstreamPkgModelsRelResource = models.RelResource
 
 type GithubComMachinefiW3BstreamPkgModelsRelStrategy = models.RelStrategy
 
+type GithubComMachinefiW3BstreamPkgModelsRelTrafficLimit = models.RelTrafficLimit
+
 type GithubComMachinefiW3BstreamPkgModelsResource struct {
 	GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPrimaryID
 	GithubComMachinefiW3BstreamPkgModelsRelResource
@@ -255,6 +276,18 @@ type GithubComMachinefiW3BstreamPkgModelsStrategy struct {
 }
 
 type GithubComMachinefiW3BstreamPkgModelsStrategyInfo = models.StrategyInfo
+
+type GithubComMachinefiW3BstreamPkgModelsTrafficLimit struct {
+	GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPrimaryID
+	GithubComMachinefiW3BstreamPkgModelsRelTrafficLimit
+	GithubComMachinefiW3BstreamPkgModelsRelProject
+	GithubComMachinefiW3BstreamPkgModelsTrafficLimitInfo
+	GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimesWithDeleted
+}
+
+type GithubComMachinefiW3BstreamPkgModelsTrafficLimitInfo = models.TrafficLimitInfo
+
+type GithubComMachinefiW3BstreamPkgModulesAccountAccessCreateReq = account_access.CreateReq
 
 type GithubComMachinefiW3BstreamPkgModulesAccountCreateAccountByUsernameReq = account.CreateAccountByUsernameReq
 
@@ -352,6 +385,8 @@ type GithubComMachinefiW3BstreamPkgModulesPublisherListRsp = publisher.ListRsp
 
 type GithubComMachinefiW3BstreamPkgModulesPublisherUpdateReq = publisher.UpdateReq
 
+type GithubComMachinefiW3BstreamPkgModulesResourceDownLoadResourceRsp = resource.DownLoadResourceRsp
+
 type GithubComMachinefiW3BstreamPkgModulesResourceListRsp = resource.ListRsp
 
 type GithubComMachinefiW3BstreamPkgModulesResourceResourceInfo struct {
@@ -367,6 +402,16 @@ type GithubComMachinefiW3BstreamPkgModulesStrategyCreateReq struct {
 }
 
 type GithubComMachinefiW3BstreamPkgModulesStrategyListRsp = strategy.ListRsp
+
+type GithubComMachinefiW3BstreamPkgModulesTrafficlimitCreateReq struct {
+	GithubComMachinefiW3BstreamPkgModelsTrafficLimitInfo
+}
+
+type GithubComMachinefiW3BstreamPkgModulesTrafficlimitListRsp = trafficlimit.ListRsp
+
+type GithubComMachinefiW3BstreamPkgModulesTrafficlimitUpdateReq struct {
+	GithubComMachinefiW3BstreamPkgModelsTrafficLimitInfo
+}
 
 type GithubComMachinefiW3BstreamPkgTypesWasmCache = wasm.Cache
 

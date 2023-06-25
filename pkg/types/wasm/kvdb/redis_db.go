@@ -91,6 +91,15 @@ func (r *RedisDB) SetKeyWithEX(key string, value []byte, exp int64) error {
 	return nil
 }
 
+func (r *RedisDB) DelKey(key string) error {
+	var args []interface{}
+	args = append(args, r.db.Key(key))
+	if _, err := r.db.Exec(&confredis.Cmd{Name: "DEL", Args: args}); err != nil {
+		return err
+	}
+	return nil
+}
+
 type redisDBKey struct{}
 
 func WithRedisDBKeyContext(redisDB *RedisDB) func(context.Context) context.Context {

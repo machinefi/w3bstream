@@ -2724,14 +2724,15 @@
             "x-status-errors": [
               "@StatusErr[BadRequest][400999001][BadRequest]!",
               "@StatusErr[DeprecatedProject][400999003][Deprecated Project]!",
-              "@StatusErr[InvalidChainHeightIDs][400999010][Invalid Chain Height IDs]!",
-              "@StatusErr[InvalidChainTxIDs][400999009][Invalid Chain Tx IDs]!",
+              "@StatusErr[InvalidChainHeightIDs][400999011][Invalid Chain Height IDs]!",
+              "@StatusErr[InvalidChainTxIDs][400999010][Invalid Chain Tx IDs]!",
               "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!",
-              "@StatusErr[InvalidContractLogIDs][400999008][Invalid Contract Log IDs]!",
+              "@StatusErr[InvalidContractLogIDs][400999009][Invalid Contract Log IDs]!",
               "@StatusErr[InvalidCronExpressions][400999005][Invalid Cron Expressions]!",
+              "@StatusErr[InvalidDeleteCondition][400999007][Invalid Delete Condition]!",
               "@StatusErr[InvalidPrivateKey][400999006][Invalid Private Key]!",
               "@StatusErr[UnknownDeployCommand][400999004][Unknown Deploy Command]!",
-              "@StatusErr[UnknownMonitorCommand][400999007][Unknown Deploy Command]!"
+              "@StatusErr[UnknownMonitorCommand][400999008][Unknown Deploy Command]!"
             ]
           },
           "401": {
@@ -3428,8 +3429,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InvalidChainHeightIDs][400999010][Invalid Chain Height IDs]!",
-              "@StatusErr[UnknownMonitorCommand][400999007][Unknown Deploy Command]!"
+              "@StatusErr[InvalidChainHeightIDs][400999011][Invalid Chain Height IDs]!",
+              "@StatusErr[UnknownMonitorCommand][400999008][Unknown Deploy Command]!"
             ]
           },
           "401": {
@@ -3820,8 +3821,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InvalidChainTxIDs][400999009][Invalid Chain Tx IDs]!",
-              "@StatusErr[UnknownMonitorCommand][400999007][Unknown Deploy Command]!"
+              "@StatusErr[InvalidChainTxIDs][400999010][Invalid Chain Tx IDs]!",
+              "@StatusErr[UnknownMonitorCommand][400999008][Unknown Deploy Command]!"
             ]
           },
           "401": {
@@ -4098,8 +4099,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[InvalidContractLogIDs][400999008][Invalid Contract Log IDs]!",
-              "@StatusErr[UnknownMonitorCommand][400999007][Unknown Deploy Command]!"
+              "@StatusErr[InvalidContractLogIDs][400999009][Invalid Contract Log IDs]!",
+              "@StatusErr[UnknownMonitorCommand][400999008][Unknown Deploy Command]!"
             ]
           },
           "401": {
@@ -8519,6 +8520,131 @@
       }
     },
     "/srv-applet-mgr/v0/traffic/x/{projectName}": {
+      "delete": {
+        "tags": [
+          "apis/traffic_limit"
+        ],
+        "summary": "BatchRemoveTrafficLimit Remove TrafficLimit by Given Conditions",
+        "operationId": "BatchRemoveTrafficLimit",
+        "parameters": [
+          {
+            "name": "projectName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "projectName",
+              "x-go-field-name": "ProjectName",
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "apiType",
+            "in": "query",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsTrafficLimitType"
+                },
+                {
+                  "x-go-field-name": "ApiType",
+                  "x-tag-name": "apiType,omitempty"
+                }
+              ]
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidDeleteCondition][400999007][Invalid Delete Condition]!"
+            ]
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoAdminPermission][401999006][No Admin Permission]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      },
       "post": {
         "tags": [
           "apis/traffic_limit"
@@ -8646,6 +8772,122 @@
             },
             "x-status-errors": [
               "@StatusErr[CreateTrafficSchedulerFailed][500999018][Create Traffic Scheduler Failed]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
+    "/srv-applet-mgr/v0/traffic/x/{projectName}/data/{trafficLimitID}": {
+      "delete": {
+        "tags": [
+          "apis/traffic_limit"
+        ],
+        "summary": "RemoveTrafficLimit Remove TrafficLimit by TrafficLimit ID",
+        "operationId": "RemoveTrafficLimit",
+        "parameters": [
+          {
+            "name": "projectName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "projectName",
+              "x-go-field-name": "ProjectName",
+              "x-tag-name": "projectName",
+              "x-tag-validate": "@projectName"
+            }
+          },
+          {
+            "name": "trafficLimitID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                },
+                {
+                  "x-go-field-name": "TrafficLimitID",
+                  "x-tag-name": "trafficLimitID"
+                }
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
+              "@StatusErr[NoAdminPermission][401999006][No Admin Permission]!",
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
+              "@StatusErr[TrafficLimitNotFound][404999020][Traffic Limit Not Found]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!"

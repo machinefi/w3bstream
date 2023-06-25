@@ -49,6 +49,8 @@ func (v Error) Key() string {
 		return "InvalidCronExpressions"
 	case InvalidPrivateKey:
 		return "InvalidPrivateKey"
+	case InvalidDeleteCondition:
+		return "InvalidDeleteCondition"
 	case UnknownMonitorCommand:
 		return "UnknownMonitorCommand"
 	case InvalidContractLogIDs:
@@ -253,6 +255,8 @@ func (v Error) Msg() string {
 		return "Invalid Cron Expressions"
 	case InvalidPrivateKey:
 		return "Invalid Private Key"
+	case InvalidDeleteCondition:
+		return "Invalid Delete Condition"
 	case UnknownMonitorCommand:
 		return "Unknown Deploy Command"
 	case InvalidContractLogIDs:
@@ -456,6 +460,8 @@ func (v Error) CanBeTalk() bool {
 	case InvalidCronExpressions:
 		return true
 	case InvalidPrivateKey:
+		return true
+	case InvalidDeleteCondition:
 		return true
 	case UnknownMonitorCommand:
 		return true
