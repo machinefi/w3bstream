@@ -168,6 +168,16 @@ const (
 	InvalidCronExpressions
 	// @errTalk Invalid Private Key
 	InvalidPrivateKey
+	// @errTalk Invalid Delete Condition
+	InvalidDeleteCondition
+	// @errTalk Unknown Deploy Command
+	UnknownMonitorCommand
+	// @errTalk Invalid Contract Log IDs
+	InvalidContractLogIDs
+	// @errTalk Invalid Chain Tx IDs
+	InvalidChainTxIDs
+	// @errTalk Invalid Chain Height IDs
+	InvalidChainHeightIDs
 )
 
 const (

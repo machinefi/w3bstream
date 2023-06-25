@@ -19,8 +19,9 @@ type AccountAccessKey struct {
 }
 
 type AccountAccessKeyInfo struct {
-	Name       string          `db:"f_name"                   json:"name"`
-	AccessKey  string          `db:"f_access_key"             json:"accessKey"`
-	ExpiredAt  types.Timestamp `db:"f_expired_at,default='0'" json:"expiredAt"`
-	_Privilege interface{}     `db:"-"` // TODO add privilege for account api key
+	Name        string          `db:"f_name"`
+	AccessKey   string          `db:"f_access_key"`
+	ExpiredAt   types.Timestamp `db:"f_expired_at,default='0'"`
+	Description string          `db:"f_desc,default=''"`
+	_Privilege  interface{}     `db:"-"` // TODO add privilege for account api key
 }

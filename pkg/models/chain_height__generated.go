@@ -156,6 +156,14 @@ func (*ChainHeight) FieldHeight() string {
 	return "Height"
 }
 
+func (m *ChainHeight) ColPaused() *builder.Column {
+	return ChainHeightTable.ColByFieldName(m.FieldPaused())
+}
+
+func (*ChainHeight) FieldPaused() string {
+	return "Paused"
+}
+
 func (m *ChainHeight) ColCreatedAt() *builder.Column {
 	return ChainHeightTable.ColByFieldName(m.FieldCreatedAt())
 }

@@ -30,7 +30,8 @@ type ChainHeightData struct {
 }
 
 type ChainHeightInfo struct {
-	EventType string `db:"f_event_type"                   json:"eventType,omitempty"`
-	ChainID   uint64 `db:"f_chain_id"                     json:"chainID"`
-	Height    uint64 `db:"f_height"                       json:"height"`
+	EventType string         `db:"f_event_type"                   json:"eventType,omitempty,default='MONITOR_DEFAULT'"`
+	ChainID   uint64         `db:"f_chain_id"                     json:"chainID"`
+	Height    uint64         `db:"f_height"                       json:"height"`
+	Paused    datatypes.Bool `db:"f_paused,default='2'"           json:"paused,omitempty,default='false'"`
 }

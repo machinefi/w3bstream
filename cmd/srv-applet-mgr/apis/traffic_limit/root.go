@@ -13,4 +13,6 @@ func init() {
 	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &ListTrafficLimit{}))
 	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &CreateTrafficLimit{}))
 	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &UpdateTrafficLimit{}))
+	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &RemoveTrafficLimit{}))
+	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &BatchRemoveTrafficLimit{}))
 }

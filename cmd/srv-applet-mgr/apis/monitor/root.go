@@ -15,4 +15,7 @@ func init() {
 	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &RemoveContractLog{}))
 	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &RemoveChainTx{}))
 	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &RemoveChainHeight{}))
+	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &ControlContractLog{}))
+	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &ControlChainTx{}))
+	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &ControlChainHeight{}))
 }

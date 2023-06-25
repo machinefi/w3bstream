@@ -13,6 +13,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/blockchain"
 	"github.com/machinefi/w3bstream/pkg/modules/cronjob"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
+	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/modules/trafficlimit"
@@ -87,6 +88,9 @@ func main() {
 			},
 			func() {
 				operator.Migrate(global.Context)
+			},
+			func() {
+				metrics.Init(global.Context)
 			},
 		)
 	})

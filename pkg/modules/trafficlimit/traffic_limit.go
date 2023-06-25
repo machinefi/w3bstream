@@ -223,21 +223,21 @@ func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
 
 	expr := builder.Select(builder.MultiWith(",",
 		builder.Alias(prj.ColName(), "f_project_name"),
-		rate.ColProjectID(),
-		rate.ColTrafficLimitID(),
-		rate.ColThreshold(),
-		rate.ColDuration(),
-		rate.ColApiType(),
-		rate.ColCreatedAt(),
-		rate.ColUpdatedAt(),
+		builder.Alias(rate.ColProjectID(), "f_project_id"),
+		builder.Alias(rate.ColTrafficLimitID(), "f_traffic_limit_id"),
+		builder.Alias(rate.ColThreshold(), "f_threshold"),
+		builder.Alias(rate.ColDuration(), "f_duration"),
+		builder.Alias(rate.ColApiType(), "f_api_type"),
+		builder.Alias(rate.ColCreatedAt(), "f_created_at"),
+		builder.Alias(rate.ColUpdatedAt(), "f_updated_at"),
 	)).From(
 		d.T(rate),
 		append([]builder.Addition{
 			builder.LeftJoin(d.T(prj)).On(rate.ColProjectID().Eq(prj.ColProjectID())),
-			builder.Where(builder.And(cond, prj.ColDeletedAt().Neq(0))),
+			builder.Where(cond),
 		}, adds...)...,
 	)
-	err = d.QueryAndScan(expr, ret.Data)
+	err = d.QueryAndScan(expr, &ret.Data)
 	if err != nil {
 		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
@@ -300,6 +300,81 @@ func GetByProjectAndType(ctx context.Context, id types.SFID, apiType enums.Traff
 		return nil, err
 	}
 	return traffic, nil
+}
+
+func RemoveBySFID(ctx context.Context, id types.SFID) error {
+	var (
+		d   = types.MustMgrDBExecutorFromContext(ctx)
+		prj = types.MustProjectFromContext(ctx)
+		rDB = kvdb.MustRedisDBKeyFromContext(ctx)
+		m   = &models.TrafficLimit{}
+	)
+
+	return sqlx.NewTasks(d).With(
+		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
+			var err error
+			m, err = GetBySFID(ctx, id)
+			return err
+		},
+		func(d sqlx.DBExecutor) error {
+			if err := m.DeleteByTrafficLimitID(d); err != nil {
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			projectKey := fmt.Sprintf("%s::%s", prj.Name, m.ApiType.String())
+			trafficKey := fmt.Sprintf("%s::%s", m.ProjectID, m.ApiType.String())
+			DeleteScheduler(projectKey)
+			rDB.DelKey(trafficKey)
+			return nil
+		},
+	).Do()
+}
+
+func Remove(ctx context.Context, r *CondArgs) error {
+	var (
+		d   = types.MustMgrDBExecutorFromContext(ctx)
+		rDB = kvdb.MustRedisDBKeyFromContext(ctx)
+		m   = &models.TrafficLimit{}
+
+		listDetail *ListDetailRsp
+		err        error
+	)
+
+	if r.Condition().IsNil() {
+		return status.InvalidDeleteCondition
+	}
+
+	return sqlx.NewTasks(d).With(
+		func(d sqlx.DBExecutor) error {
+			listDetail, err = ListDetail(ctx, &ListReq{CondArgs: *r})
+			if err != nil {
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			expr := builder.Delete().From(d.T(m), builder.Where(r.Condition()))
+
+			_, err = d.Exec(expr)
+			if err != nil {
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+
+			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			for i := range listDetail.Data {
+				projectKey := fmt.Sprintf("%s::%s", listDetail.Data[i].ProjectName, listDetail.Data[i].ApiType.String())
+				trafficKey := fmt.Sprintf("%s::%s", listDetail.Data[i].ProjectID, listDetail.Data[i].ApiType.String())
+				DeleteScheduler(projectKey)
+				rDB.DelKey(trafficKey)
+			}
+			return nil
+		},
+	).Do()
 }
 
 func TrafficLimit(ctx context.Context, apiType enums.TrafficLimitType) error {

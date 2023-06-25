@@ -82,7 +82,7 @@ func DeleteScheduler(projectKey string) error {
 		ts.Stop()
 	}
 	trafficSchedulers.Remove(projectKey)
-	// TODO del redis key
+	ts.rDB.DelKey(projectKey)
 	return nil
 }
 

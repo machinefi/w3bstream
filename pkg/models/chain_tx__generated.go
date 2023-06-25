@@ -156,6 +156,14 @@ func (*ChainTx) FieldTxAddress() string {
 	return "TxAddress"
 }
 
+func (m *ChainTx) ColPaused() *builder.Column {
+	return ChainTxTable.ColByFieldName(m.FieldPaused())
+}
+
+func (*ChainTx) FieldPaused() string {
+	return "Paused"
+}
+
 func (m *ChainTx) ColCreatedAt() *builder.Column {
 	return ChainTxTable.ColByFieldName(m.FieldCreatedAt())
 }
