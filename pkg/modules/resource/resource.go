@@ -41,8 +41,15 @@ func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filen
 		},
 		func(d sqlx.DBExecutor) error {
 			if found {
+				if !CheckExist(ctx, res.ResourceID) {
+					_, err := UploadFile(ctx, data, res.ResourceID)
+					if err != nil {
+						return err
+					}
+				}
 				return nil
 			}
+
 			path, err := UploadFile(ctx, data, id)
 			if err != nil {
 				return err
