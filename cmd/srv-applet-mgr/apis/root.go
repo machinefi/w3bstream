@@ -68,6 +68,7 @@ func init() {
 		auth.Register(operator.Root)
 		auth.Register(traffic_limit.Root)
 		auth.Register(projectoperator.Root)
+		auth.Register(event.Root2)
 	}
 
 	// root router register for event http transport
