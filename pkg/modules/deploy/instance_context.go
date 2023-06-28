@@ -8,11 +8,11 @@ import (
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
+	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/modules/projectoperator"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
-	custommetrics "github.com/machinefi/w3bstream/pkg/types/wasm/metrics"
 )
 
 func WithInstanceRuntimeContext(parent context.Context) (context.Context, error) {
@@ -57,7 +57,7 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		"@prj", prj.Name,
 		"@app", app.Name,
 	)
-	metrics := custommetrics.NewCustomMetric(prj.AccountID.String(), prj.Name)
+	metrics := metrics.NewCustomMetric(prj.AccountID.String(), prj.Name)
 
 	ctx = contextx.WithContextCompose(
 		types.WithProjectContext(prj),
