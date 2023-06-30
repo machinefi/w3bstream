@@ -3,11 +3,14 @@ package wasmtime
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync/atomic"
 	"time"
 
 	"github.com/bytecodealliance/wasmtime-go/v8"
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
+	"github.com/reactivex/rxgo/v2"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
@@ -36,6 +39,7 @@ type Instance struct {
 	handlers map[string]*wasmtime.Func
 	kvs      wasm.KVStore
 	msgQueue chan *Task
+	ch       chan rxgo.Item
 }
 
 func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte, st enums.InstanceState) (i *Instance, err error) {
@@ -70,9 +74,14 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte, st enums
 		handlers: make(map[string]*wasmtime.Func),
 		kvs:      wasm.MustKVStoreFromContext(ctx),
 		msgQueue: make(chan *Task, maxMsgPerInstance),
+		ch:       make(chan rxgo.Item),
 	}
 
 	go ins.queueWorker()
+	go func() {
+		observable := ins.streamCompute(ins.ch)
+		initSink(observable, ins.ctx, "db", "Customer")
+	}()
 
 	return ins, nil
 }
@@ -138,6 +147,12 @@ func (i *Instance) queueWorker() {
 
 		log.FromContext(task.ctx).WithValues("eid", task.EventID).Debug("get task from queue.")
 
+		if task.EventType == "OP_DEMO" {
+			log.FromContext(task.ctx).WithValues("eid", task.EventID).Info("OP_DEMO start.")
+			i.ch <- rxgo.Of(task)
+			continue
+		}
+
 		res := i.handle(task.ctx, task)
 		log.FromContext(task.ctx).WithValues("eid", task.EventID).Debug("event process completed.")
 		if len(res.ErrMsg) > 0 {
@@ -150,6 +165,166 @@ func (i *Instance) queueWorker() {
 				fmt.Sprintf("the event, whose eventtype is %s, is successfully handled by %s, ", task.EventType, task.Handler),
 			))
 		}
+	}
+}
+
+func (i *Instance) streamCompute(ch chan rxgo.Item) rxgo.Observable {
+	return rxgo.FromChannel(ch).Filter(i.filterFunc).Map(i.mapFunc).
+		GroupByDynamic(i.groupByKey, rxgo.WithBufferedChannel(10), rxgo.WithErrorStrategy(rxgo.ContinueOnError))
+}
+
+func initSink(observable rxgo.Observable, ctx context.Context, tye, schema string) {
+	c := observable.Observe()
+	for item := range c {
+
+		switch item.V.(type) {
+		case rxgo.GroupedObservable: // group operator
+			go func() {
+				obs := item.V.(rxgo.GroupedObservable)
+				for i := range obs.Observe() {
+					sink(ctx, i, tye, schema)
+				}
+			}()
+		case rxgo.ObservableImpl: // window operator
+			obs := item.V.(rxgo.ObservableImpl)
+			for i := range obs.Observe() {
+				sink(ctx, i, tye, schema)
+			}
+		default:
+			sink(ctx, item, tye, schema)
+		}
+	}
+}
+
+func sink(ctx context.Context, item rxgo.Item, tye, schema string) {
+	//customer := item.V.(models.Customer)
+	conflog.Std().Info(fmt.Sprintf("customer: %v", string(item.V.(*Task).Payload)))
+
+	//switch tye {
+	//case "db":
+	//	d, _ := wasm.SQLStoreFromContext(ctx)
+	//	if err := customer.Create(d); err != nil {
+	//		conflog.Std().Error(err)
+	//	}
+	//case "blockchain":
+	//
+	//default:
+	//
+	//}
+}
+
+func (i *Instance) filterFunc(inter interface{}) bool {
+	res := false
+
+	task := inter.(*Task)
+	task.Handler = "filterAge"
+
+	rid := i.AddResource(task.ctx, []byte(task.EventType), task.Payload)
+	defer i.RmvResource(task.ctx, rid)
+
+	code := i.handleByRid(task.ctx, task.Handler, rid).Code
+	conflog.Std().Info(fmt.Sprintf("%s wasm code %d", task.Handler, code))
+
+	if code < 0 {
+		return res
+	}
+
+	rb, ok := i.GetResource(uint32(code))
+	if !ok {
+		conflog.Std().Error(errors.New("not found"))
+		return res
+	}
+
+	result := strings.ToLower(string(rb))
+	if result == "true" {
+		res = true
+	} else if result == "false" {
+		res = false
+	} else {
+		conflog.Std().Warn(errors.New("the value does not support"))
+	}
+
+	return res
+}
+
+func (i *Instance) mapFunc(c context.Context, inter interface{}) (interface{}, error) {
+	task := inter.(*Task)
+	task.Handler = "mapTax"
+
+	rid := i.AddResource(task.ctx, []byte(task.EventType), task.Payload)
+	defer i.RmvResource(task.ctx, rid)
+
+	code := i.handleByRid(task.ctx, task.Handler, rid).Code
+	conflog.Std().Info(fmt.Sprintf("mapTax wasm code %d", code))
+
+	if code < 0 {
+		conflog.Std().Error(errors.New(fmt.Sprintf("%s %s error.", string(inter.(*Task).Payload), "mapTax")))
+		return nil, errors.New(fmt.Sprintf("%s %s error.", string(inter.(*Task).Payload), "mapTax"))
+	}
+
+	rb, ok := i.GetResource(uint32(code))
+	if !ok {
+		conflog.Std().Error(errors.New("mapTax result not found"))
+		return nil, errors.New("mapTax result not found")
+	}
+
+	task.Payload = rb
+	return task, nil
+}
+
+func (i *Instance) groupByKey(item rxgo.Item) string {
+	task := item.V.(*Task)
+	task.Handler = "groupByAge"
+
+	rid := i.AddResource(task.ctx, []byte(task.EventType), task.Payload)
+	defer i.RmvResource(task.ctx, rid)
+
+	code := i.handleByRid(task.ctx, task.Handler, rid).Code
+	conflog.Std().Info(fmt.Sprintf("groupByAge wasm code %d", code))
+
+	if code < 0 {
+		conflog.Std().Error(errors.New(fmt.Sprintf("%v %s error.", string(item.V.(*Task).Payload), "groupByAge")))
+		return "error"
+	}
+
+	rb, ok := i.GetResource(uint32(code))
+	if !ok {
+		conflog.Std().Error(errors.New("groupByAge result not found"))
+		return "error"
+	}
+
+	groupKey := string(rb)
+	return groupKey
+}
+
+func (i *Instance) handleByRid(ctx context.Context, handlerName string, rid uint32) *wasm.EventHandleResult {
+	l := types.MustLoggerFromContext(ctx)
+
+	_, l = l.Start(ctx, "instance.handleByRid")
+	defer l.End()
+
+	if err := i.rt.Instantiate(); err != nil {
+		return &wasm.EventHandleResult{
+			InstanceID: i.id.String(),
+			ErrMsg:     err.Error(),
+			Code:       wasm.ResultStatusCode_Failed,
+		}
+	}
+	defer i.rt.Deinstantiate()
+
+	result, err := i.rt.Call(handlerName, int32(rid))
+	if err != nil {
+		l.Error(err)
+		return &wasm.EventHandleResult{
+			InstanceID: i.id.String(),
+			ErrMsg:     err.Error(),
+			Code:       wasm.ResultStatusCode_Failed,
+		}
+	}
+
+	return &wasm.EventHandleResult{
+		InstanceID: i.id.String(),
+		Code:       wasm.ResultStatusCode(result.(int32)),
 	}
 }
 
