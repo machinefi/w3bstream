@@ -1,5 +1,5 @@
 // This is a generated source file. DO NOT EDIT
-// Source: models/account_access_key__generated.go
+// Source: models/access_key__generated.go
 
 package models
 
@@ -12,40 +12,40 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 )
 
-var AccountAccessKeyTable *builder.Table
+var AccessKeyTable *builder.Table
 
 func init() {
-	AccountAccessKeyTable = DB.Register(&AccountAccessKey{})
+	AccessKeyTable = DB.Register(&AccessKey{})
 }
 
-type AccountAccessKeyIterator struct {
+type AccessKeyIterator struct {
 }
 
-func (*AccountAccessKeyIterator) New() interface{} {
-	return &AccountAccessKey{}
+func (*AccessKeyIterator) New() interface{} {
+	return &AccessKey{}
 }
 
-func (*AccountAccessKeyIterator) Resolve(v interface{}) *AccountAccessKey {
-	return v.(*AccountAccessKey)
+func (*AccessKeyIterator) Resolve(v interface{}) *AccessKey {
+	return v.(*AccessKey)
 }
 
-func (*AccountAccessKey) TableName() string {
-	return "t_account_access_key"
+func (*AccessKey) TableName() string {
+	return "t_access_key"
 }
 
-func (*AccountAccessKey) TableDesc() []string {
+func (*AccessKey) TableDesc() []string {
 	return []string{
-		"AccountAPIKey account api access key",
+		"AccessKey api access key",
 	}
 }
 
-func (*AccountAccessKey) Comments() map[string]string {
+func (*AccessKey) Comments() map[string]string {
 	return map[string]string{
 		"AccountID": "AccountID  account id",
 	}
 }
 
-func (*AccountAccessKey) ColDesc() map[string][]string {
+func (*AccessKey) ColDesc() map[string][]string {
 	return map[string][]string{
 		"AccountID": []string{
 			"AccountID  account id",
@@ -53,7 +53,7 @@ func (*AccountAccessKey) ColDesc() map[string][]string {
 	}
 }
 
-func (*AccountAccessKey) ColRel() map[string][]string {
+func (*AccessKey) ColRel() map[string][]string {
 	return map[string][]string{
 		"AccountID": []string{
 			"Account",
@@ -62,116 +62,140 @@ func (*AccountAccessKey) ColRel() map[string][]string {
 	}
 }
 
-func (*AccountAccessKey) PrimaryKey() []string {
+func (*AccessKey) PrimaryKey() []string {
 	return []string{
 		"ID",
 	}
 }
 
-func (m *AccountAccessKey) IndexFieldNames() []string {
+func (m *AccessKey) IndexFieldNames() []string {
 	return []string{
-		"AccessKey",
 		"AccountID",
 		"ID",
 		"Name",
+		"Rand",
 	}
 }
 
-func (*AccountAccessKey) UniqueIndexes() builder.Indexes {
+func (*AccessKey) UniqueIndexes() builder.Indexes {
 	return builder.Indexes{
-		"ui_access_key": []string{
-			"AccessKey",
-			"DeletedAt",
-		},
-		"ui_account_key_name": []string{
+		"ui_name": []string{
 			"AccountID",
 			"Name",
 			"DeletedAt",
 		},
+		"ui_rand": []string{
+			"Rand",
+			"DeletedAt",
+		},
 	}
 }
 
-func (*AccountAccessKey) UniqueIndexUIAccessKey() string {
-	return "ui_access_key"
+func (*AccessKey) UniqueIndexUIName() string {
+	return "ui_name"
 }
 
-func (*AccountAccessKey) UniqueIndexUIAccountKeyName() string {
-	return "ui_account_key_name"
+func (*AccessKey) UniqueIndexUIRand() string {
+	return "ui_rand"
 }
 
-func (m *AccountAccessKey) ColID() *builder.Column {
-	return AccountAccessKeyTable.ColByFieldName(m.FieldID())
+func (m *AccessKey) ColID() *builder.Column {
+	return AccessKeyTable.ColByFieldName(m.FieldID())
 }
 
-func (*AccountAccessKey) FieldID() string {
+func (*AccessKey) FieldID() string {
 	return "ID"
 }
 
-func (m *AccountAccessKey) ColAccountID() *builder.Column {
-	return AccountAccessKeyTable.ColByFieldName(m.FieldAccountID())
+func (m *AccessKey) ColAccountID() *builder.Column {
+	return AccessKeyTable.ColByFieldName(m.FieldAccountID())
 }
 
-func (*AccountAccessKey) FieldAccountID() string {
+func (*AccessKey) FieldAccountID() string {
 	return "AccountID"
 }
 
-func (m *AccountAccessKey) ColName() *builder.Column {
-	return AccountAccessKeyTable.ColByFieldName(m.FieldName())
+func (m *AccessKey) ColIdentityID() *builder.Column {
+	return AccessKeyTable.ColByFieldName(m.FieldIdentityID())
 }
 
-func (*AccountAccessKey) FieldName() string {
+func (*AccessKey) FieldIdentityID() string {
+	return "IdentityID"
+}
+
+func (m *AccessKey) ColIdentityType() *builder.Column {
+	return AccessKeyTable.ColByFieldName(m.FieldIdentityType())
+}
+
+func (*AccessKey) FieldIdentityType() string {
+	return "IdentityType"
+}
+
+func (m *AccessKey) ColName() *builder.Column {
+	return AccessKeyTable.ColByFieldName(m.FieldName())
+}
+
+func (*AccessKey) FieldName() string {
 	return "Name"
 }
 
-func (m *AccountAccessKey) ColAccessKey() *builder.Column {
-	return AccountAccessKeyTable.ColByFieldName(m.FieldAccessKey())
+func (m *AccessKey) ColRand() *builder.Column {
+	return AccessKeyTable.ColByFieldName(m.FieldRand())
 }
 
-func (*AccountAccessKey) FieldAccessKey() string {
-	return "AccessKey"
+func (*AccessKey) FieldRand() string {
+	return "Rand"
 }
 
-func (m *AccountAccessKey) ColExpiredAt() *builder.Column {
-	return AccountAccessKeyTable.ColByFieldName(m.FieldExpiredAt())
+func (m *AccessKey) ColExpiredAt() *builder.Column {
+	return AccessKeyTable.ColByFieldName(m.FieldExpiredAt())
 }
 
-func (*AccountAccessKey) FieldExpiredAt() string {
+func (*AccessKey) FieldExpiredAt() string {
 	return "ExpiredAt"
 }
 
-func (m *AccountAccessKey) ColDescription() *builder.Column {
-	return AccountAccessKeyTable.ColByFieldName(m.FieldDescription())
+func (m *AccessKey) ColLastUsed() *builder.Column {
+	return AccessKeyTable.ColByFieldName(m.FieldLastUsed())
 }
 
-func (*AccountAccessKey) FieldDescription() string {
+func (*AccessKey) FieldLastUsed() string {
+	return "LastUsed"
+}
+
+func (m *AccessKey) ColDescription() *builder.Column {
+	return AccessKeyTable.ColByFieldName(m.FieldDescription())
+}
+
+func (*AccessKey) FieldDescription() string {
 	return "Description"
 }
 
-func (m *AccountAccessKey) ColCreatedAt() *builder.Column {
-	return AccountAccessKeyTable.ColByFieldName(m.FieldCreatedAt())
+func (m *AccessKey) ColCreatedAt() *builder.Column {
+	return AccessKeyTable.ColByFieldName(m.FieldCreatedAt())
 }
 
-func (*AccountAccessKey) FieldCreatedAt() string {
+func (*AccessKey) FieldCreatedAt() string {
 	return "CreatedAt"
 }
 
-func (m *AccountAccessKey) ColUpdatedAt() *builder.Column {
-	return AccountAccessKeyTable.ColByFieldName(m.FieldUpdatedAt())
+func (m *AccessKey) ColUpdatedAt() *builder.Column {
+	return AccessKeyTable.ColByFieldName(m.FieldUpdatedAt())
 }
 
-func (*AccountAccessKey) FieldUpdatedAt() string {
+func (*AccessKey) FieldUpdatedAt() string {
 	return "UpdatedAt"
 }
 
-func (m *AccountAccessKey) ColDeletedAt() *builder.Column {
-	return AccountAccessKeyTable.ColByFieldName(m.FieldDeletedAt())
+func (m *AccessKey) ColDeletedAt() *builder.Column {
+	return AccessKeyTable.ColByFieldName(m.FieldDeletedAt())
 }
 
-func (*AccountAccessKey) FieldDeletedAt() string {
+func (*AccessKey) FieldDeletedAt() string {
 	return "DeletedAt"
 }
 
-func (m *AccountAccessKey) CondByValue(db sqlx.DBExecutor) builder.SqlCondition {
+func (m *AccessKey) CondByValue(db sqlx.DBExecutor) builder.SqlCondition {
 	var (
 		tbl  = db.T(m)
 		fvs  = builder.FieldValueFromStructByNoneZero(m)
@@ -193,7 +217,7 @@ func (m *AccountAccessKey) CondByValue(db sqlx.DBExecutor) builder.SqlCondition 
 	return builder.And(cond...)
 }
 
-func (m *AccountAccessKey) Create(db sqlx.DBExecutor) error {
+func (m *AccessKey) Create(db sqlx.DBExecutor) error {
 
 	if m.CreatedAt.IsZero() {
 		m.CreatedAt.Set(time.Now())
@@ -207,26 +231,26 @@ func (m *AccountAccessKey) Create(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *AccountAccessKey) List(db sqlx.DBExecutor, cond builder.SqlCondition, adds ...builder.Addition) ([]AccountAccessKey, error) {
+func (m *AccessKey) List(db sqlx.DBExecutor, cond builder.SqlCondition, adds ...builder.Addition) ([]AccessKey, error) {
 	var (
 		tbl = db.T(m)
-		lst = make([]AccountAccessKey, 0)
+		lst = make([]AccessKey, 0)
 	)
 	cond = builder.And(tbl.ColByFieldName("DeletedAt").Eq(0), cond)
-	adds = append([]builder.Addition{builder.Where(cond), builder.Comment("AccountAccessKey.List")}, adds...)
+	adds = append([]builder.Addition{builder.Where(cond), builder.Comment("AccessKey.List")}, adds...)
 	err := db.QueryAndScan(builder.Select(nil).From(tbl, adds...), &lst)
 	return lst, err
 }
 
-func (m *AccountAccessKey) Count(db sqlx.DBExecutor, cond builder.SqlCondition, adds ...builder.Addition) (cnt int64, err error) {
+func (m *AccessKey) Count(db sqlx.DBExecutor, cond builder.SqlCondition, adds ...builder.Addition) (cnt int64, err error) {
 	tbl := db.T(m)
 	cond = builder.And(tbl.ColByFieldName("DeletedAt").Eq(0), cond)
-	adds = append([]builder.Addition{builder.Where(cond), builder.Comment("AccountAccessKey.List")}, adds...)
+	adds = append([]builder.Addition{builder.Where(cond), builder.Comment("AccessKey.List")}, adds...)
 	err = db.QueryAndScan(builder.Select(builder.Count()).From(tbl, adds...), &cnt)
 	return
 }
 
-func (m *AccountAccessKey) FetchByID(db sqlx.DBExecutor) error {
+func (m *AccessKey) FetchByID(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	err := db.QueryAndScan(
 		builder.Select(nil).
@@ -238,33 +262,14 @@ func (m *AccountAccessKey) FetchByID(db sqlx.DBExecutor) error {
 						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
-				builder.Comment("AccountAccessKey.FetchByID"),
+				builder.Comment("AccessKey.FetchByID"),
 			),
 		m,
 	)
 	return err
 }
 
-func (m *AccountAccessKey) FetchByAccessKey(db sqlx.DBExecutor) error {
-	tbl := db.T(m)
-	err := db.QueryAndScan(
-		builder.Select(nil).
-			From(
-				tbl,
-				builder.Where(
-					builder.And(
-						tbl.ColByFieldName("AccessKey").Eq(m.AccessKey),
-						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
-					),
-				),
-				builder.Comment("AccountAccessKey.FetchByAccessKey"),
-			),
-		m,
-	)
-	return err
-}
-
-func (m *AccountAccessKey) FetchByAccountIDAndName(db sqlx.DBExecutor) error {
+func (m *AccessKey) FetchByAccountIDAndName(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	err := db.QueryAndScan(
 		builder.Select(nil).
@@ -277,14 +282,33 @@ func (m *AccountAccessKey) FetchByAccountIDAndName(db sqlx.DBExecutor) error {
 						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
-				builder.Comment("AccountAccessKey.FetchByAccountIDAndName"),
+				builder.Comment("AccessKey.FetchByAccountIDAndName"),
 			),
 		m,
 	)
 	return err
 }
 
-func (m *AccountAccessKey) UpdateByIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+func (m *AccessKey) FetchByRand(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	err := db.QueryAndScan(
+		builder.Select(nil).
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("Rand").Eq(m.Rand),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
+					),
+				),
+				builder.Comment("AccessKey.FetchByRand"),
+			),
+		m,
+	)
+	return err
+}
+
+func (m *AccessKey) UpdateByIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
 		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
@@ -297,7 +321,7 @@ func (m *AccountAccessKey) UpdateByIDWithFVs(db sqlx.DBExecutor, fvs builder.Fie
 					tbl.ColByFieldName("ID").Eq(m.ID),
 					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
-				builder.Comment("AccountAccessKey.UpdateByIDWithFVs"),
+				builder.Comment("AccessKey.UpdateByIDWithFVs"),
 			).
 			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
@@ -310,43 +334,12 @@ func (m *AccountAccessKey) UpdateByIDWithFVs(db sqlx.DBExecutor, fvs builder.Fie
 	return nil
 }
 
-func (m *AccountAccessKey) UpdateByID(db sqlx.DBExecutor, zeros ...string) error {
+func (m *AccessKey) UpdateByID(db sqlx.DBExecutor, zeros ...string) error {
 	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
 	return m.UpdateByIDWithFVs(db, fvs)
 }
 
-func (m *AccountAccessKey) UpdateByAccessKeyWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
-
-	if _, ok := fvs["UpdatedAt"]; !ok {
-		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
-	}
-	tbl := db.T(m)
-	res, err := db.Exec(
-		builder.Update(tbl).
-			Where(
-				builder.And(
-					tbl.ColByFieldName("AccessKey").Eq(m.AccessKey),
-					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
-				),
-				builder.Comment("AccountAccessKey.UpdateByAccessKeyWithFVs"),
-			).
-			Set(tbl.AssignmentsByFieldValues(fvs)...),
-	)
-	if err != nil {
-		return err
-	}
-	if affected, _ := res.RowsAffected(); affected == 0 {
-		return m.FetchByAccessKey(db)
-	}
-	return nil
-}
-
-func (m *AccountAccessKey) UpdateByAccessKey(db sqlx.DBExecutor, zeros ...string) error {
-	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
-	return m.UpdateByAccessKeyWithFVs(db, fvs)
-}
-
-func (m *AccountAccessKey) UpdateByAccountIDAndNameWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+func (m *AccessKey) UpdateByAccountIDAndNameWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
 		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
@@ -360,7 +353,7 @@ func (m *AccountAccessKey) UpdateByAccountIDAndNameWithFVs(db sqlx.DBExecutor, f
 					tbl.ColByFieldName("Name").Eq(m.Name),
 					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
-				builder.Comment("AccountAccessKey.UpdateByAccountIDAndNameWithFVs"),
+				builder.Comment("AccessKey.UpdateByAccountIDAndNameWithFVs"),
 			).
 			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
@@ -373,24 +366,55 @@ func (m *AccountAccessKey) UpdateByAccountIDAndNameWithFVs(db sqlx.DBExecutor, f
 	return nil
 }
 
-func (m *AccountAccessKey) UpdateByAccountIDAndName(db sqlx.DBExecutor, zeros ...string) error {
+func (m *AccessKey) UpdateByAccountIDAndName(db sqlx.DBExecutor, zeros ...string) error {
 	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
 	return m.UpdateByAccountIDAndNameWithFVs(db, fvs)
 }
 
-func (m *AccountAccessKey) Delete(db sqlx.DBExecutor) error {
+func (m *AccessKey) UpdateByRandWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	tbl := db.T(m)
+	res, err := db.Exec(
+		builder.Update(tbl).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("Rand").Eq(m.Rand),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
+				),
+				builder.Comment("AccessKey.UpdateByRandWithFVs"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
+	)
+	if err != nil {
+		return err
+	}
+	if affected, _ := res.RowsAffected(); affected == 0 {
+		return m.FetchByRand(db)
+	}
+	return nil
+}
+
+func (m *AccessKey) UpdateByRand(db sqlx.DBExecutor, zeros ...string) error {
+	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
+	return m.UpdateByRandWithFVs(db, fvs)
+}
+
+func (m *AccessKey) Delete(db sqlx.DBExecutor) error {
 	_, err := db.Exec(
 		builder.Delete().
 			From(
 				db.T(m),
 				builder.Where(m.CondByValue(db)),
-				builder.Comment("AccountAccessKey.Delete"),
+				builder.Comment("AccessKey.Delete"),
 			),
 	)
 	return err
 }
 
-func (m *AccountAccessKey) DeleteByID(db sqlx.DBExecutor) error {
+func (m *AccessKey) DeleteByID(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	_, err := db.Exec(
 		builder.Delete().
@@ -402,13 +426,13 @@ func (m *AccountAccessKey) DeleteByID(db sqlx.DBExecutor) error {
 						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
-				builder.Comment("AccountAccessKey.DeleteByID"),
+				builder.Comment("AccessKey.DeleteByID"),
 			),
 	)
 	return err
 }
 
-func (m *AccountAccessKey) SoftDeleteByID(db sqlx.DBExecutor) error {
+func (m *AccessKey) SoftDeleteByID(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	fvs := builder.FieldValues{}
 
@@ -426,57 +450,14 @@ func (m *AccountAccessKey) SoftDeleteByID(db sqlx.DBExecutor) error {
 					tbl.ColByFieldName("ID").Eq(m.ID),
 					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
-				builder.Comment("AccountAccessKey.SoftDeleteByID"),
+				builder.Comment("AccessKey.SoftDeleteByID"),
 			).
 			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
 	return err
 }
 
-func (m *AccountAccessKey) DeleteByAccessKey(db sqlx.DBExecutor) error {
-	tbl := db.T(m)
-	_, err := db.Exec(
-		builder.Delete().
-			From(
-				tbl,
-				builder.Where(
-					builder.And(
-						tbl.ColByFieldName("AccessKey").Eq(m.AccessKey),
-						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
-					),
-				),
-				builder.Comment("AccountAccessKey.DeleteByAccessKey"),
-			),
-	)
-	return err
-}
-
-func (m *AccountAccessKey) SoftDeleteByAccessKey(db sqlx.DBExecutor) error {
-	tbl := db.T(m)
-	fvs := builder.FieldValues{}
-
-	if _, ok := fvs["DeletedAt"]; !ok {
-		fvs["DeletedAt"] = types.Timestamp{Time: time.Now()}
-	}
-
-	if _, ok := fvs["UpdatedAt"]; !ok {
-		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
-	}
-	_, err := db.Exec(
-		builder.Update(db.T(m)).
-			Where(
-				builder.And(
-					tbl.ColByFieldName("AccessKey").Eq(m.AccessKey),
-					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
-				),
-				builder.Comment("AccountAccessKey.SoftDeleteByAccessKey"),
-			).
-			Set(tbl.AssignmentsByFieldValues(fvs)...),
-	)
-	return err
-}
-
-func (m *AccountAccessKey) DeleteByAccountIDAndName(db sqlx.DBExecutor) error {
+func (m *AccessKey) DeleteByAccountIDAndName(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	_, err := db.Exec(
 		builder.Delete().
@@ -489,13 +470,13 @@ func (m *AccountAccessKey) DeleteByAccountIDAndName(db sqlx.DBExecutor) error {
 						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 					),
 				),
-				builder.Comment("AccountAccessKey.DeleteByAccountIDAndName"),
+				builder.Comment("AccessKey.DeleteByAccountIDAndName"),
 			),
 	)
 	return err
 }
 
-func (m *AccountAccessKey) SoftDeleteByAccountIDAndName(db sqlx.DBExecutor) error {
+func (m *AccessKey) SoftDeleteByAccountIDAndName(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	fvs := builder.FieldValues{}
 
@@ -514,7 +495,50 @@ func (m *AccountAccessKey) SoftDeleteByAccountIDAndName(db sqlx.DBExecutor) erro
 					tbl.ColByFieldName("Name").Eq(m.Name),
 					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
 				),
-				builder.Comment("AccountAccessKey.SoftDeleteByAccountIDAndName"),
+				builder.Comment("AccessKey.SoftDeleteByAccountIDAndName"),
+			).
+			Set(tbl.AssignmentsByFieldValues(fvs)...),
+	)
+	return err
+}
+
+func (m *AccessKey) DeleteByRand(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	_, err := db.Exec(
+		builder.Delete().
+			From(
+				tbl,
+				builder.Where(
+					builder.And(
+						tbl.ColByFieldName("Rand").Eq(m.Rand),
+						tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
+					),
+				),
+				builder.Comment("AccessKey.DeleteByRand"),
+			),
+	)
+	return err
+}
+
+func (m *AccessKey) SoftDeleteByRand(db sqlx.DBExecutor) error {
+	tbl := db.T(m)
+	fvs := builder.FieldValues{}
+
+	if _, ok := fvs["DeletedAt"]; !ok {
+		fvs["DeletedAt"] = types.Timestamp{Time: time.Now()}
+	}
+
+	if _, ok := fvs["UpdatedAt"]; !ok {
+		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
+	}
+	_, err := db.Exec(
+		builder.Update(db.T(m)).
+			Where(
+				builder.And(
+					tbl.ColByFieldName("Rand").Eq(m.Rand),
+					tbl.ColByFieldName("DeletedAt").Eq(m.DeletedAt),
+				),
+				builder.Comment("AccessKey.SoftDeleteByRand"),
 			).
 			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)

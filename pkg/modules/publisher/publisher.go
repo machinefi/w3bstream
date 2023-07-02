@@ -4,11 +4,12 @@ import (
 	"context"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
-	confjwt "github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
+	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/access_key"
 	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -182,31 +183,53 @@ func Remove(ctx context.Context, acc *models.Account, r *CondArgs) error {
 }
 
 func Create(ctx context.Context, r *CreateReq) (*models.Publisher, error) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	prj := types.MustProjectFromContext(ctx)
-	acc := types.MustAccountFromContext(ctx)
+	var (
+		d   = types.MustMgrDBExecutorFromContext(ctx)
+		prj = types.MustProjectFromContext(ctx)
+		acc = types.MustAccountFromContext(ctx)
+		idg = confid.MustSFIDGeneratorFromContext(ctx)
+		pub *models.Publisher
+		tok *access_key.CreateRsp
+	)
 
-	id := confid.MustSFIDGeneratorFromContext(ctx).MustGenSFID()
-	token, err := confjwt.MustConfFromContext(ctx).GenerateTokenWithoutExpByPayload(id)
-	if err != nil {
-		return nil, status.GenPublisherTokenFailed.StatusErr().WithDesc(err.Error())
-	}
-
-	pub := &models.Publisher{
-		RelProject:   models.RelProject{ProjectID: prj.ProjectID},
-		RelPublisher: models.RelPublisher{PublisherID: id},
-		PublisherInfo: models.PublisherInfo{
-			Name:  r.Name,
-			Key:   r.Key,
-			Token: token,
+	err := sqlx.NewTasks(d).With(
+		func(d sqlx.DBExecutor) (err error) {
+			id := idg.MustGenSFID()
+			tok, err = access_key.Create(types.WithMgrDBExecutor(ctx, d), &access_key.CreateReq{
+				IdentityID:   id,
+				IdentityType: enums.ACCESS_KEY_IDENTITY_TYPE__PUBLISHER,
+				CreateReqBase: access_key.CreateReqBase{
+					Name: "pub_" + id.String(),
+					Desc: "pub_" + id.String(),
+				},
+			})
+			if err != nil {
+				return err
+			}
+			return nil
 		},
-	}
+		func(d sqlx.DBExecutor) error {
+			pub = &models.Publisher{
+				RelProject:   models.RelProject{ProjectID: prj.ProjectID},
+				RelPublisher: models.RelPublisher{PublisherID: tok.IdentityID},
+				PublisherInfo: models.PublisherInfo{
+					Name:  r.Name,
+					Key:   r.Key,
+					Token: tok.AccessKey,
+				},
+			}
+			if err := pub.Create(d); err != nil {
+				if sqlx.DBErr(err).IsConflict() {
+					return status.PublisherConflict
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
+		},
+	).Do()
 
-	if err = pub.Create(d); err != nil {
-		if sqlx.DBErr(err).IsConflict() {
-			return nil, status.PublisherConflict
-		}
-		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	if err != nil {
+		return nil, err
 	}
 	metrics.PublisherMetricsInc(ctx, acc.AccountID.String(), prj.Name)
 	return pub, nil

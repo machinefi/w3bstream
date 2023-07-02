@@ -12,9 +12,10 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/access_key"
 	"github.com/machinefi/w3bstream/pkg/modules/account"
-	"github.com/machinefi/w3bstream/pkg/modules/account_access"
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
+	"github.com/machinefi/w3bstream/pkg/modules/blockchain"
 	"github.com/machinefi/w3bstream/pkg/modules/cronjob"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
@@ -45,6 +46,8 @@ type GithubComMachinefiW3BstreamPkgDependsBaseTypesDuration = types.Duration
 
 type GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID = types.SFID
 
+type GithubComMachinefiW3BstreamPkgDependsBaseTypesSFIDs = types.SFIDs
+
 type GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp = types.Timestamp
 
 type GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxAttachment = httpx.Attachment
@@ -65,6 +68,8 @@ type GithubComMachinefiW3BstreamPkgDependsKitStatusxErrorFields = statusx.ErrorF
 
 type GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr = statusx.StatusErr
 
+type GithubComMachinefiW3BstreamPkgEnumsAccessKeyIdentityType = enums.AccessKeyIdentityType
+
 type GithubComMachinefiW3BstreamPkgEnumsAccountRole = enums.AccountRole
 
 type GithubComMachinefiW3BstreamPkgEnumsAccountState = enums.AccountState
@@ -76,6 +81,8 @@ type GithubComMachinefiW3BstreamPkgEnumsConfigType = enums.ConfigType
 type GithubComMachinefiW3BstreamPkgEnumsDeployCmd = enums.DeployCmd
 
 type GithubComMachinefiW3BstreamPkgEnumsInstanceState = enums.InstanceState
+
+type GithubComMachinefiW3BstreamPkgEnumsMonitorCmd = enums.MonitorCmd
 
 type GithubComMachinefiW3BstreamPkgEnumsProtocol = enums.Protocol
 
@@ -91,15 +98,6 @@ type GithubComMachinefiW3BstreamPkgModelsAccount struct {
 	GithubComMachinefiW3BstreamPkgModelsAccountInfo
 	GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimesWithDeleted
 }
-
-type GithubComMachinefiW3BstreamPkgModelsAccountAccessKey struct {
-	GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesPrimaryID
-	GithubComMachinefiW3BstreamPkgModelsRelAccount
-	GithubComMachinefiW3BstreamPkgModelsAccountAccessKeyInfo
-	GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimesWithDeleted
-}
-
-type GithubComMachinefiW3BstreamPkgModelsAccountAccessKeyInfo = models.AccountAccessKeyInfo
 
 type GithubComMachinefiW3BstreamPkgModelsAccountInfo = models.AccountInfo
 
@@ -287,7 +285,19 @@ type GithubComMachinefiW3BstreamPkgModelsTrafficLimit struct {
 
 type GithubComMachinefiW3BstreamPkgModelsTrafficLimitInfo = models.TrafficLimitInfo
 
-type GithubComMachinefiW3BstreamPkgModulesAccountAccessCreateReq = account_access.CreateReq
+type GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateReqBase = access_key.CreateReqBase
+
+type GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateRsp = access_key.CreateRsp
+
+type GithubComMachinefiW3BstreamPkgModulesAccessKeyListData struct {
+	GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimes
+	Desc      string                                                   `json:"desc,omitempty"`
+	ExpiredAt *GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp `json:"expiredAt,omitempty"`
+	LastUsed  *GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp `json:"lastUsed,omitempty"`
+	Name      string                                                   `json:"name"`
+}
+
+type GithubComMachinefiW3BstreamPkgModulesAccessKeyListRsp = access_key.ListRsp
 
 type GithubComMachinefiW3BstreamPkgModulesAccountCreateAccountByUsernameReq = account.CreateAccountByUsernameReq
 
@@ -325,6 +335,8 @@ type GithubComMachinefiW3BstreamPkgModulesAppletInfo = applet.Info
 type GithubComMachinefiW3BstreamPkgModulesAppletListRsp = applet.ListRsp
 
 type GithubComMachinefiW3BstreamPkgModulesAppletUpdateReq = applet.UpdateReq
+
+type GithubComMachinefiW3BstreamPkgModulesBlockchainBatchUpdateMonitorReq = blockchain.BatchUpdateMonitorReq
 
 type GithubComMachinefiW3BstreamPkgModulesBlockchainCreateChainHeightReq struct {
 	GithubComMachinefiW3BstreamPkgModelsChainHeightInfo
@@ -403,15 +415,11 @@ type GithubComMachinefiW3BstreamPkgModulesStrategyCreateReq struct {
 
 type GithubComMachinefiW3BstreamPkgModulesStrategyListRsp = strategy.ListRsp
 
-type GithubComMachinefiW3BstreamPkgModulesTrafficlimitCreateReq struct {
-	GithubComMachinefiW3BstreamPkgModelsTrafficLimitInfo
-}
+type GithubComMachinefiW3BstreamPkgModulesTrafficlimitCreateReq = trafficlimit.CreateReq
 
 type GithubComMachinefiW3BstreamPkgModulesTrafficlimitListRsp = trafficlimit.ListRsp
 
-type GithubComMachinefiW3BstreamPkgModulesTrafficlimitUpdateReq struct {
-	GithubComMachinefiW3BstreamPkgModelsTrafficLimitInfo
-}
+type GithubComMachinefiW3BstreamPkgModulesTrafficlimitUpdateReq = trafficlimit.UpdateReq
 
 type GithubComMachinefiW3BstreamPkgTypesWasmCache = wasm.Cache
 

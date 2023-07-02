@@ -17,8 +17,11 @@ type Interface interface {
 	BatchRemovePublisher(req *BatchRemovePublisher, metas ...kit.Metadata) (kit.Metadata, error)
 	BatchRemoveStrategy(req *BatchRemoveStrategy, metas ...kit.Metadata) (kit.Metadata, error)
 	BatchRemoveTrafficLimit(req *BatchRemoveTrafficLimit, metas ...kit.Metadata) (kit.Metadata, error)
+	ControlChainHeight(req *ControlChainHeight, metas ...kit.Metadata) (kit.Metadata, error)
+	ControlChainTx(req *ControlChainTx, metas ...kit.Metadata) (kit.Metadata, error)
+	ControlContractLog(req *ControlContractLog, metas ...kit.Metadata) (kit.Metadata, error)
 	ControlInstance(req *ControlInstance, metas ...kit.Metadata) (kit.Metadata, error)
-	CreateAccountAccessKey(req *CreateAccountAccessKey, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsAccountAccessKey, kit.Metadata, error)
+	CreateAccountAccessKey(req *CreateAccountAccessKey, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateRsp, kit.Metadata, error)
 	CreateAccountByUsernameAndPassword(req *CreateAccountByUsernameAndPassword, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccountCreateAccountByUsernameRsp, kit.Metadata, error)
 	CreateAndStartInstance(req *CreateAndStartInstance, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsInstance, kit.Metadata, error)
 	CreateApplet(req *CreateApplet, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAppletCreateRsp, kit.Metadata, error)
@@ -50,6 +53,7 @@ type Interface interface {
 	GetStrategy(req *GetStrategy, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsStrategy, kit.Metadata, error)
 	GetTrafficLimit(req *GetTrafficLimit, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsTrafficLimit, kit.Metadata, error)
 	HandleEvent(req *HandleEvent, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesEventEventRsp, kit.Metadata, error)
+	ListAccountAccessKey(req *ListAccountAccessKey, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccessKeyListRsp, kit.Metadata, error)
 	ListApplet(req *ListApplet, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAppletListRsp, kit.Metadata, error)
 	ListCronJob(req *ListCronJob, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesCronjobListRsp, kit.Metadata, error)
 	ListOperator(req *ListOperator, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesOperatorListDetailRsp, kit.Metadata, error)
@@ -128,11 +132,23 @@ func (c *Client) BatchRemoveTrafficLimit(req *BatchRemoveTrafficLimit, metas ...
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
+func (c *Client) ControlChainHeight(req *ControlChainHeight, metas ...kit.Metadata) (kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
+func (c *Client) ControlChainTx(req *ControlChainTx, metas ...kit.Metadata) (kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
+func (c *Client) ControlContractLog(req *ControlContractLog, metas ...kit.Metadata) (kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
 func (c *Client) ControlInstance(req *ControlInstance, metas ...kit.Metadata) (kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
-func (c *Client) CreateAccountAccessKey(req *CreateAccountAccessKey, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsAccountAccessKey, kit.Metadata, error) {
+func (c *Client) CreateAccountAccessKey(req *CreateAccountAccessKey, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateRsp, kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
@@ -257,6 +273,10 @@ func (c *Client) GetTrafficLimit(req *GetTrafficLimit, metas ...kit.Metadata) (*
 }
 
 func (c *Client) HandleEvent(req *HandleEvent, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesEventEventRsp, kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
+func (c *Client) ListAccountAccessKey(req *ListAccountAccessKey, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccessKeyListRsp, kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
