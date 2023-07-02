@@ -77,214 +77,6 @@
         }
       }
     },
-    "/srv-applet-mgr/v0/access_key": {
-      "post": {
-        "tags": [
-          "apis/account_access"
-        ],
-        "operationId": "CreateAccountAccessKey",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInHeader",
-              "x-tag-name": "Authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInQuery",
-              "x-tag-name": "authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAccountAccessCreateReq"
-                  },
-                  {
-                    "x-go-field-name": "CreateReq"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAccountAccessCreateRsp"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
-              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
-              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
-              "@StatusErr[InvalidToken][401999002][Invalid Token]!"
-            ]
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[AccountKeyNameConflict][409999020][Account Key Name Conflict]!"
-            ]
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[DatabaseError][500999002][Database Error]!"
-            ]
-          }
-        }
-      }
-    },
-    "/srv-applet-mgr/v0/access_key/{name}": {
-      "delete": {
-        "tags": [
-          "apis/account_access"
-        ],
-        "operationId": "DeleteAccountAccessKeyByName",
-        "parameters": [
-          {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "x-go-field-name": "Name",
-              "x-tag-name": "name"
-            }
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInHeader",
-              "x-tag-name": "Authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInQuery",
-              "x-tag-name": "authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": ""
-          },
-          "401": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
-              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
-              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
-              "@StatusErr[InvalidToken][401999002][Invalid Token]!"
-            ]
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[AccountKeyNotFound][404999022][Account Key Not Found]!",
-              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
-            ]
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[DatabaseError][500999002][Database Error]!"
-            ]
-          }
-        }
-      }
-    },
     "/srv-applet-mgr/v0/account": {
       "put": {
         "tags": [
@@ -499,6 +291,414 @@
         }
       }
     },
+    "/srv-applet-mgr/v0/account_access_key": {
+      "post": {
+        "tags": [
+          "apis/account_access_key"
+        ],
+        "summary": "CreateAccountAccessKey create account access key",
+        "operationId": "CreateAccountAccessKey",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateReqBase"
+                  },
+                  {
+                    "x-go-field-name": "CreateAccountAccessKeyReq"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateRsp"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAccessKeyIdentityType][400999013][Invalid Access Key Identity Type]!"
+            ]
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
+            ]
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccessKeyNameConflict][409999020][Access Key Name Conflict]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
+    "/srv-applet-mgr/v0/account_access_key/datalist": {
+      "get": {
+        "tags": [
+          "apis/account_access_key"
+        ],
+        "summary": "ListAccountAccessKey get api access key list under current account",
+        "operationId": "ListAccountAccessKey",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "expiredAtBegin",
+            "in": "query",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp"
+                },
+                {
+                  "x-go-field-name": "ExpiredAtBegin",
+                  "x-tag-name": "expiredAtBegin,omitempty"
+                }
+              ]
+            }
+          },
+          {
+            "name": "expiredAtEnd",
+            "in": "query",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp"
+                },
+                {
+                  "x-go-field-name": "ExpiredAtEnd",
+                  "x-tag-name": "expiredAtEnd,omitempty"
+                }
+              ]
+            }
+          },
+          {
+            "name": "identityID",
+            "in": "query",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFIDs"
+                },
+                {
+                  "x-go-field-name": "IdentityIDs",
+                  "x-tag-name": "identityID,omitempty"
+                }
+              ]
+            }
+          },
+          {
+            "name": "identityType",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsAccessKeyIdentityType"
+              },
+              "x-go-field-name": "IdentityTypes",
+              "x-tag-name": "identityType,omitempty"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "x-go-field-name": "Names",
+              "x-tag-name": "name,omitempty"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 9223372036854776000,
+              "minimum": 0,
+              "default": "0",
+              "x-go-field-name": "Offset",
+              "x-tag-name": "offset,omitempty",
+              "x-tag-validate": "@int64[0,]"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 9223372036854776000,
+              "minimum": -1,
+              "default": "10",
+              "x-go-field-name": "Size",
+              "x-tag-name": "size,omitempty",
+              "x-tag-validate": "@int64[-1,]"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAccessKeyListRsp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
+    "/srv-applet-mgr/v0/account_access_key/{name}": {
+      "delete": {
+        "tags": [
+          "apis/account_access_key"
+        ],
+        "summary": "DeleteAccountAccessKeyByName delete access key by name under current account",
+        "operationId": "DeleteAccountAccessKeyByName",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-go-field-name": "Name",
+              "x-tag-name": "name"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccessKeyNotFound][404999022][Account Key Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
     "/srv-applet-mgr/v0/applet/data/{appletID}": {
       "delete": {
         "tags": [
@@ -606,9 +806,9 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[BatchRemoveWasmLogFailed][500999015][Batch Remove WasmLog Failed]!",
-              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
-              "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
+              "@StatusErr[BatchRemoveWasmLogFailed][500999012][Batch Remove WasmLog Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
@@ -868,10 +1068,10 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[BatchRemoveAppletFailed][500999011][Batch Remove Applet Failed]!",
-              "@StatusErr[BatchRemoveWasmLogFailed][500999015][Batch Remove WasmLog Failed]!",
-              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
-              "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
+              "@StatusErr[BatchRemoveAppletFailed][500999009][Batch Remove Applet Failed]!",
+              "@StatusErr[BatchRemoveWasmLogFailed][500999012][Batch Remove WasmLog Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!"
@@ -1040,10 +1240,10 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigInitFailed][500999006][Config Init Failed]!",
-              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
-              "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
-              "@StatusErr[CreateInstanceFailed][500999010][Create Instance Failed]!",
+              "@StatusErr[ConfigInitFailed][500999005][Config Init Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!",
+              "@StatusErr[CreateInstanceFailed][500999008][Create Instance Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
@@ -1394,10 +1594,10 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigInitFailed][500999006][Config Init Failed]!",
-              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
-              "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
-              "@StatusErr[CreateInstanceFailed][500999010][Create Instance Failed]!",
+              "@StatusErr[ConfigInitFailed][500999005][Config Init Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!",
+              "@StatusErr[CreateInstanceFailed][500999008][Create Instance Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
@@ -2082,13 +2282,13 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigInitFailed][500999006][Config Init Failed]!",
-              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
-              "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
-              "@StatusErr[CreateInstanceFailed][500999010][Create Instance Failed]!",
+              "@StatusErr[ConfigInitFailed][500999005][Config Init Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!",
+              "@StatusErr[CreateInstanceFailed][500999008][Create Instance Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[FetchResourceFailed][500999005][Fetch Resource Failed]!"
+              "@StatusErr[FetchResourceFailed][500999004][Fetch Resource Failed]!"
             ]
           }
         }
@@ -2202,9 +2402,9 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[BatchRemoveWasmLogFailed][500999015][Batch Remove WasmLog Failed]!",
-              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
-              "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
+              "@StatusErr[BatchRemoveWasmLogFailed][500999012][Batch Remove WasmLog Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
@@ -2459,9 +2659,9 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[BatchRemoveWasmLogFailed][500999015][Batch Remove WasmLog Failed]!",
-              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
-              "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
+              "@StatusErr[BatchRemoveWasmLogFailed][500999012][Batch Remove WasmLog Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!"
@@ -2727,6 +2927,7 @@
             "x-status-errors": [
               "@StatusErr[BadRequest][400999001][BadRequest]!",
               "@StatusErr[DeprecatedProject][400999003][Deprecated Project]!",
+              "@StatusErr[InvalidAccessKeyIdentityType][400999013][Invalid Access Key Identity Type]!",
               "@StatusErr[InvalidChainHeightIDs][400999011][Invalid Chain Height IDs]!",
               "@StatusErr[InvalidChainTxIDs][400999010][Invalid Chain Tx IDs]!",
               "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!",
@@ -2749,9 +2950,9 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[AccountAccessKeyExpired][401999019][Account Access Key Expired]!",
+              "@StatusErr[AccessKeyExpired][401999019][Account Access Key Expired]!",
               "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
-              "@StatusErr[InvalidAccountAccessKey][401999018][Invalid Account Access Key]!",
+              "@StatusErr[InvalidAccessKey][401999018][Invalid Account Access Key]!",
               "@StatusErr[InvalidAppletContext][401999016][Invalid Applet]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthPublisherID][401999012][Invalid Auth Publisher ID]!",
@@ -2805,8 +3006,8 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccessKeyNotFound][404999022][Account Key Not Found]!",
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[AccountKeyNotFound][404999022][Account Key Not Found]!",
               "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[AccountPasswordNotFound][404999018][Account Password Not Found]!",
               "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
@@ -2840,9 +3041,9 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccessKeyNameConflict][409999020][Access Key Name Conflict]!",
               "@StatusErr[AccountConflict][409999015][Account Conflict]!",
               "@StatusErr[AccountIdentityConflict][409999014][Account Identity Conflict]!",
-              "@StatusErr[AccountKeyNameConflict][409999020][Account Key Name Conflict]!",
               "@StatusErr[AccountPasswordConflict][409999016][Account Password Conflict]!",
               "@StatusErr[AppletNameConflict][409999009][Applet Name Conflict]!",
               "@StatusErr[ChainHeightConflict][409999013][Chain Height Conflict]!",
@@ -2872,25 +3073,22 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[BatchRemoveAppletFailed][500999011][Batch Remove Applet Failed]!",
-              "@StatusErr[BatchRemoveWasmLogFailed][500999015][Batch Remove WasmLog Failed]!",
-              "@StatusErr[ConfigInitFailed][500999006][Config Init Failed]!",
-              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
-              "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
-              "@StatusErr[CreateChannelFailed][500999004][Create Message Channel Failed]!",
-              "@StatusErr[CreateInstanceFailed][500999010][Create Instance Failed]!",
-              "@StatusErr[CreateTrafficSchedulerFailed][500999018][Create Traffic Scheduler Failed]!",
+              "@StatusErr[BatchRemoveAppletFailed][500999009][Batch Remove Applet Failed]!",
+              "@StatusErr[BatchRemoveWasmLogFailed][500999012][Batch Remove WasmLog Failed]!",
+              "@StatusErr[ConfigInitFailed][500999005][Config Init Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!",
+              "@StatusErr[CreateInstanceFailed][500999008][Create Instance Failed]!",
+              "@StatusErr[CreateTrafficSchedulerFailed][500999015][Create Traffic Scheduler Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[FetchResourceFailed][500999005][Fetch Resource Failed]!",
-              "@StatusErr[GenPublisherTokenFailed][500999009][Gen Publisher Token Failed]!",
-              "@StatusErr[GenTokenFailed][500999016][Gen Token Failed]!",
+              "@StatusErr[FetchResourceFailed][500999004][Fetch Resource Failed]!",
+              "@StatusErr[GenTokenFailed][500999013][Gen Token Failed]!",
               "@StatusErr[InternalServerError][500999001][internal error]",
-              "@StatusErr[MD5ChecksumFailed][500999012][Md5 Checksum Failed]!",
-              "@StatusErr[MqttConnectFailed][500999014][MQTT Connect Failed]!",
-              "@StatusErr[MqttSubscribeFailed][500999013][MQTT Subscribe Failed]!",
-              "@StatusErr[TrafficLimitExceededFailed][500999017][Traffic Limit Exceeded Failed]!",
-              "@StatusErr[UpdateTrafficSchedulerFailed][500999019][Update Traffic Scheduler Failed]!",
+              "@StatusErr[MqttConnectFailed][500999011][MQTT Connect Failed]!",
+              "@StatusErr[MqttSubscribeFailed][500999010][MQTT Subscribe Failed]!",
+              "@StatusErr[TrafficLimitExceededFailed][500999014][Traffic Limit Exceeded Failed]!",
+              "@StatusErr[UpdateTrafficSchedulerFailed][500999016][Update Traffic Scheduler Failed]!",
               "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
             ]
           }
@@ -2977,6 +3175,7 @@
             "x-status-errors": [
               "@StatusErr[BadRequest][400999001][BadRequest]!",
               "@StatusErr[DeprecatedProject][400999003][Deprecated Project]!",
+              "@StatusErr[InvalidAccessKeyIdentityType][400999013][Invalid Access Key Identity Type]!",
               "@StatusErr[InvalidChainHeightIDs][400999011][Invalid Chain Height IDs]!",
               "@StatusErr[InvalidChainTxIDs][400999010][Invalid Chain Tx IDs]!",
               "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!",
@@ -2999,9 +3198,9 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[AccountAccessKeyExpired][401999019][Account Access Key Expired]!",
+              "@StatusErr[AccessKeyExpired][401999019][Account Access Key Expired]!",
               "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
-              "@StatusErr[InvalidAccountAccessKey][401999018][Invalid Account Access Key]!",
+              "@StatusErr[InvalidAccessKey][401999018][Invalid Account Access Key]!",
               "@StatusErr[InvalidAppletContext][401999016][Invalid Applet]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
@@ -3055,8 +3254,8 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccessKeyNotFound][404999022][Account Key Not Found]!",
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[AccountKeyNotFound][404999022][Account Key Not Found]!",
               "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[AccountPasswordNotFound][404999018][Account Password Not Found]!",
@@ -3090,9 +3289,9 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccessKeyNameConflict][409999020][Access Key Name Conflict]!",
               "@StatusErr[AccountConflict][409999015][Account Conflict]!",
               "@StatusErr[AccountIdentityConflict][409999014][Account Identity Conflict]!",
-              "@StatusErr[AccountKeyNameConflict][409999020][Account Key Name Conflict]!",
               "@StatusErr[AccountPasswordConflict][409999016][Account Password Conflict]!",
               "@StatusErr[AppletNameConflict][409999009][Applet Name Conflict]!",
               "@StatusErr[ChainHeightConflict][409999013][Chain Height Conflict]!",
@@ -3122,25 +3321,22 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[BatchRemoveAppletFailed][500999011][Batch Remove Applet Failed]!",
-              "@StatusErr[BatchRemoveWasmLogFailed][500999015][Batch Remove WasmLog Failed]!",
-              "@StatusErr[ConfigInitFailed][500999006][Config Init Failed]!",
-              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
-              "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
-              "@StatusErr[CreateChannelFailed][500999004][Create Message Channel Failed]!",
-              "@StatusErr[CreateInstanceFailed][500999010][Create Instance Failed]!",
-              "@StatusErr[CreateTrafficSchedulerFailed][500999018][Create Traffic Scheduler Failed]!",
+              "@StatusErr[BatchRemoveAppletFailed][500999009][Batch Remove Applet Failed]!",
+              "@StatusErr[BatchRemoveWasmLogFailed][500999012][Batch Remove WasmLog Failed]!",
+              "@StatusErr[ConfigInitFailed][500999005][Config Init Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!",
+              "@StatusErr[CreateInstanceFailed][500999008][Create Instance Failed]!",
+              "@StatusErr[CreateTrafficSchedulerFailed][500999015][Create Traffic Scheduler Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[FetchResourceFailed][500999005][Fetch Resource Failed]!",
-              "@StatusErr[GenPublisherTokenFailed][500999009][Gen Publisher Token Failed]!",
-              "@StatusErr[GenTokenFailed][500999016][Gen Token Failed]!",
+              "@StatusErr[FetchResourceFailed][500999004][Fetch Resource Failed]!",
+              "@StatusErr[GenTokenFailed][500999013][Gen Token Failed]!",
               "@StatusErr[InternalServerError][500999001][internal error]",
-              "@StatusErr[MD5ChecksumFailed][500999012][Md5 Checksum Failed]!",
-              "@StatusErr[MqttConnectFailed][500999014][MQTT Connect Failed]!",
-              "@StatusErr[MqttSubscribeFailed][500999013][MQTT Subscribe Failed]!",
-              "@StatusErr[TrafficLimitExceededFailed][500999017][Traffic Limit Exceeded Failed]!",
-              "@StatusErr[UpdateTrafficSchedulerFailed][500999019][Update Traffic Scheduler Failed]!",
+              "@StatusErr[MqttConnectFailed][500999011][MQTT Connect Failed]!",
+              "@StatusErr[MqttSubscribeFailed][500999010][MQTT Subscribe Failed]!",
+              "@StatusErr[TrafficLimitExceededFailed][500999014][Traffic Limit Exceeded Failed]!",
+              "@StatusErr[UpdateTrafficSchedulerFailed][500999016][Update Traffic Scheduler Failed]!",
               "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
             ]
           }
@@ -3233,7 +3429,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[GenTokenFailed][500999016][Gen Token Failed]!"
+              "@StatusErr[GenTokenFailed][500999013][Gen Token Failed]!"
             ]
           }
         }
@@ -3339,7 +3535,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[GenTokenFailed][500999016][Gen Token Failed]!"
+              "@StatusErr[GenTokenFailed][500999013][Gen Token Failed]!"
             ]
           }
         }
@@ -5030,12 +5226,12 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigInitFailed][500999006][Config Init Failed]!",
-              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
+              "@StatusErr[ConfigInitFailed][500999005][Config Init Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[MqttConnectFailed][500999014][MQTT Connect Failed]!",
-              "@StatusErr[MqttSubscribeFailed][500999013][MQTT Subscribe Failed]!",
+              "@StatusErr[MqttConnectFailed][500999011][MQTT Connect Failed]!",
+              "@StatusErr[MqttSubscribeFailed][500999010][MQTT Subscribe Failed]!",
               "@StatusErr[RequestFailed][500000000][RequestFailed]"
             ]
           }
@@ -5449,10 +5645,10 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[BatchRemoveAppletFailed][500999011][Batch Remove Applet Failed]!",
-              "@StatusErr[BatchRemoveWasmLogFailed][500999015][Batch Remove WasmLog Failed]!",
-              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
-              "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
+              "@StatusErr[BatchRemoveAppletFailed][500999009][Batch Remove Applet Failed]!",
+              "@StatusErr[BatchRemoveWasmLogFailed][500999012][Batch Remove WasmLog Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!"
@@ -5688,7 +5884,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!"
@@ -5821,8 +6017,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigInitFailed][500999006][Config Init Failed]!",
-              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
+              "@StatusErr[ConfigInitFailed][500999005][Config Init Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!"
@@ -5941,7 +6137,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!"
@@ -6087,9 +6283,9 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[ConfigInitFailed][500999006][Config Init Failed]!",
-              "@StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!",
-              "@StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!",
+              "@StatusErr[ConfigInitFailed][500999005][Config Init Failed]!",
+              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
+              "@StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!"
@@ -7044,6 +7240,19 @@
               }
             }
           },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAccessKeyIdentityType][400999013][Invalid Access Key Identity Type]!"
+            ]
+          },
           "401": {
             "description": "",
             "content": {
@@ -7087,6 +7296,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccessKeyNameConflict][409999020][Access Key Name Conflict]!",
               "@StatusErr[PublisherConflict][409999007][Publisher Conflict]!"
             ]
           },
@@ -7102,8 +7312,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[GenPublisherTokenFailed][500999009][Gen Publisher Token Failed]!"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -7652,7 +7861,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[FetchResourceFailed][500999005][Fetch Resource Failed]!"
+              "@StatusErr[FetchResourceFailed][500999004][Fetch Resource Failed]!"
             ]
           }
         }
@@ -9025,7 +9234,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CreateTrafficSchedulerFailed][500999018][Create Traffic Scheduler Failed]!",
+              "@StatusErr[CreateTrafficSchedulerFailed][500999015][Create Traffic Scheduler Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!"
@@ -9445,7 +9654,7 @@
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[UpdateTrafficSchedulerFailed][500999019][Update Traffic Scheduler Failed]!"
+              "@StatusErr[UpdateTrafficSchedulerFailed][500999016][Update Traffic Scheduler Failed]!"
             ]
           }
         }
@@ -9545,7 +9754,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[BatchRemoveWasmLogFailed][500999015][Batch Remove WasmLog Failed]!",
+              "@StatusErr[BatchRemoveWasmLogFailed][500999012][Batch Remove WasmLog Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
@@ -9695,6 +9904,14 @@
         "description": "Number.MAX_SAFE_INTEGER JavaScript (2^53 – 1)",
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/base/types.SFID",
         "x-id": "GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+      },
+      "GithubComMachinefiW3BstreamPkgDependsBaseTypesSFIDs": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+        },
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/base/types.SFIDs",
+        "x-id": "GithubComMachinefiW3BstreamPkgDependsBaseTypesSFIDs"
       },
       "GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp": {
         "type": "string",
@@ -9886,6 +10103,19 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/statusx.StatusErr",
         "x-id": "GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+      },
+      "GithubComMachinefiW3BstreamPkgEnumsAccessKeyIdentityType": {
+        "type": "string",
+        "enum": [
+          "ACCOUNT",
+          "PUBLISHER"
+        ],
+        "x-enum-labels": [
+          "ACCOUNT",
+          "PUBLISHER"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.AccessKeyIdentityType",
+        "x-id": "GithubComMachinefiW3BstreamPkgEnumsAccessKeyIdentityType"
       },
       "GithubComMachinefiW3BstreamPkgEnumsAccountRole": {
         "type": "string",
@@ -11328,14 +11558,14 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.TrafficLimitInfo",
         "x-id": "GithubComMachinefiW3BstreamPkgModelsTrafficLimitInfo"
       },
-      "GithubComMachinefiW3BstreamPkgModulesAccountAccessCreateReq": {
+      "GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateReqBase": {
         "type": "object",
         "properties": {
           "desc": {
             "type": "string",
             "description": "Description access token description",
             "x-go-field-name": "Desc",
-            "x-tag-json": "desc"
+            "x-tag-json": "desc,omitempty"
           },
           "expirationDays": {
             "type": "integer",
@@ -11352,13 +11582,12 @@
           }
         },
         "required": [
-          "name",
-          "desc"
+          "name"
         ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/account_access.CreateReq",
-        "x-id": "GithubComMachinefiW3BstreamPkgModulesAccountAccessCreateReq"
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/access_key.CreateReqBase",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateReqBase"
       },
-      "GithubComMachinefiW3BstreamPkgModulesAccountAccessCreateRsp": {
+      "GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateRsp": {
         "type": "object",
         "properties": {
           "accessKey": {
@@ -11383,6 +11612,40 @@
               }
             ]
           },
+          "identityID": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+              },
+              {
+                "x-go-field-name": "IdentityID",
+                "x-tag-json": "identityID"
+              }
+            ]
+          },
+          "identityType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsAccessKeyIdentityType"
+              },
+              {
+                "x-go-field-name": "IdentityType",
+                "x-tag-json": "identityType"
+              }
+            ]
+          },
+          "lastUsed": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp"
+              },
+              {
+                "x-go-field-name": "LastUsed",
+                "x-go-star-level": 1,
+                "x-tag-json": "lastUsed,omitempty"
+              }
+            ]
+          },
           "name": {
             "type": "string",
             "x-go-field-name": "Name",
@@ -11391,10 +11654,88 @@
         },
         "required": [
           "name",
+          "identityType",
+          "identityID",
           "accessKey"
         ],
-        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/account_access.CreateRsp",
-        "x-id": "GithubComMachinefiW3BstreamPkgModulesAccountAccessCreateRsp"
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/access_key.CreateRsp",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateRsp"
+      },
+      "GithubComMachinefiW3BstreamPkgModulesAccessKeyListData": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimes"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "desc": {
+                "type": "string",
+                "x-go-field-name": "Desc",
+                "x-tag-json": "desc,omitempty"
+              },
+              "expiredAt": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp"
+                  },
+                  {
+                    "x-go-field-name": "ExpiredAt",
+                    "x-go-star-level": 1,
+                    "x-tag-json": "expiredAt,omitempty"
+                  }
+                ]
+              },
+              "lastUsed": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp"
+                  },
+                  {
+                    "x-go-field-name": "LastUsed",
+                    "x-go-star-level": 1,
+                    "x-tag-json": "lastUsed,omitempty"
+                  }
+                ]
+              },
+              "name": {
+                "type": "string",
+                "x-go-field-name": "Name",
+                "x-tag-json": "name"
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/access_key.ListData",
+            "x-id": "GithubComMachinefiW3BstreamPkgModulesAccessKeyListData"
+          }
+        ]
+      },
+      "GithubComMachinefiW3BstreamPkgModulesAccessKeyListRsp": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAccessKeyListData"
+            },
+            "x-go-field-name": "Data",
+            "x-tag-json": "data"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "x-go-field-name": "Total",
+            "x-tag-json": "total"
+          }
+        },
+        "required": [
+          "data",
+          "total"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/access_key.ListRsp",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesAccessKeyListRsp"
       },
       "GithubComMachinefiW3BstreamPkgModulesAccountCreateAccountByUsernameReq": {
         "type": "object",

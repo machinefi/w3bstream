@@ -900,7 +900,8 @@ http delete :8888/srv-applet-mgr/v0/project_operator/$PROJECTID -A bearer -a $TO
 export KEY_NAME=key_name
 export KEY_DESC=desc
 export KEY_EXPRIRATION_DAYS=30 # if expiration days is 0, this key will be not expired.
-echo '{"name":"'$KEY_NAME'", "expirationDays": $KEY_EXPRIRATION_DAYS, "desc": "'$KEY_DESC'"}' | http post :8888/srv-applet-mgr/v0/access_key -A bearer -a $TOK
+echo '{"name":"'$KEY_NAME'", "expirationDays": $KEY_EXPRIRATION_DAYS, "desc": "'$KEY_DESC'"}' | http post :8888/srv-applet-mgr/v0/account_access_key -A bearer -a $TOK
+
 ```
 
 output like
@@ -918,5 +919,29 @@ output like
 
 ```sh
 export KEY_NAME=key_name
-http delete :8888/srv-applet-mgr/v0/access_key/$KEY_NAME -A bearer -a $TOK
+http delete :8888/srv-applet-mgr/v0/account_access_key/$KEY_NAME -A bearer -a $TOK
+
+```
+
+## List Access Key
+
+```sh
+http get :8888/srv-applet-mgr/v0/account_access_key/datalist -A bearer -a $TOK
+```
+
+output like
+
+```json
+{
+    "data": [
+        {
+            "createdAt": "2023-07-03T05:01:25+08:00",
+            "desc": "desc",
+            "lastUsed": "2023-07-03T05:03:22+08:00",
+            "name": "test",
+            "updatedAt": "2023-07-03T05:03:22+08:00"
+        }
+    ],
+    "total": 1
+}
 ```

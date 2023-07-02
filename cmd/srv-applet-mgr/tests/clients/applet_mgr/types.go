@@ -12,8 +12,8 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/access_key"
 	"github.com/machinefi/w3bstream/pkg/modules/account"
-	"github.com/machinefi/w3bstream/pkg/modules/account_access"
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
 	"github.com/machinefi/w3bstream/pkg/modules/blockchain"
 	"github.com/machinefi/w3bstream/pkg/modules/cronjob"
@@ -60,6 +60,8 @@ type GithubComMachinefiW3BstreamPkgDependsBaseTypesDuration = types.Duration
 
 type GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID = types.SFID
 
+type GithubComMachinefiW3BstreamPkgDependsBaseTypesSFIDs = types.SFIDs
+
 type GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp = types.Timestamp
 
 type GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxAttachment = httpx.Attachment
@@ -79,6 +81,8 @@ type GithubComMachinefiW3BstreamPkgDependsKitStatusxErrorField = statusx.ErrorFi
 type GithubComMachinefiW3BstreamPkgDependsKitStatusxErrorFields = statusx.ErrorFields
 
 type GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr = statusx.StatusErr
+
+type GithubComMachinefiW3BstreamPkgEnumsAccessKeyIdentityType = enums.AccessKeyIdentityType
 
 type GithubComMachinefiW3BstreamPkgEnumsAccountRole = enums.AccountRole
 
@@ -295,9 +299,19 @@ type GithubComMachinefiW3BstreamPkgModelsTrafficLimit struct {
 
 type GithubComMachinefiW3BstreamPkgModelsTrafficLimitInfo = models.TrafficLimitInfo
 
-type GithubComMachinefiW3BstreamPkgModulesAccountAccessCreateReq = account_access.CreateReq
+type GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateReqBase = access_key.CreateReqBase
 
-type GithubComMachinefiW3BstreamPkgModulesAccountAccessCreateRsp = account_access.CreateRsp
+type GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateRsp = access_key.CreateRsp
+
+type GithubComMachinefiW3BstreamPkgModulesAccessKeyListData struct {
+	GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimes
+	Desc      string                                                   `json:"desc,omitempty"`
+	ExpiredAt *GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp `json:"expiredAt,omitempty"`
+	LastUsed  *GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp `json:"lastUsed,omitempty"`
+	Name      string                                                   `json:"name"`
+}
+
+type GithubComMachinefiW3BstreamPkgModulesAccessKeyListRsp = access_key.ListRsp
 
 type GithubComMachinefiW3BstreamPkgModulesAccountCreateAccountByUsernameReq = account.CreateAccountByUsernameReq
 
