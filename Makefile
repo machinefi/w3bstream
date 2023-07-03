@@ -102,11 +102,11 @@ generate: toolkit gomock
 	@cd pkg/errors              && go generate ./...
 	@cd pkg/depends/util/strfmt && go generate ./...
 	@cd pkg/test                && go generate ./...
+	@cd cmd/srv-applet-mgr      && go generate ./...
 
 .PHONY: precommit
-precommit: toolkit targets test
+precommit: toolkit generate targets test
 	@toolkit fmt
-	@cd cmd/srv-applet-mgr && make openapi --no-print-directory
 	@git add -u
 
 ## to migrate database models, if model defines changed, make this entry
