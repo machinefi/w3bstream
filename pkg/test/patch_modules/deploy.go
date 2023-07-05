@@ -54,3 +54,10 @@ func DeployWithInstanceRuntimeContext(patch *gomonkey.Patches, ctx context.Conte
 		func(_ context.Context) (context.Context, error) { return ctx, err },
 	)
 }
+
+func DeployRemoveByAppletSFID(patch *gomonkey.Patches, err error) *gomonkey.Patches {
+	return patch.ApplyFunc(
+		deploy.RemoveByAppletSFID,
+		func(_ context.Context, _ types.SFID) error { return err },
+	)
+}

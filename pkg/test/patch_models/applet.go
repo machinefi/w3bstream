@@ -6,6 +6,7 @@ import (
 	"github.com/agiledragon/gomonkey/v2"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/models"
 )
 
@@ -20,6 +21,16 @@ func AppletFetchByAppletID(patch *gomonkey.Patches, overwrite *models.Applet, er
 				*receiver = *overwrite
 			}
 			return err
+		},
+	)
+}
+
+func AppletList(patch *gomonkey.Patches, data []models.Applet, err error) *gomonkey.Patches {
+	return patch.ApplyMethod(
+		_targetModelApplet,
+		"List",
+		func(_ *models.Applet, _ sqlx.DBExecutor, _ builder.SqlCondition, _ ...builder.Addition) ([]models.Applet, error) {
+			return data, err
 		},
 	)
 }
