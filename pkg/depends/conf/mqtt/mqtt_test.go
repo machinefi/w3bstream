@@ -3,15 +3,9 @@ package mqtt_test
 /*
 import (
 	"encoding/json"
-	"fmt"
-	"testing"
 	"time"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/google/uuid"
-	. "github.com/onsi/gomega"
-
-	. "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 )
 
 type PayloadBody struct {
@@ -33,6 +27,7 @@ func UnsafeJsonMarshal(v interface{}) []byte {
 	return data
 }
 
+/* DISABLED ci macos (network)
 var (
 	topic  = "test_demo"
 	broker = &Broker{}

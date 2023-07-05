@@ -32,6 +32,9 @@ func Compose(typ SnippetType, elements ...Snippet) *SnippetLiteralCompose {
 }
 
 func Comments(cmt ...string) *SnippetComments {
+	if len(cmt) == 0 {
+		return nil
+	}
 	comments := make([]string, 0, len(cmt))
 	for _, c := range cmt {
 		comments = append(comments, strings.Split(c, "\n")...)

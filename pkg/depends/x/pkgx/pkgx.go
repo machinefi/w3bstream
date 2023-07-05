@@ -36,7 +36,7 @@ func LoadFrom(pattern string) (*Pkg, error) {
 }
 
 func New(pkg *Package) *Pkg {
-	imports := &Set{}
+	imports := make(Set)
 	imports.Append(pkg)
 	return &Pkg{
 		Package: pkg,

@@ -1,0 +1,996 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/demo": {
+      "get": {
+        "tags": [
+          "github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/openapi"
+        ],
+        "operationId": "OpenAPI",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BytesBuffer"
+                }
+              }
+            }
+          },
+          "499": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[ContextCanceled][499000000][ContextCanceled]"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[UnknownError][500000000][UnknownError]"
+            ]
+          }
+        }
+      }
+    },
+    "/demo/binary/files": {
+      "get": {
+        "tags": [
+          "routes"
+        ],
+        "summary": "download file",
+        "operationId": "DownloadFile",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxAttachment"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/demo/binary/images": {
+      "get": {
+        "tags": [
+          "routes"
+        ],
+        "summary": "show image",
+        "operationId": "ShowImage",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxImagePNG"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/demo/cookie": {
+      "post": {
+        "tags": [
+          "routes"
+        ],
+        "operationId": "Cookie",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "cookie",
+            "schema": {
+              "type": "string",
+              "x-go-field-name": "Token",
+              "x-tag-name": "token,omitempty"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          "499": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[ContextCanceled][499000000][ContextCanceled]"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[UnknownError][500000000][UnknownError]"
+            ]
+          }
+        }
+      }
+    },
+    "/demo/forms/multipart": {
+      "post": {
+        "tags": [
+          "routes"
+        ],
+        "summary": "Form Multipart",
+        "operationId": "FormMultipartWithFile",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/Data"
+                      },
+                      {
+                        "x-go-field-name": "Data",
+                        "x-tag-name": "data,omitempty"
+                      }
+                    ]
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "x-go-field-name": "File",
+                    "x-go-star-level": 1,
+                    "x-tag-name": "file"
+                  },
+                  "map": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "propertyNames": {
+                      "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitHttptransportgenTestdataServerPkgTypesProtocol"
+                    },
+                    "x-go-field-name": "Map",
+                    "x-tag-name": "map,omitempty"
+                  },
+                  "slice": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "x-go-field-name": "Slice",
+                    "x-tag-name": "slice,omitempty"
+                  },
+                  "string": {
+                    "type": "string",
+                    "deprecated": true,
+                    "x-go-field-name": "String",
+                    "x-tag-name": "string,omitempty"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "x-go-field-name": "FormData",
+                "x-tag-mime": "multipart"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/demo/forms/multipart-with-files": {
+      "post": {
+        "tags": [
+          "routes"
+        ],
+        "summary": "Form Multipart With Files",
+        "operationId": "FormMultipartWithFiles",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "files": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary",
+                      "x-go-star-level": 1
+                    },
+                    "x-go-field-name": "Files",
+                    "x-tag-name": "files"
+                  }
+                },
+                "required": [
+                  "files"
+                ],
+                "x-go-field-name": "FormData",
+                "x-tag-mime": "multipart"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/demo/forms/urlencoded": {
+      "post": {
+        "tags": [
+          "routes"
+        ],
+        "summary": "Form URL Encoded",
+        "operationId": "FormURLEncoded",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/Data"
+                      },
+                      {
+                        "x-go-field-name": "Data",
+                        "x-tag-name": "data"
+                      }
+                    ]
+                  },
+                  "slice": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "x-go-field-name": "Slice",
+                    "x-tag-name": "slice"
+                  },
+                  "string": {
+                    "type": "string",
+                    "x-go-field-name": "String",
+                    "x-tag-name": "string"
+                  }
+                },
+                "required": [
+                  "string",
+                  "slice",
+                  "data"
+                ],
+                "x-go-field-name": "FormData",
+                "x-tag-mime": "urlencoded"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/demo/proxy": {
+      "get": {
+        "tags": [
+          "routes"
+        ],
+        "operationId": "Proxy",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpInfo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[RequestTransformFailed][400000000][RequestTransformFailed]"
+            ]
+          },
+          "499": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[ClientClosedRequest][499000000][ClientClosedRequest]"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[RequestFailed][500000000][RequestFailed]"
+            ]
+          }
+        }
+      }
+    },
+    "/demo/redirect": {
+      "get": {
+        "tags": [
+          "routes"
+        ],
+        "operationId": "Redirect",
+        "responses": {
+          "302": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "routes"
+        ],
+        "operationId": "RedirectWhenError",
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/demo/restful": {
+      "head": {
+        "tags": [
+          "routes"
+        ],
+        "operationId": "HealthCheck",
+        "parameters": [
+          {
+            "name": "pullPolicy",
+            "in": "query",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitHttptransportgenTestdataServerPkgTypesPullPolicy"
+                },
+                {
+                  "x-go-field-name": "PullPolicy",
+                  "x-tag-name": "pullPolicy,omitempty"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "routes"
+        ],
+        "summary": "Create",
+        "operationId": "Create",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Data"
+                  },
+                  {
+                    "x-go-field-name": "Data"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Data"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/demo/restful/{id}": {
+      "delete": {
+        "tags": [
+          "routes"
+        ],
+        "summary": "remove by id",
+        "operationId": "RemoveByID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 6,
+              "x-go-field-name": "ID",
+              "x-tag-name": "id",
+              "x-tag-validate": "@string[6,]"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[Unauthorized][401999001][Unauthorized]!"
+            ]
+          },
+          "499": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[ContextCanceled][499000000][ContextCanceled]"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InternalServerError][500100001][InternalServerError]",
+              "@StatusErr[InternalServerError][500999001][InternalServerError]",
+              "@StatusErr[UnknownError][500000000][UnknownError]"
+            ]
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "routes"
+        ],
+        "summary": "get by id",
+        "operationId": "GetByID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 6,
+              "x-go-field-name": "ID",
+              "x-tag-name": "id",
+              "x-tag-validate": "@string[6,]"
+            }
+          },
+          {
+            "name": "label",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "x-go-field-name": "Label",
+              "x-tag-name": "label,omitempty"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "x-go-field-name": "Name",
+              "x-tag-name": "name,omitempty"
+            }
+          },
+          {
+            "name": "protocol",
+            "in": "query",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitHttptransportgenTestdataServerPkgTypesProtocol"
+                },
+                {
+                  "x-go-field-name": "Protocol",
+                  "x-tag-name": "protocol,omitempty"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Data"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "routes"
+        ],
+        "summary": "update by id",
+        "operationId": "UpdateByID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 6,
+              "x-go-field-name": "ID",
+              "x-tag-name": "id",
+              "x-tag-validate": "@string[6,]"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Data"
+                  },
+                  {
+                    "x-go-field-name": "Data"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/demo/v2/proxy": {
+      "get": {
+        "tags": [
+          "routes"
+        ],
+        "operationId": "ProxyV2",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpInfo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[RequestTransformFailed][400000000][RequestTransformFailed]"
+            ]
+          },
+          "499": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[ClientClosedRequest][499000000][ClientClosedRequest]",
+              "@StatusErr[ContextCanceled][499000000][ContextCanceled]"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[RequestFailed][500000000][RequestFailed]",
+              "@StatusErr[UnknownError][500000000][UnknownError]"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BytesBuffer": {
+        "type": "string",
+        "format": "binary",
+        "x-go-vendor-type": "bytes.Buffer",
+        "x-id": "BytesBuffer"
+      },
+      "Data": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "x-go-field-name": "ID",
+            "x-tag-json": "id"
+          },
+          "label": {
+            "type": "string",
+            "x-go-field-name": "Label",
+            "x-tag-json": "label"
+          },
+          "protocol": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitHttptransportgenTestdataServerPkgTypesProtocol"
+              },
+              {
+                "x-go-field-name": "Protocol",
+                "x-tag-json": "protocol,omitempty"
+              }
+            ]
+          },
+          "ptrString": {
+            "type": "string",
+            "x-go-field-name": "PtrString",
+            "x-go-star-level": 1,
+            "x-tag-json": "ptrString,omitempty"
+          },
+          "subData": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SubData"
+              },
+              {
+                "x-go-field-name": "SubData",
+                "x-go-star-level": 1,
+                "x-tag-json": "subData,omitempty"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "label"
+        ],
+        "x-id": "Data"
+      },
+      "GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxAttachment": {
+        "type": "string",
+        "format": "binary",
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx.Attachment",
+        "x-id": "GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxAttachment"
+      },
+      "GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxImagePNG": {
+        "type": "string",
+        "format": "binary",
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx.ImagePNG",
+        "x-id": "GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxImagePNG"
+      },
+      "GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxResponse": {
+        "type": "object",
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx.Response",
+        "x-id": "GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxResponse"
+      },
+      "GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxStatusFound": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxResponse"
+          },
+          {
+            "type": "object",
+            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx.StatusFound",
+            "x-id": "GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxStatusFound"
+          }
+        ]
+      },
+      "GithubComMachinefiW3BstreamPkgDependsKitHttptransportgenTestdataServerPkgTypesProtocol": {
+        "type": "string",
+        "enum": [
+          "HTTP",
+          "HTTPS",
+          "TCP"
+        ],
+        "x-enum-labels": [
+          "http",
+          "https",
+          "TCP"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/pkg/types.Protocol",
+        "x-id": "GithubComMachinefiW3BstreamPkgDependsKitHttptransportgenTestdataServerPkgTypesProtocol"
+      },
+      "GithubComMachinefiW3BstreamPkgDependsKitHttptransportgenTestdataServerPkgTypesPullPolicy": {
+        "type": "string",
+        "enum": [
+          "Always",
+          "IfNotPresent",
+          "Never"
+        ],
+        "x-enum-labels": [
+          "Always",
+          "IfNotPresent",
+          "Never"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/httptransportgen/testdata/server/pkg/types.PullPolicy",
+        "x-id": "GithubComMachinefiW3BstreamPkgDependsKitHttptransportgenTestdataServerPkgTypesPullPolicy"
+      },
+      "GithubComMachinefiW3BstreamPkgDependsKitStatusxErrorField": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Field path: prop.slice[2].a",
+            "x-go-field-name": "Field",
+            "x-tag-json": "field",
+            "x-tag-xml": "field"
+          },
+          "in": {
+            "type": "string",
+            "description": "In location eq. body, query, header, path, formData",
+            "x-go-field-name": "In",
+            "x-tag-json": "in",
+            "x-tag-xml": "in"
+          },
+          "msg": {
+            "type": "string",
+            "description": "Msg message",
+            "x-go-field-name": "Msg",
+            "x-tag-json": "msg",
+            "x-tag-xml": "msg"
+          }
+        },
+        "required": [
+          "field",
+          "msg",
+          "in"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/statusx.ErrorField",
+        "x-id": "GithubComMachinefiW3BstreamPkgDependsKitStatusxErrorField"
+      },
+      "GithubComMachinefiW3BstreamPkgDependsKitStatusxErrorFields": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxErrorField"
+        },
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/statusx.ErrorFields",
+        "x-id": "GithubComMachinefiW3BstreamPkgDependsKitStatusxErrorFields"
+      },
+      "GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr": {
+        "type": "object",
+        "properties": {
+          "canBeTalk": {
+            "type": "boolean",
+            "description": "can be task error; for client to should error msg to end user",
+            "x-go-field-name": "CanBeTalk",
+            "x-tag-json": "canBeTalk",
+            "x-tag-xml": "canBeTalk"
+          },
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "description": "unique err code",
+            "x-go-field-name": "Code",
+            "x-tag-json": "code",
+            "x-tag-xml": "code"
+          },
+          "desc": {
+            "type": "string",
+            "description": "desc of err",
+            "x-go-field-name": "Desc",
+            "x-tag-json": "desc",
+            "x-tag-xml": "desc"
+          },
+          "fields": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxErrorFields"
+              },
+              {
+                "description": "error in where fields",
+                "x-go-field-name": "Fields",
+                "x-tag-json": "fields",
+                "x-tag-xml": "fields"
+              }
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "request ID or other request context",
+            "x-go-field-name": "ID",
+            "x-tag-json": "id",
+            "x-tag-xml": "id"
+          },
+          "key": {
+            "type": "string",
+            "description": "key of err",
+            "x-go-field-name": "Key",
+            "x-tag-json": "key",
+            "x-tag-xml": "key"
+          },
+          "msg": {
+            "type": "string",
+            "description": "msg of err",
+            "x-go-field-name": "Msg",
+            "x-tag-json": "msg",
+            "x-tag-xml": "msg"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "error tracing",
+            "x-go-field-name": "Sources",
+            "x-tag-json": "sources",
+            "x-tag-xml": "sources"
+          }
+        },
+        "required": [
+          "key",
+          "code",
+          "msg",
+          "desc",
+          "canBeTalk",
+          "id",
+          "sources",
+          "fields"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/depends/kit/statusx.StatusErr",
+        "x-id": "GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+      },
+      "IpInfo": {
+        "type": "object",
+        "properties": {
+          "country": {
+            "type": "string",
+            "x-go-field-name": "Country",
+            "x-tag-json": "country",
+            "x-tag-xml": "country"
+          },
+          "countryCode": {
+            "type": "string",
+            "x-go-field-name": "CountryCode",
+            "x-tag-json": "countryCode",
+            "x-tag-xml": "countryCode"
+          }
+        },
+        "required": [
+          "country",
+          "countryCode"
+        ],
+        "x-id": "IpInfo"
+      },
+      "SubData": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "x-go-field-name": "Name",
+            "x-tag-json": "name"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "x-id": "SubData"
+      }
+    }
+  }
+}

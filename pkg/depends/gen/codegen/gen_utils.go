@@ -83,6 +83,7 @@ const (
 	Byte       BuiltInType = "byte"
 	Rune       BuiltInType = "rune"
 	Error      BuiltInType = "error"
+	Any        BuiltInType = "any"
 )
 
 const (

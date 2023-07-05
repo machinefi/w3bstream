@@ -1,0 +1,15 @@
+// This is a generated source file. DO NOT EDIT
+// Source: demo/types.go
+
+package demo
+
+type ExampleComCloudchainSrvDemoPkgConstantsErrorsStatusError = DemoExampleComCloudchainSrvDemoPkgConstantsErrorsStatusError
+
+type DemoExampleComCloudchainSrvDemoPkgConstantsErrorsStatusError int64
+
+const (
+	DEMO_EXAMPLE_COM_CLOUDCHAIN_SRV_DEMO_PKG_CONSTANTS_ERRORS_STATUS_ERROR__400000001 DemoExampleComCloudchainSrvDemoPkgConstantsErrorsStatusError = 400000001 // 400000001
+
+	DEMO_EXAMPLE_COM_CLOUDCHAIN_SRV_DEMO_PKG_CONSTANTS_ERRORS_STATUS_ERROR__400000002 DemoExampleComCloudchainSrvDemoPkgConstantsErrorsStatusError = 400000002 // 400000002
+
+)
