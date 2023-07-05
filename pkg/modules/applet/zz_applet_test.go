@@ -105,12 +105,7 @@ func TestApplet(t *testing.T) {
 		})
 		t.Run("#Failed", func(t *testing.T) {
 			t.Run("#DeleteByAppletIDFailed", func(t *testing.T) {
-				patch := gomonkey.ApplyFunc(
-					sqlx.NewTasks,
-					func(_ sqlx.DBExecutor) *sqlx.Tasks {
-						return nil
-					},
-				).ApplyMethod(
+				patch := gomonkey.NewPatches().ApplyMethod(
 					reflect.TypeOf(&models.Applet{}),
 					"DeleteByAppletID",
 					func(_ *models.Applet, _ sqlx.DBExecutor) error {

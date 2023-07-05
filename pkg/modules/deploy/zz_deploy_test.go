@@ -2,10 +2,10 @@ package deploy_test
 
 import (
 	"context"
-	"reflect"
 	"runtime"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/agiledragon/gomonkey/v2"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/gomega"
@@ -17,7 +17,6 @@ import (
 	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	confredis "github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/enums"
@@ -25,14 +24,17 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
-	"github.com/machinefi/w3bstream/pkg/modules/operator"
-	"github.com/machinefi/w3bstream/pkg/modules/projectoperator"
-	"github.com/machinefi/w3bstream/pkg/modules/resource"
-	"github.com/machinefi/w3bstream/pkg/modules/vm"
-	"github.com/machinefi/w3bstream/pkg/modules/wasmlog"
 	mock_sqlx "github.com/machinefi/w3bstream/pkg/test/mock_depends_kit_sqlx"
+	"github.com/machinefi/w3bstream/pkg/test/patch_models"
+	"github.com/machinefi/w3bstream/pkg/test/patch_modules"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
+)
+
+var (
+	anyError    = errors.New("any")
+	anySFID     = types.SFID(124)
+	anyWasmCode = []byte("any")
 )
 
 func TestDeploy(t *testing.T) {
@@ -81,13 +83,9 @@ func TestDeploy(t *testing.T) {
 	d.MockTxExecutor.EXPECT().IsTx().Return(true).AnyTimes()
 	d.MockDBExecutor.EXPECT().Context().Return(ctx).AnyTimes()
 
-	var (
-		anySFID  = types.SFID(124)
-		anyError = errors.New("any")
-		anyCode  = []byte("any")
-		anyState = enums.INSTANCE_STATE__STARTED
-		anyReq   = &deploy.CreateReq{}
-	)
+	errFrom := func(from string) error {
+		return errors.New(from)
+	}
 
 	t.Run("#Init", func(t *testing.T) {
 		if runtime.GOOS == `darwin` {
@@ -98,110 +96,49 @@ func TestDeploy(t *testing.T) {
 		defer patch.Reset()
 
 		t.Run("#Failed", func(t *testing.T) {
-			t.Run("#ListFailed", func(t *testing.T) {
-				patch = patch.
-					ApplyMethod(
-						reflect.TypeOf(&models.Instance{}),
-						"List",
-						func(_ *models.Instance, _ sqlx.DBExecutor, _ builder.SqlCondition, _ ...builder.Addition) ([]models.Instance, error) {
-							return nil, anyError
-						},
-					)
-				NewWithT(t).Expect(deploy.Init(ctx)).To(Equal(anyError))
+			t.Run("#ListInstanceFailed", func(t *testing.T) {
+				from := "models.Instance.List"
+				patch = patch_models.InstanceList(patch, nil, errFrom(from))
+				NewWithT(t).Expect(deploy.Init(ctx).Error()).To(Equal(from))
 			})
+
+			patch = patch_models.InstanceList(patch, []models.Instance{{
+				InstanceInfo: models.InstanceInfo{State: enums.INSTANCE_STATE__STARTED},
+			}}, nil)
+
 			t.Run("#FetchAppletFailed", func(t *testing.T) {
-				patch = patch.
-					ApplyMethod(
-						reflect.TypeOf(&models.Instance{}),
-						"List",
-						func(_ *models.Instance, _ sqlx.DBExecutor, _ builder.SqlCondition, _ ...builder.Addition) ([]models.Instance, error) {
-							return []models.Instance{{}}, nil
-						},
-					).
-					ApplyMethod(
-						reflect.TypeOf(&models.Applet{}),
-						"FetchByAppletID",
-						func(_ *models.Applet, _ sqlx.DBExecutor) error {
-							return anyError
-						},
-					)
-				NewWithT(t).Expect(deploy.Init(ctx)).To(BeNil())
-			})
-			t.Run("#FetchResourceFailed", func(t *testing.T) {
-				patch = patch.
-					ApplyMethod(
-						reflect.TypeOf(&models.Applet{}),
-						"FetchByAppletID",
-						func(_ *models.Applet, _ sqlx.DBExecutor) error {
-							return nil
-						},
-					).
-					ApplyFunc(
-						resource.GetContentBySFID,
-						func(_ context.Context, _ types.SFID) (*models.Resource, []byte, error) {
-							return nil, nil, anyError
-						},
-					)
+				from := "models.Applet.FetchByAppletID"
+				patch = patch_models.AppletFetchByAppletID(patch, nil, errFrom(from))
 				NewWithT(t).Expect(deploy.Init(ctx)).To(BeNil())
 			})
 
-			ins := &models.Instance{}
-			ins.State = enums.INSTANCE_STATE__STARTED
-			t.Run("#UpsertInstanceFailed", func(t *testing.T) {
-				patch = patch.
-					ApplyMethod(
-						reflect.TypeOf(&models.Instance{}),
-						"List",
-						func(_ *models.Instance, _ sqlx.DBExecutor, _ builder.SqlCondition, _ ...builder.Addition) ([]models.Instance, error) {
-							return []models.Instance{*ins}, nil
-						},
-					).
-					ApplyFunc(
-						resource.GetContentBySFID,
-						func(_ context.Context, _ types.SFID) (*models.Resource, []byte, error) {
-							return &models.Resource{}, anyCode, nil
-						},
-					).
-					ApplyFunc(
-						deploy.UpsertByCode,
-						func(_ context.Context, _ *deploy.CreateReq, _ []byte, _ enums.InstanceState, _ ...types.SFID) (*models.Instance, error) {
-							return nil, anyError
-						},
-					)
+			patch = patch_models.AppletFetchByAppletID(patch, &models.Applet{}, nil)
+
+			t.Run("#FetchResourceFailed", func(t *testing.T) {
+				from := "resource.GetContentBySFID"
+				patch = patch_modules.ResourceGetContentBySFID(patch, nil, nil, errFrom(from))
 				NewWithT(t).Expect(deploy.Init(ctx)).To(BeNil())
 			})
-			t.Run("$CreateVMFailed", func(t *testing.T) {
-				patch = patch.
-					ApplyFunc(
-						deploy.UpsertByCode,
-						func(_ context.Context, _ *deploy.CreateReq, _ []byte, _ enums.InstanceState, _ ...types.SFID) (*models.Instance, error) {
-							ret := *ins
-							ret.State = enums.INSTANCE_STATE__STOPPED
-							return &ret, nil
-						},
-					)
+
+			patch = patch_modules.ResourceGetContentBySFID(patch, &models.Resource{}, anyWasmCode, nil)
+
+			t.Run("#UpsertInstanceFailed", func(t *testing.T) {
+				from := "deploy.UpsertByCode"
+				patch = patch_modules.DeployUpsertByCode(patch, nil, errFrom(from))
+				NewWithT(t).Expect(deploy.Init(ctx)).To(BeNil())
+			})
+
+			t.Run("#UnexpectedDeployedVMState", func(t *testing.T) {
+				ins := &models.Instance{}
+				patch = patch_modules.DeployUpsertByCode(patch, ins, nil)
 				NewWithT(t).Expect(deploy.Init(ctx)).To(BeNil())
 			})
 		})
 		t.Run("#Success", func(t *testing.T) {
-			ins := &models.Instance{}
-			ins.State = enums.INSTANCE_STATE__STARTED
-			patch = patch.
-				ApplyMethod(
-					reflect.TypeOf(&models.Instance{}),
-					"List",
-					func(_ *models.Instance, _ sqlx.DBExecutor, _ builder.SqlCondition, _ ...builder.Addition) ([]models.Instance, error) {
-						return []models.Instance{*ins}, nil
-					},
-				).
-				ApplyFunc(
-					deploy.UpsertByCode,
-					func(_ context.Context, _ *deploy.CreateReq, _ []byte, _ enums.InstanceState, _ ...types.SFID) (*models.Instance, error) {
-						ret := *ins
-						ret.State = enums.INSTANCE_STATE__STARTED
-						return &ret, nil
-					},
-				)
+			ins := &models.Instance{
+				InstanceInfo: models.InstanceInfo{State: enums.INSTANCE_STATE__STARTED},
+			}
+			patch = patch_modules.DeployUpsertByCode(patch, ins, nil)
 			NewWithT(t).Expect(deploy.Init(ctx)).To(BeNil())
 		})
 	})
@@ -210,134 +147,91 @@ func TestDeploy(t *testing.T) {
 		if runtime.GOOS == `darwin` {
 			return
 		}
-		cases := []*struct {
-			name        string
-			mockError   error
-			expectError status.Error
-		}{
-			{
-				name: "#Success",
-			},
-			{
-				name:        "#Failed#InstanceNotFound",
-				mockError:   mock_sqlx.ErrNotFound,
-				expectError: status.InstanceNotFound,
-			},
-			{
-				name:        "#Failed#DatabaseError",
-				mockError:   mock_sqlx.ErrDatabase,
-				expectError: status.DatabaseError,
-			},
-		}
-
 		patch := gomonkey.NewPatches()
 		defer patch.Reset()
 
-		for _, c := range cases {
-			patch.ApplyMethod(
-				reflect.TypeOf(&models.Instance{}),
-				"FetchByInstanceID",
-				func(_ *models.Instance, _ sqlx.DBExecutor) error {
-					return c.mockError
-				},
-			)
+		t.Run("#Failed", func(t *testing.T) {
+			t.Run("#InstanceNotFound", func(t *testing.T) {
+				patch = patch_models.InstanceFetchByInstanceID(patch, nil, mock_sqlx.ErrNotFound)
+				_, err := deploy.GetBySFID(ctx, anySFID)
+				mock_sqlx.ExpectError(t, err, status.InstanceNotFound)
+			})
+			t.Run("#DatabaseError", func(t *testing.T) {
+				from := "models.Instance.FetchByInstanceID"
+				patch = patch_models.InstanceFetchByInstanceID(patch, nil, errFrom(from))
+				_, err := deploy.GetBySFID(ctx, anySFID)
+				mock_sqlx.ExpectError(t, err, status.DatabaseError, from)
+			})
+		})
 
+		t.Run("#Success", func(t *testing.T) {
+			patch = patch_models.InstanceFetchByInstanceID(patch, &models.Instance{}, nil)
 			_, err := deploy.GetBySFID(ctx, anySFID)
-			if c.expectError != 0 {
-				mock_sqlx.ExpectError(t, err, c.expectError)
-			} else {
-				NewWithT(t).Expect(err).To(BeNil())
-			}
-
-		}
+			NewWithT(t).Expect(err).To(BeNil())
+		})
 	})
 
 	t.Run("#GetByAppletSFID", func(t *testing.T) {
 		if runtime.GOOS == `darwin` {
 			return
 		}
-		cases := []*struct {
-			name        string
-			mockError   error
-			expectError status.Error
-		}{
-			{
-				name: "#Success",
-			},
-			{
-				name:        "#Failed#InstanceNotFound",
-				mockError:   mock_sqlx.ErrNotFound,
-				expectError: status.InstanceNotFound,
-			},
-			{
-				name:        "#Failed#DatabaseError",
-				mockError:   mock_sqlx.ErrDatabase,
-				expectError: status.DatabaseError,
-			},
-		}
-
 		patch := gomonkey.NewPatches()
 		defer patch.Reset()
 
-		for _, c := range cases {
-			patch.ApplyMethod(
-				reflect.TypeOf(&models.Instance{}),
-				"FetchByAppletID",
-				func(_ *models.Instance, _ sqlx.DBExecutor) error {
-					return c.mockError
-				},
-			)
+		t.Run("#Failed", func(t *testing.T) {
+			t.Run("#InstanceNotFound", func(t *testing.T) {
+				patch = patch_models.InstanceFetchByAppletID(patch, nil, mock_sqlx.ErrNotFound)
+				_, err := deploy.GetByAppletSFID(ctx, anySFID)
+				mock_sqlx.ExpectError(t, err, status.InstanceNotFound)
+			})
+			t.Run("#DatabaseError", func(t *testing.T) {
+				from := "models.Instance.FetchByAppletID"
+				patch = patch_models.InstanceFetchByAppletID(patch, nil, errFrom(from))
+				_, err := deploy.GetByAppletSFID(ctx, anySFID)
+				mock_sqlx.ExpectError(t, err, status.DatabaseError, from)
+			})
+		})
 
+		t.Run("#Success", func(t *testing.T) {
+			patch = patch_models.InstanceFetchByAppletID(patch, &models.Instance{}, nil)
 			_, err := deploy.GetByAppletSFID(ctx, anySFID)
-			if c.expectError != 0 {
-				mock_sqlx.ExpectError(t, err, c.expectError)
-			} else {
-				NewWithT(t).Expect(err).To(BeNil())
-			}
-
-		}
+			NewWithT(t).Expect(err).To(BeNil())
+		})
 	})
 
-	t.Run("#ListWithCond", func(t *testing.T) {
-		t.Run("#WithoutProjectID", func(t *testing.T) {
-			if runtime.GOOS == `darwin` {
-				return
-			}
-			patch := gomonkey.NewPatches()
-			defer patch.Reset()
+	t.Run("#List", func(t *testing.T) {
+		r := &deploy.ListReq{}
+		t.Run("#Failed", func(t *testing.T) {
+			from := "ListError"
+			d.MockDBExecutor.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(errFrom(from)).Times(1)
+			_, err := deploy.List(ctx, r)
+			mock_sqlx.ExpectError(t, err, status.DatabaseError, from)
 
-			arg := &deploy.CondArgs{ProjectID: 0}
-
-			patch = patch.ApplyMethod(
-				reflect.TypeOf(&models.Instance{}),
-				"List",
-				func(_ *models.Instance, _ sqlx.DBExecutor, _ builder.SqlCondition, _ ...builder.Addition) ([]models.Instance, error) {
-					return []models.Instance{{}}, nil
-				},
-			)
-
-			_, err := deploy.ListWithCond(ctx, arg)
-			NewWithT(t).Expect(err).To(BeNil())
-
-			patch = patch.ApplyMethod(
-				reflect.TypeOf(&models.Instance{}),
-				"List",
-				func(_ *models.Instance, _ sqlx.DBExecutor, _ builder.SqlCondition, _ ...builder.Addition) ([]models.Instance, error) {
-					return nil, anyError
-				},
-			)
-
-			_, err = deploy.ListWithCond(ctx, arg)
-			NewWithT(t).Expect(err).NotTo(BeNil())
+			from = "CountError"
+			d.MockDBExecutor.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(nil).Times(1)
+			d.MockDBExecutor.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(errFrom(from)).Times(1)
+			r.ProjectID = 1000
+			_, err = deploy.List(ctx, r)
+			mock_sqlx.ExpectError(t, err, status.DatabaseError, from)
 		})
-		t.Run("#WithProjectID", func(t *testing.T) {
-			arg := &deploy.CondArgs{ProjectID: 1}
-			d.MockDBExecutor.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(nil).MaxTimes(1)
-			_, err := deploy.ListWithCond(ctx, arg)
+		t.Run("#Success", func(t *testing.T) {
+			d.MockDBExecutor.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(nil).Times(2)
+			_, err := deploy.List(ctx, &deploy.ListReq{})
 			NewWithT(t).Expect(err).To(BeNil())
-			d.MockDBExecutor.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(anyError).MaxTimes(1)
-			_, err = deploy.ListWithCond(ctx, arg)
-			NewWithT(t).Expect(err).NotTo(BeNil())
+		})
+	})
+
+	t.Run("#ListByCond", func(t *testing.T) {
+		r := &deploy.CondArgs{ProjectID: 1000}
+		t.Run("#Failed", func(t *testing.T) {
+			d.MockDBExecutor.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(mock_sqlx.ErrDatabase).Times(1)
+			_, err := deploy.ListByCond(ctx, r)
+			mock_sqlx.ExpectError(t, err, status.DatabaseError)
+		})
+		t.Run("#Success", func(t *testing.T) {
+			d.MockDBExecutor.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(nil).Times(1)
+			_, err := deploy.ListByCond(ctx, r)
+			NewWithT(t).Expect(err).To(BeNil())
 		})
 	})
 
@@ -345,72 +239,39 @@ func TestDeploy(t *testing.T) {
 		if runtime.GOOS == `darwin` {
 			return
 		}
-		patch := gomonkey.ApplyMethod(
-			reflect.TypeOf(&models.Instance{}),
-			"DeleteByInstanceID",
-			func(_ *models.Instance, _ sqlx.DBExecutor) error {
-				return nil
-			},
-		).ApplyFunc(
-			config.Remove,
-			func(_ context.Context, _ *config.CondArgs) error {
-				return nil
-			},
-		).ApplyFunc(
-			wasmlog.Remove,
-			func(_ context.Context, _ *wasmlog.CondArgs) error {
-				return nil
-			},
-		)
+		patch := gomonkey.NewPatches()
 		defer patch.Reset()
 
+		t.Run("#Failed", func(t *testing.T) {
+			t.Run("#TxDeleteByInstanceIDFailed", func(t *testing.T) {
+				d.MockDBExecutor.EXPECT().Exec(gomock.Any()).Return(nil, mock_sqlx.ErrDatabase).Times(1)
+				err := deploy.RemoveBySFID(ctx, anySFID)
+				mock_sqlx.ExpectError(t, err, status.DatabaseError)
+			})
+
+			t.Run("#TxConfigRemoveFailed", func(t *testing.T) {
+				from := "config.Remove"
+				d.MockDBExecutor.EXPECT().Exec(gomock.Any()).Return(nil, nil).Times(1)
+				patch = patch_modules.ConfigRemove(patch, errFrom(from))
+				err := deploy.RemoveBySFID(ctx, anySFID)
+				NewWithT(t).Expect(err.Error()).To(Equal(from))
+			})
+
+			patch = patch_modules.ConfigRemove(patch, nil)
+
+			t.Run("#TxWasmLogRemoveFailed", func(t *testing.T) {
+				from := "wasmlog.Remove"
+				d.MockDBExecutor.EXPECT().Exec(gomock.Any()).Return(nil, nil).Times(1)
+				patch = patch_modules.WasmLogRemove(patch, errFrom(from))
+				err := deploy.RemoveBySFID(ctx, anySFID)
+				NewWithT(t).Expect(err.Error()).To(Equal(from))
+			})
+		})
 		t.Run("#Success", func(t *testing.T) {
+			d.MockDBExecutor.EXPECT().Exec(gomock.Any()).Return(nil, nil).Times(1)
+			patch = patch_modules.WasmLogRemove(patch, nil)
 			err := deploy.RemoveBySFID(ctx, anySFID)
 			NewWithT(t).Expect(err).To(BeNil())
-		})
-		t.Run("#Failed", func(t *testing.T) {
-			t.Run("#DeleteByInstanceIDFailed", func(t *testing.T) {
-				patch = patch.ApplyMethod(
-					reflect.TypeOf(&models.Instance{}),
-					"DeleteByInstanceID",
-					func(_ *models.Instance, _ sqlx.DBExecutor) error {
-						return anyError
-					},
-				)
-				err := deploy.RemoveBySFID(ctx, anySFID)
-				NewWithT(t).Expect(err).NotTo(BeNil())
-			})
-			t.Run("#RemoveConfigFailed", func(t *testing.T) {
-				patch = patch.ApplyMethod(
-					reflect.TypeOf(&models.Instance{}),
-					"DeleteByInstanceID",
-					func(_ *models.Instance, _ sqlx.DBExecutor) error {
-						return nil
-					},
-				).ApplyFunc(
-					config.Remove,
-					func(_ context.Context, _ *config.CondArgs) error {
-						return anyError
-					},
-				)
-				err := deploy.RemoveBySFID(ctx, anySFID)
-				NewWithT(t).Expect(err).NotTo(BeNil())
-			})
-			t.Run("#RemoveWasmLogFailed", func(t *testing.T) {
-				patch = patch.ApplyFunc(
-					config.Remove,
-					func(_ context.Context, _ *config.CondArgs) error {
-						return nil
-					},
-				).ApplyFunc(
-					wasmlog.Remove,
-					func(_ context.Context, _ *wasmlog.CondArgs) error {
-						return anyError
-					},
-				)
-				err := deploy.RemoveBySFID(ctx, anySFID)
-				NewWithT(t).Expect(err).NotTo(BeNil())
-			})
 		})
 	})
 
@@ -421,107 +282,54 @@ func TestDeploy(t *testing.T) {
 		patch := gomonkey.NewPatches()
 		defer patch.Reset()
 
-		patch = patch.ApplyFunc(
-			deploy.GetByAppletSFID,
-			func(_ context.Context, _ types.SFID) (*models.Instance, error) {
-				return &models.Instance{}, nil
-			},
-		).ApplyFunc(
-			deploy.RemoveBySFID,
-			func(_ context.Context, _ types.SFID) error {
-				return nil
-			},
-		)
+		t.Run("#Failed", func(t *testing.T) {
+			t.Run("#TxDeployGetByAppletSFIDFailed", func(t *testing.T) {
+				from := "deploy.GetByAppletSFID"
+				patch = patch_modules.DeployGetByAppletSFID(patch, nil, errFrom(from))
+				NewWithT(t).Expect(deploy.RemoveByAppletSFID(ctx, anySFID).Error()).To(Equal(from))
+			})
+
+			patch = patch_modules.DeployGetByAppletSFID(patch, &models.Instance{}, nil)
+
+			t.Run("#TxDeployRemoveBySFIDFailed", func(t *testing.T) {
+				from := "deploy.RemoveBySFID"
+				patch = patch_modules.DeployRemoveBySFID(patch, errFrom(from))
+				NewWithT(t).Expect(deploy.RemoveByAppletSFID(ctx, anySFID).Error()).To(Equal(from))
+			})
+		})
 
 		t.Run("#Success", func(t *testing.T) {
-			err := deploy.RemoveBySFID(ctx, anySFID)
-			NewWithT(t).Expect(err).To(BeNil())
-		})
-		t.Run("#Failed", func(t *testing.T) {
-			t.Run("#GetByAppletIDFailed", func(t *testing.T) {
-				patch = patch.ApplyFunc(
-					deploy.GetByAppletSFID,
-					func(_ context.Context, _ types.SFID) (*models.Instance, error) {
-						return nil, anyError
-					},
-				)
-				err := deploy.RemoveByAppletSFID(ctx, anySFID)
-				NewWithT(t).Expect(err).NotTo(BeNil())
-			})
-			t.Run("#RemoveBySFIDFailed", func(t *testing.T) {
-				patch = patch.ApplyFunc(
-					deploy.GetByAppletSFID,
-					func(_ context.Context, _ types.SFID) (*models.Instance, error) {
-						return &models.Instance{}, nil
-					},
-				).ApplyFunc(
-					deploy.RemoveBySFID,
-					func(_ context.Context, _ types.SFID) error {
-						return anyError
-					},
-				)
-				err := deploy.RemoveByAppletSFID(ctx, anySFID)
-				NewWithT(t).Expect(err).NotTo(BeNil())
-			})
+			patch = patch_modules.DeployRemoveBySFID(patch, nil)
+			NewWithT(t).Expect(deploy.RemoveByAppletSFID(ctx, anySFID)).To(BeNil())
 		})
 	})
 
-	t.Run("Remove", func(t *testing.T) {
+	t.Run("#Remove", func(t *testing.T) {
 		if runtime.GOOS == `darwin` {
 			return
 		}
-		anyArg := &deploy.CondArgs{}
-
 		patch := gomonkey.NewPatches()
 		defer patch.Reset()
 
-		patch = patch.
-			ApplyFunc(
-				deploy.ListWithCond,
-				func(_ context.Context, _ *deploy.CondArgs) ([]models.Instance, error) {
-					return []models.Instance{{}}, nil
-				},
-			).
-			ApplyFunc(
-				deploy.RemoveBySFID,
-				func(_ context.Context, _ types.SFID) error {
-					return nil
-				},
-			)
-
-		t.Run("#Success", func(t *testing.T) {
-			err := deploy.Remove(ctx, anyArg)
-			NewWithT(t).Expect(err).To(BeNil())
-		})
+		r := &deploy.CondArgs{}
 		t.Run("#Failed", func(t *testing.T) {
-			t.Run("#ListWithCondFailed", func(t *testing.T) {
-				patch = patch.
-					ApplyFunc(
-						deploy.ListWithCond,
-						func(_ context.Context, _ *deploy.CondArgs) ([]models.Instance, error) {
-							return nil, anyError
-						},
-					)
-				err := deploy.Remove(ctx, anyArg)
-				NewWithT(t).Expect(err).NotTo(BeNil())
+			t.Run("#TxDeployListByCondFailed", func(t *testing.T) {
+				from := "deploy.ListByCond"
+				patch = patch_modules.DeployListByCond(patch, nil, errFrom(from))
+				NewWithT(t).Expect(deploy.Remove(ctx, r).Error()).To(Equal(from))
 			})
-			t.Run("#RemoveBySFIDFailed", func(t *testing.T) {
-				patch = patch.
-					ApplyFunc(
-						deploy.ListWithCond,
-						func(_ context.Context, _ *deploy.CondArgs) ([]models.Instance, error) {
-							return []models.Instance{{}}, nil
-						},
-					).
-					ApplyFunc(
-						deploy.RemoveBySFID,
-						func(_ context.Context, _ types.SFID) error {
-							return anyError
-						},
-					)
-				err := deploy.Remove(ctx, anyArg)
-				NewWithT(t).Expect(err).NotTo(BeNil())
+
+			patch = patch_modules.DeployListByCond(patch, []models.Instance{{}}, nil)
+
+			t.Run("#TxDeployRemoveBySFIDFailed", func(t *testing.T) {
+				from := "deploy.RemoveBySFID"
+				patch = patch_modules.DeployRemoveBySFID(patch, errFrom(from))
+				NewWithT(t).Expect(deploy.Remove(ctx, r).Error()).To(Equal(from))
 			})
+		})
+		t.Run("#Success", func(t *testing.T) {
+			patch = patch_modules.DeployRemoveBySFID(patch, nil)
+			NewWithT(t).Expect(deploy.Remove(ctx, r)).To(BeNil())
 		})
 	})
 
@@ -532,247 +340,116 @@ func TestDeploy(t *testing.T) {
 		patch := gomonkey.NewPatches()
 		defer patch.Reset()
 
+		updateCasePatch := func(overwrite *models.Instance) {
+			patch = patch_models.InstanceFetchByAppletID(patch, overwrite, nil)
+		}
+		createCasePatch := func() {
+			patch = patch_models.InstanceFetchByAppletID(patch, nil, mock_sqlx.ErrNotFound)
+		}
+
+		req := &deploy.CreateReq{}
+		code := []byte("any")
+		state := enums.INSTANCE_STATE__STARTED
+
 		t.Run("#Failed", func(t *testing.T) {
-			t.Run("InvalidVMState", func(t *testing.T) {
-				_, err := deploy.UpsertByCode(ctx, anyReq, anyCode, 0)
+			t.Run("#InvalidInstanceState", func(t *testing.T) {
+				_, err := deploy.UpsertByCode(ctx, req, code, enums.InstanceState(0))
 				mock_sqlx.ExpectError(t, err, status.InvalidVMState)
 			})
-			t.Run("TryFetchAppletFromDB", func(t *testing.T) {
-				t.Run("#FetchByAppletIDFailed", func(t *testing.T) {
-					patch = patch.
-						ApplyMethod(
-							reflect.TypeOf(&models.Instance{}),
-							"FetchByAppletID",
-							func(_ *models.Instance, _ sqlx.DBExecutor) error {
-								return mock_sqlx.ErrDatabase
-							},
-						)
-					_, err := deploy.UpsertByCode(ctx, anyReq, anyCode, anyState)
-					mock_sqlx.ExpectError(t, err, status.DatabaseError)
+			t.Run("#TxFetchByAppletIDFailed", func(t *testing.T) {
+				t.Run("#DatabaseError", func(t *testing.T) {
+					from := "models.Instance.FetchByAppletID"
+					patch = patch_models.InstanceFetchByAppletID(patch, nil, errFrom(from))
+					_, err := deploy.UpsertByCode(ctx, req, code, state)
+					mock_sqlx.ExpectError(t, err, status.DatabaseError, from)
 				})
-				t.Run("#UpdateCheckOldIDFailed", func(t *testing.T) {
-					id := idg.MustGenSFID()
-					patch = patch.
-						ApplyMethod(
-							reflect.TypeOf(&models.Instance{}),
-							"FetchByAppletID",
-							func(receiver *models.Instance, _ sqlx.DBExecutor) error {
-								*receiver = models.Instance{}
-								receiver.InstanceID = id + 1 // not equal to argument
-								return nil
-							},
-						)
-					_, err := deploy.UpsertByCode(ctx, anyReq, anyCode, anyState, id)
+				t.Run("#InvalidAppletContext", func(t *testing.T) {
+					updateCasePatch(&models.Instance{
+						RelInstance: models.RelInstance{InstanceID: anySFID + 1},
+					})
+					_, err := deploy.UpsertByCode(ctx, req, code, state, anySFID)
 					mock_sqlx.ExpectError(t, err, status.InvalidAppletContext)
 				})
 			})
-			t.Run("#UpdateOrCreateInstance", func(t *testing.T) {
-				t.Run("#CaseUpdateExistedInstace", func(t *testing.T) {
-					t.Run("#UpdateByInstanceIDFailed", func(t *testing.T) {
-						id := idg.MustGenSFID()
-						patch = patch.
-							ApplyMethod(
-								reflect.TypeOf(&models.Instance{}),
-								"FetchByAppletID",
-								func(receiver *models.Instance, _ sqlx.DBExecutor) error {
-									*receiver = models.Instance{}
-									receiver.InstanceID = id // equal to argument
-									return nil
-								},
-							)
-						t.Run("#ConflictError", func(t *testing.T) {
-							patch = patch.
-								ApplyMethod(
-									reflect.TypeOf(&models.Instance{}),
-									"UpdateByInstanceID",
-									func(_ *models.Instance, _ sqlx.DBExecutor, _ ...string) error {
-										return mock_sqlx.ErrConflict
-									},
-								)
-							_, err := deploy.UpsertByCode(ctx, anyReq, anyCode, anyState, id)
-							mock_sqlx.ExpectError(t, err, status.MultiInstanceDeployed)
-						})
-						t.Run("#DatabaseError", func(t *testing.T) {
-							patch = patch.
-								ApplyMethod(
-									reflect.TypeOf(&models.Instance{}),
-									"UpdateByInstanceID",
-									func(_ *models.Instance, _ sqlx.DBExecutor, _ ...string) error {
-										return mock_sqlx.ErrDatabase
-									},
-								)
-							_, err := deploy.UpsertByCode(ctx, anyReq, anyCode, anyState, id)
-							mock_sqlx.ExpectError(t, err, status.DatabaseError)
-						})
+			t.Run("#TxUpdateOrCreateInstanceFailed", func(t *testing.T) {
+				t.Run("#CaseUpdateFailed", func(t *testing.T) {
+					updateCasePatch(&models.Instance{
+						RelInstance: models.RelInstance{InstanceID: anySFID},
 					})
-				})
-				t.Run("#CreateNewInstance", func(t *testing.T) {
-					patch = patch.
-						ApplyMethod(
-							reflect.TypeOf(&models.Instance{}),
-							"FetchByAppletID",
-							func(_ *models.Instance, _ sqlx.DBExecutor) error {
-								return mock_sqlx.ErrNotFound
-							},
-						)
-					t.Run("#ConflictError", func(t *testing.T) {
-						patch = patch.
-							ApplyMethod(
-								reflect.TypeOf(&models.Instance{}),
-								"Create",
-								func(_ *models.Instance, _ sqlx.DBExecutor) error {
-									return mock_sqlx.ErrConflict
-								},
-							)
-						_, err := deploy.UpsertByCode(ctx, anyReq, anyCode, anyState)
+					t.Run("#MultiInstanceDeployed", func(t *testing.T) {
+						patch = patch_models.InstanceUpdateByInstanceID(patch, nil, mock_sqlx.ErrConflict)
+						_, err := deploy.UpsertByCode(ctx, req, code, state, anySFID)
 						mock_sqlx.ExpectError(t, err, status.MultiInstanceDeployed)
 					})
 					t.Run("#DatabaseError", func(t *testing.T) {
-						patch = patch.
-							ApplyMethod(
-								reflect.TypeOf(&models.Instance{}),
-								"Create",
-								func(_ *models.Instance, _ sqlx.DBExecutor) error {
-									return mock_sqlx.ErrDatabase
-								},
-							)
-						_, err := deploy.UpsertByCode(ctx, anyReq, anyCode, anyState)
+						from := "models.Instance.UpdateByInstanceID"
+						patch = patch_models.InstanceUpdateByInstanceID(patch, nil, errFrom(from))
+						_, err := deploy.UpsertByCode(ctx, req, code, state, anySFID)
+						mock_sqlx.ExpectError(t, err, status.DatabaseError, from)
+					})
+				})
+				t.Run("#CaseCreateFailed", func(t *testing.T) {
+					createCasePatch()
+					t.Run("#MultiInstanceDeployed", func(t *testing.T) {
+						patch = patch_models.InstanceCreate(patch, nil, mock_sqlx.ErrConflict)
+						_, err := deploy.UpsertByCode(ctx, req, code, state, anySFID)
+						mock_sqlx.ExpectError(t, err, status.MultiInstanceDeployed)
+					})
+					t.Run("#DatabaseError", func(t *testing.T) {
+						patch = patch_models.InstanceCreate(patch, nil, mock_sqlx.ErrDatabase)
+						_, err := deploy.UpsertByCode(ctx, req, code, state, anySFID)
 						mock_sqlx.ExpectError(t, err, status.DatabaseError)
 					})
 				})
+
+				ins := &models.Instance{RelInstance: models.RelInstance{InstanceID: anySFID}}
+				patch = patch_models.InstanceUpdateByInstanceID(patch, ins, nil)
+				patch = patch_models.InstanceCreate(patch, ins, nil)
 			})
 
-			t.Run("#TryUpdateCacheConfig", func(t *testing.T) {
-				req := *anyReq
+			t.Run("#TxUpdateConfigFailed", func(t *testing.T) {
 				req.Cache = &wasm.Cache{}
 
-				id := idg.MustGenSFID()
-				patch = patch.
-					ApplyMethod(
-						reflect.TypeOf(&models.Instance{}),
-						"Create",
-						func(_ *models.Instance, _ sqlx.DBExecutor) error {
-							return nil
-						},
-					)
+				t.Run("#ConfigRemoveFailed", func(t *testing.T) {
+					from := "config.Remove"
+					patch = patch_modules.ConfigRemove(patch, errFrom(from))
+					_, err := deploy.UpsertByCode(ctx, req, code, state)
+					NewWithT(t).Expect(err.Error()).To(Equal(from))
+				})
 
-				t.Run("#RemovePrevConfigFailed", func(t *testing.T) {
-					patch = patch.
-						ApplyFunc(
-							config.Remove,
-							func(_ context.Context, _ *config.CondArgs) error {
-								return anyError
-							},
-						)
-					_, err := deploy.UpsertByCode(ctx, &req, anyCode, anyState, id)
-					NewWithT(t).Expect(err).To(Equal(anyError))
+				patch = patch_modules.ConfigRemove(patch, nil)
+
+				t.Run("#ConfigCreateFailed", func(t *testing.T) {
+					from := "config.Create"
+					patch = patch_modules.ConfigCreate(patch, nil, errFrom(from))
+					_, err := deploy.UpsertByCode(ctx, req, code, state)
+					NewWithT(t).Expect(err.Error()).To(Equal(from))
 				})
-				t.Run("#CreateNewConfigFailed", func(t *testing.T) {
-					patch = patch.
-						ApplyFunc(
-							config.Remove,
-							func(_ context.Context, _ *config.CondArgs) error {
-								return nil
-							},
-						).
-						ApplyFunc(
-							config.Create,
-							func(_ context.Context, _ types.SFID, _ wasm.Configuration) (*models.Config, error) {
-								return nil, anyError
-							},
-						)
-					_, err := deploy.UpsertByCode(ctx, &req, anyCode, anyState, id)
-					NewWithT(t).Expect(err).To(Equal(anyError))
-				})
+
+				patch = patch_modules.ConfigCreate(patch, nil, nil)
 			})
-			t.Run("#RemovePrevVMAndCreateNewOne", func(t *testing.T) {
-				id := idg.MustGenSFID()
-				patch = patch.
-					ApplyMethod(
-						reflect.TypeOf(&models.Instance{}),
-						"FetchByAppletID",
-						func(receiver *models.Instance, _ sqlx.DBExecutor) error {
-							*receiver = models.Instance{}
-							receiver.InstanceID = id
-							return nil
-						},
-					).
-					ApplyMethod(
-						reflect.TypeOf(&models.Instance{}),
-						"UpdateByInstanceID",
-						func(_ *models.Instance, _ sqlx.DBExecutor, _ ...string) error {
-							return nil
-						},
-					).
-					ApplyFunc(
-						config.Create,
-						func(_ context.Context, _ types.SFID, _ wasm.Configuration) (*models.Config, error) {
-							return &models.Config{}, nil
-						},
-					).
-					ApplyFunc(
-						deploy.WithInstanceRuntimeContext,
-						func(_ context.Context) (context.Context, error) {
-							return ctx, nil
-						},
-					)
-				t.Run("#ForUpdateToRemoveOldInstanceFailed", func(t *testing.T) {
-					patch = patch.
-						ApplyFunc(
-							vm.DelInstance,
-							func(_ context.Context, _ types.SFID) error {
-								return anyError
-							},
-						).
-						ApplyFunc(
-							vm.NewInstance,
-							func(_ context.Context, _ []byte, _ types.SFID, _ enums.InstanceState) error {
-								return anyError
-							},
-						)
-					_, err := deploy.UpsertByCode(ctx, anyReq, anyCode, anyState, id)
-					mock_sqlx.ExpectError(t, err, status.CreateInstanceFailed)
+
+			t.Run("#TxCreateInstanceVM", func(t *testing.T) {
+				updateCasePatch(&models.Instance{})
+				t.Run("#WihtInstanceRuntimeContextFailed", func(t *testing.T) {
+					from := "deploy.WithInstanceRuntimeContext"
+					patch = patch_modules.DeployWithInstanceRuntimeContext(patch, nil, errFrom(from))
+					_, err := deploy.UpsertByCode(ctx, req, code, state)
+					NewWithT(t).Expect(err.Error()).To(Equal(from))
 				})
-				t.Run("#WithRuntimeContextFailed", func(t *testing.T) {
-					patch = patch.
-						ApplyFunc(
-							deploy.WithInstanceRuntimeContext,
-							func(_ context.Context) (context.Context, error) {
-								return nil, anyError
-							},
-						)
-					_, err := deploy.UpsertByCode(ctx, anyReq, anyCode, anyState, id)
-					NewWithT(t).Expect(err).To(Equal(anyError))
-				})
-				t.Run("#NewInstanceFailed", func(t *testing.T) {
-					patch = patch.
-						ApplyFunc(
-							deploy.WithInstanceRuntimeContext,
-							func(_ context.Context) (context.Context, error) {
-								return context.Background(), nil
-							},
-						).
-						ApplyFunc(
-							vm.NewInstance,
-							func(_ context.Context, _ []byte, _ types.SFID, _ enums.InstanceState) error {
-								return anyError
-							},
-						)
-					_, err := deploy.UpsertByCode(ctx, anyReq, anyCode, anyState, id)
-					mock_sqlx.ExpectError(t, err, status.CreateInstanceFailed)
+				patch = patch_modules.DeployWithInstanceRuntimeContext(patch, nil, nil)
+				t.Run("#VmNewInstanceFailed", func(t *testing.T) {
+					from := "vm.NewInstance"
+					patch = patch_modules.VmNewInstance(patch, errFrom(from))
+					_, err := deploy.UpsertByCode(ctx, req, code, state)
+					mock_sqlx.ExpectError(t, err, status.CreateInstanceFailed, from)
 				})
 			})
 		})
 
 		t.Run("#Success", func(t *testing.T) {
-			patch = patch.
-				ApplyFunc(
-					vm.NewInstance,
-					func(_ context.Context, _ []byte, _ types.SFID, _ enums.InstanceState) error {
-						return nil
-					},
-				)
-			_, err := deploy.UpsertByCode(ctx, anyReq, anyCode, anyState)
+			patch = patch_modules.VmNewInstance(patch, nil)
+			_, err := deploy.UpsertByCode(ctx, req, code, state)
 			NewWithT(t).Expect(err).To(BeNil())
 		})
 	})
@@ -781,124 +458,59 @@ func TestDeploy(t *testing.T) {
 		if runtime.GOOS == `darwin` {
 			return
 		}
-		patch := gomonkey.ApplyFunc(
-			deploy.UpsertByCode,
-			func(_ context.Context, _ *deploy.CreateReq, _ []byte, _ enums.InstanceState, _ ...types.SFID) (*models.Instance, error) {
-				return nil, nil
-			},
-		)
+		patch := gomonkey.NewPatches()
 		defer patch.Reset()
 
-		t.Run("#Success", func(t *testing.T) {
-			patch.ApplyFunc(
-				resource.GetContentBySFID,
-				func(_ context.Context, _ types.SFID) (*models.Resource, []byte, error) {
-					return nil, anyCode, nil
-				},
-			)
-			_, err := deploy.Upsert(ctx, anyReq, anyState)
-			NewWithT(t).Expect(err).To(BeNil())
-		})
+		req := &deploy.CreateReq{}
+		state := enums.INSTANCE_STATE__STARTED
+
 		t.Run("#Failed", func(t *testing.T) {
-			patch.ApplyFunc(
-				resource.GetContentBySFID,
-				func(_ context.Context, _ types.SFID) (*models.Resource, []byte, error) {
-					return nil, nil, anyError
-				},
-			)
-			_, err := deploy.Upsert(ctx, anyReq, anyState)
-			NewWithT(t).Expect(err).To(Equal(anyError))
+			from := "resource.GetContentBySFID"
+			patch = patch_modules.ResourceGetContentBySFID(patch, nil, nil, errFrom(from))
+			_, err := deploy.Upsert(ctx, req, state)
+			NewWithT(t).Expect(err.Error()).To(Equal(from))
 		})
+		from := "deploy.UpsertByCode"
+		patch = patch_modules.ResourceGetContentBySFID(patch, nil, nil, nil)
+		patch = patch_modules.DeployUpsertByCode(patch, nil, errFrom(from))
+		_, err := deploy.Upsert(ctx, req, state)
+		NewWithT(t).Expect(err.Error()).To(Equal(from))
 	})
 
 	t.Run("#Deploy", func(t *testing.T) {
-		if runtime.GOOS == `darwin` {
-			return
-		}
-		ctx = contextx.WithContextCompose()(ctx)
-
 		patch := gomonkey.NewPatches()
 		defer patch.Reset()
 
 		t.Run("#Failed", func(t *testing.T) {
 			t.Run("#UnknownDeployCmd", func(t *testing.T) {
 				err := deploy.Deploy(ctx, enums.DeployCmd(100))
-				mock_sqlx.ExpectError(t, err, status.UnknownDeployCommand)
+				mock_sqlx.ExpectError(t, err, status.UnknownDeployCommand, "100")
 			})
 
-			t.Run("#UpdateInstance", func(t *testing.T) {
-				cases := []*struct {
-					name        string
-					mockError   error
-					expectError status.Error
-				}{
-					{
-						name:        "#MultiInstanceDeployed",
-						mockError:   mock_sqlx.ErrConflict,
-						expectError: status.MultiInstanceDeployed,
-					},
-					{
-						name:        "#InstanceNotFound",
-						mockError:   mock_sqlx.ErrNotFound,
-						expectError: status.InstanceNotFound,
-					},
-					{
-						name:        "#DatabaseError",
-						mockError:   mock_sqlx.ErrDatabase,
-						expectError: status.DatabaseError,
-					},
-				}
-
-				for _, c := range cases {
-					t.Run(c.name, func(t *testing.T) {
-						patch = patch.ApplyMethod(
-							reflect.TypeOf(&models.Instance{}),
-							"UpdateByInstanceID",
-							func(_ *models.Instance, _ sqlx.DBExecutor, _ ...string) error {
-								return c.mockError
-							},
-						)
-						err := deploy.Deploy(ctx, enums.DEPLOY_CMD__HUNGUP)
-						mock_sqlx.ExpectError(t, err, c.expectError)
-					})
-				}
-			})
-			t.Run("#ExecUpdateVMState", func(t *testing.T) {
-				patch = patch.ApplyMethod(
-					reflect.TypeOf(&models.Instance{}),
-					"UpdateByInstanceID",
-					func(_ *models.Instance, _ sqlx.DBExecutor, _ ...string) error {
-						return nil
-					},
-				)
-
-				t.Run("#StopVMFailed", func(t *testing.T) {
-					patch = patch.ApplyFunc(
-						vm.StopInstance,
-						func(_ context.Context, _ types.SFID) error {
-							return anyError
-						},
-					)
+			t.Run("#TxUpdateInstanceFailed", func(t *testing.T) {
+				t.Run("#MultiInstanceDeployed", func(t *testing.T) {
+					d.MockDBExecutor.EXPECT().Exec(gomock.Any()).Return(nil, mock_sqlx.ErrConflict).Times(1)
 					err := deploy.Deploy(ctx, enums.DEPLOY_CMD__HUNGUP)
-					NewWithT(t).Expect(err).To(BeNil())
+					mock_sqlx.ExpectError(t, err, status.MultiInstanceDeployed)
 				})
-				t.Run("#StartVMFailed", func(t *testing.T) {
-					patch = patch.ApplyFunc(
-						vm.StartInstance,
-						func(_ context.Context, _ types.SFID) error {
-							return anyError
-						},
-					)
-					err := deploy.Deploy(ctx, enums.DEPLOY_CMD__START)
-					NewWithT(t).Expect(err).To(BeNil())
+				t.Run("#InstanceNotFound", func(t *testing.T) {
+					d.MockDBExecutor.EXPECT().Exec(gomock.Any()).Return(nil, mock_sqlx.ErrNotFound).Times(1)
+					err := deploy.Deploy(ctx, enums.DEPLOY_CMD__HUNGUP)
+					mock_sqlx.ExpectError(t, err, status.InstanceNotFound)
+				})
+				t.Run("#DatabaseError", func(t *testing.T) {
+					d.MockDBExecutor.EXPECT().Exec(gomock.Any()).Return(nil, mock_sqlx.ErrDatabase).Times(1)
+					err := deploy.Deploy(ctx, enums.DEPLOY_CMD__HUNGUP)
+					mock_sqlx.ExpectError(t, err, status.DatabaseError)
 				})
 			})
 		})
-		t.Run("#Success", func(t *testing.T) {
-			err := deploy.Deploy(ctx, enums.DEPLOY_CMD__START)
-			t.Log(err)
-			NewWithT(t).Expect(err).To(BeNil())
-		})
+		d.MockDBExecutor.EXPECT().Exec(gomock.Any()).Return(sqlmock.NewResult(1, 1), nil).Times(2)
+		err := deploy.Deploy(ctx, enums.DEPLOY_CMD__HUNGUP)
+		NewWithT(t).Expect(err).To(BeNil())
+
+		err = deploy.Deploy(ctx, enums.DEPLOY_CMD__START)
+		NewWithT(t).Expect(err).To(BeNil())
 	})
 
 	t.Run("#WithInstanceRuntimeContext", func(t *testing.T) {
@@ -910,126 +522,53 @@ func TestDeploy(t *testing.T) {
 
 		t.Run("#Failed", func(t *testing.T) {
 			t.Run("#FetchProjectFailed", func(t *testing.T) {
-				patch = patch.
-					ApplyMethod(
-						reflect.TypeOf(&models.Project{}),
-						"FetchByProjectID",
-						func(_ *models.Project, _ sqlx.DBExecutor) error {
-							return anyError
-						},
-					)
+				patch = patch_models.ProjectFetchByProjectID(patch, nil, errFrom(t.Name()))
 				_, err := deploy.WithInstanceRuntimeContext(ctx)
-				NewWithT(t).Expect(err).To(Equal(anyError))
+				NewWithT(t).Expect(err.Error()).To(Equal(t.Name()))
 			})
+
+			patch = patch_models.ProjectFetchByProjectID(patch, &models.Project{}, nil)
+
 			t.Run("#FetchResourceFailed", func(t *testing.T) {
-				patch = patch.
-					ApplyMethod(
-						reflect.TypeOf(&models.Project{}),
-						"FetchByProjectID",
-						func(_ *models.Project, _ sqlx.DBExecutor) error {
-							return nil
-						},
-					).
-					ApplyMethod(
-						reflect.TypeOf(&models.Resource{}),
-						"FetchByResourceID",
-						func(_ *models.Resource, _ sqlx.DBExecutor) error {
-							return anyError
-						},
-					)
+				patch = patch_models.ResourceFetchByResourceID(patch, nil, errFrom(t.Name()))
 				_, err := deploy.WithInstanceRuntimeContext(ctx)
-				NewWithT(t).Expect(err).To(Equal(anyError))
+				NewWithT(t).Expect(err.Error()).To(Equal(t.Name()))
 			})
-			t.Run("#ListConfigurationsFailed", func(t *testing.T) {
-				patch = patch.
-					ApplyMethod(
-						reflect.TypeOf(&models.Resource{}),
-						"FetchByResourceID",
-						func(_ *models.Resource, _ sqlx.DBExecutor) error {
-							return nil
-						},
-					).
-					ApplyFunc(
-						config.List,
-						func(_ context.Context, _ *config.CondArgs) ([]*config.Detail, error) {
-							return nil, anyError
-						},
-					)
-				_, err := deploy.WithInstanceRuntimeContext(ctx)
-				NewWithT(t).Expect(err).To(Equal(anyError))
-			})
-			t.Run("#ConfigurationsInitFailed", func(t *testing.T) {
-				patch = patch.
-					ApplyFunc(
-						config.List,
-						func(_ context.Context, _ *config.CondArgs) ([]*config.Detail, error) {
-							return []*config.Detail{
-								{
-									Configuration: &wasm.Database{},
-								},
-							}, nil
-						},
-					).
-					ApplyMethod(
-						reflect.TypeOf(&wasm.Database{}),
-						"Init",
-						func(_ *wasm.Database, _ context.Context) error {
-							return anyError
-						},
-					)
-				_, err := deploy.WithInstanceRuntimeContext(ctx)
-				mock_sqlx.ExpectError(t, err, status.ConfigInitFailed)
-			})
+
+			patch = patch_models.ResourceFetchByResourceID(patch, &models.Resource{}, nil)
+
 			t.Run("#GetProjectOperatorFailed", func(t *testing.T) {
-				patch = patch.
-					ApplyMethod(
-						reflect.TypeOf(&wasm.Database{}),
-						"Init",
-						func(_ *wasm.Database, _ context.Context) error {
-							return nil
-						},
-					).
-					ApplyFunc(
-						projectoperator.GetByProject,
-						func(_ context.Context, _ types.SFID) (*models.ProjectOperator, error) {
-							return nil, status.DatabaseError
-						},
-					)
+				patch = patch_modules.ProjectOperatorGetByProject(patch, nil, errFrom(t.Name()))
 				_, err := deploy.WithInstanceRuntimeContext(ctx)
-				mock_sqlx.ExpectError(t, err, status.DatabaseError)
+				NewWithT(t).Expect(err.Error()).To(Equal(t.Name()))
 			})
-			t.Run("#ListOperatorsFailed", func(t *testing.T) {
-				patch = patch.
-					ApplyFunc(
-						projectoperator.GetByProject,
-						func(_ context.Context, _ types.SFID) (*models.ProjectOperator, error) {
-							return &models.ProjectOperator{}, nil
-						},
-					).
-					ApplyFunc(
-						operator.ListByCond,
-						func(_ context.Context, _ *operator.CondArgs) ([]models.Operator, error) {
-							return nil, anyError
-						},
-					)
+
+			patch = patch_modules.ProjectOperatorGetByProject(patch, &models.ProjectOperator{}, nil)
+
+			t.Run("#ListAccountOperatorsFailed", func(t *testing.T) {
+				patch = patch_modules.OperatorListByCond(patch, nil, errFrom(t.Name()))
 				_, err := deploy.WithInstanceRuntimeContext(ctx)
-				NewWithT(t).Expect(err).To(Equal(anyError))
+				NewWithT(t).Expect(err.Error()).To(Equal(t.Name()))
+			})
+
+			patch = patch_modules.OperatorListByCond(patch, []models.Operator{{}}, nil)
+
+			t.Run("#ListConfigurationsFailed", func(t *testing.T) {
+				patch = patch_modules.ConfigList(patch, nil, errFrom(t.Name()))
+				_, err := deploy.WithInstanceRuntimeContext(ctx)
+				NewWithT(t).Expect(err.Error()).To(Equal(t.Name()))
+			})
+
+			patch = patch_modules.ConfigList(patch, []*config.Detail{{Configuration: &wasm.Cache{}}}, nil)
+
+			t.Run("#ConfigurationsInitFailed", func(t *testing.T) {
+				patch_modules.TypesWasmInitConfiguration(patch, errFrom(t.Name()))
+				_, err := deploy.WithInstanceRuntimeContext(ctx)
+				mock_sqlx.ExpectError(t, err, status.ConfigInitFailed, t.Name())
 			})
 		})
 		t.Run("#Success", func(t *testing.T) {
-			patch = patch.
-				ApplyFunc(
-					operator.ListByCond,
-					func(_ context.Context, _ *operator.CondArgs) ([]models.Operator, error) {
-						return []models.Operator{}, nil
-					},
-				).
-				ApplyFunc(
-					wasm.NewChainClient,
-					func(_ context.Context, _ []models.Operator, _ *models.ProjectOperator) *wasm.ChainClient {
-						return &wasm.ChainClient{}
-					},
-				)
+			patch = patch_modules.TypesWasmInitConfiguration(patch, nil)
 			_, err := deploy.WithInstanceRuntimeContext(ctx)
 			NewWithT(t).Expect(err).To(BeNil())
 		})

@@ -36,13 +36,37 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 	if err := prj.FetchByProjectID(d); err != nil {
 		return nil, err
 	}
-	ctx = types.WithProject(ctx, prj)
-	ctx = wasm.WithRedisPrefix(ctx, prj.Name)
+
 	res := &models.Resource{RelResource: models.RelResource{ResourceID: app.ResourceID}}
 	if err := res.FetchByResourceID(d); err != nil {
 		return nil, err
 	}
-	ctx = types.WithResource(ctx, res)
+
+	prjOp, err := projectoperator.GetByProject(parent, prj.ProjectID)
+	if err != nil && err != status.ProjectOperatorNotFound {
+		return nil, err
+	}
+	accOp, err := operator.ListByCond(parent, &operator.CondArgs{AccountID: prj.RelAccount.AccountID})
+	if err != nil {
+		return nil, err
+	}
+	chainClient := wasm.NewChainClient(parent, prj, accOp, prjOp)
+
+	logger := types.MustLoggerFromContext(parent).WithValues(
+		"@src", "wasm",
+		"@prj", prj.Name,
+		"@app", app.Name,
+	)
+	metrics := custommetrics.NewCustomMetric(prj.AccountID.String(), prj.Name)
+
+	ctx = contextx.WithContextCompose(
+		types.WithProjectContext(prj),
+		types.WithResourceContext(res),
+		wasm.WithRedisPrefixContext(prj.Name),
+		wasm.WithChainClientContext(chainClient),
+		wasm.WithLoggerContext(logger),
+		wasm.WithCustomMetricsContext(metrics),
+	)(ctx)
 
 	configs, err := config.List(parent, &config.CondArgs{
 		RelIDs: []types.SFID{prj.ProjectID, app.AppletID, res.ResourceID, ins.InstanceID},
@@ -52,40 +76,11 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		return nil, err
 	}
 	for _, c := range configs {
-		if canBeInit, ok := c.Configuration.(wasm.ConfigurationWithInit); ok {
-			err = canBeInit.Init(ctx)
-		}
-		if err != nil {
+		if err = wasm.InitConfiguration(ctx, c); err != nil {
 			return nil, status.ConfigInitFailed.StatusErr().WithDesc(err.Error())
 		}
 		ctx = c.WithContext(ctx)
 	}
-	if _, ok := wasm.KVStoreFromContext(ctx); !ok {
-		ctx = wasm.DefaultCache().WithContext(ctx)
-	}
-	if _, ok := wasm.MQTTClientFromContext(ctx); !ok {
-		ctx = wasm.DefaultMQClient().WithContext(ctx)
-	}
-
-	var projectOperator *models.ProjectOperator
-	projectOperator, err = projectoperator.GetByProject(parent, prj.ProjectID)
-	if err != nil && err != status.ProjectOperatorNotFound {
-		return nil, err
-	}
-	operators, err := operator.ListByCond(parent, &operator.CondArgs{AccountID: prj.RelAccount.AccountID})
-	if err != nil {
-		return nil, err
-	}
-
-	ctx = wasm.WithChainClient(ctx, wasm.NewChainClient(ctx, operators, projectOperator))
-
-	ctx = wasm.WithLogger(ctx, types.MustLoggerFromContext(ctx).WithValues(
-		"@src", "wasm",
-		"@prj", prj.Name,
-		"@app", app.Name,
-	))
-
-	ctx = wasm.WithCustomMetrics(ctx, custommetrics.NewCustomMetric(prj.AccountID.String(), prj.ProjectName.Name))
 
 	return ctx, nil
 }

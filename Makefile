@@ -116,7 +116,7 @@ migrate: toolkit
 
 .PHONY: test
 test: test_depends
-	@go test -cover -coverprofile=coverage.out ./...
+	@go test -gcflags "all=-N -l" -cover -coverprofile=coverage.out ./...
 	@docker stop mqtt_test postgres_test redis_test || true && docker container rm mqtt_test postgres_test redis_test || true
 
 bench: test_depends
