@@ -72,7 +72,6 @@ func TestTrafficLimitAPIs(t *testing.T) {
 					req := &applet_mgr.UpdateTrafficLimit{ProjectName: projectName, TrafficLimitID: trafficLimitID}
 					req.UpdateReq.Threshold = 3
 					req.UpdateReq.Duration = base.Duration(3 * time.Minute)
-					req.UpdateReq.ApiType = enums.TRAFFIC_LIMIT_TYPE__EVENT
 
 					_, _, err := client.UpdateTrafficLimit(req)
 					NewWithT(t).Expect(err).To(BeNil())

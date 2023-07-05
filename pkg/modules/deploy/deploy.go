@@ -28,6 +28,8 @@ func Init(ctx context.Context) error {
 		ins = &models.Instance{}
 		app *models.Applet
 		res *models.Resource
+
+		code []byte
 	)
 
 	_, l := types.MustLoggerFromContext(ctx).Start(ctx, "deploy.Init")
@@ -38,6 +40,9 @@ func Init(ctx context.Context) error {
 		l.Error(err)
 		return err
 	}
+
+	l.WithValues("total", len(list)).Info("")
+
 	for i := range list {
 		ins = &list[i]
 		l = l.WithValues("ins", ins.InstanceID, "app", ins.AppletID)
@@ -50,8 +55,7 @@ func Init(ctx context.Context) error {
 		}
 
 		l = l.WithValues("res", app.ResourceID)
-		res = &models.Resource{RelResource: models.RelResource{ResourceID: app.ResourceID}}
-		err = app.FetchByAppletID(d)
+		res, code, err = resource.GetContentBySFID(ctx, app.ResourceID)
 		if err != nil {
 			l.Warn(err)
 			continue
@@ -63,23 +67,19 @@ func Init(ctx context.Context) error {
 		)(ctx)
 
 		state := ins.State
-		if state != enums.INSTANCE_STATE__STARTED && state != enums.INSTANCE_STATE__STOPPED {
+		l = l.WithValues("state", ins.State)
+
+		ins, err = UpsertByCode(ctx, nil, code, state, ins.InstanceID)
+		if err != nil {
+			l.Warn(err)
 			continue
 		}
-		instance, err := Upsert(ctx, nil, state, ins.InstanceID)
-		if err == nil {
-			l.WithValues("ins", instance.InstanceID, "state", instance.State).Info("init success")
+
+		if ins.State != state {
+			l.WithValues("state_vm", ins.State).Warn(errors.New("create vm failed"))
 			continue
 		}
-		l.WithValues("ins", ins.InstanceID).Warn(err)
-		ins.State = enums.INSTANCE_STATE__STOPPED
-		if err = ins.UpdateByInstanceID(d); err != nil {
-			if sqlx.DBErr(err).IsConflict() {
-				l.Warn(status.MultiInstanceDeployed.StatusErr().
-					WithDesc(ins.AppletID.String()))
-			}
-			l.Warn(status.DatabaseError.StatusErr().WithDesc(err.Error()))
-		}
+		l.Info("vm started")
 	}
 	return nil
 }
@@ -112,22 +112,53 @@ func GetByAppletSFID(ctx context.Context, id types.SFID) (*models.Instance, erro
 	return m, nil
 }
 
-func ListWithCond(ctx context.Context, r *CondArgs) (data []models.Instance, err error) {
+func List(ctx context.Context, r *ListReq) (ret *ListRsp, err error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	m := &models.Instance{}
 
-	if r.ProjectID == 0 {
-		data, err = m.List(d, r.Condition())
-	} else {
+	ret = &ListRsp{}
+
+	adds := builder.Additions{
+		builder.Where(r.Condition()),
+		r.Addition(),
+		builder.Comment("Instance.ListWithProjectPermission"),
+	}
+	if r.ProjectID != 0 {
 		app := &models.Applet{}
-		err = d.QueryAndScan(
-			builder.Select(nil).From(
-				d.T(m),
-				builder.LeftJoin(d.T(app)).On(m.ColAppletID().Eq(app.ColAppletID())),
-				builder.Where(r.Condition()),
-			), &data,
+		adds = append(adds,
+			builder.LeftJoin(d.T(app)).On(m.ColAppletID().Eq(app.ColAppletID())),
 		)
 	}
+
+	err = d.QueryAndScan(builder.Select(nil).From(d.T(m), adds...), &ret.Data)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	err = d.QueryAndScan(builder.Select(builder.Count()).From(d.T(m), adds...), &ret.Total)
+	if err != nil {
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+
+	return ret, nil
+}
+
+func ListByCond(ctx context.Context, r *CondArgs) (data []models.Instance, err error) {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.Instance{}
+
+	adds := builder.Additions{
+		builder.Where(r.Condition()),
+		builder.Comment("Instance.ListWithProjectPermission"),
+	}
+
+	if r.ProjectID != 0 {
+		app := &models.Applet{}
+		adds = append(adds,
+			builder.LeftJoin(d.T(app)).On(m.ColAppletID().Eq(app.ColAppletID())),
+		)
+	}
+
+	err = d.QueryAndScan(builder.Select(nil).From(d.T(m), adds...), &data)
 	if err != nil {
 		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
 	}
@@ -191,7 +222,7 @@ func Remove(ctx context.Context, r *CondArgs) error {
 	return sqlx.NewTasks(types.MustMgrDBExecutorFromContext(ctx)).With(
 		func(db sqlx.DBExecutor) error {
 			ctx := types.WithMgrDBExecutor(ctx, db)
-			lst, err = ListWithCond(ctx, r)
+			lst, err = ListByCond(ctx, r)
 			return err
 		},
 		func(db sqlx.DBExecutor) error {
@@ -217,6 +248,10 @@ func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.In
 	app := types.MustAppletFromContext(ctx)
 	ins := &models.Instance{}
 
+	if state != enums.INSTANCE_STATE__STARTED && state != enums.INSTANCE_STATE__STOPPED {
+		return nil, status.InvalidVMState.StatusErr().WithDesc(state.String())
+	}
+
 	err := sqlx.NewTasks(types.MustMgrDBExecutorFromContext(ctx)).With(
 		func(d sqlx.DBExecutor) error {
 			ins.AppletID = app.AppletID
@@ -240,22 +275,18 @@ func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.In
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
+			var err error
 			if forUpdate {
-				if err := ins.UpdateByInstanceID(d); err != nil {
-					if sqlx.DBErr(err).IsConflict() {
-						return status.MultiInstanceDeployed.StatusErr().
-							WithDesc(app.AppletID.String())
-					}
-					return status.DatabaseError.StatusErr().WithDesc(err.Error())
-				}
+				err = ins.UpdateByInstanceID(d)
 			} else {
-				if err := ins.Create(d); err != nil {
-					if sqlx.DBErr(err).IsConflict() {
-						return status.MultiInstanceDeployed.StatusErr().
-							WithDesc(app.AppletID.String())
-					}
-					return status.DatabaseError.StatusErr().WithDesc(err.Error())
+				err = ins.Create(d)
+			}
+			if err != nil {
+				if sqlx.DBErr(err).IsConflict() {
+					return status.MultiInstanceDeployed.StatusErr().
+						WithDesc(app.AppletID.String())
 				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
 		},
@@ -329,6 +360,10 @@ func Deploy(ctx context.Context, cmd enums.DeployCmd) (err error) {
 			if err = m.UpdateByInstanceID(d); err != nil {
 				if sqlx.DBErr(err).IsConflict() {
 					return status.MultiInstanceDeployed.StatusErr().
+						WithDesc(m.AppletID.String())
+				}
+				if sqlx.DBErr(err).IsNotFound() {
+					return status.InstanceNotFound.StatusErr().
 						WithDesc(m.AppletID.String())
 				}
 				return status.DatabaseError.StatusErr().WithDesc(err.Error())
