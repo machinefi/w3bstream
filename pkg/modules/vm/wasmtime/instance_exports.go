@@ -1,10 +1,13 @@
 package wasmtime
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"encoding/binary"
 	"fmt"
 	"math/rand"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -16,6 +19,7 @@ import (
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/modules/job"
+	"github.com/machinefi/w3bstream/pkg/modules/vm/api"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 	custommetrics "github.com/machinefi/w3bstream/pkg/types/wasm/metrics"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/sql_util"
@@ -40,6 +44,7 @@ type (
 		ctx     context.Context
 		mq      *wasm.MqttClient
 		metrics custommetrics.Metrics
+		srv     *api.Server
 	}
 )
 
@@ -50,6 +55,7 @@ func NewExportFuncs(ctx context.Context, rt *Runtime) (*ExportFuncs, error) {
 		kvs: wasm.MustKVStoreFromContext(ctx),
 		log: wasm.MustLoggerFromContext(ctx),
 		ctx: ctx,
+		srv: api.DefaultServer,
 	}
 	ef.cl, _ = wasm.ChainClientFromContext(ctx)
 	ef.db, _ = wasm.SQLStoreFromContext(ctx)
@@ -85,6 +91,7 @@ func (ef *ExportFuncs) LinkABI(impt Import) error {
 		"ws_get_sql_db":            ef.GetSQLDB,
 		"ws_get_env":               ef.GetEnv,
 		"ws_send_mqtt_msg":         ef.SendMqttMsg,
+		"ws_api_call":              ef.ApiCall,
 	} {
 		if err := impt("env", name, ff); err != nil {
 			return err
@@ -135,6 +142,35 @@ func (ef *ExportFuncs) Log(logLevel, ptr, size int32) int32 {
 		return wasm.ResultStatusCode_Failed
 	}
 	ef.logAndPersistToDB(conflog.Level(logLevel), codeSrc, string(buf))
+	return int32(wasm.ResultStatusCode_OK)
+}
+
+func (ef *ExportFuncs) ApiCall(kAddr, kSize, vmAddrPtr, vmSizePtr int32) int32 {
+	buf, err := ef.rt.Read(kAddr, kSize)
+	if err != nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return int32(wasm.ResultStatusCode_TransDataFromVMFailed)
+	}
+
+	req, err := http.ReadRequest(bufio.NewReader(bytes.NewBuffer(buf)))
+	if err != nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return int32(wasm.ResultStatusCode_ParamIllegal)
+	}
+
+	resp := ef.srv.Serve(req)
+
+	wbuf := bytes.Buffer{}
+	if err := resp.Write(&wbuf); err != nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return int32(wasm.ResultStatusCode_HostInternal)
+	}
+
+	if err := ef.rt.Copy(wbuf.Bytes(), vmAddrPtr, vmSizePtr); err != nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
+	}
+
 	return int32(wasm.ResultStatusCode_OK)
 }
 
