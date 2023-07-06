@@ -8,6 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+
 	storage "github.com/machinefi/w3bstream/pkg/depends/conf/storage"
 )
 

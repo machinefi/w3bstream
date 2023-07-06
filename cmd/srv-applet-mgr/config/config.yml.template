@@ -13,6 +13,7 @@ SRV_APPLET_MGR__Jwt_ExpIn: 0s
 SRV_APPLET_MGR__Jwt_Issuer: ""
 SRV_APPLET_MGR__Jwt_SignKey: ""
 SRV_APPLET_MGR__LocalFS_Root: ""
+SRV_APPLET_MGR__Logger_CKEndpoint: ""
 SRV_APPLET_MGR__Logger_Format: JSON
 SRV_APPLET_MGR__Logger_Level: debug
 SRV_APPLET_MGR__Logger_Name: srv-applet-mgr
