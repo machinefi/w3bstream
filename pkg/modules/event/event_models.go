@@ -21,6 +21,8 @@ type EventReq struct {
 	Timestamp int64 `in:"query" name:"timestamp,omitempty"`
 	// Payload event payload (binary only)
 	Payload bytes.Buffer `in:"body" mime:"stream"`
+	// TODO: Remove DeviceID
+	DeviceID string `in:"query" name:"device_id,omitempty"`
 }
 
 func (r *EventReq) SetDefault() {

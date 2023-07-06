@@ -34,7 +34,7 @@ var contextAccountAuthKey = reflect.TypeOf(ContextAccountAuth{}).String()
 func (r *ContextAccountAuth) ContextKey() string { return contextAccountAuthKey }
 
 func (r *ContextAccountAuth) Output(ctx context.Context) (interface{}, error) {
-	content, err := jwt.AuthContentFromContext(ctx)
+	content, _, err := jwt.AuthContentFromContext(ctx)
 	if err != nil {
 		return nil, err
 	}

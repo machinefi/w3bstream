@@ -31,6 +31,16 @@ func (r *HandleEvent) Path() string {
 func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 	r.EventReq.SetDefault()
 
+	if len(r.DeviceID) > 0 {
+		req := DataPushReqs{DataPushReq{
+			DeviceID:  r.DeviceID,
+			EventType: r.EventType,
+			Payload:   r.Payload.String(),
+			Timestamp: r.Timestamp,
+		}}
+		return handleDataPush(ctx, r.Channel, req)
+	}
+
 	var (
 		err error
 		pub = middleware.MustPublisher(ctx)
@@ -73,12 +83,14 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 
 type HandleDataPush struct {
 	httpx.MethodPost
-	DataPushReq `in:"body"`
-	Channel     string `in:"path" name:"channel"`
+	DataPushReqs `in:"body"`
+	Channel      string `in:"path" name:"channel"`
 }
 
 type (
-	DataPushReq []struct {
+	DataPushReqs []DataPushReq
+
+	DataPushReq struct {
 		DeviceID  string `json:"device_id"`
 		EventType string `json:"event_type,omitempty"`
 		Payload   string `json:"payload"`
@@ -97,10 +109,14 @@ func (r *HandleDataPush) Path() string {
 }
 
 func (r *HandleDataPush) Output(ctx context.Context) (interface{}, error) {
+	return handleDataPush(ctx, r.Channel, r.DataPushReqs)
+}
+
+func handleDataPush(ctx context.Context, ch string, req DataPushReqs) (interface{}, error) {
 	var err error
 	ca := middleware.MustCurrentAccountFromContext(ctx)
 	ctx = ca.WithAccount(ctx)
-	ctx, err = ca.WithProjectContextByName(ctx, r.Channel)
+	ctx, err = ca.WithProjectContextByName(ctx, ch)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +135,7 @@ func (r *HandleDataPush) Output(ctx context.Context) (interface{}, error) {
 		}
 	}
 	rsps := DataPushRsps{}
-	for i, v := range r.DataPushReq {
+	for i, v := range req {
 		pub, err := createPublisherIfNotExist(ctx, prj.ProjectID, v.DeviceID)
 		if err != nil {
 			rsps = append(rsps, wrapErr(i, err))
