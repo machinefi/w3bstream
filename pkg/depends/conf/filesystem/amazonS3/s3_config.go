@@ -108,9 +108,8 @@ func (s *AmazonS3) StatObject(key string) (*filesystem.ObjectMeta, error) {
 		awsErr, ok := err.(awserr.RequestFailure)
 		if ok && awsErr.StatusCode() == 404 {
 			return nil, filesystem.ErrNotExistObjectKey
-		} else {
-			return nil, err
 		}
+		return nil, err
 	}
 
 	om, err := filesystem.ParseObjectMetaFromKey(key)

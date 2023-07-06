@@ -25,6 +25,7 @@ type S3Endpoint interface {
 
 type PresignedFn func(db *ObjectDB, key string, exp time.Duration) url.Values
 
+// ObjectDB Deprecated
 type ObjectDB struct {
 	Endpoint        string
 	Region          string
@@ -185,9 +186,8 @@ func (db *ObjectDB) StatsObject(ctx context.Context, meta *filesystem.ObjectMeta
 		awsErr, ok := err.(awserr.RequestFailure)
 		if ok && awsErr.StatusCode() == 404 {
 			return nil, filesystem.ErrNotExistObjectKey
-		} else {
-			return nil, err
 		}
+		return nil, err
 	}
 
 	om, err := filesystem.ParseObjectMetaFromKey(info.Key)
@@ -272,8 +272,13 @@ func (db *ObjectDB) DownloadUrl(key string) (string, error) {
 	return u.String(), err
 }
 
+// StatObject Deprecated
 func (db *ObjectDB) StatObject(key string) (*filesystem.ObjectMeta, error) {
-	return nil, nil
+	meta, err := filesystem.ParseObjectMetaFromKey(key)
+	if err != nil {
+		return nil, err
+	}
+	return db.StatsObject(context.Background(), meta)
 }
 
 var (
