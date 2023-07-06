@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"reflect"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
@@ -26,33 +25,13 @@ var ctxPublisherAuthKey = reflect.TypeOf(ContextAccountAuth{}).String()
 func (r *ContextPublisherAuth) ContextKey() string { return ctxPublisherAuthKey }
 
 func (r *ContextPublisherAuth) Output(ctx context.Context) (interface{}, error) {
-	vRaw := jwt.AuthFromContext(ctx)
-	if _, ok := vRaw.(string); !ok {
-		var content []byte
-		switch v1 := vRaw.(type) {
-		case []byte:
-			content = v1
-		case string:
-			content = []byte(v1)
-		case fmt.Stringer:
-			content = []byte(v1.String())
-		default:
-			return nil, status.InvalidAuthValue
-		}
-
-		accountID := types.SFID(0)
-		if err := accountID.UnmarshalText(content); err != nil {
-			return nil, status.InvalidAuthAccountID
-		}
-		ca, err := account.GetAccountByAccountID(ctx, accountID)
-		if err != nil {
-			return nil, err
-		}
-		return &CurrentAccount{*ca}, nil
+	content, err := jwt.AuthContentFromContext(ctx)
+	if err != nil {
+		return nil, err
 	}
-	v := vRaw.(string)
+
 	id := types.SFID(0)
-	if err := id.UnmarshalText([]byte(v)); err != nil {
+	if err := id.UnmarshalText(content); err != nil {
 		return nil, status.InvalidAuthPublisherID
 	}
 	cp, err := publisher.GetBySFID(ctx, id)

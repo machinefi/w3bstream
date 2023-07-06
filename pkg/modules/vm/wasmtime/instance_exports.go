@@ -16,8 +16,8 @@ import (
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/modules/job"
+	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
-	custommetrics "github.com/machinefi/w3bstream/pkg/types/wasm/metrics"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/sql_util"
 )
 
@@ -39,7 +39,7 @@ type (
 		cl      *wasm.ChainClient
 		ctx     context.Context
 		mq      *wasm.MqttClient
-		metrics custommetrics.Metrics
+		metrics metrics.CustomMetrics
 	}
 )
 
@@ -92,9 +92,7 @@ func (ef *ExportFuncs) LinkABI(impt Import) error {
 	}
 
 	for name, ff := range map[string]interface{}{
-		"ws_counter_inc": ef.StatCounterInc,
-		"ws_counter_add": ef.StatCounterAdd,
-		"ws_gauge_set":   ef.StatGaugeSet,
+		"ws_submit_metrics": ef.StatSubmit,
 	} {
 		if err := impt("stat", name, ff); err != nil {
 			return err
@@ -471,32 +469,28 @@ func (ef *ExportFuncs) GetEventType(rid, vmAddrPtr, vmSizePtr int32) int32 {
 	return int32(wasm.ResultStatusCode_OK)
 }
 
-func (ef *ExportFuncs) StatCounterInc(labelAddr, labelSize int32) int32 {
-	buf, err := ef.rt.Read(labelAddr, labelSize)
+func (ef *ExportFuncs) StatSubmit(vmAddrPtr, vmSizePtr int32) int32 {
+	buf, err := ef.rt.Read(vmAddrPtr, vmSizePtr)
 	if err != nil {
 		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
-	ef.metrics.Counter(string(buf)).Inc()
-	return int32(wasm.ResultStatusCode_OK)
-}
+	str := string(buf)
+	if !gjson.Valid(str) {
+		err = errors.New("invalid json")
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return wasm.ResultStatusCode_Failed
+	}
+	object := gjson.Parse(str)
+	if object.IsArray() {
+		err = errors.New("json object should not be an array")
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return wasm.ResultStatusCode_Failed
+	}
 
-func (ef *ExportFuncs) StatCounterAdd(labelAddr, labelSize int32, value float64) int32 {
-	buf, err := ef.rt.Read(labelAddr, labelSize)
-	if err != nil {
+	if err := ef.metrics.Submit(object); err != nil {
 		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
-	ef.metrics.Counter(string(buf)).Add(value)
-	return int32(wasm.ResultStatusCode_OK)
-}
-
-func (ef *ExportFuncs) StatGaugeSet(labelAddr, labelSize int32, value float64) int32 {
-	buf, err := ef.rt.Read(labelAddr, labelSize)
-	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
-		return wasm.ResultStatusCode_Failed
-	}
-	ef.metrics.Gauge(string(buf)).Set(value)
 	return int32(wasm.ResultStatusCode_OK)
 }

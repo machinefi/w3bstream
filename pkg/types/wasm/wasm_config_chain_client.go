@@ -30,9 +30,9 @@ type ChainClient struct {
 
 // TODO impl ChainClient.Init
 
-func NewChainClient(ctx context.Context, ops []models.Operator, p *models.ProjectOperator) *ChainClient {
+func NewChainClient(ctx context.Context, prj *models.Project, ops []models.Operator, p *models.ProjectOperator) *ChainClient {
 	c := &ChainClient{
-		projectName: wsTypes.MustProjectFromContext(ctx).Name,
+		projectName: prj.Name,
 		clientMap:   make(map[uint32]*ethclient.Client, 0),
 	}
 	ethcli := wsTypes.MustETHClientConfigFromContext(ctx)
