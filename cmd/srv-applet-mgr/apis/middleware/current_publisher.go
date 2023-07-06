@@ -25,12 +25,13 @@ var ctxPublisherAuthKey = reflect.TypeOf(ContextAccountAuth{}).String()
 func (r *ContextPublisherAuth) ContextKey() string { return ctxPublisherAuthKey }
 
 func (r *ContextPublisherAuth) Output(ctx context.Context) (interface{}, error) {
-	v, ok := jwt.AuthFromContext(ctx).(string)
-	if !ok {
-		return nil, status.InvalidAuthValue
+	content, err := jwt.AuthContentFromContext(ctx)
+	if err != nil {
+		return nil, err
 	}
+
 	id := types.SFID(0)
-	if err := id.UnmarshalText([]byte(v)); err != nil {
+	if err := id.UnmarshalText(content); err != nil {
 		return nil, status.InvalidAuthPublisherID
 	}
 	cp, err := publisher.GetBySFID(ctx, id)

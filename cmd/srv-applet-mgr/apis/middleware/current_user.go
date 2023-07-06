@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"reflect"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
@@ -35,17 +34,9 @@ var contextAccountAuthKey = reflect.TypeOf(ContextAccountAuth{}).String()
 func (r *ContextAccountAuth) ContextKey() string { return contextAccountAuthKey }
 
 func (r *ContextAccountAuth) Output(ctx context.Context) (interface{}, error) {
-	var content []byte
-
-	switch v := jwt.AuthFromContext(ctx).(type) {
-	case []byte:
-		content = v
-	case string:
-		content = []byte(v)
-	case fmt.Stringer:
-		content = []byte(v.String())
-	default:
-		return nil, status.InvalidAuthValue
+	content, err := jwt.AuthContentFromContext(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	accountID := types.SFID(0)
