@@ -201,5 +201,5 @@ func Validate(ctx context.Context, key string) (interface{}, error, bool) {
 	}
 
 	// TODO check privileges
-	return m.IdentityID, nil, true
+	return m, nil, true
 }
