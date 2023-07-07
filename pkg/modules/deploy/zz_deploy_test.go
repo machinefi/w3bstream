@@ -24,6 +24,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
+	"github.com/machinefi/w3bstream/pkg/modules/vm/api"
 	mock_sqlx "github.com/machinefi/w3bstream/pkg/test/mock_depends_kit_sqlx"
 	"github.com/machinefi/w3bstream/pkg/test/patch_models"
 	"github.com/machinefi/w3bstream/pkg/test/patch_modules"
@@ -76,6 +77,7 @@ func TestDeploy(t *testing.T) {
 		types.WithTaskBoardContext(&mq.TaskBoard{}),
 		types.WithMqttBrokerContext(mqttBroker),
 		types.WithETHClientConfigContext(&types.ETHClientConfig{}),
+		types.WithWasmApiServerContext(api.NewServer()),
 		wasm.WithMQTTClientContext(&wasm.MqttClient{Client: mqttClient}),
 	)(context.Background())
 
