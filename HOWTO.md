@@ -666,7 +666,7 @@ export EVENTTYPE=mobile_geo # default means start handler
 export EVENTID=`uuidgen` ## this id is used for tracing event(recommended)
 export PAYLOAD=${payload} ## set your payload
 export TIMESTAMP=`date +%s` ## event pub timestamp(recommended)
-http post :8889/srv-applet-mgr/v0/event/$TOPIC\?eventType=$EVENTTYPE\&eventID=$EVENTID\&timestamp=$TIMESTAMP --raw=$PAYLOAD -A bearer -a $PUBTOK 
+http post :8889/srv-applet-mgr/v0/event/$TOPIC\?eventType=$EVENTTYPE\&eventID=$EVENTID\&timestamp=$TIMESTAMP --raw=$PAYLOAD -A bearer -a $PUBTOK
 ```
 
 > note event handler service using 8889 for default
