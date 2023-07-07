@@ -20,6 +20,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/modules/job"
 	"github.com/machinefi/w3bstream/pkg/modules/vm/api"
+	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 	custommetrics "github.com/machinefi/w3bstream/pkg/types/wasm/metrics"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/sql_util"
@@ -55,7 +56,7 @@ func NewExportFuncs(ctx context.Context, rt *Runtime) (*ExportFuncs, error) {
 		kvs: wasm.MustKVStoreFromContext(ctx),
 		log: wasm.MustLoggerFromContext(ctx),
 		ctx: ctx,
-		srv: api.DefaultServer,
+		srv: types.MustWasmApiServerFromContext(ctx),
 	}
 	ef.cl, _ = wasm.ChainClientFromContext(ctx)
 	ef.db, _ = wasm.SQLStoreFromContext(ctx)

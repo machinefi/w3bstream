@@ -14,6 +14,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/vm/api"
 )
 
 type (
@@ -50,6 +51,7 @@ type (
 	CtxEventID             struct{}
 	CtxMetricsCenterConfig struct{}
 	CtxRobotNotifierConfig struct{} // CtxRobotNotifierConfig for notify service level message to maintainers.
+	CtxWasmApiServer       struct{}
 )
 
 func WithStrategyResults(ctx context.Context, v []*StrategyResult) context.Context {
@@ -725,6 +727,27 @@ func RobotNotifierConfigFromContext(ctx context.Context) (*RobotNotifierConfig, 
 
 func MustRobotNotifierConfigFromContext(ctx context.Context) *RobotNotifierConfig {
 	v, ok := RobotNotifierConfigFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithWasmApiServer(ctx context.Context, v *api.Server) context.Context {
+	return contextx.WithValue(ctx, CtxWasmApiServer{}, v)
+}
+
+func WithWasmApiServerContext(v *api.Server) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxWasmApiServer{}, v)
+	}
+}
+
+func WasmApiServerFromContext(ctx context.Context) (*api.Server, bool) {
+	v, ok := ctx.Value(CtxWasmApiServer{}).(*api.Server)
+	return v, ok
+}
+
+func MustWasmApiServerFromContext(ctx context.Context) *api.Server {
+	v, ok := WasmApiServerFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

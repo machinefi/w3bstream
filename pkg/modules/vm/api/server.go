@@ -5,8 +5,6 @@ import (
 	"net/http/httptest"
 )
 
-var DefaultServer = NewServer()
-
 type Server struct {
 	srv *http.ServeMux
 }

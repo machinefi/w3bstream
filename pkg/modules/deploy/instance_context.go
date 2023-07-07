@@ -30,6 +30,7 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		types.WithTaskBoardContext(types.MustTaskBoardFromContext(parent)),
 		types.WithMqttBrokerContext(types.MustMqttBrokerFromContext(parent)),
 		types.WithETHClientConfigContext(types.MustETHClientConfigFromContext(parent)),
+		types.WithWasmApiServerContext(types.MustWasmApiServerFromContext(parent)),
 	)(context.Background())
 
 	prj := &models.Project{RelProject: models.RelProject{ProjectID: app.ProjectID}}

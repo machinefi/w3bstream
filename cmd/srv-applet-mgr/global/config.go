@@ -28,6 +28,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/vm/api"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
@@ -158,6 +159,7 @@ func init() {
 		kvdb.WithRedisDBKeyContext(kvdb.NewRedisDB(config.Redis)),
 		types.WithMetricsCenterConfigContext(config.MetricsCenter),
 		types.WithRobotNotifierConfigContext(config.RobotNotifier),
+		types.WithWasmApiServerContext(api.NewServer()),
 	)
 	Context = WithContext(context.Background())
 }
