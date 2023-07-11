@@ -2,10 +2,11 @@ package api
 
 import (
 	"fmt"
-	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
-func hello(w http.ResponseWriter, r *http.Request) {
-	name := r.Header.Get("name")
-	fmt.Fprintf(w, "hello %v", name)
+func hello(ctx *gin.Context) {
+	name := ctx.Request.Header.Get("name")
+	fmt.Fprintf(ctx.Writer, "hello %v", name)
 }
