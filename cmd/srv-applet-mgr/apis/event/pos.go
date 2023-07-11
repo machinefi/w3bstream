@@ -2,8 +2,10 @@ package event
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
@@ -31,14 +33,12 @@ func (r *HandleEvent) Path() string {
 func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 	r.EventReq.SetDefault()
 
-	if len(r.DeviceID) > 0 {
-		req := DataPushReqs{DataPushReq{
-			DeviceID:  r.DeviceID,
-			EventType: r.EventType,
-			Payload:   r.Payload.String(),
-			Timestamp: r.Timestamp,
-		}}
-		return handleDataPush(ctx, r.Channel, req)
+	if r.IsBatched() {
+		dataPushReqs := DataPushReqs{}
+		if err := json.Unmarshal(r.Payload.Bytes(), &dataPushReqs); err != nil {
+			return nil, errors.Wrap(err, "incorrect payload format for batched event")
+		}
+		return handleDataPush(ctx, r.Channel, dataPushReqs)
 	}
 
 	var (
@@ -81,12 +81,6 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 	return rsp, nil
 }
 
-type HandleDataPush struct {
-	httpx.MethodPost
-	DataPushReqs `in:"body"`
-	Channel      string `in:"path" name:"channel"`
-}
-
 type (
 	DataPushReqs []DataPushReq
 
@@ -103,14 +97,6 @@ type (
 		Results []*event.Result `json:"results"`
 	}
 )
-
-func (r *HandleDataPush) Path() string {
-	return "/:channel"
-}
-
-func (r *HandleDataPush) Output(ctx context.Context) (interface{}, error) {
-	return handleDataPush(ctx, r.Channel, r.DataPushReqs)
-}
 
 func handleDataPush(ctx context.Context, ch string, req DataPushReqs) (interface{}, error) {
 	var err error

@@ -10,6 +10,10 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
+const (
+	EVENTTYPEBATCHED = "EVENT_BATCHED"
+)
+
 type EventReq struct {
 	// Channel message channel named (intact project name)
 	Channel string `in:"path"  name:"channel"`
@@ -21,8 +25,6 @@ type EventReq struct {
 	Timestamp int64 `in:"query" name:"timestamp,omitempty"`
 	// Payload event payload (binary only)
 	Payload bytes.Buffer `in:"body" mime:"stream"`
-	// TODO: Remove DeviceID
-	DeviceID string `in:"query" name:"device_id,omitempty"`
 }
 
 func (r *EventReq) SetDefault() {
@@ -35,6 +37,10 @@ func (r *EventReq) SetDefault() {
 	if r.Timestamp == 0 {
 		r.Timestamp = time.Now().UTC().Unix()
 	}
+}
+
+func (r *EventReq) IsBatched() bool {
+	return r.EventType == EVENTTYPEBATCHED
 }
 
 type Result struct {
