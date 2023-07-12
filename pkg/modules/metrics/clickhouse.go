@@ -12,20 +12,23 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-const queueLength = 5000
+const (
+	queueLength  = 5000
+	popThreshold = 3
+)
 
-type ClickhouseClient struct {
-	conn     driver.Conn
-	sqLQueue chan string
-	cfg      *config
-}
+type (
+	ClickhouseClient struct {
+		conn     driver.Conn
+		sqLQueue chan *queueElement
+		cfg      *clickhouse.Options
+	}
 
-type config struct {
-	addr     string
-	database string
-	username string
-	password string
-}
+	queueElement struct {
+		query string
+		count int
+	}
+)
 
 var (
 	clickhouseCLI *ClickhouseClient
@@ -34,28 +37,20 @@ var (
 
 func Init(ctx context.Context) {
 	cfg, existed := types.MetricsCenterConfigFromContext(ctx)
-	if !existed || !validateCfg(cfg) {
+	if !existed || len(cfg.ClickHouseDSN) == 0 {
 		log.Println("fail to get the config of metrics center")
 		return
 	}
-	clickhouseCLI = newClickhouseClient(&config{
-		cfg.ClickHouseAddr,
-		cfg.ClickHouseDB,
-		cfg.ClickHouseUser,
-		cfg.ClickHousePassword,
-	})
+	opts, err := clickhouse.ParseDSN(cfg.ClickHouseDSN)
+	if err != nil {
+		panic(err)
+	}
+	clickhouseCLI = newClickhouseClient(opts)
 }
 
-func validateCfg(cfg *types.MetricsCenterConfig) bool {
-	return len(cfg.ClickHouseAddr) > 0 &&
-		len(cfg.ClickHouseDB) > 0 &&
-		len(cfg.ClickHouseUser) > 0 &&
-		len(cfg.ClickHousePassword) > 0
-}
-
-func newClickhouseClient(cfg *config) *ClickhouseClient {
+func newClickhouseClient(cfg *clickhouse.Options) *ClickhouseClient {
 	cc := &ClickhouseClient{
-		sqLQueue: make(chan string),
+		sqLQueue: make(chan *queueElement),
 		cfg:      cfg,
 	}
 	go cc.Run()
@@ -66,40 +61,45 @@ func (c *ClickhouseClient) Insert(query string) error {
 	if len(c.sqLQueue) > queueLength {
 		return errors.New("the queue of client is full")
 	}
-	c.sqLQueue <- query
+	c.sqLQueue <- &queueElement{
+		query: query,
+		count: 0,
+	}
 	return nil
 }
 
 func (c *ClickhouseClient) Run() {
 	for {
-		if c.conn == nil {
-			if err := c.connect(); err != nil {
-				log.Println("ClickhouseClient failed to connect: ", err)
-				time.Sleep(sleepTime)
-				continue
-			}
+		if err := c.connect(); err != nil {
+			log.Println("ClickhouseClient failed to connect: ", err)
+			time.Sleep(sleepTime)
+			continue
 		}
-		query := <-c.sqLQueue
-		if err := c.conn.AsyncInsert(context.Background(), query, true); err != nil {
+		ele := <-c.sqLQueue
+		if err := c.conn.AsyncInsert(context.Background(), ele.query, true); err != nil {
 			if !c.liveness() {
 				c.conn = nil
-				c.sqLQueue <- query
+				log.Printf("ClickhouseClient failed to connect the server: error: %s, query %s\n", err, ele.query)
+			} else {
+				log.Printf("ClickhouseClient failed to insert data: error %s, query %s\n ", err, ele.query)
+			}
+			if ele.count > popThreshold {
+				log.Printf("the query %s in ClickhouseClient is poped due to %d times failure.", ele.query, ele.count)
 				continue
 			}
-			log.Println("ClickhouseClient failed to insert data: ", err)
+			ele.count++
+			// TODO: Double linked list should be used to append the element to the head
+			// when the order of the queue is important
+			c.sqLQueue <- ele
 		}
 	}
 }
 
 func (c *ClickhouseClient) connect() error {
-	conn, err := clickhouse.Open(&clickhouse.Options{
-		Addr: []string{c.cfg.addr},
-		Auth: clickhouse.Auth{
-			Database: c.cfg.database,
-			Username: c.cfg.username,
-			Password: c.cfg.password,
-		},
-	})
+	if c.conn != nil {
+		return nil
+	}
+	conn, err := clickhouse.Open(c.cfg)
 	if err != nil {
 		return err
 	}
