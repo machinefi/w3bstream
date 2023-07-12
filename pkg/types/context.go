@@ -14,7 +14,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
 	"github.com/machinefi/w3bstream/pkg/models"
-	atypes "github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/types"
+	wasmapi "github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/types"
 )
 
 type (
@@ -731,22 +731,22 @@ func MustRobotNotifierConfigFromContext(ctx context.Context) *RobotNotifierConfi
 	return v
 }
 
-func WithWasmApiServer(ctx context.Context, v atypes.Server) context.Context {
+func WithWasmApiServer(ctx context.Context, v wasmapi.Server) context.Context {
 	return contextx.WithValue(ctx, CtxWasmApiServer{}, v)
 }
 
-func WithWasmApiServerContext(v atypes.Server) contextx.WithContext {
+func WithWasmApiServerContext(v wasmapi.Server) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
 		return contextx.WithValue(ctx, CtxWasmApiServer{}, v)
 	}
 }
 
-func WasmApiServerFromContext(ctx context.Context) (atypes.Server, bool) {
-	v, ok := ctx.Value(CtxWasmApiServer{}).(atypes.Server)
+func WasmApiServerFromContext(ctx context.Context) (wasmapi.Server, bool) {
+	v, ok := ctx.Value(CtxWasmApiServer{}).(wasmapi.Server)
 	return v, ok
 }
 
-func MustWasmApiServerFromContext(ctx context.Context) atypes.Server {
+func MustWasmApiServerFromContext(ctx context.Context) wasmapi.Server {
 	v, ok := WasmApiServerFromContext(ctx)
 	must.BeTrue(ok)
 	return v

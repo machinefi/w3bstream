@@ -18,7 +18,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/modules/job"
 	"github.com/machinefi/w3bstream/pkg/modules/metrics"
-	atypes "github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/types"
+	wasmapi "github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/types"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/sql_util"
@@ -43,7 +43,7 @@ type (
 		ctx     context.Context
 		mq      *wasm.MqttClient
 		metrics metrics.CustomMetrics
-		srv     atypes.Server
+		srv     wasmapi.Server
 	}
 )
 
