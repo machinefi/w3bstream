@@ -222,13 +222,8 @@ func init() {
 		types.WithTaskWorkerContext(_workers),
 		types.WithTaskBoardContext(mq.NewTaskBoard(_tasks)),
 		types.WithETHClientConfigContext(_ethClients),
+		types.WithWasmApiServerContext(api.NewServer(_redis, _dbMgr, conflog.Std())),
 	)
 
 	_ctx = _injection(context.Background())
-	wasmApiServer := api.NewServer(_ctx)
-	_ctx = types.WithWasmApiServer(_ctx, wasmApiServer)
-	_injection = contextx.WithContextCompose(
-		_injection,
-		types.WithWasmApiServerContext(wasmApiServer),
-	)
 }

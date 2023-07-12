@@ -13,20 +13,22 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 type ApiCallProcessor struct {
-	sysCtx context.Context
+	l      log.Logger
 	router *gin.Engine
 	cli    *asynq.Client
 }
 
-func NewApiCallProcessor(ctx context.Context, router *gin.Engine, cli *asynq.Client) *ApiCallProcessor {
+func NewApiCallProcessor(router *gin.Engine, cli *asynq.Client, l log.Logger) *ApiCallProcessor {
 	return &ApiCallProcessor{
-		sysCtx: ctx,
+		l:      l,
 		router: router,
 		cli:    cli,
 	}
@@ -46,8 +48,7 @@ func (p *ApiCallProcessor) ProcessTask(ctx context.Context, t *asynq.Task) error
 	resp := httptest.NewRecorder()
 	p.router.ServeHTTP(resp, req)
 
-	l := types.MustLoggerFromContext(p.sysCtx)
-	_, l = l.Start(p.sysCtx, "vm.api.ProcessTaskApiCall")
+	_, l := p.l.Start(context.Background(), "vm.api.ProcessTaskApiCall")
 	defer l.End()
 	l = l.WithValues("ProjectName", payload.ProjectName)
 
@@ -77,12 +78,14 @@ func (p *ApiCallProcessor) ProcessTask(ctx context.Context, t *asynq.Task) error
 }
 
 type ApiResultProcessor struct {
-	sysCtx context.Context
+	l     log.Logger
+	mgrDB sqlx.DBExecutor
 }
 
-func NewApiResultProcessor(ctx context.Context) *ApiResultProcessor {
+func NewApiResultProcessor(mgrDB sqlx.DBExecutor, l log.Logger) *ApiResultProcessor {
 	return &ApiResultProcessor{
-		sysCtx: ctx,
+		l:     l,
+		mgrDB: mgrDB,
 	}
 }
 
@@ -92,12 +95,14 @@ func (p *ApiResultProcessor) ProcessTask(ctx context.Context, t *asynq.Task) err
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
 
-	sysCtx := types.WithProject(p.sysCtx, &models.Project{
+	sysCtx := context.Background()
+	sysCtx = types.WithMgrDBExecutor(sysCtx, p.mgrDB)
+	sysCtx = types.WithLogger(sysCtx, p.l)
+	sysCtx = types.WithProject(sysCtx, &models.Project{
 		ProjectName: models.ProjectName{Name: payload.ProjectName}},
 	)
 
-	l := types.MustLoggerFromContext(sysCtx)
-	_, l = l.Start(p.sysCtx, "vm.api.ProcessTaskApiResult")
+	_, l := p.l.Start(sysCtx, "vm.api.ProcessTaskApiResult")
 	defer l.End()
 
 	if _, err := event.HandleEvent(sysCtx, payload.EventType, payload.Data); err != nil {

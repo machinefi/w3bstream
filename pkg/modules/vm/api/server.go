@@ -9,20 +9,20 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/redis"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/modules/vm/api/async"
-	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 type Server struct {
-	ctx    context.Context
-	router *gin.Engine
-	cli    *asynq.Client
-	srv    *asynq.Server
+	l   log.Logger
+	cli *asynq.Client
+	srv *asynq.Server
 }
 
 func (s *Server) Call(projectName string, data []byte) *http.Response {
-	l := types.MustLoggerFromContext(s.ctx)
-	_, l = l.Start(s.ctx, "vm.api.Call")
+	_, l := s.l.Start(context.Background(), "vm.api.Call")
 	defer l.End()
 
 	task, err := async.NewApiCallTask(projectName, data)
@@ -58,10 +58,9 @@ func newRouter() *gin.Engine {
 	return router
 }
 
-func NewServer(ctx context.Context) *Server {
+func NewServer(redisConf *redis.Redis, mgrDB sqlx.DBExecutor, l log.Logger) *Server {
 	router := newRouter()
 
-	redisConf := types.MustRedisEndpointFromContext(ctx)
 	redisCli := asynq.RedisClientOpt{
 		Addr:     fmt.Sprintf("%s:%d", redisConf.Host, redisConf.Port),
 		Password: redisConf.Password.String(),
@@ -70,11 +69,10 @@ func NewServer(ctx context.Context) *Server {
 	asyncSrv := asynq.NewServer(redisCli, asynq.Config{})
 	mux := asynq.NewServeMux()
 
-	mux.Handle(async.TaskNameApiCall, async.NewApiCallProcessor(ctx, router, asyncCli))
-	mux.Handle(async.TaskNameApiResult, async.NewApiResultProcessor(ctx))
+	mux.Handle(async.TaskNameApiCall, async.NewApiCallProcessor(router, asyncCli, l))
+	mux.Handle(async.TaskNameApiResult, async.NewApiResultProcessor(mgrDB, l))
 
-	l := types.MustLoggerFromContext(ctx)
-	_, l = l.Start(ctx, "vm.api.NewServer")
+	_, l = l.Start(context.Background(), "vm.api.NewServer")
 	defer l.End()
 
 	if err := asyncSrv.Start(mux); err != nil {
@@ -82,9 +80,8 @@ func NewServer(ctx context.Context) *Server {
 	}
 
 	return &Server{
-		ctx:    ctx,
-		router: router,
-		cli:    asyncCli,
-		srv:    asyncSrv,
+		l:   l,
+		cli: asyncCli,
+		srv: asyncSrv,
 	}
 }

@@ -159,14 +159,9 @@ func init() {
 		kvdb.WithRedisDBKeyContext(kvdb.NewRedisDB(config.Redis)),
 		types.WithMetricsCenterConfigContext(config.MetricsCenter),
 		types.WithRobotNotifierConfigContext(config.RobotNotifier),
+		types.WithWasmApiServerContext(api.NewServer(config.Redis, config.Postgres, std)),
 	)
 	Context = WithContext(context.Background())
-	wasmApiServer := api.NewServer(Context)
-	Context = types.WithWasmApiServer(Context, wasmApiServer)
-	WithContext = contextx.WithContextCompose(
-		WithContext,
-		types.WithWasmApiServerContext(wasmApiServer),
-	)
 }
 
 func Server() kit.Transport { return ServerMgr.WithContextInjector(WithContext) }
