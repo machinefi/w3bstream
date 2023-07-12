@@ -34,16 +34,16 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 	r.EventReq.SetDefault()
 
 	if r.IsBatched() {
-		dataPushReqs := DataPushReqs{}
-		if err := json.Unmarshal(r.Payload.Bytes(), &dataPushReqs); err != nil {
-			return nil, errors.Wrap(err, "incorrect payload format for batched event")
-		}
-		return handleDataPush(ctx, r.Channel, dataPushReqs)
+		return handleDataPush(ctx, r.Channel, r.Payload.Bytes())
+	}
+
+	pub, exist := middleware.PublisherFromContext(ctx)
+	if !exist {
+		return nil, errors.New("the publisher of the token is not found")
 	}
 
 	var (
 		err error
-		pub = middleware.MustPublisher(ctx)
 		rsp = &event.EventRsp{
 			Channel:     r.Channel,
 			PublisherID: pub.PublisherID,
@@ -98,9 +98,12 @@ type (
 	}
 )
 
-func handleDataPush(ctx context.Context, ch string, req DataPushReqs) (interface{}, error) {
+func handleDataPush(ctx context.Context, ch string, payload []byte) (interface{}, error) {
 	var err error
-	ca := middleware.MustCurrentAccountFromContext(ctx)
+	ca, exist := middleware.CurrentAccountFromContext(ctx)
+	if !exist {
+		return nil, errors.New("the account of the token is not found")
+	}
 	ctx = ca.WithAccount(ctx)
 	ctx, err = ca.WithProjectContextByName(ctx, ch)
 	if err != nil {
@@ -120,8 +123,14 @@ func handleDataPush(ctx context.Context, ch string, req DataPushReqs) (interface
 			}},
 		}
 	}
+
+	reqs := DataPushReqs{}
+	if err := json.Unmarshal(payload, &reqs); err != nil {
+		return nil, errors.Wrap(err, "incorrect payload format for batched event")
+	}
+
 	rsps := DataPushRsps{}
-	for i, v := range req {
+	for i, v := range reqs {
 		pub, err := createPublisherIfNotExist(ctx, prj.ProjectID, v.DeviceID)
 		if err != nil {
 			rsps = append(rsps, wrapErr(i, err))
