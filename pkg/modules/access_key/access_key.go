@@ -9,6 +9,7 @@ import (
 	base "github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
@@ -51,6 +52,7 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 			Rand:         kctx.Rand,
 			ExpiredAt:    types.Timestamp{Time: exp},
 			Description:  r.Desc,
+			Privileges:   r.Privileges.AccessPrivileges(),
 		},
 		OperationTimesWithDeleted: datatypes.OperationTimesWithDeleted{
 			OperationTimes: datatypes.OperationTimes{
@@ -103,6 +105,57 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 		rsp.ExpiredAt = nil
 	}
 	return rsp, nil
+}
+
+func UpdateByName(ctx context.Context, name string, r *UpdateReq) error {
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	acc := types.MustAccountFromContext(ctx)
+
+	m := &models.AccessKey{
+		RelAccount:    models.RelAccount{AccountID: acc.AccountID},
+		AccessKeyInfo: models.AccessKeyInfo{Name: name},
+	}
+
+	return sqlx.NewTasks(d).With(
+		func(d sqlx.DBExecutor) error {
+			if err := m.FetchByAccountIDAndName(d); err != nil {
+				if sqlx.DBErr(err).IsNotFound() {
+					return status.AccessKeyNotFound
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			if r.Desc != "" {
+				m.Description = r.Desc
+			}
+			m.ExpiredAt = base.Timestamp{}
+			if r.ExpirationDays > 0 {
+				m.ExpiredAt = base.Timestamp{
+					Time: time.Now().UTC().Add(time.Hour * 24 * time.Duration(r.ExpirationDays)),
+				}
+			}
+			m.Privileges = r.Privileges.AccessPrivileges()
+			_, err := d.Exec(
+				builder.Update(d.T(m)).Set(
+					m.ColDescription().ValueBy(m.Description),
+					m.ColExpiredAt().ValueBy(m.ExpiredAt),
+					m.ColPrivileges().ValueBy(m.Privileges),
+				).Where(
+					builder.And(
+						m.ColDeletedAt().Eq(0),
+						m.ColAccountID().Eq(acc.AccountID),
+						m.ColName().Eq(name),
+					),
+				),
+			)
+			if err != nil {
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
+		},
+	).Do()
 }
 
 func DeleteByName(ctx context.Context, name string) error {
@@ -160,6 +213,7 @@ func List(ctx context.Context, r *ListReq) (*ListRsp, error) {
 }
 
 func Validate(ctx context.Context, key string) (interface{}, error, bool) {
+	opId := httptransport.OperationIDFromContext(ctx)
 	kctx := &AccessKeyContext{}
 
 	err := kctx.UnmarshalText([]byte(key))
@@ -186,6 +240,10 @@ func Validate(ctx context.Context, key string) (interface{}, error, bool) {
 
 	if !m.ExpiredAt.IsZero() && time.Now().UTC().After(m.ExpiredAt.Time) {
 		return nil, status.AccessKeyExpired, true
+	}
+
+	if _, ok := m.Privileges[opId]; !ok {
+		return nil, status.AccessKeyPermissionDenied, true
 	}
 
 	ts := base.Timestamp{Time: time.Now().UTC()}

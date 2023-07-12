@@ -12,7 +12,8 @@ import (
 
 // Deprecated use operator.ListOperator
 type GetOperatorAddr struct {
-	httpx.MethodGet
+	httpx.MethodGet `summary:"Get account operator by name"`
+
 	AccountOperatorName string `in:"query" name:"accountOperatorName,omitempty"` // account operator name
 }
 

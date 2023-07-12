@@ -81,8 +81,6 @@ const (
 	NoResourcePermission
 	// @errTalk Invalid Account Access Key
 	InvalidAccessKey
-	// @errTalk Account Access Key Expired
-	AccessKeyExpired
 )
 
 const (
@@ -104,6 +102,10 @@ const (
 	OccupiedOperator
 	// @errTalk Unsupported FileSystem Operator
 	UnsupportedFSOperator
+	// @errTalk Account Access Key Expired
+	AccessKeyExpired
+	// @errTalk Access Key Permission Denied
+	AccessKeyPermissionDenied
 )
 
 const (

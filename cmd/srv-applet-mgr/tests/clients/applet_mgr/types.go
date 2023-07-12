@@ -38,20 +38,6 @@ type CurrentPublisher struct {
 	GithubComMachinefiW3BstreamPkgModelsPublisher
 }
 
-type DataPushReq []struct {
-	DeviceID  string `json:"device_id"`
-	EventType string `json:"event_type,omitempty"`
-	Payload   string `json:"payload"`
-	Timestamp int64  `json:"timestamp,omitempty"`
-}
-
-type DataPushRsp struct {
-	Index   int32                                              `json:"index"`
-	Results []GithubComMachinefiW3BstreamPkgModulesEventResult `json:"results"`
-}
-
-type DataPushRsps []DataPushRsp
-
 type EthClientRsp struct {
 	Clients string `json:"clients"`
 }
@@ -83,6 +69,8 @@ type GithubComMachinefiW3BstreamPkgDependsKitStatusxErrorFields = statusx.ErrorF
 type GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr = statusx.StatusErr
 
 type GithubComMachinefiW3BstreamPkgEnumsAccessKeyIdentityType = enums.AccessKeyIdentityType
+
+type GithubComMachinefiW3BstreamPkgEnumsAccessPermission = enums.AccessPermission
 
 type GithubComMachinefiW3BstreamPkgEnumsAccountRole = enums.AccountRole
 
@@ -303,6 +291,12 @@ type GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateReqBase = access_key.Cr
 
 type GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateRsp = access_key.CreateRsp
 
+type GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupAccessPrivilege = access_key.GroupAccessPrivilege
+
+type GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupAccessPrivileges = access_key.GroupAccessPrivileges
+
+type GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaBase = access_key.GroupMetaBase
+
 type GithubComMachinefiW3BstreamPkgModulesAccessKeyListData struct {
 	GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimes
 	Desc      string                                                   `json:"desc,omitempty"`
@@ -312,6 +306,8 @@ type GithubComMachinefiW3BstreamPkgModulesAccessKeyListData struct {
 }
 
 type GithubComMachinefiW3BstreamPkgModulesAccessKeyListRsp = access_key.ListRsp
+
+type GithubComMachinefiW3BstreamPkgModulesAccessKeyUpdateReq = access_key.UpdateReq
 
 type GithubComMachinefiW3BstreamPkgModulesAccountCreateAccountByUsernameReq = account.CreateAccountByUsernameReq
 

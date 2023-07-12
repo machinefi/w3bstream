@@ -52,8 +52,8 @@ type Interface interface {
 	GetPublisher(req *GetPublisher, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsPublisher, kit.Metadata, error)
 	GetStrategy(req *GetStrategy, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsStrategy, kit.Metadata, error)
 	GetTrafficLimit(req *GetTrafficLimit, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsTrafficLimit, kit.Metadata, error)
-	HandleDataPush(req *HandleDataPush, metas ...kit.Metadata) (*DataPushRsps, kit.Metadata, error)
 	HandleEvent(req *HandleEvent, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesEventEventRsp, kit.Metadata, error)
+	ListAccessGroupMetas(req *ListAccessGroupMetas, metas ...kit.Metadata) (*[]GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaBase, kit.Metadata, error)
 	ListAccountAccessKey(req *ListAccountAccessKey, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccessKeyListRsp, kit.Metadata, error)
 	ListApplet(req *ListApplet, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAppletListRsp, kit.Metadata, error)
 	ListCronJob(req *ListCronJob, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesCronjobListRsp, kit.Metadata, error)
@@ -81,6 +81,7 @@ type Interface interface {
 	RemoveStrategy(req *RemoveStrategy, metas ...kit.Metadata) (kit.Metadata, error)
 	RemoveTrafficLimit(req *RemoveTrafficLimit, metas ...kit.Metadata) (kit.Metadata, error)
 	RemoveWasmLogByInstanceID(req *RemoveWasmLogByInstanceID, metas ...kit.Metadata) (kit.Metadata, error)
+	UpdateAccountAccessKeyByName(req *UpdateAccountAccessKeyByName, metas ...kit.Metadata) (kit.Metadata, error)
 	UpdateApplet(req *UpdateApplet, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAppletCreateRsp, kit.Metadata, error)
 	UpdatePasswordByAccountID(req *UpdatePasswordByAccountID, metas ...kit.Metadata) (kit.Metadata, error)
 	UpdatePublisher(req *UpdatePublisher, metas ...kit.Metadata) (kit.Metadata, error)
@@ -273,11 +274,11 @@ func (c *Client) GetTrafficLimit(req *GetTrafficLimit, metas ...kit.Metadata) (*
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
-func (c *Client) HandleDataPush(req *HandleDataPush, metas ...kit.Metadata) (*DataPushRsps, kit.Metadata, error) {
+func (c *Client) HandleEvent(req *HandleEvent, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesEventEventRsp, kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
-func (c *Client) HandleEvent(req *HandleEvent, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesEventEventRsp, kit.Metadata, error) {
+func (c *Client) ListAccessGroupMetas(req *ListAccessGroupMetas, metas ...kit.Metadata) (*[]GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaBase, kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
@@ -386,6 +387,10 @@ func (c *Client) RemoveTrafficLimit(req *RemoveTrafficLimit, metas ...kit.Metada
 }
 
 func (c *Client) RemoveWasmLogByInstanceID(req *RemoveWasmLogByInstanceID, metas ...kit.Metadata) (kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
+func (c *Client) UpdateAccountAccessKeyByName(req *UpdateAccountAccessKeyByName, metas ...kit.Metadata) (kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
