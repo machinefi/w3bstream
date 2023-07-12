@@ -95,17 +95,16 @@ func (p *ApiResultProcessor) ProcessTask(ctx context.Context, t *asynq.Task) err
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
 
-	sysCtx := context.Background()
-	sysCtx = types.WithMgrDBExecutor(sysCtx, p.mgrDB)
-	sysCtx = types.WithLogger(sysCtx, p.l)
-	sysCtx = types.WithProject(sysCtx, &models.Project{
+	ctx = types.WithMgrDBExecutor(ctx, p.mgrDB)
+	ctx = types.WithLogger(ctx, p.l)
+	ctx = types.WithProject(ctx, &models.Project{
 		ProjectName: models.ProjectName{Name: payload.ProjectName}},
 	)
 
-	_, l := p.l.Start(sysCtx, "vm.api.ProcessTaskApiResult")
+	_, l := p.l.Start(ctx, "vm.api.ProcessTaskApiResult")
 	defer l.End()
 
-	if _, err := event.HandleEvent(sysCtx, payload.EventType, payload.Data); err != nil {
+	if _, err := event.HandleEvent(ctx, payload.EventType, payload.Data); err != nil {
 		l.Error(errors.Wrap(err, "send event failed"))
 		return err
 	}
