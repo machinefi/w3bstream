@@ -24,7 +24,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
-	wasmapimock "github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/types/mock"
+	wasmapi "github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/types/mock"
 	mock_sqlx "github.com/machinefi/w3bstream/pkg/test/mock_depends_kit_sqlx"
 	"github.com/machinefi/w3bstream/pkg/test/patch_models"
 	"github.com/machinefi/w3bstream/pkg/test/patch_modules"
@@ -63,7 +63,7 @@ func TestDeploy(t *testing.T) {
 		mqttClient = &confmqtt.Client{}
 	}
 
-	wasmApiServer := wasmapimock.NewMockServer(ctl)
+	wasmApiServer := wasmapi.NewMockServer(ctl)
 
 	ctx := contextx.WithContextCompose(
 		types.WithMgrDBExecutorContext(d),
