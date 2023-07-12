@@ -63,6 +63,8 @@ func TestDeploy(t *testing.T) {
 		mqttClient = &confmqtt.Client{}
 	}
 
+	wasmApiServer := apimock.NewMockServer(ctl)
+
 	ctx := contextx.WithContextCompose(
 		types.WithMgrDBExecutorContext(d),
 		conflog.WithLoggerContext(conflog.Std()),
@@ -78,10 +80,8 @@ func TestDeploy(t *testing.T) {
 		types.WithMqttBrokerContext(mqttBroker),
 		types.WithETHClientConfigContext(&types.ETHClientConfig{}),
 		wasm.WithMQTTClientContext(&wasm.MqttClient{Client: mqttClient}),
+		types.WithWasmApiServerContext(wasmApiServer),
 	)(context.Background())
-
-	wasmApiServer := apimock.NewMockServer(ctl)
-	ctx = types.WithWasmApiServer(ctx, wasmApiServer)
 
 	d.MockDBExecutor.EXPECT().T(gomock.Any()).Return(&builder.Table{}).AnyTimes()
 	d.MockTxExecutor.EXPECT().IsTx().Return(true).AnyTimes()
