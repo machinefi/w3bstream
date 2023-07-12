@@ -26,7 +26,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/retry"
 	"github.com/machinefi/w3bstream/pkg/depends/x/ptrx"
 	"github.com/machinefi/w3bstream/pkg/models"
-	"github.com/machinefi/w3bstream/pkg/modules/vm/api"
+	"github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
@@ -206,6 +206,11 @@ func init() {
 	}
 	_ethClients.Init()
 
+	wasmApiServer, err := wasmapi.NewServer(_redis, _dbMgr)
+	if err != nil {
+		conflog.Std().Fatal(err)
+	}
+
 	_injection = contextx.WithContextCompose(
 		types.WithMgrDBExecutorContext(_dbMgr),
 		types.WithMonitorDBExecutorContext(_dbMonitor),
@@ -222,7 +227,7 @@ func init() {
 		types.WithTaskWorkerContext(_workers),
 		types.WithTaskBoardContext(mq.NewTaskBoard(_tasks)),
 		types.WithETHClientConfigContext(_ethClients),
-		types.WithWasmApiServerContext(api.NewServer(_redis, _dbMgr, conflog.Std())),
+		types.WithWasmApiServerContext(wasmApiServer),
 	)
 
 	_ctx = _injection(context.Background())

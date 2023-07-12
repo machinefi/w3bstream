@@ -1,4 +1,4 @@
-package api
+package wasmapi
 
 import (
 	"context"
@@ -9,30 +9,31 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/pkg/errors"
 
-	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
-	"github.com/machinefi/w3bstream/pkg/modules/vm/api/async"
+	"github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/async"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 type Server struct {
-	l   log.Logger
 	cli *asynq.Client
 	srv *asynq.Server
 }
 
-func (s *Server) Call(projectName string, data []byte) *http.Response {
-	_, l := s.l.Start(context.Background(), "vm.api.Call")
+func (s *Server) Call(ctx context.Context, data []byte) *http.Response {
+	l := types.MustLoggerFromContext(ctx)
+	_, l = l.Start(ctx, "wasmapi.Call")
 	defer l.End()
 
-	task, err := async.NewApiCallTask(projectName, data)
+	prj := types.MustProjectFromContext(ctx)
+	task, err := async.NewApiCallTask(prj.Name, data)
 	if err != nil {
 		l.Error(errors.Wrap(err, "new api call task failed"))
 		return &http.Response{
 			StatusCode: http.StatusBadRequest,
 		}
 	}
-	if _, err := s.cli.Enqueue(task); err != nil {
+	if _, err := s.cli.EnqueueContext(ctx, task); err != nil {
 		l.Error(errors.Wrap(err, "could not enqueue task"))
 		return &http.Response{
 			StatusCode: http.StatusInternalServerError,
@@ -58,7 +59,7 @@ func newRouter() *gin.Engine {
 	return router
 }
 
-func NewServer(redisConf *redis.Redis, mgrDB sqlx.DBExecutor, l log.Logger) *Server {
+func NewServer(redisConf *redis.Redis, mgrDB sqlx.DBExecutor) (*Server, error) {
 	router := newRouter()
 
 	redisCli := asynq.RedisClientOpt{
@@ -69,19 +70,15 @@ func NewServer(redisConf *redis.Redis, mgrDB sqlx.DBExecutor, l log.Logger) *Ser
 	asyncSrv := asynq.NewServer(redisCli, asynq.Config{})
 	mux := asynq.NewServeMux()
 
-	mux.Handle(async.TaskNameApiCall, async.NewApiCallProcessor(router, asyncCli, l))
-	mux.Handle(async.TaskNameApiResult, async.NewApiResultProcessor(mgrDB, l))
-
-	_, l = l.Start(context.Background(), "vm.api.NewServer")
-	defer l.End()
+	mux.Handle(async.TaskNameApiCall, async.NewApiCallProcessor(router, asyncCli))
+	mux.Handle(async.TaskNameApiResult, async.NewApiResultProcessor(mgrDB))
 
 	if err := asyncSrv.Start(mux); err != nil {
-		l.Fatal(err)
+		return nil, err
 	}
 
 	return &Server{
-		l:   l,
 		cli: asyncCli,
 		srv: asyncSrv,
-	}
+	}, nil
 }

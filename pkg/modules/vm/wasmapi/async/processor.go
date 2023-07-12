@@ -13,7 +13,6 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/pkg/errors"
 
-	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
@@ -21,14 +20,12 @@ import (
 )
 
 type ApiCallProcessor struct {
-	l      log.Logger
 	router *gin.Engine
 	cli    *asynq.Client
 }
 
-func NewApiCallProcessor(router *gin.Engine, cli *asynq.Client, l log.Logger) *ApiCallProcessor {
+func NewApiCallProcessor(router *gin.Engine, cli *asynq.Client) *ApiCallProcessor {
 	return &ApiCallProcessor{
-		l:      l,
 		router: router,
 		cli:    cli,
 	}
@@ -48,7 +45,8 @@ func (p *ApiCallProcessor) ProcessTask(ctx context.Context, t *asynq.Task) error
 	resp := httptest.NewRecorder()
 	p.router.ServeHTTP(resp, req)
 
-	_, l := p.l.Start(context.Background(), "vm.api.ProcessTaskApiCall")
+	l := types.MustLoggerFromContext(ctx)
+	_, l = l.Start(ctx, "wasmapi.ProcessTaskApiCall")
 	defer l.End()
 	l = l.WithValues("ProjectName", payload.ProjectName)
 
@@ -78,13 +76,11 @@ func (p *ApiCallProcessor) ProcessTask(ctx context.Context, t *asynq.Task) error
 }
 
 type ApiResultProcessor struct {
-	l     log.Logger
 	mgrDB sqlx.DBExecutor
 }
 
-func NewApiResultProcessor(mgrDB sqlx.DBExecutor, l log.Logger) *ApiResultProcessor {
+func NewApiResultProcessor(mgrDB sqlx.DBExecutor) *ApiResultProcessor {
 	return &ApiResultProcessor{
-		l:     l,
 		mgrDB: mgrDB,
 	}
 }
@@ -96,12 +92,12 @@ func (p *ApiResultProcessor) ProcessTask(ctx context.Context, t *asynq.Task) err
 	}
 
 	ctx = types.WithMgrDBExecutor(ctx, p.mgrDB)
-	ctx = types.WithLogger(ctx, p.l)
 	ctx = types.WithProject(ctx, &models.Project{
 		ProjectName: models.ProjectName{Name: payload.ProjectName}},
 	)
 
-	_, l := p.l.Start(ctx, "vm.api.ProcessTaskApiResult")
+	l := types.MustLoggerFromContext(ctx)
+	_, l = l.Start(ctx, "wasmapi.ProcessTaskApiResult")
 	defer l.End()
 
 	if _, err := event.HandleEvent(ctx, payload.EventType, payload.Data); err != nil {

@@ -18,7 +18,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/modules/job"
 	"github.com/machinefi/w3bstream/pkg/modules/metrics"
-	atypes "github.com/machinefi/w3bstream/pkg/modules/vm/api/types"
+	atypes "github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/types"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/sql_util"
@@ -149,9 +149,7 @@ func (ef *ExportFuncs) ApiCall(kAddr, kSize, vmAddrPtr, vmSizePtr int32) int32 {
 		return int32(wasm.ResultStatusCode_TransDataFromVMFailed)
 	}
 
-	prj := types.MustProjectFromContext(ef.ctx)
-
-	resp := ef.srv.Call(prj.Name, buf)
+	resp := ef.srv.Call(ef.ctx, buf)
 
 	wbuf := bytes.Buffer{}
 	if err := resp.Write(&wbuf); err != nil {

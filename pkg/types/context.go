@@ -14,7 +14,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
 	"github.com/machinefi/w3bstream/pkg/models"
-	atypes "github.com/machinefi/w3bstream/pkg/modules/vm/api/types"
+	atypes "github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/types"
 )
 
 type (
