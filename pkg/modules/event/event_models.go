@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	EVENTTYPEBATCHED = "EVENT_BATCHED"
+	eventTypeDataPush = "$DATA#PUSH"
 )
 
 type EventReq struct {
@@ -39,8 +39,8 @@ func (r *EventReq) SetDefault() {
 	}
 }
 
-func (r *EventReq) IsBatched() bool {
-	return r.EventType == EVENTTYPEBATCHED
+func (r *EventReq) IsDataPush() bool {
+	return r.EventType == eventTypeDataPush
 }
 
 type Result struct {

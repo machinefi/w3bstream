@@ -33,7 +33,7 @@ func (r *HandleEvent) Path() string {
 func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 	r.EventReq.SetDefault()
 
-	if r.IsBatched() {
+	if r.IsDataPush() {
 		return handleDataPush(ctx, r.Channel, r.Payload.Bytes())
 	}
 
