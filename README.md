@@ -191,7 +191,7 @@ Interested in contributing to the doc? Please edit on [Github](https://github.co
 ### WASM
 - Golang: https://github.com/machinefi/w3bstream-wasm-golang-sdk
 - AssemblyScript: https://github.com/machinefi/w3bstream-wasm-ts-sdk
-- Rust: Coming soon!
+- Rust: https://github.com/machinefi/w3bstream-wasm-rust-sdk
 
 
 ## Examples

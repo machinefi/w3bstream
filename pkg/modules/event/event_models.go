@@ -10,6 +10,10 @@ import (
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
+const (
+	eventTypeDataPush = "$DATA#PUSH"
+)
+
 type EventReq struct {
 	// Channel message channel named (intact project name)
 	Channel string `in:"path"  name:"channel"`
@@ -33,6 +37,10 @@ func (r *EventReq) SetDefault() {
 	if r.Timestamp == 0 {
 		r.Timestamp = time.Now().UTC().Unix()
 	}
+}
+
+func (r *EventReq) IsDataPush() bool {
+	return r.EventType == eventTypeDataPush
 }
 
 type Result struct {
