@@ -303,9 +303,9 @@ func TestAccessKey(t *testing.T) {
 			NewWithT(t).Expect(canBeValidated).To(BeTrue())
 			NewWithT(t).Expect(err).To(BeNil())
 
-			idVal, ok := idAny.(types.SFID)
+			idVal, ok := idAny.(*models.AccessKey)
 			NewWithT(t).Expect(ok).To(BeTrue())
-			NewWithT(t).Expect(idVal).To(Equal(id))
+			NewWithT(t).Expect(idVal.IdentityID).To(Equal(id))
 		})
 		t.Run("#Failed", func(t *testing.T) {
 			t.Run("#AccessKeyContextUnmarshalFailed", func(t *testing.T) {
