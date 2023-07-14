@@ -2,16 +2,12 @@ package jwt
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
-	"github.com/machinefi/w3bstream/pkg/enums"
-	"github.com/machinefi/w3bstream/pkg/errors/status"
-	"github.com/machinefi/w3bstream/pkg/models"
 )
 
 type Auth struct {
@@ -78,23 +74,6 @@ type keyAuth struct{}
 
 func AuthFromContext(ctx context.Context) interface{} {
 	return ctx.Value(keyAuth{})
-}
-
-func AuthContentFromContext(ctx context.Context) (content []byte, ty enums.AccessKeyIdentityType, err error) {
-	switch v := AuthFromContext(ctx).(type) {
-	case []byte:
-		content = v
-	case string:
-		content = []byte(v)
-	case fmt.Stringer:
-		content = []byte(v.String())
-	case *models.AccessKey:
-		content = []byte(v.IdentityID.String())
-		ty = v.IdentityType
-	default:
-		err = status.InvalidAuthValue
-	}
-	return
 }
 
 var (

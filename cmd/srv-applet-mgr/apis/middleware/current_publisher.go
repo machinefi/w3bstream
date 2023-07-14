@@ -4,7 +4,6 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
 	"github.com/machinefi/w3bstream/pkg/enums"
@@ -26,27 +25,25 @@ var ctxPublisherAuthKey = reflect.TypeOf(ContextAccountAuth{}).String()
 func (r *ContextPublisherAuth) ContextKey() string { return ctxPublisherAuthKey }
 
 func (r *ContextPublisherAuth) Output(ctx context.Context) (interface{}, error) {
-	content, idType, err := jwt.AuthContentFromContext(ctx)
+	pl, err := ParseJwtAuthContentFromContext(ctx)
 	if err != nil {
-		return nil, err
+		return nil, status.InvalidAuthPublisherID.StatusErr().WithDesc(err.Error())
 	}
 
-	id := types.SFID(0)
-	if err := id.UnmarshalText(content); err != nil {
-		return nil, status.InvalidAuthPublisherID
-	}
-	if idType == enums.ACCESS_KEY_IDENTITY_TYPE__ACCOUNT {
-		ca, err := account.GetAccountByAccountID(ctx, id)
+	switch pl.IdentityType {
+	case enums.ACCESS_KEY_IDENTITY_TYPE__ACCOUNT:
+		ca, err := account.GetAccountByAccountID(ctx, pl.IdentityID)
 		if err != nil {
 			return nil, err
 		}
 		return &CurrentAccount{*ca}, nil
+	default: // unknown or publisher
+		cp, err := publisher.GetBySFID(ctx, pl.IdentityID)
+		if err != nil {
+			return nil, err
+		}
+		return &CurrentPublisher{cp}, nil
 	}
-	cp, err := publisher.GetBySFID(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	return &CurrentPublisher{cp}, nil
 }
 
 func PublisherFromContext(ctx context.Context) (*CurrentPublisher, bool) {

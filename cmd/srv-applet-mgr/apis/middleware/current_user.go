@@ -4,7 +4,6 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
@@ -34,20 +33,22 @@ var contextAccountAuthKey = reflect.TypeOf(ContextAccountAuth{}).String()
 func (r *ContextAccountAuth) ContextKey() string { return contextAccountAuthKey }
 
 func (r *ContextAccountAuth) Output(ctx context.Context) (interface{}, error) {
-	content, _, err := jwt.AuthContentFromContext(ctx)
+	pl, err := ParseJwtAuthContentFromContext(ctx)
 	if err != nil {
-		return nil, err
+		return nil, status.InvalidAuthAccountID.StatusErr().WithDesc(err.Error())
 	}
 
-	accountID := types.SFID(0)
-	if err := accountID.UnmarshalText(content); err != nil {
-		return nil, status.InvalidAuthAccountID
+	switch pl.IdentityType {
+	// must unknown or account
+	case enums.ACCESS_KEY_IDENTITY_TYPE__ACCOUNT, enums.ACCESS_KEY_IDENTITY_TYPE_UNKNOWN:
+		ca, err := account.GetAccountByAccountID(ctx, pl.IdentityID)
+		if err != nil {
+			return nil, err
+		}
+		return &CurrentAccount{*ca}, nil
+	default:
+		return nil, status.InvalidAuthValue
 	}
-	ca, err := account.GetAccountByAccountID(ctx, accountID)
-	if err != nil {
-		return nil, err
-	}
-	return &CurrentAccount{*ca}, nil
 }
 
 func MustCurrentAccountFromContext(ctx context.Context) *CurrentAccount {

@@ -295,6 +295,5 @@ func Validate(ctx context.Context, key string) (interface{}, error, bool) {
 		conflog.FromContext(ctx).Warn(errors.Wrap(err, "update access key last used"))
 	}
 
-	// TODO check privileges
 	return m, nil, true
 }
