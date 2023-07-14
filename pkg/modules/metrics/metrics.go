@@ -69,6 +69,11 @@ func RemoveMetrics(ctx context.Context, account string, project string) {
 			l := types.MustLoggerFromContext(ctx)
 			l.Warn(err)
 		}
+		if err := clickhouseCLI.Insert(fmt.Sprintf(`DELETE FROM ws_metrics.customized_metrics WHERE (
+			account = '%s') AND (project = '%s')`, account, project)); err != nil {
+			l := types.MustLoggerFromContext(ctx)
+			l.Warn(err)
+		}
 	}
 }
 

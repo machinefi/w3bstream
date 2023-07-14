@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	eventTypeDataPush = "$DATA#PUSH"
+	eventTypeDataPush = "DA-TA_PU-SH"
 )
 
 type EventReq struct {
