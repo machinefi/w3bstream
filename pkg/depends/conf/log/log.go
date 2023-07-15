@@ -58,8 +58,9 @@ func (l *Log) InitLogrus() {
 	logrus.AddHook(&ProjectAndMetaHook{l.Name})
 
 	if l.CKEndpoint != "" {
-		ckHook, err := newClickhouseHook(l.CKEndpoint)
-		if err == nil {
+		if ckHook, err := newClickhouseHook(l.CKEndpoint); err != nil {
+			logrus.Errorf("new ck hook error: %s", err)
+		} else {
 			logrus.AddHook(ckHook)
 		}
 	}
@@ -107,10 +108,11 @@ func newClickhouseHook(endpoint string) (*ClickhouseHook, error) {
 }
 
 func (ck *ClickhouseHook) Fire(entry *logrus.Entry) error {
-	if ck.ping() {
+	if !ck.ping() {
 		conn, err := ck.connection()
 		if err != nil {
-			fmt.Errorf("ck connection error: %w", err)
+			logrus.Errorf("ck connection error: %s", err)
+			return err
 		}
 		ck.ckDB = conn
 	}
@@ -133,11 +135,16 @@ func (ck *ClickhouseHook) connection() (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+	err = conn.Ping()
+	if err != nil {
+		return nil, err
+	}
 	return conn, nil
 }
 
 func (ck *ClickhouseHook) ping() bool {
 	if err := ck.ckDB.Ping(); err != nil {
+		logrus.Errorf("ck ping error: %s", err)
 		return false
 	}
 	return true
@@ -147,10 +154,12 @@ func (ck *ClickhouseHook) insertLogs(entries []logrus.Entry) error {
 	err := ck.doWithTx(func(tx *sql.Tx) error {
 		statement, err := tx.PrepareContext(context.Background(), ck.insertSql)
 		if err != nil {
-			return fmt.Errorf(" ck prepareContext error:%w", err)
+			return fmt.Errorf(" ck prepareContext error: %w", err)
 		}
 		defer func() {
-			_ = statement.Close()
+			if err := statement.Close(); err != nil {
+				logrus.Errorf("ck statement close error: %s", err)
+			}
 		}()
 		for _, item := range entries {
 			msg, _ := item.Bytes()
@@ -172,7 +181,7 @@ func (ck *ClickhouseHook) doWithTx(fn func(tx *sql.Tx) error) error {
 		return fmt.Errorf("ck tx begin error: %w", err)
 	}
 	defer func() {
-		_ = tx.Rollback()
+		tx.Rollback()
 	}()
 	if err := fn(tx); err != nil {
 		return err
