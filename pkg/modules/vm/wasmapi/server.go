@@ -4,15 +4,18 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hibiken/asynq"
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/async"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
 
 type Server struct {
@@ -59,19 +62,24 @@ func newRouter() *gin.Engine {
 	return router
 }
 
-func NewServer(redisConf *redis.Redis, mgrDB sqlx.DBExecutor) (*Server, error) {
+func NewServer(l log.Logger, redisConf *redis.Redis, mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB) (*Server, error) {
 	router := newRouter()
 
 	redisCli := asynq.RedisClientOpt{
-		Addr:     fmt.Sprintf("%s:%d", redisConf.Host, redisConf.Port),
-		Password: redisConf.Password.String(),
+		Network:      redisConf.Protocol,
+		Addr:         fmt.Sprintf("%s:%d", redisConf.Host, redisConf.Port),
+		Password:     redisConf.Password.String(),
+		ReadTimeout:  time.Duration(redisConf.ReadTimeout),
+		WriteTimeout: time.Duration(redisConf.WriteTimeout),
+		DialTimeout:  time.Duration(redisConf.ConnectTimeout),
+		DB:           redisConf.DB,
 	}
 	asyncCli := asynq.NewClient(redisCli)
 	asyncSrv := asynq.NewServer(redisCli, asynq.Config{})
 	mux := asynq.NewServeMux()
 
-	mux.Handle(async.TaskNameApiCall, async.NewApiCallProcessor(router, asyncCli))
-	mux.Handle(async.TaskNameApiResult, async.NewApiResultProcessor(mgrDB))
+	mux.Handle(async.TaskNameApiCall, async.NewApiCallProcessor(l, router, asyncCli))
+	mux.Handle(async.TaskNameApiResult, async.NewApiResultProcessor(l, mgrDB, kv))
 
 	if err := asyncSrv.Start(mux); err != nil {
 		return nil, err

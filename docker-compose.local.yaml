@@ -29,6 +29,8 @@ services:
       SRV_APPLET_MGR__Server_Port: "8888"
       SRV_APPLET_MGR__ServerEvent_Port: "8889"
       SRV_APPLET_MGR__LocalFS_Root: /w3bstream/asserts
+      SRV_APPLET_MGR__Redis_Host: redis
+      SRV_APPLET_MGR__Redis_Password: ${REDIS_PASSWORD:-w3bredispasS}
     volumes:
       - ${WS_WORKING_DIR:-.}/asserts:/w3bstream/asserts
 

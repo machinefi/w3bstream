@@ -206,7 +206,9 @@ func init() {
 	}
 	_ethClients.Init()
 
-	wasmApiServer, err := wasmapi.NewServer(_redis, _dbMgr)
+	redisKvDB := kvdb.NewRedisDB(_redis)
+
+	wasmApiServer, err := wasmapi.NewServer(conflog.Std(), _redis, _dbMgr, redisKvDB)
 	if err != nil {
 		conflog.Std().Fatal(err)
 	}
@@ -223,7 +225,7 @@ func init() {
 		types.WithUploadConfigContext(_uploadConfig),
 		types.WithFileSystemOpContext(_fsop),
 		types.WithRedisEndpointContext(_redis),
-		kvdb.WithRedisDBKeyContext(kvdb.NewRedisDB(_redis)),
+		kvdb.WithRedisDBKeyContext(redisKvDB),
 		types.WithTaskWorkerContext(_workers),
 		types.WithTaskBoardContext(mq.NewTaskBoard(_tasks)),
 		types.WithETHClientConfigContext(_ethClients),

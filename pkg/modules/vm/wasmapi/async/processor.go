@@ -13,19 +13,24 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
+	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
 
 type ApiCallProcessor struct {
+	l      log.Logger
 	router *gin.Engine
 	cli    *asynq.Client
 }
 
-func NewApiCallProcessor(router *gin.Engine, cli *asynq.Client) *ApiCallProcessor {
+func NewApiCallProcessor(l log.Logger, router *gin.Engine, cli *asynq.Client) *ApiCallProcessor {
 	return &ApiCallProcessor{
+		l:      l,
 		router: router,
 		cli:    cli,
 	}
@@ -45,8 +50,7 @@ func (p *ApiCallProcessor) ProcessTask(ctx context.Context, t *asynq.Task) error
 	resp := httptest.NewRecorder()
 	p.router.ServeHTTP(resp, req)
 
-	l := types.MustLoggerFromContext(ctx)
-	_, l = l.Start(ctx, "wasmapi.ProcessTaskApiCall")
+	_, l := p.l.Start(ctx, "wasmapi.ProcessTaskApiCall")
 	defer l.End()
 	l = l.WithValues("ProjectName", payload.ProjectName)
 
@@ -76,11 +80,15 @@ func (p *ApiCallProcessor) ProcessTask(ctx context.Context, t *asynq.Task) error
 }
 
 type ApiResultProcessor struct {
+	l     log.Logger
 	mgrDB sqlx.DBExecutor
+	kv    *kvdb.RedisDB
 }
 
-func NewApiResultProcessor(mgrDB sqlx.DBExecutor) *ApiResultProcessor {
+func NewApiResultProcessor(l log.Logger, mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB) *ApiResultProcessor {
 	return &ApiResultProcessor{
+		l:     l,
+		kv:    kv,
 		mgrDB: mgrDB,
 	}
 }
@@ -91,13 +99,16 @@ func (p *ApiResultProcessor) ProcessTask(ctx context.Context, t *asynq.Task) err
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
 
-	ctx = types.WithMgrDBExecutor(ctx, p.mgrDB)
-	ctx = types.WithProject(ctx, &models.Project{
-		ProjectName: models.ProjectName{Name: payload.ProjectName}},
-	)
+	ctx = contextx.WithContextCompose(
+		types.WithLoggerContext(p.l),
+		types.WithMgrDBExecutorContext(p.mgrDB),
+		kvdb.WithRedisDBKeyContext(p.kv),
+		types.WithProjectContext(&models.Project{
+			ProjectName: models.ProjectName{Name: payload.ProjectName}},
+		),
+	)(ctx)
 
-	l := types.MustLoggerFromContext(ctx)
-	_, l = l.Start(ctx, "wasmapi.ProcessTaskApiResult")
+	_, l := p.l.Start(ctx, "wasmapi.ProcessTaskApiResult")
 	defer l.End()
 
 	if _, err := event.HandleEvent(ctx, payload.EventType, payload.Data); err != nil {

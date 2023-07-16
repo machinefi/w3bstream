@@ -137,7 +137,9 @@ func init() {
 	proxy = &client.Client{Port: uint16(ServerEvent.Port), Timeout: 10 * time.Second}
 	proxy.SetDefault()
 
-	wasmApiServer, err := wasmapi.NewServer(config.Redis, config.Postgres)
+	redisKvDB := kvdb.NewRedisDB(config.Redis)
+
+	wasmApiServer, err := wasmapi.NewServer(std, config.Redis, config.Postgres, redisKvDB)
 	if err != nil {
 		std.Fatal(err)
 	}
@@ -161,7 +163,7 @@ func init() {
 		types.WithProxyClientContext(proxy),
 		types.WithWasmDBConfigContext(config.WasmDBConfig),
 		confrate.WithRateLimitKeyContext(config.RateLimit),
-		kvdb.WithRedisDBKeyContext(kvdb.NewRedisDB(config.Redis)),
+		kvdb.WithRedisDBKeyContext(redisKvDB),
 		types.WithMetricsCenterConfigContext(config.MetricsCenter),
 		types.WithRobotNotifierConfigContext(config.RobotNotifier),
 		types.WithWasmApiServerContext(wasmApiServer),
