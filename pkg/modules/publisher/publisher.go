@@ -201,6 +201,10 @@ func Create(ctx context.Context, r *CreateReq) (*models.Publisher, error) {
 				CreateReqBase: access_key.CreateReqBase{
 					Name: "pub_" + id.String(),
 					Desc: "pub_" + id.String(),
+					Privileges: access_key.GroupAccessPrivileges{{
+						Name: enums.ApiGroupEvent,
+						Perm: enums.ACCESS_PERMISSION__READ_WRITE,
+					}},
 				},
 			})
 			if err != nil {

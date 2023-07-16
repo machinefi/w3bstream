@@ -894,14 +894,43 @@ delete it
 http delete :8888/srv-applet-mgr/v0/project_operator/$PROJECTID -A bearer -a $TOK
 ```
 
-## Create Account Access Key
+## List API Group Meta List
+
+This API is used to list all API functional groups, with its name and description
+
+```sh
+http get :8888/srv-applet-mgr/v0/account_access_key/operator_group_metas -A bearer -a $TOK
+```
+
+```json
+[
+    {
+        "desc": "View and manage account",
+        "name": "Account"
+    },
+    {
+        "desc": "View and manage access token",
+        "name": "Account Access Key"
+    },
+    {
+        "desc": "Account register",
+        "name": "Account Register"
+    },
+]
+```
+
+## Create Account Access Key (with privileges)
 
 ```sh
 export KEY_NAME=key_name
 export KEY_DESC=desc
-export KEY_EXPRIRATION_DAYS=30 # if expiration days is 0, this key will be not expired.
-echo '{"name":"'$KEY_NAME'", "expirationDays": $KEY_EXPRIRATION_DAYS, "desc": "'$KEY_DESC'"}' | http post :8888/srv-applet-mgr/v0/account_access_key -A bearer -a $TOK
+export KEY_EXPIRATION_DAYS=30 # if expiration days is 0, this key will be not expired.
 
+# List all group metas through command above to fetch group name
+# and the perm is a string enum: "NO_ACCESS", "READONLY" and "READ_WRITE"
+export KEY_PRIVILEGES='[{"name":"Account", "perm":"READ_WRITE"},{"name":"Account Access Key", "perm":"NO_ACCESS"}, {"name":"Project", "perm":"READONLY"}]'
+
+echo '{"name":"'$KEY_NAME'", "expirationDays": $KEY_EXPIRATION_DAYS, "desc": "'$KEY_DESC'","privileges":'$KEY_PRIVILEGES'}' | http post :8888/srv-applet-mgr/v0/account_access_key -A bearer -a $TOK
 ```
 
 output like
@@ -913,6 +942,17 @@ output like
     "expiredAt": "2023-07-21T08:13:08.592213Z",
     "name": "key_name"
 }
+```
+
+## Update Account Access Key (with privileges)
+
+```sh
+export KEY_NAME=key_name
+export KEY_DESC=desc
+export KEY_EXPIRATION_DAYS=30
+export KEY_PRIVILEGES='[{"name":"Account", "perm":"READ_WRITE"},{"name":"Account Access Key", "perm":"NO_ACCESS"}, {"name":"Project", "perm":"READONLY"}]'
+
+echo '{"expirationDays":'$KEY_EXPIRATION_DAYS', "desc":"'$KEY_DESC'", "privileges":'$KEY_PRIVILEGES'}' | http put :8888/srv-applet-mgr/v0/account_access_key/$KEY_NAME -A bearer -a $TOK
 ```
 
 ## Delete Access Key

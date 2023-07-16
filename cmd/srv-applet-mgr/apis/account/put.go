@@ -9,7 +9,8 @@ import (
 )
 
 type UpdatePasswordByAccountID struct {
-	httpx.MethodPut
+	httpx.MethodPut `summary:"Update account password"`
+
 	account.UpdatePasswordReq `in:"body"`
 }
 

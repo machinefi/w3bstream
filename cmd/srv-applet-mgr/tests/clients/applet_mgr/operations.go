@@ -1609,142 +1609,6 @@ func (o *GetTrafficLimit) Invoke(cli kit.Client, metas ...kit.Metadata) (*Github
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
-type HandleDataPush struct {
-	Channel      string      `in:"path" name:"channel"`
-	AuthInHeader string      `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	AuthInQuery  string      `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	DataPushReq  DataPushReq `in:"body"`
-}
-
-func (o *HandleDataPush) Path() string {
-	return "/srv-applet-mgr/v0/event2/:channel"
-}
-
-func (o *HandleDataPush) Method() string {
-	return "POST"
-}
-
-// @StatusErr[AccessKeyExpired][401999019][Account Access Key Expired]!
-// @StatusErr[AccessKeyNameConflict][409999020][Access Key Name Conflict]!
-// @StatusErr[AccessKeyNotFound][404999022][Account Key Not Found]!
-// @StatusErr[AccountConflict][409999015][Account Conflict]!
-// @StatusErr[AccountIdentityConflict][409999014][Account Identity Conflict]!
-// @StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!
-// @StatusErr[AccountNotFound][404999017][Account Not Found]!
-// @StatusErr[AccountNotFound][404999017][Account Not Found]!
-// @StatusErr[AccountPasswordConflict][409999016][Account Password Conflict]!
-// @StatusErr[AccountPasswordNotFound][404999018][Account Password Not Found]!
-// @StatusErr[AppletNameConflict][409999009][Applet Name Conflict]!
-// @StatusErr[AppletNotFound][404999005][Applet Not Found]!
-// @StatusErr[BadRequest][400999001][BadRequest]!
-// @StatusErr[BatchRemoveAppletFailed][500999009][Batch Remove Applet Failed]!
-// @StatusErr[BatchRemoveWasmLogFailed][500999012][Batch Remove WasmLog Failed]!
-// @StatusErr[BlockchainNotFound][404999013][Blockchain Not Found]!
-// @StatusErr[ChainHeightConflict][409999013][Chain Height Conflict]!
-// @StatusErr[ChainHeightNotFound][404999016][Chain Height Not Found]!
-// @StatusErr[ChainTxConflict][409999012][Chain Tx Conflict]!
-// @StatusErr[ChainTxNotFound][404999015][Chain Tx Not Found]!
-// @StatusErr[ConfigConflict][409999006][Config Conflict]!
-// @StatusErr[ConfigInitFailed][500999005][Config Init Failed]!
-// @StatusErr[ConfigNotFound][404999003][Config Not Found]!
-// @StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!
-// @StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!
-// @StatusErr[Conflict][409999001][Conflict conflict error]!
-// @StatusErr[ContractLogConflict][409999011][Contract Log Conflict]!
-// @StatusErr[ContractLogNotFound][404999014][Contract Log Not Found]!
-// @StatusErr[CreateInstanceFailed][500999008][Create Instance Failed]!
-// @StatusErr[CreateTrafficSchedulerFailed][500999015][Create Traffic Scheduler Failed]!
-// @StatusErr[CronJobConflict][409999010][Cron Job Conflict]!
-// @StatusErr[CronJobNotFound][404999011][Cron Job Not Found]!
-// @StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!
-// @StatusErr[DatabaseError][500999002][Database Error]!
-// @StatusErr[DatabaseError][500999002][Database Error]!
-// @StatusErr[DeprecatedProject][400999003][Deprecated Project]!
-// @StatusErr[DisabledAccount][403999002][Disabled Account]!
-// @StatusErr[FetchResourceFailed][500999004][Fetch Resource Failed]!
-// @StatusErr[Forbidden][403999001][forbidden]
-// @StatusErr[GenTokenFailed][500999013][Gen Token Failed]!
-// @StatusErr[InstanceNotFound][404999006][Instance Not Found]!
-// @StatusErr[InstanceNotRunning][404999012][Instance Not Running]!
-// @StatusErr[InternalServerError][500999001][internal error]
-// @StatusErr[InvalidAccessKeyIdentityType][400999013][Invalid Access Key Identity Type]!
-// @StatusErr[InvalidAccessKey][401999018][Invalid Account Access Key]!
-// @StatusErr[InvalidAppletContext][401999016][Invalid Applet]!
-// @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
-// @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
-// @StatusErr[InvalidAuthPublisherID][401999012][Invalid Auth Publisher ID]!
-// @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
-// @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
-// @StatusErr[InvalidChainHeightIDs][400999011][Invalid Chain Height IDs]!
-// @StatusErr[InvalidChainTxIDs][400999010][Invalid Chain Tx IDs]!
-// @StatusErr[InvalidClaim][401999003][Invalid Claim]!
-// @StatusErr[InvalidConfigType][400999002][Invalid Config Type]!
-// @StatusErr[InvalidContractLogIDs][400999009][Invalid Contract Log IDs]!
-// @StatusErr[InvalidCronExpressions][400999005][Invalid Cron Expressions]!
-// @StatusErr[InvalidDeleteCondition][400999007][Invalid Delete Condition]!
-// @StatusErr[InvalidEthLoginMessage][401999011][Invalid Siwe Message]!
-// @StatusErr[InvalidEthLoginSignature][401999010][Invalid Siwe Signature]!
-// @StatusErr[InvalidEventChannel][401999014][Invalid Event Channel]!
-// @StatusErr[InvalidEventToken][401999015][Invalid Event Token]!
-// @StatusErr[InvalidNewPassword][401999008][Invalid New Password]!
-// @StatusErr[InvalidOldPassword][401999007][Invalid Old Password]!
-// @StatusErr[InvalidPassword][401999009][Invalid Password]!
-// @StatusErr[InvalidPrivateKey][400999006][Invalid Private Key]!
-// @StatusErr[InvalidToken][401999002][Invalid Token]!
-// @StatusErr[InvalidVMState][400999012][Invalid VM State]!
-// @StatusErr[MqttConnectFailed][500999011][MQTT Connect Failed]!
-// @StatusErr[MqttSubscribeFailed][500999010][MQTT Subscribe Failed]!
-// @StatusErr[MultiInstanceDeployed][409999008][Multi Instance Deployed]!
-// @StatusErr[NoAdminPermission][401999006][No Admin Permission]!
-// @StatusErr[NoOperatorPermission][401999005][No Operator Permission]!
-// @StatusErr[NoProjectPermission][401999004][No Project Permission]!
-// @StatusErr[NoResourcePermission][401999017][No Resource Permission]!
-// @StatusErr[NotFound][404999001][NotFound]!
-// @StatusErr[OccupiedOperator][403999008][Occupied Operator]!
-// @StatusErr[OperatorConflict][409999017][Operator Conflict]!
-// @StatusErr[OperatorNotFound][404999019][Operator Not Found]!
-// @StatusErr[ProjectNameConflict][409999002][Project Name Conflict]!
-// @StatusErr[ProjectNotFound][404999002][Project Not Found]!
-// @StatusErr[ProjectOperatorConflict][409999019][Project Operator relationship Conflict]!
-// @StatusErr[ProjectOperatorNotFound][404999021][Project Operator relationship Not Found]!
-// @StatusErr[PublisherConflict][409999007][Publisher Conflict]!
-// @StatusErr[PublisherNotFound][404999008][Publisher Not Found]!
-// @StatusErr[ResourceConflict][409999003][Resource Conflict]!
-// @StatusErr[ResourceNotFound][404999004][Resource Not Found]!
-// @StatusErr[ResourceOwnerConflict][409999004][Resource Owner Conflict]!
-// @StatusErr[ResourcePermNotFound][404999010][Resource Perm Not Found]!
-// @StatusErr[StrategyConflict][409999005][Strategy Conflict]!
-// @StatusErr[StrategyNotFound][404999007][Strategy Not Found]!
-// @StatusErr[TopicAlreadySubscribed][403999007][Topic Already Subscribed]!
-// @StatusErr[TrafficLimitConflict][409999018][Traffic Limit Conflict]!
-// @StatusErr[TrafficLimitExceededFailed][500999014][Traffic Limit Exceeded Failed]!
-// @StatusErr[TrafficLimitNotFound][404999020][Traffic Limit Not Found]!
-// @StatusErr[Unauthorized][401999001][unauthorized]
-// @StatusErr[UnknownDeployCommand][400999004][Unknown Deploy Command]!
-// @StatusErr[UnknownMonitorCommand][400999008][Unknown Deploy Command]!
-// @StatusErr[UnsupportedFSOperator][403999009][Unsupported FileSystem Operator]!
-// @StatusErr[UpdateTrafficSchedulerFailed][500999016][Update Traffic Scheduler Failed]!
-// @StatusErr[UploadFileDiskLimit][403999006][Upload File Disk Limit]!
-// @StatusErr[UploadFileFailed][500999003][Upload File Failed]!
-// @StatusErr[UploadFileMd5Unmatched][403999005][Upload File Md5 Unmatched]!
-// @StatusErr[UploadFileSizeLimit][403999004][Upload File Size Limit]!
-// @StatusErr[WhiteListForbidden][403999003][White List Forbidden]!
-
-func (o *HandleDataPush) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
-	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.HandleDataPush")
-	return cli.Do(ctx, o, metas...)
-}
-
-func (o *HandleDataPush) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*DataPushRsps, kit.Metadata, error) {
-	rsp := new(DataPushRsps)
-	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
-	return rsp, meta, err
-}
-
-func (o *HandleDataPush) Invoke(cli kit.Client, metas ...kit.Metadata) (*DataPushRsps, kit.Metadata, error) {
-	return o.InvokeContext(context.Background(), cli, metas...)
-}
-
 type HandleEvent struct {
 	// Channel message channel named (intact project name)
 	Channel      string `in:"path" name:"channel"`
@@ -1768,12 +1632,14 @@ func (o *HandleEvent) Method() string {
 	return "POST"
 }
 
-// @StatusErr[AccessKeyExpired][401999019][Account Access Key Expired]!
+// @StatusErr[AccessKeyExpired][403999010][Account Access Key Expired]!
 // @StatusErr[AccessKeyNameConflict][409999020][Access Key Name Conflict]!
 // @StatusErr[AccessKeyNotFound][404999022][Account Key Not Found]!
+// @StatusErr[AccessKeyPermissionDenied][403999011][Access Key Permission Denied]!
 // @StatusErr[AccountConflict][409999015][Account Conflict]!
 // @StatusErr[AccountIdentityConflict][409999014][Account Identity Conflict]!
 // @StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!
+// @StatusErr[AccountNotFound][404999017][Account Not Found]!
 // @StatusErr[AccountNotFound][404999017][Account Not Found]!
 // @StatusErr[AccountPasswordConflict][409999016][Account Password Conflict]!
 // @StatusErr[AccountPasswordNotFound][404999018][Account Password Not Found]!
@@ -1886,6 +1752,41 @@ func (o *HandleEvent) InvokeContext(ctx context.Context, cli kit.Client, metas .
 }
 
 func (o *HandleEvent) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesEventEventRsp, kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
+type ListAccessGroupMetas struct {
+	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+}
+
+func (o *ListAccessGroupMetas) Path() string {
+	return "/srv-applet-mgr/v0/account_access_key/operator_group_metas"
+}
+
+func (o *ListAccessGroupMetas) Method() string {
+	return "GET"
+}
+
+// @StatusErr[AccountNotFound][404999017][Account Not Found]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
+// @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
+// @StatusErr[InvalidClaim][401999003][Invalid Claim]!
+// @StatusErr[InvalidToken][401999002][Invalid Token]!
+
+func (o *ListAccessGroupMetas) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.ListAccessGroupMetas")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *ListAccessGroupMetas) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*[]GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaBase, kit.Metadata, error) {
+	rsp := new([]GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaBase)
+	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
+	return rsp, meta, err
+}
+
+func (o *ListAccessGroupMetas) Invoke(cli kit.Client, metas ...kit.Metadata) (*[]GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaBase, kit.Metadata, error) {
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
@@ -2825,6 +2726,35 @@ func (o *RemoveWasmLogByInstanceID) InvokeContext(ctx context.Context, cli kit.C
 }
 
 func (o *RemoveWasmLogByInstanceID) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
+type UpdateAccountAccessKeyByName struct {
+	Name         string                                                  `in:"path" name:"name"`
+	AuthInHeader string                                                  `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                                  `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	UpdateReq    GithubComMachinefiW3BstreamPkgModulesAccessKeyUpdateReq `in:"body"`
+}
+
+func (o *UpdateAccountAccessKeyByName) Path() string {
+	return "/srv-applet-mgr/v0/account_access_key/:name"
+}
+
+func (o *UpdateAccountAccessKeyByName) Method() string {
+	return "PUT"
+}
+
+func (o *UpdateAccountAccessKeyByName) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.UpdateAccountAccessKeyByName")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *UpdateAccountAccessKeyByName) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
+	meta, err := cli.Do(ctx, o, metas...).Into(nil)
+	return meta, err
+}
+
+func (o *UpdateAccountAccessKeyByName) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 

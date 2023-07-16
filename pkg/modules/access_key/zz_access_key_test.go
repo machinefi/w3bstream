@@ -2,8 +2,8 @@ package access_key_test
 
 import (
 	"context"
+	"database/sql"
 	"encoding/base64"
-	"reflect"
 	"runtime"
 	"strings"
 	"testing"
@@ -16,16 +16,18 @@ import (
 
 	base "github.com/machinefi/w3bstream/pkg/depends/base/types"
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/access_key"
 	mock_sqlx "github.com/machinefi/w3bstream/pkg/test/mock_depends_kit_sqlx"
+	"github.com/machinefi/w3bstream/pkg/test/patch_models"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -123,6 +125,55 @@ func TestTimeParseAndFormat(t *testing.T) {
 	}
 }
 
+var (
+	RootRouter1 *kit.Router
+	RootRouter2 *kit.Router
+	RootRouter3 *kit.Router
+)
+
+type MockGet struct{ httpx.MethodGet }
+
+func (*MockGet) Output(_ context.Context) (interface{}, error) { return nil, nil }
+
+type MockPos struct{ httpx.MethodPost }
+
+func (*MockPos) Output(_ context.Context) (interface{}, error) { return nil, nil }
+
+func (*MockPos) OperatorAttr() enums.ApiOperatorAttr { return enums.API_OPERATOR_ATTR__COMMON }
+
+func init() {
+	RootRouter1 = kit.NewRouter(httptransport.Group("mock1"))
+	RootRouter2 = kit.NewRouter(httptransport.Group("mock2"))
+	RootRouter3 = kit.NewRouter(httptransport.Group("mock3"))
+
+	RootRouter1.Register(kit.NewRouter(&MockGet{}))
+	RootRouter1.Register(kit.NewRouter(&MockPos{}))
+	RootRouter2.Register(kit.NewRouter(&MockGet{}))
+	RootRouter2.Register(kit.NewRouter(&MockPos{}))
+	RootRouter3.Register(kit.NewRouter(&MockGet{}))
+	RootRouter3.Register(kit.NewRouter(&MockPos{}))
+
+	access_key.RouterRegister(RootRouter1, "mock1", "mock group operator")
+	access_key.RouterRegister(RootRouter2, "mock2", "mock group operator")
+	access_key.RouterRegister(RootRouter3, "mock3", "mock group operator")
+}
+
+func TestRouterRegister(t *testing.T) {
+	defer func() {
+		err := recover()
+		NewWithT(t).Expect(strings.Contains(err.(error).Error(), "already registered"))
+	}()
+	access_key.RouterRegister(RootRouter1, "mock1", "mock group operator")
+}
+
+func TestOperatorGroupMetaList(t *testing.T) {
+	metas := access_key.OperatorGroupMetaList()
+	NewWithT(t).Expect(len(metas)).To(Equal(3))
+	NewWithT(t).Expect(metas[0].Name).To(Equal("mock1"))
+	NewWithT(t).Expect(metas[1].Name).To(Equal("mock2"))
+	NewWithT(t).Expect(metas[2].Name).To(Equal("mock3"))
+}
+
 func TestAccessKey(t *testing.T) {
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
@@ -149,15 +200,12 @@ func TestAccessKey(t *testing.T) {
 	d.MockTxExecutor.EXPECT().IsTx().Return(true).AnyTimes()
 	d.MockDBExecutor.EXPECT().Context().Return(ctx).AnyTimes()
 
-	anyErr := errors.New("any error")
+	errFrom := func(from string) error { return errors.New(from) }
 
 	t.Run("Create", func(t *testing.T) {
 		pub := &models.Publisher{
 			RelPublisher: models.RelPublisher{PublisherID: idg.MustGenSFID()},
 		}
-
-		patch := gomonkey.NewPatches()
-		defer patch.Reset()
 
 		t.Run("#Success", func(t *testing.T) {
 			cases := []*struct {
@@ -170,6 +218,12 @@ func TestAccessKey(t *testing.T) {
 						CreateReqBase: access_key.CreateReqBase{
 							Name:           "test",
 							ExpirationDays: 0,
+							Privileges: access_key.GroupAccessPrivileges{
+								{Name: "mock1", Perm: enums.ACCESS_PERMISSION__NO_ACCESS},
+								{Name: "mock2", Perm: enums.ACCESS_PERMISSION__READONLY},
+								{Name: "mock3", Perm: enums.ACCESS_PERMISSION__READ_WRITE},
+								{Name: "not_exists"},
+							},
 						},
 					},
 				},
@@ -179,6 +233,11 @@ func TestAccessKey(t *testing.T) {
 						CreateReqBase: access_key.CreateReqBase{
 							Name:           "test",
 							ExpirationDays: 30,
+							Privileges: access_key.GroupAccessPrivileges{
+								{Name: "mock1", Perm: enums.ACCESS_PERMISSION__NO_ACCESS},
+								{Name: "mock2", Perm: enums.ACCESS_PERMISSION__READONLY},
+								{Name: "mock3", Perm: enums.ACCESS_PERMISSION__READ_WRITE},
+							},
 						},
 					},
 				},
@@ -230,7 +289,48 @@ func TestAccessKey(t *testing.T) {
 		})
 	})
 
-	t.Run("DeleteByName", func(t *testing.T) {
+	t.Run("#Update", func(t *testing.T) {
+		patch := gomonkey.NewPatches()
+		defer patch.Reset()
+
+		t.Run("#Failed", func(t *testing.T) {
+			t.Run("#FetchByAccountIDAndNameFailed", func(t *testing.T) {
+				t.Run("#AccessKeyNotFound", func(t *testing.T) {
+					d.MockDBExecutor.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(mock_sqlx.ErrNotFound).Times(1)
+					err := access_key.UpdateByName(ctx, "any_name", &access_key.UpdateReq{})
+					mock_sqlx.ExpectError(t, err, status.AccessKeyNotFound)
+				})
+				t.Run("#DatabaseError", func(t *testing.T) {
+					d.MockDBExecutor.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(errFrom(t.Name())).Times(1)
+					err := access_key.UpdateByName(ctx, "any_name", &access_key.UpdateReq{})
+					mock_sqlx.ExpectError(t, err, status.DatabaseError, t.Name())
+				})
+			})
+			req := &access_key.UpdateReq{
+				ExpirationDays: 10,
+				Desc:           "desc",
+			}
+			if runtime.GOOS == `darwin` {
+				return
+			}
+			patch = patch_models.AccessKeyFetchByAccountIDAndName(patch, &models.AccessKey{}, nil)
+			t.Run("#UpdateFailed", func(t *testing.T) {
+				d.MockDBExecutor.EXPECT().Exec(gomock.Any()).Return(sql.Result(nil), errFrom(t.Name())).Times(1)
+				err := access_key.UpdateByName(ctx, "any_name", req)
+				mock_sqlx.ExpectError(t, err, status.DatabaseError, t.Name())
+			})
+		})
+		t.Run("#Success", func(t *testing.T) {
+			if runtime.GOOS == `darwin` {
+				return
+			}
+			d.MockDBExecutor.EXPECT().Exec(gomock.Any()).Return(sql.Result(nil), nil).Times(1)
+			err := access_key.UpdateByName(ctx, "any_name", &access_key.UpdateReq{})
+			NewWithT(t).Expect(err).To(BeNil())
+		})
+	})
+
+	t.Run("#DeleteByName", func(t *testing.T) {
 		t.Run("#Success", func(t *testing.T) {
 			d.MockDBExecutor.EXPECT().Exec(gomock.Any()).Return(nil, nil).MaxTimes(1)
 
@@ -243,26 +343,18 @@ func TestAccessKey(t *testing.T) {
 				d.MockDBExecutor.EXPECT().Exec(gomock.Any()).Return(nil, mock_sqlx.ErrNotFound).MaxTimes(1)
 
 				err := access_key.DeleteByName(ctx, "any")
-				NewWithT(t).Expect(err).NotTo(BeNil())
-
-				se, ok := statusx.IsStatusErr(err)
-				NewWithT(t).Expect(ok).To(BeTrue())
-				NewWithT(t).Expect(se.Key).To(Equal(status.AccessKeyNotFound.Key()))
+				mock_sqlx.ExpectError(t, err, status.AccessKeyNotFound)
 			})
 			t.Run("#DatabaseError", func(t *testing.T) {
-				d.MockDBExecutor.EXPECT().Exec(gomock.Any()).Return(nil, mock_sqlx.ErrDatabase).MaxTimes(1)
+				d.MockDBExecutor.EXPECT().Exec(gomock.Any()).Return(nil, errFrom(t.Name())).MaxTimes(1)
 
 				err := access_key.DeleteByName(ctx, "any")
-				NewWithT(t).Expect(err).NotTo(BeNil())
-
-				se, ok := statusx.IsStatusErr(err)
-				NewWithT(t).Expect(ok).To(BeTrue())
-				NewWithT(t).Expect(se.Key).To(Equal(status.DatabaseError.Key()))
+				mock_sqlx.ExpectError(t, err, status.DatabaseError, t.Name())
 			})
 		})
 	})
 
-	t.Run("Validate", func(t *testing.T) {
+	t.Run("#Validate", func(t *testing.T) {
 		kctx := access_key.NewAccessKeyContext(1)
 
 		id := idg.MustGenSFID()
@@ -274,6 +366,7 @@ func TestAccessKey(t *testing.T) {
 				Name:         "test",
 				Rand:         kctx.Rand,
 				ExpiredAt:    base.Timestamp{Time: kctx.GenTS.UTC().Add(2 * time.Second)},
+				Privileges:   models.AccessPrivileges{"MockOperatorID": {}},
 			},
 			OperationTimesWithDeleted: datatypes.OperationTimesWithDeleted{
 				OperationTimes: datatypes.OperationTimes{
@@ -282,19 +375,13 @@ func TestAccessKey(t *testing.T) {
 			},
 		}
 		key, _ := kctx.MarshalText()
+		ctx := httptransport.ContextWithRouteMetaID(ctx, "MockOperatorID")
 
 		t.Run("#Success", func(t *testing.T) {
 			if runtime.GOOS == `darwin` {
 				return
 			}
-			patch := gomonkey.ApplyMethod(
-				reflect.TypeOf(&models.AccessKey{}),
-				"FetchByRand",
-				func(receiver *models.AccessKey, d sqlx.DBExecutor) error {
-					*receiver = *m
-					return nil
-				},
-			)
+			patch := patch_models.AccessKeyFetchByRand(gomonkey.NewPatches(), m, nil)
 			defer patch.Reset()
 			d.MockDBExecutor.EXPECT().Exec(gomock.Any()).Return(nil, nil).Times(1)
 
@@ -307,6 +394,10 @@ func TestAccessKey(t *testing.T) {
 			NewWithT(t).Expect(ok).To(BeTrue())
 			NewWithT(t).Expect(idVal.IdentityID).To(Equal(id))
 		})
+
+		patch := gomonkey.NewPatches()
+		defer patch.Reset()
+
 		t.Run("#Failed", func(t *testing.T) {
 			t.Run("#AccessKeyContextUnmarshalFailed", func(t *testing.T) {
 				t.Run("#CanbeValidated", func(t *testing.T) {
@@ -333,136 +424,79 @@ func TestAccessKey(t *testing.T) {
 					mock_sqlx.ExpectError(t, err, status.DatabaseError)
 				})
 			})
-			t.Run("#UpdateLastUsedFailed", func(t *testing.T) {
-				if runtime.GOOS == `darwin` {
-					return
-				}
-				patch := gomonkey.ApplyMethod(
-					reflect.TypeOf(&models.AccessKey{}),
-					"FetchByRand",
-					func(receiver *models.AccessKey, d sqlx.DBExecutor) error {
-						*receiver = *m
-						return nil
-					},
-				)
-				defer patch.Reset()
-				d.MockDBExecutor.EXPECT().Exec(gomock.Any()).Return(nil, anyErr).Times(1)
-				_, err, _ := access_key.Validate(ctx, string(key))
-				NewWithT(t).Expect(err).To(BeNil())
-			})
+
+			if runtime.GOOS == `darwin` {
+				return
+			}
+
 			t.Run("#GenTsNotMatch", func(t *testing.T) {
-				if runtime.GOOS == `darwin` {
-					return
-				}
-				patch := gomonkey.ApplyMethod(
-					reflect.TypeOf(&models.AccessKey{}),
-					"FetchByRand",
-					func(receiver *models.AccessKey, d sqlx.DBExecutor) error {
-						*receiver = *m
-						receiver.CreatedAt = base.Timestamp{
-							Time: receiver.CreatedAt.Add(time.Second),
-						}
-						return nil
-					},
-				)
-				defer patch.Reset()
+				overwrite := *m
+				overwrite.CreatedAt.Time = overwrite.CreatedAt.Add(time.Second)
+				patch = patch_models.AccessKeyFetchByRand(patch, &overwrite, nil)
 				_, err, _ := access_key.Validate(ctx, string(key))
 				mock_sqlx.ExpectError(t, err, status.InvalidAccessKey)
 			})
+
+			patch = patch_models.AccessKeyFetchByRand(patch, m, nil)
+			t.Run("#AccessKeyPermissionDenied", func(t *testing.T) {
+				ctx := httptransport.ContextWithRouteMetaID(ctx, "NotEqualMockOperatorID")
+				_, err, _ := access_key.Validate(ctx, string(key))
+				mock_sqlx.ExpectError(t, err, status.AccessKeyPermissionDenied)
+			})
+
+			t.Run("#UpdateLastUsedFailed", func(t *testing.T) {
+				d.MockDBExecutor.EXPECT().Exec(gomock.Any()).Return(nil, errFrom(t.Name())).Times(1)
+				_, err, _ := access_key.Validate(ctx, string(key))
+				NewWithT(t).Expect(err).To(BeNil())
+			})
+
 			t.Run("#AccessKeyExpired", func(t *testing.T) {
-				if runtime.GOOS == `darwin` {
-					return
-				}
 				time.Sleep(3 * time.Second)
-				patch := gomonkey.ApplyMethod(
-					reflect.TypeOf(&models.AccessKey{}),
-					"FetchByRand",
-					func(receiver *models.AccessKey, d sqlx.DBExecutor) error {
-						*receiver = *m
-						return nil
-					},
-				)
-				defer patch.Reset()
 				_, err, _ := access_key.Validate(ctx, string(key))
 				mock_sqlx.ExpectError(t, err, status.AccessKeyExpired)
 			})
 		})
+
 	})
 
-	t.Run("List", func(t *testing.T) {
+	t.Run("#List", func(t *testing.T) {
 		if runtime.GOOS == `darwin` {
 			return
 		}
-		patch := gomonkey.
-			ApplyMethod(
-				reflect.TypeOf(&models.AccessKey{}),
-				"List",
-				func(r *models.AccessKey, _ sqlx.DBExecutor, _ builder.SqlCondition, _ ...builder.Addition) ([]models.AccessKey, error) {
-					return []models.AccessKey{
-						{},
-						{
-							AccessKeyInfo: models.AccessKeyInfo{
-								ExpiredAt: base.Timestamp{Time: time.Now()},
-								LastUsed:  base.Timestamp{Time: time.Now()},
-							},
-						},
-					}, nil
-				},
-			).
-			ApplyMethod(
-				reflect.TypeOf(&models.AccessKey{}),
-				"Count",
-				func(r *models.AccessKey, _ sqlx.DBExecutor, _ builder.SqlCondition) (int64, error) {
-					return 2, nil
-				},
-			)
+		patch := gomonkey.NewPatches()
 		defer patch.Reset()
+
+		t.Run("#Failed", func(t *testing.T) {
+			t.Run("#ListFailed", func(t *testing.T) {
+				d.MockDBExecutor.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(errFrom(t.Name())).Times(1)
+				_, err := access_key.List(ctx, &access_key.ListReq{})
+				mock_sqlx.ExpectError(t, err, status.DatabaseError, t.Name())
+			})
+			t.Run("#CountFailed", func(t *testing.T) {
+				d.MockDBExecutor.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(nil).Times(1)
+				d.MockDBExecutor.EXPECT().QueryAndScan(gomock.Any(), gomock.Any()).Return(errFrom(t.Name())).Times(1)
+				_, err := access_key.List(ctx, &access_key.ListReq{})
+				mock_sqlx.ExpectError(t, err, status.DatabaseError, t.Name())
+			})
+		})
+
+		result := []models.AccessKey{
+			{},
+			{
+				AccessKeyInfo: models.AccessKeyInfo{
+					ExpiredAt: base.Timestamp{Time: time.Now()},
+					LastUsed:  base.Timestamp{Time: time.Now()},
+				},
+			},
+		}
+
+		patch = patch_models.AccessKeyList(patch, result, nil)
+		patch = patch_models.AccessKeyCount(patch, 2, nil)
 		t.Run("#Success", func(t *testing.T) {
 			rsp, err := access_key.List(ctx, &access_key.ListReq{})
 			NewWithT(t).Expect(err).To(BeNil())
 			NewWithT(t).Expect(rsp.Total).To(Equal(int64(2)))
 			NewWithT(t).Expect(len(rsp.Data)).To(Equal(2))
-		})
-		t.Run("#Failed", func(t *testing.T) {
-			t.Run("#ListFailed", func(t *testing.T) {
-				patch = patch.
-					ApplyMethod(
-						reflect.TypeOf(&models.AccessKey{}),
-						"List",
-						func(r *models.AccessKey, _ sqlx.DBExecutor, _ builder.SqlCondition, _ ...builder.Addition) ([]models.AccessKey, error) {
-							return nil, anyErr
-						},
-					)
-				_, err := access_key.List(ctx, &access_key.ListReq{})
-				NewWithT(t).Expect(err).NotTo(BeNil())
-			})
-			t.Run("#CountFailed", func(t *testing.T) {
-				patch = patch.
-					ApplyMethod(
-						reflect.TypeOf(&models.AccessKey{}),
-						"List",
-						func(r *models.AccessKey, _ sqlx.DBExecutor, _ builder.SqlCondition, _ ...builder.Addition) ([]models.AccessKey, error) {
-							return []models.AccessKey{
-								{},
-								{
-									AccessKeyInfo: models.AccessKeyInfo{
-										ExpiredAt: base.Timestamp{Time: time.Now()},
-										LastUsed:  base.Timestamp{Time: time.Now()},
-									},
-								},
-							}, nil
-						},
-					).
-					ApplyMethod(
-						reflect.TypeOf(&models.AccessKey{}),
-						"Count",
-						func(r *models.AccessKey, _ sqlx.DBExecutor, _ builder.SqlCondition) (int64, error) {
-							return 0, anyErr
-						},
-					)
-				_, err := access_key.List(ctx, &access_key.ListReq{})
-				NewWithT(t).Expect(err).NotTo(BeNil())
-			})
 		})
 	})
 }

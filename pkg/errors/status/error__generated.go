@@ -99,8 +99,6 @@ func (v Error) Key() string {
 		return "NoResourcePermission"
 	case InvalidAccessKey:
 		return "InvalidAccessKey"
-	case AccessKeyExpired:
-		return "AccessKeyExpired"
 	case Forbidden:
 		return "Forbidden"
 	case DisabledAccount:
@@ -119,6 +117,10 @@ func (v Error) Key() string {
 		return "OccupiedOperator"
 	case UnsupportedFSOperator:
 		return "UnsupportedFSOperator"
+	case AccessKeyExpired:
+		return "AccessKeyExpired"
+	case AccessKeyPermissionDenied:
+		return "AccessKeyPermissionDenied"
 	case NotFound:
 		return "NotFound"
 	case ProjectNotFound:
@@ -303,8 +305,6 @@ func (v Error) Msg() string {
 		return "No Resource Permission"
 	case InvalidAccessKey:
 		return "Invalid Account Access Key"
-	case AccessKeyExpired:
-		return "Account Access Key Expired"
 	case Forbidden:
 		return "forbidden"
 	case DisabledAccount:
@@ -323,6 +323,10 @@ func (v Error) Msg() string {
 		return "Occupied Operator"
 	case UnsupportedFSOperator:
 		return "Unsupported FileSystem Operator"
+	case AccessKeyExpired:
+		return "Account Access Key Expired"
+	case AccessKeyPermissionDenied:
+		return "Access Key Permission Denied"
 	case NotFound:
 		return "NotFound"
 	case ProjectNotFound:
@@ -507,8 +511,6 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case InvalidAccessKey:
 		return true
-	case AccessKeyExpired:
-		return true
 	case Forbidden:
 		return false
 	case DisabledAccount:
@@ -526,6 +528,10 @@ func (v Error) CanBeTalk() bool {
 	case OccupiedOperator:
 		return true
 	case UnsupportedFSOperator:
+		return true
+	case AccessKeyExpired:
+		return true
+	case AccessKeyPermissionDenied:
 		return true
 	case NotFound:
 		return true
