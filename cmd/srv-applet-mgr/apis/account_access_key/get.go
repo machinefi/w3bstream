@@ -21,3 +21,13 @@ func (r *ListAccountAccessKey) Output(ctx context.Context) (interface{}, error) 
 	r.AccountID = ca.AccountID
 	return access_key.List(ctx, &r.ListReq)
 }
+
+type ListAccessGroupMetas struct {
+	httpx.MethodGet `summary:"List operator group metas"`
+}
+
+func (r *ListAccessGroupMetas) Path() string { return "/operator_group_metas" }
+
+func (r *ListAccessGroupMetas) Output(_ context.Context) (interface{}, error) {
+	return access_key.OperatorGroupMetaList(), nil
+}

@@ -171,6 +171,14 @@ func (*AccessKey) FieldDescription() string {
 	return "Description"
 }
 
+func (m *AccessKey) ColPrivileges() *builder.Column {
+	return AccessKeyTable.ColByFieldName(m.FieldPrivileges())
+}
+
+func (*AccessKey) FieldPrivileges() string {
+	return "Privileges"
+}
+
 func (m *AccessKey) ColCreatedAt() *builder.Column {
 	return AccessKeyTable.ColByFieldName(m.FieldCreatedAt())
 }

@@ -17,9 +17,12 @@ var (
 	ErrDatabase = errors.New("database error")
 )
 
-func ExpectError(t *testing.T, err error, se status.Error) {
+func ExpectError(t *testing.T, err error, se status.Error, desc ...string) {
 	NewWithT(t).Expect(err).NotTo(BeNil())
 	expect, ok := statusx.IsStatusErr(err)
 	NewWithT(t).Expect(ok).To(BeTrue())
 	NewWithT(t).Expect(expect.Key).To(Equal(se.Key()))
+	if len(desc) > 0 {
+		NewWithT(t).Expect(desc[0]).To(Equal(expect.Desc))
+	}
 }

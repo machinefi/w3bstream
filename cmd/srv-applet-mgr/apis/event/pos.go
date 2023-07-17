@@ -2,8 +2,10 @@ package event
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
@@ -31,9 +33,17 @@ func (r *HandleEvent) Path() string {
 func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 	r.EventReq.SetDefault()
 
+	if r.IsDataPush() {
+		return handleDataPush(ctx, r.Channel, r.Payload.Bytes())
+	}
+
+	pub, exist := middleware.PublisherFromContext(ctx)
+	if !exist {
+		return nil, errors.New("the publisher of the token is not found")
+	}
+
 	var (
 		err error
-		pub = middleware.MustPublisher(ctx)
 		rsp = &event.EventRsp{
 			Channel:     r.Channel,
 			PublisherID: pub.PublisherID,
@@ -71,14 +81,10 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 	return rsp, nil
 }
 
-type HandleDataPush struct {
-	httpx.MethodPost
-	DataPushReq `in:"body"`
-	Channel     string `in:"path" name:"channel"`
-}
-
 type (
-	DataPushReq []struct {
+	DataPushReqs []DataPushReq
+
+	DataPushReq struct {
 		DeviceID  string `json:"device_id"`
 		EventType string `json:"event_type,omitempty"`
 		Payload   string `json:"payload"`
@@ -92,15 +98,14 @@ type (
 	}
 )
 
-func (r *HandleDataPush) Path() string {
-	return "/:channel"
-}
-
-func (r *HandleDataPush) Output(ctx context.Context) (interface{}, error) {
+func handleDataPush(ctx context.Context, ch string, payload []byte) (interface{}, error) {
 	var err error
-	ca := middleware.MustCurrentAccountFromContext(ctx)
+	ca, exist := middleware.CurrentAccountFromContext(ctx)
+	if !exist {
+		return nil, errors.New("the account of the token is not found")
+	}
 	ctx = ca.WithAccount(ctx)
-	ctx, err = ca.WithProjectContextByName(ctx, r.Channel)
+	ctx, err = ca.WithProjectContextByName(ctx, ch)
 	if err != nil {
 		return nil, err
 	}
@@ -118,8 +123,14 @@ func (r *HandleDataPush) Output(ctx context.Context) (interface{}, error) {
 			}},
 		}
 	}
+
+	reqs := DataPushReqs{}
+	if err := json.Unmarshal(payload, &reqs); err != nil {
+		return nil, errors.Wrap(err, "incorrect payload format for batched event")
+	}
+
 	rsps := DataPushRsps{}
-	for i, v := range r.DataPushReq {
+	for i, v := range reqs {
 		pub, err := createPublisherIfNotExist(ctx, prj.ProjectID, v.DeviceID)
 		if err != nil {
 			rsps = append(rsps, wrapErr(i, err))

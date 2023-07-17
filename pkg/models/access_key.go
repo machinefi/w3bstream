@@ -1,6 +1,8 @@
 package models
 
 import (
+	"database/sql/driver"
+
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/enums"
@@ -27,5 +29,15 @@ type AccessKeyInfo struct {
 	ExpiredAt    types.Timestamp             `db:"f_expired_at,default='0'"`
 	LastUsed     types.Timestamp             `db:"f_last_used,default='0'"`
 	Description  string                      `db:"f_desc,default=''"`
-	_Privilege   interface{}                 `db:"-"` // TODO add privilege for account api key
+	Privileges   AccessPrivileges            `db:"f_privileges,default='{}'"`
 }
+
+type AccessPrivilege struct{}
+
+type AccessPrivileges map[string]AccessPrivilege
+
+func (AccessPrivileges) DataType(driver string) string { return "text" }
+
+func (m AccessPrivileges) Value() (driver.Value, error) { return datatypes.JSONValue(m) }
+
+func (m *AccessPrivileges) Scan(src interface{}) error { return datatypes.JSONScan(src, m) }

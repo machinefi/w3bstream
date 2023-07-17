@@ -82,6 +82,7 @@
         "tags": [
           "apis/account"
         ],
+        "summary": "Update account password",
         "operationId": "UpdatePasswordByAccountID",
         "parameters": [
           {
@@ -197,7 +198,7 @@
         "tags": [
           "apis/account"
         ],
-        "summary": "Deprecated use operator.ListOperator",
+        "summary": "Get account operator by name",
         "operationId": "GetOperatorAddr",
         "parameters": [
           {
@@ -607,6 +608,96 @@
         }
       }
     },
+    "/srv-applet-mgr/v0/account_access_key/operator_group_metas": {
+      "get": {
+        "tags": [
+          "apis/account_access_key"
+        ],
+        "summary": "List operator group metas",
+        "operationId": "ListAccessGroupMetas",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaBase"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
     "/srv-applet-mgr/v0/account_access_key/{name}": {
       "delete": {
         "tags": [
@@ -648,6 +739,113 @@
             }
           }
         ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccessKeyNotFound][404999022][Account Key Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "apis/account_access_key"
+        ],
+        "summary": "Update current account access key by name",
+        "operationId": "UpdateAccountAccessKeyByName",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-go-field-name": "Name",
+              "x-tag-name": "name"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAccessKeyUpdateReq"
+                  },
+                  {
+                    "x-go-field-name": "UpdateReq"
+                  }
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "204": {
             "description": ""
@@ -2950,7 +3148,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[AccessKeyExpired][401999019][Account Access Key Expired]!",
               "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
               "@StatusErr[InvalidAccessKey][401999018][Invalid Account Access Key]!",
               "@StatusErr[InvalidAppletContext][401999016][Invalid Applet]!",
@@ -2985,254 +3182,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[DisabledAccount][403999002][Disabled Account]!",
-              "@StatusErr[Forbidden][403999001][forbidden]",
-              "@StatusErr[OccupiedOperator][403999008][Occupied Operator]!",
-              "@StatusErr[TopicAlreadySubscribed][403999007][Topic Already Subscribed]!",
-              "@StatusErr[UnsupportedFSOperator][403999009][Unsupported FileSystem Operator]!",
-              "@StatusErr[UploadFileDiskLimit][403999006][Upload File Disk Limit]!",
-              "@StatusErr[UploadFileMd5Unmatched][403999005][Upload File Md5 Unmatched]!",
-              "@StatusErr[UploadFileSizeLimit][403999004][Upload File Size Limit]!",
-              "@StatusErr[WhiteListForbidden][403999003][White List Forbidden]!"
-            ]
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[AccessKeyNotFound][404999022][Account Key Not Found]!",
-              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
-              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
-              "@StatusErr[AccountPasswordNotFound][404999018][Account Password Not Found]!",
-              "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
-              "@StatusErr[BlockchainNotFound][404999013][Blockchain Not Found]!",
-              "@StatusErr[ChainHeightNotFound][404999016][Chain Height Not Found]!",
-              "@StatusErr[ChainTxNotFound][404999015][Chain Tx Not Found]!",
-              "@StatusErr[ConfigNotFound][404999003][Config Not Found]!",
-              "@StatusErr[ContractLogNotFound][404999014][Contract Log Not Found]!",
-              "@StatusErr[CronJobNotFound][404999011][Cron Job Not Found]!",
-              "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
-              "@StatusErr[InstanceNotRunning][404999012][Instance Not Running]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[OperatorNotFound][404999019][Operator Not Found]!",
-              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
-              "@StatusErr[ProjectOperatorNotFound][404999021][Project Operator relationship Not Found]!",
-              "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!",
-              "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!",
-              "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!",
-              "@StatusErr[ResourcePermNotFound][404999010][Resource Perm Not Found]!",
-              "@StatusErr[StrategyNotFound][404999007][Strategy Not Found]!",
-              "@StatusErr[TrafficLimitNotFound][404999020][Traffic Limit Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[AccessKeyNameConflict][409999020][Access Key Name Conflict]!",
-              "@StatusErr[AccountConflict][409999015][Account Conflict]!",
-              "@StatusErr[AccountIdentityConflict][409999014][Account Identity Conflict]!",
-              "@StatusErr[AccountPasswordConflict][409999016][Account Password Conflict]!",
-              "@StatusErr[AppletNameConflict][409999009][Applet Name Conflict]!",
-              "@StatusErr[ChainHeightConflict][409999013][Chain Height Conflict]!",
-              "@StatusErr[ChainTxConflict][409999012][Chain Tx Conflict]!",
-              "@StatusErr[ConfigConflict][409999006][Config Conflict]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[ContractLogConflict][409999011][Contract Log Conflict]!",
-              "@StatusErr[CronJobConflict][409999010][Cron Job Conflict]!",
-              "@StatusErr[MultiInstanceDeployed][409999008][Multi Instance Deployed]!",
-              "@StatusErr[OperatorConflict][409999017][Operator Conflict]!",
-              "@StatusErr[ProjectNameConflict][409999002][Project Name Conflict]!",
-              "@StatusErr[ProjectOperatorConflict][409999019][Project Operator relationship Conflict]!",
-              "@StatusErr[PublisherConflict][409999007][Publisher Conflict]!",
-              "@StatusErr[ResourceConflict][409999003][Resource Conflict]!",
-              "@StatusErr[ResourceOwnerConflict][409999004][Resource Owner Conflict]!",
-              "@StatusErr[StrategyConflict][409999005][Strategy Conflict]!",
-              "@StatusErr[TrafficLimitConflict][409999018][Traffic Limit Conflict]!"
-            ]
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[BatchRemoveAppletFailed][500999009][Batch Remove Applet Failed]!",
-              "@StatusErr[BatchRemoveWasmLogFailed][500999012][Batch Remove WasmLog Failed]!",
-              "@StatusErr[ConfigInitFailed][500999005][Config Init Failed]!",
-              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
-              "@StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!",
-              "@StatusErr[CreateInstanceFailed][500999008][Create Instance Failed]!",
-              "@StatusErr[CreateTrafficSchedulerFailed][500999015][Create Traffic Scheduler Failed]!",
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[FetchResourceFailed][500999004][Fetch Resource Failed]!",
-              "@StatusErr[GenTokenFailed][500999013][Gen Token Failed]!",
-              "@StatusErr[InternalServerError][500999001][internal error]",
-              "@StatusErr[MqttConnectFailed][500999011][MQTT Connect Failed]!",
-              "@StatusErr[MqttSubscribeFailed][500999010][MQTT Subscribe Failed]!",
-              "@StatusErr[TrafficLimitExceededFailed][500999014][Traffic Limit Exceeded Failed]!",
-              "@StatusErr[UpdateTrafficSchedulerFailed][500999016][Update Traffic Scheduler Failed]!",
-              "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
-            ]
-          }
-        }
-      }
-    },
-    "/srv-applet-mgr/v0/event2/{channel}": {
-      "post": {
-        "tags": [
-          "apis/event"
-        ],
-        "operationId": "HandleDataPush",
-        "parameters": [
-          {
-            "name": "channel",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "x-go-field-name": "Channel",
-              "x-tag-name": "channel"
-            }
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInHeader",
-              "x-tag-name": "Authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "x-go-field-name": "AuthInQuery",
-              "x-tag-name": "authorization,omitempty",
-              "x-tag-validate": "@string[1,]"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/DataPushReq"
-                  },
-                  {
-                    "x-go-field-name": "DataPushReq"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DataPushRsps"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[BadRequest][400999001][BadRequest]!",
-              "@StatusErr[DeprecatedProject][400999003][Deprecated Project]!",
-              "@StatusErr[InvalidAccessKeyIdentityType][400999013][Invalid Access Key Identity Type]!",
-              "@StatusErr[InvalidChainHeightIDs][400999011][Invalid Chain Height IDs]!",
-              "@StatusErr[InvalidChainTxIDs][400999010][Invalid Chain Tx IDs]!",
-              "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!",
-              "@StatusErr[InvalidContractLogIDs][400999009][Invalid Contract Log IDs]!",
-              "@StatusErr[InvalidCronExpressions][400999005][Invalid Cron Expressions]!",
-              "@StatusErr[InvalidDeleteCondition][400999007][Invalid Delete Condition]!",
-              "@StatusErr[InvalidPrivateKey][400999006][Invalid Private Key]!",
-              "@StatusErr[InvalidVMState][400999012][Invalid VM State]!",
-              "@StatusErr[UnknownDeployCommand][400999004][Unknown Deploy Command]!",
-              "@StatusErr[UnknownMonitorCommand][400999008][Unknown Deploy Command]!"
-            ]
-          },
-          "401": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[AccessKeyExpired][401999019][Account Access Key Expired]!",
-              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
-              "@StatusErr[InvalidAccessKey][401999018][Invalid Account Access Key]!",
-              "@StatusErr[InvalidAppletContext][401999016][Invalid Applet]!",
-              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
-              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
-              "@StatusErr[InvalidAuthPublisherID][401999012][Invalid Auth Publisher ID]!",
-              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
-              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
-              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
-              "@StatusErr[InvalidEthLoginMessage][401999011][Invalid Siwe Message]!",
-              "@StatusErr[InvalidEthLoginSignature][401999010][Invalid Siwe Signature]!",
-              "@StatusErr[InvalidEventChannel][401999014][Invalid Event Channel]!",
-              "@StatusErr[InvalidEventToken][401999015][Invalid Event Token]!",
-              "@StatusErr[InvalidNewPassword][401999008][Invalid New Password]!",
-              "@StatusErr[InvalidOldPassword][401999007][Invalid Old Password]!",
-              "@StatusErr[InvalidPassword][401999009][Invalid Password]!",
-              "@StatusErr[InvalidToken][401999002][Invalid Token]!",
-              "@StatusErr[NoAdminPermission][401999006][No Admin Permission]!",
-              "@StatusErr[NoOperatorPermission][401999005][No Operator Permission]!",
-              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!",
-              "@StatusErr[NoResourcePermission][401999017][No Resource Permission]!",
-              "@StatusErr[Unauthorized][401999001][unauthorized]"
-            ]
-          },
-          "403": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
+              "@StatusErr[AccessKeyExpired][403999010][Account Access Key Expired]!",
+              "@StatusErr[AccessKeyPermissionDenied][403999011][Access Key Permission Denied]!",
               "@StatusErr[DisabledAccount][403999002][Disabled Account]!",
               "@StatusErr[Forbidden][403999001][forbidden]",
               "@StatusErr[OccupiedOperator][403999008][Occupied Operator]!",
@@ -3272,6 +3223,7 @@
               "@StatusErr[OperatorNotFound][404999019][Operator Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
               "@StatusErr[ProjectOperatorNotFound][404999021][Project Operator relationship Not Found]!",
+              "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!",
               "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!",
               "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!",
               "@StatusErr[ResourcePermNotFound][404999010][Resource Perm Not Found]!",
@@ -7468,6 +7420,7 @@
         "tags": [
           "apis/account"
         ],
+        "summary": "Create account with username and password",
         "operationId": "CreateAccountByUsernameAndPassword",
         "requestBody": {
           "required": true,
@@ -9813,71 +9766,6 @@
           }
         ]
       },
-      "DataPushReq": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "device_id": {
-              "type": "string",
-              "x-go-field-name": "DeviceID",
-              "x-tag-json": "device_id"
-            },
-            "event_type": {
-              "type": "string",
-              "x-go-field-name": "EventType",
-              "x-tag-json": "event_type,omitempty"
-            },
-            "payload": {
-              "type": "string",
-              "x-go-field-name": "Payload",
-              "x-tag-json": "payload"
-            },
-            "timestamp": {
-              "type": "integer",
-              "format": "int64",
-              "x-go-field-name": "Timestamp",
-              "x-tag-json": "timestamp,omitempty"
-            }
-          },
-          "required": [
-            "device_id",
-            "payload"
-          ]
-        },
-        "x-id": "DataPushReq"
-      },
-      "DataPushRsp": {
-        "type": "object",
-        "properties": {
-          "index": {
-            "type": "integer",
-            "format": "int32",
-            "x-go-field-name": "Index",
-            "x-tag-json": "index"
-          },
-          "results": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesEventResult"
-            },
-            "x-go-field-name": "Results",
-            "x-tag-json": "results"
-          }
-        },
-        "required": [
-          "index",
-          "results"
-        ],
-        "x-id": "DataPushRsp"
-      },
-      "DataPushRsps": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/DataPushRsp"
-        },
-        "x-id": "DataPushRsps"
-      },
       "EthClientRsp": {
         "type": "object",
         "properties": {
@@ -10116,6 +10004,21 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.AccessKeyIdentityType",
         "x-id": "GithubComMachinefiW3BstreamPkgEnumsAccessKeyIdentityType"
+      },
+      "GithubComMachinefiW3BstreamPkgEnumsAccessPermission": {
+        "type": "string",
+        "enum": [
+          "NO_ACCESS",
+          "READONLY",
+          "READ_WRITE"
+        ],
+        "x-enum-labels": [
+          "NO_ACCESS",
+          "READONLY",
+          "READ_WRITE"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.AccessPermission",
+        "x-id": "GithubComMachinefiW3BstreamPkgEnumsAccessPermission"
       },
       "GithubComMachinefiW3BstreamPkgEnumsAccountRole": {
         "type": "string",
@@ -11579,6 +11482,18 @@
             "description": "Name access token name",
             "x-go-field-name": "Name",
             "x-tag-json": "name"
+          },
+          "privileges": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupAccessPrivileges"
+              },
+              {
+                "description": "Privileges operator group access privileges",
+                "x-go-field-name": "Privileges",
+                "x-tag-json": "privileges,omitempty"
+              }
+            ]
           }
         },
         "required": [
@@ -11661,6 +11576,62 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/access_key.CreateRsp",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateRsp"
       },
+      "GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupAccessPrivilege": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "x-go-field-name": "Name",
+            "x-tag-json": "name"
+          },
+          "perm": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsAccessPermission"
+              },
+              {
+                "x-go-field-name": "Perm",
+                "x-tag-json": "perm"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "perm"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/access_key.GroupAccessPrivilege",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupAccessPrivilege"
+      },
+      "GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupAccessPrivileges": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupAccessPrivilege"
+        },
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/access_key.GroupAccessPrivileges",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupAccessPrivileges"
+      },
+      "GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaBase": {
+        "type": "object",
+        "properties": {
+          "desc": {
+            "type": "string",
+            "x-go-field-name": "Desc",
+            "x-tag-json": "desc"
+          },
+          "name": {
+            "type": "string",
+            "x-go-field-name": "Name",
+            "x-tag-json": "name"
+          }
+        },
+        "required": [
+          "name",
+          "desc"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/access_key.GroupMetaBase",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaBase"
+      },
       "GithubComMachinefiW3BstreamPkgModulesAccessKeyListData": {
         "allOf": [
           {
@@ -11736,6 +11707,35 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/access_key.ListRsp",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesAccessKeyListRsp"
+      },
+      "GithubComMachinefiW3BstreamPkgModulesAccessKeyUpdateReq": {
+        "type": "object",
+        "properties": {
+          "desc": {
+            "type": "string",
+            "x-go-field-name": "Desc",
+            "x-tag-json": "desc,omitempty"
+          },
+          "expirationDays": {
+            "type": "integer",
+            "format": "int32",
+            "x-go-field-name": "ExpirationDays",
+            "x-tag-json": "expirationDays,omitempty"
+          },
+          "privileges": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupAccessPrivileges"
+              },
+              {
+                "x-go-field-name": "Privileges",
+                "x-tag-json": "privileges,omitempty"
+              }
+            ]
+          }
+        },
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/access_key.UpdateReq",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesAccessKeyUpdateReq"
       },
       "GithubComMachinefiW3BstreamPkgModulesAccountCreateAccountByUsernameReq": {
         "type": "object",

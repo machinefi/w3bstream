@@ -7,7 +7,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
-	custommetrics "github.com/machinefi/w3bstream/pkg/types/wasm/metrics"
+	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 )
 
 type (
@@ -212,22 +212,22 @@ func MustMQTTClientFromContext(ctx context.Context) *MqttClient {
 	return v
 }
 
-func WithCustomMetrics(ctx context.Context, mt custommetrics.Metrics) context.Context {
+func WithCustomMetrics(ctx context.Context, mt metrics.CustomMetrics) context.Context {
 	return contextx.WithValue(ctx, CtxCustomMetrics{}, mt)
 }
 
-func WithCustomMetricsContext(mt custommetrics.Metrics) contextx.WithContext {
+func WithCustomMetricsContext(mt metrics.CustomMetrics) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
 		return contextx.WithValue(ctx, CtxCustomMetrics{}, mt)
 	}
 }
 
-func CustomMetricsFromContext(ctx context.Context) (custommetrics.Metrics, bool) {
-	v, ok := ctx.Value(CtxCustomMetrics{}).(custommetrics.Metrics)
+func CustomMetricsFromContext(ctx context.Context) (metrics.CustomMetrics, bool) {
+	v, ok := ctx.Value(CtxCustomMetrics{}).(metrics.CustomMetrics)
 	return v, ok
 }
 
-func MustCustomMetricsFromContext(ctx context.Context) custommetrics.Metrics {
+func MustCustomMetricsFromContext(ctx context.Context) metrics.CustomMetrics {
 	v, ok := CustomMetricsFromContext(ctx)
 	must.BeTrue(ok)
 	return v

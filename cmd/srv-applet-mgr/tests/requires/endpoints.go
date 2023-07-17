@@ -26,6 +26,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/retry"
 	"github.com/machinefi/w3bstream/pkg/depends/x/ptrx"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
@@ -205,6 +206,13 @@ func init() {
 	}
 	_ethClients.Init()
 
+	redisKvDB := kvdb.NewRedisDB(_redis)
+
+	wasmApiServer, err := wasmapi.NewServer(conflog.Std(), _redis, _dbMgr, redisKvDB)
+	if err != nil {
+		conflog.Std().Fatal(err)
+	}
+
 	_injection = contextx.WithContextCompose(
 		types.WithMgrDBExecutorContext(_dbMgr),
 		types.WithMonitorDBExecutorContext(_dbMonitor),
@@ -217,10 +225,11 @@ func init() {
 		types.WithUploadConfigContext(_uploadConfig),
 		types.WithFileSystemOpContext(_fsop),
 		types.WithRedisEndpointContext(_redis),
-		kvdb.WithRedisDBKeyContext(kvdb.NewRedisDB(_redis)),
+		kvdb.WithRedisDBKeyContext(redisKvDB),
 		types.WithTaskWorkerContext(_workers),
 		types.WithTaskBoardContext(mq.NewTaskBoard(_tasks)),
 		types.WithETHClientConfigContext(_ethClients),
+		types.WithWasmApiServerContext(wasmApiServer),
 	)
 
 	_ctx = _injection(context.Background())

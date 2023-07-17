@@ -24,8 +24,8 @@ type CreateReqBase struct {
 	ExpirationDays int `json:"expirationDays,omitempty"`
 	// Description access token description
 	Desc string `json:"desc,omitempty"`
-	// TODO _Privileges access token privileges
-	_Privileges interface{}
+	// Privileges operator group access privileges
+	Privileges GroupAccessPrivileges `json:"privileges,omitempty"`
 }
 
 type CreateAccountAccessKeyReq = CreateReqBase
@@ -46,6 +46,12 @@ type CreateRsp struct {
 	ExpiredAt    *types.Timestamp            `json:"expiredAt,omitempty"`
 	LastUsed     *types.Timestamp            `json:"lastUsed,omitempty"`
 	Desc         string                      `json:"desc,omitempty"`
+}
+
+type UpdateReq struct {
+	ExpirationDays int                   `json:"expirationDays,omitempty"`
+	Desc           string                `json:"desc,omitempty"`
+	Privileges     GroupAccessPrivileges `json:"privileges,omitempty"`
 }
 
 type ListData struct {
