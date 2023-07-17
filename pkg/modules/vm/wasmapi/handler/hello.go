@@ -1,4 +1,4 @@
-package wasmapi
+package handler
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func hello(ctx *gin.Context) {
+func (h *Handler) Hello(ctx *gin.Context) {
 	name := ctx.Request.Header.Get("name")
 	fmt.Fprintf(ctx.Writer, "hello %v", name)
 }

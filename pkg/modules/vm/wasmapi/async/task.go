@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 
 	"github.com/hibiken/asynq"
+
+	"github.com/machinefi/w3bstream/pkg/models"
 )
 
 const (
@@ -12,14 +14,14 @@ const (
 )
 
 type apiCallPayload struct {
-	ProjectName string
-	Data        []byte
+	Project *models.Project
+	Data    []byte
 }
 
-func NewApiCallTask(projectName string, data []byte) (*asynq.Task, error) {
+func NewApiCallTask(prj *models.Project, data []byte) (*asynq.Task, error) {
 	payload, err := json.Marshal(apiCallPayload{
-		ProjectName: projectName,
-		Data:        data,
+		Project: prj,
+		Data:    data,
 	})
 	if err != nil {
 		return nil, err
