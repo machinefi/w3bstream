@@ -16,8 +16,6 @@ const (
 	DatabaseError
 	// @errTalk Upload File Failed
 	UploadFileFailed
-	// @errTalk Create Message Channel Failed
-	CreateChannelFailed
 	// @errTalk Fetch Resource Failed
 	FetchResourceFailed
 	// @errTalk Config Init Failed
@@ -26,14 +24,10 @@ const (
 	ConfigUninitFailed
 	// @errTalk Config Parse Failed
 	ConfigParseFailed
-	// @errTalk Gen Publisher Token Failed
-	GenPublisherTokenFailed
 	// @errTalk Create Instance Failed
 	CreateInstanceFailed
 	// @errTalk Batch Remove Applet Failed
 	BatchRemoveAppletFailed
-	// @errTalk Md5 Checksum Failed
-	MD5ChecksumFailed
 	// @errTalk MQTT Subscribe Failed
 	MqttSubscribeFailed
 	// @errTalk MQTT Connect Failed
@@ -86,9 +80,7 @@ const (
 	// @errTalk No Resource Permission
 	NoResourcePermission
 	// @errTalk Invalid Account Access Key
-	InvalidAccountAccessKey
-	// @errTalk Account Access Key Expired
-	AccountAccessKeyExpired
+	InvalidAccessKey
 )
 
 const (
@@ -110,6 +102,10 @@ const (
 	OccupiedOperator
 	// @errTalk Unsupported FileSystem Operator
 	UnsupportedFSOperator
+	// @errTalk Account Access Key Expired
+	AccessKeyExpired
+	// @errTalk Access Key Permission Denied
+	AccessKeyPermissionDenied
 )
 
 const (
@@ -151,8 +147,8 @@ const (
 	TrafficLimitConflict
 	// @errTalk Project Operator relationship Conflict
 	ProjectOperatorConflict
-	// @errTalk Account Key Name Conflict
-	AccountKeyNameConflict
+	// @errTalk Access Key Name Conflict
+	AccessKeyNameConflict
 )
 
 const (
@@ -180,6 +176,8 @@ const (
 	InvalidChainHeightIDs
 	// @errTalk Invalid VM State
 	InvalidVMState
+	// @errTalk Invalid Access Key Identity Type
+	InvalidAccessKeyIdentityType
 )
 
 const (
@@ -226,5 +224,5 @@ const (
 	// @errTalk Project Operator relationship Not Found
 	ProjectOperatorNotFound
 	// @errTalk Account Key Not Found
-	AccountKeyNotFound
+	AccessKeyNotFound
 )

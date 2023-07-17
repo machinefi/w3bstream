@@ -197,7 +197,7 @@ func Remove(ctx context.Context, r *CondArgs) error {
 				err2 := wasm.UninitConfiguration(ctx, c.Configuration)
 				if err2 != nil {
 					summary = append(summary, &statusx.ErrorField{
-						Field: c.String(), Msg: err.Error(),
+						Field: c.String(), Msg: err2.Error(),
 					})
 				}
 			}

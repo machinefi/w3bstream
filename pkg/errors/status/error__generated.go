@@ -61,6 +61,8 @@ func (v Error) Key() string {
 		return "InvalidChainHeightIDs"
 	case InvalidVMState:
 		return "InvalidVMState"
+	case InvalidAccessKeyIdentityType:
+		return "InvalidAccessKeyIdentityType"
 	case Unauthorized:
 		return "Unauthorized"
 	case InvalidAuthValue:
@@ -95,10 +97,8 @@ func (v Error) Key() string {
 		return "InvalidAppletContext"
 	case NoResourcePermission:
 		return "NoResourcePermission"
-	case InvalidAccountAccessKey:
-		return "InvalidAccountAccessKey"
-	case AccountAccessKeyExpired:
-		return "AccountAccessKeyExpired"
+	case InvalidAccessKey:
+		return "InvalidAccessKey"
 	case Forbidden:
 		return "Forbidden"
 	case DisabledAccount:
@@ -117,6 +117,10 @@ func (v Error) Key() string {
 		return "OccupiedOperator"
 	case UnsupportedFSOperator:
 		return "UnsupportedFSOperator"
+	case AccessKeyExpired:
+		return "AccessKeyExpired"
+	case AccessKeyPermissionDenied:
+		return "AccessKeyPermissionDenied"
 	case NotFound:
 		return "NotFound"
 	case ProjectNotFound:
@@ -159,8 +163,8 @@ func (v Error) Key() string {
 		return "TrafficLimitNotFound"
 	case ProjectOperatorNotFound:
 		return "ProjectOperatorNotFound"
-	case AccountKeyNotFound:
-		return "AccountKeyNotFound"
+	case AccessKeyNotFound:
+		return "AccessKeyNotFound"
 	case Conflict:
 		return "Conflict"
 	case ProjectNameConflict:
@@ -199,16 +203,14 @@ func (v Error) Key() string {
 		return "TrafficLimitConflict"
 	case ProjectOperatorConflict:
 		return "ProjectOperatorConflict"
-	case AccountKeyNameConflict:
-		return "AccountKeyNameConflict"
+	case AccessKeyNameConflict:
+		return "AccessKeyNameConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
 		return "DatabaseError"
 	case UploadFileFailed:
 		return "UploadFileFailed"
-	case CreateChannelFailed:
-		return "CreateChannelFailed"
 	case FetchResourceFailed:
 		return "FetchResourceFailed"
 	case ConfigInitFailed:
@@ -217,14 +219,10 @@ func (v Error) Key() string {
 		return "ConfigUninitFailed"
 	case ConfigParseFailed:
 		return "ConfigParseFailed"
-	case GenPublisherTokenFailed:
-		return "GenPublisherTokenFailed"
 	case CreateInstanceFailed:
 		return "CreateInstanceFailed"
 	case BatchRemoveAppletFailed:
 		return "BatchRemoveAppletFailed"
-	case MD5ChecksumFailed:
-		return "MD5ChecksumFailed"
 	case MqttSubscribeFailed:
 		return "MqttSubscribeFailed"
 	case MqttConnectFailed:
@@ -269,6 +267,8 @@ func (v Error) Msg() string {
 		return "Invalid Chain Height IDs"
 	case InvalidVMState:
 		return "Invalid VM State"
+	case InvalidAccessKeyIdentityType:
+		return "Invalid Access Key Identity Type"
 	case Unauthorized:
 		return "unauthorized"
 	case InvalidAuthValue:
@@ -303,10 +303,8 @@ func (v Error) Msg() string {
 		return "Invalid Applet"
 	case NoResourcePermission:
 		return "No Resource Permission"
-	case InvalidAccountAccessKey:
+	case InvalidAccessKey:
 		return "Invalid Account Access Key"
-	case AccountAccessKeyExpired:
-		return "Account Access Key Expired"
 	case Forbidden:
 		return "forbidden"
 	case DisabledAccount:
@@ -325,6 +323,10 @@ func (v Error) Msg() string {
 		return "Occupied Operator"
 	case UnsupportedFSOperator:
 		return "Unsupported FileSystem Operator"
+	case AccessKeyExpired:
+		return "Account Access Key Expired"
+	case AccessKeyPermissionDenied:
+		return "Access Key Permission Denied"
 	case NotFound:
 		return "NotFound"
 	case ProjectNotFound:
@@ -367,7 +369,7 @@ func (v Error) Msg() string {
 		return "Traffic Limit Not Found"
 	case ProjectOperatorNotFound:
 		return "Project Operator relationship Not Found"
-	case AccountKeyNotFound:
+	case AccessKeyNotFound:
 		return "Account Key Not Found"
 	case Conflict:
 		return "Conflict conflict error"
@@ -407,16 +409,14 @@ func (v Error) Msg() string {
 		return "Traffic Limit Conflict"
 	case ProjectOperatorConflict:
 		return "Project Operator relationship Conflict"
-	case AccountKeyNameConflict:
-		return "Account Key Name Conflict"
+	case AccessKeyNameConflict:
+		return "Access Key Name Conflict"
 	case InternalServerError:
 		return "internal error"
 	case DatabaseError:
 		return "Database Error"
 	case UploadFileFailed:
 		return "Upload File Failed"
-	case CreateChannelFailed:
-		return "Create Message Channel Failed"
 	case FetchResourceFailed:
 		return "Fetch Resource Failed"
 	case ConfigInitFailed:
@@ -425,14 +425,10 @@ func (v Error) Msg() string {
 		return "Config Uninit Failed"
 	case ConfigParseFailed:
 		return "Config Parse Failed"
-	case GenPublisherTokenFailed:
-		return "Gen Publisher Token Failed"
 	case CreateInstanceFailed:
 		return "Create Instance Failed"
 	case BatchRemoveAppletFailed:
 		return "Batch Remove Applet Failed"
-	case MD5ChecksumFailed:
-		return "Md5 Checksum Failed"
 	case MqttSubscribeFailed:
 		return "MQTT Subscribe Failed"
 	case MqttConnectFailed:
@@ -477,6 +473,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case InvalidVMState:
 		return true
+	case InvalidAccessKeyIdentityType:
+		return true
 	case Unauthorized:
 		return false
 	case InvalidAuthValue:
@@ -511,9 +509,7 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case NoResourcePermission:
 		return true
-	case InvalidAccountAccessKey:
-		return true
-	case AccountAccessKeyExpired:
+	case InvalidAccessKey:
 		return true
 	case Forbidden:
 		return false
@@ -532,6 +528,10 @@ func (v Error) CanBeTalk() bool {
 	case OccupiedOperator:
 		return true
 	case UnsupportedFSOperator:
+		return true
+	case AccessKeyExpired:
+		return true
+	case AccessKeyPermissionDenied:
 		return true
 	case NotFound:
 		return true
@@ -575,7 +575,7 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case ProjectOperatorNotFound:
 		return true
-	case AccountKeyNotFound:
+	case AccessKeyNotFound:
 		return true
 	case Conflict:
 		return true
@@ -615,15 +615,13 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case ProjectOperatorConflict:
 		return true
-	case AccountKeyNameConflict:
+	case AccessKeyNameConflict:
 		return true
 	case InternalServerError:
 		return false
 	case DatabaseError:
 		return true
 	case UploadFileFailed:
-		return true
-	case CreateChannelFailed:
 		return true
 	case FetchResourceFailed:
 		return true
@@ -633,13 +631,9 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case ConfigParseFailed:
 		return true
-	case GenPublisherTokenFailed:
-		return true
 	case CreateInstanceFailed:
 		return true
 	case BatchRemoveAppletFailed:
-		return true
-	case MD5ChecksumFailed:
 		return true
 	case MqttSubscribeFailed:
 		return true

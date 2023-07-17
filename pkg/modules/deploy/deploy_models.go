@@ -54,6 +54,11 @@ type ListReq struct {
 	datatypes.Pager
 }
 
+type ListRsp struct {
+	Data  []models.Instance `json:"data"`
+	Total int64             `json:"total"`
+}
+
 type CreateReq struct {
 	Cache *wasm.Cache `json:"cache,omitempty"`
 }

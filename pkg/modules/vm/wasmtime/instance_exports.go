@@ -1,6 +1,7 @@
 package wasmtime
 
 import (
+	"bytes"
 	"context"
 	"encoding/binary"
 	"fmt"
@@ -16,8 +17,10 @@ import (
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/modules/job"
+	"github.com/machinefi/w3bstream/pkg/modules/metrics"
+	wasmapi "github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/types"
+	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
-	custommetrics "github.com/machinefi/w3bstream/pkg/types/wasm/metrics"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/sql_util"
 )
 
@@ -39,7 +42,8 @@ type (
 		cl      *wasm.ChainClient
 		ctx     context.Context
 		mq      *wasm.MqttClient
-		metrics custommetrics.Metrics
+		metrics metrics.CustomMetrics
+		srv     wasmapi.Server
 	}
 )
 
@@ -50,6 +54,7 @@ func NewExportFuncs(ctx context.Context, rt *Runtime) (*ExportFuncs, error) {
 		kvs: wasm.MustKVStoreFromContext(ctx),
 		log: wasm.MustLoggerFromContext(ctx),
 		ctx: ctx,
+		srv: types.MustWasmApiServerFromContext(ctx),
 	}
 	ef.cl, _ = wasm.ChainClientFromContext(ctx)
 	ef.db, _ = wasm.SQLStoreFromContext(ctx)
@@ -85,6 +90,7 @@ func (ef *ExportFuncs) LinkABI(impt Import) error {
 		"ws_get_sql_db":            ef.GetSQLDB,
 		"ws_get_env":               ef.GetEnv,
 		"ws_send_mqtt_msg":         ef.SendMqttMsg,
+		"ws_api_call":              ef.ApiCall,
 	} {
 		if err := impt("env", name, ff); err != nil {
 			return err
@@ -92,9 +98,7 @@ func (ef *ExportFuncs) LinkABI(impt Import) error {
 	}
 
 	for name, ff := range map[string]interface{}{
-		"ws_counter_inc": ef.StatCounterInc,
-		"ws_counter_add": ef.StatCounterAdd,
-		"ws_gauge_set":   ef.StatGaugeSet,
+		"ws_submit_metrics": ef.StatSubmit,
 	} {
 		if err := impt("stat", name, ff); err != nil {
 			return err
@@ -135,6 +139,29 @@ func (ef *ExportFuncs) Log(logLevel, ptr, size int32) int32 {
 		return wasm.ResultStatusCode_Failed
 	}
 	ef.logAndPersistToDB(conflog.Level(logLevel), codeSrc, string(buf))
+	return int32(wasm.ResultStatusCode_OK)
+}
+
+func (ef *ExportFuncs) ApiCall(kAddr, kSize, vmAddrPtr, vmSizePtr int32) int32 {
+	buf, err := ef.rt.Read(kAddr, kSize)
+	if err != nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return int32(wasm.ResultStatusCode_TransDataFromVMFailed)
+	}
+
+	resp := ef.srv.Call(ef.ctx, buf)
+
+	wbuf := bytes.Buffer{}
+	if err := resp.Write(&wbuf); err != nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return int32(wasm.ResultStatusCode_HostInternal)
+	}
+
+	if err := ef.rt.Copy(wbuf.Bytes(), vmAddrPtr, vmSizePtr); err != nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
+	}
+
 	return int32(wasm.ResultStatusCode_OK)
 }
 
@@ -471,32 +498,28 @@ func (ef *ExportFuncs) GetEventType(rid, vmAddrPtr, vmSizePtr int32) int32 {
 	return int32(wasm.ResultStatusCode_OK)
 }
 
-func (ef *ExportFuncs) StatCounterInc(labelAddr, labelSize int32) int32 {
-	buf, err := ef.rt.Read(labelAddr, labelSize)
+func (ef *ExportFuncs) StatSubmit(vmAddrPtr, vmSizePtr int32) int32 {
+	buf, err := ef.rt.Read(vmAddrPtr, vmSizePtr)
 	if err != nil {
 		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
-	ef.metrics.Counter(string(buf)).Inc()
-	return int32(wasm.ResultStatusCode_OK)
-}
+	str := string(buf)
+	if !gjson.Valid(str) {
+		err = errors.New("invalid json")
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return wasm.ResultStatusCode_Failed
+	}
+	object := gjson.Parse(str)
+	if object.IsArray() {
+		err = errors.New("json object should not be an array")
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return wasm.ResultStatusCode_Failed
+	}
 
-func (ef *ExportFuncs) StatCounterAdd(labelAddr, labelSize int32, value float64) int32 {
-	buf, err := ef.rt.Read(labelAddr, labelSize)
-	if err != nil {
+	if err := ef.metrics.Submit(object); err != nil {
 		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
-	ef.metrics.Counter(string(buf)).Add(value)
-	return int32(wasm.ResultStatusCode_OK)
-}
-
-func (ef *ExportFuncs) StatGaugeSet(labelAddr, labelSize int32, value float64) int32 {
-	buf, err := ef.rt.Read(labelAddr, labelSize)
-	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
-		return wasm.ResultStatusCode_Failed
-	}
-	ef.metrics.Gauge(string(buf)).Set(value)
 	return int32(wasm.ResultStatusCode_OK)
 }

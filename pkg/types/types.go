@@ -115,11 +115,8 @@ func (c *WasmDBConfig) SetDefault() {
 }
 
 type MetricsCenterConfig struct {
-	Endpoint           string `env:""`
-	ClickHouseAddr     string `env:""`
-	ClickHouseDB       string `env:""`
-	ClickHouseUser     string `env:""`
-	ClickHousePassword string `env:""`
+	Endpoint      string `env:""`
+	ClickHouseDSN string `env:""`
 }
 
 type RobotNotifierConfig struct {
