@@ -3,17 +3,16 @@ package confs3
 import (
 	"bytes"
 	"context"
-	"errors"
 	"io"
 	"net/url"
-	"strconv"
-	"strings"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
 )
 
 type S3Endpoint interface {
@@ -26,6 +25,7 @@ type S3Endpoint interface {
 
 type PresignedFn func(db *ObjectDB, key string, exp time.Duration) url.Values
 
+// ObjectDB Deprecated
 type ObjectDB struct {
 	Endpoint        string
 	Region          string
@@ -76,7 +76,7 @@ func (db *ObjectDB) Client() (*minio.Client, error) {
 	return client, nil
 }
 
-func (db *ObjectDB) PublicURL(meta *ObjectMeta) *url.URL {
+func (db *ObjectDB) PublicURL(meta *filesystem.ObjectMeta) *url.URL {
 	u := &url.URL{}
 	u.Scheme = "http"
 	if db.Secure {
@@ -88,7 +88,7 @@ func (db *ObjectDB) PublicURL(meta *ObjectMeta) *url.URL {
 	return u
 }
 
-func (db *ObjectDB) ProtectURL(ctx context.Context, meta *ObjectMeta, exp time.Duration) (*url.URL, error) {
+func (db *ObjectDB) ProtectURL(ctx context.Context, meta *filesystem.ObjectMeta, exp time.Duration) (*url.URL, error) {
 	c, err := db.Client()
 	if err != nil {
 		return nil, err
@@ -105,7 +105,7 @@ func (db *ObjectDB) ProtectURL(ctx context.Context, meta *ObjectMeta, exp time.D
 	return u, nil
 }
 
-func (db *ObjectDB) PutObject(ctx context.Context, r io.Reader, meta *ObjectMeta) error {
+func (db *ObjectDB) PutObject(ctx context.Context, r io.Reader, meta *filesystem.ObjectMeta) error {
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -129,7 +129,7 @@ func (db *ObjectDB) PutObject(ctx context.Context, r io.Reader, meta *ObjectMeta
 	return err
 }
 
-func (db *ObjectDB) ReadObject(ctx context.Context, w io.Writer, meta *ObjectMeta) error {
+func (db *ObjectDB) ReadObject(ctx context.Context, w io.Writer, meta *filesystem.ObjectMeta) error {
 	c, err := db.Client()
 	if err != nil {
 		return err
@@ -149,7 +149,7 @@ func (db *ObjectDB) ReadObject(ctx context.Context, w io.Writer, meta *ObjectMet
 	return err
 }
 
-func (db *ObjectDB) PresignedPutObject(ctx context.Context, meta *ObjectMeta, exp time.Duration) (string, error) {
+func (db *ObjectDB) PresignedPutObject(ctx context.Context, meta *filesystem.ObjectMeta, exp time.Duration) (string, error) {
 	c, err := db.Client()
 	if err != nil {
 		return "", err
@@ -166,7 +166,7 @@ func (db *ObjectDB) PresignedPutObject(ctx context.Context, meta *ObjectMeta, ex
 	return address.String(), nil
 }
 
-func (db *ObjectDB) DeleteObject(ctx context.Context, meta *ObjectMeta) error {
+func (db *ObjectDB) DeleteObject(ctx context.Context, meta *filesystem.ObjectMeta) error {
 	c, err := db.Client()
 	if err != nil {
 		return err
@@ -175,24 +175,22 @@ func (db *ObjectDB) DeleteObject(ctx context.Context, meta *ObjectMeta) error {
 	return c.RemoveObject(ctx, db.BucketName, meta.Key(), DefaultRemoveObjectOptions)
 }
 
-func (db *ObjectDB) StatsObject(ctx context.Context, meta *ObjectMeta) (*ObjectMeta, error) {
+func (db *ObjectDB) StatsObject(ctx context.Context, meta *filesystem.ObjectMeta) (*filesystem.ObjectMeta, error) {
 	c, err := db.Client()
 	if err != nil {
 		return nil, err
 	}
 
-	object, err := c.GetObject(ctx, db.BucketName, meta.Key(), minio.GetObjectOptions{})
+	info, err := c.StatObject(ctx, db.BucketName, meta.Key(), minio.StatObjectOptions{})
 	if err != nil {
-		return nil, err
-	}
-	defer object.Close()
-
-	info, err := object.Stat()
-	if err != nil {
+		awsErr, ok := err.(awserr.RequestFailure)
+		if ok && awsErr.StatusCode() == 404 {
+			return nil, filesystem.ErrNotExistObjectKey
+		}
 		return nil, err
 	}
 
-	om, err := ParseObjectMetaFromKey(info.Key)
+	om, err := filesystem.ParseObjectMetaFromKey(info.Key)
 	if err != nil {
 		return nil, err
 	}
@@ -204,13 +202,13 @@ func (db *ObjectDB) StatsObject(ctx context.Context, meta *ObjectMeta) (*ObjectM
 	return om, err
 }
 
-func (db *ObjectDB) ListObjectByGroup(ctx context.Context, grp string) ([]*ObjectMeta, error) {
+func (db *ObjectDB) ListObjectByGroup(ctx context.Context, grp string) ([]*filesystem.ObjectMeta, error) {
 	c, err := db.Client()
 	if err != nil {
 		return nil, err
 	}
 
-	metas := make([]*ObjectMeta, 0)
+	metas := make([]*filesystem.ObjectMeta, 0)
 
 	objectsCh := c.ListObjects(ctx, db.BucketName, minio.ListObjectsOptions{
 		Prefix:    grp,
@@ -218,7 +216,7 @@ func (db *ObjectDB) ListObjectByGroup(ctx context.Context, grp string) ([]*Objec
 	})
 
 	for obj := range objectsCh {
-		om, err := ParseObjectMetaFromKey(obj.Key)
+		om, err := filesystem.ParseObjectMetaFromKey(obj.Key)
 		if err != nil {
 			continue
 		}
@@ -234,7 +232,7 @@ func (db *ObjectDB) ListObjectByGroup(ctx context.Context, grp string) ([]*Objec
 }
 
 func (db *ObjectDB) Upload(key string, content []byte) error {
-	meta, err := ParseObjectMetaFromKey(key)
+	meta, err := filesystem.ParseObjectMetaFromKey(key)
 	if err != nil {
 		return err
 	}
@@ -242,7 +240,7 @@ func (db *ObjectDB) Upload(key string, content []byte) error {
 }
 
 func (db *ObjectDB) Read(key string) ([]byte, error) {
-	meta, err := ParseObjectMetaFromKey(key)
+	meta, err := filesystem.ParseObjectMetaFromKey(key)
 	if err != nil {
 		return nil, err
 	}
@@ -255,7 +253,7 @@ func (db *ObjectDB) Read(key string) ([]byte, error) {
 }
 
 func (db *ObjectDB) Delete(key string) error {
-	meta, err := ParseObjectMetaFromKey(key)
+	meta, err := filesystem.ParseObjectMetaFromKey(key)
 	if err != nil {
 		return err
 	}
@@ -263,7 +261,7 @@ func (db *ObjectDB) Delete(key string) error {
 }
 
 func (db *ObjectDB) DownloadUrl(key string) (string, error) {
-	meta, err := ParseObjectMetaFromKey(key)
+	meta, err := filesystem.ParseObjectMetaFromKey(key)
 	if err != nil {
 		return "", err
 	}
@@ -274,23 +272,13 @@ func (db *ObjectDB) DownloadUrl(key string) (string, error) {
 	return u.String(), err
 }
 
-var ErrInvalidObjectKey = errors.New("invalid object key")
-
-func ParseObjectMetaFromKey(key string) (*ObjectMeta, error) {
-	parts := strings.Split(key, "/")
-	if len(parts) != 2 {
-		return nil, ErrInvalidObjectKey
-	}
-	grp := parts[0]
-
-	oid, err := strconv.ParseUint(parts[1], 10, 64)
+// StatObject Deprecated
+func (db *ObjectDB) StatObject(key string) (*filesystem.ObjectMeta, error) {
+	meta, err := filesystem.ParseObjectMetaFromKey(key)
 	if err != nil {
-		return nil, ErrInvalidObjectKey
+		return nil, err
 	}
-
-	om := &ObjectMeta{ObjectID: oid, Group: grp}
-
-	return om, nil
+	return db.StatsObject(context.Background(), meta)
 }
 
 var (

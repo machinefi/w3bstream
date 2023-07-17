@@ -79,3 +79,11 @@ func UploadFile(ctx context.Context, data []byte, id types.SFID) (path string, e
 	}
 	return
 }
+
+func CheckExist(ctx context.Context, id types.SFID) bool {
+	fs := types.MustFileSystemOpFromContext(ctx)
+
+	path := fmt.Sprintf("%s/%d", os.Getenv(consts.EnvResourceGroup), id)
+	_, err := fs.StatObject(path)
+	return err == nil
+}
