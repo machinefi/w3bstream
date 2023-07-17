@@ -55,8 +55,8 @@ func NewExportFuncs(ctx context.Context, rt *Runtime) (*ExportFuncs, error) {
 		log: wasm.MustLoggerFromContext(ctx),
 		ctx: ctx,
 		srv: types.MustWasmApiServerFromContext(ctx),
-		cl:  wasm.MustChainClientFromContext(ctx),
 	}
+	ef.cl, _ = wasm.ChainClientFromContext(ctx)
 	ef.db, _ = wasm.SQLStoreFromContext(ctx)
 	ef.env, _ = wasm.EnvFromContext(ctx)
 	ef.mq, _ = wasm.MQTTClientFromContext(ctx)
