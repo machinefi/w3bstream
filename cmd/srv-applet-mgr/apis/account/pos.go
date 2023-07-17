@@ -11,7 +11,8 @@ import (
 )
 
 type CreateAccountByUsernameAndPassword struct {
-	httpx.MethodPost
+	httpx.MethodPost `summary:"Create account with username and password"`
+
 	account.CreateAccountByUsernameReq `in:"body"`
 }
 

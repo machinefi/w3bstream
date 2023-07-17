@@ -34,12 +34,13 @@ var contextAccountAuthKey = reflect.TypeOf(ContextAccountAuth{}).String()
 func (r *ContextAccountAuth) ContextKey() string { return contextAccountAuthKey }
 
 func (r *ContextAccountAuth) Output(ctx context.Context) (interface{}, error) {
-	v, ok := jwt.AuthFromContext(ctx).(string)
-	if !ok {
-		return nil, status.InvalidAuthValue
+	content, _, err := jwt.AuthContentFromContext(ctx)
+	if err != nil {
+		return nil, err
 	}
+
 	accountID := types.SFID(0)
-	if err := accountID.UnmarshalText([]byte(v)); err != nil {
+	if err := accountID.UnmarshalText(content); err != nil {
 		return nil, status.InvalidAuthAccountID
 	}
 	ca, err := account.GetAccountByAccountID(ctx, accountID)
@@ -128,12 +129,12 @@ func (v *CurrentAccount) WithAppletContextBySFID(ctx context.Context, id types.S
 }
 
 func (v *CurrentAccount) WithResourceContextBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
-	resource, err := resource.GetBySFID(ctx, id)
+	res, err := resource.GetBySFID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	return types.WithResource(ctx, resource), nil
+	return types.WithResource(ctx, res), nil
 }
 
 // WithInstanceContextBySFID With full contexts by instance SFID

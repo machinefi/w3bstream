@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -62,7 +61,7 @@ func (c *Ctx) Context() context.Context { return c.ctx }
 // config.yml.template shows config file template and preset config values
 // config.yml contains all user configured values
 func (c *Ctx) Conf(configs ...interface{}) {
-	local, err := ioutil.ReadFile(filepath.Join(c.root, "./config/config.yml"))
+	local, err := os.ReadFile(filepath.Join(c.root, "./config/config.yml"))
 	if err == nil {
 		kv := make(map[string]string)
 		if err = yaml.Unmarshal(local, &kv); err == nil {

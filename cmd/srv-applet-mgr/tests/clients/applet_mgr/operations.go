@@ -167,6 +167,96 @@ func (o *BatchRemoveTrafficLimit) Invoke(cli kit.Client, metas ...kit.Metadata) 
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
+type ControlChainHeight struct {
+	Cmd                   GithubComMachinefiW3BstreamPkgEnumsMonitorCmd                        `in:"path" name:"cmd"`
+	ProjectName           string                                                               `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader          string                                                               `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery           string                                                               `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	BatchUpdateMonitorReq GithubComMachinefiW3BstreamPkgModulesBlockchainBatchUpdateMonitorReq `in:"body"`
+}
+
+func (o *ControlChainHeight) Path() string {
+	return "/srv-applet-mgr/v0/monitor/x/:projectName/chain_height/:cmd"
+}
+
+func (o *ControlChainHeight) Method() string {
+	return "PUT"
+}
+
+func (o *ControlChainHeight) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.ControlChainHeight")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *ControlChainHeight) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
+	meta, err := cli.Do(ctx, o, metas...).Into(nil)
+	return meta, err
+}
+
+func (o *ControlChainHeight) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
+type ControlChainTx struct {
+	Cmd                   GithubComMachinefiW3BstreamPkgEnumsMonitorCmd                        `in:"path" name:"cmd"`
+	ProjectName           string                                                               `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader          string                                                               `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery           string                                                               `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	BatchUpdateMonitorReq GithubComMachinefiW3BstreamPkgModulesBlockchainBatchUpdateMonitorReq `in:"body"`
+}
+
+func (o *ControlChainTx) Path() string {
+	return "/srv-applet-mgr/v0/monitor/x/:projectName/chain_tx/:cmd"
+}
+
+func (o *ControlChainTx) Method() string {
+	return "PUT"
+}
+
+func (o *ControlChainTx) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.ControlChainTx")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *ControlChainTx) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
+	meta, err := cli.Do(ctx, o, metas...).Into(nil)
+	return meta, err
+}
+
+func (o *ControlChainTx) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
+type ControlContractLog struct {
+	Cmd                   GithubComMachinefiW3BstreamPkgEnumsMonitorCmd                        `in:"path" name:"cmd"`
+	ProjectName           string                                                               `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader          string                                                               `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery           string                                                               `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	BatchUpdateMonitorReq GithubComMachinefiW3BstreamPkgModulesBlockchainBatchUpdateMonitorReq `in:"body"`
+}
+
+func (o *ControlContractLog) Path() string {
+	return "/srv-applet-mgr/v0/monitor/x/:projectName/contract_log/:cmd"
+}
+
+func (o *ControlContractLog) Method() string {
+	return "PUT"
+}
+
+func (o *ControlContractLog) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.ControlContractLog")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *ControlContractLog) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
+	meta, err := cli.Do(ctx, o, metas...).Into(nil)
+	return meta, err
+}
+
+func (o *ControlContractLog) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
 type ControlInstance struct {
 	Cmd          GithubComMachinefiW3BstreamPkgEnumsDeployCmd       `in:"path" name:"cmd"`
 	InstanceID   GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"instanceID"`
@@ -197,23 +287,24 @@ func (o *ControlInstance) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Met
 }
 
 type CreateAccountAccessKey struct {
-	AuthInHeader string                                                      `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	AuthInQuery  string                                                      `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	CreateReq    GithubComMachinefiW3BstreamPkgModulesAccountAccessCreateReq `in:"body"`
+	AuthInHeader              string                                                      `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery               string                                                      `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	CreateAccountAccessKeyReq GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateReqBase `in:"body"`
 }
 
 func (o *CreateAccountAccessKey) Path() string {
-	return "/srv-applet-mgr/v0/access_key"
+	return "/srv-applet-mgr/v0/account_access_key"
 }
 
 func (o *CreateAccountAccessKey) Method() string {
 	return "POST"
 }
 
-// @StatusErr[AccountKeyNameConflict][409999020][Account Key Name Conflict]!
+// @StatusErr[AccessKeyNameConflict][409999020][Access Key Name Conflict]!
 // @StatusErr[AccountNotFound][404999017][Account Not Found]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[InvalidAccessKeyIdentityType][400999013][Invalid Access Key Identity Type]!
 // @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
 // @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
 // @StatusErr[InvalidClaim][401999003][Invalid Claim]!
@@ -224,13 +315,13 @@ func (o *CreateAccountAccessKey) Do(ctx context.Context, cli kit.Client, metas .
 	return cli.Do(ctx, o, metas...)
 }
 
-func (o *CreateAccountAccessKey) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsAccountAccessKey, kit.Metadata, error) {
-	rsp := new(GithubComMachinefiW3BstreamPkgModelsAccountAccessKey)
+func (o *CreateAccountAccessKey) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateRsp, kit.Metadata, error) {
+	rsp := new(GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateRsp)
 	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
 	return rsp, meta, err
 }
 
-func (o *CreateAccountAccessKey) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsAccountAccessKey, kit.Metadata, error) {
+func (o *CreateAccountAccessKey) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateRsp, kit.Metadata, error) {
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
@@ -286,13 +377,13 @@ func (o *CreateAndStartInstance) Method() string {
 // @StatusErr[AccountNotFound][404999017][Account Not Found]!
 // @StatusErr[AppletNotFound][404999005][Applet Not Found]!
 // @StatusErr[ConfigConflict][409999006][Config Conflict]!
-// @StatusErr[ConfigInitFailed][500999006][Config Init Failed]!
-// @StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!
-// @StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!
-// @StatusErr[CreateInstanceFailed][500999010][Create Instance Failed]!
+// @StatusErr[ConfigInitFailed][500999005][Config Init Failed]!
+// @StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!
+// @StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!
+// @StatusErr[CreateInstanceFailed][500999008][Create Instance Failed]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
-// @StatusErr[FetchResourceFailed][500999005][Fetch Resource Failed]!
+// @StatusErr[FetchResourceFailed][500999004][Fetch Resource Failed]!
 // @StatusErr[InstanceNotFound][404999006][Instance Not Found]!
 // @StatusErr[InvalidAppletContext][401999016][Invalid Applet]!
 // @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
@@ -300,6 +391,7 @@ func (o *CreateAndStartInstance) Method() string {
 // @StatusErr[InvalidClaim][401999003][Invalid Claim]!
 // @StatusErr[InvalidConfigType][400999002][Invalid Config Type]!
 // @StatusErr[InvalidToken][401999002][Invalid Token]!
+// @StatusErr[InvalidVMState][400999012][Invalid VM State]!
 // @StatusErr[MultiInstanceDeployed][409999008][Multi Instance Deployed]!
 // @StatusErr[NoProjectPermission][401999004][No Project Permission]!
 // @StatusErr[ProjectNotFound][404999002][Project Not Found]!
@@ -341,10 +433,10 @@ func (o *CreateApplet) Method() string {
 // @StatusErr[AccountNotFound][404999017][Account Not Found]!
 // @StatusErr[AppletNameConflict][409999009][Applet Name Conflict]!
 // @StatusErr[ConfigConflict][409999006][Config Conflict]!
-// @StatusErr[ConfigInitFailed][500999006][Config Init Failed]!
-// @StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!
-// @StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!
-// @StatusErr[CreateInstanceFailed][500999010][Create Instance Failed]!
+// @StatusErr[ConfigInitFailed][500999005][Config Init Failed]!
+// @StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!
+// @StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!
+// @StatusErr[CreateInstanceFailed][500999008][Create Instance Failed]!
 // @StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
@@ -355,6 +447,7 @@ func (o *CreateApplet) Method() string {
 // @StatusErr[InvalidClaim][401999003][Invalid Claim]!
 // @StatusErr[InvalidConfigType][400999002][Invalid Config Type]!
 // @StatusErr[InvalidToken][401999002][Invalid Token]!
+// @StatusErr[InvalidVMState][400999012][Invalid VM State]!
 // @StatusErr[MultiInstanceDeployed][409999008][Multi Instance Deployed]!
 // @StatusErr[NoProjectPermission][401999004][No Project Permission]!
 // @StatusErr[ProjectNotFound][404999002][Project Not Found]!
@@ -615,9 +708,9 @@ func (o *CreateOrUpdateProjectEnv) Method() string {
 // @StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!
 // @StatusErr[AccountNotFound][404999017][Account Not Found]!
 // @StatusErr[ConfigConflict][409999006][Config Conflict]!
-// @StatusErr[ConfigInitFailed][500999006][Config Init Failed]!
-// @StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!
-// @StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!
+// @StatusErr[ConfigInitFailed][500999005][Config Init Failed]!
+// @StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!
+// @StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!
 // @StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
@@ -663,8 +756,8 @@ func (o *CreateProject) Method() string {
 // @StatusErr[AccountNotFound][404999017][Account Not Found]!
 // @StatusErr[ClientClosedRequest][499000000][ClientClosedRequest]
 // @StatusErr[ConfigConflict][409999006][Config Conflict]!
-// @StatusErr[ConfigInitFailed][500999006][Config Init Failed]!
-// @StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!
+// @StatusErr[ConfigInitFailed][500999005][Config Init Failed]!
+// @StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!
 // @StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
@@ -673,8 +766,8 @@ func (o *CreateProject) Method() string {
 // @StatusErr[InvalidClaim][401999003][Invalid Claim]!
 // @StatusErr[InvalidEventToken][401999015][Invalid Event Token]!
 // @StatusErr[InvalidToken][401999002][Invalid Token]!
-// @StatusErr[MqttConnectFailed][500999014][MQTT Connect Failed]!
-// @StatusErr[MqttSubscribeFailed][500999013][MQTT Subscribe Failed]!
+// @StatusErr[MqttConnectFailed][500999011][MQTT Connect Failed]!
+// @StatusErr[MqttSubscribeFailed][500999010][MQTT Subscribe Failed]!
 // @StatusErr[ProjectNameConflict][409999002][Project Name Conflict]!
 // @StatusErr[RequestFailed][500000000][RequestFailed]
 // @StatusErr[RequestTransformFailed][400000000][RequestTransformFailed]
@@ -756,8 +849,8 @@ func (o *CreateProjectSchema) Method() string {
 // @StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!
 // @StatusErr[AccountNotFound][404999017][Account Not Found]!
 // @StatusErr[ConfigConflict][409999006][Config Conflict]!
-// @StatusErr[ConfigInitFailed][500999006][Config Init Failed]!
-// @StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!
+// @StatusErr[ConfigInitFailed][500999005][Config Init Failed]!
+// @StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!
 // @StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
@@ -799,13 +892,14 @@ func (o *CreatePublisher) Method() string {
 	return "POST"
 }
 
+// @StatusErr[AccessKeyNameConflict][409999020][Access Key Name Conflict]!
 // @StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!
 // @StatusErr[AccountNotFound][404999017][Account Not Found]!
 // @StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
-// @StatusErr[GenPublisherTokenFailed][500999009][Gen Publisher Token Failed]!
+// @StatusErr[InvalidAccessKeyIdentityType][400999013][Invalid Access Key Identity Type]!
 // @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
 // @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
 // @StatusErr[InvalidClaim][401999003][Invalid Claim]!
@@ -892,7 +986,7 @@ func (o *CreateTrafficLimit) Method() string {
 
 // @StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!
 // @StatusErr[AccountNotFound][404999017][Account Not Found]!
-// @StatusErr[CreateTrafficSchedulerFailed][500999018][Create Traffic Scheduler Failed]!
+// @StatusErr[CreateTrafficSchedulerFailed][500999015][Create Traffic Scheduler Failed]!
 // @StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
@@ -928,7 +1022,7 @@ type DeleteAccountAccessKeyByName struct {
 }
 
 func (o *DeleteAccountAccessKeyByName) Path() string {
-	return "/srv-applet-mgr/v0/access_key"
+	return "/srv-applet-mgr/v0/account_access_key/:name"
 }
 
 func (o *DeleteAccountAccessKeyByName) Method() string {
@@ -966,7 +1060,7 @@ func (o *DownloadResource) Method() string {
 // @StatusErr[AccountNotFound][404999017][Account Not Found]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
-// @StatusErr[FetchResourceFailed][500999005][Fetch Resource Failed]!
+// @StatusErr[FetchResourceFailed][500999004][Fetch Resource Failed]!
 // @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
 // @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
 // @StatusErr[InvalidClaim][401999003][Invalid Claim]!
@@ -1280,7 +1374,7 @@ func (o *GetProjectEnv) Method() string {
 // @StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!
 // @StatusErr[AccountNotFound][404999017][Account Not Found]!
 // @StatusErr[ConfigNotFound][404999003][Config Not Found]!
-// @StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!
+// @StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!
 // @StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
@@ -1366,7 +1460,7 @@ func (o *GetProjectSchema) Method() string {
 // @StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!
 // @StatusErr[AccountNotFound][404999017][Account Not Found]!
 // @StatusErr[ConfigNotFound][404999003][Config Not Found]!
-// @StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!
+// @StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!
 // @StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
@@ -1538,36 +1632,37 @@ func (o *HandleEvent) Method() string {
 	return "POST"
 }
 
-// @StatusErr[AccountAccessKeyExpired][401999019][Account Access Key Expired]!
+// @StatusErr[AccessKeyExpired][403999010][Account Access Key Expired]!
+// @StatusErr[AccessKeyNameConflict][409999020][Access Key Name Conflict]!
+// @StatusErr[AccessKeyNotFound][404999022][Account Key Not Found]!
+// @StatusErr[AccessKeyPermissionDenied][403999011][Access Key Permission Denied]!
 // @StatusErr[AccountConflict][409999015][Account Conflict]!
 // @StatusErr[AccountIdentityConflict][409999014][Account Identity Conflict]!
 // @StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!
-// @StatusErr[AccountKeyNameConflict][409999020][Account Key Name Conflict]!
-// @StatusErr[AccountKeyNotFound][404999022][Account Key Not Found]!
+// @StatusErr[AccountNotFound][404999017][Account Not Found]!
 // @StatusErr[AccountNotFound][404999017][Account Not Found]!
 // @StatusErr[AccountPasswordConflict][409999016][Account Password Conflict]!
 // @StatusErr[AccountPasswordNotFound][404999018][Account Password Not Found]!
 // @StatusErr[AppletNameConflict][409999009][Applet Name Conflict]!
 // @StatusErr[AppletNotFound][404999005][Applet Not Found]!
 // @StatusErr[BadRequest][400999001][BadRequest]!
-// @StatusErr[BatchRemoveAppletFailed][500999011][Batch Remove Applet Failed]!
-// @StatusErr[BatchRemoveWasmLogFailed][500999015][Batch Remove WasmLog Failed]!
+// @StatusErr[BatchRemoveAppletFailed][500999009][Batch Remove Applet Failed]!
+// @StatusErr[BatchRemoveWasmLogFailed][500999012][Batch Remove WasmLog Failed]!
 // @StatusErr[BlockchainNotFound][404999013][Blockchain Not Found]!
 // @StatusErr[ChainHeightConflict][409999013][Chain Height Conflict]!
 // @StatusErr[ChainHeightNotFound][404999016][Chain Height Not Found]!
 // @StatusErr[ChainTxConflict][409999012][Chain Tx Conflict]!
 // @StatusErr[ChainTxNotFound][404999015][Chain Tx Not Found]!
 // @StatusErr[ConfigConflict][409999006][Config Conflict]!
-// @StatusErr[ConfigInitFailed][500999006][Config Init Failed]!
+// @StatusErr[ConfigInitFailed][500999005][Config Init Failed]!
 // @StatusErr[ConfigNotFound][404999003][Config Not Found]!
-// @StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!
-// @StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!
+// @StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!
+// @StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!
 // @StatusErr[Conflict][409999001][Conflict conflict error]!
 // @StatusErr[ContractLogConflict][409999011][Contract Log Conflict]!
 // @StatusErr[ContractLogNotFound][404999014][Contract Log Not Found]!
-// @StatusErr[CreateChannelFailed][500999004][Create Message Channel Failed]!
-// @StatusErr[CreateInstanceFailed][500999010][Create Instance Failed]!
-// @StatusErr[CreateTrafficSchedulerFailed][500999018][Create Traffic Scheduler Failed]!
+// @StatusErr[CreateInstanceFailed][500999008][Create Instance Failed]!
+// @StatusErr[CreateTrafficSchedulerFailed][500999015][Create Traffic Scheduler Failed]!
 // @StatusErr[CronJobConflict][409999010][Cron Job Conflict]!
 // @StatusErr[CronJobNotFound][404999011][Cron Job Not Found]!
 // @StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!
@@ -1575,22 +1670,25 @@ func (o *HandleEvent) Method() string {
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[DeprecatedProject][400999003][Deprecated Project]!
 // @StatusErr[DisabledAccount][403999002][Disabled Account]!
-// @StatusErr[FetchResourceFailed][500999005][Fetch Resource Failed]!
+// @StatusErr[FetchResourceFailed][500999004][Fetch Resource Failed]!
 // @StatusErr[Forbidden][403999001][forbidden]
-// @StatusErr[GenPublisherTokenFailed][500999009][Gen Publisher Token Failed]!
-// @StatusErr[GenTokenFailed][500999016][Gen Token Failed]!
+// @StatusErr[GenTokenFailed][500999013][Gen Token Failed]!
 // @StatusErr[InstanceNotFound][404999006][Instance Not Found]!
 // @StatusErr[InstanceNotRunning][404999012][Instance Not Running]!
 // @StatusErr[InternalServerError][500999001][internal error]
-// @StatusErr[InvalidAccountAccessKey][401999018][Invalid Account Access Key]!
+// @StatusErr[InvalidAccessKeyIdentityType][400999013][Invalid Access Key Identity Type]!
+// @StatusErr[InvalidAccessKey][401999018][Invalid Account Access Key]!
 // @StatusErr[InvalidAppletContext][401999016][Invalid Applet]!
 // @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
 // @StatusErr[InvalidAuthPublisherID][401999012][Invalid Auth Publisher ID]!
 // @StatusErr[InvalidAuthPublisherID][401999012][Invalid Auth Publisher ID]!
 // @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
 // @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
+// @StatusErr[InvalidChainHeightIDs][400999011][Invalid Chain Height IDs]!
+// @StatusErr[InvalidChainTxIDs][400999010][Invalid Chain Tx IDs]!
 // @StatusErr[InvalidClaim][401999003][Invalid Claim]!
 // @StatusErr[InvalidConfigType][400999002][Invalid Config Type]!
+// @StatusErr[InvalidContractLogIDs][400999009][Invalid Contract Log IDs]!
 // @StatusErr[InvalidCronExpressions][400999005][Invalid Cron Expressions]!
 // @StatusErr[InvalidDeleteCondition][400999007][Invalid Delete Condition]!
 // @StatusErr[InvalidEthLoginMessage][401999011][Invalid Siwe Message]!
@@ -1602,9 +1700,9 @@ func (o *HandleEvent) Method() string {
 // @StatusErr[InvalidPassword][401999009][Invalid Password]!
 // @StatusErr[InvalidPrivateKey][400999006][Invalid Private Key]!
 // @StatusErr[InvalidToken][401999002][Invalid Token]!
-// @StatusErr[MD5ChecksumFailed][500999012][Md5 Checksum Failed]!
-// @StatusErr[MqttConnectFailed][500999014][MQTT Connect Failed]!
-// @StatusErr[MqttSubscribeFailed][500999013][MQTT Subscribe Failed]!
+// @StatusErr[InvalidVMState][400999012][Invalid VM State]!
+// @StatusErr[MqttConnectFailed][500999011][MQTT Connect Failed]!
+// @StatusErr[MqttSubscribeFailed][500999010][MQTT Subscribe Failed]!
 // @StatusErr[MultiInstanceDeployed][409999008][Multi Instance Deployed]!
 // @StatusErr[NoAdminPermission][401999006][No Admin Permission]!
 // @StatusErr[NoOperatorPermission][401999005][No Operator Permission]!
@@ -1629,12 +1727,13 @@ func (o *HandleEvent) Method() string {
 // @StatusErr[StrategyNotFound][404999007][Strategy Not Found]!
 // @StatusErr[TopicAlreadySubscribed][403999007][Topic Already Subscribed]!
 // @StatusErr[TrafficLimitConflict][409999018][Traffic Limit Conflict]!
-// @StatusErr[TrafficLimitExceededFailed][500999017][Traffic Limit Exceeded Failed]!
+// @StatusErr[TrafficLimitExceededFailed][500999014][Traffic Limit Exceeded Failed]!
 // @StatusErr[TrafficLimitNotFound][404999020][Traffic Limit Not Found]!
 // @StatusErr[Unauthorized][401999001][unauthorized]
 // @StatusErr[UnknownDeployCommand][400999004][Unknown Deploy Command]!
+// @StatusErr[UnknownMonitorCommand][400999008][Unknown Deploy Command]!
 // @StatusErr[UnsupportedFSOperator][403999009][Unsupported FileSystem Operator]!
-// @StatusErr[UpdateTrafficSchedulerFailed][500999019][Update Traffic Scheduler Failed]!
+// @StatusErr[UpdateTrafficSchedulerFailed][500999016][Update Traffic Scheduler Failed]!
 // @StatusErr[UploadFileDiskLimit][403999006][Upload File Disk Limit]!
 // @StatusErr[UploadFileFailed][500999003][Upload File Failed]!
 // @StatusErr[UploadFileMd5Unmatched][403999005][Upload File Md5 Unmatched]!
@@ -1653,6 +1752,84 @@ func (o *HandleEvent) InvokeContext(ctx context.Context, cli kit.Client, metas .
 }
 
 func (o *HandleEvent) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesEventEventRsp, kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
+type ListAccessGroupMetas struct {
+	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+}
+
+func (o *ListAccessGroupMetas) Path() string {
+	return "/srv-applet-mgr/v0/account_access_key/operator_group_metas"
+}
+
+func (o *ListAccessGroupMetas) Method() string {
+	return "GET"
+}
+
+// @StatusErr[AccountNotFound][404999017][Account Not Found]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
+// @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
+// @StatusErr[InvalidClaim][401999003][Invalid Claim]!
+// @StatusErr[InvalidToken][401999002][Invalid Token]!
+
+func (o *ListAccessGroupMetas) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.ListAccessGroupMetas")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *ListAccessGroupMetas) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*[]GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaBase, kit.Metadata, error) {
+	rsp := new([]GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaBase)
+	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
+	return rsp, meta, err
+}
+
+func (o *ListAccessGroupMetas) Invoke(cli kit.Client, metas ...kit.Metadata) (*[]GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaBase, kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
+type ListAccountAccessKey struct {
+	AuthInHeader   string                                                     `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery    string                                                     `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	ExpiredAtBegin GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp    `in:"query" name:"expiredAtBegin,omitempty"`
+	ExpiredAtEnd   GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp    `in:"query" name:"expiredAtEnd,omitempty"`
+	IdentityIDs    GithubComMachinefiW3BstreamPkgDependsBaseTypesSFIDs        `in:"query" name:"identityID,omitempty"`
+	IdentityTypes  []GithubComMachinefiW3BstreamPkgEnumsAccessKeyIdentityType `in:"query" name:"identityType,omitempty"`
+	Names          []string                                                   `in:"query" name:"name,omitempty"`
+	Offset         int64                                                      `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
+	Size           int64                                                      `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
+}
+
+func (o *ListAccountAccessKey) Path() string {
+	return "/srv-applet-mgr/v0/account_access_key/datalist"
+}
+
+func (o *ListAccountAccessKey) Method() string {
+	return "GET"
+}
+
+// @StatusErr[AccountNotFound][404999017][Account Not Found]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
+// @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
+// @StatusErr[InvalidClaim][401999003][Invalid Claim]!
+// @StatusErr[InvalidToken][401999002][Invalid Token]!
+
+func (o *ListAccountAccessKey) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.ListAccountAccessKey")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *ListAccountAccessKey) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccessKeyListRsp, kit.Metadata, error) {
+	rsp := new(GithubComMachinefiW3BstreamPkgModulesAccessKeyListRsp)
+	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
+	return rsp, meta, err
+}
+
+func (o *ListAccountAccessKey) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccessKeyListRsp, kit.Metadata, error) {
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
@@ -2100,7 +2277,7 @@ func (o *LoginByEthAddress) Method() string {
 // @StatusErr[AccountNotFound][404999017][Account Not Found]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[DisabledAccount][403999002][Disabled Account]!
-// @StatusErr[GenTokenFailed][500999016][Gen Token Failed]!
+// @StatusErr[GenTokenFailed][500999013][Gen Token Failed]!
 // @StatusErr[InvalidEthLoginMessage][401999011][Invalid Siwe Message]!
 // @StatusErr[InvalidEthLoginSignature][401999010][Invalid Siwe Signature]!
 // @StatusErr[OperatorConflict][409999017][Operator Conflict]!
@@ -2138,7 +2315,7 @@ func (o *LoginByUsername) Method() string {
 // @StatusErr[AccountPasswordNotFound][404999018][Account Password Not Found]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[DisabledAccount][403999002][Disabled Account]!
-// @StatusErr[GenTokenFailed][500999016][Gen Token Failed]!
+// @StatusErr[GenTokenFailed][500999013][Gen Token Failed]!
 // @StatusErr[InvalidPassword][401999009][Invalid Password]!
 
 func (o *LoginByUsername) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
@@ -2552,6 +2729,35 @@ func (o *RemoveWasmLogByInstanceID) Invoke(cli kit.Client, metas ...kit.Metadata
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
+type UpdateAccountAccessKeyByName struct {
+	Name         string                                                  `in:"path" name:"name"`
+	AuthInHeader string                                                  `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                                  `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	UpdateReq    GithubComMachinefiW3BstreamPkgModulesAccessKeyUpdateReq `in:"body"`
+}
+
+func (o *UpdateAccountAccessKeyByName) Path() string {
+	return "/srv-applet-mgr/v0/account_access_key/:name"
+}
+
+func (o *UpdateAccountAccessKeyByName) Method() string {
+	return "PUT"
+}
+
+func (o *UpdateAccountAccessKeyByName) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.UpdateAccountAccessKeyByName")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *UpdateAccountAccessKeyByName) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
+	meta, err := cli.Do(ctx, o, metas...).Into(nil)
+	return meta, err
+}
+
+func (o *UpdateAccountAccessKeyByName) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
 type UpdateApplet struct {
 	AppletID     GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID   `in:"path" name:"appletID"`
 	AuthInHeader string                                               `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
@@ -2571,10 +2777,10 @@ func (o *UpdateApplet) Method() string {
 // @StatusErr[AppletNameConflict][409999009][Applet Name Conflict]!
 // @StatusErr[AppletNotFound][404999005][Applet Not Found]!
 // @StatusErr[ConfigConflict][409999006][Config Conflict]!
-// @StatusErr[ConfigInitFailed][500999006][Config Init Failed]!
-// @StatusErr[ConfigParseFailed][500999008][Config Parse Failed]!
-// @StatusErr[ConfigUninitFailed][500999007][Config Uninit Failed]!
-// @StatusErr[CreateInstanceFailed][500999010][Create Instance Failed]!
+// @StatusErr[ConfigInitFailed][500999005][Config Init Failed]!
+// @StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!
+// @StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!
+// @StatusErr[CreateInstanceFailed][500999008][Create Instance Failed]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[InstanceNotFound][404999006][Instance Not Found]!
@@ -2584,6 +2790,7 @@ func (o *UpdateApplet) Method() string {
 // @StatusErr[InvalidClaim][401999003][Invalid Claim]!
 // @StatusErr[InvalidConfigType][400999002][Invalid Config Type]!
 // @StatusErr[InvalidToken][401999002][Invalid Token]!
+// @StatusErr[InvalidVMState][400999012][Invalid VM State]!
 // @StatusErr[MultiInstanceDeployed][409999008][Multi Instance Deployed]!
 // @StatusErr[NoProjectPermission][401999004][No Project Permission]!
 // @StatusErr[ProjectNotFound][404999002][Project Not Found]!
@@ -2728,7 +2935,7 @@ func (o *UpdateTrafficLimit) Method() string {
 // @StatusErr[ProjectNotFound][404999002][Project Not Found]!
 // @StatusErr[TrafficLimitConflict][409999018][Traffic Limit Conflict]!
 // @StatusErr[TrafficLimitNotFound][404999020][Traffic Limit Not Found]!
-// @StatusErr[UpdateTrafficSchedulerFailed][500999019][Update Traffic Scheduler Failed]!
+// @StatusErr[UpdateTrafficSchedulerFailed][500999016][Update Traffic Scheduler Failed]!
 
 func (o *UpdateTrafficLimit) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
 	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.UpdateTrafficLimit")

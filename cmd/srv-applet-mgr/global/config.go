@@ -28,6 +28,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
@@ -136,6 +137,13 @@ func init() {
 	proxy = &client.Client{Port: uint16(ServerEvent.Port), Timeout: 10 * time.Second}
 	proxy.SetDefault()
 
+	redisKvDB := kvdb.NewRedisDB(config.Redis)
+
+	wasmApiServer, err := wasmapi.NewServer(std, config.Redis, config.Postgres, redisKvDB)
+	if err != nil {
+		std.Fatal(err)
+	}
+
 	WithContext = contextx.WithContextCompose(
 		types.WithMgrDBExecutorContext(config.Postgres),
 		types.WithMonitorDBExecutorContext(config.MonitorDB),
@@ -155,9 +163,10 @@ func init() {
 		types.WithProxyClientContext(proxy),
 		types.WithWasmDBConfigContext(config.WasmDBConfig),
 		confrate.WithRateLimitKeyContext(config.RateLimit),
-		kvdb.WithRedisDBKeyContext(kvdb.NewRedisDB(config.Redis)),
+		kvdb.WithRedisDBKeyContext(redisKvDB),
 		types.WithMetricsCenterConfigContext(config.MetricsCenter),
 		types.WithRobotNotifierConfigContext(config.RobotNotifier),
+		types.WithWasmApiServerContext(wasmApiServer),
 	)
 	Context = WithContext(context.Background())
 }

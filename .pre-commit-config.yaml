@@ -5,6 +5,8 @@ repos:
     rev: v4.4.0
     hooks:
       - id: detect-private-key
+      - id: detect-aws-credentials
+        args: [--allow-missing-credentials]
       - id: check-merge-conflict
       - id: check-added-large-files
 

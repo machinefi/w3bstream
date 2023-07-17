@@ -183,15 +183,18 @@ Please visit [https://docs.w3bstream.com/](https://docs.w3bstream.com/).
 Interested in contributing to the doc? Please edit on [Github](https://github.com/machinefi/w3bstream-docs-gitbook)
 
 ## SDKs
-### Devices
+
+### Client SDKs
+- Javascript/Typesript: https://github.com/machinefi/w3bstream-client-js
+- Python: https://github.com/machinefi/w3bstream-client-python
 - Android: https://github.com/machinefi/w3bstream-android-sdk
 - iOS: https://github.com/machinefi/w3bstream-ios-sdk
-- Embedded: Coming soon!
+- ESP32: https://github.com/machinefi/w3bstream-client-esp32
 
 ### WASM
 - Golang: https://github.com/machinefi/w3bstream-wasm-golang-sdk
 - AssemblyScript: https://github.com/machinefi/w3bstream-wasm-ts-sdk
-- Rust: Coming soon!
+- Rust: https://github.com/machinefi/w3bstream-wasm-rust-sdk
 
 
 ## Examples
