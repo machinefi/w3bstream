@@ -14,6 +14,7 @@ import (
 
 const (
 	queueLength  = 5000
+	queueBuffer  = 100
 	popThreshold = 3
 )
 
@@ -50,7 +51,7 @@ func Init(ctx context.Context) {
 
 func newClickhouseClient(cfg *clickhouse.Options) *ClickhouseClient {
 	cc := &ClickhouseClient{
-		sqLQueue: make(chan *queueElement),
+		sqLQueue: make(chan *queueElement, queueLength+queueBuffer),
 		cfg:      cfg,
 	}
 	go cc.Run()
