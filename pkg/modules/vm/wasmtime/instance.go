@@ -2,7 +2,9 @@ package wasmtime
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -11,6 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/reactivex/rxgo/v2"
+	"github.com/tidwall/gjson"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
@@ -30,16 +33,20 @@ const (
 )
 
 type Instance struct {
-	ctx      context.Context
-	id       types.SFID
-	rt       *Runtime
-	state    *atomic.Uint32
-	res      *mapx.Map[uint32, []byte]
-	evs      *mapx.Map[uint32, []byte]
-	handlers map[string]*wasmtime.Func
-	kvs      wasm.KVStore
-	msgQueue chan *Task
-	ch       chan rxgo.Item
+	ctx       context.Context
+	id        types.SFID
+	rt        *Runtime
+	state     *atomic.Uint32
+	res       *mapx.Map[uint32, []byte]
+	evs       *mapx.Map[uint32, []byte]
+	handlers  map[string]*wasmtime.Func
+	kvs       wasm.KVStore
+	msgQueue  chan *Task
+	ch        chan rxgo.Item
+	source    []string
+	operators []wasm.Operator
+	opMap     map[string]string
+	sink      wasm.Sink
 }
 
 func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte, st enums.InstanceState) (i *Instance, err error) {
@@ -78,10 +85,18 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte, st enums
 	}
 
 	go ins.queueWorker()
-	go func() {
-		observable := ins.streamCompute(ins.ch)
-		initSink(observable, ins.ctx, "db", "Customer")
-	}()
+
+	flow, ok := wasm.FlowFromContext(ctx)
+	if ok {
+		ins.source = flow.Source.Strategies
+		ins.operators = flow.Operators
+		ins.opMap = make(map[string]string)
+		ins.sink = flow.Sink
+		go func() {
+			observable := ins.streamCompute(ins.ch)
+			ins.initSink(observable, ins.ctx)
+		}()
+	}
 
 	return ins, nil
 }
@@ -138,6 +153,7 @@ func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data [
 
 func (i *Instance) queueWorker() {
 	for {
+		res := &wasm.EventHandleResult{}
 		task, more := <-i.msgQueue
 		log.FromContext(task.ctx).WithValues("eid", task.EventID).Debug(
 			fmt.Sprintf("queue len is %d and more is %t", len(i.msgQueue), more))
@@ -147,13 +163,15 @@ func (i *Instance) queueWorker() {
 
 		log.FromContext(task.ctx).WithValues("eid", task.EventID).Debug("get task from queue.")
 
-		if task.EventType == "OP_DEMO" {
-			log.FromContext(task.ctx).WithValues("eid", task.EventID).Info("OP_DEMO start.")
-			i.ch <- rxgo.Of(task)
-			continue
+		for _, typ := range i.source {
+			if task.EventType == typ {
+				log.FromContext(task.ctx).WithValues("eid", task.EventID).Info("Flow_op start.")
+				i.ch <- rxgo.Of(task)
+				goto Next
+			}
 		}
 
-		res := i.handle(task.ctx, task)
+		res = i.handle(task.ctx, task)
 		log.FromContext(task.ctx).WithValues("eid", task.EventID).Debug("event process completed.")
 		if len(res.ErrMsg) > 0 {
 			job.Dispatch(i.ctx, job.NewWasmLogTask(i.ctx, conflog.Level(log.ErrorLevel).String(), "vmTask", res.ErrMsg))
@@ -165,15 +183,83 @@ func (i *Instance) queueWorker() {
 				fmt.Sprintf("the event, whose eventtype is %s, is successfully handled by %s, ", task.EventType, task.Handler),
 			))
 		}
+	Next:
 	}
 }
 
 func (i *Instance) streamCompute(ch chan rxgo.Item) rxgo.Observable {
-	return rxgo.FromChannel(ch).Filter(i.filterFunc).Map(i.mapFunc).
-		GroupByDynamic(i.groupByKey, rxgo.WithBufferedChannel(10), rxgo.WithErrorStrategy(rxgo.ContinueOnError))
+	obs := rxgo.FromChannel(ch)
+	for index, op := range i.operators {
+		fmt.Println(index)
+		switch op.OpType {
+		case enums.FLOW_OPERATOR__FILTER:
+			filterNum := index
+			i.opMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__FILTER, filterNum)] = op.WasmFunc
+
+			obs = obs.Filter(func(inter interface{}) bool {
+				res := false
+				task := inter.(*Task)
+				fmt.Println(filterNum)
+				task.Handler = i.opMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__FILTER, filterNum)]
+
+				rb, ok := i.runOp(task)
+				if !ok {
+					conflog.Std().Error(errors.New("not found"))
+					return res
+				}
+
+				result := strings.ToLower(string(rb))
+				if result == "true" {
+					res = true
+				} else if result == "false" {
+					res = false
+				} else {
+					conflog.Std().Warn(errors.New("the value does not support"))
+				}
+
+				return res
+			})
+		case enums.FLOW_OPERATOR__MAP:
+			mapNum := index
+			i.opMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__MAP, mapNum)] = op.WasmFunc
+
+			obs = obs.Map(func(ctx context.Context, inter interface{}) (interface{}, error) {
+				task := inter.(*Task)
+				task.Handler = i.opMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__MAP, mapNum)]
+
+				rb, ok := i.runOp(task)
+				if !ok {
+					conflog.Std().Error(errors.New("mapTax result not found"))
+					return nil, errors.New("mapTax result not found")
+				}
+
+				task.Payload = rb
+				return task, nil
+			})
+		case enums.FLOW_OPERATOR__GROUP:
+			groupNum := index
+			i.opMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__GROUP, groupNum)] = op.WasmFunc
+
+			obs = obs.GroupByDynamic(func(item rxgo.Item) string {
+				task := item.V.(*Task)
+				task.Handler = i.opMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__GROUP, groupNum)]
+
+				rb, ok := i.runOp(task)
+				if !ok {
+					conflog.Std().Error(errors.New("groupByAge result not found"))
+					return "error"
+				}
+
+				groupKey := string(rb)
+				return groupKey
+			}, rxgo.WithBufferedChannel(10), rxgo.WithErrorStrategy(rxgo.ContinueOnError))
+		}
+	}
+
+	return obs
 }
 
-func initSink(observable rxgo.Observable, ctx context.Context, tye, schema string) {
+func (i *Instance) initSink(observable rxgo.Observable, ctx context.Context) {
 	c := observable.Observe()
 	for item := range c {
 
@@ -181,44 +267,63 @@ func initSink(observable rxgo.Observable, ctx context.Context, tye, schema strin
 		case rxgo.GroupedObservable: // group operator
 			go func() {
 				obs := item.V.(rxgo.GroupedObservable)
-				for i := range obs.Observe() {
-					sink(ctx, i, tye, schema)
+				// add other op like reduce
+				for it := range obs.Observe() {
+					i.sinkData(ctx, it)
 				}
 			}()
 		case rxgo.ObservableImpl: // window operator
 			obs := item.V.(rxgo.ObservableImpl)
-			for i := range obs.Observe() {
-				sink(ctx, i, tye, schema)
+			for it := range obs.Observe() {
+				i.sinkData(ctx, it)
 			}
 		default:
-			sink(ctx, item, tye, schema)
+			i.sinkData(ctx, item)
 		}
 	}
 }
 
-func sink(ctx context.Context, item rxgo.Item, tye, schema string) {
-	//customer := item.V.(models.Customer)
+func (i *Instance) sinkData(ctx context.Context, item rxgo.Item) {
 	conflog.Std().Info(fmt.Sprintf("customer: %v", string(item.V.(*Task).Payload)))
+	rowByte := item.V.(*Task).Payload
 
-	//switch tye {
-	//case "db":
-	//	d, _ := wasm.SQLStoreFromContext(ctx)
-	//	if err := customer.Create(d); err != nil {
-	//		conflog.Std().Error(err)
-	//	}
-	//case "blockchain":
-	//
-	//default:
-	//
-	//}
+	switch i.sink.SinkType {
+	case enums.FLOW_SINK__RMDB:
+		i.sink.SinkInfo.DBInfo.Endpoint = "postgres://test_user:test_passwd@127.0.0.1:5432/test?sslmode=disable"
+		i.sink.SinkInfo.DBInfo.DBType = "postgres"
+		db, err := sql.Open(i.sink.SinkInfo.DBInfo.DBType, i.sink.SinkInfo.DBInfo.Endpoint)
+		if err != nil {
+			conflog.Std().Error(err)
+		}
+		err = db.Ping()
+		if err != nil {
+			conflog.Std().Error(err)
+		}
+
+		//d := wasm.MustSQLStoreFromContext(ctx)
+		//db, _ := d.WithDefaultSchema()
+		sqlStringPrefix := fmt.Sprintf("INSERT INTO %s (", i.sink.SinkInfo.DBInfo.Table)
+		sqlStringSuffix := fmt.Sprintf(") VALUES (")
+		params := make([]interface{}, 0)
+		for index, c := range i.sink.SinkInfo.DBInfo.Columns {
+			params = append(params, gjson.GetBytes(rowByte, c).String())
+			sqlStringPrefix = sqlStringPrefix + c + ","
+			sqlStringSuffix = sqlStringSuffix + "$" + strconv.Itoa(index+1) + ","
+		}
+		sqlString := fmt.Sprintf("%s%s);", sqlStringPrefix[:len(sqlStringPrefix)-1], sqlStringSuffix[:len(sqlStringSuffix)-1])
+
+		_, err = db.ExecContext(context.Background(), sqlString, params...)
+		if err != nil {
+			conflog.Std().Error(err)
+		}
+	case enums.FLOW_SINK__CHAINBLOCK:
+
+	default:
+
+	}
 }
 
-func (i *Instance) filterFunc(inter interface{}) bool {
-	res := false
-
-	task := inter.(*Task)
-	task.Handler = "filterAge"
-
+func (i *Instance) runOp(task *Task) ([]byte, bool) {
 	rid := i.AddResource(task.ctx, []byte(task.EventType), task.Payload)
 	defer i.RmvResource(task.ctx, rid)
 
@@ -226,75 +331,11 @@ func (i *Instance) filterFunc(inter interface{}) bool {
 	conflog.Std().Info(fmt.Sprintf("%s wasm code %d", task.Handler, code))
 
 	if code < 0 {
-		return res
+		conflog.Std().Error(errors.New(fmt.Sprintf("%s wasm code run error", task.Handler)))
+		return nil, false
 	}
 
-	rb, ok := i.GetResource(uint32(code))
-	if !ok {
-		conflog.Std().Error(errors.New("not found"))
-		return res
-	}
-
-	result := strings.ToLower(string(rb))
-	if result == "true" {
-		res = true
-	} else if result == "false" {
-		res = false
-	} else {
-		conflog.Std().Warn(errors.New("the value does not support"))
-	}
-
-	return res
-}
-
-func (i *Instance) mapFunc(c context.Context, inter interface{}) (interface{}, error) {
-	task := inter.(*Task)
-	task.Handler = "mapTax"
-
-	rid := i.AddResource(task.ctx, []byte(task.EventType), task.Payload)
-	defer i.RmvResource(task.ctx, rid)
-
-	code := i.handleByRid(task.ctx, task.Handler, rid).Code
-	conflog.Std().Info(fmt.Sprintf("mapTax wasm code %d", code))
-
-	if code < 0 {
-		conflog.Std().Error(errors.New(fmt.Sprintf("%s %s error.", string(inter.(*Task).Payload), "mapTax")))
-		return nil, errors.New(fmt.Sprintf("%s %s error.", string(inter.(*Task).Payload), "mapTax"))
-	}
-
-	rb, ok := i.GetResource(uint32(code))
-	if !ok {
-		conflog.Std().Error(errors.New("mapTax result not found"))
-		return nil, errors.New("mapTax result not found")
-	}
-
-	task.Payload = rb
-	return task, nil
-}
-
-func (i *Instance) groupByKey(item rxgo.Item) string {
-	task := item.V.(*Task)
-	task.Handler = "groupByAge"
-
-	rid := i.AddResource(task.ctx, []byte(task.EventType), task.Payload)
-	defer i.RmvResource(task.ctx, rid)
-
-	code := i.handleByRid(task.ctx, task.Handler, rid).Code
-	conflog.Std().Info(fmt.Sprintf("groupByAge wasm code %d", code))
-
-	if code < 0 {
-		conflog.Std().Error(errors.New(fmt.Sprintf("%v %s error.", string(item.V.(*Task).Payload), "groupByAge")))
-		return "error"
-	}
-
-	rb, ok := i.GetResource(uint32(code))
-	if !ok {
-		conflog.Std().Error(errors.New("groupByAge result not found"))
-		return "error"
-	}
-
-	groupKey := string(rb)
-	return groupKey
+	return i.GetResource(uint32(code))
 }
 
 func (i *Instance) handleByRid(ctx context.Context, handlerName string, rid uint32) *wasm.EventHandleResult {

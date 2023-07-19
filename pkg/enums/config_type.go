@@ -12,6 +12,7 @@ const (
 	CONFIG_TYPE__PROJECT_ENV
 	_ // deprecated CONFIG_TYPE__CHAIN_CLIENT
 	CONFIG_TYPE__PROJECT_MQTT
+	CONFIG_TYPE__PROJECT_FLOW
 )
 
 // Impl empty wasm.Configuration

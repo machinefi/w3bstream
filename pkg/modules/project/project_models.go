@@ -63,11 +63,13 @@ type CreateReq struct {
 	models.ProjectBase
 	Env      *wasm.Env      `json:"envs,omitempty"`
 	Database *wasm.Database `json:"database,omitempty"`
+	Flow     *wasm.Flow     `json:"flow,omitempty"`
 }
 
 type CreateRsp struct {
 	*models.Project
 	Env          *wasm.Env      `json:"envs,omitempty"`
 	Database     *wasm.Database `json:"database,omitempty"`
+	Flow         *wasm.Flow     `json:"flow,omitempty"`
 	ChannelState datatypes.Bool `json:"channelState"`
 }

@@ -21,6 +21,7 @@ type (
 	CtxRuntimeEventTypes struct{}
 	CtxMqttClient        struct{}
 	CtxCustomMetrics     struct{}
+	CtxFlow              struct{}
 )
 
 func WithSQLStore(ctx context.Context, v *Database) context.Context {
@@ -229,6 +230,27 @@ func CustomMetricsFromContext(ctx context.Context) (metrics.CustomMetrics, bool)
 
 func MustCustomMetricsFromContext(ctx context.Context) metrics.CustomMetrics {
 	v, ok := CustomMetricsFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithFlow(ctx context.Context, flow *Flow) context.Context {
+	return contextx.WithValue(ctx, CtxFlow{}, flow)
+}
+
+func WithFlowContext(flow *Flow) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxFlow{}, flow)
+	}
+}
+
+func FlowFromContext(ctx context.Context) (*Flow, bool) {
+	v, ok := ctx.Value(CtxFlow{}).(*Flow)
+	return v, ok
+}
+
+func MustFlowFromContext(ctx context.Context) *Flow {
+	v, ok := FlowFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

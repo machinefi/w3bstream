@@ -19,6 +19,8 @@ func NewConfigurationByType(t enums.ConfigType) (Configuration, error) {
 		return &Env{}, nil
 	case enums.CONFIG_TYPE__PROJECT_MQTT:
 		return &MqttClient{}, nil
+	case enums.CONFIG_TYPE__PROJECT_FLOW:
+		return &Flow{}, nil
 	default:
 		return nil, errors.Errorf("invalid config type: %d", t)
 	}

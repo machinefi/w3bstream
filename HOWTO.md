@@ -230,7 +230,25 @@ export PROJECTENV='{
     ["envKey3", "envValue3"]
   ]
 }'
-echo '{"name":"'$PROJECTNAME'","database": '$PROJECTDATABASE',"envs":'$PROJECTENV'}' | http post :8888/srv-applet-mgr/v0/project -A bearer -a $TOK
+export PROJECTFLOW='{
+  "source": {"strategies": ["flow_poc"]},
+  "operators": [
+      {"opType": "FILTER", "wasmFunc": "filterAge"}, 
+      {"opType": "MAP", "wasmFunc": "mapTax"}, {"opType": "GROUP", "wasmFunc": "groupByAge"}
+  ],
+  "sink": {
+      "sinkType": "RMDB", 
+      "sinkInfo": {
+          "DBInfo": {
+              "endpoint": "postgres://test_user:test_passwd@127.0.0.1:5432/test?sslmode=disable" , 
+              "DBType": "postgres", 
+              "table": "customer", 
+              "columns": ["id", "firstName", "lastName", "age", "taxNumber", "city"]
+          }
+      }
+  } 
+}'
+echo '{"name":"'$PROJECTNAME'","database": '$PROJECTDATABASE',"envs":'$PROJECTENV',"flow": '$PROJECTFLOW'}' | http post :8888/srv-applet-mgr/v0/project -A bearer -a $TOK
 ```
 
 You can define your own database model.

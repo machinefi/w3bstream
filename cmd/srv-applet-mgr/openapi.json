@@ -10065,13 +10065,15 @@
           "PROJECT_DATABASE",
           "INSTANCE_CACHE",
           "PROJECT_ENV",
-          "PROJECT_MQTT"
+          "PROJECT_MQTT",
+          "PROJECT_FLOW"
         ],
         "x-enum-labels": [
           "PROJECT_DATABASE",
           "INSTANCE_CACHE",
           "PROJECT_ENV",
-          "PROJECT_MQTT"
+          "PROJECT_MQTT",
+          "PROJECT_FLOW"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.ConfigType",
         "x-id": "GithubComMachinefiW3BstreamPkgEnumsConfigType"
@@ -10088,6 +10090,38 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.DeployCmd",
         "x-id": "GithubComMachinefiW3BstreamPkgEnumsDeployCmd"
+      },
+      "GithubComMachinefiW3BstreamPkgEnumsFlowOperator": {
+        "type": "string",
+        "enum": [
+          "FILTER",
+          "MAP",
+          "FLATMAP",
+          "GROUP",
+          "COUNT"
+        ],
+        "x-enum-labels": [
+          "FILTER",
+          "MAP",
+          "FLATMAP",
+          "GROUP",
+          "COUNT"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.FlowOperator",
+        "x-id": "GithubComMachinefiW3BstreamPkgEnumsFlowOperator"
+      },
+      "GithubComMachinefiW3BstreamPkgEnumsFlowSink": {
+        "type": "string",
+        "enum": [
+          "RMDB",
+          "CHAINBLOCK"
+        ],
+        "x-enum-labels": [
+          "RMDB",
+          "CHAINBLOCK"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.FlowSink",
+        "x-id": "GithubComMachinefiW3BstreamPkgEnumsFlowSink"
       },
       "GithubComMachinefiW3BstreamPkgEnumsInstanceState": {
         "type": "string",
@@ -12437,6 +12471,18 @@
                     "x-tag-json": "envs,omitempty"
                   }
                 ]
+              },
+              "flow": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgTypesWasmFlow"
+                  },
+                  {
+                    "x-go-field-name": "Flow",
+                    "x-go-star-level": 1,
+                    "x-tag-json": "flow,omitempty"
+                  }
+                ]
               }
             },
             "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/project.CreateReq",
@@ -12484,6 +12530,18 @@
                     "x-go-field-name": "Env",
                     "x-go-star-level": 1,
                     "x-tag-json": "envs,omitempty"
+                  }
+                ]
+              },
+              "flow": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgTypesWasmFlow"
+                  },
+                  {
+                    "x-go-field-name": "Flow",
+                    "x-go-star-level": 1,
+                    "x-tag-json": "flow,omitempty"
                   }
                 ]
               }
@@ -12848,6 +12906,19 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/trafficlimit.UpdateReq",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesTrafficlimitUpdateReq"
       },
+      "GithubComMachinefiW3BstreamPkgTypesWasmCBInfo": {
+        "type": "object",
+        "properties": {
+          "chainID": {
+            "type": "integer",
+            "format": "int32",
+            "x-go-field-name": "ChainID",
+            "x-tag-json": "chainID,omitempty"
+          }
+        },
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/types/wasm.CBInfo",
+        "x-id": "GithubComMachinefiW3BstreamPkgTypesWasmCBInfo"
+      },
       "GithubComMachinefiW3BstreamPkgTypesWasmCache": {
         "type": "object",
         "properties": {
@@ -12957,6 +13028,36 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/types/wasm.Constrains",
         "x-id": "GithubComMachinefiW3BstreamPkgTypesWasmConstrains"
       },
+      "GithubComMachinefiW3BstreamPkgTypesWasmDBInfo": {
+        "type": "object",
+        "properties": {
+          "DBType": {
+            "type": "string",
+            "x-go-field-name": "DBType",
+            "x-tag-json": "DBType,omitempty"
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "x-go-field-name": "Columns",
+            "x-tag-json": "columns,omitempty"
+          },
+          "endpoint": {
+            "type": "string",
+            "x-go-field-name": "Endpoint",
+            "x-tag-json": "endpoint,omitempty"
+          },
+          "table": {
+            "type": "string",
+            "x-go-field-name": "Table",
+            "x-tag-json": "table,omitempty"
+          }
+        },
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/types/wasm.DBInfo",
+        "x-id": "GithubComMachinefiW3BstreamPkgTypesWasmDBInfo"
+      },
       "GithubComMachinefiW3BstreamPkgTypesWasmDatabase": {
         "type": "object",
         "properties": {
@@ -13008,6 +13109,48 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/types/wasm.Env",
         "x-id": "GithubComMachinefiW3BstreamPkgTypesWasmEnv"
       },
+      "GithubComMachinefiW3BstreamPkgTypesWasmFlow": {
+        "type": "object",
+        "properties": {
+          "operators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgTypesWasmOperator"
+            },
+            "x-go-field-name": "Operators",
+            "x-tag-json": "operators"
+          },
+          "sink": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgTypesWasmSink"
+              },
+              {
+                "x-go-field-name": "Sink",
+                "x-tag-json": "sink"
+              }
+            ]
+          },
+          "source": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgTypesWasmSource"
+              },
+              {
+                "x-go-field-name": "Source",
+                "x-tag-json": "source"
+              }
+            ]
+          }
+        },
+        "required": [
+          "source",
+          "operators",
+          "sink"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/types/wasm.Flow",
+        "x-id": "GithubComMachinefiW3BstreamPkgTypesWasmFlow"
+      },
       "GithubComMachinefiW3BstreamPkgTypesWasmKey": {
         "type": "object",
         "properties": {
@@ -13046,6 +13189,38 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/types/wasm.Key",
         "x-id": "GithubComMachinefiW3BstreamPkgTypesWasmKey"
       },
+      "GithubComMachinefiW3BstreamPkgTypesWasmOperator": {
+        "type": "object",
+        "properties": {
+          "opType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsFlowOperator"
+              },
+              {
+                "x-go-field-name": "OpType",
+                "x-tag-json": "opType"
+              }
+            ]
+          },
+          "parallel": {
+            "type": "integer",
+            "format": "int32",
+            "x-go-field-name": "Parallel",
+            "x-tag-json": "parallel,omitempty"
+          },
+          "wasmFunc": {
+            "type": "string",
+            "x-go-field-name": "WasmFunc",
+            "x-tag-json": "wasmFunc,omitempty"
+          }
+        },
+        "required": [
+          "opType"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/types/wasm.Operator",
+        "x-id": "GithubComMachinefiW3BstreamPkgTypesWasmOperator"
+      },
       "GithubComMachinefiW3BstreamPkgTypesWasmSchema": {
         "type": "object",
         "properties": {
@@ -13067,6 +13242,86 @@
         },
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/types/wasm.Schema",
         "x-id": "GithubComMachinefiW3BstreamPkgTypesWasmSchema"
+      },
+      "GithubComMachinefiW3BstreamPkgTypesWasmSink": {
+        "type": "object",
+        "properties": {
+          "sinkInfo": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgTypesWasmSinkInfo"
+              },
+              {
+                "x-go-field-name": "SinkInfo",
+                "x-tag-json": "sinkInfo"
+              }
+            ]
+          },
+          "sinkType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsFlowSink"
+              },
+              {
+                "x-go-field-name": "SinkType",
+                "x-tag-json": "sinkType"
+              }
+            ]
+          }
+        },
+        "required": [
+          "sinkType",
+          "sinkInfo"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/types/wasm.Sink",
+        "x-id": "GithubComMachinefiW3BstreamPkgTypesWasmSink"
+      },
+      "GithubComMachinefiW3BstreamPkgTypesWasmSinkInfo": {
+        "type": "object",
+        "properties": {
+          "DBInfo": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgTypesWasmDBInfo"
+              },
+              {
+                "x-go-field-name": "DBInfo",
+                "x-tag-json": "DBInfo,omitempty"
+              }
+            ]
+          },
+          "chainBlock": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgTypesWasmCBInfo"
+              },
+              {
+                "x-go-field-name": "ChainBlock",
+                "x-tag-json": "chainBlock,omitempty"
+              }
+            ]
+          }
+        },
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/types/wasm.SinkInfo",
+        "x-id": "GithubComMachinefiW3BstreamPkgTypesWasmSinkInfo"
+      },
+      "GithubComMachinefiW3BstreamPkgTypesWasmSource": {
+        "type": "object",
+        "properties": {
+          "strategies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "x-go-field-name": "Strategies",
+            "x-tag-json": "strategies"
+          }
+        },
+        "required": [
+          "strategies"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/types/wasm.Source",
+        "x-id": "GithubComMachinefiW3BstreamPkgTypesWasmSource"
       },
       "GithubComMachinefiW3BstreamPkgTypesWasmTable": {
         "type": "object",
