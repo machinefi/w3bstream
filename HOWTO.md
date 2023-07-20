@@ -234,7 +234,9 @@ export PROJECTFLOW='{
   "source": {"strategies": ["flow_poc"]},
   "operators": [
       {"opType": "FILTER", "wasmFunc": "filterAge"}, 
-      {"opType": "MAP", "wasmFunc": "mapTax"}, {"opType": "GROUP", "wasmFunc": "groupByAge"}
+      {"opType": "MAP", "wasmFunc": "mapTax"}, 
+      {"opType": "WINDOW", "wasmFunc": "groupByAge"},
+      {"opType": "REDUCE", "wasmFunc": "reduce"}
   ],
   "sink": {
       "sinkType": "RMDB", 

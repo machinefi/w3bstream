@@ -10097,15 +10097,15 @@
           "FILTER",
           "MAP",
           "FLATMAP",
-          "GROUP",
-          "COUNT"
+          "WINDOW",
+          "REDUCE"
         ],
         "x-enum-labels": [
           "FILTER",
           "MAP",
           "FLATMAP",
-          "GROUP",
-          "COUNT"
+          "WINDOW",
+          "REDUCE"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.FlowOperator",
         "x-id": "GithubComMachinefiW3BstreamPkgEnumsFlowOperator"

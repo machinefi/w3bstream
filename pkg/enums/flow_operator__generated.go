@@ -25,10 +25,10 @@ func ParseFlowOperatorFromString(s string) (FlowOperator, error) {
 		return FLOW_OPERATOR__MAP, nil
 	case "FLATMAP":
 		return FLOW_OPERATOR__FLATMAP, nil
-	case "GROUP":
-		return FLOW_OPERATOR__GROUP, nil
-	case "COUNT":
-		return FLOW_OPERATOR__COUNT, nil
+	case "WINDOW":
+		return FLOW_OPERATOR__WINDOW, nil
+	case "REDUCE":
+		return FLOW_OPERATOR__REDUCE, nil
 	}
 }
 
@@ -44,10 +44,10 @@ func ParseFlowOperatorFromLabel(s string) (FlowOperator, error) {
 		return FLOW_OPERATOR__MAP, nil
 	case "FLATMAP":
 		return FLOW_OPERATOR__FLATMAP, nil
-	case "GROUP":
-		return FLOW_OPERATOR__GROUP, nil
-	case "COUNT":
-		return FLOW_OPERATOR__COUNT, nil
+	case "WINDOW":
+		return FLOW_OPERATOR__WINDOW, nil
+	case "REDUCE":
+		return FLOW_OPERATOR__REDUCE, nil
 	}
 }
 
@@ -67,10 +67,10 @@ func (v FlowOperator) String() string {
 		return "MAP"
 	case FLOW_OPERATOR__FLATMAP:
 		return "FLATMAP"
-	case FLOW_OPERATOR__GROUP:
-		return "GROUP"
-	case FLOW_OPERATOR__COUNT:
-		return "COUNT"
+	case FLOW_OPERATOR__WINDOW:
+		return "WINDOW"
+	case FLOW_OPERATOR__REDUCE:
+		return "REDUCE"
 	}
 }
 
@@ -86,10 +86,10 @@ func (v FlowOperator) Label() string {
 		return "MAP"
 	case FLOW_OPERATOR__FLATMAP:
 		return "FLATMAP"
-	case FLOW_OPERATOR__GROUP:
-		return "GROUP"
-	case FLOW_OPERATOR__COUNT:
-		return "COUNT"
+	case FLOW_OPERATOR__WINDOW:
+		return "WINDOW"
+	case FLOW_OPERATOR__REDUCE:
+		return "REDUCE"
 	}
 }
 
@@ -98,7 +98,7 @@ func (v FlowOperator) TypeName() string {
 }
 
 func (v FlowOperator) ConstValues() []enum.IntStringerEnum {
-	return []enum.IntStringerEnum{FLOW_OPERATOR__FILTER, FLOW_OPERATOR__MAP, FLOW_OPERATOR__FLATMAP, FLOW_OPERATOR__GROUP, FLOW_OPERATOR__COUNT}
+	return []enum.IntStringerEnum{FLOW_OPERATOR__FILTER, FLOW_OPERATOR__MAP, FLOW_OPERATOR__FLATMAP, FLOW_OPERATOR__WINDOW, FLOW_OPERATOR__REDUCE}
 }
 
 func (v FlowOperator) MarshalText() ([]byte, error) {
