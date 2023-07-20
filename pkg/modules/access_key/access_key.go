@@ -52,7 +52,7 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 			Rand:         kctx.Rand,
 			ExpiredAt:    types.Timestamp{Time: exp},
 			Description:  r.Desc,
-			Privileges:   r.Privileges.AccessPrivileges(),
+			Privileges:   r.Privileges.ConvToPrivilegeModel(),
 		},
 		OperationTimesWithDeleted: datatypes.OperationTimesWithDeleted{
 			OperationTimes: datatypes.OperationTimes{
@@ -98,16 +98,16 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 		IdentityType: r.IdentityType,
 		IdentityID:   r.IdentityID,
 		AccessKey:    string(key),
-		ExpiredAt:    &types.Timestamp{Time: exp},
+		Privileges:   ConvToGroupMetaWithPrivileges(m.Privileges),
 		Desc:         r.Desc,
 	}
-	if rsp.ExpiredAt.IsZero() {
-		rsp.ExpiredAt = nil
+	if !exp.IsZero() {
+		rsp.ExpiredAt = &types.Timestamp{Time: exp}
 	}
 	return rsp, nil
 }
 
-func UpdateByName(ctx context.Context, name string, r *UpdateReq) error {
+func UpdateByName(ctx context.Context, name string, r *UpdateReq) (*UpdateRsp, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	acc := types.MustAccountFromContext(ctx)
 
@@ -116,7 +116,7 @@ func UpdateByName(ctx context.Context, name string, r *UpdateReq) error {
 		AccessKeyInfo: models.AccessKeyInfo{Name: name},
 	}
 
-	return sqlx.NewTasks(d).With(
+	err := sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
 			if err := m.FetchByAccountIDAndName(d); err != nil {
 				if sqlx.DBErr(err).IsNotFound() {
@@ -136,7 +136,7 @@ func UpdateByName(ctx context.Context, name string, r *UpdateReq) error {
 					Time: time.Now().UTC().Add(time.Hour * 24 * time.Duration(r.ExpirationDays)),
 				}
 			}
-			m.Privileges = r.Privileges.AccessPrivileges()
+			m.Privileges = r.Privileges.ConvToPrivilegeModel()
 			_, err := d.Exec(
 				builder.Update(d.T(m)).Set(
 					m.ColDescription().ValueBy(m.Description),
@@ -156,6 +156,23 @@ func UpdateByName(ctx context.Context, name string, r *UpdateReq) error {
 			return nil
 		},
 	).Do()
+	if err != nil {
+		return nil, err
+	}
+	rsp := &UpdateRsp{
+		Name:         m.Name,
+		IdentityType: m.IdentityType,
+		IdentityID:   m.IdentityID,
+		Privileges:   ConvToGroupMetaWithPrivileges(m.Privileges),
+		Desc:         m.Description,
+	}
+	if !m.ExpiredAt.IsZero() {
+		rsp.ExpiredAt = &m.ExpiredAt
+	}
+	if !m.LastUsed.IsZero() {
+		rsp.LastUsed = &m.LastUsed
+	}
+	return rsp, nil
 }
 
 func DeleteByName(ctx context.Context, name string) error {
@@ -195,21 +212,28 @@ func List(ctx context.Context, r *ListReq) (*ListRsp, error) {
 	ret := &ListRsp{Total: cnt}
 
 	for i := range lst {
-		v := &ListData{
-			Name: lst[i].Name,
-			Desc: lst[i].Description,
-		}
-		if !lst[i].ExpiredAt.IsZero() {
-			v.ExpiredAt = &base.Timestamp{Time: lst[i].ExpiredAt.Time}
-		}
-		if !lst[i].LastUsed.IsZero() {
-			v.LastUsed = &base.Timestamp{Time: lst[i].LastUsed.Time}
-		}
-		v.OperationTimes = lst[i].OperationTimes
-		ret.Data = append(ret.Data, v)
+		ret.Data = append(ret.Data, NewListDataByModel(&lst[i]))
 	}
 
 	return ret, nil
+}
+
+func GetByName(ctx context.Context, name string) (*ListData, error) {
+	acc := types.MustAccountFromContext(ctx)
+
+	k := &models.AccessKey{
+		RelAccount:    models.RelAccount{AccountID: acc.AccountID},
+		AccessKeyInfo: models.AccessKeyInfo{Name: name},
+	}
+
+	err := k.FetchByAccountIDAndName(types.MustMgrDBExecutorFromContext(ctx))
+	if err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, status.AccessKeyNotFound
+		}
+		return nil, status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return NewListDataByModel(k), nil
 }
 
 func Validate(ctx context.Context, key string) (interface{}, error, bool) {
@@ -242,8 +266,21 @@ func Validate(ctx context.Context, key string) (interface{}, error, bool) {
 		return nil, status.AccessKeyExpired, true
 	}
 
-	if _, ok := m.Privileges[opId]; !ok {
-		return nil, status.AccessKeyPermissionDenied, true
+	groupName, ok := gOperators[opId]
+	if !ok {
+		err = errors.Errorf("operator id is not registered: operator[%s]", opId)
+		return nil, status.AccessKeyPermissionDenied.StatusErr().WithDesc(err.Error()), true
+	}
+	perm, ok := m.Privileges[groupName]
+	if !ok {
+		err = errors.Errorf("no group permission: group[%s]", groupName)
+		return nil, status.AccessKeyPermissionDenied.StatusErr().WithDesc(err.Error()), true
+	}
+	opMeta := gOperatorGroups[groupName].Operators[opId]
+	if perm < opMeta.MinimalPerm {
+		err = errors.Errorf("no operator permission: operator[%s] group[%s] have perm[%s] need perm[%s]",
+			opId, groupName, perm, opMeta.MinimalPerm)
+		return nil, status.AccessKeyPermissionDenied.StatusErr().WithDesc(err.Error()), true
 	}
 
 	ts := base.Timestamp{Time: time.Now().UTC()}

@@ -14,6 +14,7 @@ var (
 func init() {
 	Root.Register(kit.NewRouter(&ListAccountAccessKey{}))
 	Root.Register(kit.NewRouter(&ListAccessGroupMetas{}))
+	Root.Register(kit.NewRouter(&GetAccessKeyByName{}))
 	Root.Register(kit.NewRouter(&CreateAccountAccessKey{}))
 	Root.Register(kit.NewRouter(&UpdateAccountAccessKeyByName{}))
 	Root.Register(kit.NewRouter(&DeleteAccountAccessKeyByName{}))

@@ -423,6 +423,104 @@
         }
       }
     },
+    "/srv-applet-mgr/v0/account_access_key/data/{name}": {
+      "get": {
+        "tags": [
+          "apis/account_access_key"
+        ],
+        "operationId": "GetAccessKeyByName",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-go-field-name": "Name",
+              "x-tag-name": "name"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInHeader",
+              "x-tag-name": "Authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "x-go-field-name": "AuthInQuery",
+              "x-tag-name": "authorization,omitempty",
+              "x-tag-validate": "@string[1,]"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAccessKeyListData"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
+              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
+              "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
+              "@StatusErr[InvalidToken][401999002][Invalid Token]!"
+            ]
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[AccessKeyNotFound][404999022][Account Key Not Found]!",
+              "@StatusErr[AccountNotFound][404999017][Account Not Found]!"
+            ]
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
+            ]
+          }
+        }
+      }
+    },
     "/srv-applet-mgr/v0/account_access_key/datalist": {
       "get": {
         "tags": [
@@ -847,8 +945,15 @@
           }
         },
         "responses": {
-          "204": {
-            "description": ""
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAccessKeyUpdateRsp"
+                }
+              }
+            }
           },
           "401": {
             "description": "",
@@ -6665,6 +6770,7 @@
               }
             },
             "x-status-errors": [
+              "@StatusErr[AccessKeyNotFound][404999022][Account Key Not Found]!",
               "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
               "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!"
@@ -11549,29 +11655,26 @@
               }
             ]
           },
-          "lastUsed": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp"
-              },
-              {
-                "x-go-field-name": "LastUsed",
-                "x-go-star-level": 1,
-                "x-tag-json": "lastUsed,omitempty"
-              }
-            ]
-          },
           "name": {
             "type": "string",
             "x-go-field-name": "Name",
             "x-tag-json": "name"
+          },
+          "privileges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaWithPrivilege"
+            },
+            "x-go-field-name": "Privileges",
+            "x-tag-json": "privileges"
           }
         },
         "required": [
           "name",
           "identityType",
           "identityID",
-          "accessKey"
+          "accessKey",
+          "privileges"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/access_key.CreateRsp",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateRsp"
@@ -11632,6 +11735,34 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/access_key.GroupMetaBase",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaBase"
       },
+      "GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaWithPrivilege": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "perm": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsAccessPermission"
+                  },
+                  {
+                    "x-go-field-name": "Perm",
+                    "x-tag-json": "perm"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "perm"
+            ],
+            "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/access_key.GroupMetaWithPrivilege",
+            "x-id": "GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaWithPrivilege"
+          }
+        ]
+      },
       "GithubComMachinefiW3BstreamPkgModulesAccessKeyListData": {
         "allOf": [
           {
@@ -11673,6 +11804,14 @@
                 "type": "string",
                 "x-go-field-name": "Name",
                 "x-tag-json": "name"
+              },
+              "privileges": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaWithPrivilege"
+                },
+                "x-go-field-name": "Privileges",
+                "x-tag-json": "privileges,omitempty"
               }
             },
             "required": [
@@ -11736,6 +11875,83 @@
         },
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/access_key.UpdateReq",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesAccessKeyUpdateReq"
+      },
+      "GithubComMachinefiW3BstreamPkgModulesAccessKeyUpdateRsp": {
+        "type": "object",
+        "properties": {
+          "desc": {
+            "type": "string",
+            "x-go-field-name": "Desc",
+            "x-tag-json": "desc,omitempty"
+          },
+          "expiredAt": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp"
+              },
+              {
+                "x-go-field-name": "ExpiredAt",
+                "x-go-star-level": 1,
+                "x-tag-json": "expiredAt,omitempty"
+              }
+            ]
+          },
+          "identityID": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+              },
+              {
+                "x-go-field-name": "IdentityID",
+                "x-tag-json": "identityID"
+              }
+            ]
+          },
+          "identityType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsAccessKeyIdentityType"
+              },
+              {
+                "x-go-field-name": "IdentityType",
+                "x-tag-json": "identityType"
+              }
+            ]
+          },
+          "lastUsed": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp"
+              },
+              {
+                "x-go-field-name": "LastUsed",
+                "x-go-star-level": 1,
+                "x-tag-json": "lastUsed,omitempty"
+              }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "x-go-field-name": "Name",
+            "x-tag-json": "name"
+          },
+          "privileges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaWithPrivilege"
+            },
+            "x-go-field-name": "Privileges",
+            "x-tag-json": "privileges"
+          }
+        },
+        "required": [
+          "name",
+          "identityType",
+          "identityID",
+          "privileges"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/access_key.UpdateRsp",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesAccessKeyUpdateRsp"
       },
       "GithubComMachinefiW3BstreamPkgModulesAccountCreateAccountByUsernameReq": {
         "type": "object",

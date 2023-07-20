@@ -14,10 +14,11 @@ import (
 )
 
 type OperatorMeta struct {
-	OperatorID string
-	Summary    string
-	Method     string
-	Attr       enums.ApiOperatorAttr
+	OperatorID  string
+	Summary     string
+	Method      string
+	Attr        enums.ApiOperatorAttr
+	MinimalPerm enums.AccessPermission
 }
 
 type WithOperatorAttr interface {
@@ -31,7 +32,7 @@ type GroupMetaBase struct {
 
 type GroupMeta struct {
 	GroupMetaBase
-	Operators []*OperatorMeta
+	Operators map[string]*OperatorMeta
 }
 
 type GroupAccessPrivilege struct {
@@ -41,44 +42,62 @@ type GroupAccessPrivilege struct {
 
 type GroupAccessPrivileges []GroupAccessPrivilege
 
-func (gaps GroupAccessPrivileges) AccessPrivileges() models.AccessPrivileges {
-	ret := make(models.AccessPrivileges)
+func (gaps GroupAccessPrivileges) ConvToPrivilegeModel() models.GroupAccessPrivileges {
+	ret := make(models.GroupAccessPrivileges)
+
+	for k := range gOperatorGroups {
+		ret[k] = enums.ACCESS_PERMISSION__NO_ACCESS
+	}
 
 	for i := range gaps {
 		p := &gaps[i]
-		meta, ok := gOperatorGroups[p.Name]
-		if !ok {
+		if _, ok := ret[p.Name]; !ok {
 			continue
 		}
 
 		switch p.Perm {
-		case enums.ACCESS_PERMISSION__READ_WRITE:
-			for _, op := range meta.Operators {
-				ret[op.OperatorID] = struct{}{}
-			}
-		case enums.ACCESS_PERMISSION__READONLY:
-			for _, op := range meta.Operators {
-				if op.Method == http.MethodGet {
-					ret[op.OperatorID] = struct{}{}
-				}
-			}
+		case enums.ACCESS_PERMISSION__READ_WRITE, enums.ACCESS_PERMISSION__READONLY, enums.ACCESS_PERMISSION__NO_ACCESS:
+			ret[p.Name] = p.Perm
 		default:
-			continue
+			ret[p.Name] = enums.ACCESS_PERMISSION__NO_ACCESS
 		}
 	}
 	return ret
 }
 
-var (
-	gOperatorGroups = map[string]*GroupMeta{}
+func ConvToGroupMetaWithPrivileges(privileges models.GroupAccessPrivileges) []*GroupMetaWithPrivilege {
+	ret := make([]*GroupMetaWithPrivilege, 0, len(privileges))
+	for name, perm := range privileges {
+		ret = append(ret, &GroupMetaWithPrivilege{
+			GroupMetaBase: GroupMetaBase{
+				Name: name,
+				Desc: gOperatorGroups[name].Desc,
+			},
+			Perm: perm,
+		})
+	}
+	return ret
+}
 
+type GroupMetaWithPrivilege struct {
+	GroupMetaBase
+	Perm enums.AccessPermission `json:"perm"`
+}
+
+var (
+	// gOperatorGroups mapping group name and  group meta
+	gOperatorGroups = map[string]*GroupMeta{}
+	// gOperators mapping operator id and group name
+	gOperators = map[string]string{}
+
+	// gOperatorGroupMetas group meta list
 	gOperatorGroupMetas         []*GroupMetaBase
 	gOperatorGroupMetasInitOnce = &sync.Once{}
 )
 
 func RouterRegister(r *kit.Router, name, desc string) {
 	if _, ok := gOperatorGroups[name]; ok {
-		panic(errors.Errorf("operator group: %s already registered", name))
+		panic(errors.Errorf("group already registered: group[%s]", name))
 	}
 
 	routes := r.Routes()
@@ -87,6 +106,7 @@ func RouterRegister(r *kit.Router, name, desc string) {
 			Name: name,
 			Desc: desc,
 		},
+		Operators: map[string]*OperatorMeta{},
 	}
 
 	for _, route := range routes {
@@ -100,10 +120,25 @@ func RouterRegister(r *kit.Router, name, desc string) {
 			Attr:       enums.API_OPERATOR_ATTR__COMMON,
 		}
 
+		switch op.Method {
+		case http.MethodGet:
+			op.MinimalPerm = enums.ACCESS_PERMISSION__READONLY
+		case http.MethodPost, http.MethodPut, http.MethodDelete:
+			op.MinimalPerm = enums.ACCESS_PERMISSION__READ_WRITE
+		default:
+			continue
+		}
+
 		if with, ok := fact.Operator.(WithOperatorAttr); ok {
 			op.Attr = with.OperatorAttr()
 		}
-		group.Operators = append(group.Operators, op)
+
+		if groupName, ok := gOperators[op.OperatorID]; ok {
+			panic(errors.Errorf("operator id already registered in group: operator[%s] group[%s]", op.OperatorID, groupName))
+		}
+
+		gOperators[op.OperatorID] = name
+		group.Operators[op.OperatorID] = op
 	}
 	gOperatorGroups[name] = group
 }
