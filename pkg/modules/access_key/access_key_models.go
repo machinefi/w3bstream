@@ -9,6 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	base "github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/depends/x/stringsx"
@@ -43,8 +44,8 @@ type CreateRsp struct {
 	IdentityType enums.AccessKeyIdentityType `json:"identityType"`
 	IdentityID   types.SFID                  `json:"identityID"`
 	AccessKey    string                      `json:"accessKey"`
+	Privileges   []*GroupMetaWithPrivilege   `json:"privileges"`
 	ExpiredAt    *types.Timestamp            `json:"expiredAt,omitempty"`
-	LastUsed     *types.Timestamp            `json:"lastUsed,omitempty"`
 	Desc         string                      `json:"desc,omitempty"`
 }
 
@@ -54,11 +55,46 @@ type UpdateReq struct {
 	Privileges     GroupAccessPrivileges `json:"privileges,omitempty"`
 }
 
+type UpdateRsp struct {
+	Name         string                      `json:"name"`
+	IdentityType enums.AccessKeyIdentityType `json:"identityType"`
+	IdentityID   types.SFID                  `json:"identityID"`
+	Privileges   []*GroupMetaWithPrivilege   `json:"privileges"`
+	ExpiredAt    *types.Timestamp            `json:"expiredAt,omitempty"`
+	LastUsed     *types.Timestamp            `json:"lastUsed,omitempty"`
+	Desc         string                      `json:"desc,omitempty"`
+}
+
+func NewListDataByModel(v *models.AccessKey) *ListData {
+	ret := &ListData{
+		Name:           v.Name,
+		Desc:           v.Description,
+		OperationTimes: v.OperationTimes,
+	}
+	if !v.ExpiredAt.IsZero() {
+		ret.ExpiredAt = &base.Timestamp{Time: v.ExpiredAt.Time}
+	}
+	if !v.LastUsed.IsZero() {
+		ret.LastUsed = &base.Timestamp{Time: v.LastUsed.Time}
+	}
+	for name, perm := range v.Privileges {
+		ret.Privileges = append(ret.Privileges, GroupMetaWithPrivilege{
+			GroupMetaBase: GroupMetaBase{
+				Name: name,
+				Desc: gOperatorGroups[name].Desc,
+			},
+			Perm: perm,
+		})
+	}
+	return ret
+}
+
 type ListData struct {
-	Name      string           `json:"name"`
-	ExpiredAt *types.Timestamp `json:"expiredAt,omitempty"`
-	LastUsed  *types.Timestamp `json:"lastUsed,omitempty"`
-	Desc      string           `json:"desc,omitempty"`
+	Name       string                   `json:"name"`
+	ExpiredAt  *types.Timestamp         `json:"expiredAt,omitempty"`
+	LastUsed   *types.Timestamp         `json:"lastUsed,omitempty"`
+	Privileges []GroupMetaWithPrivilege `json:"privileges,omitempty"`
+	Desc       string                   `json:"desc,omitempty"`
 	datatypes.OperationTimes
 }
 

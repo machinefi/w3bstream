@@ -6,6 +6,7 @@ import (
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
+	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -133,6 +134,13 @@ func RemoveBySFID(ctx context.Context, acc *models.Account, prj *models.Project,
 				return status.DatabaseError.StatusErr().WithDesc(err.Error())
 			}
 			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			ctx := contextx.WithContextCompose(
+				types.WithMgrDBExecutorContext(d),
+				types.WithAccountContext(acc),
+			)(ctx)
+			return access_key.DeleteByName(ctx, "pub_"+id.String())
 		},
 	).Do(); err != nil {
 		return err

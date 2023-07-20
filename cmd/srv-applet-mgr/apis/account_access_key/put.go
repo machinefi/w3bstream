@@ -19,5 +19,5 @@ func (r *UpdateAccountAccessKeyByName) Path() string { return "/:name" }
 
 func (r *UpdateAccountAccessKeyByName) Output(ctx context.Context) (interface{}, error) {
 	ca := middleware.MustCurrentAccountFromContext(ctx)
-	return nil, access_key.UpdateByName(ca.WithAccount(ctx), r.Name, &r.UpdateReq)
+	return access_key.UpdateByName(ca.WithAccount(ctx), r.Name, &r.UpdateReq)
 }

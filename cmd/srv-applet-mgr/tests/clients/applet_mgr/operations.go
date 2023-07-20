@@ -1110,6 +1110,44 @@ func (o *EthClient) Invoke(cli kit.Client, metas ...kit.Metadata) (*EthClientRsp
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
+type GetAccessKeyByName struct {
+	Name         string `in:"path" name:"name"`
+	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+}
+
+func (o *GetAccessKeyByName) Path() string {
+	return "/srv-applet-mgr/v0/account_access_key/data/:name"
+}
+
+func (o *GetAccessKeyByName) Method() string {
+	return "GET"
+}
+
+// @StatusErr[AccessKeyNotFound][404999022][Account Key Not Found]!
+// @StatusErr[AccountNotFound][404999017][Account Not Found]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
+// @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
+// @StatusErr[InvalidClaim][401999003][Invalid Claim]!
+// @StatusErr[InvalidToken][401999002][Invalid Token]!
+
+func (o *GetAccessKeyByName) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.GetAccessKeyByName")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *GetAccessKeyByName) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccessKeyListData, kit.Metadata, error) {
+	rsp := new(GithubComMachinefiW3BstreamPkgModulesAccessKeyListData)
+	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
+	return rsp, meta, err
+}
+
+func (o *GetAccessKeyByName) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccessKeyListData, kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
 type GetApplet struct {
 	AppletID     GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"appletID"`
 	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
@@ -2744,17 +2782,27 @@ func (o *UpdateAccountAccessKeyByName) Method() string {
 	return "PUT"
 }
 
+// @StatusErr[AccessKeyNotFound][404999022][Account Key Not Found]!
+// @StatusErr[AccountNotFound][404999017][Account Not Found]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
+// @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
+// @StatusErr[InvalidClaim][401999003][Invalid Claim]!
+// @StatusErr[InvalidToken][401999002][Invalid Token]!
+
 func (o *UpdateAccountAccessKeyByName) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
 	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.UpdateAccountAccessKeyByName")
 	return cli.Do(ctx, o, metas...)
 }
 
-func (o *UpdateAccountAccessKeyByName) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
-	meta, err := cli.Do(ctx, o, metas...).Into(nil)
-	return meta, err
+func (o *UpdateAccountAccessKeyByName) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccessKeyUpdateRsp, kit.Metadata, error) {
+	rsp := new(GithubComMachinefiW3BstreamPkgModulesAccessKeyUpdateRsp)
+	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
+	return rsp, meta, err
 }
 
-func (o *UpdateAccountAccessKeyByName) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Metadata, error) {
+func (o *UpdateAccountAccessKeyByName) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccessKeyUpdateRsp, kit.Metadata, error) {
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 

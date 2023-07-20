@@ -940,7 +940,24 @@ output like
     "accessKey": "w3b_xxxx",
     "desc": "desc",
     "expiredAt": "2023-07-21T08:13:08.592213Z",
-    "name": "key_name"
+    "name": "key_name",
+    "privileges": [
+        {
+            "desc": "View and manage project blockchain operator",
+            "name": "Project Operator",
+            "perm": "NO_ACCESS"
+        },
+        {
+            "desc": "View and manage project config",
+            "name": "Project Config",
+            "perm": "NO_ACCESS"
+        },
+        {
+            "desc": "View and manage applet",
+            "name": "Applet",
+            "perm": "NO_ACCESS"
+        }
+    ]
 }
 ```
 
@@ -953,6 +970,36 @@ export KEY_EXPIRATION_DAYS=30
 export KEY_PRIVILEGES='[{"name":"Account", "perm":"READ_WRITE"},{"name":"Account Access Key", "perm":"NO_ACCESS"}, {"name":"Project", "perm":"READONLY"}]'
 
 echo '{"expirationDays":'$KEY_EXPIRATION_DAYS', "desc":"'$KEY_DESC'", "privileges":'$KEY_PRIVILEGES'}' | http put :8888/srv-applet-mgr/v0/account_access_key/$KEY_NAME -A bearer -a $TOK
+```
+
+output like
+
+```json
+{
+    "desc": "test access",
+    "expiredAt": "2023-08-19T01:01:43.847047Z",
+    "identityID": "155396149766916097",
+    "identityType": "ACCOUNT",
+    "lastUsed": "2023-07-20T08:46:28+08:00",
+    "name": "test",
+    "privileges": [
+        {
+            "desc": "View and manage project blockchain operator",
+            "name": "Project Operator",
+            "perm": "NO_ACCESS"
+        },
+        {
+            "desc": "View and manage project config",
+            "name": "Project Config",
+            "perm": "NO_ACCESS"
+        },
+        {
+            "desc": "View and manage applet",
+            "name": "Applet",
+            "perm": "NO_ACCESS"
+        }
+    ]
+}
 ```
 
 ## Delete Access Key
@@ -979,7 +1026,24 @@ output like
             "desc": "desc",
             "lastUsed": "2023-07-03T05:03:22+08:00",
             "name": "test",
-            "updatedAt": "2023-07-03T05:03:22+08:00"
+            "updatedAt": "2023-07-03T05:03:22+08:00",
+            "privileges": [
+                {
+                    "desc": "View and manage project blockchain operator",
+                    "name": "Project Operator",
+                    "perm": "NO_ACCESS"
+                },
+                {
+                    "desc": "View and manage project config",
+                    "name": "Project Config",
+                    "perm": "NO_ACCESS"
+                },
+                {
+                    "desc": "View and manage applet",
+                    "name": "Applet",
+                    "perm": "NO_ACCESS"
+                }
+            ]
         }
     ],
     "total": 1

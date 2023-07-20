@@ -297,17 +297,25 @@ type GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupAccessPrivileges = acces
 
 type GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaBase = access_key.GroupMetaBase
 
+type GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaWithPrivilege struct {
+	GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaBase
+	Perm GithubComMachinefiW3BstreamPkgEnumsAccessPermission `json:"perm"`
+}
+
 type GithubComMachinefiW3BstreamPkgModulesAccessKeyListData struct {
 	GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimes
-	Desc      string                                                   `json:"desc,omitempty"`
-	ExpiredAt *GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp `json:"expiredAt,omitempty"`
-	LastUsed  *GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp `json:"lastUsed,omitempty"`
-	Name      string                                                   `json:"name"`
+	Desc       string                                                                 `json:"desc,omitempty"`
+	ExpiredAt  *GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp               `json:"expiredAt,omitempty"`
+	LastUsed   *GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp               `json:"lastUsed,omitempty"`
+	Name       string                                                                 `json:"name"`
+	Privileges []GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaWithPrivilege `json:"privileges,omitempty"`
 }
 
 type GithubComMachinefiW3BstreamPkgModulesAccessKeyListRsp = access_key.ListRsp
 
 type GithubComMachinefiW3BstreamPkgModulesAccessKeyUpdateReq = access_key.UpdateReq
+
+type GithubComMachinefiW3BstreamPkgModulesAccessKeyUpdateRsp = access_key.UpdateRsp
 
 type GithubComMachinefiW3BstreamPkgModulesAccountCreateAccountByUsernameReq = account.CreateAccountByUsernameReq
 
