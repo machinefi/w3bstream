@@ -9,10 +9,8 @@ import (
 
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
-	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/modules/projectoperator"
-	apitypes "github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/types"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
@@ -30,7 +28,8 @@ type sendTxResp struct {
 }
 
 func (h *Handler) SendTx(c *gin.Context) {
-	_, l := h.l.Start(c, "wasmapi.handler.SendTx")
+	l := types.MustLoggerFromContext(c.Request.Context())
+	_, l = l.Start(c, "wasmapi.handler.SendTx")
 	defer l.End()
 
 	var req sendTxReq
@@ -40,24 +39,12 @@ func (h *Handler) SendTx(c *gin.Context) {
 		return
 	}
 
-	projectID := types.SFID(0)
-	if err := projectID.UnmarshalText([]byte(c.Request.Header.Get(apitypes.W3bstreamSystemProjectID))); err != nil {
-		l.Error(errors.Wrap(err, "decode project id failed"))
-		c.JSON(http.StatusInternalServerError, newErrResp(err))
-		return
-	}
+	prj := types.MustProjectFromContext(c.Request.Context())
 
-	l = l.WithValues("ProjectID", projectID)
-
-	prj := &models.Project{RelProject: models.RelProject{ProjectID: projectID}}
-	if err := prj.FetchByProjectID(h.mgrDB); err != nil {
-		l.Error(errors.Wrap(err, "fetch project failed"))
-		c.JSON(http.StatusInternalServerError, newErrResp(err))
-		return
-	}
+	l = l.WithValues("ProjectID", prj.ProjectID)
 
 	ctx := contextx.WithContextCompose(
-		types.WithLoggerContext(h.l),
+		types.WithLoggerContext(l),
 		types.WithMgrDBExecutorContext(h.mgrDB),
 		types.WithETHClientConfigContext(h.ethCli),
 	)(context.Background())

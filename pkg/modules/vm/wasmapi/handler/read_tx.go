@@ -5,10 +5,12 @@ import (
 	"net/http"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
+
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 type readTxReq struct {
@@ -17,11 +19,12 @@ type readTxReq struct {
 }
 
 type readTxResp struct {
-	Transaction *types.Transaction `json:"transaction,omitempty"`
+	Transaction *ethtypes.Transaction `json:"transaction,omitempty"`
 }
 
 func (h *Handler) ReadTx(c *gin.Context) {
-	_, l := h.l.Start(c, "wasmapi.handler.ReadTx")
+	l := types.MustLoggerFromContext(c.Request.Context())
+	_, l = l.Start(c, "wasmapi.handler.ReadTx")
 	defer l.End()
 
 	var req readTxReq

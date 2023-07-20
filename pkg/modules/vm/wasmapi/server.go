@@ -53,12 +53,12 @@ func (s *Server) Shutdown() {
 	s.srv.Shutdown()
 }
 
-func newRouter(mgrDB sqlx.DBExecutor, l log.Logger, ethCli *types.ETHClientConfig) *gin.Engine {
+func newRouter(mgrDB sqlx.DBExecutor, ethCli *types.ETHClientConfig) *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Recovery())
 	router.Use(handler.ParamValidate())
 
-	handlers := handler.New(mgrDB, l, ethCli)
+	handlers := handler.New(mgrDB, ethCli)
 
 	router.GET("/system/hello", handlers.Hello)
 	router.GET("/system/read_tx", handlers.ReadTx)
@@ -68,7 +68,7 @@ func newRouter(mgrDB sqlx.DBExecutor, l log.Logger, ethCli *types.ETHClientConfi
 }
 
 func NewServer(l log.Logger, redisConf *redis.Redis, mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB, ethCli *types.ETHClientConfig) (*Server, error) {
-	router := newRouter(mgrDB, l, ethCli)
+	router := newRouter(mgrDB, ethCli)
 
 	redisCli := asynq.RedisClientOpt{
 		Network:      redisConf.Protocol,

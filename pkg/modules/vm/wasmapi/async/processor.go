@@ -18,7 +18,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
-	apitypes "github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/types"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
@@ -48,7 +47,10 @@ func (p *ApiCallProcessor) ProcessTask(ctx context.Context, t *asynq.Task) error
 		return fmt.Errorf("http.ReadRequest failed: %v: %w", err, asynq.SkipRetry)
 	}
 
-	req.Header.Set(apitypes.W3bstreamSystemProjectID, payload.Project.ProjectID.String())
+	req = req.WithContext(contextx.WithContextCompose(
+		types.WithProjectContext(payload.Project),
+		types.WithLoggerContext(p.l),
+	)(ctx))
 
 	resp := httptest.NewRecorder()
 	p.router.ServeHTTP(resp, req)
