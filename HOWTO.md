@@ -442,6 +442,7 @@ output like:
 ```sh
 echo $PROJECTENV | http post :8888/srv-applet-mgr/v0/project_config/x/$PROJECTNAME/PROJECT_ENV -A bearer -a $TOK
 echo $PROJECTDATABASE | http post :8888/srv-applet-mgr/v0/project_config/x/$PROJECTNAME/PROJECT_DATABASE -A bearer -a $TOK
+echo $PROJECTFLOW | http post :8888/srv-applet-mgr/v0/project_config/x/$PROJECTNAME/PROJECT_FLOW -A bearer -a $TOK
 ```
 
 ### Review your projects and project configurations
@@ -450,6 +451,7 @@ echo $PROJECTDATABASE | http post :8888/srv-applet-mgr/v0/project_config/x/$PROJ
 http get :8888/srv-applet-mgr/v0/project/x/$PROJECTNAME/data -A bearer -a $TOK ## fetch project by name
 http get :8888/srv-applet-mgr/v0/project_config/x/demo/PROJECT_ENV -A bearer -a $TOK  # fetch project env configuration
 http get :8888/srv-applet-mgr/v0/project_config/x/demo/PROJECT_DATABASE -A bearer -a $TOK  # fetch project database configuration
+http get :8888/srv-applet-mgr/v0/project_config/x/$PROJECTNAME/PROJECT_FLOW -A bearer -a $TOK  # fetch project database configuration
 http get :8888/srv-applet-mgr/v0/project/datalist -A bearer -a $TOK # fetch project list you created
 ```
 
