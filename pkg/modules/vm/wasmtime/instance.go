@@ -47,6 +47,7 @@ type Instance struct {
 	operators   []wasm.Operator
 	simpleOpMap map[string]string
 	windOps     []wasm.Operator
+	windOpMap   map[string]string
 	sink        wasm.Sink
 }
 
@@ -92,6 +93,7 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte, st enums
 		ins.source = flow.Source.Strategies
 		ins.operators = flow.Operators
 		ins.simpleOpMap = make(map[string]string)
+		ins.windOpMap = make(map[string]string)
 		ins.windOps = make([]wasm.Operator, 0)
 		ins.sink = flow.Sink
 		go func() {
@@ -262,15 +264,23 @@ func (i *Instance) initSink(observable rxgo.Observable, ctx context.Context) {
 				}
 			}()
 		case *rxgo.ObservableImpl: // window operator
-			obs := item.V
-			for _, op := range i.windOps {
+			var (
+				obs   = item.V
+				index = 0
+				op    = wasm.Operator{}
+			)
+
+			for index, op = range i.windOps {
 				switch op.OpType {
 				// last op
 				case enums.FLOW_OPERATOR__REDUCE:
+					reduceNum := index
+					i.windOpMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__REDUCE, reduceNum)] = op.WasmFunc
+
 					obs = obs.(*rxgo.ObservableImpl).Reduce(func(ctx context.Context, inter1 interface{}, inter2 interface{}) (interface{}, error) {
 						var task1, task2 *Task
 						task2 = inter2.(*Task)
-						task2.Handler = op.WasmFunc
+						task2.Handler = i.windOpMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__REDUCE, reduceNum)]
 
 						tasks := make([]*Task, 0)
 						if inter1 != nil {
@@ -288,9 +298,28 @@ func (i *Instance) initSink(observable rxgo.Observable, ctx context.Context) {
 						task2.Payload = rb
 						return task2, nil
 					})
+				case enums.FLOW_OPERATOR__GROUP:
+					groupNum := index
+					i.windOpMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__GROUP, groupNum)] = op.WasmFunc
+
+					obs = obs.(*rxgo.ObservableImpl).GroupByDynamic(func(item rxgo.Item) string {
+						task := item.V.(*Task)
+						task.Handler = i.windOpMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__GROUP, groupNum)]
+
+						rb, ok := i.runOp(task)
+						if !ok {
+							conflog.Std().Error(errors.New(fmt.Sprintf("%s result not found", op.WasmFunc)))
+							return "error"
+						}
+
+						groupKey := string(rb)
+						return groupKey
+					}, rxgo.WithBufferedChannel(2), rxgo.WithErrorStrategy(rxgo.ContinueOnError))
+					goto skip
 				}
 			}
 
+		skip:
 			switch obs.(type) {
 			case rxgo.OptionalSingle:
 				for it := range obs.(rxgo.OptionalSingle).Observe() {
@@ -298,7 +327,62 @@ func (i *Instance) initSink(observable rxgo.Observable, ctx context.Context) {
 				}
 			case *rxgo.ObservableImpl:
 				for it := range obs.(*rxgo.ObservableImpl).Observe() {
-					i.sinkData(ctx, it)
+					// check group or common
+					switch it.V.(type) {
+					case rxgo.GroupedObservable:
+						go func() {
+							grpObs := it.V
+							op := wasm.Operator{}
+							// add other op like reduce
+							// there are other ops after group op, should add here
+							if index < len(i.windOps)-1 {
+								for j := index; j < len(i.windOps); j++ {
+									op = i.windOps[j]
+									switch op.OpType {
+									case enums.FLOW_OPERATOR__REDUCE:
+										reduceNum := j
+										i.windOpMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__REDUCE, reduceNum)] = op.WasmFunc
+
+										grpObs = grpObs.(rxgo.GroupedObservable).Reduce(func(ctx context.Context, inter1 interface{}, inter2 interface{}) (interface{}, error) {
+											var task1, task2 *Task
+											task2 = inter2.(*Task)
+											task2.Handler = i.windOpMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__REDUCE, reduceNum)]
+
+											tasks := make([]*Task, 0)
+											if inter1 != nil {
+												task1 = inter1.(*Task)
+											}
+											tasks = append(tasks, task1)
+											tasks = append(tasks, task2)
+
+											rb, ok := i.runOp(tasks...)
+											if !ok {
+												conflog.Std().Error(errors.New(fmt.Sprintf("%s result not found", op.WasmFunc)))
+												return nil, errors.New(fmt.Sprintf("%s result not found", op.WasmFunc))
+											}
+
+											task2.Payload = rb
+											return task2, nil
+										})
+									}
+								}
+							}
+							switch grpObs.(type) {
+							case rxgo.OptionalSingle:
+								for it := range grpObs.(rxgo.OptionalSingle).Observe() {
+									i.sinkData(ctx, it)
+								}
+							case *rxgo.ObservableImpl:
+								for it := range grpObs.(*rxgo.ObservableImpl).Observe() {
+									i.sinkData(ctx, it)
+								}
+							default:
+								i.sinkData(ctx, it)
+							}
+						}()
+					default:
+						i.sinkData(ctx, it)
+					}
 				}
 			}
 		default:

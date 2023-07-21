@@ -10365,6 +10365,7 @@
           "MAP",
           "FLATMAP",
           "WINDOW",
+          "GROUP",
           "REDUCE"
         ],
         "x-enum-labels": [
@@ -10372,6 +10373,7 @@
           "MAP",
           "FLATMAP",
           "WINDOW",
+          "GROUP",
           "REDUCE"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.FlowOperator",

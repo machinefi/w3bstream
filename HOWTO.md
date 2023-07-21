@@ -236,6 +236,7 @@ export PROJECTFLOW='{
       {"opType": "FILTER", "wasmFunc": "filterAge"}, 
       {"opType": "MAP", "wasmFunc": "mapTax"}, 
       {"opType": "WINDOW", "wasmFunc": "groupByAge"},
+      {"opType": "GROUP", "wasmFunc": "groupByAge"},
       {"opType": "REDUCE", "wasmFunc": "reduce"}
   ],
   "sink": {
