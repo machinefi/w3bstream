@@ -201,6 +201,7 @@ func (i *Instance) streamCompute(ch chan rxgo.Item) rxgo.Observable {
 			i.simpleOpMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__FILTER, filterNum)] = op.WasmFunc
 
 			obs = obs.Filter(func(inter interface{}) bool {
+				start := time.Now()
 				res := false
 				task := inter.(*Task)
 				fmt.Println(filterNum)
@@ -220,7 +221,8 @@ func (i *Instance) streamCompute(ch chan rxgo.Item) rxgo.Observable {
 				} else {
 					conflog.Std().Warn(errors.New("the value does not support"))
 				}
-
+				duration := time.Since(start)
+				conflog.Std().Info(fmt.Sprintf("%s template cost %s", task.Handler, duration.String()))
 				return res
 			})
 		case op.OpType == enums.FLOW_OPERATOR__MAP:
@@ -228,6 +230,7 @@ func (i *Instance) streamCompute(ch chan rxgo.Item) rxgo.Observable {
 			i.simpleOpMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__MAP, mapNum)] = op.WasmFunc
 
 			obs = obs.Map(func(ctx context.Context, inter interface{}) (interface{}, error) {
+				start := time.Now()
 				task := inter.(*Task)
 				task.Handler = i.simpleOpMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__MAP, mapNum)]
 
@@ -238,6 +241,8 @@ func (i *Instance) streamCompute(ch chan rxgo.Item) rxgo.Observable {
 				}
 
 				task.Payload = rb
+				duration := time.Since(start)
+				conflog.Std().Info(fmt.Sprintf("%s template cost %s", task.Handler, duration.String()))
 				return task, nil
 			})
 		case op.OpType == enums.FLOW_OPERATOR__WINDOW:
@@ -278,6 +283,7 @@ func (i *Instance) initSink(observable rxgo.Observable, ctx context.Context) {
 					i.windOpMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__REDUCE, reduceNum)] = op.WasmFunc
 
 					obs = obs.(*rxgo.ObservableImpl).Reduce(func(ctx context.Context, inter1 interface{}, inter2 interface{}) (interface{}, error) {
+						start := time.Now()
 						var task1, task2 *Task
 						task2 = inter2.(*Task)
 						task2.Handler = i.windOpMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__REDUCE, reduceNum)]
@@ -296,6 +302,8 @@ func (i *Instance) initSink(observable rxgo.Observable, ctx context.Context) {
 						}
 
 						task2.Payload = rb
+						duration := time.Since(start)
+						conflog.Std().Info(fmt.Sprintf("%s template cost %s", task2.Handler, duration.String()))
 						return task2, nil
 					})
 				case enums.FLOW_OPERATOR__GROUP:
@@ -303,6 +311,7 @@ func (i *Instance) initSink(observable rxgo.Observable, ctx context.Context) {
 					i.windOpMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__GROUP, groupNum)] = op.WasmFunc
 
 					obs = obs.(*rxgo.ObservableImpl).GroupByDynamic(func(item rxgo.Item) string {
+						start := time.Now()
 						task := item.V.(*Task)
 						task.Handler = i.windOpMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__GROUP, groupNum)]
 
@@ -313,6 +322,8 @@ func (i *Instance) initSink(observable rxgo.Observable, ctx context.Context) {
 						}
 
 						groupKey := string(rb)
+						duration := time.Since(start)
+						conflog.Std().Info(fmt.Sprintf("%s template cost %s", task.Handler, duration.String()))
 						return groupKey
 					}, rxgo.WithBufferedChannel(2), rxgo.WithErrorStrategy(rxgo.ContinueOnError))
 					goto skip
@@ -344,6 +355,7 @@ func (i *Instance) initSink(observable rxgo.Observable, ctx context.Context) {
 										i.windOpMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__REDUCE, reduceNum)] = op.WasmFunc
 
 										grpObs = grpObs.(rxgo.GroupedObservable).Reduce(func(ctx context.Context, inter1 interface{}, inter2 interface{}) (interface{}, error) {
+											start := time.Now()
 											var task1, task2 *Task
 											task2 = inter2.(*Task)
 											task2.Handler = i.windOpMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__REDUCE, reduceNum)]
@@ -362,6 +374,8 @@ func (i *Instance) initSink(observable rxgo.Observable, ctx context.Context) {
 											}
 
 											task2.Payload = rb
+											duration := time.Since(start)
+											conflog.Std().Info(fmt.Sprintf("%s template cost %s", task2.Handler, duration.String()))
 											return task2, nil
 										})
 									}
@@ -454,7 +468,10 @@ func (i *Instance) runOp(task ...*Task) ([]byte, bool) {
 		}
 	}()
 
+	start := time.Now()
 	code := i.handleByRid(ctx, handler, rids...).Code
+	duration := time.Since(start)
+	conflog.Std().Info(fmt.Sprintf("%s wasm cost %s", handler, duration.String()))
 
 	//rid := i.AddResource(task.ctx, []byte(task.EventType), task.Payload)
 	//defer i.RmvResource(task.ctx, rid)
