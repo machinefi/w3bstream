@@ -77,7 +77,7 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		return nil, err
 	}
 	for _, c := range configs {
-		if err = wasm.InitConfiguration(ctx, c); err != nil {
+		if err = wasm.InitConfiguration(ctx, c.Configuration); err != nil {
 			return nil, status.ConfigInitFailed.StatusErr().WithDesc(err.Error())
 		}
 		ctx = c.WithContext(ctx)
