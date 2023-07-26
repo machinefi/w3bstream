@@ -24,7 +24,7 @@ func Marshal(c wasm.Configuration) (data []byte, err error) {
 }
 
 func Unmarshal(data []byte, typ enums.ConfigType) (c wasm.Configuration, err error) {
-	c, err = wasm.NewConfigurationByType(typ)
+	c, err = wasm.NewUserConfigurationByType(typ)
 	if err != nil {
 		return nil, status.InvalidConfigType.StatusErr().WithDesc(err.Error())
 	}

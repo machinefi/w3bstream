@@ -68,7 +68,7 @@ func init() {
 		Logger        *conflog.Log
 		UploadConf    *types.UploadConfig
 		EthClient     *types.ETHClientConfig
-		WhiteList     *types.WhiteList
+		WhiteList     *types.EthAddressWhiteList
 		ServerEvent   *confhttp.Server
 		FileSystem    *types.FileSystem
 		AmazonS3      *amazonS3.AmazonS3
@@ -88,7 +88,7 @@ func init() {
 		Logger:        &conflog.Log{},
 		UploadConf:    &types.UploadConfig{},
 		EthClient:     &types.ETHClientConfig{},
-		WhiteList:     &types.WhiteList{},
+		WhiteList:     &types.EthAddressWhiteList{},
 		ServerEvent:   ServerEvent,
 		FileSystem:    &types.FileSystem{},
 		AmazonS3:      &amazonS3.AmazonS3{},
@@ -158,7 +158,7 @@ func init() {
 		types.WithTaskWorkerContext(worker),
 		types.WithTaskBoardContext(mq.NewTaskBoard(tasks)),
 		types.WithETHClientConfigContext(config.EthClient),
-		types.WithWhiteListContext(config.WhiteList),
+		types.WithEthAddressWhiteListContext(config.WhiteList),
 		types.WithFileSystemOpContext(fs),
 		types.WithProxyClientContext(proxy),
 		types.WithWasmDBConfigContext(config.WasmDBConfig),

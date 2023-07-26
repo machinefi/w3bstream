@@ -15,6 +15,7 @@ import (
 	"golang.org/x/text/encoding/unicode"
 
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/modules/job"
 	"github.com/machinefi/w3bstream/pkg/modules/metrics"
@@ -41,7 +42,7 @@ type (
 		log     conflog.Logger
 		cl      *wasm.ChainClient
 		ctx     context.Context
-		mq      *wasm.MqttClient
+		mq      *confmqtt.Client
 		metrics metrics.CustomMetrics
 		srv     wasmapi.Server
 	}
@@ -49,19 +50,19 @@ type (
 
 func NewExportFuncs(ctx context.Context, rt *Runtime) (*ExportFuncs, error) {
 	ef := &ExportFuncs{
-		res: wasm.MustRuntimeResourceFromContext(ctx),
-		evs: wasm.MustRuntimeEventTypesFromContext(ctx),
-		kvs: wasm.MustKVStoreFromContext(ctx),
-		log: wasm.MustLoggerFromContext(ctx),
-		ctx: ctx,
-		srv: types.MustWasmApiServerFromContext(ctx),
+		res:     wasm.MustRuntimeResourceFromContext(ctx),
+		evs:     wasm.MustRuntimeEventTypesFromContext(ctx),
+		kvs:     wasm.MustKVStoreFromContext(ctx),
+		log:     wasm.MustLoggerFromContext(ctx),
+		srv:     types.MustWasmApiServerFromContext(ctx),
+		cl:      wasm.MustChainClientFromContext(ctx),
+		db:      wasm.MustSQLStoreFromContext(ctx),
+		env:     wasm.MustEnvFromContext(ctx),
+		mq:      wasm.MustMQTTClientFromContext(ctx),
+		metrics: wasm.MustCustomMetricsFromContext(ctx),
+		rt:      rt,
+		ctx:     ctx,
 	}
-	ef.cl, _ = wasm.ChainClientFromContext(ctx)
-	ef.db, _ = wasm.SQLStoreFromContext(ctx)
-	ef.env, _ = wasm.EnvFromContext(ctx)
-	ef.mq, _ = wasm.MQTTClientFromContext(ctx)
-	ef.rt = rt
-	ef.metrics, _ = wasm.CustomMetricsFromContext(ctx)
 
 	return ef, nil
 }
@@ -411,7 +412,7 @@ func (ef *ExportFuncs) SendTXWithOperator(chainID int32, offset, size, vmAddrPtr
 }
 
 func (ef *ExportFuncs) SendMqttMsg(topicAddr, topicSize, msgAddr, msgSize int32) int32 {
-	if ef.mq == nil || ef.mq.Client == nil {
+	if ef.mq == nil {
 		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, errors.New("mq client doesn't exist").Error())
 		return wasm.ResultStatusCode_Failed
 	}

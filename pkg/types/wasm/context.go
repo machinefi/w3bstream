@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
@@ -191,22 +192,22 @@ func MustRuntimeEventTypesFromContext(ctx context.Context) *mapx.Map[uint32, []b
 	return v
 }
 
-func WithMQTTClient(ctx context.Context, mq *MqttClient) context.Context {
+func WithMQTTClient(ctx context.Context, mq *mqtt.Client) context.Context {
 	return contextx.WithValue(ctx, CtxMqttClient{}, mq)
 }
 
-func WithMQTTClientContext(mq *MqttClient) contextx.WithContext {
+func WithMQTTClientContext(mq *mqtt.Client) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
 		return contextx.WithValue(ctx, CtxMqttClient{}, mq)
 	}
 }
 
-func MQTTClientFromContext(ctx context.Context) (*MqttClient, bool) {
-	v, ok := ctx.Value(CtxMqttClient{}).(*MqttClient)
+func MQTTClientFromContext(ctx context.Context) (*mqtt.Client, bool) {
+	v, ok := ctx.Value(CtxMqttClient{}).(*mqtt.Client)
 	return v, ok
 }
 
-func MustMQTTClientFromContext(ctx context.Context) *MqttClient {
+func MustMQTTClientFromContext(ctx context.Context) *mqtt.Client {
 	v, ok := MQTTClientFromContext(ctx)
 	must.BeTrue(ok)
 	return v

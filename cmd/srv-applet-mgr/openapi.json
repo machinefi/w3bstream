@@ -10170,14 +10170,12 @@
         "enum": [
           "PROJECT_DATABASE",
           "INSTANCE_CACHE",
-          "PROJECT_ENV",
-          "PROJECT_MQTT"
+          "PROJECT_ENV"
         ],
         "x-enum-labels": [
           "PROJECT_DATABASE",
           "INSTANCE_CACHE",
-          "PROJECT_ENV",
-          "PROJECT_MQTT"
+          "PROJECT_ENV"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.ConfigType",
         "x-id": "GithubComMachinefiW3BstreamPkgEnumsConfigType"

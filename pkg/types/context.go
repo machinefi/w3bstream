@@ -17,41 +17,84 @@ import (
 	wasmapi "github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/types"
 )
 
+// global contexts
 type (
-	CtxMgrDBExecutor       struct{} // CtxMgrDBExecutor sqlx.DBExecutor
-	CtxMonitorDBExecutor   struct{} // CtxMonitorDBExecutor sqlx.DBExecutor
-	CtxWasmDBEndpoint      struct{} // CtxWasmDBEndpoint sqlx.DBExecutor
-	CtxLogger              struct{} // CtxLogger log.Logger
-	CtxMqttBroker          struct{} // CtxMqttBroker mqtt.Broker
-	CtxRedisEndpoint       struct{} // CtxRedisEndpoint redis.Redis
-	CtxUploadConfig        struct{} // CtxUploadConfig UploadConfig
-	CtxTaskWorker          struct{}
-	CtxTaskBoard           struct{}
-	CtxProject             struct{}
-	CtxApplet              struct{}
-	CtxResource            struct{}
-	CtxInstance            struct{}
-	CtxEthClient           struct{} // CtxEthClient ETHClientConfig
-	CtxWhiteList           struct{}
-	CtxFileSystem          struct{}
-	CtxStrategy            struct{}
-	CtxPublisher           struct{}
-	CtxCronJob             struct{}
-	CtxOperator            struct{}
-	ContractLog            struct{}
-	ChainHeight            struct{}
-	ChainTx                struct{}
-	CtxAccount             struct{}
-	CtxStrategyResults     struct{}
-	CtxFileSystemOp        struct{}
-	CtxProxyClient         struct{}
-	CtxResourceOwnership   struct{}
-	CtxWasmDBConfig        struct{} // CtxWasmDBConfig wasm database config
-	CtxTrafficLimit        struct{}
-	CtxEventID             struct{}
+	// CtxMgrDBExecutor type sqlx.DBExecutor for global manager server database
+	CtxMgrDBExecutor struct{}
+	// CtxMonitorDBExecutor type sqlx.DBExecutor for global monitor server database
+	CtxMonitorDBExecutor struct{}
+	// CtxWasmDBEndpoint type *types.Endpoint. for global wasm database endpoint
+	CtxWasmDBEndpoint struct{}
+	// CtxLogger type log.Logger. service logger
+	CtxLogger struct{}
+	// CtxMqttBroker *mqtt.Broker. mqtt broker
+	CtxMqttBroker struct{}
+	// CtxRedisEndpoint type *redis.Redis. redis endpoint
+	CtxRedisEndpoint struct{}
+	// CtxUploadConfig type *UploadConfig. resource upload configuration
+	CtxUploadConfig struct{}
+	// CtxTaskWorker type *mq.TaskWorker. service async task worker
+	CtxTaskWorker struct{}
+	// CtxTaskBoard type *mq.TaskBoard service async task manager
+	CtxTaskBoard struct{}
+	// CtxWhiteList type *EthAddressWhiteList global eth address white list
+	CtxEthAddressWhiteList struct{}
+	// CtxEthClient type *ETHClientConfig global eth chain endpoints
+	CtxEthClient struct{}
+	// CtxFileSystemOp type filesystem.FileSystemOp describe resource storing operation type
+	CtxFileSystemOp struct{}
+	// CtxProxyClient type *client.Client http client for forwarding mqtt event
+	CtxProxyClient struct{}
+	// CtxWasmDBConfig type *WasmDBConfig wasm database config TODO combine with WasmDBEndpoint
+	CtxWasmDBConfig struct{}
+	// CtxRobotNotifierConfig type *RobotNotifierConfig for notify service level message to maintainers.
+	CtxRobotNotifierConfig struct{}
+	// CtxMetricsCenterConfig *MetricsCenterConfig for metrics
 	CtxMetricsCenterConfig struct{}
-	CtxRobotNotifierConfig struct{} // CtxRobotNotifierConfig for notify service level message to maintainers.
-	CtxWasmApiServer       struct{}
+)
+
+// model contexts
+type (
+	// CtxProject type *models.Project
+	CtxProject struct{}
+	// CtxApplet type *models.Applet
+	CtxApplet struct{}
+	// CtxResource type *models.Resource
+	CtxResource struct{}
+	// CtxInstance type *models.Instance
+	CtxInstance struct{}
+	// CtxStrategy type *models.Strategy
+	CtxStrategy struct{}
+	// CtxPublisher type *models.Publisher
+	CtxPublisher struct{}
+	// CtxCronJob type *models.CronJob
+	CtxCronJob struct{}
+	// CtxOperator type *models.Operator
+	CtxOperator struct{}
+	// CtxOperators type []models.Operator filtered operators
+	CtxOperators struct{}
+	// CtxProjectOperator type *models.ProjectOperator
+	CtxProjectOperator struct{}
+	// CtxContractLog type *models.ContractLog
+	CtxContractLog struct{}
+	// CtxChainHeight type *models.ChainHeight
+	CtxChainHeight struct{}
+	// CtxChainTx type *models.ChainTx
+	CtxChainTx struct{}
+	// CtxAccount type *models.Account
+	CtxAccount struct{}
+	// CtxResourceOwnership type *models.ResourceOwnership
+	CtxResourceOwnership struct{}
+	// CtxTrafficLimit type *models.TrafficLimit
+	CtxTrafficLimit struct{}
+)
+type (
+	// CtxStrategyResults type []*StrategyResult event strategies
+	CtxStrategyResults struct{} // CtxStrategyResults
+	// CtxEventID type string. current event id
+	CtxEventID struct{}
+	// CtxWasmApiServer type wasmapi/types.Server wasm global async server TODO move to wasm context package
+	CtxWasmApiServer struct{}
 )
 
 func WithStrategyResults(ctx context.Context, v []*StrategyResult) context.Context {
@@ -160,17 +203,17 @@ func MustOperatorFromContext(ctx context.Context) *models.Operator {
 }
 
 func WithContractLog(ctx context.Context, v *models.ContractLog) context.Context {
-	return contextx.WithValue(ctx, ContractLog{}, v)
+	return contextx.WithValue(ctx, CtxContractLog{}, v)
 }
 
 func WithContractLogContext(v *models.ContractLog) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, ContractLog{}, v)
+		return contextx.WithValue(ctx, CtxContractLog{}, v)
 	}
 }
 
 func ContractLogFromContext(ctx context.Context) (*models.ContractLog, bool) {
-	v, ok := ctx.Value(ContractLog{}).(*models.ContractLog)
+	v, ok := ctx.Value(CtxContractLog{}).(*models.ContractLog)
 	return v, ok
 }
 
@@ -181,17 +224,17 @@ func MustContractLogFromContext(ctx context.Context) *models.ContractLog {
 }
 
 func WithChainHeight(ctx context.Context, v *models.ChainHeight) context.Context {
-	return contextx.WithValue(ctx, ChainHeight{}, v)
+	return contextx.WithValue(ctx, CtxChainHeight{}, v)
 }
 
 func WithChainHeightContext(v *models.ChainHeight) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, ChainHeight{}, v)
+		return contextx.WithValue(ctx, CtxChainHeight{}, v)
 	}
 }
 
 func ChainHeightFromContext(ctx context.Context) (*models.ChainHeight, bool) {
-	v, ok := ctx.Value(ChainHeight{}).(*models.ChainHeight)
+	v, ok := ctx.Value(CtxChainHeight{}).(*models.ChainHeight)
 	return v, ok
 }
 
@@ -202,17 +245,17 @@ func MustChainHeightFromContext(ctx context.Context) *models.ChainHeight {
 }
 
 func WithChainTx(ctx context.Context, v *models.ChainTx) context.Context {
-	return contextx.WithValue(ctx, ChainTx{}, v)
+	return contextx.WithValue(ctx, CtxChainTx{}, v)
 }
 
 func WithChainTxContext(v *models.ChainTx) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, ChainTx{}, v)
+		return contextx.WithValue(ctx, CtxChainTx{}, v)
 	}
 }
 
 func ChainTxFromContext(ctx context.Context) (*models.ChainTx, bool) {
-	v, ok := ctx.Value(ChainTx{}).(*models.ChainTx)
+	v, ok := ctx.Value(CtxChainTx{}).(*models.ChainTx)
 	return v, ok
 }
 
@@ -520,23 +563,23 @@ func MustETHClientConfigFromContext(ctx context.Context) *ETHClientConfig {
 	return v
 }
 
-func WithWhiteList(ctx context.Context, v *WhiteList) context.Context {
-	return contextx.WithValue(ctx, CtxWhiteList{}, v)
+func WithEthAddressWhiteList(ctx context.Context, v *EthAddressWhiteList) context.Context {
+	return contextx.WithValue(ctx, CtxEthAddressWhiteList{}, v)
 }
 
-func WithWhiteListContext(v *WhiteList) contextx.WithContext {
+func WithEthAddressWhiteListContext(v *EthAddressWhiteList) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, CtxWhiteList{}, v)
+		return contextx.WithValue(ctx, CtxEthAddressWhiteList{}, v)
 	}
 }
 
-func WhiteListFromContext(ctx context.Context) (*WhiteList, bool) {
-	v, ok := ctx.Value(CtxWhiteList{}).(*WhiteList)
+func EthAddressWhiteListFromContext(ctx context.Context) (*EthAddressWhiteList, bool) {
+	v, ok := ctx.Value(CtxEthAddressWhiteList{}).(*EthAddressWhiteList)
 	return v, ok
 }
 
-func MustWhiteListFromContext(ctx context.Context) *WhiteList {
-	v, ok := WhiteListFromContext(ctx)
+func MustEthAddressWhiteListFromContext(ctx context.Context) *EthAddressWhiteList {
+	v, ok := EthAddressWhiteListFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
@@ -748,6 +791,48 @@ func WasmApiServerFromContext(ctx context.Context) (wasmapi.Server, bool) {
 
 func MustWasmApiServerFromContext(ctx context.Context) wasmapi.Server {
 	v, ok := WasmApiServerFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithOperators(ctx context.Context, v []models.Operator) context.Context {
+	return contextx.WithValue(ctx, CtxOperators{}, v)
+}
+
+func WithOperatorsContext(v []models.Operator) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxOperators{}, v)
+	}
+}
+
+func OperatorsFromContext(ctx context.Context) ([]models.Operator, bool) {
+	v, ok := ctx.Value(CtxOperators{}).([]models.Operator)
+	return v, ok
+}
+
+func MustOperatorsFromContext(ctx context.Context) []models.Operator {
+	v, ok := OperatorsFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithProjectOperator(ctx context.Context, v *models.ProjectOperator) context.Context {
+	return contextx.WithValue(ctx, CtxProjectOperator{}, v)
+}
+
+func WithProjectOperatorContext(v *models.ProjectOperator) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxProjectOperator{}, v)
+	}
+}
+
+func ProjectOperatorFromContext(ctx context.Context) (*models.ProjectOperator, bool) {
+	v, ok := ctx.Value(CtxProjectOperator{}).(*models.ProjectOperator)
+	return v, ok
+}
+
+func MustProjectOperatorFromContext(ctx context.Context) *models.ProjectOperator {
+	v, ok := ProjectOperatorFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

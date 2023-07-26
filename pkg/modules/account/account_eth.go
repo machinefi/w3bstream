@@ -135,7 +135,7 @@ func ValidateLoginByEthAddress(ctx context.Context, r *LoginByEthAddressReq) (*m
 
 	address := strings.ToLower(msg.GetAddress().String())
 
-	if lst, ok := types.WhiteListFromContext(ctx); ok {
+	if lst, ok := types.EthAddressWhiteListFromContext(ctx); ok {
 		if !lst.Validate(address) {
 			return nil, status.WhiteListForbidden
 		}

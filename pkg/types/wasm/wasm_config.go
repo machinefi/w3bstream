@@ -5,11 +5,10 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/enums"
 )
 
-func NewConfigurationByType(t enums.ConfigType) (Configuration, error) {
+func NewUserConfigurationByType(t enums.ConfigType) (Configuration, error) {
 	switch t {
 	case enums.CONFIG_TYPE__PROJECT_DATABASE:
 		return &Database{}, nil
@@ -17,8 +16,6 @@ func NewConfigurationByType(t enums.ConfigType) (Configuration, error) {
 		return &Cache{}, nil
 	case enums.CONFIG_TYPE__PROJECT_ENV:
 		return &Env{}, nil
-	case enums.CONFIG_TYPE__PROJECT_MQTT:
-		return &MqttClient{}, nil
 	default:
 		return nil, errors.Errorf("invalid config type: %d", t)
 	}
@@ -29,28 +26,65 @@ type Configuration interface {
 	WithContext(context.Context) context.Context
 }
 
-// ConfigurationWithInit support recursive initialize
-type ConfigurationWithInit interface {
-	Configuration
-	types.ValidatedInitializerWith
-}
-
-// ConfigurationWithUninit support recursive uninitialize
-type ConfigurationWithUninit interface {
-	Configuration
+type CanBeUninit interface {
 	Uninit(context.Context) error
 }
 
-func InitConfiguration(ctx context.Context, c Configuration) error {
-	if canBeInit, ok := c.(ConfigurationWithInit); ok {
-		return canBeInit.Init(ctx)
+type CanBeInit interface {
+	Init(context.Context) error
+}
+
+func InitConfiguration(parent context.Context, c Configuration) error {
+	if canBeInit, ok := c.(CanBeInit); ok {
+		return canBeInit.Init(parent)
 	}
 	return nil
 }
 
-func UninitConfiguration(ctx context.Context, c Configuration) error {
-	if canBeUninit, ok := c.(ConfigurationWithUninit); ok {
-		return canBeUninit.Uninit(ctx)
+func UninitConfiguration(parent context.Context, c Configuration) error {
+	if canBeUninit, ok := c.(CanBeUninit); ok {
+		return canBeUninit.Uninit(parent)
+	}
+	return nil
+}
+
+type ConfigType string
+
+const (
+	ConfigLogger     ConfigType = "LOGGER"
+	ConfigMqttClient ConfigType = "MQTT_CLIENT"
+	ConfigChains     ConfigType = "CHAINS"
+	ConfigMetrics    ConfigType = "METRICS"
+)
+
+var ConfigTypes = []ConfigType{
+	ConfigLogger,
+	ConfigMqttClient,
+	ConfigChains,
+	ConfigMetrics,
+}
+
+func NewGlobalConfigurationByType(t ConfigType) (GlobalConfiguration, error) {
+	switch t {
+	case ConfigLogger:
+		return &Logger{}, nil
+	case ConfigMqttClient:
+		return &MqttClient{}, nil
+	case ConfigChains:
+		return &ChainClient{}, nil
+	default: // TODO case ConfigMetrics:
+		return nil, nil // errors.Errorf("invalid global config type: %d", t)
+	}
+}
+
+type GlobalConfiguration interface {
+	GlobalConfigType() ConfigType
+	WithContext(context.Context) context.Context
+}
+
+func InitGlobalConfiguration(parent context.Context, c GlobalConfiguration) error {
+	if canBeInit, ok := c.(CanBeInit); ok {
+		return canBeInit.Init(parent)
 	}
 	return nil
 }

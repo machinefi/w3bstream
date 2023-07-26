@@ -27,8 +27,8 @@ func (env *Env) Get(k string) (v string, exists bool) {
 	return os.LookupEnv(env.Key(k))
 }
 
-func (env *Env) Init(ctx context.Context) (err error) {
-	env.prefix = types.MustProjectFromContext(ctx).Name + "__"
+func (env *Env) Init(parent context.Context) (err error) {
+	env.prefix = types.MustProjectFromContext(parent).Name + "__"
 
 	defer func() {
 		if err != nil {

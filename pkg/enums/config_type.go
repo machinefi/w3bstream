@@ -11,7 +11,7 @@ const (
 	CONFIG_TYPE__INSTANCE_CACHE
 	CONFIG_TYPE__PROJECT_ENV
 	_ // deprecated CONFIG_TYPE__CHAIN_CLIENT
-	CONFIG_TYPE__PROJECT_MQTT
+	_ // deprecated CONFIG_TYPE__PROJECT_MQTT
 )
 
 // Impl empty wasm.Configuration

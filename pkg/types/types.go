@@ -71,10 +71,10 @@ type (
 	ValidatedInitializerWith = types.ValidatedInitializerWith
 )
 
-type WhiteList []string
+type EthAddressWhiteList []string
 
-func (v *WhiteList) Init() {
-	lst := WhiteList{}
+func (v *EthAddressWhiteList) Init() {
+	lst := EthAddressWhiteList{}
 	for _, addr := range *v {
 		if err := strfmt.EthAddressValidator.Validate(addr); err == nil {
 			lst = append(lst, strings.ToLower(addr))
@@ -83,7 +83,7 @@ func (v *WhiteList) Init() {
 	*v = lst
 }
 
-func (v *WhiteList) Validate(address string) bool {
+func (v *EthAddressWhiteList) Validate(address string) bool {
 	if v == nil || len(*v) == 0 {
 		return true
 	}

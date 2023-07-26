@@ -208,13 +208,13 @@ func (d *Database) WithDefaultSchema() (sqlx.DBExecutor, error) {
 	return d.WithSchema("public")
 }
 
-func (d *Database) Init(ctx context.Context) (err error) {
+func (d *Database) Init(parent context.Context) (err error) {
 	// init database endpoint
-	prj := types.MustProjectFromContext(ctx)
+	prj := types.MustProjectFromContext(parent)
 	d.Name = prj.DatabaseName()
 
 	// clone config and init config
-	ep := *types.MustWasmDBEndpointFromContext(ctx)
+	ep := *types.MustWasmDBEndpointFromContext(parent)
 	ep.Base = d.Name
 
 	if ep.Param == nil {
@@ -264,7 +264,7 @@ func (d *Database) Init(ctx context.Context) (err error) {
 		if err = driverpostgres.GrantAllPrivileges(d.ep, domain, d.Name, user); err != nil {
 			return errors.Wrap(err, "grant privilege")
 		}
-		conf, ok := types.WasmDBConfigFromContext(ctx)
+		conf, ok := types.WasmDBConfigFromContext(parent)
 		if !ok {
 			conf = &types.WasmDBConfig{}
 			conf.SetDefault()

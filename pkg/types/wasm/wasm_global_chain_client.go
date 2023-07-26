@@ -15,11 +15,25 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
 
+	base "github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	wsTypes "github.com/machinefi/w3bstream/pkg/types"
 )
+
+func NewChainClient(ctx context.Context, prj *models.Project, ops []models.Operator, op *models.ProjectOperator) *ChainClient {
+	ctx = contextx.WithContextCompose(
+		wsTypes.WithProjectContext(prj),
+		wsTypes.WithOperatorsContext(ops),
+		wsTypes.WithProjectOperatorContext(op),
+	)(ctx)
+
+	cli := &ChainClient{}
+	_ = cli.Init(ctx)
+	return cli
+}
 
 type ChainClient struct {
 	projectName string
@@ -28,36 +42,41 @@ type ChainClient struct {
 	operators   map[string]*ecdsa.PrivateKey
 }
 
-// TODO impl ChainClient.Init
+func (c *ChainClient) GlobalConfigType() ConfigType { return ConfigChains }
 
-func NewChainClient(ctx context.Context, prj *models.Project, ops []models.Operator, p *models.ProjectOperator) *ChainClient {
-	c := &ChainClient{
-		projectName: prj.Name,
-		clientMap:   make(map[uint32]*ethclient.Client, 0),
+func (c *ChainClient) Init(parent context.Context) error {
+	prj := wsTypes.MustProjectFromContext(parent)
+	ops := wsTypes.MustOperatorsFromContext(parent)
+
+	c.projectName = prj.Name
+	if c.clientMap == nil {
+		c.clientMap = make(map[uint32]*ethclient.Client)
 	}
-	ethcli := wsTypes.MustETHClientConfigFromContext(ctx)
-	c.endpoints = ethcli.Clients
+	if c.operators == nil {
+		c.operators = make(map[string]*ecdsa.PrivateKey)
+	}
 
-	c.operators = convOperators(ops, p)
-	return c
-}
+	defaultOpID := base.SFID(0)
+	if op, ok := wsTypes.ProjectOperatorFromContext(parent); ok {
+		defaultOpID = op.OperatorID
+	}
 
-func convOperators(ops []models.Operator, p *models.ProjectOperator) map[string]*ecdsa.PrivateKey {
-	res := make(map[string]*ecdsa.PrivateKey, len(ops))
 	for _, op := range ops {
-		res[op.Name] = crypto.ToECDSAUnsafe(common.FromHex(op.PrivateKey))
-	}
-
-	if p != nil {
-		for _, op := range ops {
-			if op.OperatorID == p.OperatorID {
-				res[operator.DefaultOperatorName] = crypto.ToECDSAUnsafe(common.FromHex(op.PrivateKey))
-				break
-			}
+		pk := crypto.ToECDSAUnsafe(common.FromHex(op.PrivateKey))
+		c.operators[op.Name] = pk
+		if defaultOpID == op.OperatorID {
+			c.operators[operator.DefaultOperatorName] = pk
 		}
 	}
 
-	return res
+	ethcli := wsTypes.MustETHClientConfigFromContext(parent)
+	c.endpoints = ethcli.Clients
+
+	return nil
+}
+
+func (c *ChainClient) WithContext(ctx context.Context) context.Context {
+	return WithChainClient(ctx, c)
 }
 
 func (c *ChainClient) SendTXWithOperator(chainID uint32, toStr, valueStr, dataStr, operatorName string) (string, error) {

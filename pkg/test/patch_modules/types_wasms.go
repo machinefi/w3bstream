@@ -16,9 +16,16 @@ func TypesWasmInitConfiguration(patch *gomonkey.Patches, err error) *gomonkey.Pa
 	)
 }
 
+func TypesWasmInitGlobalConfiguration(patch *gomonkey.Patches, err error) *gomonkey.Patches {
+	return patch.ApplyFunc(
+		wasm.InitGlobalConfiguration,
+		func(_ context.Context, _ wasm.GlobalConfiguration) error { return err },
+	)
+}
+
 func TypesWasmNewConfigurationByType(patch *gomonkey.Patches, c wasm.Configuration, err error) *gomonkey.Patches {
 	return patch.ApplyFunc(
-		wasm.NewConfigurationByType,
+		wasm.NewUserConfigurationByType,
 		func(_ enums.ConfigType) (wasm.Configuration, error) { return c, err },
 	)
 }

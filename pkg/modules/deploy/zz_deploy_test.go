@@ -79,7 +79,7 @@ func TestDeploy(t *testing.T) {
 		types.WithTaskBoardContext(&mq.TaskBoard{}),
 		types.WithMqttBrokerContext(mqttBroker),
 		types.WithETHClientConfigContext(&types.ETHClientConfig{}),
-		wasm.WithMQTTClientContext(&wasm.MqttClient{Client: mqttClient}),
+		wasm.WithMQTTClientContext(mqttClient),
 		types.WithWasmApiServerContext(wasmApiServer),
 	)(context.Background())
 
@@ -533,14 +533,6 @@ func TestDeploy(t *testing.T) {
 
 			patch = patch_models.ProjectFetchByProjectID(patch, &models.Project{}, nil)
 
-			t.Run("#FetchResourceFailed", func(t *testing.T) {
-				patch = patch_models.ResourceFetchByResourceID(patch, nil, errFrom(t.Name()))
-				_, err := deploy.WithInstanceRuntimeContext(ctx)
-				NewWithT(t).Expect(err.Error()).To(Equal(t.Name()))
-			})
-
-			patch = patch_models.ResourceFetchByResourceID(patch, &models.Resource{}, nil)
-
 			t.Run("#GetProjectOperatorFailed", func(t *testing.T) {
 				patch = patch_modules.ProjectOperatorGetByProject(patch, nil, errFrom(t.Name()))
 				_, err := deploy.WithInstanceRuntimeContext(ctx)
@@ -568,11 +560,20 @@ func TestDeploy(t *testing.T) {
 			t.Run("#ConfigurationsInitFailed", func(t *testing.T) {
 				patch_modules.TypesWasmInitConfiguration(patch, errFrom(t.Name()))
 				_, err := deploy.WithInstanceRuntimeContext(ctx)
-				mock_sqlx.ExpectError(t, err, status.ConfigInitFailed, t.Name())
+				mock_sqlx.ExpectError(t, err, status.ConfigInitFailed)
+			})
+
+			patch = patch_modules.TypesWasmInitConfiguration(patch, nil)
+
+			t.Run("#GlobalConfigurationInitFailed", func(t *testing.T) {
+				patch_modules.TypesWasmInitGlobalConfiguration(patch, errFrom(t.Name()))
+				_, err := deploy.WithInstanceRuntimeContext(ctx)
+				mock_sqlx.ExpectError(t, err, status.ConfigInitFailed)
 			})
 		})
+
 		t.Run("#Success", func(t *testing.T) {
-			patch = patch_modules.TypesWasmInitConfiguration(patch, nil)
+			patch = patch_modules.TypesWasmInitGlobalConfiguration(patch, nil)
 			_, err := deploy.WithInstanceRuntimeContext(ctx)
 			NewWithT(t).Expect(err).To(BeNil())
 		})
