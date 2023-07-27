@@ -436,7 +436,7 @@ func (i *Instance) sinkData(ctx context.Context, item rxgo.Item) {
 		if err != nil {
 			conflog.Std().Error(err)
 		}
-	case enums.FLOW_SINK__CHAINBLOCK:
+	case enums.FLOW_SINK__BLOCKCHAIN:
 
 	default:
 

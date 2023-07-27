@@ -63,7 +63,7 @@ func (s *Sink) UnmarshalJSON(b []byte) error {
 	switch s.SinkType {
 	case enums.FLOW_SINK__RMDB:
 		s.SinkInfo = SinkInfo{DBInfo: tmp.SinkInfo.DBInfo}
-	case enums.FLOW_SINK__CHAINBLOCK:
+	case enums.FLOW_SINK__BLOCKCHAIN:
 		s.SinkInfo = SinkInfo{ChainBlock: tmp.SinkInfo.ChainBlock}
 	case enums.FLOW_SINK_UNKNOWN:
 		s.SinkInfo = tmp.SinkInfo

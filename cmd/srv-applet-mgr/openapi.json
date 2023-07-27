@@ -10383,11 +10383,11 @@
         "type": "string",
         "enum": [
           "RMDB",
-          "CHAINBLOCK"
+          "BLOCKCHAIN"
         ],
         "x-enum-labels": [
           "RMDB",
-          "CHAINBLOCK"
+          "BLOCKCHAIN"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.FlowSink",
         "x-id": "GithubComMachinefiW3BstreamPkgEnumsFlowSink"

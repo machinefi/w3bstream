@@ -21,8 +21,8 @@ func ParseFlowSinkFromString(s string) (FlowSink, error) {
 		return FLOW_SINK_UNKNOWN, nil
 	case "RMDB":
 		return FLOW_SINK__RMDB, nil
-	case "CHAINBLOCK":
-		return FLOW_SINK__CHAINBLOCK, nil
+	case "BLOCKCHAIN":
+		return FLOW_SINK__BLOCKCHAIN, nil
 	}
 }
 
@@ -34,8 +34,8 @@ func ParseFlowSinkFromLabel(s string) (FlowSink, error) {
 		return FLOW_SINK_UNKNOWN, nil
 	case "RMDB":
 		return FLOW_SINK__RMDB, nil
-	case "CHAINBLOCK":
-		return FLOW_SINK__CHAINBLOCK, nil
+	case "BLOCKCHAIN":
+		return FLOW_SINK__BLOCKCHAIN, nil
 	}
 }
 
@@ -51,8 +51,8 @@ func (v FlowSink) String() string {
 		return ""
 	case FLOW_SINK__RMDB:
 		return "RMDB"
-	case FLOW_SINK__CHAINBLOCK:
-		return "CHAINBLOCK"
+	case FLOW_SINK__BLOCKCHAIN:
+		return "BLOCKCHAIN"
 	}
 }
 
@@ -64,8 +64,8 @@ func (v FlowSink) Label() string {
 		return ""
 	case FLOW_SINK__RMDB:
 		return "RMDB"
-	case FLOW_SINK__CHAINBLOCK:
-		return "CHAINBLOCK"
+	case FLOW_SINK__BLOCKCHAIN:
+		return "BLOCKCHAIN"
 	}
 }
 
@@ -74,7 +74,7 @@ func (v FlowSink) TypeName() string {
 }
 
 func (v FlowSink) ConstValues() []enum.IntStringerEnum {
-	return []enum.IntStringerEnum{FLOW_SINK__RMDB, FLOW_SINK__CHAINBLOCK}
+	return []enum.IntStringerEnum{FLOW_SINK__RMDB, FLOW_SINK__BLOCKCHAIN}
 }
 
 func (v FlowSink) MarshalText() ([]byte, error) {
