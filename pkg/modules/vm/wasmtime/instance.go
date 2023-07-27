@@ -194,7 +194,6 @@ func (i *Instance) queueWorker() {
 func (i *Instance) streamCompute(ch chan rxgo.Item) rxgo.Observable {
 	obs := rxgo.FromChannel(ch)
 	for index, op := range i.operators {
-		fmt.Println(index)
 		switch {
 		case op.OpType == enums.FLOW_OPERATOR__FILTER:
 			filterNum := index
@@ -204,7 +203,6 @@ func (i *Instance) streamCompute(ch chan rxgo.Item) rxgo.Observable {
 				start := time.Now()
 				res := false
 				task := inter.(*Task)
-				fmt.Println(filterNum)
 				task.Handler = i.simpleOpMap[fmt.Sprintf("%s_%d", enums.FLOW_OPERATOR__FILTER, filterNum)]
 
 				rb, ok := i.runOp(task)
@@ -406,7 +404,6 @@ func (i *Instance) initSink(observable rxgo.Observable, ctx context.Context) {
 }
 
 func (i *Instance) sinkData(ctx context.Context, item rxgo.Item) {
-	conflog.Std().Info(fmt.Sprintf("customer: %v", string(item.V.(*Task).Payload)))
 	rowByte := item.V.(*Task).Payload
 
 	switch i.sink.SinkType {
@@ -420,8 +417,6 @@ func (i *Instance) sinkData(ctx context.Context, item rxgo.Item) {
 			conflog.Std().Error(err)
 		}
 
-		//d := wasm.MustSQLStoreFromContext(ctx)
-		//db, _ := d.WithDefaultSchema()
 		sqlStringPrefix := fmt.Sprintf("INSERT INTO %s (", i.sink.SinkInfo.DBInfo.Table)
 		sqlStringSuffix := fmt.Sprintf(") VALUES (")
 		params := make([]interface{}, 0)
@@ -473,10 +468,6 @@ func (i *Instance) runOp(task ...*Task) ([]byte, bool) {
 	duration := time.Since(start)
 	conflog.Std().Info(fmt.Sprintf("%s wasm cost %s", handler, duration.String()))
 
-	//rid := i.AddResource(task.ctx, []byte(task.EventType), task.Payload)
-	//defer i.RmvResource(task.ctx, rid)
-
-	//code := i.handleByRid(task.ctx, task.Handler, rid).Code
 	conflog.Std().Info(fmt.Sprintf("%s wasm code %d", handler, code))
 
 	if code < 0 {
