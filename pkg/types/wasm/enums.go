@@ -25,3 +25,11 @@ const (
 )
 
 type InstanceState = enums.InstanceState
+
+type LogType string
+
+const (
+	LogTypeInstance = "wasm"
+	LogTypeExports  = "exports"
+	LogTypeAsync    = "async"
+)

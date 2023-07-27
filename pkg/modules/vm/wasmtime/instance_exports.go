@@ -68,10 +68,9 @@ func NewExportFuncs(ctx context.Context, rt *Runtime) (*ExportFuncs, error) {
 }
 
 var (
-	_       wasm.ABI = (*ExportFuncs)(nil)
-	_rand            = rand.New(rand.NewSource(time.Now().UnixNano()))
-	efSrc            = "wasmExportFunc"
-	codeSrc          = "wasmCode"
+	_ wasm.ABI = (*ExportFuncs)(nil)
+
+	_rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 )
 
 func (ef *ExportFuncs) LinkABI(impt Import) error {
@@ -109,13 +108,13 @@ func (ef *ExportFuncs) LinkABI(impt Import) error {
 	return nil
 }
 
-func (ef *ExportFuncs) logAndPersistToDB(logLevel conflog.Level, logSrc, msg string) {
-	ef.log.Debug(fmt.Sprintf("start invoke logAndPersistToDB with %s and %s", logLevel.String(), msg))
-	if len(logSrc) == 0 {
-		logSrc = efSrc
+func (ef *ExportFuncs) logAndPersistToDB(lv conflog.Level, t wasm.LogType, msg string) {
+	ef.log.Debug(fmt.Sprintf("start invoke logAndPersistToDB with %s and %s", lv.String(), msg))
+	if len(t) == 0 {
+		t = wasm.LogTypeExports
 	}
-	ef.log = ef.log.WithValues("@src", logSrc)
-	switch logLevel {
+	ef.log = ef.log.WithValues("@src", t)
+	switch lv {
 	case conflog.TraceLevel:
 		ef.log.Trace(msg)
 	case conflog.DebugLevel:
@@ -129,24 +128,24 @@ func (ef *ExportFuncs) logAndPersistToDB(logLevel conflog.Level, logSrc, msg str
 	default:
 		ef.log.Trace(msg)
 	}
-	job.Dispatch(ef.ctx, job.NewWasmLogTask(ef.ctx, logLevel.String(), logSrc, msg))
+	job.Dispatch(ef.ctx, job.NewWasmLogTask(wasm.NewLogContext(ef.ctx, t, lv, msg)))
 }
 
 func (ef *ExportFuncs) Log(logLevel, ptr, size int32) int32 {
 	ef.log.Debug("start invoke log")
 	buf, err := ef.rt.Read(ptr, size)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, codeSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeInstance, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
-	ef.logAndPersistToDB(conflog.Level(logLevel), codeSrc, string(buf))
+	ef.logAndPersistToDB(conflog.Level(logLevel), wasm.LogTypeInstance, string(buf))
 	return int32(wasm.ResultStatusCode_OK)
 }
 
 func (ef *ExportFuncs) ApiCall(kAddr, kSize, vmAddrPtr, vmSizePtr int32) int32 {
 	buf, err := ef.rt.Read(kAddr, kSize)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return int32(wasm.ResultStatusCode_TransDataFromVMFailed)
 	}
 
@@ -154,12 +153,12 @@ func (ef *ExportFuncs) ApiCall(kAddr, kSize, vmAddrPtr, vmSizePtr int32) int32 {
 
 	wbuf := bytes.Buffer{}
 	if err := resp.Write(&wbuf); err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return int32(wasm.ResultStatusCode_HostInternal)
 	}
 
 	if err := ef.rt.Copy(wbuf.Bytes(), vmAddrPtr, vmSizePtr); err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
 
@@ -170,15 +169,15 @@ func (ef *ExportFuncs) ApiCall(kAddr, kSize, vmAddrPtr, vmSizePtr int32) int32 {
 func (ef *ExportFuncs) Abort(msgPtr int32, fileNamePtr int32, line int32, col int32) {
 	msg, err := ef.readString(msgPtr)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, errors.Wrap(err, "fail to decode arguments in env.abort").Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, errors.Wrap(err, "fail to decode arguments in env.abort").Error())
 		return
 	}
 	fileName, err := ef.readString(fileNamePtr)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, errors.Wrap(err, "fail to decode arguments in env.abort").Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, errors.Wrap(err, "fail to decode arguments in env.abort").Error())
 		return
 	}
-	ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, errors.Errorf("abort: %s at %s:%d:%d", msg, fileName, line, col).Error())
+	ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, errors.Errorf("abort: %s at %s:%d:%d", msg, fileName, line, col).Error())
 }
 
 func (ef *ExportFuncs) readString(ptr int32) (string, error) {
@@ -208,7 +207,7 @@ func (ef *ExportFuncs) readString(ptr int32) (string, error) {
 func (ef *ExportFuncs) Trace(msgPtr int32, _ int32, arr ...float64) {
 	msg, err := ef.readString(msgPtr)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, errors.Wrap(err, "fail to decode arguments in env.abort").Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, errors.Wrap(err, "fail to decode arguments in env.abort").Error())
 		return
 	}
 
@@ -216,7 +215,7 @@ func (ef *ExportFuncs) Trace(msgPtr int32, _ int32, arr ...float64) {
 	if len(str) > 0 {
 		str = " " + str
 	}
-	ef.logAndPersistToDB(conflog.InfoLevel, efSrc, fmt.Sprintf("trace: %s%s", msg, str))
+	ef.logAndPersistToDB(conflog.InfoLevel, wasm.LogTypeExports, fmt.Sprintf("trace: %s%s", msg, str))
 }
 
 // Seed is reserved for imported func env.seed() which is auto-generated by assemblyScript
@@ -231,7 +230,7 @@ func (ef *ExportFuncs) GetData(rid, vmAddrPtr, vmSizePtr int32) int32 {
 	}
 
 	if err := ef.rt.Copy(data, vmAddrPtr, vmSizePtr); err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
 
@@ -242,7 +241,7 @@ func (ef *ExportFuncs) GetData(rid, vmAddrPtr, vmSizePtr int32) int32 {
 func (ef *ExportFuncs) SetData(rid, addr, size int32) int32 {
 	buf, err := ef.rt.Read(addr, size)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
 	ef.res.Store(uint32(rid), buf)
@@ -252,7 +251,7 @@ func (ef *ExportFuncs) SetData(rid, addr, size int32) int32 {
 func (ef *ExportFuncs) GetDB(kAddr, kSize int32, vmAddrPtr, vmSizePtr int32) int32 {
 	key, err := ef.rt.Read(kAddr, kSize)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return int32(wasm.ResultStatusCode_ResourceNotFound)
 	}
 
@@ -261,10 +260,10 @@ func (ef *ExportFuncs) GetDB(kAddr, kSize int32, vmAddrPtr, vmSizePtr int32) int
 		return int32(wasm.ResultStatusCode_ResourceNotFound)
 	}
 
-	ef.logAndPersistToDB(conflog.InfoLevel, efSrc, fmt.Sprintf("host.GetDB %s:%s", string(key), strconv.Quote(string(val))))
+	ef.logAndPersistToDB(conflog.InfoLevel, wasm.LogTypeExports, fmt.Sprintf("host.GetDB %s:%s", string(key), strconv.Quote(string(val))))
 
 	if err := ef.rt.Copy(val, vmAddrPtr, vmSizePtr); err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
 
@@ -274,20 +273,20 @@ func (ef *ExportFuncs) GetDB(kAddr, kSize int32, vmAddrPtr, vmSizePtr int32) int
 func (ef *ExportFuncs) SetDB(kAddr, kSize, vAddr, vSize int32) int32 {
 	key, err := ef.rt.Read(kAddr, kSize)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return int32(wasm.ResultStatusCode_ResourceNotFound)
 	}
 	val, err := ef.rt.Read(vAddr, vSize)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return int32(wasm.ResultStatusCode_ResourceNotFound)
 	}
 
-	ef.logAndPersistToDB(conflog.InfoLevel, efSrc, fmt.Sprintf("host.SetDB %s:%s", string(key), strconv.Quote(string(val))))
+	ef.logAndPersistToDB(conflog.InfoLevel, wasm.LogTypeExports, fmt.Sprintf("host.SetDB %s:%s", string(key), strconv.Quote(string(val))))
 
 	err = ef.kvs.Set(string(key), val)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return int32(wasm.ResultStatusCode_Failed)
 	}
 	return int32(wasm.ResultStatusCode_OK)
@@ -299,24 +298,24 @@ func (ef *ExportFuncs) SetSQLDB(addr, size int32) int32 {
 	}
 	data, err := ef.rt.Read(addr, size)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return int32(wasm.ResultStatusCode_ResourceNotFound)
 	}
 
 	prestate, params, err := sql_util.ParseQuery(data)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 
 	db, err := ef.db.WithDefaultSchema()
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	_, err = db.ExecContext(context.Background(), prestate, params...)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 
@@ -329,35 +328,35 @@ func (ef *ExportFuncs) GetSQLDB(addr, size int32, vmAddrPtr, vmSizePtr int32) in
 	}
 	data, err := ef.rt.Read(addr, size)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return int32(wasm.ResultStatusCode_ResourceNotFound)
 	}
 
 	prestate, params, err := sql_util.ParseQuery(data)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 
 	db, err := ef.db.WithDefaultSchema()
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	rows, err := db.QueryContext(context.Background(), prestate, params...)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 
 	ret, err := sql_util.JsonifyRows(rows)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 
 	if err := ef.rt.Copy(ret, vmAddrPtr, vmSizePtr); err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
 
@@ -367,22 +366,22 @@ func (ef *ExportFuncs) GetSQLDB(addr, size int32, vmAddrPtr, vmSizePtr int32) in
 // TODO: make sendTX async, and add callback if possible
 func (ef *ExportFuncs) SendTX(chainID int32, offset, size, vmAddrPtr, vmSizePtr int32) int32 {
 	if ef.cl == nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, errors.New("eth client doesn't exist").Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, errors.New("eth client doesn't exist").Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	buf, err := ef.rt.Read(offset, size)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	ret := gjson.Parse(string(buf))
 	txHash, err := ef.cl.SendTX(uint32(chainID), ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String())
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	if err := ef.rt.Copy([]byte(txHash), vmAddrPtr, vmSizePtr); err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	return int32(wasm.ResultStatusCode_OK)
@@ -390,22 +389,22 @@ func (ef *ExportFuncs) SendTX(chainID int32, offset, size, vmAddrPtr, vmSizePtr 
 
 func (ef *ExportFuncs) SendTXWithOperator(chainID int32, offset, size, vmAddrPtr, vmSizePtr int32) int32 {
 	if ef.cl == nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, errors.New("eth client doesn't exist").Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, errors.New("eth client doesn't exist").Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	buf, err := ef.rt.Read(offset, size)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	ret := gjson.Parse(string(buf))
 	txHash, err := ef.cl.SendTXWithOperator(uint32(chainID), ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String(), ret.Get("operatorName").String())
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	if err := ef.rt.Copy([]byte(txHash), vmAddrPtr, vmSizePtr); err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	return int32(wasm.ResultStatusCode_OK)
@@ -413,7 +412,7 @@ func (ef *ExportFuncs) SendTXWithOperator(chainID int32, offset, size, vmAddrPtr
 
 func (ef *ExportFuncs) SendMqttMsg(topicAddr, topicSize, msgAddr, msgSize int32) int32 {
 	if ef.mq == nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, errors.New("mq client doesn't exist").Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, errors.New("mq client doesn't exist").Error())
 		return wasm.ResultStatusCode_Failed
 	}
 
@@ -425,17 +424,17 @@ func (ef *ExportFuncs) SendMqttMsg(topicAddr, topicSize, msgAddr, msgSize int32)
 
 	topicBuf, err = ef.rt.Read(topicAddr, topicSize)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	msgBuf, err = ef.rt.Read(msgAddr, msgSize)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	err = ef.mq.WithTopic(string(topicBuf)).Publish(string(msgBuf))
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	return int32(wasm.ResultStatusCode_OK)
@@ -443,22 +442,22 @@ func (ef *ExportFuncs) SendMqttMsg(topicAddr, topicSize, msgAddr, msgSize int32)
 
 func (ef *ExportFuncs) CallContract(chainID int32, offset, size int32, vmAddrPtr, vmSizePtr int32) int32 {
 	if ef.cl == nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, errors.New("eth client doesn't exist").Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, errors.New("eth client doesn't exist").Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	buf, err := ef.rt.Read(offset, size)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	ret := gjson.Parse(string(buf))
 	data, err := ef.cl.CallContract(uint32(chainID), ret.Get("to").String(), ret.Get("data").String())
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	if err = ef.rt.Copy(data, vmAddrPtr, vmSizePtr); err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	return int32(wasm.ResultStatusCode_OK)
@@ -470,7 +469,7 @@ func (ef *ExportFuncs) GetEnv(kAddr, kSize int32, vmAddrPtr, vmSizePtr int32) in
 	}
 	key, err := ef.rt.Read(kAddr, kSize)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
 
@@ -480,7 +479,7 @@ func (ef *ExportFuncs) GetEnv(kAddr, kSize int32, vmAddrPtr, vmSizePtr int32) in
 	}
 
 	if err = ef.rt.Copy([]byte(val), vmAddrPtr, vmSizePtr); err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
 	return int32(wasm.ResultStatusCode_OK)
@@ -493,7 +492,7 @@ func (ef *ExportFuncs) GetEventType(rid, vmAddrPtr, vmSizePtr int32) int32 {
 	}
 
 	if err := ef.rt.Copy(data, vmAddrPtr, vmSizePtr); err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
 	return int32(wasm.ResultStatusCode_OK)
@@ -502,24 +501,24 @@ func (ef *ExportFuncs) GetEventType(rid, vmAddrPtr, vmSizePtr int32) int32 {
 func (ef *ExportFuncs) StatSubmit(vmAddrPtr, vmSizePtr int32) int32 {
 	buf, err := ef.rt.Read(vmAddrPtr, vmSizePtr)
 	if err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	str := string(buf)
 	if !gjson.Valid(str) {
 		err = errors.New("invalid json")
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	object := gjson.Parse(str)
 	if object.IsArray() {
 		err = errors.New("json object should not be an array")
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 
 	if err := ef.metrics.Submit(object); err != nil {
-		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		ef.logAndPersistToDB(conflog.ErrorLevel, wasm.LogTypeExports, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
 	return int32(wasm.ResultStatusCode_OK)

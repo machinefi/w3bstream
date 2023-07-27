@@ -462,7 +462,7 @@ http get :8888/srv-applet-mgr/v0/project/datalist -A bearer -a $TOK # fetch proj
 export WASMFILE=build/wasms/log.wasm
 export WASMNAME=log.wasm
 export APPLETNAME=log
-http --form post :8888/srv-applet-mgr/v0/applet/x/$PROJECTNAME file@$WASMFILE info='{"appletName":"'$APPLETNAME'","wasmName":"'$WASMNAME'"}' -A bearer -a $TOK 
+http --form post :8888/srv-applet-mgr/v0/applet/x/$PROJECTNAME file@$WASMFILE info='{"appletName":"'$APPLETNAME'","wasmName":"'$WASMNAME'"}' -A bearer -a $TOK
 ```
 
 output like

@@ -56,6 +56,7 @@ const (
 	ConfigLogger     ConfigType = "LOGGER"
 	ConfigMqttClient ConfigType = "MQTT_CLIENT"
 	ConfigChains     ConfigType = "CHAINS"
+	ConfigTraceInfo  ConfigType = "TRACE_INFO"
 	ConfigMetrics    ConfigType = "METRICS"
 )
 
@@ -63,6 +64,7 @@ var ConfigTypes = []ConfigType{
 	ConfigLogger,
 	ConfigMqttClient,
 	ConfigChains,
+	ConfigTraceInfo,
 	ConfigMetrics,
 }
 
@@ -74,6 +76,8 @@ func NewGlobalConfigurationByType(t ConfigType) (GlobalConfiguration, error) {
 		return &MqttClient{}, nil
 	case ConfigChains:
 		return &ChainClient{}, nil
+	case ConfigTraceInfo:
+		return &TraceInfo{}, nil
 	default: // TODO case ConfigMetrics:
 		return nil, nil // errors.Errorf("invalid global config type: %d", t)
 	}
