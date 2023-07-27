@@ -3,6 +3,8 @@ package enums
 const (
 	EVENTTYPEDEFAULT         = "DEFAULT"
 	MONITOR_EVENTTYPEDEFAULT = "MONITOR_DEFAULT"
+
+	WasmLogMaxLength = 1024
 )
 
 const (

@@ -3,7 +3,6 @@ package wasm
 import (
 	"context"
 
-	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
@@ -23,6 +22,7 @@ type (
 	CtxMqttClient        struct{}
 	CtxCustomMetrics     struct{}
 	CtxFlow              struct{}
+	CtxTraceInfo         struct{}
 )
 
 func WithSQLStore(ctx context.Context, v *Database) context.Context {
@@ -67,22 +67,22 @@ func MustKVStoreFromContext(ctx context.Context) KVStore {
 	return v
 }
 
-func WithLogger(ctx context.Context, v log.Logger) context.Context {
+func WithLogger(ctx context.Context, v *Logger) context.Context {
 	return contextx.WithValue(ctx, CtxLogger{}, v)
 }
 
-func WithLoggerContext(v log.Logger) contextx.WithContext {
+func WithLoggerContext(v *Logger) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
 		return contextx.WithValue(ctx, CtxLogger{}, v)
 	}
 }
 
-func LoggerFromContext(ctx context.Context) (log.Logger, bool) {
-	v, ok := ctx.Value(CtxLogger{}).(log.Logger)
+func LoggerFromContext(ctx context.Context) (*Logger, bool) {
+	v, ok := ctx.Value(CtxLogger{}).(*Logger)
 	return v, ok
 }
 
-func MustLoggerFromContext(ctx context.Context) log.Logger {
+func MustLoggerFromContext(ctx context.Context) *Logger {
 	v, ok := LoggerFromContext(ctx)
 	must.BeTrue(ok)
 	return v
@@ -252,6 +252,27 @@ func FlowFromContext(ctx context.Context) (*Flow, bool) {
 
 func MustFlowFromContext(ctx context.Context) *Flow {
 	v, ok := FlowFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithTraceInfo(ctx context.Context, v *TraceInfo) context.Context {
+	return contextx.WithValue(ctx, CtxTraceInfo{}, v)
+}
+
+func WithTraceInfoContext(flow *TraceInfo) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxTraceInfo{}, flow)
+	}
+}
+
+func TraceInfoFromContext(ctx context.Context) (*TraceInfo, bool) {
+	v, ok := ctx.Value(CtxTraceInfo{}).(*TraceInfo)
+	return v, ok
+}
+
+func MustTraceInfoFromContext(ctx context.Context) *TraceInfo {
+	v, ok := TraceInfoFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

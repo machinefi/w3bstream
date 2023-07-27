@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -47,13 +48,18 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		}
 		parent = types.WithOperators(parent, ops)
 	}
-	apisrv := types.MustWasmApiServerFromContext(parent)
-	metric := metrics.NewCustomMetric(prj.AccountID.String(), prj.ProjectID.String())
-	logger := types.MustLoggerFromContext(parent)
 
 	// wasm runtime context
-	// all configurations will be init from parent(host) context and with value to wasm runtime context
-	ctx := context.Background()
+	// original context is inherited from global context.
+	// and configurations will be init from parent(host) context and with value to wasm runtime context
+	ctx := contextx.WithContextCompose(
+		types.WithWasmApiServerContext(types.MustWasmApiServerFromContext(parent)),
+		types.WithLoggerContext(types.MustLoggerFromContext(parent)),
+		types.WithTaskBoardContext(types.MustTaskBoardFromContext(parent)),
+		types.WithTaskWorkerContext(types.MustTaskWorkerFromContext(parent)),
+		confid.WithSFIDGeneratorContext(confid.MustSFIDGeneratorFromContext(parent)),
+		wasm.WithCustomMetricsContext(metrics.NewCustomMetric(prj.AccountID.String(), prj.ProjectID.String())),
+	)(context.Background())
 
 	// with user defined contexts
 	configs, err := config.List(parent, &config.CondArgs{
@@ -86,9 +92,5 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		ctx = c.WithContext(ctx)
 	}
 
-	return contextx.WithContextCompose(
-		types.WithWasmApiServerContext(apisrv),
-		types.WithLoggerContext(logger),
-		wasm.WithCustomMetricsContext(metric),
-	)(ctx), nil
+	return ctx, nil
 }

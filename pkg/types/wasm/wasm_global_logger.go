@@ -8,7 +8,7 @@ import (
 )
 
 type Logger struct {
-	logger conflog.Logger
+	conflog.Logger
 }
 
 func (l *Logger) GlobalConfigType() ConfigType { return ConfigLogger }
@@ -19,10 +19,10 @@ func (l *Logger) Init(parent context.Context) error {
 	app := types.MustAppletFromContext(parent)
 	ins := types.MustInstanceFromContext(parent)
 
-	l.logger = log.WithValues("@src", "wasm", "prj", prj.Name, "app", app.Name, "ins", ins.InstanceID)
+	l.Logger = log.WithValues("@src", "wasm", "prj", prj.Name, "app", app.Name, "ins", ins.InstanceID)
 	return nil
 }
 
 func (l *Logger) WithContext(ctx context.Context) context.Context {
-	return WithLogger(ctx, l.logger)
+	return WithLogger(ctx, l)
 }

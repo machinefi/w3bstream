@@ -1,35 +1,34 @@
 package job
 
 import (
-	"context"
 	"fmt"
 	"time"
 
-	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
-	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
-func NewWasmLogTask(ctx context.Context, logLevel, logSrc, msg string) *WasmLogTask {
-	wasm.MustLoggerFromContext(ctx).Debug(fmt.Sprintf("new log task with %s-%s", logSrc, msg))
+func NewWasmLogTask(v *wasm.LogContext) *WasmLogTask {
+	l := conflog.Std()
+	l.Debug(fmt.Sprintf("new log task with %s-%s", v.Type, v.Message))
 	task := &WasmLogTask{
 		wasmLog: &models.WasmLog{
-			RelWasmLog: models.RelWasmLog{WasmLogID: confid.MustSFIDGeneratorFromContext(ctx).MustGenSFID()},
+			RelWasmLog: models.RelWasmLog{WasmLogID: v.LogID},
 			WasmLogInfo: models.WasmLogInfo{
-				ProjectName: types.MustProjectFromContext(ctx).ProjectName.Name,
-				AppletName:  types.MustAppletFromContext(ctx).Name,
-				InstanceID:  types.MustInstanceFromContext(ctx).InstanceID,
-				Src:         logSrc,
-				Level:       logLevel,
+				ProjectName: v.ProjectName,
+				AppletName:  v.AppletName,
+				InstanceID:  v.InstanceID,
+				Src:         string(v.Type),
+				Level:       v.Level.String(),
 				LogTime:     time.Now().UnixNano(),
-				Msg:         subStringWithLength(msg, enums.WasmLogMaxLength),
+				Msg:         subStringWithLength(v.Message, enums.WasmLogMaxLength),
 			},
 		},
 	}
-	wasm.MustLoggerFromContext(ctx).Debug(fmt.Sprintf("log record is %v", task.wasmLog))
+	l.Debug(fmt.Sprintf("log record is %v", task.wasmLog))
 	return task
 }
 

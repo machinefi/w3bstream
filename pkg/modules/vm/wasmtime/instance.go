@@ -178,14 +178,9 @@ func (i *Instance) queueWorker() {
 		res = i.handle(task.ctx, task)
 		log.FromContext(task.ctx).WithValues("eid", task.EventID).Debug("event process completed.")
 		if len(res.ErrMsg) > 0 {
-			job.Dispatch(i.ctx, job.NewWasmLogTask(i.ctx, conflog.Level(log.ErrorLevel).String(), "vmTask", res.ErrMsg))
+			job.Dispatch(i.ctx, job.NewWasmLogTask(wasm.NewLogContext(i.ctx, wasm.LogTypeInstance, log.ErrorLevel, res.ErrMsg)))
 		} else {
-			job.Dispatch(i.ctx, job.NewWasmLogTask(
-				i.ctx,
-				conflog.Level(log.InfoLevel).String(),
-				"vmTask",
-				fmt.Sprintf("the event, whose eventtype is %s, is successfully handled by %s, ", task.EventType, task.Handler),
-			))
+			job.Dispatch(i.ctx, job.NewWasmLogTask(wasm.NewLogContext(i.ctx, wasm.LogTypeInstance, log.InfoLevel, "success")))
 		}
 	Next:
 	}
