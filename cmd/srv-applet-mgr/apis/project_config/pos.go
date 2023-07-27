@@ -47,3 +47,22 @@ func (r *CreateOrUpdateProjectEnv) Output(ctx context.Context) (interface{}, err
 	}
 	return config.Upsert(ctx, types.MustProjectFromContext(ctx).ProjectID, &r.Env)
 }
+
+type CreateOrUpdateProjectFlow struct {
+	httpx.MethodPost
+	wasm.Flow `in:"body"`
+}
+
+func (r *CreateOrUpdateProjectFlow) Path() string {
+	return "/PROJECT_FLOW"
+}
+
+func (r *CreateOrUpdateProjectFlow) Output(ctx context.Context) (interface{}, error) {
+	prj := middleware.MustProjectName(ctx)
+	ca := middleware.MustCurrentAccountFromContext(ctx)
+	ctx, err := ca.WithProjectContextByName(ctx, prj)
+	if err != nil {
+		return nil, err
+	}
+	return config.Upsert(ctx, types.MustProjectFromContext(ctx).ProjectID, &r.Flow)
+}

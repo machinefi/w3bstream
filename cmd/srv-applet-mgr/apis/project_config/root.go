@@ -13,8 +13,10 @@ var Root = kit.NewRouter(httptransport.Group("/project_config"))
 func init() {
 	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &GetProjectSchema{}))
 	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &GetProjectEnv{}))
+	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &GetProjectFlow{}))
 	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &CreateProjectSchema{}))
 	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &CreateOrUpdateProjectEnv{}))
+	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &CreateOrUpdateProjectFlow{}))
 
 	access_key.RouterRegister(Root, enums.ApiGroupProjectConfig, enums.ApiGroupProjectConfigDesc)
 }

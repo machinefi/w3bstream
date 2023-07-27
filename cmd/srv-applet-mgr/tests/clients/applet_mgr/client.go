@@ -31,6 +31,7 @@ type Interface interface {
 	CreateCronJob(req *CreateCronJob, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsCronJob, kit.Metadata, error)
 	CreateOperator(req *CreateOperator, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsOperator, kit.Metadata, error)
 	CreateOrUpdateProjectEnv(req *CreateOrUpdateProjectEnv, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsConfig, kit.Metadata, error)
+	CreateOrUpdateProjectFlow(req *CreateOrUpdateProjectFlow, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsConfig, kit.Metadata, error)
 	CreateProject(req *CreateProject, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesProjectCreateRsp, kit.Metadata, error)
 	CreateProjectOperator(req *CreateProjectOperator, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsProjectOperator, kit.Metadata, error)
 	CreateProjectSchema(req *CreateProjectSchema, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsConfig, kit.Metadata, error)
@@ -48,6 +49,7 @@ type Interface interface {
 	GetOperatorAddr(req *GetOperatorAddr, metas ...kit.Metadata) (*string, kit.Metadata, error)
 	GetProject(req *GetProject, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsProject, kit.Metadata, error)
 	GetProjectEnv(req *GetProjectEnv, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgTypesWasmEnv, kit.Metadata, error)
+	GetProjectFlow(req *GetProjectFlow, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgTypesWasmFlow, kit.Metadata, error)
 	GetProjectOperator(req *GetProjectOperator, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesOperatorDetail, kit.Metadata, error)
 	GetProjectSchema(req *GetProjectSchema, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgTypesWasmDatabase, kit.Metadata, error)
 	GetPublisher(req *GetPublisher, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsPublisher, kit.Metadata, error)
@@ -191,6 +193,10 @@ func (c *Client) CreateOrUpdateProjectEnv(req *CreateOrUpdateProjectEnv, metas .
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
+func (c *Client) CreateOrUpdateProjectFlow(req *CreateOrUpdateProjectFlow, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsConfig, kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
 func (c *Client) CreateProject(req *CreateProject, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesProjectCreateRsp, kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
@@ -256,6 +262,10 @@ func (c *Client) GetProject(req *GetProject, metas ...kit.Metadata) (*GithubComM
 }
 
 func (c *Client) GetProjectEnv(req *GetProjectEnv, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgTypesWasmEnv, kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
+func (c *Client) GetProjectFlow(req *GetProjectFlow, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgTypesWasmFlow, kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 

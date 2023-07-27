@@ -16,6 +16,8 @@ func NewUserConfigurationByType(t enums.ConfigType) (Configuration, error) {
 		return &Cache{}, nil
 	case enums.CONFIG_TYPE__PROJECT_ENV:
 		return &Env{}, nil
+	case enums.CONFIG_TYPE__PROJECT_FLOW:
+		return &Flow{}, nil
 	default:
 		return nil, errors.Errorf("invalid config type: %d", t)
 	}

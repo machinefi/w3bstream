@@ -167,6 +167,14 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 				return err
 			}
 			rsp.Database = r.Database
+			if r.Flow == nil {
+				r.Flow = &wasm.Flow{}
+			}
+			_, err = config.Create(ctx, prj.ProjectID, r.Flow)
+			if err != nil {
+				return err
+			}
+			rsp.Flow = r.Flow
 			return nil
 		},
 	).Do()

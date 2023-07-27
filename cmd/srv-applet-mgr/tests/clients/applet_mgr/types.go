@@ -82,6 +82,10 @@ type GithubComMachinefiW3BstreamPkgEnumsConfigType = enums.ConfigType
 
 type GithubComMachinefiW3BstreamPkgEnumsDeployCmd = enums.DeployCmd
 
+type GithubComMachinefiW3BstreamPkgEnumsFlowOperator = enums.FlowOperator
+
+type GithubComMachinefiW3BstreamPkgEnumsFlowSink = enums.FlowSink
+
 type GithubComMachinefiW3BstreamPkgEnumsInstanceState = enums.InstanceState
 
 type GithubComMachinefiW3BstreamPkgEnumsMonitorCmd = enums.MonitorCmd
@@ -394,6 +398,7 @@ type GithubComMachinefiW3BstreamPkgModulesProjectCreateReq struct {
 	GithubComMachinefiW3BstreamPkgModelsProjectBase
 	Database *GithubComMachinefiW3BstreamPkgTypesWasmDatabase `json:"database,omitempty"`
 	Env      *GithubComMachinefiW3BstreamPkgTypesWasmEnv      `json:"envs,omitempty"`
+	Flow     *GithubComMachinefiW3BstreamPkgTypesWasmFlow     `json:"flow,omitempty"`
 }
 
 type GithubComMachinefiW3BstreamPkgModulesProjectCreateRsp struct {
@@ -401,6 +406,7 @@ type GithubComMachinefiW3BstreamPkgModulesProjectCreateRsp struct {
 	ChannelState GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesBool `json:"channelState"`
 	Database     *GithubComMachinefiW3BstreamPkgTypesWasmDatabase          `json:"database,omitempty"`
 	Env          *GithubComMachinefiW3BstreamPkgTypesWasmEnv               `json:"envs,omitempty"`
+	Flow         *GithubComMachinefiW3BstreamPkgTypesWasmFlow              `json:"flow,omitempty"`
 }
 
 type GithubComMachinefiW3BstreamPkgModulesProjectDetail = project.Detail
@@ -439,19 +445,33 @@ type GithubComMachinefiW3BstreamPkgModulesTrafficlimitListRsp = trafficlimit.Lis
 
 type GithubComMachinefiW3BstreamPkgModulesTrafficlimitUpdateReq = trafficlimit.UpdateReq
 
+type GithubComMachinefiW3BstreamPkgTypesWasmCBInfo = wasm.CBInfo
+
 type GithubComMachinefiW3BstreamPkgTypesWasmCache = wasm.Cache
 
 type GithubComMachinefiW3BstreamPkgTypesWasmColumn = wasm.Column
 
 type GithubComMachinefiW3BstreamPkgTypesWasmConstrains = wasm.Constrains
 
+type GithubComMachinefiW3BstreamPkgTypesWasmDBInfo = wasm.DBInfo
+
 type GithubComMachinefiW3BstreamPkgTypesWasmDatabase = wasm.Database
 
 type GithubComMachinefiW3BstreamPkgTypesWasmEnv = wasm.Env
 
+type GithubComMachinefiW3BstreamPkgTypesWasmFlow = wasm.Flow
+
 type GithubComMachinefiW3BstreamPkgTypesWasmKey = wasm.Key
 
+type GithubComMachinefiW3BstreamPkgTypesWasmOperator = wasm.Operator
+
 type GithubComMachinefiW3BstreamPkgTypesWasmSchema = wasm.Schema
+
+type GithubComMachinefiW3BstreamPkgTypesWasmSink = wasm.Sink
+
+type GithubComMachinefiW3BstreamPkgTypesWasmSinkInfo = wasm.SinkInfo
+
+type GithubComMachinefiW3BstreamPkgTypesWasmSource = wasm.Source
 
 type GithubComMachinefiW3BstreamPkgTypesWasmTable = wasm.Table
 

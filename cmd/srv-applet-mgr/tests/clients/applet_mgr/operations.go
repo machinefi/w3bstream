@@ -738,6 +738,54 @@ func (o *CreateOrUpdateProjectEnv) Invoke(cli kit.Client, metas ...kit.Metadata)
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
+type CreateOrUpdateProjectFlow struct {
+	ProjectName  string                                      `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                      `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                      `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	Flow         GithubComMachinefiW3BstreamPkgTypesWasmFlow `in:"body"`
+}
+
+func (o *CreateOrUpdateProjectFlow) Path() string {
+	return "/srv-applet-mgr/v0/project_config/x/:projectName/PROJECT_FLOW"
+}
+
+func (o *CreateOrUpdateProjectFlow) Method() string {
+	return "POST"
+}
+
+// @StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!
+// @StatusErr[AccountNotFound][404999017][Account Not Found]!
+// @StatusErr[ConfigConflict][409999006][Config Conflict]!
+// @StatusErr[ConfigInitFailed][500999005][Config Init Failed]!
+// @StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!
+// @StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!
+// @StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
+// @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
+// @StatusErr[InvalidClaim][401999003][Invalid Claim]!
+// @StatusErr[InvalidConfigType][400999002][Invalid Config Type]!
+// @StatusErr[InvalidToken][401999002][Invalid Token]!
+// @StatusErr[NoProjectPermission][401999004][No Project Permission]!
+// @StatusErr[ProjectNotFound][404999002][Project Not Found]!
+
+func (o *CreateOrUpdateProjectFlow) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.CreateOrUpdateProjectFlow")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *CreateOrUpdateProjectFlow) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsConfig, kit.Metadata, error) {
+	rsp := new(GithubComMachinefiW3BstreamPkgModelsConfig)
+	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
+	return rsp, meta, err
+}
+
+func (o *CreateOrUpdateProjectFlow) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsConfig, kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
 type CreateProject struct {
 	AuthInHeader string                                                `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
 	AuthInQuery  string                                                `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
@@ -1437,6 +1485,51 @@ func (o *GetProjectEnv) InvokeContext(ctx context.Context, cli kit.Client, metas
 }
 
 func (o *GetProjectEnv) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgTypesWasmEnv, kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
+type GetProjectFlow struct {
+	ProjectName  string `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+}
+
+func (o *GetProjectFlow) Path() string {
+	return "/srv-applet-mgr/v0/project_config/x/:projectName/PROJECT_FLOW"
+}
+
+func (o *GetProjectFlow) Method() string {
+	return "GET"
+}
+
+// @StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!
+// @StatusErr[AccountNotFound][404999017][Account Not Found]!
+// @StatusErr[ConfigNotFound][404999003][Config Not Found]!
+// @StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!
+// @StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
+// @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
+// @StatusErr[InvalidClaim][401999003][Invalid Claim]!
+// @StatusErr[InvalidConfigType][400999002][Invalid Config Type]!
+// @StatusErr[InvalidToken][401999002][Invalid Token]!
+// @StatusErr[NoProjectPermission][401999004][No Project Permission]!
+// @StatusErr[ProjectNotFound][404999002][Project Not Found]!
+
+func (o *GetProjectFlow) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.GetProjectFlow")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *GetProjectFlow) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgTypesWasmFlow, kit.Metadata, error) {
+	rsp := new(GithubComMachinefiW3BstreamPkgTypesWasmFlow)
+	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
+	return rsp, meta, err
+}
+
+func (o *GetProjectFlow) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgTypesWasmFlow, kit.Metadata, error) {
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 

@@ -230,7 +230,28 @@ export PROJECTENV='{
     ["envKey3", "envValue3"]
   ]
 }'
-echo '{"name":"'$PROJECTNAME'","database": '$PROJECTDATABASE',"envs":'$PROJECTENV'}' | http post :8888/srv-applet-mgr/v0/project -A bearer -a $TOK
+export PROJECTFLOW='{
+  "source": {"strategies": ["flow_poc"]},
+  "operators": [
+      {"opType": "FILTER", "wasmFunc": "filterAge"}, 
+      {"opType": "MAP", "wasmFunc": "mapTax"}, 
+      {"opType": "WINDOW", "wasmFunc": "groupByAge"},
+      {"opType": "GROUP", "wasmFunc": "groupByAge"},
+      {"opType": "REDUCE", "wasmFunc": "reduce"}
+  ],
+  "sink": {
+      "sinkType": "RMDB", 
+      "sinkInfo": {
+          "DBInfo": {
+              "endpoint": "postgres://test_user:test_passwd@127.0.0.1:5432/test?sslmode=disable" , 
+              "DBType": "postgres", 
+              "table": "customer", 
+              "columns": ["id", "firstName", "lastName", "age", "taxNumber", "city"]
+          }
+      }
+  } 
+}'
+echo '{"name":"'$PROJECTNAME'","database": '$PROJECTDATABASE',"envs":'$PROJECTENV',"flow": '$PROJECTFLOW'}' | http post :8888/srv-applet-mgr/v0/project -A bearer -a $TOK
 ```
 
 You can define your own database model.
@@ -422,6 +443,7 @@ output like:
 ```sh
 echo $PROJECTENV | http post :8888/srv-applet-mgr/v0/project_config/x/$PROJECTNAME/PROJECT_ENV -A bearer -a $TOK
 echo $PROJECTDATABASE | http post :8888/srv-applet-mgr/v0/project_config/x/$PROJECTNAME/PROJECT_DATABASE -A bearer -a $TOK
+echo $PROJECTFLOW | http post :8888/srv-applet-mgr/v0/project_config/x/$PROJECTNAME/PROJECT_FLOW -A bearer -a $TOK
 ```
 
 ### Review your projects and project configurations
@@ -430,6 +452,7 @@ echo $PROJECTDATABASE | http post :8888/srv-applet-mgr/v0/project_config/x/$PROJ
 http get :8888/srv-applet-mgr/v0/project/x/$PROJECTNAME/data -A bearer -a $TOK ## fetch project by name
 http get :8888/srv-applet-mgr/v0/project_config/x/demo/PROJECT_ENV -A bearer -a $TOK  # fetch project env configuration
 http get :8888/srv-applet-mgr/v0/project_config/x/demo/PROJECT_DATABASE -A bearer -a $TOK  # fetch project database configuration
+http get :8888/srv-applet-mgr/v0/project_config/x/$PROJECTNAME/PROJECT_FLOW -A bearer -a $TOK  # fetch project database configuration
 http get :8888/srv-applet-mgr/v0/project/datalist -A bearer -a $TOK # fetch project list you created
 ```
 
