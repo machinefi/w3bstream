@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
 )
 
 type LocalFileSystem struct {
@@ -59,6 +60,21 @@ func (l *LocalFileSystem) Read(key string) ([]byte, error) {
 
 func (l *LocalFileSystem) Delete(key string) error {
 	return os.Remove(l.path(key))
+}
+
+func (l *LocalFileSystem) StatObject(key string) (*filesystem.ObjectMeta, error) {
+	info, err := os.Stat(l.path(key))
+	if err != nil {
+		return nil, filesystem.ErrNotExistObjectKey
+	}
+
+	om, err := filesystem.ParseObjectMetaFromKey(key)
+	if err != nil {
+		return nil, err
+	}
+	om.Size = info.Size()
+
+	return om, nil
 }
 
 func (l *LocalFileSystem) path(name string) string {

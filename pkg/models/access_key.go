@@ -29,15 +29,14 @@ type AccessKeyInfo struct {
 	ExpiredAt    types.Timestamp             `db:"f_expired_at,default='0'"`
 	LastUsed     types.Timestamp             `db:"f_last_used,default='0'"`
 	Description  string                      `db:"f_desc,default=''"`
-	Privileges   AccessPrivileges            `db:"f_privileges,default='{}'"`
+	Privileges   GroupAccessPrivileges       `db:"f_privileges,default='[]'"`
 }
 
-type AccessPrivilege struct{}
+// GroupAccessPrivileges mapping group name and access permission
+type GroupAccessPrivileges map[string]enums.AccessPermission
 
-type AccessPrivileges map[string]AccessPrivilege
+func (GroupAccessPrivileges) DataType(driver string) string { return "text" }
 
-func (AccessPrivileges) DataType(driver string) string { return "text" }
+func (m GroupAccessPrivileges) Value() (driver.Value, error) { return datatypes.JSONValue(m) }
 
-func (m AccessPrivileges) Value() (driver.Value, error) { return datatypes.JSONValue(m) }
-
-func (m *AccessPrivileges) Scan(src interface{}) error { return datatypes.JSONScan(src, m) }
+func (m *GroupAccessPrivileges) Scan(src interface{}) error { return datatypes.JSONScan(src, m) }

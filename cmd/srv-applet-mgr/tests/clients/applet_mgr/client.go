@@ -41,6 +41,7 @@ type Interface interface {
 	DeleteAccountAccessKeyByName(req *DeleteAccountAccessKeyByName, metas ...kit.Metadata) (kit.Metadata, error)
 	DownloadResource(req *DownloadResource, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxAttachment, kit.Metadata, error)
 	EthClient(metas ...kit.Metadata) (*EthClientRsp, kit.Metadata, error)
+	GetAccessKeyByName(req *GetAccessKeyByName, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccessKeyListData, kit.Metadata, error)
 	GetApplet(req *GetApplet, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsApplet, kit.Metadata, error)
 	GetDownloadResourceUrl(req *GetDownloadResourceUrl, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesResourceDownLoadResourceRsp, kit.Metadata, error)
 	GetInstanceByAppletID(req *GetInstanceByAppletID, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsInstance, kit.Metadata, error)
@@ -83,7 +84,7 @@ type Interface interface {
 	RemoveStrategy(req *RemoveStrategy, metas ...kit.Metadata) (kit.Metadata, error)
 	RemoveTrafficLimit(req *RemoveTrafficLimit, metas ...kit.Metadata) (kit.Metadata, error)
 	RemoveWasmLogByInstanceID(req *RemoveWasmLogByInstanceID, metas ...kit.Metadata) (kit.Metadata, error)
-	UpdateAccountAccessKeyByName(req *UpdateAccountAccessKeyByName, metas ...kit.Metadata) (kit.Metadata, error)
+	UpdateAccountAccessKeyByName(req *UpdateAccountAccessKeyByName, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccessKeyUpdateRsp, kit.Metadata, error)
 	UpdateApplet(req *UpdateApplet, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAppletCreateRsp, kit.Metadata, error)
 	UpdatePasswordByAccountID(req *UpdatePasswordByAccountID, metas ...kit.Metadata) (kit.Metadata, error)
 	UpdatePublisher(req *UpdatePublisher, metas ...kit.Metadata) (kit.Metadata, error)
@@ -230,6 +231,10 @@ func (c *Client) DownloadResource(req *DownloadResource, metas ...kit.Metadata) 
 
 func (c *Client) EthClient(metas ...kit.Metadata) (*EthClientRsp, kit.Metadata, error) {
 	return (&EthClient{}).InvokeContext(c.Context(), c.Client, metas...)
+}
+
+func (c *Client) GetAccessKeyByName(req *GetAccessKeyByName, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccessKeyListData, kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
 func (c *Client) GetApplet(req *GetApplet, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsApplet, kit.Metadata, error) {
@@ -400,7 +405,7 @@ func (c *Client) RemoveWasmLogByInstanceID(req *RemoveWasmLogByInstanceID, metas
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
-func (c *Client) UpdateAccountAccessKeyByName(req *UpdateAccountAccessKeyByName, metas ...kit.Metadata) (kit.Metadata, error) {
+func (c *Client) UpdateAccountAccessKeyByName(req *UpdateAccountAccessKeyByName, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccessKeyUpdateRsp, kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 

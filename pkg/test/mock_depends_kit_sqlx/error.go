@@ -26,3 +26,11 @@ func ExpectError(t *testing.T, err error, se status.Error, desc ...string) {
 		NewWithT(t).Expect(desc[0]).To(Equal(expect.Desc))
 	}
 }
+
+func ErrNotFoundFrom(from string) error {
+	return sqlx.NewSqlError(sqlx.SqlErrTypeNotFound, from)
+}
+
+func ErrConflictFrom(from string) error {
+	return sqlx.NewSqlError(sqlx.SqlErrTypeConflict, from)
+}

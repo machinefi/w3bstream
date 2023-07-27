@@ -47,12 +47,18 @@ func (p *ApiCallProcessor) ProcessTask(ctx context.Context, t *asynq.Task) error
 		return fmt.Errorf("http.ReadRequest failed: %v: %w", err, asynq.SkipRetry)
 	}
 
+	req = req.WithContext(contextx.WithContextCompose(
+		types.WithProjectContext(payload.Project),
+		types.WithLoggerContext(p.l),
+	)(ctx))
+
 	resp := httptest.NewRecorder()
 	p.router.ServeHTTP(resp, req)
 
+	projectName := payload.Project.ProjectName.Name
 	_, l := p.l.Start(ctx, "wasmapi.ProcessTaskApiCall")
 	defer l.End()
-	l = l.WithValues("ProjectName", payload.ProjectName)
+	l = l.WithValues("ProjectName", projectName)
 
 	wbuf := bytes.Buffer{}
 	if err := resp.Result().Write(&wbuf); err != nil {
@@ -63,10 +69,10 @@ func (p *ApiCallProcessor) ProcessTask(ctx context.Context, t *asynq.Task) error
 	eventType := req.Header.Get("eventType")
 	if eventType == "" {
 		l.Error(errors.New("miss eventType"))
-		return fmt.Errorf("miss eventType, projectName %v: %w", payload.ProjectName, asynq.SkipRetry)
+		return fmt.Errorf("miss eventType, projectName %v: %w", projectName, asynq.SkipRetry)
 	}
 
-	task, err := newApiResultTask(payload.ProjectName, eventType, wbuf.Bytes())
+	task, err := newApiResultTask(projectName, eventType, wbuf.Bytes())
 	if err != nil {
 		l.Error(errors.Wrap(err, "new api result task failed"))
 		return fmt.Errorf("new api result task failed: %v: %w", err, asynq.SkipRetry)

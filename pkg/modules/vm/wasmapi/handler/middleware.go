@@ -1,4 +1,4 @@
-package wasmapi
+package handler
 
 import (
 	"errors"

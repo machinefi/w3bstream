@@ -3,14 +3,17 @@ package amazonS3
 import (
 	"bytes"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
 )
 
 type AmazonS3 struct {
@@ -94,4 +97,28 @@ func (s *AmazonS3) DownloadUrl(key string) (string, error) {
 		Key:    aws.String(key),
 	})
 	return req.Presign(s.UrlExpire.Duration())
+}
+
+func (s *AmazonS3) StatObject(key string) (*filesystem.ObjectMeta, error) {
+	resp, err := s.cli.HeadObject(&s3.HeadObjectInput{
+		Bucket: aws.String(s.BucketName),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		awsErr, ok := err.(awserr.RequestFailure)
+		if ok && awsErr.StatusCode() == 404 {
+			return nil, filesystem.ErrNotExistObjectKey
+		}
+		return nil, err
+	}
+
+	om, err := filesystem.ParseObjectMetaFromKey(key)
+	if err != nil {
+		return nil, err
+	}
+	om.ContentType = *resp.ContentType
+	om.ETag = strings.Trim(*resp.ETag, "\"")
+	om.Size = *resp.ContentLength
+
+	return om, nil
 }

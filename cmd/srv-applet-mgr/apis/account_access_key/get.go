@@ -31,3 +31,15 @@ func (r *ListAccessGroupMetas) Path() string { return "/operator_group_metas" }
 func (r *ListAccessGroupMetas) Output(_ context.Context) (interface{}, error) {
 	return access_key.OperatorGroupMetaList(), nil
 }
+
+type GetAccessKeyByName struct {
+	httpx.MethodGet
+	Name string `in:"path" name:"name"`
+}
+
+func (r *GetAccessKeyByName) Path() string { return "/data/:name" }
+
+func (r *GetAccessKeyByName) Output(ctx context.Context) (interface{}, error) {
+	ca := middleware.MustCurrentAccountFromContext(ctx)
+	return access_key.GetByName(ca.WithAccount(ctx), r.Name)
+}

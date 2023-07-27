@@ -14,6 +14,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/async"
+	"github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/handler"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
@@ -29,7 +30,7 @@ func (s *Server) Call(ctx context.Context, data []byte) *http.Response {
 	defer l.End()
 
 	prj := types.MustProjectFromContext(ctx)
-	task, err := async.NewApiCallTask(prj.Name, data)
+	task, err := async.NewApiCallTask(prj, data)
 	if err != nil {
 		l.Error(errors.Wrap(err, "new api call task failed"))
 		return &http.Response{
@@ -52,18 +53,22 @@ func (s *Server) Shutdown() {
 	s.srv.Shutdown()
 }
 
-func newRouter() *gin.Engine {
+func newRouter(mgrDB sqlx.DBExecutor, ethCli *types.ETHClientConfig) *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Recovery())
-	router.Use(ParamValidate())
+	router.Use(handler.ParamValidate())
 
-	router.GET("/system/hello", hello)
+	handlers := handler.New(mgrDB, ethCli)
+
+	router.GET("/system/hello", handlers.Hello)
+	router.GET("/system/read_tx", handlers.ReadTx)
+	router.POST("/system/send_tx", handlers.SendTx)
 
 	return router
 }
 
-func NewServer(l log.Logger, redisConf *redis.Redis, mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB) (*Server, error) {
-	router := newRouter()
+func NewServer(l log.Logger, redisConf *redis.Redis, mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB, ethCli *types.ETHClientConfig) (*Server, error) {
+	router := newRouter(mgrDB, ethCli)
 
 	redisCli := asynq.RedisClientOpt{
 		Network:      redisConf.Protocol,
