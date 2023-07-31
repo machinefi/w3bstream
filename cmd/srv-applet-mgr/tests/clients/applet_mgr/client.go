@@ -17,6 +17,7 @@ type Interface interface {
 	BatchRemovePublisher(req *BatchRemovePublisher, metas ...kit.Metadata) (kit.Metadata, error)
 	BatchRemoveStrategy(req *BatchRemoveStrategy, metas ...kit.Metadata) (kit.Metadata, error)
 	BatchRemoveTrafficLimit(req *BatchRemoveTrafficLimit, metas ...kit.Metadata) (kit.Metadata, error)
+	ChainConfig(metas ...kit.Metadata) (*ChainConfigResp, kit.Metadata, error)
 	ControlChainHeight(req *ControlChainHeight, metas ...kit.Metadata) (kit.Metadata, error)
 	ControlChainTx(req *ControlChainTx, metas ...kit.Metadata) (kit.Metadata, error)
 	ControlContractLog(req *ControlContractLog, metas ...kit.Metadata) (kit.Metadata, error)
@@ -135,6 +136,10 @@ func (c *Client) BatchRemoveStrategy(req *BatchRemoveStrategy, metas ...kit.Meta
 
 func (c *Client) BatchRemoveTrafficLimit(req *BatchRemoveTrafficLimit, metas ...kit.Metadata) (kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
+func (c *Client) ChainConfig(metas ...kit.Metadata) (*ChainConfigResp, kit.Metadata, error) {
+	return (&ChainConfig{}).InvokeContext(c.Context(), c.Client, metas...)
 }
 
 func (c *Client) ControlChainHeight(req *ControlChainHeight, metas ...kit.Metadata) (kit.Metadata, error) {

@@ -1909,6 +1909,26 @@
         }
       }
     },
+    "/srv-applet-mgr/v0/configuration/chain_config": {
+      "get": {
+        "tags": [
+          "apis/configuration"
+        ],
+        "operationId": "ChainConfig",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChainConfigResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/srv-applet-mgr/v0/configuration/eth_client": {
       "get": {
         "tags": [
@@ -10116,6 +10136,20 @@
         "format": "binary",
         "x-go-vendor-type": "bytes.Buffer",
         "x-id": "BytesBuffer"
+      },
+      "ChainConfigResp": {
+        "type": "object",
+        "properties": {
+          "chains": {
+            "type": "string",
+            "x-go-field-name": "Chains",
+            "x-tag-json": "chains"
+          }
+        },
+        "required": [
+          "chains"
+        ],
+        "x-id": "ChainConfigResp"
       },
       "CurrentAccount": {
         "allOf": [

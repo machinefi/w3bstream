@@ -167,6 +167,32 @@ func (o *BatchRemoveTrafficLimit) Invoke(cli kit.Client, metas ...kit.Metadata) 
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
+type ChainConfig struct {
+}
+
+func (o *ChainConfig) Path() string {
+	return "/srv-applet-mgr/v0/configuration/chain_config"
+}
+
+func (o *ChainConfig) Method() string {
+	return "GET"
+}
+
+func (o *ChainConfig) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.ChainConfig")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *ChainConfig) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*ChainConfigResp, kit.Metadata, error) {
+	rsp := new(ChainConfigResp)
+	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
+	return rsp, meta, err
+}
+
+func (o *ChainConfig) Invoke(cli kit.Client, metas ...kit.Metadata) (*ChainConfigResp, kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
 type ControlChainHeight struct {
 	Cmd                   GithubComMachinefiW3BstreamPkgEnumsMonitorCmd                        `in:"path" name:"cmd"`
 	ProjectName           string                                                               `in:"path" name:"projectName" validate:"@projectName"`

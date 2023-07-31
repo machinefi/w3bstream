@@ -30,6 +30,10 @@ import (
 
 type BytesBuffer = bytes.Buffer
 
+type ChainConfigResp struct {
+	Chains string `json:"chains"`
+}
+
 type CurrentAccount struct {
 	GithubComMachinefiW3BstreamPkgModelsAccount
 }

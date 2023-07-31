@@ -4,6 +4,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -57,6 +58,34 @@ func (c *ETHClientConfig) Init() {
 		url := v.String()
 		c.Clients[uint32(chainID)] = url
 	}
+}
+
+type Chain struct {
+	ID       uint64 `json:"id"` // w3bstream private id
+	ChainID  uint64 `json:"chainID,omitempty"`
+	Name     string `json:"name"`
+	Endpoint string `json:"endpoint"`
+}
+
+type ChainConfig struct {
+	Configs string            `env:""     json:"-"`
+	Chains  map[uint64]*Chain `env:"-"    json:"chains"` // ID -> Chain
+}
+
+func (c *ChainConfig) Init() {
+	cs := []*Chain{}
+
+	if c.Configs != "" {
+		if err := json.Unmarshal([]byte(c.Configs), &cs); err != nil {
+			panic(err)
+		}
+	}
+
+	csm := make(map[uint64]*Chain)
+	for _, c := range cs {
+		csm[c.ID] = c
+	}
+	c.Chains = csm
 }
 
 // aliases from base/types

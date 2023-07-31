@@ -68,6 +68,7 @@ func init() {
 		Logger        *conflog.Log
 		UploadConf    *types.UploadConfig
 		EthClient     *types.ETHClientConfig
+		ChainConfig   *types.ChainConfig
 		WhiteList     *types.EthAddressWhiteList
 		ServerEvent   *confhttp.Server
 		FileSystem    *types.FileSystem
@@ -88,6 +89,7 @@ func init() {
 		Logger:        &conflog.Log{},
 		UploadConf:    &types.UploadConfig{},
 		EthClient:     &types.ETHClientConfig{},
+		ChainConfig:   &types.ChainConfig{},
 		WhiteList:     &types.EthAddressWhiteList{},
 		ServerEvent:   ServerEvent,
 		FileSystem:    &types.FileSystem{},
@@ -158,6 +160,7 @@ func init() {
 		types.WithTaskWorkerContext(worker),
 		types.WithTaskBoardContext(mq.NewTaskBoard(tasks)),
 		types.WithETHClientConfigContext(config.EthClient),
+		types.WithChainConfigContext(config.ChainConfig),
 		types.WithEthAddressWhiteListContext(config.WhiteList),
 		types.WithFileSystemOpContext(fs),
 		types.WithProxyClientContext(proxy),

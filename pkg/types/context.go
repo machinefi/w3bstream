@@ -41,6 +41,8 @@ type (
 	CtxEthAddressWhiteList struct{}
 	// CtxEthClient type *ETHClientConfig global eth chain endpoints
 	CtxEthClient struct{}
+	// CtxChainConfig type *ChainConfig global chain endpoints
+	CtxChainConfig struct{}
 	// CtxFileSystemOp type filesystem.FileSystemOp describe resource storing operation type
 	CtxFileSystemOp struct{}
 	// CtxProxyClient type *client.Client http client for forwarding mqtt event
@@ -559,6 +561,27 @@ func ETHClientConfigFromContext(ctx context.Context) (*ETHClientConfig, bool) {
 
 func MustETHClientConfigFromContext(ctx context.Context) *ETHClientConfig {
 	v, ok := ETHClientConfigFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithChainConfig(ctx context.Context, v *ChainConfig) context.Context {
+	return contextx.WithValue(ctx, ChainConfig{}, v)
+}
+
+func WithChainConfigContext(v *ChainConfig) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, ChainConfig{}, v)
+	}
+}
+
+func ChainConfigFromContext(ctx context.Context) (*ChainConfig, bool) {
+	v, ok := ctx.Value(ChainConfig{}).(*ChainConfig)
+	return v, ok
+}
+
+func MustChainConfigFromContext(ctx context.Context) *ChainConfig {
+	v, ok := ChainConfigFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
