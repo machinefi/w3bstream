@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -50,6 +51,7 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 	apisrv := types.MustWasmApiServerFromContext(parent)
 	metric := metrics.NewCustomMetric(prj.AccountID.String(), prj.ProjectID.String())
 	logger := types.MustLoggerFromContext(parent)
+	sfid := confid.MustSFIDGeneratorFromContext(parent)
 
 	// wasm runtime context
 	// all configurations will be init from parent(host) context and with value to wasm runtime context
@@ -90,5 +92,11 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		types.WithWasmApiServerContext(apisrv),
 		types.WithLoggerContext(logger),
 		wasm.WithCustomMetricsContext(metric),
+		confid.WithSFIDGeneratorContext(sfid),
+		types.WithProjectContext(prj),
+		types.WithAppletContext(app),
+		types.WithInstanceContext(ins),
+		types.WithTaskWorkerContext(types.MustTaskWorkerFromContext(parent)),
+		types.WithTaskBoardContext(types.MustTaskBoardFromContext(parent)),
 	)(ctx), nil
 }
