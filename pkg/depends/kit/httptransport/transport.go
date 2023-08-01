@@ -3,6 +3,7 @@ package httptransport
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -13,10 +14,10 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/errors"
 
-	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/handlers"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/transformer"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/validator"
 	_ "github.com/machinefi/w3bstream/pkg/depends/kit/validator/strfmt"
 )
@@ -84,7 +85,7 @@ func (t *HttpTransport) Serve(router *kit.Router) error {
 func (t *HttpTransport) ServeContext(ctx context.Context, router *kit.Router) error {
 	t.SetDefault()
 
-	logger := log.FromContext(ctx)
+	logger := logr.FromContext(ctx)
 
 	t.httpRouter = t.toHttpRouter(router)
 
@@ -95,7 +96,7 @@ func (t *HttpTransport) ServeContext(ctx context.Context, router *kit.Router) er
 
 	for i := range t.Modifiers {
 		if err := t.Modifiers[i](t.srv); err != nil {
-			logger.Fatal(err)
+			log.Fatal(err)
 		}
 	}
 
@@ -107,7 +108,7 @@ func (t *HttpTransport) ServeContext(ctx context.Context, router *kit.Router) er
 				if err == http.ErrServerClosed {
 					logger.Error(err)
 				} else {
-					logger.Fatal(err)
+					log.Fatal(err)
 				}
 			}
 			return
@@ -117,7 +118,7 @@ func (t *HttpTransport) ServeContext(ctx context.Context, router *kit.Router) er
 			if err == http.ErrServerClosed {
 				logger.Error(err)
 			} else {
-				logger.Fatal(err)
+				log.Fatal(err)
 			}
 		}
 	}()
@@ -131,7 +132,7 @@ func (t *HttpTransport) ServeContext(ctx context.Context, router *kit.Router) er
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	logger.Info("shutdowning in %s", timeout)
+	log.Println("Server shutdown in 10 second")
 
 	return t.srv.Shutdown(ctx)
 }

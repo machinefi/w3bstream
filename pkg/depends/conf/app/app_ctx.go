@@ -227,7 +227,7 @@ func (c *Ctx) marshal(rv reflect.Value) error {
 func (c *Ctx) MarshalDefault() error {
 	// TODO: add comment for each single config element
 	m := map[string]string{
-		consts.GoRuntimeEnv: consts.DevelopEnv,
+		consts.GoRuntimeEnv: consts.ProduceEnv,
 	}
 	for _, vars := range c.vars {
 		for _, v := range vars.Values {

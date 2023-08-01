@@ -18,6 +18,7 @@ type Endpoint struct {
 	Hostname string
 	Port     uint16
 	Base     string
+	Path     string
 	Username string
 	Password Password
 	Param    url.Values
@@ -48,6 +49,15 @@ func (e Endpoint) String() string {
 		log.Fatal(err)
 	}
 	return s
+}
+
+// URL with host, port and path only
+func (e Endpoint) URL() string {
+	return (&url.URL{
+		Scheme: e.Scheme,
+		Host:   e.Host(),
+		Path:   e.Path,
+	}).String()
 }
 
 func (e Endpoint) SecurityString() string {
@@ -102,6 +112,8 @@ func ParseEndpoint(text string) (*Endpoint, error) {
 	if q := u.Query(); len(q) > 0 {
 		ep.Param = q
 	}
+
+	ep.Path = u.Path
 
 	if len(u.Path) > 0 {
 		ep.Base = strings.Split(u.Path[1:], "/")[0]

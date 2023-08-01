@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/client"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
@@ -53,7 +51,7 @@ func (req *request) Path() string { return req.path }
 func (c *ClientEndpoint) SetDefault() {
 	c.Client.SetDefault()
 	c.Client.Transports = []client.HttpTransport{
-		NewLogRoundTripper(logrus.WithContext(context.Background())),
+		NewLogRoundTripper(),
 	}
 }
 

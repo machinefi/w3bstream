@@ -1,4 +1,4 @@
-GO_RUNTIME_ENV: DEV
+GO_RUNTIME_ENV: PROD
 SRV_APPLET_MGR__AmazonS3_AccessKeyID: ""
 SRV_APPLET_MGR__AmazonS3_BucketName: ""
 SRV_APPLET_MGR__AmazonS3_Endpoint: ""
@@ -7,6 +7,7 @@ SRV_APPLET_MGR__AmazonS3_S3ForcePathStyle: "false"
 SRV_APPLET_MGR__AmazonS3_SecretAccessKey: ""
 SRV_APPLET_MGR__AmazonS3_SessionToken: ""
 SRV_APPLET_MGR__AmazonS3_UrlExpire: 10m
+SRV_APPLET_MGR__ChainConfig_Configs: ""
 SRV_APPLET_MGR__EthClient_Endpoints: ""
 SRV_APPLET_MGR__FileSystem_Type: LOCAL
 SRV_APPLET_MGR__Jwt_ExpIn: 0s
@@ -40,6 +41,11 @@ SRV_APPLET_MGR__MqttBroker_Retry_Interval: 3s
 SRV_APPLET_MGR__MqttBroker_Retry_Repeats: "3"
 SRV_APPLET_MGR__MqttBroker_Server: mqtt://127.0.0.1:1883
 SRV_APPLET_MGR__MqttBroker_Timeout: 10s
+SRV_APPLET_MGR__NewLogger_Format: JSON
+SRV_APPLET_MGR__NewLogger_Level: error
+SRV_APPLET_MGR__NewLogger_Output: ALWAYS
+SRV_APPLET_MGR__NewLogger_Service: ""
+SRV_APPLET_MGR__NewLogger_Version: ""
 SRV_APPLET_MGR__Postgres_ConnMaxLifetime: 1h
 SRV_APPLET_MGR__Postgres_Master: postgres://127.0.0.1:5432
 SRV_APPLET_MGR__Postgres_PoolSize: "10"
@@ -73,6 +79,18 @@ SRV_APPLET_MGR__ServerEvent_Debug: "true"
 SRV_APPLET_MGR__ServerEvent_HealthCheck: http://:80/
 SRV_APPLET_MGR__ServerEvent_Port: "80"
 SRV_APPLET_MGR__ServerEvent_Spec: ./openapi.json
+SRV_APPLET_MGR__Tracer_DebugMode: "false"
+SRV_APPLET_MGR__Tracer_GrpcEndpoint: ""
+SRV_APPLET_MGR__Tracer_HttpEndpoint: ""
+SRV_APPLET_MGR__Tracer_InstanceID: ""
+SRV_APPLET_MGR__Tracer_ServiceName: ""
+SRV_APPLET_MGR__Tracer_ServiceVersion: ""
+SRV_APPLET_MGR__Tracer_TLS_Ca: ""
+SRV_APPLET_MGR__Tracer_TLS_CaPath: ""
+SRV_APPLET_MGR__Tracer_TLS_Crt: ""
+SRV_APPLET_MGR__Tracer_TLS_CrtPath: ""
+SRV_APPLET_MGR__Tracer_TLS_Key: ""
+SRV_APPLET_MGR__Tracer_TLS_KeyPath: ""
 SRV_APPLET_MGR__UploadConf_DiskReserveBytes: "20971520"
 SRV_APPLET_MGR__UploadConf_FilesizeLimitBytes: "1048576"
 SRV_APPLET_MGR__WasmDB: ""
