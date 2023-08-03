@@ -92,6 +92,15 @@ func (c *ChainConfig) Init() {
 	c.ChainIDs = cidm
 }
 
+func (c *ChainConfig) GetChain(chainID uint64, chainName enums.ChainName) (*Chain, bool) {
+	r, ok := c.ChainIDs[chainID]
+	if ok {
+		return r, ok
+	}
+	r, ok = c.Chains[chainName]
+	return r, ok
+}
+
 // aliases from base/types
 type (
 	SFID                     = types.SFID

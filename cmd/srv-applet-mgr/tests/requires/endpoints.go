@@ -213,7 +213,7 @@ func init() {
 
 	redisKvDB := kvdb.NewRedisDB(_redis)
 
-	wasmApiServer, err := wasmapi.NewServer(conflog.Std(), _redis, _dbMgr, redisKvDB, _ethClients)
+	wasmApiServer, err := wasmapi.NewServer(conflog.Std(), _redis, _dbMgr, redisKvDB, _ethClients, _chainConf)
 	if err != nil {
 		conflog.Std().Fatal(err)
 	}
