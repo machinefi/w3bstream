@@ -566,17 +566,17 @@ func MustETHClientConfigFromContext(ctx context.Context) *ETHClientConfig {
 }
 
 func WithChainConfig(ctx context.Context, v *ChainConfig) context.Context {
-	return contextx.WithValue(ctx, ChainConfig{}, v)
+	return contextx.WithValue(ctx, CtxChainConfig{}, v)
 }
 
 func WithChainConfigContext(v *ChainConfig) contextx.WithContext {
 	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, ChainConfig{}, v)
+		return contextx.WithValue(ctx, CtxChainConfig{}, v)
 	}
 }
 
 func ChainConfigFromContext(ctx context.Context) (*ChainConfig, bool) {
-	v, ok := ctx.Value(ChainConfig{}).(*ChainConfig)
+	v, ok := ctx.Value(CtxChainConfig{}).(*ChainConfig)
 	return v, ok
 }
 

@@ -61,31 +61,35 @@ func (c *ETHClientConfig) Init() {
 }
 
 type Chain struct {
-	ID       uint64 `json:"id"` // w3bstream private id
-	ChainID  uint64 `json:"chainID,omitempty"`
-	Name     string `json:"name"`
-	Endpoint string `json:"endpoint"`
+	ChainID  uint64          `json:"chainID,omitempty"`
+	Name     enums.ChainName `json:"name"`
+	Endpoint string          `json:"endpoint"`
 }
 
 type ChainConfig struct {
-	Configs string            `env:""     json:"-"`
-	Chains  map[uint64]*Chain `env:"-"    json:"chains"` // ID -> Chain
+	Configs  string                     `env:""     json:"-"`
+	Chains   map[enums.ChainName]*Chain `env:"-"    json:"-"`
+	ChainIDs map[uint64]*Chain          `env:"-"    json:"-"`
 }
 
 func (c *ChainConfig) Init() {
 	cs := []*Chain{}
-
 	if c.Configs != "" {
 		if err := json.Unmarshal([]byte(c.Configs), &cs); err != nil {
 			panic(err)
 		}
 	}
 
-	csm := make(map[uint64]*Chain)
+	cm := make(map[enums.ChainName]*Chain)
+	cidm := make(map[uint64]*Chain)
 	for _, c := range cs {
-		csm[c.ID] = c
+		cm[c.Name] = c
+		if c.ChainID != 0 {
+			cidm[c.ChainID] = c
+		}
 	}
-	c.Chains = csm
+	c.Chains = cm
+	c.ChainIDs = cidm
 }
 
 // aliases from base/types
