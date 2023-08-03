@@ -12,6 +12,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/mock"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
+	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -22,14 +23,20 @@ func TestChainHeight(t *testing.T) {
 	defer ctrl.Finish()
 
 	var (
-		db         = mock.NewMockDBExecutor(ctrl)
-		ethClients = &types.ETHClientConfig{
-			Clients: map[uint32]string{4690: "https://babel-api.testnet.iotex.io"},
+		db    = mock.NewMockDBExecutor(ctrl)
+		chain = &types.Chain{
+			ChainID:  4690,
+			Endpoint: "https://babel-api.testnet.iotex.io",
+			Name:     enums.CHAIN_NAME_IOTEX_TESTNET,
+		}
+		chainConf = &types.ChainConfig{
+			Chains:   map[enums.ChainName]*types.Chain{chain.Name: chain},
+			ChainIDs: map[uint64]*types.Chain{4690: chain},
 		}
 		ctx = contextx.WithContextCompose(
 			types.WithMonitorDBExecutorContext(db),
 			confid.WithSFIDGeneratorContext(confid.MustNewSFIDGenerator()),
-			types.WithETHClientConfigContext(ethClients),
+			types.WithChainConfigContext(chainConf),
 		)(context.Background())
 		req = CreateChainHeightReq{
 			ProjectName: "test_project",

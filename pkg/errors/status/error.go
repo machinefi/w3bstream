@@ -178,6 +178,8 @@ const (
 	InvalidVMState
 	// @errTalk Invalid Access Key Identity Type
 	InvalidAccessKeyIdentityType
+	// @errTalk Missing Chain
+	MissingChain
 )
 
 const (

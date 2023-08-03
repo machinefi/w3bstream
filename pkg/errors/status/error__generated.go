@@ -63,6 +63,8 @@ func (v Error) Key() string {
 		return "InvalidVMState"
 	case InvalidAccessKeyIdentityType:
 		return "InvalidAccessKeyIdentityType"
+	case MissingChain:
+		return "MissingChain"
 	case Unauthorized:
 		return "Unauthorized"
 	case InvalidAuthValue:
@@ -269,6 +271,8 @@ func (v Error) Msg() string {
 		return "Invalid VM State"
 	case InvalidAccessKeyIdentityType:
 		return "Invalid Access Key Identity Type"
+	case MissingChain:
+		return "Missing Chain"
 	case Unauthorized:
 		return "unauthorized"
 	case InvalidAuthValue:
@@ -474,6 +478,8 @@ func (v Error) CanBeTalk() bool {
 	case InvalidVMState:
 		return true
 	case InvalidAccessKeyIdentityType:
+		return true
+	case MissingChain:
 		return true
 	case Unauthorized:
 		return false

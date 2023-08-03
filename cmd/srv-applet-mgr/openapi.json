@@ -3259,6 +3259,7 @@
               "@StatusErr[InvalidDeleteCondition][400999007][Invalid Delete Condition]!",
               "@StatusErr[InvalidPrivateKey][400999006][Invalid Private Key]!",
               "@StatusErr[InvalidVMState][400999012][Invalid VM State]!",
+              "@StatusErr[MissingChain][400999014][Missing Chain]!",
               "@StatusErr[UnknownDeployCommand][400999004][Unknown Deploy Command]!",
               "@StatusErr[UnknownMonitorCommand][400999008][Unknown Deploy Command]!"
             ]
@@ -3687,6 +3688,19 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[MissingChain][400999014][Missing Chain]!"
+            ]
           },
           "401": {
             "description": "",
@@ -10466,6 +10480,33 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.CacheMode",
         "x-id": "GithubComMachinefiW3BstreamPkgEnumsCacheMode"
       },
+      "GithubComMachinefiW3BstreamPkgEnumsChainName": {
+        "type": "string",
+        "enum": [
+          "ethereum-mainnet",
+          "goerli",
+          "iotex-mainnet",
+          "iotex-testnet",
+          "mumbai",
+          "polygon-mainnet",
+          "solana-devnet",
+          "solana-mainnet",
+          "solana-testnet"
+        ],
+        "x-enum-labels": [
+          "ethereum-mainnet",
+          "goerli",
+          "iotex-mainnet",
+          "iotex-testnet",
+          "mumbai",
+          "polygon-mainnet",
+          "solana-devnet",
+          "solana-mainnet",
+          "solana-testnet"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.ChainName",
+        "x-id": "GithubComMachinefiW3BstreamPkgEnumsChainName"
+      },
       "GithubComMachinefiW3BstreamPkgEnumsConfigType": {
         "type": "string",
         "enum": [
@@ -10809,7 +10850,18 @@
             "type": "integer",
             "format": "uint64",
             "x-go-field-name": "ChainID",
-            "x-tag-json": "chainID"
+            "x-tag-json": "chainID,omitempty"
+          },
+          "chainName": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsChainName"
+              },
+              {
+                "x-go-field-name": "ChainName",
+                "x-tag-json": "chainName,omitempty"
+              }
+            ]
           },
           "eventType": {
             "type": "string",
@@ -10835,7 +10887,6 @@
           }
         },
         "required": [
-          "chainID",
           "height"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.ChainHeightInfo",
