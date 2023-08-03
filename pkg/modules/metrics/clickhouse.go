@@ -1,9 +1,12 @@
 package metrics
 
 import (
+	"container/list"
 	"context"
 	"errors"
 	"log"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/ClickHouse/clickhouse-go/v2"
@@ -13,16 +16,15 @@ import (
 )
 
 const (
-	queueLength  = 5000
-	queueBuffer  = 100
-	popThreshold = 3
+	queueLength      = 5000
+	popThreshold     = 3
+	concurrentWorker = 1
 )
 
 type (
 	ClickhouseClient struct {
-		conn     driver.Conn
-		sqLQueue chan *queueElement
-		cfg      *clickhouse.Options
+		workerPool []*connWorker
+		sqLQueue   chan *queueElement
 	}
 
 	queueElement struct {
@@ -46,30 +48,123 @@ func Init(ctx context.Context) {
 	if err != nil {
 		panic(err)
 	}
+	{
+		opts.Settings["async_insert"] = 1
+		opts.Settings["wait_for_async_insert"] = 0
+		opts.Settings["async_insert_busy_timeout_ms"] = 100
+	}
 	clickhouseCLI = newClickhouseClient(opts)
 }
 
 func newClickhouseClient(cfg *clickhouse.Options) *ClickhouseClient {
 	cc := &ClickhouseClient{
-		sqLQueue: make(chan *queueElement, queueLength+queueBuffer),
-		cfg:      cfg,
+		sqLQueue: make(chan *queueElement, queueLength),
 	}
-	go cc.Run()
+	for i := 0; i < concurrentWorker; i++ {
+		cc.workerPool = append(cc.workerPool, &connWorker{
+			sqLQueue: cc.sqLQueue,
+			cfg:      cfg,
+		})
+		go cc.workerPool[i].run()
+	}
 	return cc
 }
 
 func (c *ClickhouseClient) Insert(query string) error {
-	if len(c.sqLQueue) > queueLength {
-		return errors.New("the queue of client is full")
-	}
-	c.sqLQueue <- &queueElement{
+	select {
+	case c.sqLQueue <- &queueElement{
 		query: query,
 		count: 0,
+	}:
+	default:
+		return errors.New("the queue of client is full")
 	}
 	return nil
 }
 
-func (c *ClickhouseClient) Run() {
+type BatchWorker struct {
+	cli      *ClickhouseClient
+	signal   chan *list.List
+	preStatm string
+	li       *list.List
+	mtx      sync.Mutex
+}
+
+const (
+	batchSize = 50000
+)
+
+func NewBatchWorker(preStatm string) *BatchWorker {
+	bw := &BatchWorker{
+		cli:      clickhouseCLI,
+		signal:   make(chan *list.List, queueLength),
+		preStatm: preStatm,
+		li:       list.New(),
+	}
+	go bw.run()
+	return bw
+}
+
+func (b *BatchWorker) Insert(query string) error {
+	if b.cli == nil {
+		return errors.New("clickhouse client is not initialized")
+	}
+	b.mtx.Lock()
+	defer b.mtx.Unlock()
+	b.li.PushBack(query)
+	if b.li.Len() > batchSize {
+		select {
+		case b.signal <- b.li:
+			b.li = list.New()
+		default:
+			return errors.New("batchWorker queue is full")
+		}
+	}
+	return nil
+}
+
+func (b *BatchWorker) run() {
+	ticker := time.NewTicker(200 * time.Millisecond)
+	for {
+		select {
+		case <-ticker.C:
+			b.mtx.Lock()
+			li := b.li
+			b.li = list.New()
+			b.mtx.Unlock()
+			arr := pack(li)
+			if len(arr) == 0 {
+				continue
+			}
+			err := b.cli.Insert(b.preStatm + "(" + strings.Join(arr, "),(") + ")")
+			if err != nil {
+				log.Println("batchWorker failed to insert: ", err)
+			}
+		case li := <-b.signal:
+			arr := pack(li)
+			err := b.cli.Insert(b.preStatm + "(" + strings.Join(arr, "),(") + ")")
+			if err != nil {
+				log.Println("batchWorker failed to insert: ", err)
+			}
+		}
+	}
+}
+
+func pack(li *list.List) []string {
+	arr := make([]string, 0, li.Len())
+	for element := li.Front(); element != nil; element = element.Next() {
+		arr = append(arr, element.Value.(string))
+	}
+	return arr
+}
+
+type connWorker struct {
+	sqLQueue chan *queueElement
+	conn     driver.Conn
+	cfg      *clickhouse.Options
+}
+
+func (c *connWorker) run() {
 	for {
 		if err := c.connect(); err != nil {
 			log.Println("ClickhouseClient failed to connect: ", err)
@@ -77,7 +172,7 @@ func (c *ClickhouseClient) Run() {
 			continue
 		}
 		ele := <-c.sqLQueue
-		if err := c.conn.AsyncInsert(context.Background(), ele.query, true); err != nil {
+		if err := c.conn.Exec(context.Background(), ele.query); err != nil {
 			if !c.liveness() {
 				c.conn = nil
 				log.Printf("ClickhouseClient failed to connect the server: error: %s, query %s\n", err, ele.query)
@@ -96,7 +191,7 @@ func (c *ClickhouseClient) Run() {
 	}
 }
 
-func (c *ClickhouseClient) connect() error {
+func (c *connWorker) connect() error {
 	if c.conn != nil {
 		return nil
 	}
@@ -113,7 +208,7 @@ func (c *ClickhouseClient) connect() error {
 	return nil
 }
 
-func (c *ClickhouseClient) liveness() bool {
+func (c *connWorker) liveness() bool {
 	if err := c.conn.Ping(context.Background()); err != nil {
 		log.Println("failed to ping clickhouse server: ", err)
 		return false
