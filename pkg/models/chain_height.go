@@ -3,13 +3,12 @@ package models
 import (
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
-	"github.com/machinefi/w3bstream/pkg/enums"
 )
 
 // ChainHeight database model chainheight
 // @def primary                   ID
 // @def unique_index UI_chain_height_id   ChainHeightID
-// @def unique_index UI_chain_height_uniq ProjectName EventType ChainID ChainName Height Uniq
+// @def unique_index UI_chain_height_uniq ProjectName EventType ChainID Height Uniq
 //
 //go:generate toolkit gen model ChainHeight --database MonitorDB
 type ChainHeight struct {
@@ -31,9 +30,8 @@ type ChainHeightData struct {
 }
 
 type ChainHeightInfo struct {
-	EventType string          `db:"f_event_type"                   json:"eventType,omitempty,default='MONITOR_DEFAULT'"`
-	ChainID   uint64          `db:"f_chain_id,default='0'"         json:"chainID,omitempty"`
-	ChainName enums.ChainName `db:"f_chain_name,default=''"        json:"chainName,omitempty"`
-	Height    uint64          `db:"f_height"                       json:"height"`
-	Paused    datatypes.Bool  `db:"f_paused,default='2'"           json:"paused,omitempty,default='false'"`
+	EventType string         `db:"f_event_type"                   json:"eventType,omitempty,default='MONITOR_DEFAULT'"`
+	ChainID   uint64         `db:"f_chain_id"                     json:"chainID"`
+	Height    uint64         `db:"f_height"                       json:"height"`
+	Paused    datatypes.Bool `db:"f_paused,default='2'"           json:"paused,omitempty,default='false'"`
 }

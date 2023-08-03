@@ -8,7 +8,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
-	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -49,25 +48,6 @@ func checkChainID(ctx context.Context, id uint64) error {
 	ethcli := types.MustETHClientConfigFromContext(ctx)
 	if _, ok := ethcli.Clients[uint32(id)]; !ok {
 		return status.BlockchainNotFound
-	}
-	return nil
-}
-
-func checkChain(ctx context.Context, chainID uint64, chainName enums.ChainName) error {
-	if chainID == 0 && chainName == "" {
-		return status.MissingChain
-	}
-	c := types.MustChainConfigFromContext(ctx)
-
-	if chainID != 0 {
-		if _, ok := c.ChainIDs[chainID]; !ok {
-			return status.BlockchainNotFound
-		}
-	}
-	if chainName != "" {
-		if _, ok := c.Chains[chainName]; !ok {
-			return status.BlockchainNotFound
-		}
 	}
 	return nil
 }

@@ -206,11 +206,6 @@ func init() {
 	}
 	_ethClients.Init()
 
-	_chainConf := &types.ChainConfig{
-		Configs: `[{"chainID":4690,"name":"iotex-testnet","endpoint":"https://babel-api.testnet.iotex.io"}]`,
-	}
-	_chainConf.Init()
-
 	redisKvDB := kvdb.NewRedisDB(_redis)
 
 	wasmApiServer, err := wasmapi.NewServer(conflog.Std(), _redis, _dbMgr, redisKvDB, _ethClients)
@@ -234,7 +229,6 @@ func init() {
 		types.WithTaskWorkerContext(_workers),
 		types.WithTaskBoardContext(mq.NewTaskBoard(_tasks)),
 		types.WithETHClientConfigContext(_ethClients),
-		types.WithChainConfigContext(_chainConf),
 		types.WithWasmApiServerContext(wasmApiServer),
 	)
 

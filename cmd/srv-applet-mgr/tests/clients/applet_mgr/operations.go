@@ -527,7 +527,6 @@ func (o *CreateChainHeight) Method() string {
 // @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
 // @StatusErr[InvalidClaim][401999003][Invalid Claim]!
 // @StatusErr[InvalidToken][401999002][Invalid Token]!
-// @StatusErr[MissingChain][400999014][Missing Chain]!
 // @StatusErr[NoProjectPermission][401999004][No Project Permission]!
 // @StatusErr[ProjectNotFound][404999002][Project Not Found]!
 
@@ -1859,7 +1858,6 @@ func (o *HandleEvent) Method() string {
 // @StatusErr[InvalidPrivateKey][400999006][Invalid Private Key]!
 // @StatusErr[InvalidToken][401999002][Invalid Token]!
 // @StatusErr[InvalidVMState][400999012][Invalid VM State]!
-// @StatusErr[MissingChain][400999014][Missing Chain]!
 // @StatusErr[MqttConnectFailed][500999011][MQTT Connect Failed]!
 // @StatusErr[MqttSubscribeFailed][500999010][MQTT Subscribe Failed]!
 // @StatusErr[MultiInstanceDeployed][409999008][Multi Instance Deployed]!
