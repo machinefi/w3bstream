@@ -3,6 +3,7 @@ package deploy
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
@@ -49,7 +50,14 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		parent = types.WithOperators(parent, ops)
 	}
 	apisrv := types.MustWasmApiServerFromContext(parent)
-	metric := metrics.NewCustomMetric(prj.AccountID.String(), prj.ProjectID.String())
+	account := prj.AccountID.String()
+	if strings.HasPrefix(prj.Name, "eth_") {
+		parts := strings.Split(prj.Name, "_")
+		if len(parts) >= 3 {
+			account = strings.Join(parts[0:2], "_")
+		}
+	}
+	metric := metrics.NewCustomMetric(account, prj.Name)
 	logger := types.MustLoggerFromContext(parent)
 	sfid := confid.MustSFIDGeneratorFromContext(parent)
 

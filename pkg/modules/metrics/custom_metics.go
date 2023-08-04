@@ -14,8 +14,8 @@ type (
 
 type (
 	metrics struct {
-		account string
-		project string
+		account string // account use wallet address (if exists) or account id
+		project string // project use project name
 		writer  *BatchWorker
 	}
 )
