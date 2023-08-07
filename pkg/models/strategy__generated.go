@@ -40,11 +40,25 @@ func (*Strategy) TableDesc() []string {
 }
 
 func (*Strategy) Comments() map[string]string {
-	return map[string]string{}
+	return map[string]string{
+		"AutoCollectMetric": "AutoCollectMetric if allow host collect event data for metering",
+		"EventType":         "EventType user defined event type",
+		"Handler":           "Handler wasm handler fn name",
+	}
 }
 
 func (*Strategy) ColDesc() map[string][]string {
-	return map[string][]string{}
+	return map[string][]string{
+		"AutoCollectMetric": []string{
+			"AutoCollectMetric if allow host collect event data for metering",
+		},
+		"EventType": []string{
+			"EventType user defined event type",
+		},
+		"Handler": []string{
+			"Handler wasm handler fn name",
+		},
+	}
 }
 
 func (*Strategy) ColRel() map[string][]string {
@@ -136,6 +150,14 @@ func (m *Strategy) ColHandler() *builder.Column {
 
 func (*Strategy) FieldHandler() string {
 	return "Handler"
+}
+
+func (m *Strategy) ColAutoCollectMetric() *builder.Column {
+	return StrategyTable.ColByFieldName(m.FieldAutoCollectMetric())
+}
+
+func (*Strategy) FieldAutoCollectMetric() string {
+	return "AutoCollectMetric"
 }
 
 func (m *Strategy) ColCreatedAt() *builder.Column {

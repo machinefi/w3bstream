@@ -629,20 +629,22 @@ Create a strategy of handler in applet and eventType
 ```sh
 export EVENTTYPE=mobile_geo
 export HANDLER=handle_geo_data
-echo '{"appletID":"'$APPLETID'", "eventType":"'$EVENTTYPE'", "handler":"'$HANDLER'"}' | http post :8888/srv-applet-mgr/v0/strategy/x/$PROJECTNAME -A bearer -a $TOK
+export AUTOCOLLECTMETIC=true
+echo '{"appletID":"'$APPLETID'", "eventType":"'$EVENTTYPE'", "handler":"'$HANDLER'", "autoCollectMetric":$AUTOCOLLECTMETIC}' | http post :8888/srv-applet-mgr/v0/strategy/x/$PROJECTNAME -A bearer -a $TOK
 ```
 
 output like:
 
 ```json
 {
-  "appletID": "11276843999120385",
-  "createdAt": "2023-05-03T16:17:40.942225+08:00",
-  "eventType": "mobile_geo",
-  "handler": "handle_geo_data",
-  "projectID": "11276843314064388",
-  "strategyID": "155392037140510721",
-  "updatedAt": "2023-05-03T16:17:40.942225+08:00"
+    "appletID": "155396152440654850",
+    "autoCollectMetric": true,
+    "createdAt": "2023-08-07T13:58:32.428387+08:00",
+    "eventType": "AUTO_COLLECT_METRIC2",
+    "handler": "start",
+    "projectID": "155396149977461760",
+    "strategyID": "155400522057232384",
+    "updatedAt": "2023-08-07T13:58:32.428387+08:00"
 }
 ```
 

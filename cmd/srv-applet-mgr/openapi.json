@@ -11807,13 +11807,27 @@
       "GithubComMachinefiW3BstreamPkgModelsStrategyInfo": {
         "type": "object",
         "properties": {
+          "autoCollectMetric": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesBool"
+              },
+              {
+                "description": "AutoCollectMetric if allow host collect event data for metering",
+                "x-go-field-name": "AutoCollectMetric",
+                "x-tag-json": "autoCollectMetric,omitempty"
+              }
+            ]
+          },
           "eventType": {
             "type": "string",
+            "description": "EventType user defined event type",
             "x-go-field-name": "EventType",
             "x-tag-json": "eventType"
           },
           "handler": {
             "type": "string",
+            "description": "Handler wasm handler fn name",
             "x-go-field-name": "Handler",
             "x-tag-json": "handler"
           }

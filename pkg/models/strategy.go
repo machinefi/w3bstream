@@ -26,11 +26,16 @@ type RelStrategy struct {
 }
 
 type StrategyInfo struct {
+	// EventType user defined event type
 	EventType string `db:"f_event_type" json:"eventType"`
-	Handler   string `db:"f_handler"    json:"handler"`
+	// Handler wasm handler fn name
+	Handler string `db:"f_handler" json:"handler"`
+	// AutoCollectMetric if allow host collect event data for metering
+	AutoCollectMetric datatypes.Bool `db:"f_auto_collect_metric,default='2'" json:"autoCollectMetric,omitempty"`
 }
 
 var DefaultStrategyInfo = StrategyInfo{
-	EventType: enums.EVENTTYPEDEFAULT,
-	Handler:   "start",
+	EventType:         enums.EVENTTYPEDEFAULT,
+	Handler:           "start",
+	AutoCollectMetric: datatypes.FALSE,
 }
