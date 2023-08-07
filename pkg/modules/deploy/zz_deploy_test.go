@@ -79,6 +79,7 @@ func TestDeploy(t *testing.T) {
 		types.WithTaskBoardContext(&mq.TaskBoard{}),
 		types.WithMqttBrokerContext(mqttBroker),
 		types.WithETHClientConfigContext(&types.ETHClientConfig{}),
+		types.WithChainConfigContext(&types.ChainConfig{}),
 		wasm.WithMQTTClientContext(mqttClient),
 		types.WithWasmApiServerContext(wasmApiServer),
 	)(context.Background())
