@@ -16,6 +16,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/async"
 	"github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/handler"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/wasm"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
 
@@ -30,7 +31,8 @@ func (s *Server) Call(ctx context.Context, data []byte) *http.Response {
 	defer l.End()
 
 	prj := types.MustProjectFromContext(ctx)
-	task, err := async.NewApiCallTask(prj, data)
+	chainCli := wasm.MustChainClientFromContext(ctx)
+	task, err := async.NewApiCallTask(prj, chainCli, data)
 	if err != nil {
 		l.Error(errors.Wrap(err, "new api call task failed"))
 		return &http.Response{
@@ -53,12 +55,12 @@ func (s *Server) Shutdown() {
 	s.srv.Shutdown()
 }
 
-func newRouter(mgrDB sqlx.DBExecutor, ethCli *types.ETHClientConfig, chainConf *types.ChainConfig) *gin.Engine {
+func newRouter(mgrDB sqlx.DBExecutor, chainConf *types.ChainConfig) *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Recovery())
 	router.Use(handler.ParamValidate())
 
-	handlers := handler.New(mgrDB, ethCli, chainConf)
+	handlers := handler.New(mgrDB, chainConf)
 
 	router.GET("/system/hello", handlers.Hello)
 	router.GET("/system/read_tx", handlers.ReadTx)
@@ -67,8 +69,8 @@ func newRouter(mgrDB sqlx.DBExecutor, ethCli *types.ETHClientConfig, chainConf *
 	return router
 }
 
-func NewServer(l log.Logger, redisConf *redis.Redis, mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB, ethCli *types.ETHClientConfig, chainConf *types.ChainConfig) (*Server, error) {
-	router := newRouter(mgrDB, ethCli, chainConf)
+func NewServer(l log.Logger, redisConf *redis.Redis, mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB, chainConf *types.ChainConfig) (*Server, error) {
+	router := newRouter(mgrDB, chainConf)
 
 	redisCli := asynq.RedisClientOpt{
 		Network:      redisConf.Protocol,

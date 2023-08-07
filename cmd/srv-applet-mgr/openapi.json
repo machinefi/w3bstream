@@ -10556,6 +10556,22 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.MonitorCmd",
         "x-id": "GithubComMachinefiW3BstreamPkgEnumsMonitorCmd"
       },
+      "GithubComMachinefiW3BstreamPkgEnumsOperatorKeyType": {
+        "type": "integer",
+        "format": "int32",
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "x-enum-labels": [
+          "0",
+          "1",
+          "2"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.OperatorKeyType",
+        "x-id": "GithubComMachinefiW3BstreamPkgEnumsOperatorKeyType"
+      },
       "GithubComMachinefiW3BstreamPkgEnumsProtocol": {
         "type": "string",
         "enum": [
@@ -11233,6 +11249,17 @@
             "type": "string",
             "x-go-field-name": "Name",
             "x-tag-json": "name"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsOperatorKeyType"
+              },
+              {
+                "x-go-field-name": "Type",
+                "x-tag-json": "type,omitempty,default='1'"
+              }
+            ]
           }
         },
         "required": [

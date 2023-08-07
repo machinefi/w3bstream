@@ -16,7 +16,7 @@ import (
 )
 
 type readTxReq struct {
-	ChainID   uint32          `json:"chainID"`
+	ChainID   uint64          `json:"chainID"`
 	ChainName enums.ChainName `json:"chainName"`
 	Hash      string          `json:"hash"       binding:"required"`
 }
@@ -49,7 +49,7 @@ func (h *Handler) ReadTx(c *gin.Context) {
 
 	l = l.WithValues("chain_id", req.ChainID, "chain_name", req.ChainName)
 
-	chain, ok := h.chainConf.GetChain(uint64(req.ChainID), req.ChainName)
+	chain, ok := h.chainConf.GetChain(req.ChainID, req.ChainName)
 	if !ok {
 		err := errors.New("blockchain not exist")
 		l.Error(err)
@@ -60,7 +60,7 @@ func (h *Handler) ReadTx(c *gin.Context) {
 	var resp any
 
 	switch {
-	case chain.ChainID != 0:
+	case chain.IsEth():
 		client, err := ethclient.Dial(chain.Endpoint)
 		if err != nil {
 			l.Error(errors.Wrap(err, "dial chain address failed"))
@@ -76,7 +76,7 @@ func (h *Handler) ReadTx(c *gin.Context) {
 		}
 		resp = &readEthTxResp{Transaction: tx}
 
-	case chain.Name == enums.SOLANA_DEVNET || chain.Name == enums.SOLANA_TESTNET || chain.Name == enums.SOLANA_MAINNET_BETA:
+	case chain.IsSolana():
 		cli := client.NewClient(chain.Endpoint)
 		tx, err := cli.GetTransaction(context.Background(), req.Hash)
 		if err != nil {

@@ -66,6 +66,14 @@ type Chain struct {
 	Endpoint string          `json:"endpoint"`
 }
 
+func (c *Chain) IsSolana() bool {
+	return c.Name == enums.SOLANA_DEVNET || c.Name == enums.SOLANA_TESTNET || c.Name == enums.SOLANA_MAINNET_BETA
+}
+
+func (c *Chain) IsEth() bool {
+	return c.ChainID != 0
+}
+
 type ChainConfig struct {
 	Configs  string                     `env:""     json:"-"`
 	Chains   map[enums.ChainName]*Chain `env:"-"    json:"-"`

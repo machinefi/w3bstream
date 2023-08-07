@@ -141,7 +141,7 @@ func init() {
 
 	redisKvDB := kvdb.NewRedisDB(config.Redis)
 
-	wasmApiServer, err := wasmapi.NewServer(std, config.Redis, config.Postgres, redisKvDB, config.EthClient, config.ChainConfig)
+	wasmApiServer, err := wasmapi.NewServer(std, config.Redis, config.Postgres, redisKvDB, config.ChainConfig)
 	if err != nil {
 		std.Fatal(err)
 	}
