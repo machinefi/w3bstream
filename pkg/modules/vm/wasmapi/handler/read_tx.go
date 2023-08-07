@@ -4,11 +4,10 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/blocto/solana-go-sdk/client"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/rpc"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 
@@ -27,7 +26,7 @@ type readEthTxResp struct {
 }
 
 type readSolanaTxResp struct {
-	Transaction *rpc.GetTransactionResult `json:"result,omitempty"`
+	Transaction *client.Transaction `json:"result,omitempty"`
 }
 
 func (h *Handler) ReadTx(c *gin.Context) {
@@ -78,15 +77,8 @@ func (h *Handler) ReadTx(c *gin.Context) {
 		resp = &readEthTxResp{Transaction: tx}
 
 	case chain.Name == enums.SOLANA_DEVNET || chain.Name == enums.SOLANA_TESTNET || chain.Name == enums.SOLANA_MAINNET_BETA:
-		client := rpc.New(chain.Endpoint)
-		txSig, err := solana.SignatureFromBase58(req.Hash)
-		if err != nil {
-			l.Error(errors.Wrap(err, "decode http request hash failed"))
-			c.JSON(http.StatusBadRequest, newErrResp(err))
-			return
-		}
-
-		tx, err := client.GetTransaction(context.Background(), txSig, nil)
+		cli := client.NewClient(chain.Endpoint)
+		tx, err := cli.GetTransaction(context.Background(), req.Hash)
 		if err != nil {
 			l.Error(errors.Wrap(err, "query transaction failed"))
 			c.JSON(http.StatusInternalServerError, newErrResp(err))
