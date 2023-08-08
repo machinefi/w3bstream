@@ -62,7 +62,7 @@ SRV_APPLET_MGR__Redis_MaxActive: "5"
 SRV_APPLET_MGR__Redis_MaxIdle: "3"
 SRV_APPLET_MGR__Redis_Password: ""
 SRV_APPLET_MGR__Redis_Port: "6379"
-SRV_APPLET_MGR__Redis_Prefix: 'dev:srv-applet-mgr:'
+SRV_APPLET_MGR__Redis_Prefix: ""
 SRV_APPLET_MGR__Redis_Protocol: tcp
 SRV_APPLET_MGR__Redis_ReadTimeout: 10s
 SRV_APPLET_MGR__Redis_Wait: "true"
@@ -93,5 +93,7 @@ SRV_APPLET_MGR__Tracer_TLS_Key: ""
 SRV_APPLET_MGR__Tracer_TLS_KeyPath: ""
 SRV_APPLET_MGR__UploadConf_DiskReserveBytes: "20971520"
 SRV_APPLET_MGR__UploadConf_FilesizeLimitBytes: "1048576"
-SRV_APPLET_MGR__WasmDB: ""
+SRV_APPLET_MGR__WasmDBConfig_ConnMaxLifetime: 20s
+SRV_APPLET_MGR__WasmDBConfig_Endpoint: ""
 SRV_APPLET_MGR__WasmDBConfig_MaxConnection: "2"
+SRV_APPLET_MGR__WasmDBConfig_PoolSize: "2"

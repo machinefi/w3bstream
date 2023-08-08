@@ -10,7 +10,7 @@ TEST__REDIS__MaxActive: "5"
 TEST__REDIS__MaxIdle: "3"
 TEST__REDIS__Password: ""
 TEST__REDIS__Port: "6379"
-TEST__REDIS__Prefix: 'prod:test:'
+TEST__REDIS__Prefix: ""
 TEST__REDIS__Protocol: tcp
 TEST__REDIS__ReadTimeout: 10s
 TEST__REDIS__Wait: "true"

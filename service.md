@@ -68,3 +68,11 @@ SRV_APPLET_MGR__RobotNotifier_URL: ""     ## required: lark group webhook url,
 SRV_APPLET_MGR__RobotNotifier_Vendor: ""  ## robot vendor. eg Lark, DingTalk WeWork
 ```
 
+### WasmDBConfig
+
+```yaml
+SRV_APPLET_MGR__WasmDBConfig_Endpoint: ""           ## wasm database endpoint, default ''
+SRV_APPLET_MGR__WasmDBConfig_MaxConnection: "2"     ## wasm database max connection for each wasm instance, default 2
+SRV_APPLET_MGR__WasmDBConfig_ConnMaxLifetime: "20s" ## wasm database max connection lifetime default 20 seconds
+SRV_APPLET_MGR__WasmDBConfig_PoolSize: "2"          ## wasm database connection pool size default 2
+```

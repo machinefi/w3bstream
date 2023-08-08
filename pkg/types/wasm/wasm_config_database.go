@@ -6,11 +6,9 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/pkg/errors"
 
-	base "github.com/machinefi/w3bstream/pkg/depends/base/types"
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	confpostgres "github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
@@ -214,7 +212,8 @@ func (d *Database) Init(parent context.Context) (err error) {
 	d.Name = prj.DatabaseName()
 
 	// clone config and init config
-	ep := *types.MustWasmDBEndpointFromContext(parent)
+	cfg := types.MustWasmDBConfigFromContext(parent)
+	ep := cfg.Endpoint
 	ep.Base = d.Name
 
 	if ep.Param == nil {
@@ -226,8 +225,8 @@ func (d *Database) Init(parent context.Context) (err error) {
 		Master:          ep,
 		Database:        sqlx.NewDatabase(d.Name),
 		Retry:           retry.Default,
-		PoolSize:        2,
-		ConnMaxLifetime: *base.AsDuration(10 * time.Minute),
+		PoolSize:        cfg.PoolSize,
+		ConnMaxLifetime: cfg.ConnMaxLifetime,
 	}
 	d.ep.SetDefault()
 
@@ -264,12 +263,7 @@ func (d *Database) Init(parent context.Context) (err error) {
 		if err = driverpostgres.GrantAllPrivileges(d.ep, domain, d.Name, user); err != nil {
 			return errors.Wrap(err, "grant privilege")
 		}
-		conf, ok := types.WasmDBConfigFromContext(parent)
-		if !ok {
-			conf = &types.WasmDBConfig{}
-			conf.SetDefault()
-		}
-		if err = driverpostgres.AlterUserConnectionLimit(d.ep, user, conf.MaxConnection); err != nil {
+		if err = driverpostgres.AlterUserConnectionLimit(d.ep, user, cfg.MaxConnection); err != nil {
 			return errors.Wrap(err, "limit connection")
 		}
 	}

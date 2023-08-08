@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/tidwall/gjson"
 
@@ -155,12 +156,21 @@ type StrategyResult struct {
 }
 
 type WasmDBConfig struct {
-	MaxConnection int
+	Endpoint        types.Endpoint
+	MaxConnection   int
+	PoolSize        int
+	ConnMaxLifetime types.Duration
 }
 
 func (c *WasmDBConfig) SetDefault() {
 	if c.MaxConnection == 0 {
 		c.MaxConnection = 2
+	}
+	if c.PoolSize == 0 {
+		c.PoolSize = 2
+	}
+	if c.ConnMaxLifetime == 0 {
+		c.ConnMaxLifetime = *types.AsDuration(time.Second * 20)
 	}
 }
 

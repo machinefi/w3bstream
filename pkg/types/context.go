@@ -3,7 +3,6 @@ package types
 import (
 	"context"
 
-	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
@@ -23,8 +22,6 @@ type (
 	CtxMgrDBExecutor struct{}
 	// CtxMonitorDBExecutor type sqlx.DBExecutor for global monitor server database
 	CtxMonitorDBExecutor struct{}
-	// CtxWasmDBEndpoint type *types.Endpoint. for global wasm database endpoint
-	CtxWasmDBEndpoint struct{}
 	// CtxLogger type log.Logger. service logger
 	CtxLogger struct{}
 	// CtxMqttBroker *mqtt.Broker. mqtt broker
@@ -47,7 +44,7 @@ type (
 	CtxFileSystemOp struct{}
 	// CtxProxyClient type *client.Client http client for forwarding mqtt event
 	CtxProxyClient struct{}
-	// CtxWasmDBConfig type *WasmDBConfig wasm database config TODO combine with WasmDBEndpoint
+	// CtxWasmDBConfig type *WasmDBConfig wasm database config
 	CtxWasmDBConfig struct{}
 	// CtxRobotNotifierConfig type *RobotNotifierConfig for notify service level message to maintainers.
 	CtxRobotNotifierConfig struct{}
@@ -326,27 +323,6 @@ func MonitorDBExecutorFromContext(ctx context.Context) (sqlx.DBExecutor, bool) {
 
 func MustMonitorDBExecutorFromContext(ctx context.Context) sqlx.DBExecutor {
 	v, ok := MonitorDBExecutorFromContext(ctx)
-	must.BeTrue(ok)
-	return v
-}
-
-func WithWasmDBEndpoint(ctx context.Context, v *types.Endpoint) context.Context {
-	return contextx.WithValue(ctx, CtxWasmDBEndpoint{}, v)
-}
-
-func WithWasmDBEndpointContext(v *types.Endpoint) contextx.WithContext {
-	return func(ctx context.Context) context.Context {
-		return contextx.WithValue(ctx, CtxWasmDBEndpoint{}, v)
-	}
-}
-
-func WasmDBEndpointFromContext(ctx context.Context) (*types.Endpoint, bool) {
-	v, ok := ctx.Value(CtxWasmDBEndpoint{}).(*types.Endpoint)
-	return v, ok
-}
-
-func MustWasmDBEndpointFromContext(ctx context.Context) *types.Endpoint {
-	v, ok := WasmDBEndpointFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

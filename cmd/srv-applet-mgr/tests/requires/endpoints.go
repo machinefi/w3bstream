@@ -108,7 +108,10 @@ func Databases() {
 			panic(err)
 		}
 	}
-	_dbWasmEp = &ep.Master
+	_dbWasmEp = &types.WasmDBConfig{
+		Endpoint:      ep.Master,
+		MaxConnection: 2,
+	}
 }
 
 func Mqtt() {
@@ -164,7 +167,7 @@ var (
 	_broker      *mqtt.Broker
 	_dbMgr       sqlx.DBExecutor
 	_dbMonitor   sqlx.DBExecutor
-	_dbWasmEp    *base.Endpoint
+	_dbWasmEp    *types.WasmDBConfig
 	_injection   contextx.WithContext
 	_ctx         context.Context
 )
@@ -221,7 +224,7 @@ func init() {
 	_injection = contextx.WithContextCompose(
 		types.WithMgrDBExecutorContext(_dbMgr),
 		types.WithMonitorDBExecutorContext(_dbMonitor),
-		types.WithWasmDBEndpointContext(_dbWasmEp),
+		types.WithWasmDBConfigContext(_dbWasmEp),
 		types.WithLoggerContext(conflog.Std()),
 		types.WithMqttBrokerContext(_broker),
 		conflog.WithLoggerContext(conflog.Std()),
