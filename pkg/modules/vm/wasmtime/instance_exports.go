@@ -101,7 +101,8 @@ func (ef *ExportFuncs) LinkABI(impt Import) error {
 	}
 
 	for name, ff := range map[string]interface{}{
-		"ws_submit_metrics": ef.StatSubmit,
+		"ws_submit_metrics":     ef.StatSubmit,
+		"ws_submit_geo_metrics": ef.StatSubmitGeoData,
 	} {
 		if err := impt("stat", name, ff); err != nil {
 			return err
@@ -366,7 +367,6 @@ func (ef *ExportFuncs) GetSQLDB(addr, size int32, vmAddrPtr, vmSizePtr int32) in
 	return int32(wasm.ResultStatusCode_OK)
 }
 
-// TODO: make sendTX async, and add callback if possible
 func (ef *ExportFuncs) SendTX(chainID int32, offset, size, vmAddrPtr, vmSizePtr int32) int32 {
 	if ef.cl == nil {
 		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, errors.New("eth client doesn't exist").Error())
@@ -521,6 +521,14 @@ func (ef *ExportFuncs) StatSubmit(vmAddrPtr, vmSizePtr int32) int32 {
 	}
 
 	if err := ef.metrics.Submit(object); err != nil {
+		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
+		return wasm.ResultStatusCode_Failed
+	}
+	return int32(wasm.ResultStatusCode_OK)
+}
+
+func (ef *ExportFuncs) StatSubmitGeoData(lat, long float64) int32 {
+	if err := ef.metrics.SubmitGeoData(lat, long); err != nil {
 		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
