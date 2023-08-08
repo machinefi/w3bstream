@@ -32,7 +32,8 @@ docker-compose restart
 
 # Run W3bstream node from code
 
-If you are interested in diving into the code and run the node using a locally built docker, here is the steps of building the docker image from code.
+If you are interested in diving into the code and run the node using a locally built docker, here is the steps of
+building the docker image from code.
 
 ### Build docker image from code
 
@@ -47,10 +48,13 @@ make build_backend_image
  ```
 
 ### Stop server running in docker containers
+
  ```bash
  make stop_docker
  ```
+
 ### Delete docker resources
+
  ```bash
  make drop_docker
  ```
@@ -514,7 +518,7 @@ is default
 
 `info.strategies[i].handler` routing wasm handler name (wasm exported)
 
-### create instance of the applet you created before
+### Create instance of the applet you created before
 
 ```sh
 export APPLETID=11276843999120385 ## created before
@@ -716,12 +720,53 @@ output like
 
 ### Publish event through mqtt (use `pub_client` CLI)
 
+#### Use namespace only
+
 ```sh
 export MQTT_HOST=localhost
 export MQTT_PORT=1883
 export MQTT_USERNAME=username
 export MQTT_PASSWORD=password
 ./pub_client -topic $TOPIC -token $PUBTOK -data $PAYLOAD -host $MQTT_HOST -port $MQTT_PORT -usernmae $MQTT_USERNAME -password $MQTT_PASSWORD
+```
+
+#### Use more information in topic
+
+```sh
+export MQTT_HOST=localhost
+export MQTT_PORT=1883
+export MQTT_USERNAME=
+export MQTT_PASSWORD=
+export TOPIC="$PROJECTNAME/push/$PUB_TOK/$EVENTTYPE/ts=$(date +%s)&id=$(uuidgen)"
+export PAYLOAD=$(input your payload)
+export MN=$(input your device mn)
+./pub_client -mn $MN -topic $TOPIC -data $PAYLOAD -wait 10
+
+```
+
+`pub_client` will send payload to topic you assigned, and wait 10 second from topic `ack/$MN` for ack
+
+output like
+
+```text
+>>>> message published
+receive ack from ack/mn-LOCOL-DEV
+<<<< message ack received
+{
+  "channel": "aid_155396149766916097_sincos",
+  "publisherID": "155400623279265799",
+  "publisherKey": "mn-LOCAL-DEV",
+  "eventID": "4CAD8CC1-B2FC-4E00-BA31-55E2E7518D29",
+  "results": [
+    {
+      "appletName": "155396152440654851",
+      "instanceID": "155396152440662018",
+      "handler": "start",
+      "returnValue": null,
+      "code": 0
+    }
+  ]
+}
 ```
 
 server log like
@@ -853,8 +898,6 @@ export CHAINHEIGHTID=${chainHeightID}
 http delete :8888/srv-applet-mgr/v0/monitor/x/$PROJECTNAME/chain_height/$CHAINHEIGHTID -A bearer -a $TOK
 ```
 
-
-
 ### Create operator
 
 ```sh
@@ -867,15 +910,16 @@ output like
 
 ```json
 {
-    "accountID": "9221139481037349891",
-    "createdAt": "2023-05-23T13:30:00.11819655Z",
-    "name": "myoperator",
-    "operatorID": "11278637725570052",
-    "updatedAt": "2023-05-23T13:30:00.118200425Z"
+  "accountID": "9221139481037349891",
+  "createdAt": "2023-05-23T13:30:00.11819655Z",
+  "name": "myoperator",
+  "operatorID": "11278637725570052",
+  "updatedAt": "2023-05-23T13:30:00.118200425Z"
 }
 ```
 
 list all operators
+
 ```sh
 http get :8888/srv-applet-mgr/v0/operator/datalist -A bearer -a $TOK
 ```
@@ -886,7 +930,6 @@ delete it
 export OPERATORID=${operatorID}
 http delete :8888/srv-applet-mgr/v0/operator/data/$OPERATORID -A bearer -a $TOK
 ```
-
 
 ### Create project operator
 
@@ -899,14 +942,15 @@ output like
 
 ```json
 {
-    "createdAt": "2023-05-23T13:32:03.918223385Z",
-    "operatorID": "11278637725570052",
-    "projectID": "9221139481524034564",
-    "updatedAt": "2023-05-23T13:32:03.918233052Z"
+  "createdAt": "2023-05-23T13:32:03.918223385Z",
+  "operatorID": "11278637725570052",
+  "projectID": "9221139481524034564",
+  "updatedAt": "2023-05-23T13:32:03.918233052Z"
 }
 ```
 
 get project operator
+
 ```sh
 http get :8888/srv-applet-mgr/v0/project_operator/data/$PROJECTID -A bearer -a $TOK
 ```
@@ -927,18 +971,18 @@ http get :8888/srv-applet-mgr/v0/account_access_key/operator_group_metas -A bear
 
 ```json
 [
-    {
-        "desc": "View and manage account",
-        "name": "Account"
-    },
-    {
-        "desc": "View and manage access token",
-        "name": "Account Access Key"
-    },
-    {
-        "desc": "Account register",
-        "name": "Account Register"
-    },
+  {
+    "desc": "View and manage account",
+    "name": "Account"
+  },
+  {
+    "desc": "View and manage access token",
+    "name": "Account Access Key"
+  },
+  {
+    "desc": "Account register",
+    "name": "Account Register"
+  }
 ]
 ```
 
@@ -960,27 +1004,27 @@ output like
 
 ```json
 {
-    "accessKey": "w3b_xxxx",
-    "desc": "desc",
-    "expiredAt": "2023-07-21T08:13:08.592213Z",
-    "name": "key_name",
-    "privileges": [
-        {
-            "desc": "View and manage project blockchain operator",
-            "name": "Project Operator",
-            "perm": "NO_ACCESS"
-        },
-        {
-            "desc": "View and manage project config",
-            "name": "Project Config",
-            "perm": "NO_ACCESS"
-        },
-        {
-            "desc": "View and manage applet",
-            "name": "Applet",
-            "perm": "NO_ACCESS"
-        }
-    ]
+  "accessKey": "w3b_xxxx",
+  "desc": "desc",
+  "expiredAt": "2023-07-21T08:13:08.592213Z",
+  "name": "key_name",
+  "privileges": [
+    {
+      "desc": "View and manage project blockchain operator",
+      "name": "Project Operator",
+      "perm": "NO_ACCESS"
+    },
+    {
+      "desc": "View and manage project config",
+      "name": "Project Config",
+      "perm": "NO_ACCESS"
+    },
+    {
+      "desc": "View and manage applet",
+      "name": "Applet",
+      "perm": "NO_ACCESS"
+    }
+  ]
 }
 ```
 
@@ -999,29 +1043,29 @@ output like
 
 ```json
 {
-    "desc": "test access",
-    "expiredAt": "2023-08-19T01:01:43.847047Z",
-    "identityID": "155396149766916097",
-    "identityType": "ACCOUNT",
-    "lastUsed": "2023-07-20T08:46:28+08:00",
-    "name": "test",
-    "privileges": [
-        {
-            "desc": "View and manage project blockchain operator",
-            "name": "Project Operator",
-            "perm": "NO_ACCESS"
-        },
-        {
-            "desc": "View and manage project config",
-            "name": "Project Config",
-            "perm": "NO_ACCESS"
-        },
-        {
-            "desc": "View and manage applet",
-            "name": "Applet",
-            "perm": "NO_ACCESS"
-        }
-    ]
+  "desc": "test access",
+  "expiredAt": "2023-08-19T01:01:43.847047Z",
+  "identityID": "155396149766916097",
+  "identityType": "ACCOUNT",
+  "lastUsed": "2023-07-20T08:46:28+08:00",
+  "name": "test",
+  "privileges": [
+    {
+      "desc": "View and manage project blockchain operator",
+      "name": "Project Operator",
+      "perm": "NO_ACCESS"
+    },
+    {
+      "desc": "View and manage project config",
+      "name": "Project Config",
+      "perm": "NO_ACCESS"
+    },
+    {
+      "desc": "View and manage applet",
+      "name": "Applet",
+      "perm": "NO_ACCESS"
+    }
+  ]
 }
 ```
 
@@ -1043,32 +1087,32 @@ output like
 
 ```json
 {
-    "data": [
+  "data": [
+    {
+      "createdAt": "2023-07-03T05:01:25+08:00",
+      "desc": "desc",
+      "lastUsed": "2023-07-03T05:03:22+08:00",
+      "name": "test",
+      "updatedAt": "2023-07-03T05:03:22+08:00",
+      "privileges": [
         {
-            "createdAt": "2023-07-03T05:01:25+08:00",
-            "desc": "desc",
-            "lastUsed": "2023-07-03T05:03:22+08:00",
-            "name": "test",
-            "updatedAt": "2023-07-03T05:03:22+08:00",
-            "privileges": [
-                {
-                    "desc": "View and manage project blockchain operator",
-                    "name": "Project Operator",
-                    "perm": "NO_ACCESS"
-                },
-                {
-                    "desc": "View and manage project config",
-                    "name": "Project Config",
-                    "perm": "NO_ACCESS"
-                },
-                {
-                    "desc": "View and manage applet",
-                    "name": "Applet",
-                    "perm": "NO_ACCESS"
-                }
-            ]
+          "desc": "View and manage project blockchain operator",
+          "name": "Project Operator",
+          "perm": "NO_ACCESS"
+        },
+        {
+          "desc": "View and manage project config",
+          "name": "Project Config",
+          "perm": "NO_ACCESS"
+        },
+        {
+          "desc": "View and manage applet",
+          "name": "Applet",
+          "perm": "NO_ACCESS"
         }
-    ],
-    "total": 1
+      ]
+    }
+  ],
+  "total": 1
 }
 ```

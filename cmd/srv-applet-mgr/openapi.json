@@ -12833,6 +12833,12 @@
               }
             ]
           },
+          "publisherKey": {
+            "type": "string",
+            "description": "PublisherKey publisher(device) mn unique id of this device",
+            "x-go-field-name": "PublisherKey",
+            "x-tag-json": "publisherKey"
+          },
           "results": {
             "type": "array",
             "items": {
@@ -12846,6 +12852,7 @@
         "required": [
           "channel",
           "publisherID",
+          "publisherKey",
           "eventID",
           "results"
         ],

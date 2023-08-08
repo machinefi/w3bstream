@@ -45,9 +45,10 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 	var (
 		err error
 		rsp = &event.EventRsp{
-			Channel:     r.Channel,
-			PublisherID: pub.PublisherID,
-			EventID:     r.EventID,
+			Channel:      r.Channel,
+			PublisherID:  pub.PublisherID,
+			PublisherKey: pub.Key,
+			EventID:      r.EventID,
 		}
 	)
 

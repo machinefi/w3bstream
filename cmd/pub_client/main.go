@@ -27,7 +27,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&cid, "id", "", "publish client id")
+	flag.StringVar(&mn, "mn", "", "publisher(device) mn")
 	flag.StringVar(&topic, "topic", "", "publish topic")
 	flag.StringVar(&token, "token", "", "publish token")
 	flag.StringVar(&data, "data", "", "payload data, read file pls use '@PATH'")
@@ -41,7 +41,7 @@ func init() {
 }
 
 var (
-	cid      string         // client id/pub id
+	mn       string         // publisher mn
 	data     string         // message payload
 	topic    string         // mqtt topic
 	token    string         // publisher token
@@ -59,8 +59,8 @@ func init() {
 	if seq == "" {
 		seq = uuid.NewString()
 	}
-	if cid == "" {
-		cid = uuid.NewString()
+	if mn == "" {
+		mn = uuid.NewString()
 	}
 	if host == "" {
 		host = "localhost"
@@ -103,7 +103,7 @@ func init() {
 			Token:   token,
 			PubTime: time.Now().UTC().UnixMicro(),
 			EventId: seq,
-			PubId:   cid,
+			PubId:   mn,
 		},
 		Payload: pl,
 	}
@@ -115,7 +115,7 @@ func init() {
 }
 
 func main() {
-	c, err := broker.Client(cid)
+	c, err := broker.Client(mn)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -127,29 +127,31 @@ func main() {
 	}
 	fmt.Println(">>>> message published")
 
-	rspChannel := path.Join(topic, cid)
-	rspChan := make(chan interface{}, 0)
+	ack := path.Join("ack", mn)
+	fmt.Printf("receive ack from %s\n", ack)
+	sig := make(chan interface{})
 
-	err = c.WithTopic(rspChannel).Subscribe(func(cli mqtt.Client, msg mqtt.Message) {
+	err = c.WithTopic(ack).Subscribe(func(cli mqtt.Client, msg mqtt.Message) {
 		fmt.Println("<<<< message ack received")
 		rsp := &event.EventRsp{}
 		if err = json.Unmarshal(msg.Payload(), rsp); err != nil {
 			fmt.Println(err)
 		}
-		ack, err := json.MarshalIndent(rsp, "", "  ")
+		content, _ := json.MarshalIndent(rsp, "", "  ")
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("unmarshal failed %v\n", err)
+		} else {
+			fmt.Println(string(content))
 		}
-		fmt.Println(string(ack))
-		rspChan <- 0
+		sig <- 0
 	})
 	if err != nil {
 		fmt.Println(err)
 	}
 	select {
-	case <-rspChan:
+	case <-sig:
 	case <-time.After(time.Second * time.Duration(wait)):
 		fmt.Println("**** message ack timeout")
 	}
-	_ = c.WithTopic(rspChannel).Unsubscribe()
+	_ = c.WithTopic(ack).Unsubscribe()
 }
