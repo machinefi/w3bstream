@@ -50,7 +50,7 @@ type PrivateKey struct {
 
 type ChainClient struct {
 	ProjectName string
-	operators   map[string]*PrivateKey
+	Operators   map[string]*PrivateKey
 }
 
 func (c *ChainClient) GlobalConfigType() ConfigType { return ConfigChains }
@@ -60,8 +60,8 @@ func (c *ChainClient) Init(parent context.Context) error {
 	ops := wsTypes.MustOperatorsFromContext(parent)
 
 	c.ProjectName = prj.Name
-	if c.operators == nil {
-		c.operators = make(map[string]*PrivateKey)
+	if c.Operators == nil {
+		c.Operators = make(map[string]*PrivateKey)
 	}
 
 	defaultOpID := base.SFID(0)
@@ -81,9 +81,9 @@ func (c *ChainClient) Init(parent context.Context) error {
 			p.Ecdsa = pk
 		}
 
-		c.operators[op.Name] = p
+		c.Operators[op.Name] = p
 		if defaultOpID == op.OperatorID {
-			c.operators[operator.DefaultOperatorName] = p
+			c.Operators[operator.DefaultOperatorName] = p
 		}
 	}
 
@@ -95,7 +95,7 @@ func (c *ChainClient) WithContext(ctx context.Context) context.Context {
 }
 
 func (c *ChainClient) SendTXWithOperator(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr, operatorName string) (string, error) {
-	pvk, ok := c.operators[operatorName]
+	pvk, ok := c.Operators[operatorName]
 	if !ok {
 		return "", errors.New("private key is empty")
 	}
@@ -103,7 +103,7 @@ func (c *ChainClient) SendTXWithOperator(conf *types.ChainConfig, chainID uint64
 }
 
 func (c *ChainClient) SendTX(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr string) (string, error) {
-	pvk, ok := c.operators[operator.DefaultOperatorName]
+	pvk, ok := c.Operators[operator.DefaultOperatorName]
 	if !ok {
 		return "", errors.New("private key is empty")
 	}
