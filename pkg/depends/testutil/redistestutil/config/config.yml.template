@@ -1,4 +1,4 @@
-GO_RUNTIME_ENV: DEV
+GO_RUNTIME_ENV: PROD
 TEST__ENDPOINT__Endpoint: tcp://127.0.0.1:6379
 TEST__ENDPOINT__Prefix: 'prod:test:'
 TEST__ENDPOINT__Wait: "true"

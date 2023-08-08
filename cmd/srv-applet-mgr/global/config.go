@@ -16,10 +16,12 @@ import (
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	confjwt "github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	conflogger "github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	confpostgres "github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
 	confrate "github.com/machinefi/w3bstream/pkg/depends/conf/rate_limit"
 	confredis "github.com/machinefi/w3bstream/pkg/depends/conf/redis"
+	conftracer "github.com/machinefi/w3bstream/pkg/depends/conf/tracer"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/client"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
@@ -63,6 +65,8 @@ func init() {
 		WasmDB        *base.Endpoint
 		MqttBroker    *confmqtt.Broker
 		Redis         *confredis.Redis
+		NewLogger     *conflogger.Config
+		Tracer        *conftracer.Config
 		Server        *confhttp.Server
 		Jwt           *confjwt.Jwt
 		Logger        *conflog.Log
@@ -84,6 +88,8 @@ func init() {
 		WasmDB:        wasmdb,
 		MqttBroker:    &confmqtt.Broker{},
 		Redis:         &confredis.Redis{},
+		NewLogger:     &conflogger.Config{},
+		Tracer:        &conftracer.Config{},
 		Server:        ServerMgr,
 		Jwt:           &confjwt.Jwt{},
 		Logger:        &conflog.Log{},
@@ -174,11 +180,15 @@ func init() {
 	Context = WithContext(context.Background())
 }
 
-func Server() kit.Transport { return ServerMgr.WithContextInjector(WithContext) }
+func Server() kit.Transport {
+	return ServerMgr.WithContextInjector(WithContext).WithName("srv-applet-mgr")
+}
 
 func TaskServer() kit.Transport { return worker.WithContextInjector(WithContext) }
 
-func EventServer() kit.Transport { return ServerEvent.WithContextInjector(WithContext) }
+func EventServer() kit.Transport {
+	return ServerEvent.WithContextInjector(WithContext).WithName("srv-event")
+}
 
 func Migrate() {
 	ctx, log := conflog.StdContext(context.Background())
