@@ -1,12 +1,10 @@
 package metrics
 
 import (
-	"container/list"
 	"context"
 	"errors"
 	"log"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/ClickHouse/clickhouse-go/v2"
@@ -18,7 +16,7 @@ import (
 const (
 	queueLength      = 5000
 	popThreshold     = 3
-	concurrentWorker = 1
+	concurrentWorker = 10
 )
 
 type (
@@ -83,86 +81,77 @@ func (c *ClickhouseClient) Insert(query string) error {
 	return nil
 }
 
-type BatchWorker struct {
-	signal   chan *list.List
+type SQLBatcher struct {
+	signal   chan string
 	preStatm string
-	li       *list.List
-	mtx      sync.Mutex
+	buf      []string
 }
 
 const (
-	batchSize = 50000
+	batchSize      = 50000
+	tickerInterval = 200 * time.Millisecond
 )
 
-func NewBatchWorker(preStatm string) *BatchWorker {
-	bw := &BatchWorker{
-		signal:   make(chan *list.List, queueLength),
+func NewSQLBatcher(preStatm string) *SQLBatcher {
+	bw := &SQLBatcher{
+		signal:   make(chan string, queueLength),
 		preStatm: preStatm,
-		li:       list.New(),
+		buf:      make([]string, 0, batchSize),
 	}
 	go bw.run()
 	return bw
 }
 
-func (b *BatchWorker) Insert(query string) error {
+func (b *SQLBatcher) Insert(query string) error {
 	if clickhouseCLI == nil {
 		return errors.New("clickhouse client is not initialized")
 	}
-	b.mtx.Lock()
-	defer b.mtx.Unlock()
-	b.li.PushBack(query)
-	if b.li.Len() > batchSize {
-		select {
-		case b.signal <- b.li:
-			b.li = list.New()
-		default:
-			return errors.New("batchWorker queue is full")
-		}
+	select {
+	case b.signal <- query:
+		return nil
+	default:
+		return errors.New("the queue of SQLBatcher is full")
 	}
-	return nil
 }
 
-func (b *BatchWorker) run() {
-	ticker := time.NewTicker(200 * time.Millisecond)
+func (b *SQLBatcher) run() {
+	ticker := time.NewTicker(tickerInterval)
 	for {
 		select {
 		case <-ticker.C:
-			b.mtx.Lock()
-			li := b.li
-			b.li = list.New()
-			b.mtx.Unlock()
-			arr := pack(li)
-			if len(arr) == 0 {
+			if len(b.buf) == 0 {
 				continue
 			}
 			if clickhouseCLI == nil {
 				log.Println("clickhouse client is not initialized")
 				continue
 			}
-			err := clickhouseCLI.Insert(b.preStatm + "(" + strings.Join(arr, "),(") + ")")
+			err := clickhouseCLI.Insert(b.preStatm + "(" + strings.Join(b.buf, "),(") + ")")
 			if err != nil {
-				log.Println("batchWorker failed to insert: ", err)
+				log.Println("SQLBatcher failed to insert: ", err)
+				continue
 			}
-		case li := <-b.signal:
-			arr := pack(li)
+			b.buf = make([]string, 0, batchSize)
+		case str, ok := <-b.signal:
+			if !ok {
+				return
+			}
 			if clickhouseCLI == nil {
 				log.Println("clickhouse client is not initialized")
 				continue
 			}
-			err := clickhouseCLI.Insert(b.preStatm + "(" + strings.Join(arr, "),(") + ")")
-			if err != nil {
-				log.Println("batchWorker failed to insert: ", err)
+			b.buf = append(b.buf, str)
+			if len(b.buf) >= batchSize {
+				err := clickhouseCLI.Insert(b.preStatm + "(" + strings.Join(b.buf, "),(") + ")")
+				if err != nil {
+					log.Println("SQLBatcher failed to insert: ", err)
+					continue
+				}
+				b.buf = make([]string, 0, batchSize)
+				ticker.Reset(tickerInterval)
 			}
 		}
 	}
-}
-
-func pack(li *list.List) []string {
-	arr := make([]string, 0, li.Len())
-	for element := li.Front(); element != nil; element = element.Next() {
-		arr = append(arr, element.Value.(string))
-	}
-	return arr
 }
 
 type connWorker struct {

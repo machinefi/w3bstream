@@ -26,7 +26,7 @@ var (
 		},
 		[]string{"account", "project", "publisher", "eventtype"},
 	)
-	eventClickhouseCli = NewBatchWorker("INSERT INTO ws_metrics.inbound_events_metrics VALUES")
+	eventClickhouseCli = NewSQLBatcher("INSERT INTO ws_metrics.inbound_events_metrics VALUES")
 
 	publisherMtc = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
@@ -35,7 +35,7 @@ var (
 		},
 		[]string{"account", "project"},
 	)
-	publisherClickhouseCli = NewBatchWorker("INSERT INTO ws_metrics.publishers_metrics VALUES")
+	publisherClickhouseCli = NewSQLBatcher("INSERT INTO ws_metrics.publishers_metrics VALUES")
 
 	BlockChainTxMtc = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Name: _blockChainTxMtcName,

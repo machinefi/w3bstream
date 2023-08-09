@@ -16,7 +16,7 @@ type (
 	metrics struct {
 		account string // account use wallet address (if exists) or account id
 		project string // project use project name
-		writer  *BatchWorker
+		writer  *SQLBatcher
 	}
 )
 
@@ -24,7 +24,7 @@ func NewCustomMetric(account string, project string) CustomMetrics {
 	return &metrics{
 		account: account,
 		project: project,
-		writer:  NewBatchWorker("INSERT INTO ws_metrics.customized_metrics VALUES"),
+		writer:  NewSQLBatcher("INSERT INTO ws_metrics.customized_metrics VALUES"),
 	}
 }
 
