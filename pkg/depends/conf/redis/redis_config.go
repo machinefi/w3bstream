@@ -146,15 +146,20 @@ func (r *Redis) SetDefault() {
 	if r.DB == 0 {
 		r.DB = 1
 	}
-	if r.Prefix == "" {
-		r.Prefix = fmt.Sprintf("%s:%s:",
-			strings.ToLower(os.Getenv(consts.GoRuntimeEnv)),
-			strings.ToLower(os.Getenv(consts.EnvProjectName)),
-		)
-	}
 }
 
 func (r *Redis) Init() {
+	if r.Prefix == "" {
+		env := consts.ProduceEnv
+		if v := os.Getenv(consts.GoRuntimeEnv); v != "" {
+			env = strings.ToLower(v)
+		}
+		prj := "unknown"
+		if v := os.Getenv(consts.EnvProjectName); v != "" {
+			prj = strings.ToLower(v)
+		}
+		r.Prefix = fmt.Sprintf("%s:%s:", env, prj)
+	}
 	if r.pool == nil {
 		r.init()
 	}

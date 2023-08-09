@@ -45,9 +45,10 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 	var (
 		err error
 		rsp = &event.EventRsp{
-			Channel:     r.Channel,
-			PublisherID: pub.PublisherID,
-			EventID:     r.EventID,
+			Channel:      r.Channel,
+			PublisherID:  pub.PublisherID,
+			PublisherKey: pub.Key,
+			EventID:      r.EventID,
 		}
 	)
 
@@ -74,10 +75,10 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 	}
 
 	prj := types.MustProjectFromContext(ctx)
-	metrics.EventMetricsInc(ctx, prj.AccountID.String(), prj.Name, pub.Key, r.EventType)
 
 	ctx = types.WithEventID(ctx, r.EventID)
 	rsp.Results = event.OnEvent(ctx, r.Payload.Bytes())
+	metrics.EventMetricsInc(ctx, prj.AccountID.String(), prj.Name, pub.Key, r.EventType)
 	return rsp, nil
 }
 
@@ -202,8 +203,8 @@ func handleEvent(ctx context.Context,
 	}
 	ctx = types.WithStrategyResults(ctx, res)
 
-	metrics.EventMetricsInc(ctx, prj.AccountID.String(), prj.Name, pub.Key, eventType)
-
 	ctx = types.WithEventID(ctx, eventID)
-	return event.OnEvent(ctx, payload), nil
+	ret := event.OnEvent(ctx, payload)
+	metrics.EventMetricsInc(ctx, prj.AccountID.String(), prj.Name, pub.Key, eventType)
+	return ret, nil
 }

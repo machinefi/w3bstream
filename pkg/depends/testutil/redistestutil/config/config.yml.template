@@ -1,4 +1,4 @@
-GO_RUNTIME_ENV: DEV
+GO_RUNTIME_ENV: PROD
 TEST__ENDPOINT__Endpoint: tcp://127.0.0.1:6379
 TEST__ENDPOINT__Prefix: 'prod:test:'
 TEST__ENDPOINT__Wait: "true"
@@ -10,7 +10,7 @@ TEST__REDIS__MaxActive: "5"
 TEST__REDIS__MaxIdle: "3"
 TEST__REDIS__Password: ""
 TEST__REDIS__Port: "6379"
-TEST__REDIS__Prefix: 'prod:test:'
+TEST__REDIS__Prefix: ""
 TEST__REDIS__Protocol: tcp
 TEST__REDIS__ReadTimeout: 10s
 TEST__REDIS__Wait: "true"

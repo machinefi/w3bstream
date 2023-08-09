@@ -94,6 +94,8 @@ type GithubComMachinefiW3BstreamPkgEnumsInstanceState = enums.InstanceState
 
 type GithubComMachinefiW3BstreamPkgEnumsMonitorCmd = enums.MonitorCmd
 
+type GithubComMachinefiW3BstreamPkgEnumsOperatorKeyType = enums.OperatorKeyType
+
 type GithubComMachinefiW3BstreamPkgEnumsProtocol = enums.Protocol
 
 type GithubComMachinefiW3BstreamPkgEnumsTrafficLimitType = enums.TrafficLimitType

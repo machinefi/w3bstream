@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
 
-	base "github.com/machinefi/w3bstream/pkg/depends/base/types"
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
@@ -73,12 +72,13 @@ func TestDeploy(t *testing.T) {
 		types.WithAppletContext(&models.Applet{}),
 		types.WithResourceContext(&models.Resource{}),
 		types.WithInstanceContext(&models.Instance{}),
-		types.WithWasmDBEndpointContext(&base.Endpoint{}),
+		types.WithWasmDBConfigContext(&types.WasmDBConfig{}),
 		types.WithRedisEndpointContext(&confredis.Redis{}),
 		types.WithTaskWorkerContext(&mq.TaskWorker{}),
 		types.WithTaskBoardContext(&mq.TaskBoard{}),
 		types.WithMqttBrokerContext(mqttBroker),
 		types.WithETHClientConfigContext(&types.ETHClientConfig{}),
+		types.WithChainConfigContext(&types.ChainConfig{}),
 		wasm.WithMQTTClientContext(mqttClient),
 		types.WithWasmApiServerContext(wasmApiServer),
 	)(context.Background())

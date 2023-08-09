@@ -3,23 +3,30 @@ package wasm
 import (
 	"context"
 	"crypto/ecdsa"
+	"crypto/ed25519"
 	"encoding/hex"
+	"encoding/json"
 	"math/big"
 	"strconv"
 	"strings"
 
+	"github.com/blocto/solana-go-sdk/client"
+	solcommon "github.com/blocto/solana-go-sdk/common"
+	soltypes "github.com/blocto/solana-go-sdk/types"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
 
 	base "github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
+	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
+	"github.com/machinefi/w3bstream/pkg/types"
 	wsTypes "github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -35,11 +42,15 @@ func NewChainClient(ctx context.Context, prj *models.Project, ops []models.Opera
 	return cli
 }
 
+type PrivateKey struct {
+	Type    enums.OperatorKeyType
+	Ecdsa   *ecdsa.PrivateKey
+	Ed25519 ed25519.PrivateKey
+}
+
 type ChainClient struct {
-	projectName string
-	endpoints   map[uint32]string
-	clientMap   map[uint32]*ethclient.Client
-	operators   map[string]*ecdsa.PrivateKey
+	ProjectName string
+	Operators   map[string]*PrivateKey
 }
 
 func (c *ChainClient) GlobalConfigType() ConfigType { return ConfigChains }
@@ -48,12 +59,9 @@ func (c *ChainClient) Init(parent context.Context) error {
 	prj := wsTypes.MustProjectFromContext(parent)
 	ops := wsTypes.MustOperatorsFromContext(parent)
 
-	c.projectName = prj.Name
-	if c.clientMap == nil {
-		c.clientMap = make(map[uint32]*ethclient.Client)
-	}
-	if c.operators == nil {
-		c.operators = make(map[string]*ecdsa.PrivateKey)
+	c.ProjectName = prj.Name
+	if c.Operators == nil {
+		c.Operators = make(map[string]*PrivateKey)
 	}
 
 	defaultOpID := base.SFID(0)
@@ -62,15 +70,22 @@ func (c *ChainClient) Init(parent context.Context) error {
 	}
 
 	for _, op := range ops {
-		pk := crypto.ToECDSAUnsafe(common.FromHex(op.PrivateKey))
-		c.operators[op.Name] = pk
+		p := &PrivateKey{Type: op.Type}
+		b := common.FromHex(op.PrivateKey)
+
+		if op.Type == enums.OPERATOR_KEY__ED25519 {
+			pk := ed25519.PrivateKey(b)
+			p.Ed25519 = pk
+		} else {
+			pk := crypto.ToECDSAUnsafe(b)
+			p.Ecdsa = pk
+		}
+
+		c.Operators[op.Name] = p
 		if defaultOpID == op.OperatorID {
-			c.operators[operator.DefaultOperatorName] = pk
+			c.Operators[operator.DefaultOperatorName] = p
 		}
 	}
-
-	ethcli := wsTypes.MustETHClientConfigFromContext(parent)
-	c.endpoints = ethcli.Clients
 
 	return nil
 }
@@ -79,24 +94,81 @@ func (c *ChainClient) WithContext(ctx context.Context) context.Context {
 	return WithChainClient(ctx, c)
 }
 
-func (c *ChainClient) SendTXWithOperator(chainID uint32, toStr, valueStr, dataStr, operatorName string) (string, error) {
-	pvk, ok := c.operators[operatorName]
+func (c *ChainClient) SendTXWithOperator(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr, operatorName string) (string, error) {
+	pvk, ok := c.Operators[operatorName]
 	if !ok {
 		return "", errors.New("private key is empty")
 	}
-	return c.sendTX(chainID, toStr, valueStr, dataStr, pvk)
+	return c.sendTX(conf, chainID, chainName, toStr, valueStr, dataStr, pvk)
 }
 
-func (c *ChainClient) SendTX(chainID uint32, toStr, valueStr, dataStr string) (string, error) {
-	pvk, ok := c.operators[operator.DefaultOperatorName]
+func (c *ChainClient) SendTX(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr string) (string, error) {
+	pvk, ok := c.Operators[operator.DefaultOperatorName]
 	if !ok {
 		return "", errors.New("private key is empty")
 	}
-	return c.sendTX(chainID, toStr, valueStr, dataStr, pvk)
+	return c.sendTX(conf, chainID, chainName, toStr, valueStr, dataStr, pvk)
 }
 
-func (c *ChainClient) sendTX(chainID uint32, toStr, valueStr, dataStr string, pvk *ecdsa.PrivateKey) (string, error) {
-	cli, err := c.getEthClient(chainID)
+func (c *ChainClient) sendTX(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr string, pvk *PrivateKey) (string, error) {
+	chain, ok := conf.GetChain(chainID, chainName)
+	if !ok {
+		return "", errors.Errorf("the chain %d %s is not supported", chainID, chainName)
+	}
+	if chain.IsSolana() {
+		if pvk.Type != enums.OPERATOR_KEY__ED25519 {
+			return "", errors.New("invalid operator key type, require ED25519")
+		}
+		return c.sendSolanaTX(chain, dataStr, pvk.Ed25519)
+	}
+
+	if pvk.Type != enums.OPERATOR_KEY__ECDSA {
+		return "", errors.New("invalid operator key type, require ECDSA")
+	}
+	return c.sendEthTX(chain, toStr, valueStr, dataStr, pvk.Ecdsa)
+}
+
+func (c *ChainClient) sendSolanaTX(chain *types.Chain, dataStr string, pvk ed25519.PrivateKey) (string, error) {
+	cli := client.NewClient(chain.Endpoint)
+	account := soltypes.Account{
+		PublicKey:  solcommon.PublicKeyFromBytes(pvk.Public().(ed25519.PublicKey)),
+		PrivateKey: pvk,
+	}
+	ins := []soltypes.Instruction{}
+	if err := json.Unmarshal([]byte(dataStr), &ins); err != nil {
+		return "", errors.Wrap(err, "invalid data format")
+	}
+	if len(ins) == 0 {
+		return "", errors.New("missing instruction data")
+	}
+
+	resp, err := cli.GetLatestBlockhash(context.Background())
+	if err != nil {
+		return "", errors.Wrap(err, "failed to get solana latest block hash")
+	}
+	tx, err := soltypes.NewTransaction(soltypes.NewTransactionParam{
+		Message: soltypes.NewMessage(soltypes.NewMessageParam{
+			FeePayer:        account.PublicKey,
+			RecentBlockhash: resp.Blockhash,
+			Instructions:    ins,
+		}),
+		Signers: []soltypes.Account{account},
+	})
+	if err != nil {
+		return "", errors.Wrap(err, "failed to build solana raw tx")
+	}
+	hash, err := cli.SendTransaction(context.Background(), tx)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to send solana tx")
+	}
+	return hash, nil
+}
+
+func (c *ChainClient) sendEthTX(chain *types.Chain, toStr, valueStr, dataStr string, pvk *ecdsa.PrivateKey) (string, error) {
+	if toStr == "" || valueStr == "" {
+		return "", errors.New("missing to or value string")
+	}
+	cli, err := ethclient.Dial(chain.Endpoint)
 	if err != nil {
 		return "", err
 	}
@@ -135,8 +207,8 @@ func (c *ChainClient) sendTX(chainID uint32, toStr, valueStr, dataStr string, pv
 	}
 
 	// Create a new transaction
-	tx := types.NewTx(
-		&types.LegacyTx{
+	tx := ethtypes.NewTx(
+		&ethtypes.LegacyTx{
 			Nonce:    nonce,
 			GasPrice: gasPrice,
 			Gas:      gasLimit,
@@ -149,38 +221,30 @@ func (c *ChainClient) sendTX(chainID uint32, toStr, valueStr, dataStr string, pv
 	if err != nil {
 		return "", err
 	}
-	signedTx, err := types.SignTx(tx, types.NewLondonSigner(chainid), pvk)
+	signedTx, err := ethtypes.SignTx(tx, ethtypes.NewLondonSigner(chainid), pvk)
 	if err != nil {
 		return "", err
 	}
 
-	metrics.BlockChainTxMtc.WithLabelValues(c.projectName, strconv.Itoa(int(chainID))).Inc()
+	metrics.BlockChainTxMtc.WithLabelValues(c.ProjectName, strconv.Itoa(int(chain.ChainID))).Inc()
 
 	err = cli.SendTransaction(context.Background(), signedTx)
 	if err != nil {
 		return "", err
 	}
 	return signedTx.Hash().Hex(), nil
-
 }
 
-func (c *ChainClient) getEthClient(chainID uint32) (*ethclient.Client, error) {
-	if cli, exist := c.clientMap[chainID]; exist {
-		return cli, nil
+func (c *ChainClient) getEthClient(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName) (*ethclient.Client, error) {
+	chain, ok := conf.GetChain(chainID, chainName)
+	if !ok {
+		return nil, errors.Errorf("the chain %d %s is not supported", chainID, chainName)
 	}
-	chainEndpoint, exist := c.endpoints[chainID]
-	if !exist {
-		return nil, errors.Errorf("the chain %d is not supported", chainID)
-	}
-	chain, err := ethclient.Dial(chainEndpoint)
-	if err != nil {
-		return nil, errors.Wrap(err, "fail to dial the endpoint of the chain")
-	}
-	c.clientMap[chainID] = chain
-	return chain, nil
+
+	return ethclient.Dial(chain.Endpoint)
 }
 
-func (c *ChainClient) CallContract(chainID uint32, toStr, dataStr string) ([]byte, error) {
+func (c *ChainClient) CallContract(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, dataStr string) ([]byte, error) {
 	var (
 		to = common.HexToAddress(toStr)
 	)
@@ -188,7 +252,7 @@ func (c *ChainClient) CallContract(chainID uint32, toStr, dataStr string) ([]byt
 	if err != nil {
 		return nil, err
 	}
-	cli, err := c.getEthClient(chainID)
+	cli, err := c.getEthClient(conf, chainID, chainName)
 	if err != nil {
 		return nil, err
 	}
@@ -198,7 +262,7 @@ func (c *ChainClient) CallContract(chainID uint32, toStr, dataStr string) ([]byt
 		Data: data,
 	}
 
-	metrics.BlockChainTxMtc.WithLabelValues(c.projectName, strconv.Itoa(int(chainID))).Inc()
+	metrics.BlockChainTxMtc.WithLabelValues(c.ProjectName, strconv.Itoa(int(chainID))).Inc()
 
 	return cli.CallContract(context.Background(), msg, nil)
 }

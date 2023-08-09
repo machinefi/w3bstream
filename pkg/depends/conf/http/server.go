@@ -4,9 +4,10 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/otel"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/http/mws"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
@@ -27,10 +28,16 @@ type Server struct {
 	Debug       *bool                        `env:""`
 	ht          *httptransport.HttpTransport `env:"-"`
 	injector    contextx.WithContext         `env:"-"`
+	name        string
 }
 
 func (s Server) WithContextInjector(injector contextx.WithContext) *Server {
 	s.injector = injector
+	return &s
+}
+
+func (s Server) WithName(name string) *Server {
+	s.name = name
 	return &s
 }
 
@@ -73,6 +80,7 @@ func (s *Server) Serve(router *kit.Router) error {
 		s.ht.SetDefault()
 	}
 
+	tr := otel.Tracer(s.name)
 	ht := s.ht
 	ht.Port = s.Port
 
@@ -82,14 +90,16 @@ func (s *Server) Serve(router *kit.Router) error {
 		mws.DefaultCORS(),
 		mws.HealthCheckHandler(),
 		mws.MetricsHandler(),
-		// TraceLogHandler("Server"),
-		TraceLogHandlerWithLogger(logrus.WithContext(context.Background()), "Server"),
+		TraceLogHandler(tr),
 		NewContextInjectorMw(s.injector),
 	)
 	if s.Debug != nil && *s.Debug {
 		ht.Middlewares = append(ht.Middlewares, mws.PProfHandler(*s.Debug))
 	}
-	return s.ht.Serve(router)
+
+	ctx, _ := logger.NewSpanContext(context.Background(), s.name)
+
+	return s.ht.ServeContext(ctx, router)
 }
 
 func (s *Server) Shutdown() {

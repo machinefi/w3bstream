@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/tidwall/gjson"
 
@@ -66,6 +67,14 @@ type Chain struct {
 	Endpoint string          `json:"endpoint"`
 }
 
+func (c *Chain) IsSolana() bool {
+	return c.Name == enums.SOLANA_DEVNET || c.Name == enums.SOLANA_TESTNET || c.Name == enums.SOLANA_MAINNET_BETA
+}
+
+func (c *Chain) IsEth() bool {
+	return c.ChainID != 0
+}
+
 type ChainConfig struct {
 	Configs  string                     `env:""     json:"-"`
 	Chains   map[enums.ChainName]*Chain `env:"-"    json:"-"`
@@ -90,6 +99,15 @@ func (c *ChainConfig) Init() {
 	}
 	c.Chains = cm
 	c.ChainIDs = cidm
+}
+
+func (c *ChainConfig) GetChain(chainID uint64, chainName enums.ChainName) (*Chain, bool) {
+	r, ok := c.ChainIDs[chainID]
+	if ok {
+		return r, ok
+	}
+	r, ok = c.Chains[chainName]
+	return r, ok
 }
 
 // aliases from base/types
@@ -138,12 +156,21 @@ type StrategyResult struct {
 }
 
 type WasmDBConfig struct {
-	MaxConnection int
+	Endpoint        types.Endpoint
+	MaxConnection   int
+	PoolSize        int
+	ConnMaxLifetime types.Duration
 }
 
 func (c *WasmDBConfig) SetDefault() {
 	if c.MaxConnection == 0 {
 		c.MaxConnection = 2
+	}
+	if c.PoolSize == 0 {
+		c.PoolSize = 2
+	}
+	if c.ConnMaxLifetime == 0 {
+		c.ConnMaxLifetime = *types.AsDuration(time.Second * 20)
 	}
 }
 

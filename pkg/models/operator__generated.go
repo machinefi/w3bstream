@@ -139,6 +139,14 @@ func (*Operator) FieldName() string {
 	return "Name"
 }
 
+func (m *Operator) ColType() *builder.Column {
+	return OperatorTable.ColByFieldName(m.FieldType())
+}
+
+func (*Operator) FieldType() string {
+	return "Type"
+}
+
 func (m *Operator) ColCreatedAt() *builder.Column {
 	return OperatorTable.ColByFieldName(m.FieldCreatedAt())
 }

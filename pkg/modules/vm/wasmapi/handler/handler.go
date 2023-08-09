@@ -6,13 +6,13 @@ import (
 )
 
 type Handler struct {
-	mgrDB  sqlx.DBExecutor
-	ethCli *types.ETHClientConfig
+	mgrDB     sqlx.DBExecutor
+	chainConf *types.ChainConfig
 }
 
-func New(mgrDB sqlx.DBExecutor, ethCli *types.ETHClientConfig) *Handler {
+func New(mgrDB sqlx.DBExecutor, chainConf *types.ChainConfig) *Handler {
 	return &Handler{
-		mgrDB:  mgrDB,
-		ethCli: ethCli,
+		mgrDB:     mgrDB,
+		chainConf: chainConf,
 	}
 }

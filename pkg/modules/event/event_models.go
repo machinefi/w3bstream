@@ -63,6 +63,8 @@ type EventRsp struct {
 	Channel string `json:"channel"`
 	// PublisherID publisher(device) unique id in w3b node
 	PublisherID types.SFID `json:"publisherID"`
+	// PublisherKey publisher(device) mn unique id of this device
+	PublisherKey string `json:"publisherKey"`
 	// EventID same as EventReq.EventID
 	EventID string `json:"eventID"`
 	// Results result for each wasm invoke, which hits strategies.

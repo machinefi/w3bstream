@@ -1,7 +1,6 @@
 package metrics
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/tidwall/gjson"
@@ -15,8 +14,9 @@ type (
 
 type (
 	metrics struct {
-		account string
-		project string
+		account string // account use wallet address (if exists) or account id
+		project string // project use project name
+		writer  *SQLBatcher
 	}
 )
 
@@ -24,15 +24,11 @@ func NewCustomMetric(account string, project string) CustomMetrics {
 	return &metrics{
 		account: account,
 		project: project,
+		writer:  NewSQLBatcher("INSERT INTO ws_metrics.customized_metrics VALUES"),
 	}
 }
 
 func (m *metrics) Submit(obj gjson.Result) error {
-	if clickhouseCLI == nil {
-		return errors.New("clickhouse client is not initialized")
-	}
-
 	objStr := obj.String()
-	return clickhouseCLI.Insert(fmt.Sprintf(`INSERT INTO ws_metrics.customized_metrics VALUES (
-			now(), '%s', '%s', '%s')`, m.account, m.project, objStr))
+	return m.writer.Insert(fmt.Sprintf(`now(), '%s', '%s', '%s'`, m.account, m.project, objStr))
 }

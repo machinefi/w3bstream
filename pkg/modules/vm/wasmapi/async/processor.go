@@ -19,6 +19,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/wasm"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
 
@@ -49,6 +50,7 @@ func (p *ApiCallProcessor) ProcessTask(ctx context.Context, t *asynq.Task) error
 
 	req = req.WithContext(contextx.WithContextCompose(
 		types.WithProjectContext(payload.Project),
+		wasm.WithChainClientContext(payload.ChainClient),
 		types.WithLoggerContext(p.l),
 	)(ctx))
 

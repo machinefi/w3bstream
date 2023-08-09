@@ -6,6 +6,7 @@ import (
 	"github.com/hibiken/asynq"
 
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
 const (
@@ -14,14 +15,16 @@ const (
 )
 
 type apiCallPayload struct {
-	Project *models.Project
-	Data    []byte
+	Project     *models.Project
+	ChainClient *wasm.ChainClient
+	Data        []byte
 }
 
-func NewApiCallTask(prj *models.Project, data []byte) (*asynq.Task, error) {
+func NewApiCallTask(prj *models.Project, chainCli *wasm.ChainClient, data []byte) (*asynq.Task, error) {
 	payload, err := json.Marshal(apiCallPayload{
-		Project: prj,
-		Data:    data,
+		Project:     prj,
+		ChainClient: chainCli,
+		Data:        data,
 	})
 	if err != nil {
 		return nil, err

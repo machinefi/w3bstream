@@ -41,6 +41,7 @@ type (
 		db      *wasm.Database
 		log     conflog.Logger
 		cl      *wasm.ChainClient
+		cf      *types.ChainConfig
 		ctx     context.Context
 		mq      *confmqtt.Client
 		metrics metrics.CustomMetrics
@@ -56,6 +57,7 @@ func NewExportFuncs(ctx context.Context, rt *Runtime) (*ExportFuncs, error) {
 		log:     wasm.MustLoggerFromContext(ctx),
 		srv:     types.MustWasmApiServerFromContext(ctx),
 		cl:      wasm.MustChainClientFromContext(ctx),
+		cf:      types.MustChainConfigFromContext(ctx),
 		db:      wasm.MustSQLStoreFromContext(ctx),
 		env:     wasm.MustEnvFromContext(ctx),
 		mq:      wasm.MustMQTTClientFromContext(ctx),
@@ -376,7 +378,7 @@ func (ef *ExportFuncs) SendTX(chainID int32, offset, size, vmAddrPtr, vmSizePtr 
 		return wasm.ResultStatusCode_Failed
 	}
 	ret := gjson.Parse(string(buf))
-	txHash, err := ef.cl.SendTX(uint32(chainID), ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String())
+	txHash, err := ef.cl.SendTX(ef.cf, uint64(chainID), "", ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String())
 	if err != nil {
 		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
@@ -399,7 +401,7 @@ func (ef *ExportFuncs) SendTXWithOperator(chainID int32, offset, size, vmAddrPtr
 		return wasm.ResultStatusCode_Failed
 	}
 	ret := gjson.Parse(string(buf))
-	txHash, err := ef.cl.SendTXWithOperator(uint32(chainID), ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String(), ret.Get("operatorName").String())
+	txHash, err := ef.cl.SendTXWithOperator(ef.cf, uint64(chainID), "", ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String(), ret.Get("operatorName").String())
 	if err != nil {
 		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
@@ -452,7 +454,7 @@ func (ef *ExportFuncs) CallContract(chainID int32, offset, size int32, vmAddrPtr
 		return wasm.ResultStatusCode_Failed
 	}
 	ret := gjson.Parse(string(buf))
-	data, err := ef.cl.CallContract(uint32(chainID), ret.Get("to").String(), ret.Get("data").String())
+	data, err := ef.cl.CallContract(ef.cf, uint64(chainID), "", ret.Get("to").String(), ret.Get("data").String())
 	if err != nil {
 		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed

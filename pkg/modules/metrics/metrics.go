@@ -26,6 +26,7 @@ var (
 		},
 		[]string{"account", "project", "publisher", "eventtype"},
 	)
+	eventClickhouseCli = NewSQLBatcher("INSERT INTO ws_metrics.inbound_events_metrics VALUES")
 
 	publisherMtc = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
@@ -34,6 +35,7 @@ var (
 		},
 		[]string{"account", "project"},
 	)
+	publisherClickhouseCli = NewSQLBatcher("INSERT INTO ws_metrics.publishers_metrics VALUES")
 
 	BlockChainTxMtc = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Name: _blockChainTxMtcName,
@@ -80,8 +82,8 @@ func RemoveMetrics(ctx context.Context, account string, project string) {
 func EventMetricsInc(ctx context.Context, account, project, publisher, eventtype string) {
 	eventMtc.WithLabelValues(account, project, publisher, eventtype).Inc()
 	if clickhouseCLI != nil {
-		if err := clickhouseCLI.Insert(fmt.Sprintf(`INSERT INTO ws_metrics.inbound_events_metrics VALUES (
-			now(), '%s', '%s', '%s', '%s', %d)`, account, project, publisher, eventtype, 1)); err != nil {
+		if err := eventClickhouseCli.Insert(fmt.Sprintf(`now(), '%s', '%s', '%s', 
+		'%s', %d`, account, project, publisher, eventtype, 1)); err != nil {
 			l := types.MustLoggerFromContext(ctx)
 			l.Error(err)
 		}
@@ -91,8 +93,7 @@ func EventMetricsInc(ctx context.Context, account, project, publisher, eventtype
 func PublisherMetricsInc(ctx context.Context, account, project string) {
 	publisherMtc.WithLabelValues(account, project).Inc()
 	if clickhouseCLI != nil {
-		if err := clickhouseCLI.Insert(fmt.Sprintf(`INSERT INTO ws_metrics.publishers_metrics VALUES (
-		now(), '%s', '%s', %d)`, account, project, 1)); err != nil {
+		if err := publisherClickhouseCli.Insert(fmt.Sprintf(`now(), '%s', '%s', %d`, account, project, 1)); err != nil {
 			l := types.MustLoggerFromContext(ctx)
 			l.Error(err)
 		}
@@ -102,8 +103,7 @@ func PublisherMetricsInc(ctx context.Context, account, project string) {
 func PublisherMetricsDec(ctx context.Context, account, project string) {
 	publisherMtc.WithLabelValues(account, project).Dec()
 	if clickhouseCLI != nil {
-		if err := clickhouseCLI.Insert(fmt.Sprintf(`INSERT INTO ws_metrics.publishers_metrics VALUES (
-		now(), '%s', '%s', %d)`, account, project, -1)); err != nil {
+		if err := publisherClickhouseCli.Insert(fmt.Sprintf(`now(), '%s', '%s', %d`, account, project, -1)); err != nil {
 			l := types.MustLoggerFromContext(ctx)
 			l.Error(err)
 		}

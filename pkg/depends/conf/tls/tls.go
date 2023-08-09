@@ -24,6 +24,11 @@ type X509KeyPair struct {
 	conf    *tls.Config
 }
 
+func (c *X509KeyPair) IsZero() bool {
+	return c.Key == "" || c.Crt == "" || c.Ca == "" &&
+		c.KeyPath == "" || c.CrtPath == "" || c.CaPath == ""
+}
+
 func (c *X509KeyPair) read() (key, crt, ca []byte, err error, empty bool) {
 	if c.Key+c.Ca+c.Crt != "" {
 		return []byte(c.Key), []byte(c.Crt), []byte(c.Ca), nil, false

@@ -7,7 +7,6 @@ import (
 
 	_ "github.com/machinefi/w3bstream/cmd/srv-applet-mgr/types"
 	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
-	base "github.com/machinefi/w3bstream/pkg/depends/base/types"
 	confapp "github.com/machinefi/w3bstream/pkg/depends/conf/app"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/amazonS3"
@@ -16,10 +15,12 @@ import (
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	confjwt "github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	conflogger "github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	confpostgres "github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
 	confrate "github.com/machinefi/w3bstream/pkg/depends/conf/rate_limit"
 	confredis "github.com/machinefi/w3bstream/pkg/depends/conf/redis"
+	conftracer "github.com/machinefi/w3bstream/pkg/depends/conf/tracer"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/client"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
@@ -45,7 +46,6 @@ var (
 
 	db        = &confpostgres.Endpoint{Database: models.DB}
 	monitordb = &confpostgres.Endpoint{Database: models.MonitorDB}
-	wasmdb    = &base.Endpoint{}
 
 	ServerMgr   = &confhttp.Server{}
 	ServerEvent = &confhttp.Server{} // serverEvent support event http transport
@@ -60,9 +60,10 @@ func init() {
 	config := &struct {
 		Postgres      *confpostgres.Endpoint
 		MonitorDB     *confpostgres.Endpoint
-		WasmDB        *base.Endpoint
 		MqttBroker    *confmqtt.Broker
 		Redis         *confredis.Redis
+		NewLogger     *conflogger.Config
+		Tracer        *conftracer.Config
 		Server        *confhttp.Server
 		Jwt           *confjwt.Jwt
 		Logger        *conflog.Log
@@ -81,9 +82,10 @@ func init() {
 	}{
 		Postgres:      db,
 		MonitorDB:     monitordb,
-		WasmDB:        wasmdb,
 		MqttBroker:    &confmqtt.Broker{},
 		Redis:         &confredis.Redis{},
+		NewLogger:     &conflogger.Config{},
+		Tracer:        &conftracer.Config{},
 		Server:        ServerMgr,
 		Jwt:           &confjwt.Jwt{},
 		Logger:        &conflog.Log{},
@@ -141,7 +143,7 @@ func init() {
 
 	redisKvDB := kvdb.NewRedisDB(config.Redis)
 
-	wasmApiServer, err := wasmapi.NewServer(std, config.Redis, config.Postgres, redisKvDB, config.EthClient)
+	wasmApiServer, err := wasmapi.NewServer(std, config.Redis, config.Postgres, redisKvDB, config.ChainConfig)
 	if err != nil {
 		std.Fatal(err)
 	}
@@ -149,7 +151,6 @@ func init() {
 	WithContext = contextx.WithContextCompose(
 		types.WithMgrDBExecutorContext(config.Postgres),
 		types.WithMonitorDBExecutorContext(config.MonitorDB),
-		types.WithWasmDBEndpointContext(config.WasmDB),
 		types.WithRedisEndpointContext(config.Redis),
 		types.WithLoggerContext(std),
 		conflog.WithLoggerContext(std),
@@ -174,11 +175,15 @@ func init() {
 	Context = WithContext(context.Background())
 }
 
-func Server() kit.Transport { return ServerMgr.WithContextInjector(WithContext) }
+func Server() kit.Transport {
+	return ServerMgr.WithContextInjector(WithContext).WithName("srv-applet-mgr")
+}
 
 func TaskServer() kit.Transport { return worker.WithContextInjector(WithContext) }
 
-func EventServer() kit.Transport { return ServerEvent.WithContextInjector(WithContext) }
+func EventServer() kit.Transport {
+	return ServerEvent.WithContextInjector(WithContext).WithName("srv-event")
+}
 
 func Migrate() {
 	ctx, log := conflog.StdContext(context.Background())
