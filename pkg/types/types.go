@@ -13,6 +13,7 @@ import (
 	"github.com/tidwall/gjson"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/validator/strfmt"
 	"github.com/machinefi/w3bstream/pkg/enums"
 )
@@ -147,12 +148,13 @@ func (v *EthAddressWhiteList) Validate(address string) bool {
 }
 
 type StrategyResult struct {
-	ProjectName string     `json:"projectName" db:"f_prj_name"`
-	AppletID    types.SFID `json:"appletID"    db:"f_app_id"`
-	AppletName  string     `json:"appletName"  db:"f_app_name"`
-	InstanceID  types.SFID `json:"instanceID"  db:"f_ins_id"`
-	Handler     string     `json:"handler"     db:"f_hdl"`
-	EventType   string     `json:"eventType"   db:"f_evt"`
+	ProjectName string         `json:"projectName" db:"f_prj_name"`
+	AppletID    types.SFID     `json:"appletID"    db:"f_app_id"`
+	AppletName  string         `json:"appletName"  db:"f_app_name"`
+	InstanceID  types.SFID     `json:"instanceID"  db:"f_ins_id"`
+	Handler     string         `json:"handler"     db:"f_hdl"`
+	EventType   string         `json:"eventType"   db:"f_evt"`
+	AutoCollect datatypes.Bool `json:"autoCollect" db:"f_auto_collect"`
 }
 
 type WasmDBConfig struct {

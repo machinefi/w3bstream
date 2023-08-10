@@ -108,6 +108,7 @@ func ListDetailByCond(ctx context.Context, r *CondArgs, adds ...builder.Addition
 		builder.Alias(ins.ColInstanceID(), "f_ins_id"),
 		builder.Alias(sty.ColHandler(), "f_hdl"),
 		builder.Alias(sty.ColEventType(), "f_evt"),
+		builder.Alias(sty.ColAutoCollectMetric(), "f_auto_collect"),
 		builder.Alias(sty.ColUpdatedAt(), "f_updated_at"),
 		builder.Alias(sty.ColCreatedAt(), "f_created_at"),
 	)).From(

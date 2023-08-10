@@ -7,9 +7,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	"github.com/machinefi/w3bstream/pkg/modules/strategy"
 	"github.com/machinefi/w3bstream/pkg/modules/trafficlimit"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
@@ -99,6 +101,12 @@ func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
 				ReturnValue: nil,
 				ReturnCode:  int(rv.Code),
 				Error:       rv.ErrMsg,
+			}
+		}(v)
+
+		go func(v *types.StrategyResult) {
+			if v.AutoCollect == datatypes.BooleanValue(true) {
+				metrics.GeoCollect(ctx, data)
 			}
 		}(v)
 	}
