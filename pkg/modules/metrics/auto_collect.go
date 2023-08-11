@@ -7,6 +7,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
+	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -14,14 +15,20 @@ var autoCollectCli = NewSQLBatcher("INSERT INTO ws_metrics.auto_collect_metrics 
 
 func GeoCollect(ctx context.Context, data []byte) {
 	var (
-		l         = types.MustLoggerFromContext(ctx)
-		project   = types.MustProjectFromContext(ctx)
-		publisher = types.MustPublisherFromContext(ctx)
-		eventID   = types.MustEventIDFromContext(ctx)
+		l       = types.MustLoggerFromContext(ctx)
+		project = types.MustProjectFromContext(ctx)
+		eventID = types.MustEventIDFromContext(ctx)
 
 		dataStr = string(data)
 		rawMap  = make(map[string]interface{})
 	)
+
+	publisher, ok := types.PublisherFromContext(ctx)
+	if !ok {
+		publisher = &models.Publisher{
+			PublisherInfo: models.PublisherInfo{Key: "unknown"},
+		}
+	}
 
 	// get lat or latitude key from data
 	switch {
