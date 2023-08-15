@@ -187,6 +187,7 @@ Interested in contributing to the doc? Please edit on [Github](https://github.co
 ### Client SDKs
 - Javascript/Typesript: https://github.com/machinefi/w3bstream-client-js
 - Python: https://github.com/machinefi/w3bstream-client-python
+- Golang: https://github.com/machinefi/w3bstream-client-go
 - Android: https://github.com/machinefi/w3bstream-android-sdk
 - iOS: https://github.com/machinefi/w3bstream-ios-sdk
 - ESP32: https://github.com/machinefi/w3bstream-client-esp32
