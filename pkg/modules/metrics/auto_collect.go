@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -37,7 +38,8 @@ func GeoCollect(ctx context.Context, data []byte) {
 	case gjson.Get(dataStr, "latitude").Exists():
 		rawMap["latitude"] = gjson.Get(dataStr, "latitude").Float()
 	default:
-		rawMap["latitude"] = 0
+		l.WithValues("eid", eventID).Warn(errors.New("there is no lat info"))
+		return
 	}
 
 	// get long or longitude key from data
@@ -45,9 +47,10 @@ func GeoCollect(ctx context.Context, data []byte) {
 	case gjson.Get(dataStr, "long").Exists():
 		rawMap["longitude"] = gjson.Get(dataStr, "long").Float()
 	case gjson.Get(dataStr, "longitude").Exists():
-		rawMap["longitude"] = gjson.Get(dataStr, "long").Float()
+		rawMap["longitude"] = gjson.Get(dataStr, "longitude").Float()
 	default:
-		rawMap["longitude"] = 0
+		l.WithValues("eid", eventID).Warn(errors.New("there is no long info"))
+		return
 	}
 
 	rawData, err := json.Marshal(rawMap)
