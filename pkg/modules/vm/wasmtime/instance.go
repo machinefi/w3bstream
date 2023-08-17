@@ -98,7 +98,7 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte, st enums
 		ins.sink = flow.Sink
 		go func() {
 			observable := ins.streamCompute(ins.ch)
-			ins.initSink(observable, ins.ctx)
+			ins.initSink(ins.ctx, observable)
 		}()
 	}
 
@@ -255,7 +255,7 @@ func (i *Instance) streamCompute(ch chan rxgo.Item) rxgo.Observable {
 	return obs
 }
 
-func (i *Instance) initSink(observable rxgo.Observable, ctx context.Context) {
+func (i *Instance) initSink(ctx context.Context, observable rxgo.Observable) {
 	c := observable.Observe()
 	for item := range c {
 

@@ -22,6 +22,8 @@ func GeoCollect(ctx context.Context, data []byte) {
 
 		dataStr = string(data)
 		rawMap  = make(map[string]interface{})
+		noLat   = false
+		noLong  = false
 	)
 
 	publisher, ok := types.PublisherFromContext(ctx)
@@ -39,7 +41,7 @@ func GeoCollect(ctx context.Context, data []byte) {
 		rawMap["latitude"] = gjson.Get(dataStr, "latitude").Float()
 	default:
 		l.WithValues("eid", eventID).Warn(errors.New("there is no lat info"))
-		return
+		noLat = true
 	}
 
 	// get long or longitude key from data
@@ -50,6 +52,10 @@ func GeoCollect(ctx context.Context, data []byte) {
 		rawMap["longitude"] = gjson.Get(dataStr, "longitude").Float()
 	default:
 		l.WithValues("eid", eventID).Warn(errors.New("there is no long info"))
+		noLong = true
+	}
+
+	if noLat || noLong {
 		return
 	}
 
