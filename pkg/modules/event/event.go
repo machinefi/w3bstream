@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
@@ -58,8 +59,10 @@ func HandleEvent(ctx context.Context, t string, data []byte) (interface{}, error
 }
 
 func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
+	ctx, l := logr.Start(ctx, "modules.event.OnEvent")
+	defer l.End()
+
 	var (
-		l       = types.MustLoggerFromContext(ctx)
 		r       = types.MustStrategyResultsFromContext(ctx)
 		eventID = types.MustEventIDFromContext(ctx)
 

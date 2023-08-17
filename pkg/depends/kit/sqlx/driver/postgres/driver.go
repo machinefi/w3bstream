@@ -10,7 +10,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
 
-	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/timer"
 )
@@ -47,8 +47,9 @@ var _ interface {
 } = (*LoggingConn)(nil)
 
 func (c *LoggingConn) BeginTx(ctx context.Context, opts driver.TxOptions) (driver.Tx, error) {
-	l := log.FromContext(ctx)
+	l := logr.FromContext(ctx)
 	l.Debug("=========== Beginning Transaction ===========")
+
 	tx, err := c.Conn.(driver.ConnBeginTx).BeginTx(ctx, opts)
 	if err != nil {
 		l.Error(errors.Wrap(err, "failed to begin transaction"))
@@ -61,19 +62,25 @@ func (c *LoggingConn) Prepare(string) (driver.Stmt, error) { panic("dont use Pre
 
 func (c *LoggingConn) QueryContext(ctx context.Context, query string, args []driver.NamedValue) (rows driver.Rows, err error) {
 	cost := timer.Start()
-	_ctx, l := log.Start(ctx, "Query")
+	_ctx, l := logr.Start(ctx, "Query")
 
 	defer func() {
 		qs := interpolate(query, args)
+		du := cost().Microseconds()
+
+		l = l.WithValues(
+			"@cst", du,
+			"@sql", qs.String(),
+		)
 
 		if err != nil {
 			if pgErr, ok := sqlx.UnwrapAll(err).(*pq.Error); !ok {
-				l.Error(errors.Wrapf(err, "query failed: %s", qs))
+				l.Error(err)
 			} else {
-				l.Warn(errors.Wrapf(pgErr, "query failed: %s", qs))
+				l.Warn(pgErr)
 			}
 		} else {
-			l.WithValues("cost", cost().String()).Debug("%s", qs)
+			l.Debug("")
 		}
 
 		l.End()
@@ -85,33 +92,39 @@ func (c *LoggingConn) QueryContext(ctx context.Context, query string, args []dri
 
 func (c *LoggingConn) ExecContext(ctx context.Context, query string, args []driver.NamedValue) (res driver.Result, err error) {
 	cost := timer.Start()
-	_ctx, l := log.Start(ctx, "Exec")
+
+	ctx, l := logr.Start(ctx, "Exec")
 
 	defer func() {
 		qs := interpolate(query, args)
+		du := strconv.FormatInt(cost().Microseconds(), 10) + "μs"
+
+		l = l.WithValues(
+			"@cst", du,
+			"@sql", qs.String(),
+		)
 
 		if err != nil {
 			if pgError, ok := sqlx.UnwrapAll(err).(*pq.Error); !ok {
-				l.Error(errors.Wrapf(err, "exec failed: %s", qs))
+				l.Error(err)
 			} else if pgError.Code == "23505" {
-				l.Warn(errors.Wrapf(pgError, "exec failed: %s", qs))
+				l.Warn(pgError)
 			} else {
-				l.Error(errors.Wrapf(pgError, "exec failed: %s", qs))
+				l.Error(pgError)
 			}
 			return
 		}
 
-		l.WithValues("cost", cost().String()).Debug(qs.String())
-
+		l.Debug("")
 		l.End()
 	}()
 
-	res, err = c.Conn.(driver.ExecerContext).ExecContext(_ctx, replaceValueHolder(query), args)
+	res, err = c.Conn.(driver.ExecerContext).ExecContext(ctx, replaceValueHolder(query), args)
 	return
 }
 
 type LoggingTx struct {
-	l  log.Logger
+	l  logr.Logger
 	tx driver.Tx
 }
 

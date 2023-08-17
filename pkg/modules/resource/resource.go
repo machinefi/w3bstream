@@ -9,6 +9,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/local"
 	s3db "github.com/machinefi/w3bstream/pkg/depends/conf/filesystem/s3"
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
@@ -99,6 +100,9 @@ func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filen
 }
 
 func GetBySFID(ctx context.Context, id types.SFID) (*models.Resource, error) {
+	ctx, l := logr.Start(ctx, "models.resource.GetBySFID")
+	defer l.End()
+
 	res := &models.Resource{}
 	res.ResourceID = id
 	if err := res.FetchByResourceID(types.MustMgrDBExecutorFromContext(ctx)); err != nil {
@@ -123,6 +127,9 @@ func GetByMd5(ctx context.Context, md5 string) (*models.Resource, error) {
 }
 
 func GetContentBySFID(ctx context.Context, id types.SFID) (*models.Resource, []byte, error) {
+	ctx, l := logr.Start(ctx, "models.resource.GetContentBySFID")
+	defer l.End()
+
 	res, err := GetBySFID(ctx, id)
 	if err != nil {
 		return nil, nil, err
@@ -181,6 +188,9 @@ func GetDownloadUrlBySFID(ctx context.Context, id types.SFID) (*DownLoadResource
 }
 
 func ReadContent(ctx context.Context, m *models.Resource) ([]byte, error) {
+	ctx, l := logr.Start(ctx, "models.resource.ReadContent")
+	defer l.End()
+
 	fs := types.MustFileSystemOpFromContext(ctx)
 	data, err := fs.Read(m.Path)
 	if err != nil {

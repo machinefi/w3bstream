@@ -2,7 +2,7 @@ package redistestutil
 
 import (
 	"github.com/machinefi/w3bstream/pkg/depends/conf/app"
-	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	conflogger "github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 )
 
@@ -14,7 +14,7 @@ var (
 func init() {
 	app.New(
 		app.WithName("test"),
-		app.WithLogger(log.Std()),
+		app.WithLogger(conflogger.Std()),
 		app.WithRoot("."),
 	).Conf(Redis, Endpoint)
 }

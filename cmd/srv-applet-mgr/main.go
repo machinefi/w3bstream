@@ -8,6 +8,7 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/global"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/tasks"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 	"github.com/machinefi/w3bstream/pkg/modules/account"
 	"github.com/machinefi/w3bstream/pkg/modules/blockchain"
@@ -17,7 +18,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/modules/trafficlimit"
-	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 var app = global.App
@@ -27,6 +27,9 @@ func init() {
 }
 
 func main() {
+	ctx, l := logger.NewSpanContext(global.WithContext(context.Background()), "main")
+	defer l.End()
+
 	app.Execute(func(args ...string) {
 		BatchRun(
 			func() {
@@ -39,29 +42,27 @@ func main() {
 				kit.Run(tasks.Root, global.TaskServer())
 			},
 			func() {
-				if err := project.Init(global.Context); err != nil {
+				if err := project.Init(ctx); err != nil {
+					l.Error(err)
 					panic(err)
 				}
 			},
 			func() {
-				if err := deploy.Init(global.Context); err != nil {
+				if err := deploy.Init(ctx); err != nil {
+					l.Error(err)
 					panic(err)
 				}
 			},
 			func() {
-				if err := trafficlimit.Init(global.Context); err != nil {
+				if err := trafficlimit.Init(ctx); err != nil {
 					panic(err)
 				}
 			},
 			func() {
-				l := types.MustLoggerFromContext(global.Context)
-
-				_, l = l.Start(context.Background(), "init.CreateAdmin")
-				defer l.End()
-
-				passwd, err := account.CreateAdminIfNotExist(global.Context)
+				passwd, err := account.CreateAdminIfNotExist(ctx)
 				if err != nil {
-					l.Panic(err)
+					l.Error(err)
+					panic(err)
 				}
 				if passwd == "" {
 					l.Info("admin already exists")
@@ -70,27 +71,22 @@ func main() {
 				}
 			},
 			func() {
-				l := types.MustLoggerFromContext(global.Context)
-
-				_, l = l.Start(context.Background(), "init.InitChainDB")
-				defer l.End()
-
-				if err := blockchain.InitChainDB(global.Context); err != nil {
-					l.Panic(err)
-					return
+				if err := blockchain.InitChainDB(ctx); err != nil {
+					l.Error(err)
+					panic(err)
 				}
 			},
 			func() {
-				blockchain.Monitor(global.Context)
+				blockchain.Monitor(ctx)
 			},
 			func() {
-				cronjob.Run(global.Context)
+				cronjob.Run(ctx)
 			},
 			func() {
-				operator.Migrate(global.Context)
+				operator.Migrate(ctx)
 			},
 			func() {
-				metrics.Init(global.Context)
+				metrics.Init(ctx)
 			},
 		)
 	})

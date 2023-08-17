@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
 	"github.com/machinefi/w3bstream/pkg/enums"
@@ -33,6 +34,9 @@ var contextAccountAuthKey = reflect.TypeOf(ContextAccountAuth{}).String()
 func (r *ContextAccountAuth) ContextKey() string { return contextAccountAuthKey }
 
 func (r *ContextAccountAuth) Output(ctx context.Context) (interface{}, error) {
+	ctx, l := logr.Start(ctx, "middleware.ContextAccountAuth.Output")
+	defer l.End()
+
 	pl, err := ParseJwtAuthContentFromContext(ctx)
 	if err != nil {
 		return nil, status.InvalidAuthAccountID.StatusErr().WithDesc(err.Error())
@@ -79,6 +83,9 @@ func (v *CurrentAccount) WithAccount(ctx context.Context) context.Context {
 
 // WithProjectContextByName With project context by project name(in database)
 func (v *CurrentAccount) WithProjectContextByName(ctx context.Context, name string) (context.Context, error) {
+	ctx, l := logr.Start(ctx, "CurrentAccount.WithProjectContextByName")
+	defer l.End()
+
 	prj, err := project.GetByName(ctx, name)
 	if err != nil {
 		return nil, err
@@ -92,6 +99,9 @@ func (v *CurrentAccount) WithProjectContextByName(ctx context.Context, name stri
 
 // WithProjectContextBySFID With project context by project SFID
 func (v *CurrentAccount) WithProjectContextBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	ctx, l := logr.Start(ctx, "CurrentAccount.WithProjectContextBySFID")
+	defer l.End()
+
 	prj, err := project.GetBySFID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -105,6 +115,9 @@ func (v *CurrentAccount) WithProjectContextBySFID(ctx context.Context, id types.
 
 // WithAppletContextBySFID With applet contexts by applet SFID
 func (v *CurrentAccount) WithAppletContextBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	ctx, l := logr.Start(ctx, "CurrentAccount.WithAppletContextBySFID")
+	defer l.End()
+
 	app, err := applet.GetBySFID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -130,6 +143,9 @@ func (v *CurrentAccount) WithAppletContextBySFID(ctx context.Context, id types.S
 }
 
 func (v *CurrentAccount) WithResourceContextBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	ctx, l := logr.Start(ctx, "CurrentAccount.WithResourceContextBySFID")
+	defer l.End()
+
 	res, err := resource.GetBySFID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -140,6 +156,9 @@ func (v *CurrentAccount) WithResourceContextBySFID(ctx context.Context, id types
 
 // WithInstanceContextBySFID With full contexts by instance SFID
 func (v *CurrentAccount) WithInstanceContextBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	ctx, l := logr.Start(ctx, "CurrentAccount.WithInstanceContextBySFID")
+	defer l.End()
+
 	var (
 		ins *models.Instance
 		app *models.Applet
@@ -167,6 +186,9 @@ func (v *CurrentAccount) WithInstanceContextBySFID(ctx context.Context, id types
 }
 
 func (v *CurrentAccount) WithStrategyBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	ctx, l := logr.Start(ctx, "CurrentAccount.WithStrategyBySFID")
+	defer l.End()
+
 	sty, err := strategy.GetBySFID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -176,6 +198,9 @@ func (v *CurrentAccount) WithStrategyBySFID(ctx context.Context, id types.SFID) 
 }
 
 func (v *CurrentAccount) WithPublisherBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	ctx, l := logr.Start(ctx, "CurrentAccount.WithPublisherBySFID")
+	defer l.End()
+
 	pub, err := publisher.GetBySFID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -185,6 +210,9 @@ func (v *CurrentAccount) WithPublisherBySFID(ctx context.Context, id types.SFID)
 }
 
 func (v *CurrentAccount) WithResourceOwnerContextBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	ctx, l := logr.Start(ctx, "CurrentAccount.WithResourceOwnerContextBySFID")
+	defer l.End()
+
 	ship, err := resource.GetOwnerByAccountAndSFID(ctx, v.AccountID, id)
 	if err != nil {
 		return nil, err
@@ -197,6 +225,9 @@ func (v *CurrentAccount) WithResourceOwnerContextBySFID(ctx context.Context, id 
 }
 
 func (v *CurrentAccount) WithCronJobBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	ctx, l := logr.Start(ctx, "CurrentAccount.WithCronJobBySFID")
+	defer l.End()
+
 	cronJob, err := cronjob.GetBySFID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -206,6 +237,9 @@ func (v *CurrentAccount) WithCronJobBySFID(ctx context.Context, id types.SFID) (
 }
 
 func (v *CurrentAccount) WithOperatorBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	ctx, l := logr.Start(ctx, "CurrentAccount.WithOperatorBySFID")
+	defer l.End()
+
 	op, err := operator.GetBySFID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -217,15 +251,21 @@ func (v *CurrentAccount) WithOperatorBySFID(ctx context.Context, id types.SFID) 
 }
 
 func (v *CurrentAccount) WithContractLogBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
-	l, err := blockchain.GetContractLogBySFID(ctx, id)
+	ctx, l := logr.Start(ctx, "CurrentAccount.WithContractLogBySFID")
+	defer l.End()
+
+	cl, err := blockchain.GetContractLogBySFID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	ctx = types.WithContractLog(ctx, l)
-	return v.WithProjectContextByName(ctx, l.ProjectName)
+	ctx = types.WithContractLog(ctx, cl)
+	return v.WithProjectContextByName(ctx, cl.ProjectName)
 }
 
 func (v *CurrentAccount) WithChainHeightBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	ctx, l := logr.Start(ctx, "CurrentAccount.WithChainHeightBySFID")
+	defer l.End()
+
 	h, err := blockchain.GetChainHeightBySFID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -235,6 +275,9 @@ func (v *CurrentAccount) WithChainHeightBySFID(ctx context.Context, id types.SFI
 }
 
 func (v *CurrentAccount) WithChainTxBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	ctx, l := logr.Start(ctx, "CurrentAccount.WithChainTxBySFID")
+	defer l.End()
+
 	t, err := blockchain.GetChainTxBySFID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -244,6 +287,9 @@ func (v *CurrentAccount) WithChainTxBySFID(ctx context.Context, id types.SFID) (
 }
 
 func (v *CurrentAccount) WithTrafficLimitContextBySFID(ctx context.Context, id types.SFID) (context.Context, error) {
+	ctx, l := logr.Start(ctx, "CurrentAccount.WithTrafficLimitContextBySFID")
+	defer l.End()
+
 	traffic, err := trafficlimit.GetBySFID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -253,6 +299,9 @@ func (v *CurrentAccount) WithTrafficLimitContextBySFID(ctx context.Context, id t
 }
 
 func (v *CurrentAccount) WithTrafficLimitContextBySFIDAndProjectName(ctx context.Context, id types.SFID) (context.Context, error) {
+	ctx, l := logr.Start(ctx, "CurrentAccount.WithTrafficLimitContextBySFIDAndProjectName")
+	defer l.End()
+
 	traffic, err := trafficlimit.GetBySFID(ctx, id)
 	if err != nil {
 		return nil, err

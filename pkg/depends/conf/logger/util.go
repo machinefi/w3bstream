@@ -1,7 +1,10 @@
 package logger
 
 import (
+	"fmt"
+
 	"go.opentelemetry.io/otel/attribute"
+	"golang.org/x/exp/slog"
 
 	"github.com/machinefi/w3bstream/pkg/depends/x/textx"
 )
@@ -25,4 +28,16 @@ func KVsToAttr(kvs ...any) (atts []attribute.KeyValue) {
 		return atts
 	}
 	return nil
+}
+
+func KVsToSlogAttr(kvs ...interface{}) (attr []slog.Attr) {
+	if len(kvs)%2 != 0 {
+		return nil
+	}
+
+	for i := 0; i < len(kvs); i += 2 {
+		attr = append(attr, slog.Any(fmt.Sprintf("%v", kvs[i]), kvs[i+1]))
+	}
+
+	return
 }

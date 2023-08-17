@@ -1,13 +1,15 @@
 package roundtrippers
 
 import (
-	"fmt"
 	"net/http"
-	"time"
+	"net/url"
+	"strconv"
 
 	"github.com/pkg/errors"
+	"go.opentelemetry.io/contrib/propagators/b3"
+	"go.opentelemetry.io/otel/propagation"
 
-	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/timer"
 )
 
@@ -24,18 +26,22 @@ func NewLogRoundTripper() func(rt http.RoundTripper) http.RoundTripper {
 }
 
 func (rt *LogRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	cost := timer.Start()
-	ctx, logger := log.Start(req.Context(), "Request")
-	defer logger.End()
+	ctx := req.Context()
 
-	resp, err := rt.next.RoundTrip(req.WithContext(ctx))
+	b3.New(b3.WithInjectEncoding(b3.B3SingleHeader)).Inject(ctx, propagation.HeaderCarrier(req.Header))
+
+	ctx, l := logr.Start(ctx, "Request")
+	defer l.End()
+
+	cost := timer.Start()
+	rsp, err := rt.next.RoundTrip(req.WithContext(ctx))
 
 	defer func() {
-		l := logger.WithValues(
-			"cost", fmt.Sprintf("%0.3fms", float64(cost()/time.Millisecond)),
-			"method", req.Method[0:3],
-			"url", req.URL.String(),
-			"metadata", req.Header,
+		duration := strconv.FormatInt(cost().Microseconds(), 10) + "μs"
+		l = l.WithValues(
+			"@cst", duration,
+			"@mtd", req.Method[0:3],
+			"@url", OmitAuthorization(req.URL),
 		)
 
 		if err == nil {
@@ -45,5 +51,12 @@ func (rt *LogRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) 
 		}
 	}()
 
-	return resp, err
+	return rsp, err
+}
+
+func OmitAuthorization(u *url.URL) string {
+	query := u.Query()
+	query.Del("authorization")
+	u.RawQuery = query.Encode()
+	return u.String()
 }

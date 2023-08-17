@@ -5,7 +5,6 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/x/ptrx"
@@ -27,7 +26,6 @@ func CreateUserIfNotExists(d sqlx.DBExecutor, usename, passwd string) (error, bo
 
 	_, err = d.Exec(builder.Expr("CREATE USER " + usename + " WITH PASSWORD '" + passwd + "'"))
 	if err != nil {
-		log.Std().Error(err)
 		return err, false
 	}
 	return nil, true

@@ -67,7 +67,7 @@ func ParseInboundMessage(msg mqtt.Message) (*eventpb.Event, error) {
 
 func (s *subscriber) subscribing(ctx context.Context) error {
 	return s.cli.WithTopic(s.topic + "/#").Subscribe(func(c mqtt.Client, msg mqtt.Message) {
-		ctx, l := logger.NewSpanContext(ctx, "MqttInbound")
+		ctx, l := logger.NewSpanContext(ctx, "modules.transporter.mqtt.subscriber.handle")
 		defer l.End()
 
 		ev, err := ParseInboundMessage(msg)

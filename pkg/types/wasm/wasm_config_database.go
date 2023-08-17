@@ -4,13 +4,12 @@ import (
 	"context"
 	"fmt"
 	"net/url"
-	"os"
 	"strings"
 
 	"github.com/pkg/errors"
 
-	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	confpostgres "github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	driverpostgres "github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/driver/postgres"
@@ -207,6 +206,9 @@ func (d *Database) WithDefaultSchema() (sqlx.DBExecutor, error) {
 }
 
 func (d *Database) Init(parent context.Context) (err error) {
+	parent, l := logr.Start(parent, "types.wasm.Database.Init")
+	defer l.End()
+
 	// init database endpoint
 	prj := types.MustProjectFromContext(parent)
 	d.Name = prj.DatabaseName()
@@ -275,11 +277,13 @@ func (d *Database) Init(parent context.Context) (err error) {
 			ep.AddTable(t.Build())
 		}
 		db := ep.WithSchema(s.Name)
-		conflog.Std().Info("migrating %s", s.Name)
-		if err = migration.Migrate(db, os.Stderr); err != nil {
-			conflog.Std().Info(err.Error())
+		l := l.WithValues("schema", s.Name)
+		l.Debug("start migrating")
+		if err = migration.Migrate(db, nil); err != nil {
+			l.Error(err)
 			return err
 		}
+		l.Debug("migrated")
 	}
 
 	return nil

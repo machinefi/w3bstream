@@ -1,16 +1,20 @@
 package wasmtime
 
 import (
+	"context"
 	"encoding/binary"
 
 	"github.com/bytecodealliance/wasmtime-go/v8"
 	"github.com/pkg/errors"
+
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 )
 
 var (
 	ErrNotLinked           = errors.New("not linked")
 	ErrAlreadyInstantiated = errors.New("already instantiated")
 	ErrNotInstantiated     = errors.New("not instantiated")
+	ErrFuncNotImported     = errors.New("func not imported")
 	ErrAlreadyLinked       = errors.New("already linked")
 	engine                 = wasmtime.NewEngineWithConfig(wasmtime.NewConfig())
 )
@@ -50,7 +54,10 @@ func (rt *Runtime) Link(lk ABILinker, code []byte) error {
 	return nil
 }
 
-func (rt *Runtime) Instantiate() error {
+func (rt *Runtime) Instantiate(ctx context.Context) error {
+	ctx, l := logr.Start(ctx, "modules.vm.wasmtime.Runtime.Instantiate")
+	defer l.End()
+
 	if rt.module == nil {
 		return ErrNotLinked
 	}
@@ -70,7 +77,10 @@ func (rt *Runtime) Instantiate() error {
 	return nil
 }
 
-func (rt *Runtime) Deinstantiate() {
+func (rt *Runtime) Deinstantiate(ctx context.Context) {
+	ctx, l := logr.Start(ctx, "modules.vm.wasmtime.Runtime.Deinstantiate")
+	defer l.End()
+
 	rt.instance = nil
 	rt.store = nil
 }
@@ -99,7 +109,10 @@ func putUint32Le(buf []byte, vmAddr int32, val uint32) error {
 	return nil
 }
 
-func (rt *Runtime) Call(name string, args ...interface{}) (interface{}, error) {
+func (rt *Runtime) Call(ctx context.Context, name string, args ...interface{}) (interface{}, error) {
+	ctx, l := logr.Start(ctx, "modules.vm.wasmtime.Runtime.Call", "func", name)
+	defer l.End()
+
 	if rt.module == nil {
 		return nil, ErrNotLinked
 	}
@@ -108,7 +121,7 @@ func (rt *Runtime) Call(name string, args ...interface{}) (interface{}, error) {
 	}
 	fn := rt.instance.GetFunc(rt.store, name)
 	if fn == nil {
-		return nil, errors.Errorf("runtime: %s fn is not imported", name)
+		return nil, ErrFuncNotImported
 	}
 	return fn.Call(rt.store, args...)
 }

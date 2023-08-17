@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
@@ -22,6 +23,9 @@ import (
 )
 
 func Init(ctx context.Context) error {
+	ctx, l := logr.Start(ctx, "modules.deploy.Init")
+	defer l.End()
+
 	var (
 		d = types.MustMgrDBExecutorFromContext(ctx)
 
@@ -32,16 +36,11 @@ func Init(ctx context.Context) error {
 		code []byte
 	)
 
-	_, l := types.MustLoggerFromContext(ctx).Start(ctx, "deploy.Init")
-	defer l.End()
-
 	list, err := ins.List(d, nil)
 	if err != nil {
 		l.Error(err)
 		return err
 	}
-
-	l.WithValues("total", len(list)).Info("")
 
 	for i := range list {
 		ins = &list[i]
@@ -240,6 +239,9 @@ func Remove(ctx context.Context, r *CondArgs) error {
 
 // UpsertByCode upsert instance and its config, and deploy wasm if needed
 func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.InstanceState, old ...types.SFID) (*models.Instance, error) {
+	ctx, l := logr.Start(ctx, "modules.deploy.UpsertByCode")
+	defer l.End()
+
 	var (
 		idg       = confid.MustSFIDGeneratorFromContext(ctx)
 		forUpdate = false
@@ -307,7 +309,7 @@ func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.In
 		func(d sqlx.DBExecutor) error {
 			if forUpdate {
 				if err := vm.DelInstance(ctx, ins.InstanceID); err != nil {
-					// Warn
+					l.Warn(err)
 				}
 			}
 			_ctx, err := WithInstanceRuntimeContext(types.WithInstance(ctx, ins))
@@ -320,7 +322,7 @@ func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.In
 			}
 			ins.State, _ = vm.GetInstanceState(ins.InstanceID)
 			if ins.State != state {
-				// Warn
+				l.Warn(errors.New("unmatched instance state"))
 			}
 			return nil
 		},

@@ -7,6 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/depends/util"
@@ -276,6 +277,9 @@ func ValidateLoginByUsername(ctx context.Context, r *LoginByUsernameReq) (*model
 }
 
 func GetAccountByAccountID(ctx context.Context, accountID types.SFID) (*models.Account, error) {
+	ctx, l := logr.Start(ctx, "modules.account.GetAccountByAccountID")
+	defer l.End()
+
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	m := &models.Account{RelAccount: models.RelAccount{AccountID: accountID}}
 
