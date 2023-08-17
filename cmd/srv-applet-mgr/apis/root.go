@@ -21,6 +21,7 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/traffic_limit"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/version"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/wasmlog"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/xvm"
 	confhttp "github.com/machinefi/w3bstream/pkg/depends/conf/http"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
@@ -68,6 +69,8 @@ func init() {
 		auth.Register(operator.Root)
 		auth.Register(traffic_limit.Root)
 		auth.Register(projectoperator.Root)
+
+		auth.Register(xvm.Root)
 	}
 
 	// root router register for event http transport

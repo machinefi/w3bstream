@@ -997,6 +997,49 @@ func (o *CreatePublisher) Invoke(cli kit.Client, metas ...kit.Metadata) (*Github
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
+type CreateRisc0VM struct {
+	ProjectName      string                                                   `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader     string                                                   `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery      string                                                   `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	CreateRisc0VmReq GithubComMachinefiW3BstreamPkgModulesXvmCreateRisc0VmReq `in:"body" mime:"multipart"`
+}
+
+func (o *CreateRisc0VM) Path() string {
+	return "/srv-applet-mgr/v0/xvm/x/:projectName"
+}
+
+func (o *CreateRisc0VM) Method() string {
+	return "POST"
+}
+
+// @StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!
+// @StatusErr[AccountNotFound][404999017][Account Not Found]!
+// @StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
+// @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
+// @StatusErr[InvalidClaim][401999003][Invalid Claim]!
+// @StatusErr[InvalidToken][401999002][Invalid Token]!
+// @StatusErr[NoProjectPermission][401999004][No Project Permission]!
+// @StatusErr[ProjectNotFound][404999002][Project Not Found]!
+
+func (o *CreateRisc0VM) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.CreateRisc0VM")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *CreateRisc0VM) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesXvmCreateRisc0VmRsp, kit.Metadata, error) {
+	rsp := new(GithubComMachinefiW3BstreamPkgModulesXvmCreateRisc0VmRsp)
+	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
+	return rsp, meta, err
+}
+
+func (o *CreateRisc0VM) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesXvmCreateRisc0VmRsp, kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
 type CreateStrategy struct {
 	ProjectName  string                                                 `in:"path" name:"projectName" validate:"@projectName"`
 	AuthInHeader string                                                 `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
