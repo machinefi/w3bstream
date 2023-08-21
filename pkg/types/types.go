@@ -85,10 +85,10 @@ type ChainConfig struct {
 	ChainIDs map[uint64]*Chain          `env:"-"    json:"-"`
 }
 
-func (r *ChainConfig) LivenessCheck() map[string]string {
+func (cc *ChainConfig) LivenessCheck() map[string]string {
 	m := map[string]string{}
 
-	for _, c := range r.Chains {
+	for _, c := range cc.Chains {
 		key := c.Endpoint
 		var err error
 
@@ -104,7 +104,6 @@ func (r *ChainConfig) LivenessCheck() map[string]string {
 			m[key] = "ok"
 		}
 	}
-
 	return m
 }
 
