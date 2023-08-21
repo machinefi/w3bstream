@@ -6,19 +6,19 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <title>W3bStream Status</title>
+    <title>W3bStream CI/CD Status Dashboard</title>
 </head>
 
 <body>
-    <h1>W3bStream Status dashboard</h1>
+    <h1>W3bStream CI/CD Status Dashboard</h1>
     <div class="table-responsive">
         <table id="myTable" class="table">
             <thead>
                 <tr>
-                    <th>endpoint</th>
-                    <th><a href="https://devnet-prod.w3bstream.com">prod</a></th>
-                    <th><a href="https://devnet-staging.w3bstream.com">staging</a></th>
-                    <th><a href="https://dev.w3bstream.com">dev</a></th>
+                    <th>Endpoint</th>
+                    <th><a href="https://devnet-prod.w3bstream.com">Prod</a></th>
+                    <th><a href="https://devnet-staging.w3bstream.com">Staging</a></th>
+                    <th><a href="https://dev.w3bstream.com">Dev</a></th>
                 </tr>
             </thead>
             <tbody>
@@ -51,7 +51,7 @@
                                     v = '❌'
                                 }
                                 if(prop.startsWith('Server/srv-applet-mgr')) {
-                                    temp['version'] = prop.split('@')[1]
+                                    temp['Version'] = prop.split('@')[1]
                                     temp['Server/srv-applet-mgr']=v;
                                 }
                                 if(prop.startsWith('TaskWorker/DbLogStoring')) {
