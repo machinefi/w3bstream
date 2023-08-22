@@ -65,6 +65,7 @@ func newRouter(mgrDB sqlx.DBExecutor, chainConf *types.ChainConfig) *gin.Engine 
 	router.GET("/system/hello", handlers.Hello)
 	router.GET("/system/read_tx", handlers.ReadTx)
 	router.POST("/system/send_tx", handlers.SendTx)
+	router.POST("/system/send_userop", handlers.SendUserOp)
 
 	return router
 }

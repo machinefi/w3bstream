@@ -79,10 +79,17 @@ func (c *Chain) IsEth() bool {
 	return c.ChainID != 0
 }
 
+func (c *Chain) IsUserOpSupported() bool {
+	return c.Name == enums.POLYGON_MAINNET || c.Name == enums.MUMBAI || c.Name == enums.IOTEX_MAINNET || c.Name == enums.IOTEX_TESTNET
+}
+
 type ChainConfig struct {
-	Configs  string                     `env:""     json:"-"`
-	Chains   map[enums.ChainName]*Chain `env:"-"    json:"-"`
-	ChainIDs map[uint64]*Chain          `env:"-"    json:"-"`
+	Configs             string                     `env:""     json:"-"`
+	Chains              map[enums.ChainName]*Chain `env:"-"    json:"-"`
+	ChainIDs            map[uint64]*Chain          `env:"-"    json:"-"`
+	AAUserOpEndpoint    string                     `env:""     json:"-"`
+	AABundlerEndpoint   string                     `env:""     json:"-"`
+	AAPaymasterEndpoint string                     `env:""     json:"-"`
 }
 
 func (cc *ChainConfig) LivenessCheck() map[string]string {

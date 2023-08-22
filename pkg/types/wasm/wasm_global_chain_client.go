@@ -6,7 +6,9 @@ import (
 	"crypto/ed25519"
 	"encoding/hex"
 	"encoding/json"
+	"io"
 	"math/big"
+	"net/http"
 	"strconv"
 	"strings"
 
@@ -43,9 +45,10 @@ func NewChainClient(ctx context.Context, prj *models.Project, ops []models.Opera
 }
 
 type PrivateKey struct {
-	Type    enums.OperatorKeyType
-	Ecdsa   *ecdsa.PrivateKey
-	Ed25519 ed25519.PrivateKey
+	Operator *models.Operator
+	Type     enums.OperatorKeyType
+	Ecdsa    *ecdsa.PrivateKey
+	Ed25519  ed25519.PrivateKey
 }
 
 type ChainClient struct {
@@ -70,7 +73,7 @@ func (c *ChainClient) Init(parent context.Context) error {
 	}
 
 	for _, op := range ops {
-		p := &PrivateKey{Type: op.Type}
+		p := &PrivateKey{Type: op.Type, Operator: &op}
 		b := common.FromHex(op.PrivateKey)
 
 		if op.Type == enums.OPERATOR_KEY__ED25519 {
@@ -92,6 +95,49 @@ func (c *ChainClient) Init(parent context.Context) error {
 
 func (c *ChainClient) WithContext(ctx context.Context) context.Context {
 	return WithChainClient(ctx, c)
+}
+
+func (c *ChainClient) SendUserOpWithOperator(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, dataStr, operatorName string) (string, error) {
+	pvk, ok := c.Operators[operatorName]
+	if !ok {
+		return "", errors.New("private key is empty")
+	}
+
+	chain, ok := conf.GetChain(chainID, chainName)
+	if !ok {
+		return "", errors.Errorf("the chain %d %s is not supported", chainID, chainName)
+	}
+	if !chain.IsUserOpSupported() {
+		return "", errors.New("the chain not support user operation")
+	}
+	if pvk.Type != enums.OPERATOR_KEY__ECDSA {
+		return "", errors.New("invalid operator key type, require ECDSA")
+	}
+	req, err := http.NewRequest("POST", conf.AAUserOpEndpoint, nil)
+	if err != nil {
+		return "", errors.Wrap(err, "call user operation service failed")
+	}
+	defer req.Body.Close()
+
+	req.Header.Set("data", dataStr)
+	req.Header.Set("chainEndpoint", chain.Endpoint)
+	req.Header.Set("privateKey", pvk.Operator.PrivateKey)
+	req.Header.Set("bundlerEndpoint", conf.AABundlerEndpoint)
+	req.Header.Set("paymasterEndpoint", conf.AABundlerEndpoint)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", errors.Wrap(err, "call user operation service failed")
+	}
+	defer resp.Body.Close()
+
+	body, error := io.ReadAll(resp.Body)
+	if error != nil {
+		return "", errors.Wrap(err, "read user operation service response failed")
+	}
+	ss := strings.Split(string(body), "Transaction hash:")
+	s := strings.Split(ss[1], "Done")
+	return strings.TrimSpace(s[0]), nil
 }
 
 func (c *ChainClient) SendTXWithOperator(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr, operatorName string) (string, error) {
