@@ -82,6 +82,8 @@ func (b *Broker) options(cid string) *mqtt.ClientOptions {
 		opt.SetTLSConfig(b.Cert.TLSConfig())
 	}
 
+	opt.SetCleanSession(false)
+	opt.SetResumeSubs(true)
 	opt.SetKeepAlive(b.Keepalive.Duration())
 	opt.SetWriteTimeout(b.Timeout.Duration())
 	opt.SetConnectTimeout(b.Timeout.Duration())

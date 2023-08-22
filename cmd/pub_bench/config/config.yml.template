@@ -1,0 +1,14 @@
+GO_RUNTIME_ENV: PROD
+PUB_BENCH__CONFIG__Broker_Cert_Ca: ""
+PUB_BENCH__CONFIG__Broker_Cert_CaPath: ""
+PUB_BENCH__CONFIG__Broker_Cert_Crt: ""
+PUB_BENCH__CONFIG__Broker_Cert_CrtPath: ""
+PUB_BENCH__CONFIG__Broker_Cert_Key: ""
+PUB_BENCH__CONFIG__Broker_Cert_KeyPath: ""
+PUB_BENCH__CONFIG__Broker_Keepalive: 3h
+PUB_BENCH__CONFIG__Broker_QoS: ONCE
+PUB_BENCH__CONFIG__Broker_RetainPublish: "false"
+PUB_BENCH__CONFIG__Broker_Retry_Interval: 3s
+PUB_BENCH__CONFIG__Broker_Retry_Repeats: "3"
+PUB_BENCH__CONFIG__Broker_Server: mqtt://127.0.0.1:1883
+PUB_BENCH__CONFIG__Broker_Timeout: 10s

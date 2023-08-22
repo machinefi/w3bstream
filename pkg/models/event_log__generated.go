@@ -40,11 +40,25 @@ func (*EventLog) TableDesc() []string {
 }
 
 func (*EventLog) Comments() map[string]string {
-	return map[string]string{}
+	return map[string]string{
+		"PublishedAt": "PublishedAt the timestamp when device publish event",
+		"ReceivedAt":  "ReceivedAt the timestamp when event received by us",
+		"RespondedAt": "RespondedAt the timestamp when event handled and send response",
+	}
 }
 
 func (*EventLog) ColDesc() map[string][]string {
-	return map[string][]string{}
+	return map[string][]string{
+		"PublishedAt": []string{
+			"PublishedAt the timestamp when device publish event",
+		},
+		"ReceivedAt": []string{
+			"ReceivedAt the timestamp when event received by us",
+		},
+		"RespondedAt": []string{
+			"RespondedAt the timestamp when event handled and send response",
+		},
+	}
 }
 
 func (*EventLog) ColRel() map[string][]string {
@@ -62,6 +76,9 @@ func (*EventLog) Indexes() builder.Indexes {
 		"i_applet_id": []string{
 			"ProjectID",
 		},
+		"i_event_id": []string{
+			"EventID",
+		},
 		"i_project_id": []string{
 			"ProjectID",
 		},
@@ -78,18 +95,6 @@ func (m *EventLog) IndexFieldNames() []string {
 		"ProjectID",
 		"PublisherID",
 	}
-}
-
-func (*EventLog) UniqueIndexes() builder.Indexes {
-	return builder.Indexes{
-		"ui_event_id": []string{
-			"EventID",
-		},
-	}
-}
-
-func (*EventLog) UniqueIndexUIEventID() string {
-	return "ui_event_id"
 }
 
 func (m *EventLog) ColID() *builder.Column {
@@ -116,20 +121,36 @@ func (*EventLog) FieldProjectID() string {
 	return "ProjectID"
 }
 
-func (m *EventLog) ColAppletID() *builder.Column {
-	return EventLogTable.ColByFieldName(m.FieldAppletID())
-}
-
-func (*EventLog) FieldAppletID() string {
-	return "AppletID"
-}
-
 func (m *EventLog) ColPublisherID() *builder.Column {
 	return EventLogTable.ColByFieldName(m.FieldPublisherID())
 }
 
 func (*EventLog) FieldPublisherID() string {
 	return "PublisherID"
+}
+
+func (m *EventLog) ColPublishedAt() *builder.Column {
+	return EventLogTable.ColByFieldName(m.FieldPublishedAt())
+}
+
+func (*EventLog) FieldPublishedAt() string {
+	return "PublishedAt"
+}
+
+func (m *EventLog) ColReceivedAt() *builder.Column {
+	return EventLogTable.ColByFieldName(m.FieldReceivedAt())
+}
+
+func (*EventLog) FieldReceivedAt() string {
+	return "ReceivedAt"
+}
+
+func (m *EventLog) ColRespondedAt() *builder.Column {
+	return EventLogTable.ColByFieldName(m.FieldRespondedAt())
+}
+
+func (*EventLog) FieldRespondedAt() string {
+	return "RespondedAt"
 }
 
 func (m *EventLog) ColCreatedAt() *builder.Column {
@@ -219,24 +240,6 @@ func (m *EventLog) FetchByID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *EventLog) FetchByEventID(db sqlx.DBExecutor) error {
-	tbl := db.T(m)
-	err := db.QueryAndScan(
-		builder.Select(nil).
-			From(
-				tbl,
-				builder.Where(
-					builder.And(
-						tbl.ColByFieldName("EventID").Eq(m.EventID),
-					),
-				),
-				builder.Comment("EventLog.FetchByEventID"),
-			),
-		m,
-	)
-	return err
-}
-
 func (m *EventLog) UpdateByIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
@@ -267,36 +270,6 @@ func (m *EventLog) UpdateByID(db sqlx.DBExecutor, zeros ...string) error {
 	return m.UpdateByIDWithFVs(db, fvs)
 }
 
-func (m *EventLog) UpdateByEventIDWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
-
-	if _, ok := fvs["UpdatedAt"]; !ok {
-		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
-	}
-	tbl := db.T(m)
-	res, err := db.Exec(
-		builder.Update(tbl).
-			Where(
-				builder.And(
-					tbl.ColByFieldName("EventID").Eq(m.EventID),
-				),
-				builder.Comment("EventLog.UpdateByEventIDWithFVs"),
-			).
-			Set(tbl.AssignmentsByFieldValues(fvs)...),
-	)
-	if err != nil {
-		return err
-	}
-	if affected, _ := res.RowsAffected(); affected == 0 {
-		return m.FetchByEventID(db)
-	}
-	return nil
-}
-
-func (m *EventLog) UpdateByEventID(db sqlx.DBExecutor, zeros ...string) error {
-	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
-	return m.UpdateByEventIDWithFVs(db, fvs)
-}
-
 func (m *EventLog) Delete(db sqlx.DBExecutor) error {
 	_, err := db.Exec(
 		builder.Delete().
@@ -321,23 +294,6 @@ func (m *EventLog) DeleteByID(db sqlx.DBExecutor) error {
 					),
 				),
 				builder.Comment("EventLog.DeleteByID"),
-			),
-	)
-	return err
-}
-
-func (m *EventLog) DeleteByEventID(db sqlx.DBExecutor) error {
-	tbl := db.T(m)
-	_, err := db.Exec(
-		builder.Delete().
-			From(
-				tbl,
-				builder.Where(
-					builder.And(
-						tbl.ColByFieldName("EventID").Eq(m.EventID),
-					),
-				),
-				builder.Comment("EventLog.DeleteByEventID"),
 			),
 	)
 	return err
