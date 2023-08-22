@@ -62,7 +62,7 @@ func (c *LoggingConn) Prepare(string) (driver.Stmt, error) { panic("dont use Pre
 
 func (c *LoggingConn) QueryContext(ctx context.Context, query string, args []driver.NamedValue) (rows driver.Rows, err error) {
 	cost := timer.Start()
-	_ctx, l := logr.Start(ctx, "Query")
+	_ctx, l := logr.Start(ctx, "postgres.Query")
 
 	defer func() {
 		qs := interpolate(query, args)
@@ -93,7 +93,7 @@ func (c *LoggingConn) QueryContext(ctx context.Context, query string, args []dri
 func (c *LoggingConn) ExecContext(ctx context.Context, query string, args []driver.NamedValue) (res driver.Result, err error) {
 	cost := timer.Start()
 
-	ctx, l := logr.Start(ctx, "Exec")
+	ctx, l := logr.Start(ctx, "postgres.Exec")
 
 	defer func() {
 		qs := interpolate(query, args)

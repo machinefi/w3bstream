@@ -42,13 +42,11 @@ func main() {
 				kit.Run(tasks.Root, global.TaskServer())
 			},
 			func() {
-				if err := project.Init(ctx); err != nil {
+				if err := deploy.Init(ctx); err != nil {
 					l.Error(err)
 					panic(err)
 				}
-			},
-			func() {
-				if err := deploy.Init(ctx); err != nil {
+				if err := project.Init(ctx); err != nil {
 					l.Error(err)
 					panic(err)
 				}

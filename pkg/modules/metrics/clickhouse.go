@@ -10,6 +10,7 @@ import (
 	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -103,6 +104,9 @@ func NewSQLBatcher(preStatm string) *SQLBatcher {
 }
 
 func (b *SQLBatcher) Insert(query string) error {
+	_, l := logger.NewSpanContext(context.Background(), "modules.metrics.SQLBatcher.Insert")
+	defer l.End()
+
 	if clickhouseCLI == nil {
 		return errors.New("clickhouse client is not initialized")
 	}
@@ -126,12 +130,7 @@ func (b *SQLBatcher) run() {
 				log.Println("clickhouse client is not initialized")
 				continue
 			}
-			err := clickhouseCLI.Insert(b.preStatm + "(" + strings.Join(b.buf, "),(") + ")")
-			if err != nil {
-				log.Println("SQLBatcher failed to insert: ", err)
-				continue
-			}
-			b.buf = make([]string, 0, batchSize)
+			_ = b.insert()
 		case str, ok := <-b.signal:
 			if !ok {
 				return
@@ -142,16 +141,26 @@ func (b *SQLBatcher) run() {
 			}
 			b.buf = append(b.buf, str)
 			if len(b.buf) >= batchSize {
-				err := clickhouseCLI.Insert(b.preStatm + "(" + strings.Join(b.buf, "),(") + ")")
-				if err != nil {
-					log.Println("SQLBatcher failed to insert: ", err)
+				if b.insert() != nil {
 					continue
 				}
-				b.buf = make([]string, 0, batchSize)
 				ticker.Reset(tickerInterval)
 			}
 		}
 	}
+}
+
+func (b *SQLBatcher) insert() error {
+	_, l := logger.NewSpanContext(context.Background(), "modules.metrics.SQLBatcher.insert")
+	defer l.End()
+
+	err := clickhouseCLI.Insert(b.preStatm + "(" + strings.Join(b.buf, "),(") + ")")
+	if err != nil {
+		l.Error(err)
+		return err
+	}
+	b.buf = b.buf[0:0]
+	return nil
 }
 
 type connWorker struct {

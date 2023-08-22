@@ -12861,6 +12861,13 @@
             "description": "Results result for each wasm invoke, which hits strategies.",
             "x-go-field-name": "Results",
             "x-tag-json": "results"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Timestamp event respond time when event handled done.",
+            "x-go-field-name": "Timestamp",
+            "x-tag-json": "timestamp"
           }
         },
         "required": [
@@ -12868,6 +12875,7 @@
           "publisherID",
           "publisherKey",
           "eventID",
+          "timestamp",
           "results"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/event.EventRsp",

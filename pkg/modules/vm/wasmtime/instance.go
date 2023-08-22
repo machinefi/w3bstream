@@ -19,6 +19,7 @@ import (
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/enums"
@@ -74,7 +75,6 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte, st enums
 	state.Store(uint32(st))
 
 	ins := &Instance{
-		ctx:      ctx,
 		rt:       rt,
 		id:       id,
 		state:    state,
@@ -85,8 +85,6 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte, st enums
 		msgQueue: make(chan *Task, maxMsgPerInstance),
 		ch:       make(chan rxgo.Item),
 	}
-
-	go ins.queueWorker(ctx)
 
 	flow, ok := wasm.FlowFromContext(ctx)
 	if ok {
@@ -139,23 +137,18 @@ func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data [
 		}
 	}
 
-	select {
-	case <-time.After(5 * time.Second):
-		return &wasm.EventHandleResult{
-			InstanceID: i.id.String(),
-			Code:       wasm.ResultStatusCode_Failed,
-			ErrMsg:     "fail to add the event to the VM",
-		}
-	case i.msgQueue <- newTask(ctx, fn, eventType, data):
-		eventID := types.MustEventIDFromContext(ctx)
-		log.FromContext(ctx).WithValues("eid", eventID).Debug("put task in queue.")
-
-		return &wasm.EventHandleResult{
-			InstanceID: i.id.String(),
-			Code:       wasm.ResultStatusCode_OK,
-			ErrMsg:     "",
-		}
+	task := &Task{
+		EventID:   types.MustEventIDFromContext(ctx),
+		EventType: eventType,
+		Handler:   fn,
+		Payload:   data,
+		TaskState: mq.TASK_STATE__PENDING,
+		vm:        i,
+		retrieve:  make(chan *wasm.EventHandleResult),
 	}
+
+	job.Dispatch(ctx, task)
+	return task.Wait()
 }
 
 func (i *Instance) queueWorker(ctx context.Context) {
@@ -452,8 +445,8 @@ func (i *Instance) runOp(task ...*Task) ([]byte, bool) {
 		// if task is nil,  set rid is 0
 		var rid uint32 = 0
 		if t != nil {
-			rid = i.AddResource(t.ctx, []byte(t.EventType), t.Payload)
-			ctx = t.ctx
+			rid = i.AddResource([]byte(t.EventType), t.Payload)
+			// ctx = t.ctx
 			handler = t.Handler
 		}
 
@@ -461,7 +454,7 @@ func (i *Instance) runOp(task ...*Task) ([]byte, bool) {
 	}
 	defer func() {
 		for _, rid := range rids {
-			i.RmvResource(context.Background(), uint32(rid.(int32)))
+			i.RmvResource(uint32(rid.(int32)))
 		}
 	}()
 
@@ -512,11 +505,15 @@ func (i *Instance) handleByRid(ctx context.Context, handlerName string, rids ...
 }
 
 func (i *Instance) handle(ctx context.Context, task *Task) *wasm.EventHandleResult {
-	ctx, l := logr.Start(ctx, "modules.vm.wasmtime.Instance.handle", "event_id", task.EventID)
+	ctx, l := logr.Start(ctx, "modules.vm.wasmtime.Instance.handle",
+		"event_id", task.EventID,
+		"instance_id", i.id,
+	)
 	defer l.End()
 
-	rid := i.AddResource(ctx, []byte(task.EventType), task.Payload)
-	defer i.RmvResource(ctx, rid)
+	l.Info("start processing task")
+	rid := i.AddResource([]byte(task.EventType), task.Payload)
+	defer i.RmvResource(rid)
 
 	if err := i.rt.Instantiate(ctx); err != nil {
 		return &wasm.EventHandleResult{
@@ -529,7 +526,7 @@ func (i *Instance) handle(ctx context.Context, task *Task) *wasm.EventHandleResu
 
 	// TODO support wasm return data(not only code) for HTTP responding
 	result, err := i.rt.Call(ctx, task.Handler, int32(rid))
-	l.WithValues("eid", task.EventID).Debug("call wasm runtime completed.")
+	l.Debug("call wasm runtime completed.")
 	if err != nil {
 		l.Error(err)
 		return &wasm.EventHandleResult{
@@ -545,7 +542,7 @@ func (i *Instance) handle(ctx context.Context, task *Task) *wasm.EventHandleResu
 	}
 }
 
-func (i *Instance) AddResource(ctx context.Context, eventType, data []byte) uint32 {
+func (i *Instance) AddResource(eventType, data []byte) uint32 {
 	var id = int32(uuid.New().ID() % uint32(maxInt))
 	i.res.Store(uint32(id), data)
 	i.evs.Store(uint32(id), eventType)
@@ -556,7 +553,7 @@ func (i *Instance) GetResource(id uint32) ([]byte, bool) {
 	return i.res.Load(id)
 }
 
-func (i *Instance) RmvResource(ctx context.Context, id uint32) {
+func (i *Instance) RmvResource(id uint32) {
 	i.res.Remove(id)
 	i.evs.Remove(id)
 }

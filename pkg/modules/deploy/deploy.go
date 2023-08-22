@@ -44,7 +44,7 @@ func Init(ctx context.Context) error {
 
 	for i := range list {
 		ins = &list[i]
-		l = l.WithValues("ins", ins.InstanceID, "app", ins.AppletID)
+		l = l.WithValues("ins", ins.InstanceID)
 
 		app = &models.Applet{RelApplet: models.RelApplet{AppletID: ins.AppletID}}
 		err = app.FetchByAppletID(d)
@@ -53,7 +53,6 @@ func Init(ctx context.Context) error {
 			continue
 		}
 
-		l = l.WithValues("res", app.ResourceID)
 		res, code, err = resource.GetContentBySFID(ctx, app.ResourceID)
 		if err != nil {
 			l.Warn(err)
@@ -66,7 +65,7 @@ func Init(ctx context.Context) error {
 		)(ctx)
 
 		state := ins.State
-		l = l.WithValues("state", ins.State)
+		l = l.WithValues("state_db", ins.State)
 
 		ins, err = UpsertByCode(ctx, nil, code, state, ins.InstanceID)
 		if err != nil {
@@ -75,10 +74,10 @@ func Init(ctx context.Context) error {
 		}
 
 		if ins.State != state {
-			l.WithValues("state_vm", ins.State).Warn(errors.New("create vm failed"))
+			l.WithValues("state_mem", ins.State).Warn(errors.New("create vm failed"))
 			continue
 		}
-		l.Info("vm started")
+		l.Info("started")
 	}
 	return nil
 }
@@ -308,9 +307,7 @@ func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.In
 		},
 		func(d sqlx.DBExecutor) error {
 			if forUpdate {
-				if err := vm.DelInstance(ctx, ins.InstanceID); err != nil {
-					l.Warn(err)
-				}
+				_ = vm.DelInstance(ctx, ins.InstanceID)
 			}
 			_ctx, err := WithInstanceRuntimeContext(types.WithInstance(ctx, ins))
 			if err != nil {
