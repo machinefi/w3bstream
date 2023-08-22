@@ -239,6 +239,7 @@ func init() {
 		types.WithETHClientConfigContext(_ethClients),
 		types.WithChainConfigContext(_chainConf),
 		types.WithWasmApiServerContext(wasmApiServer),
+		types.WithProxyClientContext(&client.Client{}),
 	)
 
 	_ctx = _injection(context.Background())

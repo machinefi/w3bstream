@@ -116,7 +116,7 @@ func init() {
 	_ = os.Setenv(consts.EnvResourceGroup, group)
 
 	tasks = mem_mq.New(0)
-	worker = mq.NewTaskWorker(tasks, mq.WithWorkerCount(3), mq.WithChannel(name))
+	worker = mq.NewTaskWorker(tasks, mq.WithWorkerCount(1024), mq.WithChannel(name))
 
 	App = confapp.New(
 		confapp.WithName(name),

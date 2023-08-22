@@ -46,13 +46,22 @@ func (e *stdoutSpanExporter) ExportSpans(ctx context.Context, spans []trace.Read
 			if err := lv.UnmarshalText([]byte(strings.TrimPrefix(event.Name, "@"))); err != nil {
 				continue
 			}
-			msg := ""
 			attr := make([]slog.Attr, 0)
+
+			spanID := data.Name()
+			if data.SpanContext().HasSpanID() {
+				spanID = data.SpanContext().SpanID().String()
+			}
+			attr = append(attr, slog.String("span_id", spanID))
+			attr = append(attr, slog.String("trace_id", data.SpanContext().TraceID().String()))
+			if p := data.Parent(); p.IsValid() && p.HasSpanID() {
+				attr = append(attr, slog.String("parent", p.SpanID().String()))
+			}
 
 			for _, kv := range event.Attributes {
 				switch k := string(kv.Key); k {
 				case "@msg":
-					msg = kv.Value.AsString()
+					attr = append(attr, slog.String("@msg", kv.Value.AsString()))
 				case "@stack":
 					continue // too long
 				case "":
@@ -73,23 +82,12 @@ func (e *stdoutSpanExporter) ExportSpans(ctx context.Context, spans []trace.Read
 					}
 					continue
 				}
-				attr = append(attr, slog.Any(k, kv.Value.AsInterface()))
+				if kv.Valid() {
+					attr = append(attr, slog.Any(k, kv.Value.AsInterface()))
+				}
 			}
 
-			spanID := data.Name()
-			if data.SpanContext().HasSpanID() {
-				spanID = data.SpanContext().SpanID().String()
-			}
-			attr = append(attr,
-				slog.String("@trace", data.SpanContext().TraceID().String()),
-				slog.String("@span", spanID),
-			)
-
-			if p := data.Parent(); p.IsValid() && p.HasSpanID() {
-				attr = append(attr, slog.String("@parent", p.SpanID().String()))
-			}
-
-			gStdLogger.LogAttrs(ctx, lv, msg, attr...)
+			gStdLogger.LogAttrs(ctx, lv, "", attr...)
 		}
 	}
 	return nil
