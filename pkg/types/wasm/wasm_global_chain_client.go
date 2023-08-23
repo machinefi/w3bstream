@@ -6,6 +6,7 @@ import (
 	"crypto/ed25519"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
 	"math/big"
 	"net/http"
@@ -123,7 +124,7 @@ func (c *ChainClient) SendUserOpWithOperator(conf *types.ChainConfig, chainID ui
 	req.Header.Set("chainEndpoint", chain.Endpoint)
 	req.Header.Set("privateKey", pvk.Operator.PrivateKey)
 	req.Header.Set("bundlerEndpoint", conf.AABundlerEndpoint)
-	req.Header.Set("paymasterEndpoint", conf.AABundlerEndpoint)
+	req.Header.Set("paymasterEndpoint", fmt.Sprintf("%s/%s", conf.AABundlerEndpoint, pvk.Operator.PaymasterKey))
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {

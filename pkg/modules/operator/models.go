@@ -7,10 +7,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 )
 
-type CreateReq struct {
-	Name       string `json:"name"`
-	PrivateKey string `json:"privateKey"`
-}
+type CreateReq = models.OperatorInfo
 
 type CondArgs struct {
 	AccountID types.SFID `name:"-"`
