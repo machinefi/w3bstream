@@ -87,8 +87,10 @@ func Create(ctx context.Context, r *CreateReq) (*models.Operator, error) {
 		RelAccount:  models.RelAccount{AccountID: acc.AccountID},
 		RelOperator: models.RelOperator{OperatorID: id},
 		OperatorInfo: models.OperatorInfo{
-			Name:       r.Name,
-			PrivateKey: r.PrivateKey,
+			Name:         r.Name,
+			PrivateKey:   r.PrivateKey,
+			PaymasterKey: r.PaymasterKey,
+			Type:         r.Type,
 		},
 	}
 
