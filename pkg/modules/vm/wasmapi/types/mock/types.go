@@ -6,10 +6,11 @@ package mock
 
 import (
 	context "context"
-	http "net/http"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+
+	types "github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/types"
 )
 
 // MockServer is a mock of Server interface.
@@ -36,10 +37,10 @@ func (m *MockServer) EXPECT() *MockServerMockRecorder {
 }
 
 // Call mocks base method.
-func (m *MockServer) Call(ctx context.Context, data []byte) *http.Response {
+func (m *MockServer) Call(ctx context.Context, data []byte) *types.HttpResponse {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Call", ctx, data)
-	ret0, _ := ret[0].(*http.Response)
+	ret0, _ := ret[0].(*types.HttpResponse)
 	return ret0
 }
 

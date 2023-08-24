@@ -15,6 +15,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/async"
 	"github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/handler"
+	apitypes "github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/types"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
@@ -25,7 +26,7 @@ type Server struct {
 	srv *asynq.Server
 }
 
-func (s *Server) Call(ctx context.Context, data []byte) *http.Response {
+func (s *Server) Call(ctx context.Context, data []byte) *apitypes.HttpResponse {
 	l := types.MustLoggerFromContext(ctx)
 	_, l = l.Start(ctx, "wasmapi.Call")
 	defer l.End()
@@ -35,18 +36,18 @@ func (s *Server) Call(ctx context.Context, data []byte) *http.Response {
 	task, err := async.NewApiCallTask(prj, chainCli, data)
 	if err != nil {
 		l.Error(errors.Wrap(err, "new api call task failed"))
-		return &http.Response{
+		return &apitypes.HttpResponse{
 			StatusCode: http.StatusBadRequest,
 		}
 	}
 	if _, err := s.cli.EnqueueContext(ctx, task); err != nil {
 		l.Error(errors.Wrap(err, "could not enqueue task"))
-		return &http.Response{
+		return &apitypes.HttpResponse{
 			StatusCode: http.StatusInternalServerError,
 		}
 	}
 
-	return &http.Response{
+	return &apitypes.HttpResponse{
 		StatusCode: http.StatusOK,
 	}
 }

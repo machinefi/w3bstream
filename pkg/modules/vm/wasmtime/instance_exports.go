@@ -1,9 +1,9 @@
 package wasmtime
 
 import (
-	"bytes"
 	"context"
 	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"strconv"
@@ -154,13 +154,13 @@ func (ef *ExportFuncs) ApiCall(kAddr, kSize, vmAddrPtr, vmSizePtr int32) int32 {
 
 	resp := ef.srv.Call(ef.ctx, buf)
 
-	wbuf := bytes.Buffer{}
-	if err := resp.Write(&wbuf); err != nil {
+	respJson, err := json.Marshal(resp)
+	if err != nil {
 		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return int32(wasm.ResultStatusCode_HostInternal)
 	}
 
-	if err := ef.rt.Copy(wbuf.Bytes(), vmAddrPtr, vmSizePtr); err != nil {
+	if err := ef.rt.Copy(respJson, vmAddrPtr, vmSizePtr); err != nil {
 		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
