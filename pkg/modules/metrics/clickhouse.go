@@ -10,6 +10,8 @@ import (
 	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -88,7 +90,7 @@ type SQLBatcher struct {
 }
 
 const (
-	batchSize      = 50000
+	batchSize      = 100
 	tickerInterval = 200 * time.Millisecond
 )
 
@@ -102,7 +104,9 @@ func NewSQLBatcher(preStatm string) *SQLBatcher {
 	return bw
 }
 
-func (b *SQLBatcher) Insert(query string) error {
+func (b *SQLBatcher) Insert(ctx context.Context, query string) error {
+	ctx, l := logr.Start(ctx, "modules.metrics.SQLBatcher.Insert")
+	defer l.End()
 	if clickhouseCLI == nil {
 		return errors.New("clickhouse client is not initialized")
 	}
@@ -126,12 +130,9 @@ func (b *SQLBatcher) run() {
 				log.Println("clickhouse client is not initialized")
 				continue
 			}
-			err := clickhouseCLI.Insert(b.preStatm + "(" + strings.Join(b.buf, "),(") + ")")
-			if err != nil {
-				log.Println("SQLBatcher failed to insert: ", err)
+			if err := b.insertQueries(); err != nil {
 				continue
 			}
-			b.buf = make([]string, 0, batchSize)
 		case str, ok := <-b.signal:
 			if !ok {
 				return
@@ -142,16 +143,29 @@ func (b *SQLBatcher) run() {
 			}
 			b.buf = append(b.buf, str)
 			if len(b.buf) >= batchSize {
-				err := clickhouseCLI.Insert(b.preStatm + "(" + strings.Join(b.buf, "),(") + ")")
-				if err != nil {
-					log.Println("SQLBatcher failed to insert: ", err)
+				if err := b.insertQueries(); err != nil {
 					continue
 				}
-				b.buf = make([]string, 0, batchSize)
 				ticker.Reset(tickerInterval)
 			}
 		}
 	}
+}
+
+func (b *SQLBatcher) insertQueries() error {
+	_, l := logger.NewSpanContext(context.Background(), "modules.metrics.SQLBatcher.insertQueries")
+	defer l.End()
+
+	err := clickhouseCLI.Insert(b.preStatm + "(" + strings.Join(b.buf, "),(") + ")")
+
+	l = l.WithValues("insert_count", len(b.buf))
+	if err != nil {
+		l.Error(err)
+		return err
+	}
+	l.Info("")
+	b.buf = b.buf[0:0]
+	return nil
 }
 
 type connWorker struct {

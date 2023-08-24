@@ -63,7 +63,7 @@ func GeoCollect(ctx context.Context, data []byte) {
 	if err != nil {
 		l.WithValues("eid", eventID).Error(err)
 	}
-	if err := autoCollectCli.Insert(fmt.Sprintf(`now(), '%s', '%s', '%s', 
+	if err := autoCollectCli.Insert(ctx, fmt.Sprintf(`now(), '%s', '%s', '%s', 
 		'%s'`, project.AccountID.String(), project.Name, publisher.Key, string(rawData))); err != nil {
 		l.WithValues("eid", eventID).Error(err)
 	}

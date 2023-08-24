@@ -1,9 +1,12 @@
 package metrics
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/tidwall/gjson"
+
+	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 )
 
 type (
@@ -30,5 +33,7 @@ func NewCustomMetric(account string, project string) CustomMetrics {
 
 func (m *metrics) Submit(obj gjson.Result) error {
 	objStr := obj.String()
-	return m.writer.Insert(fmt.Sprintf(`now(), '%s', '%s', '%s'`, m.account, m.project, objStr))
+	ctx, l := logger.NewSpanContext(context.Background(), "modules.metrics.Submit")
+	defer l.End()
+	return m.writer.Insert(ctx, fmt.Sprintf(`now(), '%s', '%s', '%s'`, m.account, m.project, objStr))
 }
