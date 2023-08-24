@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
-	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
@@ -119,6 +119,9 @@ func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
 }
 
 func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
+	ctx, l := logr.Start(ctx, "modules.project.Create")
+	defer l.End()
+
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	acc := types.MustAccountFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
@@ -179,12 +182,12 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 		},
 	).Do()
 	if err != nil {
+		l.Error(err)
 		return nil, err
 	}
 
 	if err = mqtt.Subscribe(ctx, prj.Name); err != nil {
-		conflog.FromContext(ctx).WithValues("prj", prj.Name).
-			Warn(errors.Wrap(err, "channel create failed"))
+		l.WithValues("prj", prj.Name).Warn(errors.Wrap(err, "channel create failed"))
 	}
 	rsp.ChannelState = datatypes.BooleanValue(err == nil)
 
@@ -192,6 +195,9 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 }
 
 func RemoveBySFID(ctx context.Context, id types.SFID) (err error) {
+	ctx, l := logr.Start(ctx, "modules.project.RemoveBySFID", "porject_id", id)
+	defer l.End()
+
 	var (
 		d = types.MustMgrDBExecutorFromContext(ctx)
 		p *models.Project
@@ -204,7 +210,8 @@ func RemoveBySFID(ctx context.Context, id types.SFID) (err error) {
 				return err
 			}
 			mqtt.Stop(ctx, p.Name)
-			conflog.FromContext(ctx).WithValues("prj", p.Name).Info("stop subscribing")
+			l = l.WithValues("project_name", p.Name)
+			l.Info("stop subscribing")
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
@@ -225,9 +232,10 @@ func RemoveBySFID(ctx context.Context, id types.SFID) (err error) {
 }
 
 func Init(ctx context.Context) error {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	_, l := conflog.FromContext(ctx).Start(ctx, "project.Init")
+	ctx, l := logr.Start(ctx, "modules.project.Init")
 	defer l.End()
+
+	d := types.MustMgrDBExecutorFromContext(ctx)
 
 	data, err := (&models.Project{}).List(d, nil)
 	if err != nil {

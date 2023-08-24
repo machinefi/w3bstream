@@ -8,8 +8,8 @@ import (
 
 	base "github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
-	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
@@ -292,7 +292,7 @@ func Validate(ctx context.Context, key string) (interface{}, error, bool) {
 			m.ColRand().Eq(kctx.Rand),
 		),
 	); err != nil {
-		conflog.FromContext(ctx).Warn(errors.Wrap(err, "update access key last used"))
+		logr.FromContext(ctx).Warn(errors.Wrap(err, "update access key last used"))
 	}
 
 	return m, nil, true

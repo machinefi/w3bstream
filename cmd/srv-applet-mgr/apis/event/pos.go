@@ -9,6 +9,7 @@ import (
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
@@ -31,16 +32,16 @@ func (r *HandleEvent) Path() string {
 }
 
 func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
+	ctx, l := logr.Start(ctx, "api.event.HandleEvent")
+	defer l.End()
+
 	r.EventReq.SetDefault()
 
 	if r.IsDataPush() {
 		return handleDataPush(ctx, r.Channel, r.Payload.Bytes())
 	}
 
-	pub, exist := middleware.PublisherFromContext(ctx)
-	if !exist {
-		return nil, errors.New("the publisher of the token is not found")
-	}
+	pub := middleware.MustPublisher(ctx)
 
 	var (
 		err error
@@ -101,6 +102,9 @@ type (
 )
 
 func handleDataPush(ctx context.Context, ch string, payload []byte) (interface{}, error) {
+	ctx, l := logr.Start(ctx, "api.Event.HandleDataPush")
+	defer l.End()
+
 	var err error
 	ca, exist := middleware.CurrentAccountFromContext(ctx)
 	if !exist {

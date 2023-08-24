@@ -6,6 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
@@ -37,6 +38,9 @@ func ProjectNameForDisplay(name string) (string, error) {
 }
 
 func ProjectNameModifier(ctx context.Context) (prefix string, err error) {
+	ctx, l := logr.Start(ctx, "middleware.ProjectNameModifier")
+	defer l.End()
+
 	ca, ok := CurrentAccountFromContext(ctx)
 	if !ok {
 		return "", status.CurrentAccountAbsence

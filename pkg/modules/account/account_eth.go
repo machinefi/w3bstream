@@ -2,12 +2,12 @@ package account
 
 import (
 	"context"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"strings"
 
 	// "github.com/spruceid/siwe-go"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
-	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
@@ -18,6 +18,9 @@ import (
 )
 
 func FetchOrCreateAccountByEthAddress(ctx context.Context, address types.EthAddress) (*models.Account, *models.AccountIdentity, error) {
+	_, l := logr.Start(ctx, "modules.accountEth.FetchOrCreateAccountByEthAddress")
+	defer l.End()
+
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	g := confid.MustSFIDGeneratorFromContext(ctx)
 
@@ -103,9 +106,6 @@ func FetchOrCreateAccountByEthAddress(ctx context.Context, address types.EthAddr
 		},
 	).Do()
 
-	_, l := conflog.FromContext(ctx).Start(ctx, "FetchOrCreateAccountByEthAddress")
-	defer l.End()
-
 	if err != nil {
 		l.Error(err)
 		return nil, nil, err
@@ -119,7 +119,7 @@ type LoginByEthAddressReq struct {
 }
 
 func ValidateLoginByEthAddress(ctx context.Context, r *LoginByEthAddressReq) (*models.Account, error) {
-	_, l := conflog.FromContext(ctx).Start(ctx, "LoginByEthAddress")
+	_, l := logr.Start(ctx, "modules.accountEth.ValidateLoginByEthAddress")
 	defer l.End()
 
 	msg, err := siwe.ParseMessage(r.Message)

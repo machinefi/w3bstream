@@ -121,7 +121,7 @@ func init() {
 	App = confapp.New(
 		confapp.WithName(name),
 		confapp.WithRoot(".."),
-		confapp.WithLogger(conflog.Std()),
+		confapp.WithLogger(conflogger.Std()),
 	)
 	App.Conf(config, worker)
 
@@ -186,14 +186,16 @@ func EventServer() kit.Transport {
 }
 
 func Migrate() {
-	ctx, log := conflog.StdContext(context.Background())
+	ctx, l := conflogger.NewSpanContext(context.Background(), "global.Migrate")
+	defer l.End()
 
-	log.Start(ctx, "Migrate")
-	defer log.End()
 	if err := migration.Migrate(db.WithContext(ctx), nil); err != nil {
-		log.Panic(err)
+		l.Error(err)
+		panic(err)
 	}
+
 	if err := migration.Migrate(monitordb.WithContext(ctx), nil); err != nil {
-		log.Panic(err)
+		l.Error(err)
+		panic(err)
 	}
 }

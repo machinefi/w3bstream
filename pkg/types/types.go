@@ -1,6 +1,7 @@
 package types
 
 import (
+	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
@@ -10,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/blocto/solana-go-sdk/client"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/tidwall/gjson"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
@@ -80,6 +83,28 @@ type ChainConfig struct {
 	Configs  string                     `env:""     json:"-"`
 	Chains   map[enums.ChainName]*Chain `env:"-"    json:"-"`
 	ChainIDs map[uint64]*Chain          `env:"-"    json:"-"`
+}
+
+func (cc *ChainConfig) LivenessCheck() map[string]string {
+	m := map[string]string{}
+
+	for _, c := range cc.Chains {
+		key := c.Endpoint
+		var err error
+
+		if c.IsSolana() {
+			cli := client.NewClient(c.Endpoint)
+			_, err = cli.GetLatestBlockhash(context.Background())
+		} else {
+			_, err = ethclient.Dial(c.Endpoint)
+		}
+		if err != nil {
+			m[key] = err.Error()
+		} else {
+			m[key] = "ok"
+		}
+	}
+	return m
 }
 
 func (c *ChainConfig) Init() {

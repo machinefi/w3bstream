@@ -2,13 +2,13 @@ package handlers
 
 import (
 	"net/http"
-	"strings"
+	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
-	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/metax"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/timer"
 )
@@ -60,45 +60,34 @@ func (h *loggerHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	var (
-		writer   = &LoggerResponseWriter{rw: rw}
-		logger   = log.FromContext(req.Context())
-		level, _ = log.ParseLevel(strings.ToLower(req.Header.Get("x-log-level")))
+		w = &LoggerResponseWriter{rw: rw}
+		l = logr.FromContext(req.Context())
 	)
-
-	if level == log.PanicLevel {
-		level = log.TraceLevel
-	}
 
 	defer func() {
 		header := req.Header
+		duration := strconv.FormatInt(cost().Microseconds(), 10) + "μs"
 		fields := []interface{}{
-			"@tag", "access",
-			"@cst", cost().Milliseconds(),
+			"@cst", duration,
 			"@rmt", httpx.ClientIP(req),
 			"@mtd", req.Method[0:3],
 			"@url", req.URL.String(),
 			"@agent", header.Get(httpx.HeaderUserAgent),
-			"@status", writer.statusCode,
+			"@status", w.statusCode,
 		}
-		if writer.err != nil {
-			if writer.statusCode >= http.StatusInternalServerError {
-				if level >= log.ErrorLevel {
-					logger.WithValues(fields).Error(writer.err)
-				}
+		if w.err != nil {
+			if w.statusCode >= http.StatusInternalServerError {
+				l.WithValues(fields).Error(w.err)
 			} else {
-				if level >= log.WarnLevel {
-					logger.WithValues(fields).Warn(writer.err)
-				}
+				l.WithValues(fields).Warn(w.err)
 			}
 		} else {
-			if level >= log.InfoLevel {
-				logger.WithValues(fields).Info("")
-			}
+			l.WithValues(fields).Info("")
 		}
 	}()
 
 	h.next.ServeHTTP(
-		writer,
+		w,
 		req.WithContext(
 			metax.ContextWithMeta(req.Context(), metax.ParseMeta(reqID)),
 		),

@@ -6,7 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 )
 
 type Task func(db DBExecutor) error
@@ -43,7 +43,7 @@ func (tasks *Tasks) Do() (err error) {
 
 	db := tasks.db
 
-	l := log.FromContext(db.Context())
+	l := logr.FromContext(db.Context())
 
 	if maybeTx, ok := db.(TxExecutor); ok {
 		inTxScope := false

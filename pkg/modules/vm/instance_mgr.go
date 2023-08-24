@@ -5,7 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -18,23 +18,8 @@ var (
 	ErrNotFound = errors.New("instance not found")
 )
 
-func AddInstance(ctx context.Context, i wasm.Instance) types.SFID {
-	l := types.MustLoggerFromContext(ctx)
-	idg := confid.MustSFIDGeneratorFromContext(ctx)
-
-	_, l = l.Start(ctx, "AddInstance")
-	defer l.End()
-
-	id := idg.MustGenSFID()
-
-	AddInstanceByID(ctx, id, i)
-
-	return id
-}
 func AddInstanceByID(ctx context.Context, id types.SFID, i wasm.Instance) {
-	l := types.MustLoggerFromContext(ctx)
-
-	_, l = l.Start(ctx, "AddInstanceByID")
+	ctx, l := logr.Start(ctx, "modules.vm.AddInstanceByID")
 	defer l.End()
 
 	instances.Store(id, i)
@@ -42,9 +27,7 @@ func AddInstanceByID(ctx context.Context, id types.SFID, i wasm.Instance) {
 }
 
 func DelInstance(ctx context.Context, id types.SFID) error {
-	l := types.MustLoggerFromContext(ctx)
-
-	_, l = l.Start(ctx, "DelInstance")
+	ctx, l := logr.Start(ctx, "modules.vm.DelInstance")
 	defer l.End()
 
 	i, _ := instances.LoadAndRemove(id)
@@ -55,9 +38,7 @@ func DelInstance(ctx context.Context, id types.SFID) error {
 }
 
 func StartInstance(ctx context.Context, id types.SFID) error {
-	l := types.MustLoggerFromContext(ctx)
-
-	_, l = l.Start(ctx, "StartInstance")
+	ctx, l := logr.Start(ctx, "modules.vm.StartInstance")
 	defer l.End()
 
 	l = l.WithValues("instance", id)
@@ -81,9 +62,7 @@ func StartInstance(ctx context.Context, id types.SFID) error {
 }
 
 func StopInstance(ctx context.Context, id types.SFID) error {
-	l := types.MustLoggerFromContext(ctx)
-
-	_, l = l.Start(ctx, "StopInstance")
+	ctx, l := logr.Start(ctx, "modules.vm.StopInstance")
 	defer l.End()
 
 	l = l.WithValues("instance", id)

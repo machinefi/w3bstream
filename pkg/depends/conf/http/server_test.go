@@ -12,7 +12,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
-	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
@@ -58,14 +58,8 @@ func (GetOther) Output(ctx context.Context) (interface{}, error) {
 }
 
 func TestHttp(t *testing.T) {
-	l := log.Log{
-		Level:        log.DebugLevel,
-		Format:       log.LOGGER_FORMAT_TYPE__TEXT,
-		Output:       log.LOGGER_OUTPUT_TYPE__ALWAYS,
-		ReportCaller: true,
-	}
-	l.SetDefault()
-	l.Init()
+	ctx, l := logger.NewSpanContext(context.Background(), "TestHttp")
+	defer l.End()
 
 	server := &Server{}
 	server.SetDefault()
@@ -117,14 +111,14 @@ func TestHttp(t *testing.T) {
 	}
 
 	t.Run("GetSome", func(t *testing.T) {
-		meta, err := client.Do(context.Background(), NewRequest(http.MethodGet, "/some")).Into(nil)
+		meta, err := client.Do(ctx, NewRequest(http.MethodGet, "/some")).Into(nil)
 		NewWithT(t).Expect(err).To(BeNil())
 
 		NewWithT(t).Expect(http.Header(meta).Get("b3")).NotTo(BeEmpty())
 	})
 
 	t.Run("GetOther", func(t *testing.T) {
-		meta, err := client.Do(context.Background(), NewRequest(http.MethodGet, "/other")).Into(nil)
+		meta, err := client.Do(ctx, NewRequest(http.MethodGet, "/other")).Into(nil)
 		NewWithT(t).Expect(err).To(BeNil())
 		NewWithT(t).Expect(http.Header(meta).Get("b3")).NotTo(BeEmpty())
 	})

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
@@ -16,6 +17,9 @@ import (
 )
 
 func GetBySFID(ctx context.Context, id types.SFID) (*models.Publisher, error) {
+	ctx, l := logr.Start(ctx, "modules.publisher.GetBySFID")
+	defer l.End()
+
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	m := &models.Publisher{RelPublisher: models.RelPublisher{PublisherID: id}}
 
@@ -29,6 +33,9 @@ func GetBySFID(ctx context.Context, id types.SFID) (*models.Publisher, error) {
 }
 
 func GetByProjectAndKey(ctx context.Context, prj types.SFID, key string) (*models.Publisher, error) {
+	ctx, l := logr.Start(ctx, "modules.publisher.GetByProjectAndKey")
+	defer l.End()
+
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	m := &models.Publisher{
 		RelProject:    models.RelProject{ProjectID: prj},
@@ -45,6 +52,9 @@ func GetByProjectAndKey(ctx context.Context, prj types.SFID, key string) (*model
 }
 
 func ListByCond(ctx context.Context, r *CondArgs) (data []models.Publisher, err error) {
+	ctx, l := logr.Start(ctx, "modules.publisher.ListByCond")
+	defer l.End()
+
 	var (
 		d = types.MustMgrDBExecutorFromContext(ctx)
 		m = &models.Publisher{}
@@ -57,6 +67,9 @@ func ListByCond(ctx context.Context, r *CondArgs) (data []models.Publisher, err 
 }
 
 func List(ctx context.Context, r *ListReq) (*ListRsp, error) {
+	ctx, l := logr.Start(ctx, "modules.publisher.List")
+	defer l.End()
+
 	var (
 		d = types.MustMgrDBExecutorFromContext(ctx)
 		m = &models.Publisher{}
@@ -80,6 +93,9 @@ func List(ctx context.Context, r *ListReq) (*ListRsp, error) {
 }
 
 func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
+	ctx, l := logr.Start(ctx, "modules.publisher.ListDetail")
+	defer l.End()
+
 	var (
 		d = types.MustMgrDBExecutorFromContext(ctx)
 
@@ -119,6 +135,9 @@ func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
 }
 
 func RemoveBySFID(ctx context.Context, acc *models.Account, prj *models.Project, id types.SFID) error {
+	ctx, l := logr.Start(ctx, "modules.publisher.RemoveBySFID")
+	defer l.End()
+
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	m := &models.Publisher{}
 
@@ -150,6 +169,9 @@ func RemoveBySFID(ctx context.Context, acc *models.Account, prj *models.Project,
 }
 
 func RemoveByProjectAndKey(ctx context.Context, prj types.SFID, key string) error {
+	ctx, l := logr.Start(ctx, "modules.publisher.RemoveByProjectAndKey")
+	defer l.End()
+
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	m := &models.Publisher{}
 
@@ -170,6 +192,9 @@ func RemoveByProjectAndKey(ctx context.Context, prj types.SFID, key string) erro
 }
 
 func Remove(ctx context.Context, acc *models.Account, r *CondArgs) error {
+	ctx, l := logr.Start(ctx, "modules.publisher.Remove")
+	defer l.End()
+
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	m := &models.Publisher{}
 	prj := types.MustProjectFromContext(ctx)
@@ -191,6 +216,9 @@ func Remove(ctx context.Context, acc *models.Account, r *CondArgs) error {
 }
 
 func Create(ctx context.Context, r *CreateReq) (*models.Publisher, error) {
+	ctx, l := logr.Start(ctx, "modules.publisher.Create")
+	defer l.End()
+
 	var (
 		d   = types.MustMgrDBExecutorFromContext(ctx)
 		prj = types.MustProjectFromContext(ctx)

@@ -8,7 +8,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/deploy"
-	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 )
 
 type OptSetter = func(conf *Ctx)
@@ -31,7 +31,7 @@ func WithRoot(root string) OptSetter {
 	}
 }
 
-func WithLogger(l log.Logger) OptSetter { return func(c *Ctx) { c.ctx = log.WithLogger(c.ctx, l) } }
+func WithLogger(l logr.Logger) OptSetter { return func(c *Ctx) { c.ctx = logr.WithLogger(c.ctx, l) } }
 
 func WithDeployer(deployers ...deploy.Deployer) OptSetter {
 	return func(c *Ctx) {

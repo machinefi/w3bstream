@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
@@ -275,7 +276,7 @@ func GetByProjectAndTypeMustDB(ctx context.Context, id types.SFID, apiType enums
 }
 
 func GetByProjectAndType(ctx context.Context, id types.SFID, apiType enums.TrafficLimitType) (*models.TrafficLimit, error) {
-	_, l := types.MustLoggerFromContext(ctx).Start(ctx, "trafficLimit.GetByProjectAndType")
+	_, l := types.MustLoggerFromContext(ctx).Start(ctx, "modules.trafficLimit.GetByProjectAndType")
 	defer l.End()
 
 	var (
@@ -388,8 +389,10 @@ func Remove(ctx context.Context, r *CondArgs) error {
 }
 
 func TrafficLimit(ctx context.Context, apiType enums.TrafficLimitType) error {
+	ctx, l := logr.Start(ctx, "modules.trafficLimit.TrafficLimit")
+	defer l.End()
+
 	var (
-		l   = types.MustLoggerFromContext(ctx)
 		rDB = kvdb.MustRedisDBKeyFromContext(ctx)
 		prj = types.MustProjectFromContext(ctx)
 

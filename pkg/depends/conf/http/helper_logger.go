@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -18,52 +17,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/metax"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/timer"
 )
-
-func NewLogRoundTripper() func(http.RoundTripper) http.RoundTripper {
-	return func(next http.RoundTripper) http.RoundTripper {
-		return &LogRoundTripper{next: next}
-	}
-}
-
-type LogRoundTripper struct {
-	next http.RoundTripper
-}
-
-func (rt *LogRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	var (
-		ctx   = req.Context()
-		lv, _ = logr.ParseLevel(strings.ToLower(req.Header.Get("x-log-level")))
-	)
-	if lv == 0 {
-		lv = logr.DebugLevel
-	}
-
-	// inject h3 form context
-	b3.New(b3.WithInjectEncoding(b3.B3SingleHeader)).
-		Inject(ctx, propagation.HeaderCarrier(req.Header))
-
-	ctx, l := logr.Start(ctx, "Request")
-	defer l.End()
-
-	cost := timer.Start()
-	rsp, err := rt.next.RoundTrip(req.WithContext(ctx))
-	l = l.WithValues(
-		"@cst", cost().Milliseconds(),
-		"@mtd", req.Method[0:3],
-		"@url", OmitAuthorization(req.URL),
-	)
-
-	if err == nil {
-		if lv >= logr.InfoLevel {
-			l.Info("success")
-		}
-	} else {
-		if lv >= logr.WarnLevel {
-			l.Warn(errors.Wrap(err, "http request failed"))
-		}
-	}
-	return rsp, err
-}
 
 func TraceLogHandler(tr trace.Tracer) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
