@@ -50,6 +50,7 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-co-op/gocron v1.22.0
 	github.com/golang/mock v1.6.0
+	github.com/gorilla/websocket v1.5.0
 	github.com/hibiken/asynq v0.24.1
 	github.com/minio/minio-go/v7 v7.0.52
 	github.com/mitchellh/mapstructure v1.4.1
@@ -94,7 +95,6 @@ require (
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
-	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect

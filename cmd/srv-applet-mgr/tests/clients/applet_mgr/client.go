@@ -36,6 +36,7 @@ type Interface interface {
 	CreateProject(req *CreateProject, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesProjectCreateRsp, kit.Metadata, error)
 	CreateProjectOperator(req *CreateProjectOperator, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsProjectOperator, kit.Metadata, error)
 	CreateProjectSchema(req *CreateProjectSchema, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsConfig, kit.Metadata, error)
+	CreateProof(req *CreateProof, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesXvmCreateProofRsp, kit.Metadata, error)
 	CreatePublisher(req *CreatePublisher, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsPublisher, kit.Metadata, error)
 	CreateRisc0VM(req *CreateRisc0VM, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesXvmCreateRisc0VmRsp, kit.Metadata, error)
 	CreateStrategy(req *CreateStrategy, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsStrategy, kit.Metadata, error)
@@ -212,6 +213,10 @@ func (c *Client) CreateProjectOperator(req *CreateProjectOperator, metas ...kit.
 }
 
 func (c *Client) CreateProjectSchema(req *CreateProjectSchema, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsConfig, kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
+func (c *Client) CreateProof(req *CreateProof, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesXvmCreateProofRsp, kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 

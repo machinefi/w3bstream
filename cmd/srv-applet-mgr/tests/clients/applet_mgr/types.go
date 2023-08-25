@@ -452,6 +452,10 @@ type GithubComMachinefiW3BstreamPkgModulesTrafficlimitListRsp = trafficlimit.Lis
 
 type GithubComMachinefiW3BstreamPkgModulesTrafficlimitUpdateReq = trafficlimit.UpdateReq
 
+type GithubComMachinefiW3BstreamPkgModulesXvmCreateProofReq = xvm.CreateProofReq
+
+type GithubComMachinefiW3BstreamPkgModulesXvmCreateProofRsp = xvm.CreateProofRsp
+
 type GithubComMachinefiW3BstreamPkgModulesXvmCreateRisc0VmReq = xvm.CreateRisc0VmReq
 
 type GithubComMachinefiW3BstreamPkgModulesXvmCreateRisc0VmRsp = xvm.CreateRisc0VmRsp

@@ -10,4 +10,5 @@ var Root = kit.NewRouter(httptransport.Group("/xvm"))
 
 func init() {
 	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &CreateRisc0VM{}))
+	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &CreateProof{}))
 }

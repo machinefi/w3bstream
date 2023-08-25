@@ -21,3 +21,22 @@ func (r *CreateRisc0VM) Output(ctx context.Context) (interface{}, error) {
 	}
 	return xvm.CreateRisc0Vm(ctx, &r.CreateRisc0VmReq)
 }
+
+type CreateProof struct {
+	httpx.MethodPost
+	xvm.CreateProofReq `in:"body"`
+}
+
+func (r *CreateProof) Path() string {
+	return "/generate_proof"
+}
+
+func (r *CreateProof) Output(ctx context.Context) (interface{}, error) {
+	ca := middleware.MustCurrentAccountFromContext(ctx)
+	ctx, err := ca.WithProjectContextByName(ca.WithAccount(ctx), middleware.MustProjectName(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	return xvm.CreateProof(ctx, &r.CreateProofReq)
+}
