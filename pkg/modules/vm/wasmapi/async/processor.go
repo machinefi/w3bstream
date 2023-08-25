@@ -78,11 +78,19 @@ func (p *ApiCallProcessor) ProcessTask(ctx context.Context, t *asynq.Task) error
 		}
 	}
 
+	respHeader := resp.Header
+	for k, v := range apiReq.Header {
+		if k == "Content-Type" {
+			continue
+		}
+		respHeader[k] = v
+	}
+
 	apiResp := apitypes.HttpResponse{
 		Status:     resp.Status,
 		StatusCode: resp.StatusCode,
 		Proto:      resp.Proto,
-		Header:     resp.Header,
+		Header:     respHeader,
 		Body:       body,
 	}
 	apiRespJson, err := json.Marshal(&apiResp)
