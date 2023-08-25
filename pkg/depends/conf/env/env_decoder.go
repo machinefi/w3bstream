@@ -53,7 +53,7 @@ func (d *Decoder) scan(w *PathWalker, rv reflect.Value) error {
 		switch kind {
 		case reflect.Array, reflect.Slice:
 			size := d.vars.Len(w.String())
-			if kind == reflect.Slice && rv.IsNil() {
+			if kind == reflect.Slice && rv.IsNil() && size > 0 {
 				rv.Set(reflect.MakeSlice(rv.Type(), size, size))
 			}
 			for i := 0; i < rv.Len(); i++ {
