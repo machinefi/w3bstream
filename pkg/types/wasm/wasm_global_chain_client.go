@@ -44,7 +44,7 @@ func NewChainClient(ctx context.Context, prj *models.Project, ops []models.Opera
 
 type PrivateKey struct {
 	Type    enums.OperatorKeyType
-	Ecdsa   *ecdsa.PrivateKey
+	Ecdsa   []byte
 	Ed25519 ed25519.PrivateKey
 }
 
@@ -77,8 +77,7 @@ func (c *ChainClient) Init(parent context.Context) error {
 			pk := ed25519.PrivateKey(b)
 			p.Ed25519 = pk
 		} else {
-			pk := crypto.ToECDSAUnsafe(b)
-			p.Ecdsa = pk
+			p.Ecdsa = b
 		}
 
 		c.Operators[op.Name] = p
@@ -125,7 +124,7 @@ func (c *ChainClient) sendTX(conf *types.ChainConfig, chainID uint64, chainName 
 	if pvk.Type != enums.OPERATOR_KEY__ECDSA {
 		return "", errors.New("invalid operator key type, require ECDSA")
 	}
-	return c.sendEthTX(chain, toStr, valueStr, dataStr, pvk.Ecdsa)
+	return c.sendEthTX(chain, toStr, valueStr, dataStr, crypto.ToECDSAUnsafe(pvk.Ecdsa))
 }
 
 func (c *ChainClient) sendSolanaTX(chain *types.Chain, dataStr string, pvk ed25519.PrivateKey) (string, error) {
