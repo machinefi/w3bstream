@@ -6,6 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/modules/vm/wasmtime"
 )
 
@@ -22,6 +23,9 @@ func (t *HandleEvent) SetArg(v interface{}) error {
 }
 
 func (t *HandleEvent) Output(ctx context.Context) (interface{}, error) {
+	ctx, l := logr.Start(ctx, "tasks.HandleEvent.Output")
+	defer l.End()
+
 	t.Handle(ctx)
 	return nil, nil
 }

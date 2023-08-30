@@ -18,6 +18,7 @@ import (
 	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/retry"
+	"github.com/machinefi/w3bstream/pkg/depends/x/misc/timer"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
 )
 
@@ -80,7 +81,7 @@ func init() {
 		Retry:     *retry.Default,
 		Timeout:   types.Duration(time.Second * time.Duration(wait)),
 		Keepalive: types.Duration(time.Second * time.Duration(wait)),
-		QoS:       confmqtt.QOS__ONCE,
+		QoS:       confmqtt.QOS__ONLY_ONCE,
 	}
 
 	broker.SetDefault()
@@ -120,6 +121,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+	cost := timer.Start()
 	err = c.WithTopic(topic).Publish(raw)
 	if err != nil {
 		fmt.Println(err)
@@ -153,5 +155,6 @@ func main() {
 	case <-time.After(time.Second * time.Duration(wait)):
 		fmt.Println("**** message ack timeout")
 	}
+	fmt.Printf("cost: %dms", cost().Milliseconds())
 	_ = c.WithTopic(ack).Unsubscribe()
 }

@@ -276,7 +276,7 @@ func GetByProjectAndTypeMustDB(ctx context.Context, id types.SFID, apiType enums
 }
 
 func GetByProjectAndType(ctx context.Context, id types.SFID, apiType enums.TrafficLimitType) (*models.TrafficLimit, error) {
-	_, l := types.MustLoggerFromContext(ctx).Start(ctx, "modules.trafficLimit.GetByProjectAndType")
+	_, l := logr.Start(ctx, "modules.trafficLimit.GetByProjectAndType")
 	defer l.End()
 
 	var (
@@ -290,7 +290,6 @@ func GetByProjectAndType(ctx context.Context, id types.SFID, apiType enums.Traff
 
 	valByte, err = rDB.GetKey(trafficKey)
 	if err != nil || valByte == nil {
-		l.Warn(err)
 		traffic, err = GetByProjectAndTypeMustDB(ctx, id, apiType)
 		if err != nil {
 			return nil, err

@@ -33,6 +33,7 @@ func Forward(ctx context.Context, channel string, ev *eventpb.Event) (interface{
 		Channel:   channel,
 		EventType: ev.Header.GetEventType(),
 		EventID:   ev.Header.GetEventId(),
+		Timestamp: ev.Header.GetPubTime(),
 		Payload:   *(bytes.NewBuffer(ev.Payload)),
 	}
 

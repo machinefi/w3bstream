@@ -241,6 +241,7 @@ func init() {
 		types.WithETHClientConfigContext(_ethClients),
 		types.WithChainConfigContext(_chainConf),
 		types.WithWasmApiServerContext(wasmApiServer),
+		types.WithProxyClientContext(&client.Client{}),
 		types.WithOperatorPoolContext(operatorPool),
 	)
 

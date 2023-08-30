@@ -6,7 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -28,6 +28,8 @@ func (t *DbLogStoring) SetArg(v interface{}) error {
 }
 
 func (t *DbLogStoring) Output(ctx context.Context) (interface{}, error) {
-	log.FromContext(ctx).Debug("insert log to db")
+	ctx, l := logr.Start(ctx, "tasks.DbLogger.Output")
+	defer l.End()
+
 	return nil, t.l.Create(types.MustMgrDBExecutorFromContext(ctx))
 }

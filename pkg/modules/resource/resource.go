@@ -100,7 +100,7 @@ func Create(ctx context.Context, acc types.SFID, fh *multipart.FileHeader, filen
 }
 
 func GetBySFID(ctx context.Context, id types.SFID) (*models.Resource, error) {
-	ctx, l := logr.Start(ctx, "models.resource.GetBySFID")
+	ctx, l := logr.Start(ctx, "modules.resource.GetBySFID")
 	defer l.End()
 
 	res := &models.Resource{}
@@ -127,7 +127,7 @@ func GetByMd5(ctx context.Context, md5 string) (*models.Resource, error) {
 }
 
 func GetContentBySFID(ctx context.Context, id types.SFID) (*models.Resource, []byte, error) {
-	ctx, l := logr.Start(ctx, "models.resource.GetContentBySFID")
+	ctx, l := logr.Start(ctx, "modules.resource.GetContentBySFID")
 	defer l.End()
 
 	res, err := GetBySFID(ctx, id)
@@ -188,7 +188,7 @@ func GetDownloadUrlBySFID(ctx context.Context, id types.SFID) (*DownLoadResource
 }
 
 func ReadContent(ctx context.Context, m *models.Resource) ([]byte, error) {
-	ctx, l := logr.Start(ctx, "models.resource.ReadContent")
+	ctx, l := logr.Start(ctx, "modules.resource.ReadContent")
 	defer l.End()
 
 	fs := types.MustFileSystemOpFromContext(ctx)
