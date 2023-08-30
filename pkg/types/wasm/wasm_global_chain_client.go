@@ -26,6 +26,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
+	optypes "github.com/machinefi/w3bstream/pkg/modules/operator/pool/types"
 	"github.com/machinefi/w3bstream/pkg/types"
 	wsTypes "github.com/machinefi/w3bstream/pkg/types"
 )
@@ -93,7 +94,7 @@ func (c *ChainClient) WithContext(ctx context.Context) context.Context {
 	return WithChainClient(ctx, c)
 }
 
-func (c *ChainClient) SendTXWithOperator(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr, operatorName string) (string, error) {
+func (c *ChainClient) SendTXWithOperator(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr, operatorName string, opPool optypes.Pool) (string, error) {
 	pvk, ok := c.Operators[operatorName]
 	if !ok {
 		return "", errors.New("private key is empty")

@@ -107,5 +107,6 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		types.WithTaskWorkerContext(types.MustTaskWorkerFromContext(parent)),
 		types.WithTaskBoardContext(types.MustTaskBoardFromContext(parent)),
 		types.WithChainConfigContext(types.MustChainConfigFromContext(parent)),
+		types.WithOperatorPoolContext(types.MustOperatorPoolFromContext(parent)),
 	)(ctx), nil
 }

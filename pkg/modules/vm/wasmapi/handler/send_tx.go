@@ -54,7 +54,7 @@ func (h *Handler) SendTx(c *gin.Context) {
 		req.OperatorName = operator.DefaultOperatorName
 	}
 
-	hash, err := chainCli.SendTXWithOperator(h.chainConf, req.ChainID, req.ChainName, req.To, req.Value, req.Data, req.OperatorName)
+	hash, err := chainCli.SendTXWithOperator(h.chainConf, req.ChainID, req.ChainName, req.To, req.Value, req.Data, req.OperatorName, h.opPool)
 	if err != nil {
 		l.Error(errors.Wrap(err, "send tx with operator failed"))
 		c.JSON(http.StatusInternalServerError, newErrResp(err))

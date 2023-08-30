@@ -13,6 +13,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
 	"github.com/machinefi/w3bstream/pkg/models"
+	optypes "github.com/machinefi/w3bstream/pkg/modules/operator/pool/types"
 	wasmapi "github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/types"
 )
 
@@ -50,6 +51,8 @@ type (
 	CtxRobotNotifierConfig struct{}
 	// CtxMetricsCenterConfig *MetricsCenterConfig for metrics
 	CtxMetricsCenterConfig struct{}
+	// CtxOperatorPool type *operator.Pool global operator memory pool
+	CtxOperatorPool struct{}
 )
 
 // model contexts
@@ -832,6 +835,27 @@ func ProjectOperatorFromContext(ctx context.Context) (*models.ProjectOperator, b
 
 func MustProjectOperatorFromContext(ctx context.Context) *models.ProjectOperator {
 	v, ok := ProjectOperatorFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithOperatorPool(ctx context.Context, v optypes.Pool) context.Context {
+	return contextx.WithValue(ctx, CtxOperatorPool{}, v)
+}
+
+func WithOperatorPoolContext(v optypes.Pool) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxOperatorPool{}, v)
+	}
+}
+
+func OperatorPoolFromContext(ctx context.Context) (optypes.Pool, bool) {
+	v, ok := ctx.Value(CtxOperatorPool{}).(optypes.Pool)
+	return v, ok
+}
+
+func MustOperatorPoolFromContext(ctx context.Context) optypes.Pool {
+	v, ok := OperatorPoolFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
