@@ -23,6 +23,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
+	optypes "github.com/machinefi/w3bstream/pkg/modules/operator/pool/types/mock"
 	wasmapi "github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/types/mock"
 	mock_sqlx "github.com/machinefi/w3bstream/pkg/test/mock_depends_kit_sqlx"
 	"github.com/machinefi/w3bstream/pkg/test/patch_models"
@@ -63,6 +64,7 @@ func TestDeploy(t *testing.T) {
 	}
 
 	wasmApiServer := wasmapi.NewMockServer(ctl)
+	operatorPool := optypes.NewMockPool(ctl)
 
 	ctx := contextx.WithContextCompose(
 		types.WithMgrDBExecutorContext(d),
@@ -81,6 +83,7 @@ func TestDeploy(t *testing.T) {
 		types.WithChainConfigContext(&types.ChainConfig{}),
 		wasm.WithMQTTClientContext(mqttClient),
 		types.WithWasmApiServerContext(wasmApiServer),
+		types.WithOperatorPoolContext(operatorPool),
 	)(context.Background())
 
 	d.MockDBExecutor.EXPECT().T(gomock.Any()).Return(&builder.Table{}).AnyTimes()
