@@ -381,7 +381,7 @@ func (ef *ExportFuncs) SendTX(chainID int32, offset, size, vmAddrPtr, vmSizePtr 
 		return wasm.ResultStatusCode_Failed
 	}
 	ret := gjson.Parse(string(buf))
-	txHash, err := ef.cl.SendTX(ef.cf, uint64(chainID), "", ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String())
+	txHash, err := ef.cl.SendTX(ef.cf, uint64(chainID), "", ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String(), ef.opPool, types.MustProjectFromContext(ef.ctx))
 	if err != nil {
 		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
@@ -404,7 +404,7 @@ func (ef *ExportFuncs) SendTXWithOperator(chainID int32, offset, size, vmAddrPtr
 		return wasm.ResultStatusCode_Failed
 	}
 	ret := gjson.Parse(string(buf))
-	txHash, err := ef.cl.SendTXWithOperator(ef.cf, uint64(chainID), "", ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String(), ret.Get("operatorName").String(), ef.opPool)
+	txHash, err := ef.cl.SendTXWithOperator(ef.cf, uint64(chainID), "", ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String(), ret.Get("operatorName").String(), ef.opPool, types.MustProjectFromContext(ef.ctx))
 	if err != nil {
 		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
