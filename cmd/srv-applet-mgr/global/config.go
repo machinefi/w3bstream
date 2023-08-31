@@ -145,7 +145,9 @@ func init() {
 	redisKvDB := kvdb.NewRedisDB(config.Redis)
 	operatorPool := pool.NewPool(config.Postgres)
 
-	wasmApiServer, err := wasmapi.NewServer(std, config.Redis, config.Postgres, redisKvDB, config.ChainConfig, operatorPool)
+	tb := mq.NewTaskBoard(tasks)
+
+	wasmApiServer, err := wasmapi.NewServer(std, config.Redis, config.Postgres, redisKvDB, config.ChainConfig, tb, worker, operatorPool)
 	if err != nil {
 		std.Fatal(err)
 	}
@@ -161,7 +163,7 @@ func init() {
 		confid.WithSFIDGeneratorContext(confid.MustNewSFIDGenerator()),
 		confjwt.WithConfContext(config.Jwt),
 		types.WithTaskWorkerContext(worker),
-		types.WithTaskBoardContext(mq.NewTaskBoard(tasks)),
+		types.WithTaskBoardContext(tb),
 		types.WithETHClientConfigContext(config.EthClient),
 		types.WithChainConfigContext(config.ChainConfig),
 		types.WithEthAddressWhiteListContext(config.WhiteList),

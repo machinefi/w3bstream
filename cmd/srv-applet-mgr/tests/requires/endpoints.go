@@ -218,7 +218,9 @@ func init() {
 	redisKvDB := kvdb.NewRedisDB(_redis)
 	operatorPool := pool.NewPool(_dbMgr)
 
-	wasmApiServer, err := wasmapi.NewServer(conflog.Std(), _redis, _dbMgr, redisKvDB, _chainConf, operatorPool)
+	tb := mq.NewTaskBoard(_tasks)
+
+	wasmApiServer, err := wasmapi.NewServer(conflog.Std(), _redis, _dbMgr, redisKvDB, _chainConf, tb, _workers, operatorPool)
 	if err != nil {
 		conflog.Std().Fatal(err)
 	}
@@ -237,7 +239,7 @@ func init() {
 		types.WithRedisEndpointContext(_redis),
 		kvdb.WithRedisDBKeyContext(redisKvDB),
 		types.WithTaskWorkerContext(_workers),
-		types.WithTaskBoardContext(mq.NewTaskBoard(_tasks)),
+		types.WithTaskBoardContext(tb),
 		types.WithETHClientConfigContext(_ethClients),
 		types.WithChainConfigContext(_chainConf),
 		types.WithWasmApiServerContext(wasmApiServer),

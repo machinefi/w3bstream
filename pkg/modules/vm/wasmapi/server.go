@@ -12,6 +12,7 @@ import (
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/redis"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	optypes "github.com/machinefi/w3bstream/pkg/modules/operator/pool/types"
 	"github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/async"
@@ -71,7 +72,7 @@ func newRouter(mgrDB sqlx.DBExecutor, chainConf *types.ChainConfig, opPool optyp
 	return router
 }
 
-func NewServer(l log.Logger, redisConf *redis.Redis, mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB, chainConf *types.ChainConfig, opPool optypes.Pool) (*Server, error) {
+func NewServer(l log.Logger, redisConf *redis.Redis, mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB, chainConf *types.ChainConfig, tb *mq.TaskBoard, tw *mq.TaskWorker, opPool optypes.Pool) (*Server, error) {
 	router := newRouter(mgrDB, chainConf, opPool)
 
 	redisCli := asynq.RedisClientOpt{
@@ -88,7 +89,7 @@ func NewServer(l log.Logger, redisConf *redis.Redis, mgrDB sqlx.DBExecutor, kv *
 	mux := asynq.NewServeMux()
 
 	mux.Handle(async.TaskNameApiCall, async.NewApiCallProcessor(l, router, asyncCli))
-	mux.Handle(async.TaskNameApiResult, async.NewApiResultProcessor(l, mgrDB, kv))
+	mux.Handle(async.TaskNameApiResult, async.NewApiResultProcessor(l, mgrDB, kv, tb, tw))
 
 	if err := asyncSrv.Start(mux); err != nil {
 		return nil, err
