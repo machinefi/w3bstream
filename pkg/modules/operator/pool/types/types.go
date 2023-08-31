@@ -1,7 +1,6 @@
 package types
 
 import (
-	"context"
 	"sync"
 
 	basetypes "github.com/machinefi/w3bstream/pkg/depends/base/types"
@@ -14,5 +13,5 @@ type SyncOperator struct {
 }
 
 type Pool interface {
-	Get(ctx context.Context, accountID basetypes.SFID, opName string) (*SyncOperator, error)
+	Get(accountID basetypes.SFID, opName string) (*SyncOperator, error)
 }

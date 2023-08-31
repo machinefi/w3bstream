@@ -21,7 +21,7 @@ func (p *Pool) getKey(accountID types.SFID, opName string) string {
 	return fmt.Sprintf("%d-%s", accountID, opName)
 }
 
-func (p *Pool) Get(ctx context.Context, accountID types.SFID, opName string) (*optypes.SyncOperator, error) {
+func (p *Pool) Get(accountID types.SFID, opName string) (*optypes.SyncOperator, error) {
 	key := p.getKey(accountID, opName)
 
 	p.mux.RLock()
@@ -32,10 +32,10 @@ func (p *Pool) Get(ctx context.Context, accountID types.SFID, opName string) (*o
 		return op, nil
 	}
 
-	return p.setOperator(ctx, accountID, opName)
+	return p.setOperator(accountID, opName)
 }
 
-func (p *Pool) setOperator(ctx context.Context, accountID types.SFID, opName string) (*optypes.SyncOperator, error) {
+func (p *Pool) setOperator(accountID types.SFID, opName string) (*optypes.SyncOperator, error) {
 	p.mux.Lock()
 	defer p.mux.Unlock()
 
@@ -45,7 +45,7 @@ func (p *Pool) setOperator(ctx context.Context, accountID types.SFID, opName str
 		return sop, nil
 	}
 
-	op, err := operator.GetByAccountAndName(types.WithMgrDBExecutor(ctx, p.db), accountID, opName)
+	op, err := operator.GetByAccountAndName(types.WithMgrDBExecutor(context.Background(), p.db), accountID, opName)
 	if err != nil {
 		return nil, err
 	}

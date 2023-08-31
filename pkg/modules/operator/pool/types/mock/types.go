@@ -5,7 +5,6 @@
 package mock
 
 import (
-	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -38,16 +37,16 @@ func (m *MockPool) EXPECT() *MockPoolMockRecorder {
 }
 
 // Get mocks base method.
-func (m *MockPool) Get(ctx context.Context, accountID types.SFID, opName string) (*types0.SyncOperator, error) {
+func (m *MockPool) Get(accountID types.SFID, opName string) (*types0.SyncOperator, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", ctx, accountID, opName)
+	ret := m.ctrl.Call(m, "Get", accountID, opName)
 	ret0, _ := ret[0].(*types0.SyncOperator)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Get indicates an expected call of Get.
-func (mr *MockPoolMockRecorder) Get(ctx, accountID, opName interface{}) *gomock.Call {
+func (mr *MockPoolMockRecorder) Get(accountID, opName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockPool)(nil).Get), ctx, accountID, opName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockPool)(nil).Get), accountID, opName)
 }
