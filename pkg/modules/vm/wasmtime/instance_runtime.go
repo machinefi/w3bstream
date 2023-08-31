@@ -3,20 +3,24 @@ package wasmtime
 import (
 	"context"
 	"encoding/binary"
+	"fmt"
+	"runtime/debug"
 
 	"github.com/bytecodealliance/wasmtime-go/v8"
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 )
 
 var (
-	ErrNotLinked           = errors.New("not linked")
-	ErrAlreadyInstantiated = errors.New("already instantiated")
-	ErrNotInstantiated     = errors.New("not instantiated")
-	ErrFuncNotImported     = errors.New("func not imported")
-	ErrAlreadyLinked       = errors.New("already linked")
-	engine                 = wasmtime.NewEngineWithConfig(wasmtime.NewConfig())
+	ErrNotLinked            = errors.New("not linked")
+	ErrAlreadyInstantiated  = errors.New("already instantiated")
+	ErrNotInstantiated      = errors.New("not instantiated")
+	ErrFuncNotImported      = errors.New("func not imported")
+	ErrAlreadyLinked        = errors.New("already linked")
+	ErrStoreNotInstantiated = errors.New("store not instantiated")
+	engine                  = wasmtime.NewEngineWithConfig(wasmtime.NewConfig())
 )
 
 type (
@@ -109,20 +113,36 @@ func putUint32Le(buf []byte, vmAddr int32, val uint32) error {
 	return nil
 }
 
-func (rt *Runtime) Call(ctx context.Context, name string, args ...interface{}) (interface{}, error) {
-	ctx, l := logr.Start(ctx, "modules.vm.wasmtime.Runtime.Call", "func", name)
+func (rt *Runtime) Call(ctx context.Context, name string, args ...interface{}) (v interface{}, err error) {
+	ctx, l := logr.Start(ctx, "modules.vm.wasmtime.Runtime.Call")
 	defer l.End()
 
+	l = l.WithValues("store", rt.store, "func", name, "args", args)
+
 	if rt.module == nil {
+		l.Error(ErrNotLinked)
 		return nil, ErrNotLinked
 	}
 	if rt.instance == nil {
+		l.Error(ErrNotInstantiated)
 		return nil, ErrNotInstantiated
+	}
+	if rt.store == nil {
+		l.Error(ErrStoreNotInstantiated)
+		return nil, ErrStoreNotInstantiated
 	}
 	fn := rt.instance.GetFunc(rt.store, name)
 	if fn == nil {
+		l.Error(ErrFuncNotImported)
 		return nil, ErrFuncNotImported
 	}
+	l.Info("call")
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("err=%v, stack=%s", r, string(debug.Stack()))
+			l.Error(err)
+		}
+	}()
 	return fn.Call(rt.store, args...)
 }
 
@@ -145,23 +165,38 @@ func (rt *Runtime) Read(addr, size int32) ([]byte, error) {
 }
 
 func (rt *Runtime) Copy(hostData []byte, vmAddrPtr, vmSizePtr int32) error {
+	_, l := logger.NewSpanContext(context.Background(), "modules.vm.wasmtime.Runtime.Copy")
+	defer l.End()
+
+	l = l.WithValues("host_data_size", len(hostData), "vm_addr_ptr", vmAddrPtr, "vm_size_ptr", vmSizePtr)
+
 	if rt.module == nil {
+		l.Error(ErrNotLinked)
 		return ErrNotLinked
 	}
 	if rt.instance == nil {
+		l.Error(ErrNotInstantiated)
 		return ErrNotInstantiated
 	}
 	size := len(hostData)
 	addr, mem, err := rt.alloc(int32(size))
 	if err != nil {
+		l.Error(errors.Wrap(err, "runtime.alloc failed"))
 		return err
 	}
 	if copied := copy(mem[addr:], hostData); copied != size {
+		l.Error(errors.New("copy data failed"))
 		return errors.New("fail to copy data")
 	}
 	if err = putUint32Le(mem, vmAddrPtr, uint32(addr)); err != nil {
+		l.Error(err)
 		return err
 	}
+	if err = putUint32Le(mem, vmSizePtr, uint32(size)); err != nil {
+		l.Error(err)
+		return err
+	}
+	l.Info("copied")
 
-	return putUint32Le(mem, vmSizePtr, uint32(size))
+	return nil
 }

@@ -15,6 +15,7 @@ import (
 	"golang.org/x/text/encoding/unicode"
 
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/modules/job"
@@ -227,15 +228,24 @@ func (ef *ExportFuncs) Seed() float64 {
 }
 
 func (ef *ExportFuncs) GetData(rid, vmAddrPtr, vmSizePtr int32) int32 {
+	_, l := logger.NewSpanContext(context.Background(), "modules.vm.wasmtime.ExportFuncs.GetData")
+	defer l.End()
+
+	l = l.WithValues("resource_id", rid, "vm_addr", vmAddrPtr, "vm_size", vmSizePtr)
+
 	data, ok := ef.res.Load(uint32(rid))
 	if !ok {
+		l.Info("resource not found")
 		return int32(wasm.ResultStatusCode_ResourceNotFound)
 	}
+	l = l.WithValues("host_data_size", len(data))
 
 	if err := ef.rt.Copy(data, vmAddrPtr, vmSizePtr); err != nil {
+		l.Error(err)
 		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return int32(wasm.ResultStatusCode_TransDataToVMFailed)
 	}
+	l.Info("")
 
 	return int32(wasm.ResultStatusCode_OK)
 }
