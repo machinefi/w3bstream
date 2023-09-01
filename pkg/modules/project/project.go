@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
@@ -15,6 +16,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
+	"github.com/machinefi/w3bstream/pkg/modules/publisher"
 	"github.com/machinefi/w3bstream/pkg/modules/transporter/mqtt"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
@@ -125,12 +127,18 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	acc := types.MustAccountFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
+	public := datatypes.FALSE
+
+	if r.Public == datatypes.TRUE {
+		public = r.Public
+	}
 
 	prj := &models.Project{
 		RelProject:  models.RelProject{ProjectID: idg.MustGenSFID()},
 		RelAccount:  models.RelAccount{AccountID: acc.AccountID},
 		ProjectName: models.ProjectName{Name: r.Name},
 		ProjectBase: models.ProjectBase{
+			Public:      public,
 			Version:     r.Version,
 			Proto:       r.Proto,
 			Description: r.Description,
@@ -178,6 +186,16 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 				return err
 			}
 			rsp.Flow = r.Flow
+			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			if prj.Public == datatypes.FALSE {
+				return nil
+			}
+
+			if _, err := publisher.CreateAnonymousPublisher(ctx); err != nil {
+				return err
+			}
 			return nil
 		},
 	).Do()
@@ -237,6 +255,12 @@ func Init(ctx context.Context) error {
 
 	d := types.MustMgrDBExecutorFromContext(ctx)
 
+	user, err := (&models.Account{}).List(d, nil)
+	for _, u := range user {
+		ctx = types.WithAccount(ctx, &u)
+		break
+	}
+
 	data, err := (&models.Project{}).List(d, nil)
 	if err != nil {
 		return err
@@ -249,6 +273,12 @@ func Init(ctx context.Context) error {
 			l.Warn(errors.Wrap(err, "channel create failed"))
 		}
 		l.Info("start subscribe")
+
+		if v.Public == datatypes.TRUE && jwt.WithAnonymousPublisherFn == nil {
+			if _, err = publisher.CreateAnonymousPublisher(ctx); err != nil {
+				l.Warn(errors.Wrap(err, "anonymous publisher create failed"))
+			}
+		}
 	}
 	return nil
 }

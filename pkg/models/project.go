@@ -34,6 +34,7 @@ type ProjectName struct {
 }
 
 type ProjectBase struct {
+	Public      datatypes.Bool `db:"f_public,default='2'" json:"public,omitempty"`   // Public is true, project receive event from anonymous publisher
 	Version     string         `db:"f_version,default=''" json:"version,omitempty"`  // Version project version
 	Proto       enums.Protocol `db:"f_proto,default='0'"  json:"protocol,omitempty"` // Proto project protocol for event publisher
 	Description string         `db:"f_description,default=''"    json:"description,omitempty"`
