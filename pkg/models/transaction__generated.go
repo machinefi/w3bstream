@@ -66,15 +66,15 @@ func (m *Transaction) IndexFieldNames() []string {
 
 func (*Transaction) UniqueIndexes() builder.Indexes {
 	return builder.Indexes{
-		"ui_cron_job_id": []string{
+		"ui_transaction_id": []string{
 			"TransactionID",
 			"DeletedAt",
 		},
 	}
 }
 
-func (*Transaction) UniqueIndexUICronJobID() string {
-	return "ui_cron_job_id"
+func (*Transaction) UniqueIndexUITransactionID() string {
+	return "ui_transaction_id"
 }
 
 func (m *Transaction) ColID() *builder.Column {
