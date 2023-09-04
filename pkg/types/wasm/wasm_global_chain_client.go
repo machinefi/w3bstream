@@ -173,6 +173,10 @@ func (c *ChainClient) sendEthTX(chain *types.Chain, toStr, valueStr, dataStr str
 	if toStr == "" || valueStr == "" {
 		return "", errors.New("missing to or value string")
 	}
+
+	op.Mux.Lock()
+	defer op.Mux.Unlock()
+
 	cli, err := ethclient.Dial(chain.Endpoint)
 	if err != nil {
 		return "", err
@@ -213,9 +217,6 @@ func (c *ChainClient) sendEthTX(chain *types.Chain, toStr, valueStr, dataStr str
 	if err != nil {
 		return "", err
 	}
-
-	op.Mux.Lock()
-	defer op.Mux.Unlock()
 
 	nonce, err := cli.PendingNonceAt(context.Background(), sender)
 	if err != nil {
