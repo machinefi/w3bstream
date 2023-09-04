@@ -127,18 +127,13 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	acc := types.MustAccountFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
-	public := datatypes.FALSE
-
-	if r.Public == datatypes.TRUE {
-		public = r.Public
-	}
 
 	prj := &models.Project{
 		RelProject:  models.RelProject{ProjectID: idg.MustGenSFID()},
 		RelAccount:  models.RelAccount{AccountID: acc.AccountID},
 		ProjectName: models.ProjectName{Name: r.Name},
 		ProjectBase: models.ProjectBase{
-			Public:      public,
+			Public:      r.Public,
 			Version:     r.Version,
 			Proto:       r.Proto,
 			Description: r.Description,
@@ -189,13 +184,12 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
-			if prj.Public == datatypes.FALSE {
-				return nil
+			if prj.Public == datatypes.TRUE {
+				if _, err := publisher.CreateAnonymousPublisher(ctx); err != nil {
+					return err
+				}
 			}
 
-			if _, err := publisher.CreateAnonymousPublisher(ctx); err != nil {
-				return err
-			}
 			return nil
 		},
 	).Do()
