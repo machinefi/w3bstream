@@ -8,10 +8,9 @@ import (
 
 // Transaction schema for blockchain transaction information
 // @def primary                      ID
-// @def unique_index UI_cron_job_id  CronJobID
-// @def unique_index UI_cron         ProjectID CronExpressions EventType
+// @def unique_index UI_cron_job_id  TransactionID
 //
-//go:generate toolkit gen model CronJob --database DB
+//go:generate toolkit gen model Transaction --database DB
 type Transaction struct {
 	datatypes.PrimaryID
 	RelTransaction
