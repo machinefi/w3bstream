@@ -26,8 +26,8 @@ type RelTransaction struct {
 type TransactionInfo struct {
 	ChainName enums.ChainName        `db:"f_chain_name"            json:"chainName"`
 	Nonce     uint64                 `db:"f_nonce,default='0'"     json:"nonce,omitempty"`
-	Hash      string                 `db:"f_hash"                  json:"hash"`
-	Sender    string                 `db:"f_sender"                json:"sender"`
+	Hash      string                 `db:"f_hash,default=''"       json:"hash,omitempty"`
+	Sender    string                 `db:"f_sender,default=''"     json:"sender,omitempty"`
 	Receiver  string                 `db:"f_receiver,default=''"   json:"receiver,omitempty"`
 	Data      string                 `db:"f_data,default=''"       json:"data,omitempty"`
 	State     enums.TransactionState `db:"f_state,default='0'"     json:"state"`
