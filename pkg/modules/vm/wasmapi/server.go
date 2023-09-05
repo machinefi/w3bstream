@@ -10,6 +10,7 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/pkg/errors"
 
+	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
@@ -58,12 +59,12 @@ func (s *Server) Shutdown() {
 	s.srv.Shutdown()
 }
 
-func newRouter(mgrDB sqlx.DBExecutor, chainConf *types.ChainConfig, opPool optypes.Pool) *gin.Engine {
+func newRouter(mgrDB sqlx.DBExecutor, chainConf *types.ChainConfig, opPool optypes.Pool, sfid confid.SFIDGenerator) *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Recovery())
 	router.Use(handler.ParamValidate())
 
-	handlers := handler.New(mgrDB, chainConf, opPool)
+	handlers := handler.New(mgrDB, chainConf, opPool, sfid)
 
 	router.GET("/system/hello", handlers.Hello)
 	router.GET("/system/read_tx", handlers.ReadTx)
@@ -72,8 +73,8 @@ func newRouter(mgrDB sqlx.DBExecutor, chainConf *types.ChainConfig, opPool optyp
 	return router
 }
 
-func NewServer(l log.Logger, redisConf *redis.Redis, mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB, chainConf *types.ChainConfig, tb *mq.TaskBoard, tw *mq.TaskWorker, opPool optypes.Pool) (*Server, error) {
-	router := newRouter(mgrDB, chainConf, opPool)
+func NewServer(l log.Logger, redisConf *redis.Redis, mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB, chainConf *types.ChainConfig, tb *mq.TaskBoard, tw *mq.TaskWorker, opPool optypes.Pool, sfid confid.SFIDGenerator) (*Server, error) {
+	router := newRouter(mgrDB, chainConf, opPool, sfid)
 
 	redisCli := asynq.RedisClientOpt{
 		Network:      redisConf.Protocol,

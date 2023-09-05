@@ -53,6 +53,15 @@ type ChainClient struct {
 	Operators   map[string]*PrivateKey
 }
 
+type SendTxResp struct {
+	ChainName enums.ChainName
+	Nonce     uint64
+	Hash      string
+	Sender    string
+	Receiver  string
+	Data      string
+}
+
 func (c *ChainClient) GlobalConfigType() ConfigType { return ConfigChains }
 
 func (c *ChainClient) Init(parent context.Context) error {
@@ -93,10 +102,10 @@ func (c *ChainClient) WithContext(ctx context.Context) context.Context {
 	return WithChainClient(ctx, c)
 }
 
-func (c *ChainClient) SendTXWithOperator(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr, operatorName string, opPool optypes.Pool, prj *models.Project) (string, error) {
+func (c *ChainClient) SendTXWithOperator(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr, operatorName string, opPool optypes.Pool, prj *models.Project) (*SendTxResp, error) {
 	op, err := opPool.Get(prj.AccountID, operatorName)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	return c.sendTX(conf, chainID, chainName, toStr, valueStr, dataStr, op)
 }
@@ -106,28 +115,29 @@ func (c *ChainClient) SendTX(conf *types.ChainConfig, chainID uint64, chainName 
 	if err != nil {
 		return "", err
 	}
-	return c.sendTX(conf, chainID, chainName, toStr, valueStr, dataStr, op)
+	resp, err := c.sendTX(conf, chainID, chainName, toStr, valueStr, dataStr, op)
+	return resp.Hash, err
 }
 
-func (c *ChainClient) sendTX(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr string, op *optypes.SyncOperator) (string, error) {
+func (c *ChainClient) sendTX(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr string, op *optypes.SyncOperator) (*SendTxResp, error) {
 	chain, ok := conf.GetChain(chainID, chainName)
 	if !ok {
-		return "", errors.Errorf("the chain %d %s is not supported", chainID, chainName)
+		return nil, errors.Errorf("the chain %d %s is not supported", chainID, chainName)
 	}
 	if chain.IsSolana() {
 		if op.Op.Type != enums.OPERATOR_KEY__ED25519 {
-			return "", errors.New("invalid operator key type, require ED25519")
+			return nil, errors.New("invalid operator key type, require ED25519")
 		}
 		return c.sendSolanaTX(chain, dataStr, op)
 	}
 
 	if op.Op.Type != enums.OPERATOR_KEY__ECDSA {
-		return "", errors.New("invalid operator key type, require ECDSA")
+		return nil, errors.New("invalid operator key type, require ECDSA")
 	}
 	return c.sendEthTX(chain, toStr, valueStr, dataStr, op)
 }
 
-func (c *ChainClient) sendSolanaTX(chain *types.Chain, dataStr string, op *optypes.SyncOperator) (string, error) {
+func (c *ChainClient) sendSolanaTX(chain *types.Chain, dataStr string, op *optypes.SyncOperator) (*SendTxResp, error) {
 	cli := client.NewClient(chain.Endpoint)
 	b := common.FromHex(op.Op.PrivateKey)
 	pk := ed25519.PrivateKey(b)
@@ -137,15 +147,15 @@ func (c *ChainClient) sendSolanaTX(chain *types.Chain, dataStr string, op *optyp
 	}
 	ins := []soltypes.Instruction{}
 	if err := json.Unmarshal([]byte(dataStr), &ins); err != nil {
-		return "", errors.Wrap(err, "invalid data format")
+		return nil, errors.Wrap(err, "invalid data format")
 	}
 	if len(ins) == 0 {
-		return "", errors.New("missing instruction data")
+		return nil, errors.New("missing instruction data")
 	}
 
 	resp, err := cli.GetLatestBlockhash(context.Background())
 	if err != nil {
-		return "", errors.Wrap(err, "failed to get solana latest block hash")
+		return nil, errors.Wrap(err, "failed to get solana latest block hash")
 	}
 	tx, err := soltypes.NewTransaction(soltypes.NewTransactionParam{
 		Message: soltypes.NewMessage(soltypes.NewMessageParam{
@@ -156,7 +166,7 @@ func (c *ChainClient) sendSolanaTX(chain *types.Chain, dataStr string, op *optyp
 		Signers: []soltypes.Account{account},
 	})
 	if err != nil {
-		return "", errors.Wrap(err, "failed to build solana raw tx")
+		return nil, errors.Wrap(err, "failed to build solana raw tx")
 	}
 
 	op.Mux.Lock()
@@ -164,14 +174,19 @@ func (c *ChainClient) sendSolanaTX(chain *types.Chain, dataStr string, op *optyp
 
 	hash, err := cli.SendTransaction(context.Background(), tx)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to send solana tx")
+		return nil, errors.Wrap(err, "failed to send solana tx")
 	}
-	return hash, nil
+	return &SendTxResp{
+		ChainName: chain.Name,
+		Hash:      hash,
+		Sender:    account.PublicKey.String(),
+		Data:      dataStr,
+	}, nil
 }
 
-func (c *ChainClient) sendEthTX(chain *types.Chain, toStr, valueStr, dataStr string, op *optypes.SyncOperator) (string, error) {
+func (c *ChainClient) sendEthTX(chain *types.Chain, toStr, valueStr, dataStr string, op *optypes.SyncOperator) (*SendTxResp, error) {
 	if toStr == "" || valueStr == "" {
-		return "", errors.New("missing to or value string")
+		return nil, errors.New("missing to or value string")
 	}
 
 	op.Mux.Lock()
@@ -179,7 +194,7 @@ func (c *ChainClient) sendEthTX(chain *types.Chain, toStr, valueStr, dataStr str
 
 	cli, err := ethclient.Dial(chain.Endpoint)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	b := common.FromHex(op.Op.PrivateKey)
@@ -189,16 +204,16 @@ func (c *ChainClient) sendEthTX(chain *types.Chain, toStr, valueStr, dataStr str
 
 	value, ok := new(big.Int).SetString(valueStr, 10)
 	if !ok {
-		return "", errors.New("fail to read tx value")
+		return nil, errors.New("fail to read tx value")
 	}
 	data, err := hex.DecodeString(strings.TrimPrefix(dataStr, "0x"))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	gasPrice, err := cli.SuggestGasPrice(context.Background())
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	msg := ethereum.CallMsg{
@@ -210,17 +225,17 @@ func (c *ChainClient) sendEthTX(chain *types.Chain, toStr, valueStr, dataStr str
 	}
 	gasLimit, err := cli.EstimateGas(context.Background(), msg)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	chainid, err := cli.ChainID(context.Background())
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	nonce, err := cli.PendingNonceAt(context.Background(), sender)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// Create a new transaction
@@ -236,16 +251,23 @@ func (c *ChainClient) sendEthTX(chain *types.Chain, toStr, valueStr, dataStr str
 
 	signedTx, err := ethtypes.SignTx(tx, ethtypes.NewLondonSigner(chainid), pk)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	metrics.BlockChainTxMtc.WithLabelValues(c.ProjectName, strconv.Itoa(int(chain.ChainID))).Inc()
 
 	err = cli.SendTransaction(context.Background(), signedTx)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return signedTx.Hash().Hex(), nil
+	return &SendTxResp{
+		ChainName: chain.Name,
+		Nonce:     nonce,
+		Hash:      signedTx.Hash().Hex(),
+		Sender:    sender.String(),
+		Receiver:  toStr,
+		Data:      dataStr,
+	}, nil
 }
 
 func (c *ChainClient) getEthClient(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName) (*ethclient.Client, error) {

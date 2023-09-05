@@ -404,12 +404,12 @@ func (ef *ExportFuncs) SendTXWithOperator(chainID int32, offset, size, vmAddrPtr
 		return wasm.ResultStatusCode_Failed
 	}
 	ret := gjson.Parse(string(buf))
-	txHash, err := ef.cl.SendTXWithOperator(ef.cf, uint64(chainID), "", ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String(), ret.Get("operatorName").String(), ef.opPool, types.MustProjectFromContext(ef.ctx))
+	txResp, err := ef.cl.SendTXWithOperator(ef.cf, uint64(chainID), "", ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String(), ret.Get("operatorName").String(), ef.opPool, types.MustProjectFromContext(ef.ctx))
 	if err != nil {
 		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
-	if err := ef.rt.Copy([]byte(txHash), vmAddrPtr, vmSizePtr); err != nil {
+	if err := ef.rt.Copy([]byte(txResp.Hash), vmAddrPtr, vmSizePtr); err != nil {
 		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}

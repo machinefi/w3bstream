@@ -220,7 +220,9 @@ func init() {
 
 	tb := mq.NewTaskBoard(_tasks)
 
-	wasmApiServer, err := wasmapi.NewServer(conflog.Std(), _redis, _dbMgr, redisKvDB, _chainConf, tb, _workers, operatorPool)
+	sfIDGenerator := confid.MustNewSFIDGenerator()
+
+	wasmApiServer, err := wasmapi.NewServer(conflog.Std(), _redis, _dbMgr, redisKvDB, _chainConf, tb, _workers, operatorPool, sfIDGenerator)
 	if err != nil {
 		conflog.Std().Fatal(err)
 	}
@@ -232,7 +234,7 @@ func init() {
 		types.WithLoggerContext(conflog.Std()),
 		types.WithMqttBrokerContext(_broker),
 		conflog.WithLoggerContext(conflog.Std()),
-		confid.WithSFIDGeneratorContext(confid.MustNewSFIDGenerator()),
+		confid.WithSFIDGeneratorContext(sfIDGenerator),
 		confjwt.WithConfContext(_jwt),
 		types.WithUploadConfigContext(_uploadConfig),
 		types.WithFileSystemOpContext(_fsop),
