@@ -1,6 +1,7 @@
 package async
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -21,7 +22,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/event"
 	apitypes "github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/types"
 	"github.com/machinefi/w3bstream/pkg/types"
-	"github.com/machinefi/w3bstream/pkg/types/wasm"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
 
@@ -45,68 +45,34 @@ func (p *ApiCallProcessor) ProcessTask(ctx context.Context, t *asynq.Task) error
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
 
-	apiReq := apitypes.HttpRequest{}
-	if err := json.Unmarshal(payload.Data, &apiReq); err != nil {
-		return fmt.Errorf("http.ReadRequest failed: %v: %w", err, asynq.SkipRetry)
-	}
-	req, err := http.NewRequest(apiReq.Method, apiReq.Url, bytes.NewReader(apiReq.Body))
+	req, err := http.ReadRequest(bufio.NewReader(bytes.NewBuffer(payload.Data)))
 	if err != nil {
 		return fmt.Errorf("http.ReadRequest failed: %v: %w", err, asynq.SkipRetry)
 	}
-	req.Header = apiReq.Header
-
-	req = req.WithContext(contextx.WithContextCompose(
-		types.WithProjectContext(payload.Project),
-		wasm.WithChainClientContext(payload.ChainClient),
-		types.WithLoggerContext(p.l),
-	)(ctx))
 
 	respRecorder := httptest.NewRecorder()
 	p.router.ServeHTTP(respRecorder, req)
 
-	projectName := payload.Project.ProjectName.Name
+	prj := types.MustProjectFromContext(req.Context())
 	_, l := p.l.Start(ctx, "wasmapi.ProcessTaskApiCall")
 	defer l.End()
-	l = l.WithValues("ProjectName", projectName)
+	l = l.WithValues("ProjectName", prj.ProjectName.Name)
 
-	resp := respRecorder.Result()
-	var body []byte
-	if resp.Body != nil {
-		body, err = io.ReadAll(resp.Body)
-		if err != nil {
-			l.Error(errors.Wrap(err, "encode http response failed"))
-			return fmt.Errorf("encode http response failed: %v: %w", err, asynq.SkipRetry)
-		}
+	apiResp, err := ConvHttpResponse(req.Header, respRecorder.Result())
+	if err != nil {
+		l.Error(errors.Wrap(err, "conv http response failed"))
+		return fmt.Errorf("conv http response failed: %v: %w", err, asynq.SkipRetry)
 	}
 
-	respHeader := resp.Header
-	for k, v := range apiReq.Header {
-		if k == "Content-Type" {
-			continue
-		}
-		respHeader[k] = v
-	}
-
-	apiResp := apitypes.HttpResponse{
-		Status:     resp.Status,
-		StatusCode: resp.StatusCode,
-		Proto:      resp.Proto,
-		Header:     respHeader,
-		Body:       body,
-	}
-	apiRespJson, err := json.Marshal(&apiResp)
+	apiRespJson, err := json.Marshal(apiResp)
 	if err != nil {
 		l.Error(errors.Wrap(err, "encode http response failed"))
 		return fmt.Errorf("encode http response failed: %v: %w", err, asynq.SkipRetry)
 	}
 
 	eventType := req.Header.Get("eventType")
-	if eventType == "" {
-		l.Error(errors.New("miss eventType"))
-		return fmt.Errorf("miss eventType, projectName %v: %w", projectName, asynq.SkipRetry)
-	}
 
-	task, err := newApiResultTask(projectName, eventType, apiRespJson)
+	task, err := newApiResultTask(prj.ProjectName.Name, eventType, apiRespJson)
 	if err != nil {
 		l.Error(errors.Wrap(err, "new api result task failed"))
 		return fmt.Errorf("new api result task failed: %v: %w", err, asynq.SkipRetry)
@@ -163,4 +129,31 @@ func (p *ApiResultProcessor) ProcessTask(ctx context.Context, t *asynq.Task) err
 	}
 
 	return nil
+}
+
+func ConvHttpResponse(reqHeader http.Header, resp *http.Response) (*apitypes.HttpResponse, error) {
+	var body []byte
+	var err error
+	if resp.Body != nil {
+		body, err = io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	respHeader := resp.Header
+	for k, v := range reqHeader {
+		if k == "Content-Type" {
+			continue
+		}
+		respHeader[k] = v
+	}
+
+	return &apitypes.HttpResponse{
+		Status:     resp.Status,
+		StatusCode: resp.StatusCode,
+		Proto:      resp.Proto,
+		Header:     respHeader,
+		Body:       body,
+	}, nil
 }

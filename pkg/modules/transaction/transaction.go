@@ -45,7 +45,7 @@ func (s *syncer) do(ctx context.Context) {
 	_, l = l.Start(ctx, "transaction.syncer")
 	defer l.End()
 
-	cs, err := m.List(d, builder.And(m.ColState().Neq(enums.TRANSACTION_STATE__CONFIRMED), m.ColState().Neq(enums.TRANSACTION_STATE__FAILED)))
+	cs, err := m.List(d, builder.And(m.ColState().Neq(enums.TRANSACTION_STATE__CONFIRMED), m.ColState().Neq(enums.TRANSACTION_STATE__FAILED), m.ColState().Neq(enums.TRANSACTION_STATE_UNKNOWN)))
 	if err != nil {
 		l.Error(errors.Wrap(err, "list transaction db failed"))
 		return

@@ -141,12 +141,28 @@ func (*Transaction) FieldReceiver() string {
 	return "Receiver"
 }
 
+func (m *Transaction) ColValue() *builder.Column {
+	return TransactionTable.ColByFieldName(m.FieldValue())
+}
+
+func (*Transaction) FieldValue() string {
+	return "Value"
+}
+
 func (m *Transaction) ColData() *builder.Column {
 	return TransactionTable.ColByFieldName(m.FieldData())
 }
 
 func (*Transaction) FieldData() string {
 	return "Data"
+}
+
+func (m *Transaction) ColOperatorName() *builder.Column {
+	return TransactionTable.ColByFieldName(m.FieldOperatorName())
+}
+
+func (*Transaction) FieldOperatorName() string {
+	return "OperatorName"
 }
 
 func (m *Transaction) ColState() *builder.Column {
