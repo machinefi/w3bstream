@@ -83,6 +83,8 @@ func newRouter(mgrDB sqlx.DBExecutor, chainConf *types.ChainConfig, opPool optyp
 	router.GET("/system/read_tx", handlers.ReadTx)
 	router.GET("/system/read_tx/async", handlers.ReadTxAsync)
 	router.POST("/system/send_tx", handlers.SendTx)
+	router.POST("/system/send_tx/async", handlers.SendTxAsync)
+	router.POST("/system/send_tx/async/state", handlers.SendTxAsyncStateCheck)
 
 	return router
 }

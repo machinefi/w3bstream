@@ -64,6 +64,11 @@ func (p *ApiCallProcessor) ProcessTask(ctx context.Context, t *asynq.Task) error
 		return fmt.Errorf("conv http response failed: %v: %w", err, asynq.SkipRetry)
 	}
 
+	// no content need return to caller
+	if apiResp.StatusCode == http.StatusNoContent {
+		return nil
+	}
+
 	apiRespJson, err := json.Marshal(apiResp)
 	if err != nil {
 		l.Error(errors.Wrap(err, "encode http response failed"))

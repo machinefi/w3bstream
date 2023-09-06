@@ -18,7 +18,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/modules/trafficlimit"
-	"github.com/machinefi/w3bstream/pkg/modules/transaction"
 )
 
 var app = global.App
@@ -86,9 +85,6 @@ func main() {
 			},
 			func() {
 				metrics.Init(ctx)
-			},
-			func() {
-				transaction.RunTxSyncer(ctx)
 			},
 		)
 	})
