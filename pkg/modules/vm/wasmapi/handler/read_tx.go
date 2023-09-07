@@ -9,6 +9,7 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/enums"
@@ -34,7 +35,7 @@ func (h *Handler) ReadTx(c *gin.Context) {
 	defer l.End()
 
 	var req readTxReq
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		l.Error(errors.Wrap(err, "decode http request failed"))
 		c.JSON(http.StatusBadRequest, newErrResp(err))
 		return
@@ -50,7 +51,7 @@ func (h *Handler) ReadTx(c *gin.Context) {
 		return
 	}
 
-	if err := h.setAsync(c.Request); err != nil {
+	if err := h.setAsync(c); err != nil {
 		l.Error(err)
 		c.JSON(http.StatusInternalServerError, newErrResp(err))
 		return

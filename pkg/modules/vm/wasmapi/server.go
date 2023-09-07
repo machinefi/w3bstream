@@ -44,7 +44,7 @@ func (s *Server) Call(ctx context.Context, data []byte) *apitypes.HttpResponse {
 			StatusCode: http.StatusBadRequest,
 		}
 	}
-	req, err := http.NewRequest(apiReq.Method, apiReq.Url, bytes.NewReader(apiReq.Body))
+	req, err := http.NewRequestWithContext(ctx, apiReq.Method, apiReq.Url, bytes.NewReader(apiReq.Body))
 	if err != nil {
 		l.Error(errors.Wrap(err, "build http request failed"))
 		return &apitypes.HttpResponse{
@@ -52,7 +52,6 @@ func (s *Server) Call(ctx context.Context, data []byte) *apitypes.HttpResponse {
 		}
 	}
 	req.Header = apiReq.Header
-	req = req.WithContext(ctx)
 
 	respRecorder := httptest.NewRecorder()
 	s.router.ServeHTTP(respRecorder, req)

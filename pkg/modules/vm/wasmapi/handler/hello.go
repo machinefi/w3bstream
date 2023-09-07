@@ -10,7 +10,7 @@ import (
 func (h *Handler) Hello(c *gin.Context) {
 	name := c.Request.Header.Get("name")
 
-	if err := h.setAsync(c.Request); err != nil {
+	if err := h.setAsync(c); err != nil {
 		c.JSON(http.StatusInternalServerError, newErrResp(err))
 		return
 	}

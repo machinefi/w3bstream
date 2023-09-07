@@ -11,6 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/enums"
@@ -40,7 +41,7 @@ func (h *Handler) SendTx(c *gin.Context) {
 	defer l.End()
 
 	var req sendTxReq
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		l.Error(errors.Wrap(err, "decode http request failed"))
 		c.JSON(http.StatusBadRequest, newErrResp(err))
 		return
@@ -82,7 +83,7 @@ func (h *Handler) SendTx(c *gin.Context) {
 	}
 
 	c.Request.Header.Add("TransactionID", id.String())
-	if err := h.setAsync(c.Request); err != nil {
+	if err := h.setAsync(c); err != nil {
 		l.Error(err)
 		c.JSON(http.StatusInternalServerError, newErrResp(err))
 		return
@@ -100,7 +101,7 @@ func (h *Handler) SendTxAsync(c *gin.Context) {
 
 	var req sendTxReq
 	var id types.SFID
-	c.ShouldBindJSON(&req)
+	c.ShouldBindBodyWith(&req, binding.JSON)
 	id.UnmarshalText([]byte(c.Request.Header.Get("TransactionID")))
 
 	prj := types.MustProjectFromContext(c.Request.Context())
@@ -138,7 +139,7 @@ func (h *Handler) SendTxAsync(c *gin.Context) {
 		return
 	}
 
-	if err := h.setAsyncAdvance(c.Request, "/system/send_tx/async/state", 10*time.Second); err != nil {
+	if err := h.setAsyncAdvance(c, "/system/send_tx/async/state", 10*time.Second); err != nil {
 		l.Error(err)
 		c.JSON(http.StatusInternalServerError, newErrResp(err))
 		return
@@ -154,7 +155,7 @@ func (h *Handler) SendTxAsyncStateCheck(c *gin.Context) {
 
 	var req sendTxReq
 	var id types.SFID
-	c.ShouldBindJSON(&req)
+	c.ShouldBindBodyWith(&req, binding.JSON)
 	id.UnmarshalText([]byte(c.Request.Header.Get("TransactionID")))
 	l = l.WithValues("TransactionID", id)
 
@@ -202,7 +203,7 @@ func (h *Handler) SendTxAsyncStateCheck(c *gin.Context) {
 		return
 	}
 
-	if err := h.setAsyncAdvance(c.Request, "/system/send_tx/async/state", 10*time.Second); err != nil {
+	if err := h.setAsyncAdvance(c, "/system/send_tx/async/state", 10*time.Second); err != nil {
 		l.Error(err)
 		c.JSON(http.StatusInternalServerError, newErrResp(err))
 		return

@@ -22,6 +22,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/event"
 	apitypes "github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/types"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/wasm"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
 )
 
@@ -49,14 +50,19 @@ func (p *ApiCallProcessor) ProcessTask(ctx context.Context, t *asynq.Task) error
 	if err != nil {
 		return fmt.Errorf("http.ReadRequest failed: %v: %w", err, asynq.SkipRetry)
 	}
+	req = req.WithContext(contextx.WithContextCompose(
+		types.WithProjectContext(payload.Project),
+		wasm.WithChainClientContext(payload.ChainClient),
+		types.WithLoggerContext(p.l),
+	)(context.Background()))
 
 	respRecorder := httptest.NewRecorder()
 	p.router.ServeHTTP(respRecorder, req)
 
-	prj := types.MustProjectFromContext(req.Context())
 	_, l := p.l.Start(ctx, "wasmapi.ProcessTaskApiCall")
 	defer l.End()
-	l = l.WithValues("ProjectName", prj.ProjectName.Name)
+	prjName := payload.Project.ProjectName.Name
+	l = l.WithValues("ProjectName", prjName)
 
 	apiResp, err := ConvHttpResponse(req.Header, respRecorder.Result())
 	if err != nil {
@@ -77,7 +83,7 @@ func (p *ApiCallProcessor) ProcessTask(ctx context.Context, t *asynq.Task) error
 
 	eventType := req.Header.Get("eventType")
 
-	task, err := newApiResultTask(prj.ProjectName.Name, eventType, apiRespJson)
+	task, err := newApiResultTask(prjName, eventType, apiRespJson)
 	if err != nil {
 		l.Error(errors.Wrap(err, "new api result task failed"))
 		return fmt.Errorf("new api result task failed: %v: %w", err, asynq.SkipRetry)

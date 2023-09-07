@@ -2,17 +2,26 @@ package handler
 
 import (
 	"bytes"
-	"net/http"
+	"io"
 	"path"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/hibiken/asynq"
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/async"
+	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
-func (h *Handler) setAsync(req *http.Request) error {
+func (h *Handler) setAsync(c *gin.Context) error {
+	if cb, ok := c.Get(gin.BodyBytesKey); ok {
+		if cbb, ok := cb.([]byte); ok {
+			c.Request.Body = io.NopCloser(bytes.NewReader(cbb))
+		}
+	}
+	req := c.Request
 	req.URL.Path = path.Join(req.URL.Path, "async")
 
 	var buf bytes.Buffer
@@ -20,7 +29,10 @@ func (h *Handler) setAsync(req *http.Request) error {
 		return errors.Wrap(err, "http request write to buffer failed")
 	}
 
-	task, err := async.NewApiCallTask(buf.Bytes())
+	prj := types.MustProjectFromContext(req.Context())
+	chainCli := wasm.MustChainClientFromContext(req.Context())
+
+	task, err := async.NewApiCallTask(prj, chainCli, buf.Bytes())
 	if err != nil {
 		return errors.Wrap(err, "new api call task failed")
 	}
@@ -30,7 +42,13 @@ func (h *Handler) setAsync(req *http.Request) error {
 	return nil
 }
 
-func (h *Handler) setAsyncAdvance(req *http.Request, path string, after time.Duration) error {
+func (h *Handler) setAsyncAdvance(c *gin.Context, path string, after time.Duration) error {
+	if cb, ok := c.Get(gin.BodyBytesKey); ok {
+		if cbb, ok := cb.([]byte); ok {
+			c.Request.Body = io.NopCloser(bytes.NewReader(cbb))
+		}
+	}
+	req := c.Request
 	req.URL.Path = path
 
 	var buf bytes.Buffer
@@ -38,7 +56,10 @@ func (h *Handler) setAsyncAdvance(req *http.Request, path string, after time.Dur
 		return errors.Wrap(err, "http request write to buffer failed")
 	}
 
-	task, err := async.NewApiCallTask(buf.Bytes())
+	prj := types.MustProjectFromContext(req.Context())
+	chainCli := wasm.MustChainClientFromContext(req.Context())
+
+	task, err := async.NewApiCallTask(prj, chainCli, buf.Bytes())
 	if err != nil {
 		return errors.Wrap(err, "new api call task failed")
 	}
