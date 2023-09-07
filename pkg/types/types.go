@@ -13,6 +13,7 @@ import (
 
 	"github.com/blocto/solana-go-sdk/client"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
@@ -90,15 +91,7 @@ func (cc *ChainConfig) LivenessCheck() map[string]string {
 
 	for _, c := range cc.Chains {
 		key := c.Endpoint
-		var err error
-
-		if c.IsSolana() {
-			cli := client.NewClient(c.Endpoint)
-			_, err = cli.GetLatestBlockhash(context.Background())
-		} else {
-			_, err = ethclient.Dial(c.Endpoint)
-		}
-		if err != nil {
+		if err := cc.chainLivenessCheck(c); err != nil {
 			m[key] = err.Error()
 		} else {
 			m[key] = "ok"
@@ -134,6 +127,27 @@ func (c *ChainConfig) GetChain(chainID uint64, chainName enums.ChainName) (*Chai
 	}
 	r, ok = c.Chains[chainName]
 	return r, ok
+}
+
+func (c *ChainConfig) chainLivenessCheck(chain *Chain) error {
+	if chain.IsSolana() {
+		cli := client.NewClient(chain.Endpoint)
+		_, err := cli.GetLatestBlockhash(context.Background())
+		return err
+	} else if chain.IsEth() {
+		cli, err := ethclient.Dial(chain.Endpoint)
+		if err != nil {
+			return err
+		}
+		chainID, err := cli.ChainID(context.Background())
+		if err != nil {
+			return err
+		}
+		if chainID.Uint64() != chain.ChainID {
+			return errors.Errorf("chainID mismatch, want %d, got %d", chain.ChainID, chainID.Uint64())
+		}
+	}
+	return nil
 }
 
 // aliases from base/types
