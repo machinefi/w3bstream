@@ -25,6 +25,7 @@ type Interface interface {
 	CreateAccountAccessKey(req *CreateAccountAccessKey, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateRsp, kit.Metadata, error)
 	CreateAccountByUsernameAndPassword(req *CreateAccountByUsernameAndPassword, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccountCreateAccountByUsernameRsp, kit.Metadata, error)
 	CreateAndStartInstance(req *CreateAndStartInstance, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsInstance, kit.Metadata, error)
+	CreateAnonymousPublisher(req *CreateAnonymousPublisher, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsPublisher, kit.Metadata, error)
 	CreateApplet(req *CreateApplet, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAppletCreateRsp, kit.Metadata, error)
 	CreateChainHeight(req *CreateChainHeight, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsChainHeight, kit.Metadata, error)
 	CreateChainTx(req *CreateChainTx, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsChainTx, kit.Metadata, error)
@@ -167,6 +168,10 @@ func (c *Client) CreateAccountByUsernameAndPassword(req *CreateAccountByUsername
 }
 
 func (c *Client) CreateAndStartInstance(req *CreateAndStartInstance, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsInstance, kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
+func (c *Client) CreateAnonymousPublisher(req *CreateAnonymousPublisher, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsPublisher, kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 

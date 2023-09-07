@@ -278,12 +278,11 @@ func (d *Database) Init(parent context.Context) (err error) {
 		}
 		db := ep.WithSchema(s.Name)
 		l := l.WithValues("schema", s.Name)
-		l.Debug("start migrating")
 		if err = migration.Migrate(db, nil); err != nil {
 			l.Error(err)
 			return err
 		}
-		l.Debug("migrated")
+		l.Info("migrated")
 	}
 
 	return nil

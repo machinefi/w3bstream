@@ -26,6 +26,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/retry"
 	"github.com/machinefi/w3bstream/pkg/depends/x/ptrx"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/operator/pool"
 	"github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
@@ -215,8 +216,13 @@ func init() {
 	_chainConf.Init()
 
 	redisKvDB := kvdb.NewRedisDB(_redis)
+	operatorPool := pool.NewPool(_dbMgr)
 
-	wasmApiServer, err := wasmapi.NewServer(conflog.Std(), _redis, _dbMgr, redisKvDB, _chainConf)
+	tb := mq.NewTaskBoard(_tasks)
+
+	sfIDGenerator := confid.MustNewSFIDGenerator()
+
+	wasmApiServer, err := wasmapi.NewServer(conflog.Std(), _redis, _dbMgr, redisKvDB, _chainConf, tb, _workers, operatorPool, sfIDGenerator)
 	if err != nil {
 		conflog.Std().Fatal(err)
 	}
@@ -228,17 +234,19 @@ func init() {
 		types.WithLoggerContext(conflog.Std()),
 		types.WithMqttBrokerContext(_broker),
 		conflog.WithLoggerContext(conflog.Std()),
-		confid.WithSFIDGeneratorContext(confid.MustNewSFIDGenerator()),
+		confid.WithSFIDGeneratorContext(sfIDGenerator),
 		confjwt.WithConfContext(_jwt),
 		types.WithUploadConfigContext(_uploadConfig),
 		types.WithFileSystemOpContext(_fsop),
 		types.WithRedisEndpointContext(_redis),
 		kvdb.WithRedisDBKeyContext(redisKvDB),
 		types.WithTaskWorkerContext(_workers),
-		types.WithTaskBoardContext(mq.NewTaskBoard(_tasks)),
+		types.WithTaskBoardContext(tb),
 		types.WithETHClientConfigContext(_ethClients),
 		types.WithChainConfigContext(_chainConf),
 		types.WithWasmApiServerContext(wasmApiServer),
+		types.WithProxyClientContext(&client.Client{}),
+		types.WithOperatorPoolContext(operatorPool),
 	)
 
 	_ctx = _injection(context.Background())

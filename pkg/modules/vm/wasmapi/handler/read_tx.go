@@ -9,6 +9,7 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/enums"
@@ -16,9 +17,8 @@ import (
 )
 
 type readTxReq struct {
-	ChainID   uint64          `json:"chainID"`
-	ChainName enums.ChainName `json:"chainName"`
-	Hash      string          `json:"hash"       binding:"required"`
+	ChainName enums.ChainName `json:"chainName"   binding:"required"`
+	Hash      string          `json:"hash"        binding:"required"`
 }
 
 type readEthTxResp struct {
@@ -35,27 +35,42 @@ func (h *Handler) ReadTx(c *gin.Context) {
 	defer l.End()
 
 	var req readTxReq
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		l.Error(errors.Wrap(err, "decode http request failed"))
 		c.JSON(http.StatusBadRequest, newErrResp(err))
 		return
 	}
-	if req.ChainID == 0 && req.ChainName == "" {
-		err := errors.New("missing chain param")
-		l.Error(err)
-		c.JSON(http.StatusBadRequest, newErrResp(err))
-		return
-	}
 
-	l = l.WithValues("chain_id", req.ChainID, "chain_name", req.ChainName)
+	l = l.WithValues("chain_name", req.ChainName)
 
-	chain, ok := h.chainConf.GetChain(req.ChainID, req.ChainName)
+	_, ok := h.chainConf.Chains[req.ChainName]
 	if !ok {
 		err := errors.New("blockchain not exist")
 		l.Error(err)
 		c.JSON(http.StatusBadRequest, newErrResp(err))
 		return
 	}
+
+	if err := h.setAsync(c); err != nil {
+		l.Error(err)
+		c.JSON(http.StatusInternalServerError, newErrResp(err))
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
+func (h *Handler) ReadTxAsync(c *gin.Context) {
+	l := types.MustLoggerFromContext(c.Request.Context())
+	_, l = l.Start(c, "wasmapi.handler.ReadTxAsync")
+	defer l.End()
+
+	var req readTxReq
+	c.ShouldBindJSON(&req)
+
+	l = l.WithValues("chain_name", req.ChainName)
+
+	chain := h.chainConf.Chains[req.ChainName]
 
 	var resp any
 

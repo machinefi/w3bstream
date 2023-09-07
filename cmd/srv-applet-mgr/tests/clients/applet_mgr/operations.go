@@ -440,6 +440,51 @@ func (o *CreateAndStartInstance) Invoke(cli kit.Client, metas ...kit.Metadata) (
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
+type CreateAnonymousPublisher struct {
+	ProjectName  string `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+}
+
+func (o *CreateAnonymousPublisher) Path() string {
+	return "/srv-applet-mgr/v0/publisher/x/:projectName/anonymous"
+}
+
+func (o *CreateAnonymousPublisher) Method() string {
+	return "POST"
+}
+
+// @StatusErr[AccessKeyNameConflict][409999020][Access Key Name Conflict]!
+// @StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!
+// @StatusErr[AccountNotFound][404999017][Account Not Found]!
+// @StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[InvalidAccessKeyIdentityType][400999013][Invalid Access Key Identity Type]!
+// @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
+// @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
+// @StatusErr[InvalidClaim][401999003][Invalid Claim]!
+// @StatusErr[InvalidToken][401999002][Invalid Token]!
+// @StatusErr[NoProjectPermission][401999004][No Project Permission]!
+// @StatusErr[ProjectNameConflict][409999002][Project Name Conflict]!
+// @StatusErr[ProjectNotFound][404999002][Project Not Found]!
+
+func (o *CreateAnonymousPublisher) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.CreateAnonymousPublisher")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *CreateAnonymousPublisher) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsPublisher, kit.Metadata, error) {
+	rsp := new(GithubComMachinefiW3BstreamPkgModelsPublisher)
+	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
+	return rsp, meta, err
+}
+
+func (o *CreateAnonymousPublisher) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsPublisher, kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
 type CreateApplet struct {
 	ProjectName  string                                               `in:"path" name:"projectName" validate:"@projectName"`
 	AuthInHeader string                                               `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
@@ -826,6 +871,7 @@ func (o *CreateProject) Method() string {
 	return "POST"
 }
 
+// @StatusErr[AccessKeyNameConflict][409999020][Access Key Name Conflict]!
 // @StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!
 // @StatusErr[AccountNotFound][404999017][Account Not Found]!
 // @StatusErr[ClientClosedRequest][499000000][ClientClosedRequest]
@@ -835,6 +881,7 @@ func (o *CreateProject) Method() string {
 // @StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[InvalidAccessKeyIdentityType][400999013][Invalid Access Key Identity Type]!
 // @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
 // @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
 // @StatusErr[InvalidClaim][401999003][Invalid Claim]!

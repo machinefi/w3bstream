@@ -23,3 +23,20 @@ func (r *CreatePublisher) Output(ctx context.Context) (interface{}, error) {
 
 	return publisher.Create(ctx, &r.CreateReq)
 }
+
+type CreateAnonymousPublisher struct {
+	httpx.MethodPost
+}
+
+func (r *CreateAnonymousPublisher) Path() string { return "/anonymous" }
+
+func (r *CreateAnonymousPublisher) Output(ctx context.Context) (interface{}, error) {
+	acc := middleware.MustCurrentAccountFromContext(ctx)
+	prjName := middleware.MustProjectName(ctx)
+	ctx, err := acc.WithProjectContextByName(acc.WithAccount(ctx), prjName)
+	if err != nil {
+		return nil, err
+	}
+
+	return publisher.CreateAnonymousPublisher(ctx)
+}

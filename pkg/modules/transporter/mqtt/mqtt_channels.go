@@ -36,7 +36,6 @@ func Subscribe(ctx context.Context, topic string) error {
 		broker.Close(cli)
 		return status.TopicAlreadySubscribed.StatusErr().WithDesc(topic)
 	}
-	l.Debug("started")
 	return nil
 }
 

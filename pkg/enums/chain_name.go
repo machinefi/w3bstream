@@ -13,4 +13,8 @@ const (
 	SOLANA_MAINNET_BETA ChainName = "solana-mainnet-beta"
 	SOLANA_TESTNET      ChainName = "solana-testnet"
 	SOLANA_DEVNET       ChainName = "solana-devnet"
+	ARBITRUM_ONE        ChainName = "arbitrum-one"
+	ARBITRUM_GOERLI     ChainName = "arbitrum-goerli"
+	OP_MAINNET          ChainName = "op-mainnet"
+	OP_GOERLI           ChainName = "op-goerli"
 )

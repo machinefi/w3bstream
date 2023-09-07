@@ -44,6 +44,7 @@ func (*Project) Comments() map[string]string {
 		"AccountID": "AccountID  account id",
 		"Name":      "Name project name",
 		"Proto":     "Proto project protocol for event publisher",
+		"Public":    "Public is true, project receive event from anonymous publisher",
 		"Version":   "Version project version",
 	}
 }
@@ -58,6 +59,9 @@ func (*Project) ColDesc() map[string][]string {
 		},
 		"Proto": []string{
 			"Proto project protocol for event publisher",
+		},
+		"Public": []string{
+			"Public is true, project receive event from anonymous publisher",
 		},
 		"Version": []string{
 			"Version project version",
@@ -139,6 +143,14 @@ func (m *Project) ColName() *builder.Column {
 
 func (*Project) FieldName() string {
 	return "Name"
+}
+
+func (m *Project) ColPublic() *builder.Column {
+	return ProjectTable.ColByFieldName(m.FieldPublic())
+}
+
+func (*Project) FieldPublic() string {
+	return "Public"
 }
 
 func (m *Project) ColVersion() *builder.Column {

@@ -29,6 +29,10 @@ func (r Auth) Output(ctx context.Context) (pl interface{}, err error) {
 	}
 	tok := strings.TrimSpace(strings.Replace(av, "Bearer", " ", 1))
 
+	if WithAnonymousPublisherFn != nil {
+		tok, err = WithAnonymousPublisherFn(ctx, tok)
+	}
+
 	ok = false
 	if BuiltInTokenValidateFn != nil {
 		pl, err, ok = BuiltInTokenValidateFn(ctx, tok)
@@ -91,4 +95,10 @@ var WithPermissionFn func(interface{}) bool
 
 func SetWithPermissionFn(f func(interface{}) bool) {
 	WithPermissionFn = f
+}
+
+var WithAnonymousPublisherFn func(context.Context, string) (string, error)
+
+func SetWithAnonymousPublisherFn(f func(context.Context, string) (string, error)) {
+	WithAnonymousPublisherFn = f
 }

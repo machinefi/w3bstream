@@ -29,6 +29,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/operator/pool"
 	"github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
@@ -142,8 +143,13 @@ func init() {
 	proxy.SetDefault()
 
 	redisKvDB := kvdb.NewRedisDB(config.Redis)
+	operatorPool := pool.NewPool(config.Postgres)
 
-	wasmApiServer, err := wasmapi.NewServer(std, config.Redis, config.Postgres, redisKvDB, config.ChainConfig)
+	tb := mq.NewTaskBoard(tasks)
+
+	sfIDGenerator := confid.MustNewSFIDGenerator()
+
+	wasmApiServer, err := wasmapi.NewServer(std, config.Redis, config.Postgres, redisKvDB, config.ChainConfig, tb, worker, operatorPool, sfIDGenerator)
 	if err != nil {
 		std.Fatal(err)
 	}
@@ -156,10 +162,10 @@ func init() {
 		conflog.WithLoggerContext(std),
 		types.WithUploadConfigContext(config.UploadConf),
 		types.WithMqttBrokerContext(config.MqttBroker),
-		confid.WithSFIDGeneratorContext(confid.MustNewSFIDGenerator()),
+		confid.WithSFIDGeneratorContext(sfIDGenerator),
 		confjwt.WithConfContext(config.Jwt),
 		types.WithTaskWorkerContext(worker),
-		types.WithTaskBoardContext(mq.NewTaskBoard(tasks)),
+		types.WithTaskBoardContext(tb),
 		types.WithETHClientConfigContext(config.EthClient),
 		types.WithChainConfigContext(config.ChainConfig),
 		types.WithEthAddressWhiteListContext(config.WhiteList),
@@ -171,6 +177,7 @@ func init() {
 		types.WithMetricsCenterConfigContext(config.MetricsCenter),
 		types.WithRobotNotifierConfigContext(config.RobotNotifier),
 		types.WithWasmApiServerContext(wasmApiServer),
+		types.WithOperatorPoolContext(operatorPool),
 	)
 	Context = WithContext(context.Background())
 }
