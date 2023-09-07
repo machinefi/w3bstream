@@ -53,24 +53,29 @@
                                 if(prop.startsWith('Server/srv-applet-mgr')) {
                                     temp['Version'] = prop.split('@')[1]
                                     temp['Server/srv-applet-mgr']=v;
-                                }
-                                if(prop.startsWith('TaskWorker/DbLogStoring')) {
+                                } else if(prop.startsWith('TaskWorker/DbLogStoring')) {
                                     temp['TaskWorker/DbLogStoring']=v;
-                                }
-                                if(prop.startsWith('TaskWorker/HandleEvent')) {
+                                } else if(prop.startsWith('TaskWorker/HandleEvent')) {
                                     temp['TaskWorker/HandleEvent']=v;
-                                }
-                                if(prop.startsWith('mqtt-broker-cli')) {
-                                    temp['mqtt-broker-cli']=v;
-                                }
-                                if(prop.startsWith('postgres-cli')) {
-                                    temp['postgres-cli']=v;
-                                }
-                                if(prop.startsWith('redis-cli')) {
-                                    temp['redis-cli']=v;
+                                } else if(prop.startsWith('mqtt-broker-cli')) {
+                                    temp['MQTT-broker-cli']=v;
+                                } else if(prop.startsWith('postgres-cli')) {
+                                    temp['Postgres-cli']=v;
+                                } else if(prop.startsWith('redis-cli')) {
+                                    temp['Redis-cli']=v;
+                                } else {
+                                    temp[prop]=v;
                                 }
                             }
-                            result[i]=temp
+                            ordered = Object.keys(temp).sort().reverse().reduce(
+                                (obj, key) => { 
+                                    obj[key] = temp[key]; 
+                                    return obj;
+                                }, 
+                                {}
+                            );
+                            
+                            result[i]=ordered
                         });
 
                         if (result.length == urls.length) {

@@ -2,7 +2,6 @@ package wasm
 
 import (
 	"context"
-	"crypto/ecdsa"
 	"crypto/ed25519"
 	"encoding/hex"
 	"encoding/json"
@@ -26,6 +25,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
+	optypes "github.com/machinefi/w3bstream/pkg/modules/operator/pool/types"
 	"github.com/machinefi/w3bstream/pkg/types"
 	wsTypes "github.com/machinefi/w3bstream/pkg/types"
 )
@@ -51,6 +51,15 @@ type PrivateKey struct {
 type ChainClient struct {
 	ProjectName string
 	Operators   map[string]*PrivateKey
+}
+
+type SendTxResp struct {
+	ChainName enums.ChainName
+	Nonce     uint64
+	Hash      string
+	Sender    string
+	Receiver  string
+	Data      string
 }
 
 func (c *ChainClient) GlobalConfigType() ConfigType { return ConfigChains }
@@ -93,57 +102,60 @@ func (c *ChainClient) WithContext(ctx context.Context) context.Context {
 	return WithChainClient(ctx, c)
 }
 
-func (c *ChainClient) SendTXWithOperator(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr, operatorName string) (string, error) {
-	pvk, ok := c.Operators[operatorName]
-	if !ok {
-		return "", errors.New("private key is empty")
+func (c *ChainClient) SendTXWithOperator(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr, operatorName string, opPool optypes.Pool, prj *models.Project) (*SendTxResp, error) {
+	op, err := opPool.Get(prj.AccountID, operatorName)
+	if err != nil {
+		return nil, err
 	}
-	return c.sendTX(conf, chainID, chainName, toStr, valueStr, dataStr, pvk)
+	return c.sendTX(conf, chainID, chainName, toStr, valueStr, dataStr, op)
 }
 
-func (c *ChainClient) SendTX(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr string) (string, error) {
-	pvk, ok := c.Operators[operator.DefaultOperatorName]
-	if !ok {
-		return "", errors.New("private key is empty")
+func (c *ChainClient) SendTX(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr string, opPool optypes.Pool, prj *models.Project) (string, error) {
+	op, err := opPool.Get(prj.AccountID, operator.DefaultOperatorName)
+	if err != nil {
+		return "", err
 	}
-	return c.sendTX(conf, chainID, chainName, toStr, valueStr, dataStr, pvk)
+	resp, err := c.sendTX(conf, chainID, chainName, toStr, valueStr, dataStr, op)
+	return resp.Hash, err
 }
 
-func (c *ChainClient) sendTX(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr string, pvk *PrivateKey) (string, error) {
+func (c *ChainClient) sendTX(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr string, op *optypes.SyncOperator) (*SendTxResp, error) {
 	chain, ok := conf.GetChain(chainID, chainName)
 	if !ok {
-		return "", errors.Errorf("the chain %d %s is not supported", chainID, chainName)
+		return nil, errors.Errorf("the chain %d %s is not supported", chainID, chainName)
 	}
 	if chain.IsSolana() {
-		if pvk.Type != enums.OPERATOR_KEY__ED25519 {
-			return "", errors.New("invalid operator key type, require ED25519")
+		if op.Op.Type != enums.OPERATOR_KEY__ED25519 {
+			return nil, errors.New("invalid operator key type, require ED25519")
 		}
-		return c.sendSolanaTX(chain, dataStr, pvk.Ed25519)
+		return c.sendSolanaTX(chain, dataStr, op)
 	}
 
-	if pvk.Type != enums.OPERATOR_KEY__ECDSA {
-		return "", errors.New("invalid operator key type, require ECDSA")
+	if op.Op.Type != enums.OPERATOR_KEY__ECDSA {
+		return nil, errors.New("invalid operator key type, require ECDSA")
 	}
-	return c.sendEthTX(chain, toStr, valueStr, dataStr, crypto.ToECDSAUnsafe(pvk.Ecdsa))
+	return c.sendEthTX(chain, toStr, valueStr, dataStr, op)
 }
 
-func (c *ChainClient) sendSolanaTX(chain *types.Chain, dataStr string, pvk ed25519.PrivateKey) (string, error) {
+func (c *ChainClient) sendSolanaTX(chain *types.Chain, dataStr string, op *optypes.SyncOperator) (*SendTxResp, error) {
 	cli := client.NewClient(chain.Endpoint)
+	b := common.FromHex(op.Op.PrivateKey)
+	pk := ed25519.PrivateKey(b)
 	account := soltypes.Account{
-		PublicKey:  solcommon.PublicKeyFromBytes(pvk.Public().(ed25519.PublicKey)),
-		PrivateKey: pvk,
+		PublicKey:  solcommon.PublicKeyFromBytes(pk.Public().(ed25519.PublicKey)),
+		PrivateKey: pk,
 	}
 	ins := []soltypes.Instruction{}
 	if err := json.Unmarshal([]byte(dataStr), &ins); err != nil {
-		return "", errors.Wrap(err, "invalid data format")
+		return nil, errors.Wrap(err, "invalid data format")
 	}
 	if len(ins) == 0 {
-		return "", errors.New("missing instruction data")
+		return nil, errors.New("missing instruction data")
 	}
 
 	resp, err := cli.GetLatestBlockhash(context.Background())
 	if err != nil {
-		return "", errors.Wrap(err, "failed to get solana latest block hash")
+		return nil, errors.Wrap(err, "failed to get solana latest block hash")
 	}
 	tx, err := soltypes.NewTransaction(soltypes.NewTransactionParam{
 		Message: soltypes.NewMessage(soltypes.NewMessageParam{
@@ -154,43 +166,54 @@ func (c *ChainClient) sendSolanaTX(chain *types.Chain, dataStr string, pvk ed255
 		Signers: []soltypes.Account{account},
 	})
 	if err != nil {
-		return "", errors.Wrap(err, "failed to build solana raw tx")
+		return nil, errors.Wrap(err, "failed to build solana raw tx")
 	}
+
+	op.Mux.Lock()
+	defer op.Mux.Unlock()
+
 	hash, err := cli.SendTransaction(context.Background(), tx)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to send solana tx")
+		return nil, errors.Wrap(err, "failed to send solana tx")
 	}
-	return hash, nil
+	return &SendTxResp{
+		ChainName: chain.Name,
+		Hash:      hash,
+		Sender:    account.PublicKey.String(),
+		Data:      dataStr,
+	}, nil
 }
 
-func (c *ChainClient) sendEthTX(chain *types.Chain, toStr, valueStr, dataStr string, pvk *ecdsa.PrivateKey) (string, error) {
+func (c *ChainClient) sendEthTX(chain *types.Chain, toStr, valueStr, dataStr string, op *optypes.SyncOperator) (*SendTxResp, error) {
 	if toStr == "" || valueStr == "" {
-		return "", errors.New("missing to or value string")
+		return nil, errors.New("missing to or value string")
 	}
+
+	op.Mux.Lock()
+	defer op.Mux.Unlock()
+
 	cli, err := ethclient.Dial(chain.Endpoint)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	var (
-		sender = crypto.PubkeyToAddress(pvk.PublicKey)
-		to     = common.HexToAddress(toStr)
-	)
+
+	b := common.FromHex(op.Op.PrivateKey)
+	pk := crypto.ToECDSAUnsafe(b)
+	sender := crypto.PubkeyToAddress(pk.PublicKey)
+	to := common.HexToAddress(toStr)
+
 	value, ok := new(big.Int).SetString(valueStr, 10)
 	if !ok {
-		return "", errors.New("fail to read tx value")
+		return nil, errors.New("fail to read tx value")
 	}
 	data, err := hex.DecodeString(strings.TrimPrefix(dataStr, "0x"))
 	if err != nil {
-		return "", err
-	}
-	nonce, err := cli.PendingNonceAt(context.Background(), sender)
-	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	gasPrice, err := cli.SuggestGasPrice(context.Background())
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	msg := ethereum.CallMsg{
@@ -202,7 +225,17 @@ func (c *ChainClient) sendEthTX(chain *types.Chain, toStr, valueStr, dataStr str
 	}
 	gasLimit, err := cli.EstimateGas(context.Background(), msg)
 	if err != nil {
-		return "", err
+		return nil, err
+	}
+
+	chainid, err := cli.ChainID(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	nonce, err := cli.PendingNonceAt(context.Background(), sender)
+	if err != nil {
+		return nil, err
 	}
 
 	// Create a new transaction
@@ -216,22 +249,25 @@ func (c *ChainClient) sendEthTX(chain *types.Chain, toStr, valueStr, dataStr str
 			Data:     data,
 		})
 
-	chainid, err := cli.ChainID(context.Background())
+	signedTx, err := ethtypes.SignTx(tx, ethtypes.NewLondonSigner(chainid), pk)
 	if err != nil {
-		return "", err
-	}
-	signedTx, err := ethtypes.SignTx(tx, ethtypes.NewLondonSigner(chainid), pvk)
-	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	metrics.BlockChainTxMtc.WithLabelValues(c.ProjectName, strconv.Itoa(int(chain.ChainID))).Inc()
 
 	err = cli.SendTransaction(context.Background(), signedTx)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return signedTx.Hash().Hex(), nil
+	return &SendTxResp{
+		ChainName: chain.Name,
+		Nonce:     nonce,
+		Hash:      signedTx.Hash().Hex(),
+		Sender:    sender.String(),
+		Receiver:  toStr,
+		Data:      dataStr,
+	}, nil
 }
 
 func (c *ChainClient) getEthClient(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName) (*ethclient.Client, error) {

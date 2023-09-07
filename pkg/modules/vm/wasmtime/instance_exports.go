@@ -19,6 +19,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/modules/job"
 	"github.com/machinefi/w3bstream/pkg/modules/metrics"
+	optypes "github.com/machinefi/w3bstream/pkg/modules/operator/pool/types"
 	wasmapi "github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/types"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
@@ -46,6 +47,7 @@ type (
 		mq      *confmqtt.Client
 		metrics metrics.CustomMetrics
 		srv     wasmapi.Server
+		opPool  optypes.Pool
 	}
 )
 
@@ -56,6 +58,7 @@ func NewExportFuncs(ctx context.Context, rt *Runtime) (*ExportFuncs, error) {
 		kvs:     wasm.MustKVStoreFromContext(ctx),
 		log:     wasm.MustLoggerFromContext(ctx),
 		srv:     types.MustWasmApiServerFromContext(ctx),
+		opPool:  types.MustOperatorPoolFromContext(ctx),
 		cl:      wasm.MustChainClientFromContext(ctx),
 		cf:      types.MustChainConfigFromContext(ctx),
 		db:      wasm.MustSQLStoreFromContext(ctx),
@@ -378,7 +381,7 @@ func (ef *ExportFuncs) SendTX(chainID int32, offset, size, vmAddrPtr, vmSizePtr 
 		return wasm.ResultStatusCode_Failed
 	}
 	ret := gjson.Parse(string(buf))
-	txHash, err := ef.cl.SendTX(ef.cf, uint64(chainID), "", ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String())
+	txHash, err := ef.cl.SendTX(ef.cf, uint64(chainID), "", ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String(), ef.opPool, types.MustProjectFromContext(ef.ctx))
 	if err != nil {
 		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
@@ -401,12 +404,12 @@ func (ef *ExportFuncs) SendTXWithOperator(chainID int32, offset, size, vmAddrPtr
 		return wasm.ResultStatusCode_Failed
 	}
 	ret := gjson.Parse(string(buf))
-	txHash, err := ef.cl.SendTXWithOperator(ef.cf, uint64(chainID), "", ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String(), ret.Get("operatorName").String())
+	txResp, err := ef.cl.SendTXWithOperator(ef.cf, uint64(chainID), "", ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String(), ret.Get("operatorName").String(), ef.opPool, types.MustProjectFromContext(ef.ctx))
 	if err != nil {
 		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
-	if err := ef.rt.Copy([]byte(txHash), vmAddrPtr, vmSizePtr); err != nil {
+	if err := ef.rt.Copy([]byte(txResp.Hash), vmAddrPtr, vmSizePtr); err != nil {
 		ef.logAndPersistToDB(conflog.ErrorLevel, efSrc, err.Error())
 		return wasm.ResultStatusCode_Failed
 	}
