@@ -16,6 +16,7 @@ func init() {
 	Root.Register(kit.NewRouter(&RemovePublisher{}))
 	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &BatchRemovePublisher{}))
 	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &CreatePublisher{}))
+	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &CreateAnonymousPublisher{}))
 	Root.Register(kit.NewRouter(&middleware.ProjectProvider{}, &UpdatePublisher{}))
 
 	access_key.RouterRegister(Root, enums.ApiGroupPublisher, enums.ApiGroupPublisherDesc)
