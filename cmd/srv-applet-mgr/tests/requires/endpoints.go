@@ -215,6 +215,12 @@ func init() {
 	}
 	_chainConf.Init()
 
+	// TODO instance
+	_risc0Conf := &types.Risc0Config{
+		Endpoint:        "127.0.0.1:3000",
+		CreateProofPath: "/ws/api/prove_file",
+	}
+
 	redisKvDB := kvdb.NewRedisDB(_redis)
 	operatorPool := pool.NewPool(_dbMgr)
 
@@ -222,7 +228,7 @@ func init() {
 
 	sfIDGenerator := confid.MustNewSFIDGenerator()
 
-	wasmApiServer, err := wasmapi.NewServer(conflog.Std(), _redis, _dbMgr, redisKvDB, _chainConf, tb, _workers, operatorPool, sfIDGenerator)
+	wasmApiServer, err := wasmapi.NewServer(conflog.Std(), _redis, _dbMgr, redisKvDB, _chainConf, tb, _workers, operatorPool, sfIDGenerator, _risc0Conf)
 	if err != nil {
 		conflog.Std().Fatal(err)
 	}

@@ -67,6 +67,8 @@ SRV_APPLET_MGR__Redis_Protocol: tcp
 SRV_APPLET_MGR__Redis_ReadTimeout: 10s
 SRV_APPLET_MGR__Redis_Wait: "true"
 SRV_APPLET_MGR__Redis_WriteTimeout: 10s
+SRV_APPLET_MGR__Risc0Config_CreateProofPath: ""
+SRV_APPLET_MGR__Risc0Config_Endpoint: ""
 SRV_APPLET_MGR__RobotNotifier_Env: ""
 SRV_APPLET_MGR__RobotNotifier_Secret: ""
 SRV_APPLET_MGR__RobotNotifier_URL: ""

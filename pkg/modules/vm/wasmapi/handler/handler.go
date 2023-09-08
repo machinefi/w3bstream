@@ -15,14 +15,17 @@ type Handler struct {
 	chainConf *types.ChainConfig
 	sfid      confid.SFIDGenerator
 	asyncCli  *asynq.Client
+	risc0Conf *types.Risc0Config
 }
 
-func New(mgrDB sqlx.DBExecutor, chainConf *types.ChainConfig, opPool optypes.Pool, sfid confid.SFIDGenerator, asyncCli *asynq.Client) *Handler {
+func New(mgrDB sqlx.DBExecutor, chainConf *types.ChainConfig, opPool optypes.Pool, sfid confid.SFIDGenerator,
+	asyncCli *asynq.Client, risc0Conf *types.Risc0Config) *Handler {
 	return &Handler{
 		opPool:    opPool,
 		mgrDB:     mgrDB,
 		chainConf: chainConf,
 		sfid:      sfid,
 		asyncCli:  asyncCli,
+		risc0Conf: risc0Conf,
 	}
 }

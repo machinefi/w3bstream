@@ -70,12 +70,13 @@ func (s *Server) Shutdown() {
 	s.srv.Shutdown()
 }
 
-func newRouter(mgrDB sqlx.DBExecutor, chainConf *types.ChainConfig, opPool optypes.Pool, sfid confid.SFIDGenerator, asyncCli *asynq.Client) *gin.Engine {
+func newRouter(mgrDB sqlx.DBExecutor, chainConf *types.ChainConfig, opPool optypes.Pool, sfid confid.SFIDGenerator,
+	asyncCli *asynq.Client, risc0Conf *types.Risc0Config) *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Recovery())
 	router.Use(handler.ParamValidate())
 
-	handlers := handler.New(mgrDB, chainConf, opPool, sfid, asyncCli)
+	handlers := handler.New(mgrDB, chainConf, opPool, sfid, asyncCli, risc0Conf)
 
 	router.GET("/system/hello", handlers.Hello)
 	router.GET("/system/hello/async", handlers.HelloAsync)
@@ -84,11 +85,14 @@ func newRouter(mgrDB sqlx.DBExecutor, chainConf *types.ChainConfig, opPool optyp
 	router.POST("/system/send_tx", handlers.SendTx)
 	router.POST("/system/send_tx/async", handlers.SendTxAsync)
 	router.POST("/system/send_tx/async/state", handlers.SendTxAsyncStateCheck)
+	router.POST("/system/gen_zk_proof", handlers.GenRisc0Proof)
+	router.POST("/system/gen_zk_proof/async", handlers.GenRisc0ProofAsync)
 
 	return router
 }
 
-func NewServer(l log.Logger, redisConf *redis.Redis, mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB, chainConf *types.ChainConfig, tb *mq.TaskBoard, tw *mq.TaskWorker, opPool optypes.Pool, sfid confid.SFIDGenerator) (*Server, error) {
+func NewServer(l log.Logger, redisConf *redis.Redis, mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB, chainConf *types.ChainConfig,
+	tb *mq.TaskBoard, tw *mq.TaskWorker, opPool optypes.Pool, sfid confid.SFIDGenerator, risc0Conf *types.Risc0Config) (*Server, error) {
 
 	redisCli := asynq.RedisClientOpt{
 		Network:      redisConf.Protocol,
@@ -102,7 +106,7 @@ func NewServer(l log.Logger, redisConf *redis.Redis, mgrDB sqlx.DBExecutor, kv *
 	asyncCli := asynq.NewClient(redisCli)
 	asyncSrv := asynq.NewServer(redisCli, asynq.Config{})
 
-	router := newRouter(mgrDB, chainConf, opPool, sfid, asyncCli)
+	router := newRouter(mgrDB, chainConf, opPool, sfid, asyncCli, risc0Conf)
 
 	mux := asynq.NewServeMux()
 	mux.Handle(async.TaskNameApiCall, async.NewApiCallProcessor(l, router, asyncCli))

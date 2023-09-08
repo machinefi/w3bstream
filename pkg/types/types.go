@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -234,4 +235,22 @@ func (c *RobotNotifierConfig) Init() {
 			return signature, nil
 		}
 	}
+}
+
+type Risc0Config struct {
+	Endpoint        string
+	CreateProofPath string
+}
+
+func (r *Risc0Config) LivenessCheck() map[string]string {
+	m := map[string]string{}
+
+	_, err := http.NewRequest("GET", fmt.Sprintf("http://%s", r.Endpoint), nil)
+	if err != nil {
+		m[r.Endpoint] = err.Error()
+	} else {
+		m[r.Endpoint] = "ok"
+	}
+
+	return m
 }
