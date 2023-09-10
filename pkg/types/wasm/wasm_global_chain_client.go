@@ -6,10 +6,10 @@ import (
 	"crypto/ed25519"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
 	"math/big"
 	"net/http"
-	"path"
 	"strconv"
 	"strings"
 
@@ -171,7 +171,7 @@ func (c *ChainClient) sendUserOp(conf *wsTypes.ChainConfig, chain *wsTypes.Chain
 		Data:                  dataStr,
 		ChainRPC:              chain.Endpoint,
 		BundlerRPC:            conf.AABundlerEndpoint,
-		PaymasterRPC:          path.Join(conf.AAPaymasterEndpoint, op.Op.PaymasterKey),
+		PaymasterRPC:          fmt.Sprintf("%s/%s", conf.AAPaymasterEndpoint, op.Op.PaymasterKey),
 		EntryPointAddress:     conf.AAEntryPointContractAddress,
 		AccountFactoryAddress: conf.AAAccountFactoryContractAddress,
 	})
@@ -183,6 +183,7 @@ func (c *ChainClient) sendUserOp(conf *wsTypes.ChainConfig, chain *wsTypes.Chain
 	if err != nil {
 		return nil, errors.Wrap(err, "build aa service http request failed")
 	}
+	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {

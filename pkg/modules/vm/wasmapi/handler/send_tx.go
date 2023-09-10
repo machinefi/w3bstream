@@ -119,14 +119,18 @@ func (h *Handler) SendTxAsync(c *gin.Context) {
 		state = enums.TRANSACTION_STATE__PENDING
 	}
 
+	txInfo := models.TransactionInfo{
+		State: state,
+	}
+	if txResp != nil {
+		txInfo.Sender = txResp.Sender
+		txInfo.Hash = txResp.Hash
+		txInfo.Nonce = txResp.Nonce
+	}
+
 	m := &models.Transaction{
-		RelTransaction: models.RelTransaction{TransactionID: id},
-		TransactionInfo: models.TransactionInfo{
-			State:  state,
-			Sender: txResp.Sender,
-			Hash:   txResp.Hash,
-			Nonce:  txResp.Nonce,
-		},
+		RelTransaction:  models.RelTransaction{TransactionID: id},
+		TransactionInfo: txInfo,
 	}
 	if err := m.UpdateByTransactionID(h.mgrDB); err != nil {
 		l.Error(errors.Wrap(err, "update transaction db failed"))
