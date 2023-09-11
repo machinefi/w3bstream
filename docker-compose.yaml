@@ -71,15 +71,9 @@ services:
     ports:
       - '6379:6379'
 
-  prometheus:
-    image: prom/prometheus:latest
-    depends_on:
-      - "w3bapp"
-    user: root
-    command: --web.enable-lifecycle --web.enable-admin-api --config.file=/etc/prometheus/prometheus.yml
-    container_name: prometheus
+  aa_service:
+    image: iotexdev/aa-service
+    container_name: aa-service
     restart: always
-    volumes:
-      - ${WS_WORKING_DIR}/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
-      - "9090:9090"
+      - "8080:8080"
