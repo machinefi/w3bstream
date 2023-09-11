@@ -170,10 +170,10 @@ func (c *ChainClient) sendUserOp(conf *wsTypes.ChainConfig, chain *wsTypes.Chain
 		Value:                 valueStr,
 		Data:                  dataStr,
 		ChainRPC:              chain.Endpoint,
-		BundlerRPC:            conf.AABundlerEndpoint,
-		PaymasterRPC:          fmt.Sprintf("%s/%s", conf.AAPaymasterEndpoint, op.Op.PaymasterKey),
-		EntryPointAddress:     conf.AAEntryPointContractAddress,
-		AccountFactoryAddress: conf.AAAccountFactoryContractAddress,
+		BundlerRPC:            chain.AABundlerEndpoint,
+		PaymasterRPC:          fmt.Sprintf("%s/%s", chain.AAPaymasterEndpoint, op.Op.PaymasterKey),
+		EntryPointAddress:     chain.AAEntryPointContractAddress,
+		AccountFactoryAddress: chain.AAAccountFactoryContractAddress,
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "build aa service params failed")
