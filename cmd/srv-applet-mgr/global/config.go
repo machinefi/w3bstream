@@ -80,6 +80,7 @@ func init() {
 		RateLimit     *confrate.RateLimit
 		MetricsCenter *types.MetricsCenterConfig
 		RobotNotifier *types.RobotNotifierConfig
+		Risc0Config   *types.Risc0Config
 	}{
 		Postgres:      db,
 		MonitorDB:     monitordb,
@@ -102,6 +103,7 @@ func init() {
 		RateLimit:     &confrate.RateLimit{},
 		MetricsCenter: &types.MetricsCenterConfig{},
 		RobotNotifier: &types.RobotNotifierConfig{},
+		Risc0Config:   &types.Risc0Config{},
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
@@ -149,7 +151,8 @@ func init() {
 
 	sfIDGenerator := confid.MustNewSFIDGenerator()
 
-	wasmApiServer, err := wasmapi.NewServer(std, config.Redis, config.Postgres, redisKvDB, config.ChainConfig, tb, worker, operatorPool, sfIDGenerator)
+	wasmApiServer, err := wasmapi.NewServer(std, config.Redis, config.Postgres, redisKvDB, config.ChainConfig,
+		tb, worker, operatorPool, sfIDGenerator, config.Risc0Config)
 	if err != nil {
 		std.Fatal(err)
 	}
