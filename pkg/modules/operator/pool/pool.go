@@ -56,8 +56,26 @@ func (p *Pool) setOperator(accountID types.SFID, opName string) (*optypes.SyncOp
 	return nsop, nil
 }
 
+func (p *Pool) Delete(id types.SFID) error {
+	ctx := types.WithMgrDBExecutor(context.Background(), p.db)
+	op, err := operator.GetBySFID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if err := operator.RemoveBySFID(ctx, id); err != nil {
+		return err
+	}
+
+	key := p.getKey(op.AccountID, op.Name)
+
+	p.mux.Lock()
+	defer p.mux.Unlock()
+	delete(p.operators, key)
+
+	return nil
+}
+
 // operator memory pool
-// TODO support operator delete
 func NewPool(mgrDB sqlx.DBExecutor) optypes.Pool {
 	return &Pool{
 		db:        mgrDB,

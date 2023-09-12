@@ -9,6 +9,7 @@ import (
 // Transaction schema for blockchain transaction information
 // @def primary                      ID
 // @def unique_index UI_transaction_id  TransactionID
+// @def index I_project_id  ProjectID
 //
 //go:generate toolkit gen model Transaction --database DB
 type Transaction struct {

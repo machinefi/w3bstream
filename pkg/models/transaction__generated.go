@@ -57,9 +57,18 @@ func (*Transaction) PrimaryKey() []string {
 	}
 }
 
+func (*Transaction) Indexes() builder.Indexes {
+	return builder.Indexes{
+		"i_project_id": []string{
+			"ProjectID",
+		},
+	}
+}
+
 func (m *Transaction) IndexFieldNames() []string {
 	return []string{
 		"ID",
+		"ProjectID",
 		"TransactionID",
 	}
 }

@@ -5,7 +5,6 @@ import (
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
-	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -22,5 +21,6 @@ func (r *RemoveOperator) Output(ctx context.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return nil, operator.RemoveBySFID(ctx, r.OperatorID)
+	pool := types.MustOperatorPoolFromContext(ctx)
+	return nil, pool.Delete(r.OperatorID)
 }

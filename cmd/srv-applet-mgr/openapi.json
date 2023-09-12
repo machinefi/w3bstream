@@ -4991,19 +4991,6 @@
               "@StatusErr[NoOperatorPermission][401999005][No Operator Permission]!"
             ]
           },
-          "403": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[OccupiedOperator][403999008][Occupied Operator]!"
-            ]
-          },
           "404": {
             "description": "",
             "content": {

@@ -14,4 +14,5 @@ type SyncOperator struct {
 
 type Pool interface {
 	Get(accountID basetypes.SFID, opName string) (*SyncOperator, error)
+	Delete(id basetypes.SFID) error
 }
