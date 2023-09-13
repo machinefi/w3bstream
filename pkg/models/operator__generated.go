@@ -131,6 +131,14 @@ func (*Operator) FieldPrivateKey() string {
 	return "PrivateKey"
 }
 
+func (m *Operator) ColPaymasterKey() *builder.Column {
+	return OperatorTable.ColByFieldName(m.FieldPaymasterKey())
+}
+
+func (*Operator) FieldPaymasterKey() string {
+	return "PaymasterKey"
+}
+
 func (m *Operator) ColName() *builder.Column {
 	return OperatorTable.ColByFieldName(m.FieldName())
 }

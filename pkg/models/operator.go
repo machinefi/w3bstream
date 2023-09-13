@@ -25,7 +25,8 @@ type RelOperator struct {
 }
 
 type OperatorInfo struct {
-	PrivateKey string                `db:"f_private_key" json:"-"`
-	Name       string                `db:"f_name" json:"name"`
-	Type       enums.OperatorKeyType `db:"f_type,default='1'"           json:"type,omitempty,default='1'"`
+	PrivateKey   string                `db:"f_private_key"                  json:"-"`
+	PaymasterKey string                `db:"f_paymaster_key,default=''"     json:"-"`
+	Name         string                `db:"f_name"                         json:"name"`
+	Type         enums.OperatorKeyType `db:"f_type,default='1'"             json:"type,omitempty,default='1'"`
 }

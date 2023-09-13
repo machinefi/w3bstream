@@ -4,12 +4,15 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
+	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
 )
 
 type CreateReq struct {
-	Name       string `json:"name"`
-	PrivateKey string `json:"privateKey"`
+	Name         string                `json:"name"`
+	PrivateKey   string                `json:"privateKey"`
+	PaymasterKey string                `json:"paymasterKey,omitempty"`
+	Type         enums.OperatorKeyType `json:"type,omitempty,default='1'"`
 }
 
 type CondArgs struct {

@@ -36,6 +36,20 @@ func (m *MockPool) EXPECT() *MockPoolMockRecorder {
 	return m.recorder
 }
 
+// Delete mocks base method.
+func (m *MockPool) Delete(id types.SFID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockPoolMockRecorder) Delete(id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockPool)(nil).Delete), id)
+}
+
 // Get mocks base method.
 func (m *MockPool) Get(accountID types.SFID, opName string) (*types0.SyncOperator, error) {
 	m.ctrl.T.Helper()

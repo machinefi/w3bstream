@@ -1,11 +1,15 @@
 package wasm
 
 import (
+	"bytes"
 	"context"
 	"crypto/ed25519"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	"io"
 	"math/big"
+	"net/http"
 	"strconv"
 	"strings"
 
@@ -26,7 +30,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	optypes "github.com/machinefi/w3bstream/pkg/modules/operator/pool/types"
-	"github.com/machinefi/w3bstream/pkg/types"
 	wsTypes "github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -102,7 +105,7 @@ func (c *ChainClient) WithContext(ctx context.Context) context.Context {
 	return WithChainClient(ctx, c)
 }
 
-func (c *ChainClient) SendTXWithOperator(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr, operatorName string, opPool optypes.Pool, prj *models.Project) (*SendTxResp, error) {
+func (c *ChainClient) SendTXWithOperator(conf *wsTypes.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr, operatorName string, opPool optypes.Pool, prj *models.Project) (*SendTxResp, error) {
 	op, err := opPool.Get(prj.AccountID, operatorName)
 	if err != nil {
 		return nil, err
@@ -110,7 +113,7 @@ func (c *ChainClient) SendTXWithOperator(conf *types.ChainConfig, chainID uint64
 	return c.sendTX(conf, chainID, chainName, toStr, valueStr, dataStr, op)
 }
 
-func (c *ChainClient) SendTX(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr string, opPool optypes.Pool, prj *models.Project) (string, error) {
+func (c *ChainClient) SendTX(conf *wsTypes.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr string, opPool optypes.Pool, prj *models.Project) (string, error) {
 	op, err := opPool.Get(prj.AccountID, operator.DefaultOperatorName)
 	if err != nil {
 		return "", err
@@ -119,10 +122,16 @@ func (c *ChainClient) SendTX(conf *types.ChainConfig, chainID uint64, chainName 
 	return resp.Hash, err
 }
 
-func (c *ChainClient) sendTX(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr string, op *optypes.SyncOperator) (*SendTxResp, error) {
+func (c *ChainClient) sendTX(conf *wsTypes.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, valueStr, dataStr string, op *optypes.SyncOperator) (*SendTxResp, error) {
 	chain, ok := conf.GetChain(chainID, chainName)
 	if !ok {
 		return nil, errors.Errorf("the chain %d %s is not supported", chainID, chainName)
+	}
+	if op.Op.PaymasterKey != "" {
+		if !chain.IsAASupported() {
+			return nil, errors.New("account abstraction not supported at the chain")
+		}
+		return c.sendUserOp(conf, chain, toStr, valueStr, dataStr, op)
 	}
 	if chain.IsSolana() {
 		if op.Op.Type != enums.OPERATOR_KEY__ED25519 {
@@ -137,7 +146,76 @@ func (c *ChainClient) sendTX(conf *types.ChainConfig, chainID uint64, chainName 
 	return c.sendEthTX(chain, toStr, valueStr, dataStr, op)
 }
 
-func (c *ChainClient) sendSolanaTX(chain *types.Chain, dataStr string, op *optypes.SyncOperator) (*SendTxResp, error) {
+func (c *ChainClient) sendUserOp(conf *wsTypes.ChainConfig, chain *wsTypes.Chain, toStr, valueStr, dataStr string, op *optypes.SyncOperator) (*SendTxResp, error) {
+	if toStr == "" || valueStr == "" {
+		return nil, errors.New("missing to or value string")
+	}
+
+	op.Mux.Lock()
+	defer op.Mux.Unlock()
+
+	params, err := json.Marshal(struct {
+		PrivateKey            string `json:"privateKey,omitempty"`
+		To                    string `json:"to,omitempty"`
+		Value                 string `json:"value,omitempty"`
+		Data                  string `json:"data,omitempty"`
+		ChainRPC              string `json:"chainRPC,omitempty"`
+		BundlerRPC            string `json:"bundlerRPC,omitempty"`
+		PaymasterRPC          string `json:"paymasterRPC,omitempty"`
+		EntryPointAddress     string `json:"entryPointAddress,omitempty"`
+		AccountFactoryAddress string `json:"accountFactoryAddress,omitempty"`
+	}{
+		PrivateKey:            op.Op.PrivateKey,
+		To:                    toStr,
+		Value:                 valueStr,
+		Data:                  dataStr,
+		ChainRPC:              chain.Endpoint,
+		BundlerRPC:            chain.AABundlerEndpoint,
+		PaymasterRPC:          fmt.Sprintf("%s/%s", chain.AAPaymasterEndpoint, op.Op.PaymasterKey),
+		EntryPointAddress:     chain.AAEntryPointContractAddress,
+		AccountFactoryAddress: chain.AAAccountFactoryContractAddress,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "build aa service params failed")
+	}
+
+	req, err := http.NewRequest("POST", conf.AAUserOpEndpoint, bytes.NewReader(params))
+	if err != nil {
+		return nil, errors.Wrap(err, "build aa service http request failed")
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, errors.Wrap(err, "call aa service failed")
+	}
+	defer resp.Body.Close()
+
+	body, error := io.ReadAll(resp.Body)
+	if error != nil {
+		return nil, errors.Wrap(err, "read aa service response failed")
+	}
+	jsonResp := struct {
+		TxHash string `json:"txHash,omitempty"`
+	}{}
+	if err := json.Unmarshal(body, &jsonResp); err != nil {
+		return nil, errors.Wrap(err, "unmarshal aa service response failed")
+	}
+
+	b := common.FromHex(op.Op.PrivateKey)
+	pk := crypto.ToECDSAUnsafe(b)
+	sender := crypto.PubkeyToAddress(pk.PublicKey)
+
+	return &SendTxResp{
+		ChainName: chain.Name,
+		Sender:    sender.String(),
+		Hash:      jsonResp.TxHash,
+		Receiver:  toStr,
+		Data:      dataStr,
+	}, nil
+}
+
+func (c *ChainClient) sendSolanaTX(chain *wsTypes.Chain, dataStr string, op *optypes.SyncOperator) (*SendTxResp, error) {
 	cli := client.NewClient(chain.Endpoint)
 	b := common.FromHex(op.Op.PrivateKey)
 	pk := ed25519.PrivateKey(b)
@@ -184,7 +262,7 @@ func (c *ChainClient) sendSolanaTX(chain *types.Chain, dataStr string, op *optyp
 	}, nil
 }
 
-func (c *ChainClient) sendEthTX(chain *types.Chain, toStr, valueStr, dataStr string, op *optypes.SyncOperator) (*SendTxResp, error) {
+func (c *ChainClient) sendEthTX(chain *wsTypes.Chain, toStr, valueStr, dataStr string, op *optypes.SyncOperator) (*SendTxResp, error) {
 	if toStr == "" || valueStr == "" {
 		return nil, errors.New("missing to or value string")
 	}
@@ -270,7 +348,7 @@ func (c *ChainClient) sendEthTX(chain *types.Chain, toStr, valueStr, dataStr str
 	}, nil
 }
 
-func (c *ChainClient) getEthClient(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName) (*ethclient.Client, error) {
+func (c *ChainClient) getEthClient(conf *wsTypes.ChainConfig, chainID uint64, chainName enums.ChainName) (*ethclient.Client, error) {
 	chain, ok := conf.GetChain(chainID, chainName)
 	if !ok {
 		return nil, errors.Errorf("the chain %d %s is not supported", chainID, chainName)
@@ -279,7 +357,7 @@ func (c *ChainClient) getEthClient(conf *types.ChainConfig, chainID uint64, chai
 	return ethclient.Dial(chain.Endpoint)
 }
 
-func (c *ChainClient) CallContract(conf *types.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, dataStr string) ([]byte, error) {
+func (c *ChainClient) CallContract(conf *wsTypes.ChainConfig, chainID uint64, chainName enums.ChainName, toStr, dataStr string) ([]byte, error) {
 	var (
 		to = common.HexToAddress(toStr)
 	)

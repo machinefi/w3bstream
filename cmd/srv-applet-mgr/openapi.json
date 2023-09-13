@@ -4991,19 +4991,6 @@
               "@StatusErr[NoOperatorPermission][401999005][No Operator Permission]!"
             ]
           },
-          "403": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[OccupiedOperator][403999008][Occupied Operator]!"
-            ]
-          },
           "404": {
             "description": "",
             "content": {
@@ -13095,10 +13082,26 @@
             "x-go-field-name": "Name",
             "x-tag-json": "name"
           },
+          "paymasterKey": {
+            "type": "string",
+            "x-go-field-name": "PaymasterKey",
+            "x-tag-json": "paymasterKey,omitempty"
+          },
           "privateKey": {
             "type": "string",
             "x-go-field-name": "PrivateKey",
             "x-tag-json": "privateKey"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsOperatorKeyType"
+              },
+              {
+                "x-go-field-name": "Type",
+                "x-tag-json": "type,omitempty,default='1'"
+              }
+            ]
           }
         },
         "required": [

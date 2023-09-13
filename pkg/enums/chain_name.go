@@ -17,4 +17,6 @@ const (
 	ARBITRUM_GOERLI     ChainName = "arbitrum-goerli"
 	OP_MAINNET          ChainName = "op-mainnet"
 	OP_GOERLI           ChainName = "op-goerli"
+	BASE_MAINNET        ChainName = "base-mainnet"
+	BASE_GOERLI         ChainName = "base-goerli"
 )
