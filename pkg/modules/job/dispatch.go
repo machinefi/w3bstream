@@ -3,11 +3,13 @@ package job
 import (
 	"context"
 
+	"github.com/pkg/errors"
+
+	confmq "github.com/machinefi/w3bstream/pkg/depends/conf/mq"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
 	"github.com/machinefi/w3bstream/pkg/modules/robot_notifier"
 	"github.com/machinefi/w3bstream/pkg/modules/robot_notifier/lark"
-	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 func Dispatch(ctx context.Context, t mq.Task) {
@@ -17,13 +19,17 @@ func Dispatch(ctx context.Context, t mq.Task) {
 	)
 	defer l.End()
 
-	tb := types.MustTaskBoardFromContext(ctx)
-	tw := types.MustTaskWorkerFromContext(ctx)
+	tasks := confmq.MustMqFromContext(ctx)
 
-	if err := tb.Dispatch(tw.Channel, t); err != nil {
-		if body, err := lark.Build(ctx, "job dispatching", "WARNING", err.Error()); err != nil {
-			_ = robot_notifier.Push(ctx, body, nil)
+	if err := tasks.TaskBoard.Dispatch(tasks.TaskWorker.Channel, t); err != nil {
+		if body, _err := lark.Build(ctx, "job dispatching", "WARNING", err.Error()); _err != nil {
+			l.Warn(errors.Wrap(_err, "build lark message"))
+		} else {
+			if _err = robot_notifier.Push(ctx, body, nil); _err != nil {
+				l.Warn(errors.Wrap(_err, "notifier push message"))
+			}
 		}
+
 		l.Error(err)
 	}
 }

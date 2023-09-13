@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/global"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/tasks"
+	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 	"github.com/machinefi/w3bstream/pkg/modules/account"
@@ -17,6 +19,8 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
+	"github.com/machinefi/w3bstream/pkg/modules/robot_notifier"
+	"github.com/machinefi/w3bstream/pkg/modules/robot_notifier/lark"
 	"github.com/machinefi/w3bstream/pkg/modules/trafficlimit"
 )
 
@@ -84,6 +88,18 @@ func main() {
 			},
 			func() {
 				metrics.Init(ctx)
+			},
+			func() {
+				body, err := lark.Build(
+					ctx,
+					"service started",
+					"INFO",
+					fmt.Sprintf("service started at: %s", types.Timestamp{Time: time.Now()}.String()),
+				)
+				if err != nil {
+					return
+				}
+				_ = robot_notifier.Push(ctx, body, nil)
 			},
 		)
 	})

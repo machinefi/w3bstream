@@ -14,12 +14,11 @@ import (
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	confjwt "github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	confmq "github.com/machinefi/w3bstream/pkg/depends/conf/mq"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/client"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/mq/mem_mq"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/migration"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
@@ -203,8 +202,14 @@ func init() {
 		}
 	}
 
-	_tasks := mem_mq.New(0)
-	_workers := mq.NewTaskWorker(_tasks, mq.WithWorkerCount(3), mq.WithChannel("apis_tests"))
+	//_tasks := mem_mq.New(0)
+	//_workers := mq.NewTaskWorker(_tasks, mq.WithWorkerCount(3), mq.WithChannel("apis_tests"))
+	// tb := mq.NewTaskBoard(_tasks)
+
+	_taskMgr := &confmq.Config{}
+	_taskMgr.SetDefault()
+	_ = _taskMgr.Init()
+
 	_ethClients := &types.ETHClientConfig{
 		Endpoints: `{"4689": "https://babel-api.mainnet.iotex.io", "4690": "https://babel-api.testnet.iotex.io"}`,
 	}
@@ -224,11 +229,9 @@ func init() {
 	redisKvDB := kvdb.NewRedisDB(_redis)
 	operatorPool := pool.NewPool(_dbMgr)
 
-	tb := mq.NewTaskBoard(_tasks)
-
 	sfIDGenerator := confid.MustNewSFIDGenerator()
 
-	wasmApiServer, err := wasmapi.NewServer(conflog.Std(), _redis, _dbMgr, redisKvDB, _chainConf, tb, _workers, operatorPool, sfIDGenerator, _risc0Conf)
+	wasmApiServer, err := wasmapi.NewServer(conflog.Std(), _redis, _dbMgr, redisKvDB, _chainConf, _taskMgr, operatorPool, sfIDGenerator, _risc0Conf)
 	if err != nil {
 		conflog.Std().Fatal(err)
 	}
@@ -246,8 +249,7 @@ func init() {
 		types.WithFileSystemOpContext(_fsop),
 		types.WithRedisEndpointContext(_redis),
 		kvdb.WithRedisDBKeyContext(redisKvDB),
-		types.WithTaskWorkerContext(_workers),
-		types.WithTaskBoardContext(tb),
+		confmq.WithMqContext(_taskMgr),
 		types.WithETHClientConfigContext(_ethClients),
 		types.WithChainConfigContext(_chainConf),
 		types.WithWasmApiServerContext(wasmApiServer),

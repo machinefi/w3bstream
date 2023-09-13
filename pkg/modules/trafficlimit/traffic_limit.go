@@ -404,7 +404,7 @@ func TrafficLimit(ctx context.Context, apiType enums.TrafficLimitType) error {
 		if !ok || !se.Is(status.TrafficLimitNotFound) {
 			return err
 		}
-		l.Warn(err)
+		// l.Warn(err)
 	}
 	if m != nil {
 		if valByte, err = rDB.IncrBy(fmt.Sprintf("%s::%s", prj.Name, m.ApiType.String()), []byte(strconv.Itoa(-1))); err != nil {

@@ -8,7 +8,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/client"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
@@ -31,10 +30,6 @@ type (
 	CtxRedisEndpoint struct{}
 	// CtxUploadConfig type *UploadConfig. resource upload configuration
 	CtxUploadConfig struct{}
-	// CtxTaskWorker type *mq.TaskWorker. service async task worker
-	CtxTaskWorker struct{}
-	// CtxTaskBoard type *mq.TaskBoard service async task manager
-	CtxTaskBoard struct{}
 	// CtxWhiteList type *EthAddressWhiteList global eth address white list
 	CtxEthAddressWhiteList struct{}
 	// CtxEthClient type *ETHClientConfig global eth chain endpoints
@@ -389,48 +384,6 @@ func MqttBrokerFromContext(ctx context.Context) (*mqtt.Broker, bool) {
 
 func MustMqttBrokerFromContext(ctx context.Context) *mqtt.Broker {
 	v, ok := MqttBrokerFromContext(ctx)
-	must.BeTrue(ok)
-	return v
-}
-
-func WithTaskBoard(ctx context.Context, tb *mq.TaskBoard) context.Context {
-	return contextx.WithValue(ctx, CtxTaskBoard{}, tb)
-}
-
-func WithTaskBoardContext(tb *mq.TaskBoard) contextx.WithContext {
-	return func(ctx context.Context) context.Context {
-		return WithTaskBoard(ctx, tb)
-	}
-}
-
-func TaskBoardFromContext(ctx context.Context) (*mq.TaskBoard, bool) {
-	v, ok := ctx.Value(CtxTaskBoard{}).(*mq.TaskBoard)
-	return v, ok
-}
-
-func MustTaskBoardFromContext(ctx context.Context) *mq.TaskBoard {
-	v, ok := TaskBoardFromContext(ctx)
-	must.BeTrue(ok)
-	return v
-}
-
-func WithTaskWorker(ctx context.Context, tw *mq.TaskWorker) context.Context {
-	return contextx.WithValue(ctx, CtxTaskWorker{}, tw)
-}
-
-func WithTaskWorkerContext(tw *mq.TaskWorker) contextx.WithContext {
-	return func(ctx context.Context) context.Context {
-		return WithTaskWorker(ctx, tw)
-	}
-}
-
-func TaskWorkerFromContext(ctx context.Context) (*mq.TaskWorker, bool) {
-	v, ok := ctx.Value(CtxTaskWorker{}).(*mq.TaskWorker)
-	return v, ok
-}
-
-func MustTaskWorkerFromContext(ctx context.Context) *mq.TaskWorker {
-	v, ok := TaskWorkerFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

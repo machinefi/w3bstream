@@ -16,6 +16,7 @@ import (
 	confjwt "github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	conflogger "github.com/machinefi/w3bstream/pkg/depends/conf/logger"
+	confmq "github.com/machinefi/w3bstream/pkg/depends/conf/mq"
 	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	confpostgres "github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
 	confrate "github.com/machinefi/w3bstream/pkg/depends/conf/rate_limit"
@@ -23,8 +24,6 @@ import (
 	conftracer "github.com/machinefi/w3bstream/pkg/depends/conf/tracer"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/client"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/mq/mem_mq"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/migration"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/enums"
@@ -40,9 +39,6 @@ var (
 	WithContext contextx.WithContext
 	Context     context.Context
 
-	tasks  mq.TaskManager
-	worker *mq.TaskWorker
-
 	proxy *client.Client // proxy client for forward mqtt event
 
 	db        = &confpostgres.Endpoint{Database: models.DB}
@@ -50,6 +46,7 @@ var (
 
 	ServerMgr   = &confhttp.Server{}
 	ServerEvent = &confhttp.Server{} // serverEvent support event http transport
+	TaskMgr     = &confmq.Config{}
 
 	fs  filesystem.FileSystemOp
 	std = conflog.Std().(conflog.LevelSetter).SetLevel(conflog.InfoLevel)
@@ -81,6 +78,7 @@ func init() {
 		MetricsCenter *types.MetricsCenterConfig
 		RobotNotifier *types.RobotNotifierConfig
 		Risc0Config   *types.Risc0Config
+		Mq            *confmq.Config
 	}{
 		Postgres:      db,
 		MonitorDB:     monitordb,
@@ -104,6 +102,7 @@ func init() {
 		MetricsCenter: &types.MetricsCenterConfig{},
 		RobotNotifier: &types.RobotNotifierConfig{},
 		Risc0Config:   &types.Risc0Config{},
+		Mq:            TaskMgr,
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
@@ -118,15 +117,12 @@ func init() {
 	}
 	_ = os.Setenv(consts.EnvResourceGroup, group)
 
-	tasks = mem_mq.New(0)
-	worker = mq.NewTaskWorker(tasks, mq.WithWorkerCount(3), mq.WithChannel(name))
-
 	App = confapp.New(
 		confapp.WithName(name),
 		confapp.WithRoot(".."),
 		confapp.WithLogger(conflogger.Std()),
 	)
-	App.Conf(config, worker)
+	App.Conf(config /*, worker*/)
 
 	if config.FileSystem.Type == enums.FILE_SYSTEM_MODE__S3 &&
 		!config.AmazonS3.IsZero() {
@@ -139,7 +135,7 @@ func init() {
 		config.RobotNotifier = nil
 	}
 
-	confhttp.RegisterCheckerBy(config, worker)
+	confhttp.RegisterCheckerBy(config)
 
 	proxy = &client.Client{Port: uint16(ServerEvent.Port), Timeout: 10 * time.Second}
 	proxy.SetDefault()
@@ -147,12 +143,10 @@ func init() {
 	redisKvDB := kvdb.NewRedisDB(config.Redis)
 	operatorPool := pool.NewPool(config.Postgres)
 
-	tb := mq.NewTaskBoard(tasks)
-
 	sfIDGenerator := confid.MustNewSFIDGenerator()
 
 	wasmApiServer, err := wasmapi.NewServer(std, config.Redis, config.Postgres, redisKvDB, config.ChainConfig,
-		tb, worker, operatorPool, sfIDGenerator, config.Risc0Config)
+		config.Mq, operatorPool, sfIDGenerator, config.Risc0Config)
 	if err != nil {
 		std.Fatal(err)
 	}
@@ -167,8 +161,7 @@ func init() {
 		types.WithMqttBrokerContext(config.MqttBroker),
 		confid.WithSFIDGeneratorContext(sfIDGenerator),
 		confjwt.WithConfContext(config.Jwt),
-		types.WithTaskWorkerContext(worker),
-		types.WithTaskBoardContext(tb),
+		confmq.WithMqContext(config.Mq),
 		types.WithETHClientConfigContext(config.EthClient),
 		types.WithChainConfigContext(config.ChainConfig),
 		types.WithEthAddressWhiteListContext(config.WhiteList),
@@ -189,7 +182,9 @@ func Server() kit.Transport {
 	return ServerMgr.WithContextInjector(WithContext).WithName("srv-applet-mgr")
 }
 
-func TaskServer() kit.Transport { return worker.WithContextInjector(WithContext) }
+func TaskServer() kit.Transport {
+	return TaskMgr.WithContextInjector(WithContext)
+}
 
 func EventServer() kit.Transport {
 	return ServerEvent.WithContextInjector(WithContext).WithName("srv-event")
