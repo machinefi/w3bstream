@@ -37,7 +37,9 @@ type Interface interface {
 	CreateProject(req *CreateProject, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesProjectCreateRsp, kit.Metadata, error)
 	CreateProjectOperator(req *CreateProjectOperator, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsProjectOperator, kit.Metadata, error)
 	CreateProjectSchema(req *CreateProjectSchema, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsConfig, kit.Metadata, error)
+	CreateProof(req *CreateProof, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesXvmCreateProofRsp, kit.Metadata, error)
 	CreatePublisher(req *CreatePublisher, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsPublisher, kit.Metadata, error)
+	CreateRisc0VM(req *CreateRisc0VM, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesXvmCreateRisc0VmRsp, kit.Metadata, error)
 	CreateStrategy(req *CreateStrategy, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsStrategy, kit.Metadata, error)
 	CreateTrafficLimit(req *CreateTrafficLimit, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsTrafficLimit, kit.Metadata, error)
 	DeleteAccountAccessKeyByName(req *DeleteAccountAccessKeyByName, metas ...kit.Metadata) (kit.Metadata, error)
@@ -219,7 +221,15 @@ func (c *Client) CreateProjectSchema(req *CreateProjectSchema, metas ...kit.Meta
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 
+func (c *Client) CreateProof(req *CreateProof, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesXvmCreateProofRsp, kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
 func (c *Client) CreatePublisher(req *CreatePublisher, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsPublisher, kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
+func (c *Client) CreateRisc0VM(req *CreateRisc0VM, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesXvmCreateRisc0VmRsp, kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 

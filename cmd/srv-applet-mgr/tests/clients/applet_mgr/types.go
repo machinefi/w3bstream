@@ -25,6 +25,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/resource"
 	"github.com/machinefi/w3bstream/pkg/modules/strategy"
 	"github.com/machinefi/w3bstream/pkg/modules/trafficlimit"
+	"github.com/machinefi/w3bstream/pkg/modules/xvm"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
@@ -450,6 +451,16 @@ type GithubComMachinefiW3BstreamPkgModulesTrafficlimitCreateReq = trafficlimit.C
 type GithubComMachinefiW3BstreamPkgModulesTrafficlimitListRsp = trafficlimit.ListRsp
 
 type GithubComMachinefiW3BstreamPkgModulesTrafficlimitUpdateReq = trafficlimit.UpdateReq
+
+type GithubComMachinefiW3BstreamPkgModulesXvmCreateProofReq = xvm.CreateProofReq
+
+type GithubComMachinefiW3BstreamPkgModulesXvmCreateProofRsp = xvm.CreateProofRsp
+
+type GithubComMachinefiW3BstreamPkgModulesXvmCreateRisc0VmReq = xvm.CreateRisc0VmReq
+
+type GithubComMachinefiW3BstreamPkgModulesXvmCreateRisc0VmRsp = xvm.CreateRisc0VmRsp
+
+type GithubComMachinefiW3BstreamPkgModulesXvmRisc0Info = xvm.Risc0Info
 
 type GithubComMachinefiW3BstreamPkgTypesWasmCBInfo = wasm.CBInfo
 

@@ -149,6 +149,8 @@ const (
 	ProjectOperatorConflict
 	// @errTalk Access Key Name Conflict
 	AccessKeyNameConflict
+	// @errTalk Proof Conflict
+	ProofConflict
 )
 
 const (

@@ -205,6 +205,8 @@ func (v Error) Key() string {
 		return "ProjectOperatorConflict"
 	case AccessKeyNameConflict:
 		return "AccessKeyNameConflict"
+	case ProofConflict:
+		return "ProofConflict"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -411,6 +413,8 @@ func (v Error) Msg() string {
 		return "Project Operator relationship Conflict"
 	case AccessKeyNameConflict:
 		return "Access Key Name Conflict"
+	case ProofConflict:
+		return "Proof Conflict"
 	case InternalServerError:
 		return "internal error"
 	case DatabaseError:
@@ -616,6 +620,8 @@ func (v Error) CanBeTalk() bool {
 	case ProjectOperatorConflict:
 		return true
 	case AccessKeyNameConflict:
+		return true
+	case ProofConflict:
 		return true
 	case InternalServerError:
 		return false
