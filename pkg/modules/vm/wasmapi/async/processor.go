@@ -15,7 +15,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
+	confmq "github.com/machinefi/w3bstream/pkg/depends/conf/mq"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -100,17 +100,15 @@ type ApiResultProcessor struct {
 	l     log.Logger
 	mgrDB sqlx.DBExecutor
 	kv    *kvdb.RedisDB
-	tb    *mq.TaskBoard
-	tw    *mq.TaskWorker
+	tasks *confmq.Config
 }
 
-func NewApiResultProcessor(l log.Logger, mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB, tb *mq.TaskBoard, tw *mq.TaskWorker) *ApiResultProcessor {
+func NewApiResultProcessor(l log.Logger, mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB, tasks *confmq.Config) *ApiResultProcessor {
 	return &ApiResultProcessor{
 		l:     l,
 		kv:    kv,
 		mgrDB: mgrDB,
-		tb:    tb,
-		tw:    tw,
+		tasks: tasks,
 	}
 }
 
@@ -121,8 +119,7 @@ func (p *ApiResultProcessor) ProcessTask(ctx context.Context, t *asynq.Task) err
 	}
 
 	ctx = contextx.WithContextCompose(
-		types.WithTaskBoardContext(p.tb),
-		types.WithTaskWorkerContext(p.tw),
+		confmq.WithMqContext(p.tasks),
 		types.WithLoggerContext(p.l),
 		types.WithMgrDBExecutorContext(p.mgrDB),
 		kvdb.WithRedisDBKeyContext(p.kv),

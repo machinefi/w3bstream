@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	confmq "github.com/machinefi/w3bstream/pkg/depends/conf/mq"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -104,8 +105,7 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		types.WithProjectContext(prj),
 		types.WithAppletContext(app),
 		types.WithInstanceContext(ins),
-		types.WithTaskWorkerContext(types.MustTaskWorkerFromContext(parent)),
-		types.WithTaskBoardContext(types.MustTaskBoardFromContext(parent)),
+		confmq.WithMqContext(confmq.MustMqFromContext(parent)),
 		types.WithChainConfigContext(types.MustChainConfigFromContext(parent)),
 		types.WithOperatorPoolContext(types.MustOperatorPoolFromContext(parent)),
 	)(ctx), nil

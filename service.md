@@ -111,3 +111,12 @@ SRV_APPLET_MGR__Tracer_TLS_KeyPath: ""
 SRV_APPLET_MGR__Risc0Config_CreateProofPath: "/ws/api/prove_file"
 SRV_APPLET_MGR__Risc0Config_Endpoint: "127.0.0.1:3000"              ## risc server endpoint, just ip and port
 ```
+### Task Manager MQ 
+
+```yaml
+SRV_APPLET_MGR__Mq_Channel: ""              ## channel name, if empty use env `PRJ_NAME`
+SRV_APPLET_MGR__Mq_Limit: "1024"            ## queue limit default 1024
+SRV_APPLET_MGR__Mq_PushQueueTimeout: "1s"   ## push timeout default 1s
+SRV_APPLET_MGR__Mq_Store: "MEM"             ## support mem only now
+SRV_APPLET_MGR__Mq_WorkerCount: "256"       ## task worker count, default 256
+```
