@@ -92,6 +92,7 @@ type Interface interface {
 	UpdatePublisher(req *UpdatePublisher, metas ...kit.Metadata) (kit.Metadata, error)
 	UpdateStrategy(req *UpdateStrategy, metas ...kit.Metadata) (kit.Metadata, error)
 	UpdateTrafficLimit(req *UpdateTrafficLimit, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsTrafficLimit, kit.Metadata, error)
+	UpsertPublisher(req *UpsertPublisher, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsPublisher, kit.Metadata, error)
 	VersionRouter(metas ...kit.Metadata) (*string, kit.Metadata, error)
 }
 
@@ -436,6 +437,10 @@ func (c *Client) UpdateStrategy(req *UpdateStrategy, metas ...kit.Metadata) (kit
 }
 
 func (c *Client) UpdateTrafficLimit(req *UpdateTrafficLimit, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsTrafficLimit, kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
+func (c *Client) UpsertPublisher(req *UpsertPublisher, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsPublisher, kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 

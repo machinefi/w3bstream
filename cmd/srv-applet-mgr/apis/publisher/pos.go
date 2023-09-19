@@ -40,3 +40,20 @@ func (r *CreateAnonymousPublisher) Output(ctx context.Context) (interface{}, err
 
 	return publisher.CreateAnonymousPublisher(ctx)
 }
+
+type UpsertPublisher struct {
+	httpx.MethodPost
+	publisher.CreateReq `in:"body"`
+}
+
+func (r *UpsertPublisher) Path() string { return "/upsert" }
+
+func (r *UpsertPublisher) Output(ctx context.Context) (interface{}, error) {
+	acc := middleware.MustCurrentAccountFromContext(ctx)
+	ctx, err := acc.WithProjectContextByName(acc.WithAccount(ctx), middleware.MustProjectName(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	return publisher.Upsert(ctx, &r.CreateReq)
+}

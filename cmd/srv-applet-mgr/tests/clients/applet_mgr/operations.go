@@ -3166,6 +3166,52 @@ func (o *UpdateTrafficLimit) Invoke(cli kit.Client, metas ...kit.Metadata) (*Git
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
+type UpsertPublisher struct {
+	ProjectName  string                                                  `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                                  `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                                  `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	CreateReq    GithubComMachinefiW3BstreamPkgModulesPublisherCreateReq `in:"body"`
+}
+
+func (o *UpsertPublisher) Path() string {
+	return "/srv-applet-mgr/v0/publisher/x/:projectName/upsert"
+}
+
+func (o *UpsertPublisher) Method() string {
+	return "POST"
+}
+
+// @StatusErr[AccessKeyNameConflict][409999020][Access Key Name Conflict]!
+// @StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!
+// @StatusErr[AccountNotFound][404999017][Account Not Found]!
+// @StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[DatabaseError][500999002][Database Error]!
+// @StatusErr[InvalidAccessKeyIdentityType][400999013][Invalid Access Key Identity Type]!
+// @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
+// @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
+// @StatusErr[InvalidClaim][401999003][Invalid Claim]!
+// @StatusErr[InvalidToken][401999002][Invalid Token]!
+// @StatusErr[NoProjectPermission][401999004][No Project Permission]!
+// @StatusErr[ProjectNotFound][404999002][Project Not Found]!
+// @StatusErr[PublisherConflict][409999007][Publisher Conflict]!
+
+func (o *UpsertPublisher) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.UpsertPublisher")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *UpsertPublisher) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsPublisher, kit.Metadata, error) {
+	rsp := new(GithubComMachinefiW3BstreamPkgModelsPublisher)
+	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
+	return rsp, meta, err
+}
+
+func (o *UpsertPublisher) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsPublisher, kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
 type VersionRouter struct {
 }
 
