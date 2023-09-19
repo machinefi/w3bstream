@@ -54,7 +54,7 @@ func CreateRisc0Vm(ctx context.Context, req *CreateRisc0VmReq) (*CreateRisc0VmRs
 	if err != nil {
 		panic(err)
 	}
-	request, err := http.NewRequest("POST", "http://127.0.0.1:3000/api/prove_file", &b)
+	request, err := http.NewRequest("POST", "http://127.0.0.1:3000/api/create_instance", &b)
 	if err != nil {
 		panic(err)
 	}
