@@ -275,6 +275,85 @@ func Create(ctx context.Context, r *CreateReq) (*models.Publisher, error) {
 	return pub, nil
 }
 
+func Upsert(ctx context.Context, r *CreateReq) (*models.Publisher, error) {
+	ctx, l := logr.Start(ctx, "modules.publisher.Upsert")
+	defer l.End()
+
+	var (
+		d      = types.MustMgrDBExecutorFromContext(ctx)
+		prj    = types.MustProjectFromContext(ctx)
+		acc    = types.MustAccountFromContext(ctx)
+		idg    = confid.MustSFIDGeneratorFromContext(ctx)
+		pub    *models.Publisher
+		tok    *access_key.CreateRsp
+		exists = false
+	)
+
+	err := sqlx.NewTasks(d).With(
+		func(d sqlx.DBExecutor) error {
+			pub = &models.Publisher{}
+			if err := pub.FetchByProjectIDAndKey(d); err != nil {
+				if sqlx.DBErr(err).IsNotFound() {
+					return nil
+				} else {
+					return status.DatabaseError.StatusErr().WithDesc(err.Error())
+				}
+			}
+			exists = true
+			return nil
+		},
+		func(d sqlx.DBExecutor) (err error) {
+			if exists {
+				return nil
+			}
+			id := idg.MustGenSFID()
+			tok, err = access_key.Create(types.WithMgrDBExecutor(ctx, d), &access_key.CreateReq{
+				IdentityID:   id,
+				IdentityType: enums.ACCESS_KEY_IDENTITY_TYPE__PUBLISHER,
+				CreateReqBase: access_key.CreateReqBase{
+					Name: "pub_" + id.String(),
+					Desc: "pub_" + id.String(),
+					Privileges: access_key.GroupAccessPrivileges{{
+						Name: enums.ApiGroupEvent,
+						Perm: enums.ACCESS_PERMISSION__READ_WRITE,
+					}},
+				},
+			})
+			if err != nil {
+				return err
+			}
+			return nil
+		},
+		func(d sqlx.DBExecutor) error {
+			if exists {
+				return nil
+			}
+			pub = &models.Publisher{
+				RelProject:   models.RelProject{ProjectID: prj.ProjectID},
+				RelPublisher: models.RelPublisher{PublisherID: tok.IdentityID},
+				PublisherInfo: models.PublisherInfo{
+					Name:  r.Name,
+					Key:   r.Key,
+					Token: tok.AccessKey,
+				},
+			}
+			if err := pub.Create(d); err != nil {
+				if sqlx.DBErr(err).IsConflict() {
+					return status.PublisherConflict
+				}
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
+		},
+	).Do()
+
+	if err != nil {
+		return nil, err
+	}
+	metrics.PublisherMetricsInc(ctx, acc.AccountID.String(), prj.Name)
+	return pub, nil
+}
+
 func Update(ctx context.Context, r *UpdateReq) error {
 	var (
 		d = types.MustMgrDBExecutorFromContext(ctx)
