@@ -10734,6 +10734,45 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.CacheMode",
         "x-id": "GithubComMachinefiW3BstreamPkgEnumsCacheMode"
       },
+      "GithubComMachinefiW3BstreamPkgEnumsChainName": {
+        "type": "string",
+        "enum": [
+          "arbitrum-goerli",
+          "arbitrum-one",
+          "base-goerli",
+          "base-mainnet",
+          "ethereum-mainnet",
+          "goerli",
+          "iotex-mainnet",
+          "iotex-testnet",
+          "mumbai",
+          "op-goerli",
+          "op-mainnet",
+          "polygon-mainnet",
+          "solana-devnet",
+          "solana-mainnet-beta",
+          "solana-testnet"
+        ],
+        "x-enum-labels": [
+          "arbitrum-goerli",
+          "arbitrum-one",
+          "base-goerli",
+          "base-mainnet",
+          "ethereum-mainnet",
+          "goerli",
+          "iotex-mainnet",
+          "iotex-testnet",
+          "mumbai",
+          "op-goerli",
+          "op-mainnet",
+          "polygon-mainnet",
+          "solana-devnet",
+          "solana-mainnet-beta",
+          "solana-testnet"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.ChainName",
+        "x-id": "GithubComMachinefiW3BstreamPkgEnumsChainName"
+      },
       "GithubComMachinefiW3BstreamPkgEnumsConfigType": {
         "type": "string",
         "enum": [
@@ -11093,7 +11132,18 @@
             "type": "integer",
             "format": "uint64",
             "x-go-field-name": "ChainID",
-            "x-tag-json": "chainID"
+            "x-tag-json": "chainID,omitempty"
+          },
+          "chainName": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsChainName"
+              },
+              {
+                "x-go-field-name": "ChainName",
+                "x-tag-json": "chainName,omitempty"
+              }
+            ]
           },
           "eventType": {
             "type": "string",
@@ -11119,7 +11169,6 @@
           }
         },
         "required": [
-          "chainID",
           "height"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/models.ChainHeightInfo",

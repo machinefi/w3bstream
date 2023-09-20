@@ -61,6 +61,7 @@ func (m *ChainHeight) IndexFieldNames() []string {
 	return []string{
 		"ChainHeightID",
 		"ChainID",
+		"ChainName",
 		"EventType",
 		"Height",
 		"ID",
@@ -78,6 +79,7 @@ func (*ChainHeight) UniqueIndexes() builder.Indexes {
 			"ProjectName",
 			"EventType",
 			"ChainID",
+			"ChainName",
 			"Height",
 			"Uniq",
 		},
@@ -146,6 +148,14 @@ func (m *ChainHeight) ColChainID() *builder.Column {
 
 func (*ChainHeight) FieldChainID() string {
 	return "ChainID"
+}
+
+func (m *ChainHeight) ColChainName() *builder.Column {
+	return ChainHeightTable.ColByFieldName(m.FieldChainName())
+}
+
+func (*ChainHeight) FieldChainName() string {
+	return "ChainName"
 }
 
 func (m *ChainHeight) ColHeight() *builder.Column {
@@ -269,7 +279,7 @@ func (m *ChainHeight) FetchByChainHeightID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *ChainHeight) FetchByProjectNameAndEventTypeAndChainIDAndHeightAndUniq(db sqlx.DBExecutor) error {
+func (m *ChainHeight) FetchByProjectNameAndEventTypeAndChainIDAndChainNameAndHeightAndUniq(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	err := db.QueryAndScan(
 		builder.Select(nil).
@@ -280,11 +290,12 @@ func (m *ChainHeight) FetchByProjectNameAndEventTypeAndChainIDAndHeightAndUniq(d
 						tbl.ColByFieldName("ProjectName").Eq(m.ProjectName),
 						tbl.ColByFieldName("EventType").Eq(m.EventType),
 						tbl.ColByFieldName("ChainID").Eq(m.ChainID),
+						tbl.ColByFieldName("ChainName").Eq(m.ChainName),
 						tbl.ColByFieldName("Height").Eq(m.Height),
 						tbl.ColByFieldName("Uniq").Eq(m.Uniq),
 					),
 				),
-				builder.Comment("ChainHeight.FetchByProjectNameAndEventTypeAndChainIDAndHeightAndUniq"),
+				builder.Comment("ChainHeight.FetchByProjectNameAndEventTypeAndChainIDAndChainNameAndHeightAndUniq"),
 			),
 		m,
 	)
@@ -351,7 +362,7 @@ func (m *ChainHeight) UpdateByChainHeightID(db sqlx.DBExecutor, zeros ...string)
 	return m.UpdateByChainHeightIDWithFVs(db, fvs)
 }
 
-func (m *ChainHeight) UpdateByProjectNameAndEventTypeAndChainIDAndHeightAndUniqWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
+func (m *ChainHeight) UpdateByProjectNameAndEventTypeAndChainIDAndChainNameAndHeightAndUniqWithFVs(db sqlx.DBExecutor, fvs builder.FieldValues) error {
 
 	if _, ok := fvs["UpdatedAt"]; !ok {
 		fvs["UpdatedAt"] = types.Timestamp{Time: time.Now()}
@@ -364,10 +375,11 @@ func (m *ChainHeight) UpdateByProjectNameAndEventTypeAndChainIDAndHeightAndUniqW
 					tbl.ColByFieldName("ProjectName").Eq(m.ProjectName),
 					tbl.ColByFieldName("EventType").Eq(m.EventType),
 					tbl.ColByFieldName("ChainID").Eq(m.ChainID),
+					tbl.ColByFieldName("ChainName").Eq(m.ChainName),
 					tbl.ColByFieldName("Height").Eq(m.Height),
 					tbl.ColByFieldName("Uniq").Eq(m.Uniq),
 				),
-				builder.Comment("ChainHeight.UpdateByProjectNameAndEventTypeAndChainIDAndHeightAndUniqWithFVs"),
+				builder.Comment("ChainHeight.UpdateByProjectNameAndEventTypeAndChainIDAndChainNameAndHeightAndUniqWithFVs"),
 			).
 			Set(tbl.AssignmentsByFieldValues(fvs)...),
 	)
@@ -375,14 +387,14 @@ func (m *ChainHeight) UpdateByProjectNameAndEventTypeAndChainIDAndHeightAndUniqW
 		return err
 	}
 	if affected, _ := res.RowsAffected(); affected == 0 {
-		return m.FetchByProjectNameAndEventTypeAndChainIDAndHeightAndUniq(db)
+		return m.FetchByProjectNameAndEventTypeAndChainIDAndChainNameAndHeightAndUniq(db)
 	}
 	return nil
 }
 
-func (m *ChainHeight) UpdateByProjectNameAndEventTypeAndChainIDAndHeightAndUniq(db sqlx.DBExecutor, zeros ...string) error {
+func (m *ChainHeight) UpdateByProjectNameAndEventTypeAndChainIDAndChainNameAndHeightAndUniq(db sqlx.DBExecutor, zeros ...string) error {
 	fvs := builder.FieldValueFromStructByNoneZero(m, zeros...)
-	return m.UpdateByProjectNameAndEventTypeAndChainIDAndHeightAndUniqWithFVs(db, fvs)
+	return m.UpdateByProjectNameAndEventTypeAndChainIDAndChainNameAndHeightAndUniqWithFVs(db, fvs)
 }
 
 func (m *ChainHeight) Delete(db sqlx.DBExecutor) error {
@@ -431,7 +443,7 @@ func (m *ChainHeight) DeleteByChainHeightID(db sqlx.DBExecutor) error {
 	return err
 }
 
-func (m *ChainHeight) DeleteByProjectNameAndEventTypeAndChainIDAndHeightAndUniq(db sqlx.DBExecutor) error {
+func (m *ChainHeight) DeleteByProjectNameAndEventTypeAndChainIDAndChainNameAndHeightAndUniq(db sqlx.DBExecutor) error {
 	tbl := db.T(m)
 	_, err := db.Exec(
 		builder.Delete().
@@ -442,11 +454,12 @@ func (m *ChainHeight) DeleteByProjectNameAndEventTypeAndChainIDAndHeightAndUniq(
 						tbl.ColByFieldName("ProjectName").Eq(m.ProjectName),
 						tbl.ColByFieldName("EventType").Eq(m.EventType),
 						tbl.ColByFieldName("ChainID").Eq(m.ChainID),
+						tbl.ColByFieldName("ChainName").Eq(m.ChainName),
 						tbl.ColByFieldName("Height").Eq(m.Height),
 						tbl.ColByFieldName("Uniq").Eq(m.Uniq),
 					),
 				),
-				builder.Comment("ChainHeight.DeleteByProjectNameAndEventTypeAndChainIDAndHeightAndUniq"),
+				builder.Comment("ChainHeight.DeleteByProjectNameAndEventTypeAndChainIDAndChainNameAndHeightAndUniq"),
 			),
 	)
 	return err

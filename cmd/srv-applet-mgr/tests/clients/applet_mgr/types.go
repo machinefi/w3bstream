@@ -82,6 +82,8 @@ type GithubComMachinefiW3BstreamPkgEnumsAccountState = enums.AccountState
 
 type GithubComMachinefiW3BstreamPkgEnumsCacheMode = enums.CacheMode
 
+type GithubComMachinefiW3BstreamPkgEnumsChainName = enums.ChainName
+
 type GithubComMachinefiW3BstreamPkgEnumsConfigType = enums.ConfigType
 
 type GithubComMachinefiW3BstreamPkgEnumsDeployCmd = enums.DeployCmd
