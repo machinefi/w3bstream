@@ -11,6 +11,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+
 	sqlx "github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	builder "github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 )
