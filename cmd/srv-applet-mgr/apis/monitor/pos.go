@@ -62,5 +62,3 @@ func (r *CreateChainHeight) Output(ctx context.Context) (interface{}, error) {
 	r.ProjectName = types.MustProjectFromContext(ctx).ProjectName.Name
 	return blockchain.CreateChainHeight(ctx, &r.CreateChainHeightReq)
 }
-
-// for test
