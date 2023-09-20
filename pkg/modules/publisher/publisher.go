@@ -291,7 +291,13 @@ func Upsert(ctx context.Context, r *CreateReq) (*models.Publisher, error) {
 
 	err := sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
-			pub = &models.Publisher{}
+			pub = &models.Publisher{
+				PublisherInfo: models.PublisherInfo{
+					Name: r.Name,
+					Key:  r.Key,
+				},
+				RelProject: models.RelProject{ProjectID: prj.ProjectID},
+			}
 			if err := pub.FetchByProjectIDAndKey(d); err != nil {
 				if sqlx.DBErr(err).IsNotFound() {
 					return nil
