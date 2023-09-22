@@ -8,6 +8,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
+	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -22,7 +23,7 @@ func CreateChainHeight(ctx context.Context, r *CreateChainHeightReq) (*models.Ch
 	d := types.MustMonitorDBExecutorFromContext(ctx)
 	idg := confid.MustSFIDGeneratorFromContext(ctx)
 
-	if err := checkChainID(ctx, r.ChainID); err != nil {
+	if err := checkChain(ctx, r.ChainID, r.ChainName); err != nil {
 		return nil, err
 	}
 
@@ -95,6 +96,14 @@ func BatchUpdateChainHeightPausedBySFIDs(ctx context.Context, ids []types.SFID, 
 
 	if _, err := d.Exec(expr); err != nil {
 		return status.DatabaseError.StatusErr().WithDesc(err.Error())
+	}
+	return nil
+}
+
+func checkChain(ctx context.Context, chainID uint64, chainName enums.ChainName) error {
+	cs := types.MustChainConfigFromContext(ctx)
+	if _, ok := cs.GetChain(chainID, chainName); !ok {
+		return status.BlockchainNotFound
 	}
 	return nil
 }

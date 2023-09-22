@@ -106,7 +106,7 @@ func TestChainHeightAPIs(t *testing.T) {
 					req.CreateChainHeightReq.ChainID = 0
 					_, _, err := client.CreateChainHeight(&req)
 					requires.CheckError(t, err, &statusx.StatusErr{
-						Key: "badRequest",
+						Key: "ProjectNotFound",
 					})
 				}
 			})

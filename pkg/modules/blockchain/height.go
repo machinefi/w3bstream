@@ -2,8 +2,11 @@ package blockchain
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
+	"github.com/blocto/solana-go-sdk/client"
+	"github.com/blocto/solana-go-sdk/rpc"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
 
@@ -30,7 +33,7 @@ func (h *height) run(ctx context.Context) {
 func (h *height) do(ctx context.Context) {
 	d := types.MustMonitorDBExecutorFromContext(ctx)
 	l := types.MustLoggerFromContext(ctx)
-	ethcli := types.MustETHClientConfigFromContext(ctx)
+	chainConf := types.MustChainConfigFromContext(ctx)
 	m := &models.ChainHeight{}
 
 	_, l = l.Start(ctx, "height.run")
@@ -42,12 +45,12 @@ func (h *height) do(ctx context.Context) {
 		return
 	}
 	for _, c := range cs {
-		chainAddress, ok := ethcli.Clients[uint32(c.ChainID)]
+		chain, ok := chainConf.GetChain(c.ChainID, c.ChainName)
 		if !ok {
-			l.WithValues("chainID", c.ChainID).Error(errors.New("blockchain not exist"))
+			l.WithValues("chainID", c.ChainID, "chainName", c.ChainName).Error(errors.New("blockchain not exist"))
 			continue
 		}
-		res, err := h.checkHeightAndSendEvent(ctx, &c, chainAddress)
+		res, err := h.checkHeightAndSendEvent(ctx, &c, chain)
 		if err != nil {
 			l.Error(errors.Wrap(err, "check chain height and send event failed"))
 			continue
@@ -62,7 +65,7 @@ func (h *height) do(ctx context.Context) {
 	}
 }
 
-func (h *height) checkHeightAndSendEvent(ctx context.Context, c *models.ChainHeight, address string) (bool, error) {
+func (h *height) checkHeightAndSendEvent(ctx context.Context, c *models.ChainHeight, chain *types.Chain) (bool, error) {
 	l := types.MustLoggerFromContext(ctx)
 
 	_, l = l.Start(ctx, "height.checkHeightAndSendEvent")
@@ -70,21 +73,20 @@ func (h *height) checkHeightAndSendEvent(ctx context.Context, c *models.ChainHei
 
 	l = l.WithValues("type", "chain_height", "chain_height_id", c.ChainHeightID)
 
-	client, err := ethclient.Dial(address)
+	headerNumber, err := h.getHeaderNumber(ctx, chain)
 	if err != nil {
 		l.Error(err)
 		return false, err
 	}
-	header, err := client.HeaderByNumber(context.Background(), nil)
-	if err != nil {
-		l.Error(err)
-		return false, err
-	}
-	if headerNumber := header.Number.Uint64(); headerNumber < c.Height {
+	if headerNumber < c.Height {
 		l.WithValues("headerNumber", headerNumber, "chainHeight", c.Height).Debug("did not arrive")
 		return false, nil
 	}
-	data, err := header.MarshalJSON()
+	data, err := json.Marshal(struct {
+		HeaderNumber uint64
+	}{
+		headerNumber,
+	})
 	if err != nil {
 		l.Error(err)
 		return false, err
@@ -94,4 +96,33 @@ func (h *height) checkHeightAndSendEvent(ctx context.Context, c *models.ChainHei
 		return false, err
 	}
 	return true, nil
+}
+
+func (h *height) getHeaderNumber(ctx context.Context, chain *types.Chain) (uint64, error) {
+	switch {
+	case chain.IsEth():
+		client, err := ethclient.Dial(chain.Endpoint)
+		if err != nil {
+			return 0, err
+		}
+		header, err := client.HeaderByNumber(context.Background(), nil)
+		if err != nil {
+			return 0, err
+		}
+		return header.Number.Uint64(), nil
+
+	case chain.IsSolana():
+		cli := client.NewClient(chain.Endpoint)
+		res, err := cli.RpcClient.GetBlockHeightWithConfig(context.Background(), rpc.GetBlockHeightConfig{Commitment: rpc.CommitmentFinalized})
+		if err != nil {
+			return 0, err
+		}
+		if res.Error != nil {
+			return 0, res.Error
+		}
+		return res.Result, nil
+
+	default:
+		return 0, errors.New("unsupported chain")
+	}
 }

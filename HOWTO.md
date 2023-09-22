@@ -601,6 +601,28 @@ output like
 
 > the `token` responded is used for validating publisher when publishing event.
 
+### Register publisher if not exists
+
+```sh
+export PUBNAME=mobile    # device name
+export PUBKEY=mn20130503 # device unique identity, usually it is device's machine number or serial number
+echo '{"name":"'$PUBNAME'", "key":"'$PUBKEY'"}' | http post :8888/srv-applet-mgr/v0/publisher/x/{projectName}/upsert -A bearer -a $TOK
+```
+
+output like
+
+```sh
+{
+    "createdAt": "2023-05-03T16:13:16.343103+08:00",
+    "key": "mn20130503",
+    "name": "mobile",
+    "projectID": "11276843314064388",
+    "publisherID": "155392036869560322",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJQYXlsb2FkIjoiMTU1MzkyMDM2ODY5NTYwMzIyIiwiaXNzIjoiaW90ZXgtdzNic3RyZWFtIn0.OHME3ij5MaJcvekctgYvosQ8DIo-K-guQbYPbQAdyYo",
+    "updatedAt": "2023-05-03T16:13:16.343103+08:00"
+}
+
+
 ### Review registered publisher
 
 ```sh
