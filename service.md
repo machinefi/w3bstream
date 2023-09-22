@@ -108,8 +108,9 @@ SRV_APPLET_MGR__Tracer_TLS_KeyPath: ""
 ### risc server
 
 ``` yaml
-SRV_APPLET_MGR__Risc0Config_CreateProofPath: "/ws/api/prove_file"
+SRV_APPLET_MGR__Risc0Config_CreateProofPath: "/"
 SRV_APPLET_MGR__Risc0Config_Endpoint: "127.0.0.1:3000"              ## risc server endpoint, just ip and port
+SRV_APPLET_MGR__Risc0Config_Websocket: "127.0.0.1:3001"
 ```
 ### Task Manager MQ 
 

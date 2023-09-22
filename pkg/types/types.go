@@ -262,6 +262,7 @@ func (c *RobotNotifierConfig) Init() {
 
 type Risc0Config struct {
 	Endpoint        string
+	Websocket       string
 	CreateProofPath string
 }
 

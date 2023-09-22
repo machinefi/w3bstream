@@ -49,7 +49,7 @@ func (h *Handler) GenRisc0ProofAsync(c *gin.Context) {
 
 	l = l.WithValues("ProjectID", prj.ProjectID)
 
-	rsp, err := risc0vm.CreateProof(c.Request.Context(), &req, h.risc0Conf.Endpoint, h.risc0Conf.CreateProofPath)
+	rsp, err := risc0vm.CreateProof(c.Request.Context(), &req, h.risc0Conf.Websocket, h.risc0Conf.CreateProofPath)
 	if err != nil {
 		l.Error(errors.Wrap(err, fmt.Sprintf("send risc0 server request %s failed", h.risc0Conf.CreateProofPath)))
 		c.JSON(http.StatusInternalServerError, newErrResp(err))
