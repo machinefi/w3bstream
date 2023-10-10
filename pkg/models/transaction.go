@@ -31,7 +31,7 @@ type TransactionInfo struct {
 	Sender       string                 `db:"f_sender,default=''"             json:"sender,omitempty"`
 	Receiver     string                 `db:"f_receiver,default=''"           json:"receiver,omitempty"`
 	Value        string                 `db:"f_value,default=''"              json:"value,omitempty"`
-	Data         string                 `db:"f_data,default=''"               json:"data,omitempty"`
+	Data         string                 `db:"f_data,default='',size=4096"     json:"data,omitempty"`
 	OperatorName string                 `db:"f_operator_name,default=''"      json:"operatorName,omitempty"`
 	State        enums.TransactionState `db:"f_state,default='0'"             json:"state,omitempty"`
 	EventType    string                 `db:"f_event_type"                    json:"eventType"`
