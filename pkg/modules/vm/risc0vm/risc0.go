@@ -16,7 +16,9 @@ func CreateProof(ctx context.Context, req *CreateProofReq, host string, path str
 	ctx, l := logr.Start(ctx, "modules.xvm.CreateProof")
 	defer l.End()
 
-	params["params"] = req.Params
+	params["private_input"] = req.PrivateInput
+	params["public_input"] = req.PublicInput
+	params["receipt_type"] = req.ReceiptType
 	params["image_id"] = req.ImageID
 	jsonParams, err := json.Marshal(params)
 	if err != nil {
