@@ -103,6 +103,15 @@ func (c *Client) Do(ctx context.Context, req interface{}, metas ...kit.Metadata)
 
 	httpClient := ClientFromContext(ctx)
 	if httpClient == nil {
+		if c.Protocol == "http+unix" {
+			if t := DftTransportFromContext(ctx); t == nil {
+				ctx = ContextWithDftTransport(ctx, &http.Transport{
+					DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
+						return net.Dial("unix", c.Host)
+					},
+				})
+			}
+		}
 		httpClient = GetShortConnClientContext(ctx, c.Timeout, c.Transports...)
 	}
 
@@ -130,6 +139,10 @@ func (c *Client) Do(ctx context.Context, req interface{}, metas ...kit.Metadata)
 }
 
 func (c *Client) toUrl(path string) string {
+	if c.Protocol == "http+unix" {
+		return "http://localhost" + path
+	}
+
 	protocol := c.Protocol
 	if protocol == "" {
 		protocol = "http"
