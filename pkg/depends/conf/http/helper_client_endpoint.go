@@ -36,19 +36,6 @@ func (c *ClientEndpoint) LivenessCheck() map[string]string {
 	return s
 }
 
-func NewRequest(method string, path string) *request {
-	return &request{method: method, path: path}
-}
-
-type request struct {
-	method string
-	path   string
-}
-
-func (req *request) Method() string { return req.method }
-
-func (req *request) Path() string { return req.path }
-
 func (c *ClientEndpoint) SetDefault() {
 	c.Client.SetDefault()
 	c.Client.Transports = []client.HttpTransport{
@@ -70,3 +57,16 @@ func (c *ClientEndpoint) Init() {
 		c.Client.Timeout = c.Timeout
 	}
 }
+
+func NewRequest(method string, path string) *request {
+	return &request{method: method, path: path}
+}
+
+type request struct {
+	method string
+	path   string
+}
+
+func (req *request) Method() string { return req.method }
+
+func (req *request) Path() string { return req.path }

@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"net/http"
 	"strconv"
 
 	"go.opentelemetry.io/otel"
@@ -22,13 +23,22 @@ func WithMiddlewares(ms ...httptransport.HttpMiddleware) {
 }
 
 type Server struct {
-	Port        int                          `env:",opt,expose"`
-	Spec        string                       `env:",opt,copy"`
-	HealthCheck string                       `env:",opt,healthCheck"`
-	Debug       *bool                        `env:""`
-	ht          *httptransport.HttpTransport `env:"-"`
-	injector    contextx.WithContext         `env:"-"`
-	name        string
+	// Protocol support `http`, `https`, `unix`(http server based on unix domain socket), default `http`
+	Protocol string `env:""`
+	// Addr listen addr, default `0.0.0.0`. if based on a unix socket, set Addr as unix socket file abs path
+	Addr string `env:""`
+	// Port listen port
+	Port int `env:",opt,expose"`
+	// Spec document rel path
+	Spec string `env:",opt,copy"`
+	// HealthCheck path
+	HealthCheck string `env:",opt,healthCheck"`
+	// Debug if enable debug mode
+	Debug *bool `env:""`
+
+	ht       *httptransport.HttpTransport
+	injector contextx.WithContext
+	name     string
 }
 
 func (s Server) WithContextInjector(injector contextx.WithContext) *Server {
@@ -52,24 +62,39 @@ func (s *Server) LivenessCheck() map[string]string {
 }
 
 func (s *Server) SetDefault() {
-	if s.Port == 0 {
-		s.Port = 80
+	if s.Protocol == "" {
+		s.Protocol = "http"
 	}
-
+	if s.Addr == "" {
+		s.Addr = "0.0.0.0"
+	}
+	if s.Port == 0 {
+		switch s.Protocol {
+		case "http":
+			s.Port = 80
+		case "https":
+			s.Port = 443
+		}
+	}
 	if s.Spec == "" {
 		s.Spec = "./openapi.json"
 	}
-
 	if s.Debug == nil {
-		s.Debug = ptrx.Bool(true)
+		s.Debug = ptrx.Ptr(true)
 	}
-
 	if s.HealthCheck == "" {
 		s.HealthCheck = "http://:" + strconv.FormatInt(int64(s.Port), 10) + "/"
 	}
-
 	if s.ht == nil {
-		s.ht = httptransport.NewHttpTransport()
+		modifiers := make([]httptransport.ServerModifier, 0)
+		if s.Protocol == "http+unix" {
+			modifiers = append(modifiers, func(srv *http.Server) error {
+				srv.Addr = ":unix@" + s.Addr
+				return nil
+			})
+		}
+
+		s.ht = httptransport.NewHttpTransport(modifiers...)
 		s.ht.SetDefault()
 	}
 }
