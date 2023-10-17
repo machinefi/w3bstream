@@ -321,6 +321,7 @@ func (c *ChainClient) CallContract(conf *wsTypes.ChainConfig, chainID uint64, ch
 	return cli.CallContract(context.Background(), msg, nil)
 }
 
+// TODO: move to a more appropriate place
 type EthClient interface {
 	TransactionByHash(ctx context.Context, hash string) (any, error)
 	TransactionState(ctx context.Context, hash string) (enums.TransactionState, error)
