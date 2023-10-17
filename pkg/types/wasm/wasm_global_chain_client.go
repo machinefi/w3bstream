@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"math/big"
 	"net/http"
 	"strconv"
 	"strings"
@@ -27,9 +26,11 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/blockchain/clients"
 	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	optypes "github.com/machinefi/w3bstream/pkg/modules/operator/pool/types"
+	"github.com/machinefi/w3bstream/pkg/types"
 	wsTypes "github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -270,78 +271,18 @@ func (c *ChainClient) sendEthTX(chain *wsTypes.Chain, toStr, valueStr, dataStr s
 	op.Mux.Lock()
 	defer op.Mux.Unlock()
 
-	cli, err := ethclient.Dial(chain.Endpoint)
-	if err != nil {
-		return nil, err
-	}
-
 	b := common.FromHex(op.Op.PrivateKey)
 	pk := crypto.ToECDSAUnsafe(b)
 	sender := crypto.PubkeyToAddress(pk.PublicKey)
-	to := common.HexToAddress(toStr)
-
-	value, ok := new(big.Int).SetString(valueStr, 10)
-	if !ok {
-		return nil, errors.New("fail to read tx value")
-	}
-	data, err := hex.DecodeString(strings.TrimPrefix(dataStr, "0x"))
-	if err != nil {
-		return nil, err
-	}
-
-	gasPrice, err := cli.SuggestGasPrice(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
-	msg := ethereum.CallMsg{
-		From:     sender,
-		To:       &to,
-		GasPrice: gasPrice,
-		Value:    value,
-		Data:     data,
-	}
-	gasLimit, err := cli.EstimateGas(context.Background(), msg)
-	if err != nil {
-		return nil, err
-	}
-
-	chainid, err := cli.ChainID(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
-	nonce, err := cli.PendingNonceAt(context.Background(), sender)
-	if err != nil {
-		return nil, err
-	}
-
-	// Create a new transaction
-	tx := ethtypes.NewTx(
-		&ethtypes.LegacyTx{
-			Nonce:    nonce,
-			GasPrice: gasPrice,
-			Gas:      gasLimit,
-			To:       &to,
-			Value:    value,
-			Data:     data,
-		})
-
-	signedTx, err := ethtypes.SignTx(tx, ethtypes.NewLondonSigner(chainid), pk)
-	if err != nil {
-		return nil, err
-	}
-
-	metrics.BlockChainTxMtc.WithLabelValues(c.ProjectName, strconv.Itoa(int(chain.ChainID))).Inc()
-
-	err = cli.SendTransaction(context.Background(), signedTx)
+	client := NewEthClient(chain)
+	tx, err := client.SendTransaction(context.Background(), toStr, valueStr, dataStr, op)
 	if err != nil {
 		return nil, err
 	}
 	return &SendTxResp{
 		ChainName: chain.Name,
-		Nonce:     nonce,
-		Hash:      signedTx.Hash().Hex(),
+		Nonce:     tx.Nonce(),
+		Hash:      tx.Hash().Hex(),
 		Sender:    sender.String(),
 		Receiver:  toStr,
 		Data:      dataStr,
@@ -378,4 +319,18 @@ func (c *ChainClient) CallContract(conf *wsTypes.ChainConfig, chainID uint64, ch
 	metrics.BlockChainTxMtc.WithLabelValues(c.ProjectName, strconv.Itoa(int(chainID))).Inc()
 
 	return cli.CallContract(context.Background(), msg, nil)
+}
+
+type EthClient interface {
+	TransactionByHash(ctx context.Context, hash string) (any, error)
+	TransactionState(ctx context.Context, hash string) (enums.TransactionState, error)
+	SendTransaction(ctx context.Context, toStr, valueStr, dataStr string, op *optypes.SyncOperator) (*ethtypes.Transaction, error)
+}
+
+func NewEthClient(chain *types.Chain) EthClient {
+	if chain.IsZKSync() {
+		return clients.NewZKSyncClient(chain.Endpoint)
+	} else {
+		return clients.NewEthClient(chain.Endpoint)
+	}
 }
