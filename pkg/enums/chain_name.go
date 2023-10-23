@@ -19,4 +19,6 @@ const (
 	OP_GOERLI           ChainName = "op-goerli"
 	BASE_MAINNET        ChainName = "base-mainnet"
 	BASE_GOERLI         ChainName = "base-goerli"
+	ZKSYNC_ERA_MAINNET  ChainName = "zksync-era-mainnet"
+	ZKSYNC_ERA_TESTNET  ChainName = "zksync-era-testnet"
 )

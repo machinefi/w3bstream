@@ -7,9 +7,6 @@ import (
 
 	solclient "github.com/blocto/solana-go-sdk/client"
 	"github.com/blocto/solana-go-sdk/rpc"
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/pkg/errors"
@@ -217,36 +214,7 @@ func (h *Handler) SendTxAsyncStateCheck(c *gin.Context) {
 }
 
 func (h *Handler) getEthState(chain *types.Chain, hash string) (enums.TransactionState, error) {
-	client, err := ethclient.Dial(chain.Endpoint)
-	if err != nil {
-		return enums.TRANSACTION_STATE_UNKNOWN, errors.Wrap(err, "dial chain failed")
-	}
-	nh := common.HexToHash(hash)
-
-	_, p, err := client.TransactionByHash(context.Background(), nh)
-	if err != nil {
-		if err == ethereum.NotFound {
-			return enums.TRANSACTION_STATE__FAILED, nil
-		} else {
-			return enums.TRANSACTION_STATE_UNKNOWN, errors.Wrap(err, "get transaction by hash failed")
-		}
-	} else {
-		if p {
-			return enums.TRANSACTION_STATE__PENDING, nil
-		}
-	}
-
-	receipt, err := client.TransactionReceipt(context.Background(), nh)
-	if err != nil {
-		if err == ethereum.NotFound {
-			return enums.TRANSACTION_STATE__IN_BLOCK, nil
-		}
-		return enums.TRANSACTION_STATE_UNKNOWN, errors.Wrap(err, "get transaction receipt failed")
-	}
-	if receipt.Status == 0 {
-		return enums.TRANSACTION_STATE__FAILED, nil
-	}
-	return enums.TRANSACTION_STATE__CONFIRMED, nil
+	return wasm.NewEthClient(chain).TransactionState(context.Background(), hash)
 }
 
 func (h *Handler) getSolanaState(chain *types.Chain, hash string) (enums.TransactionState, error) {
