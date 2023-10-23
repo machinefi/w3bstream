@@ -16,16 +16,19 @@ import (
 	"github.com/pkg/errors"
 )
 
+// EthClient is a client for ethereum compatible chain
 type EthClient struct {
 	endpoint string
 }
 
+// NewEthClient creates a new EthClient
 func NewEthClient(endpoint string) *EthClient {
 	return &EthClient{
 		endpoint: endpoint,
 	}
 }
 
+// TransactionByHash returns transaction by hash
 func (c *EthClient) TransactionByHash(ctx context.Context, hash string) (any, error) {
 	client, err := ethclient.Dial(c.endpoint)
 	if err != nil {
@@ -38,6 +41,8 @@ func (c *EthClient) TransactionByHash(ctx context.Context, hash string) (any, er
 	return tx, nil
 }
 
+// TransactionState returns transaction state
+// TODO: refactor to reduce duplicate code with other chain clients (e.g. zksync.go)
 func (c *EthClient) TransactionState(ctx context.Context, hash string) (enums.TransactionState, error) {
 	client, err := ethclient.Dial(c.endpoint)
 	if err != nil {
@@ -49,13 +54,11 @@ func (c *EthClient) TransactionState(ctx context.Context, hash string) (enums.Tr
 	if err != nil {
 		if err == ethereum.NotFound {
 			return enums.TRANSACTION_STATE__FAILED, nil
-		} else {
-			return enums.TRANSACTION_STATE_UNKNOWN, errors.Wrap(err, "get transaction by hash failed")
 		}
-	} else {
-		if p {
-			return enums.TRANSACTION_STATE__PENDING, nil
-		}
+		return enums.TRANSACTION_STATE_UNKNOWN, errors.Wrap(err, "get transaction by hash failed")
+	}
+	if p {
+		return enums.TRANSACTION_STATE__PENDING, nil
 	}
 
 	receipt, err := client.TransactionReceipt(ctx, nh)
@@ -71,14 +74,14 @@ func (c *EthClient) TransactionState(ctx context.Context, hash string) (enums.Tr
 	return enums.TRANSACTION_STATE__CONFIRMED, nil
 }
 
+// SendTransaction sends transaction
 func (c *EthClient) SendTransaction(ctx context.Context, toStr, valueStr, dataStr string, op *optypes.SyncOperator) (*ethtypes.Transaction, error) {
 	cli, err := ethclient.Dial(c.endpoint)
 	if err != nil {
 		return nil, err
 	}
 
-	b := common.FromHex(op.Op.PrivateKey)
-	pk := crypto.ToECDSAUnsafe(b)
+	pk := crypto.ToECDSAUnsafe(common.FromHex(op.Op.PrivateKey))
 	sender := crypto.PubkeyToAddress(pk.PublicKey)
 	to := common.HexToAddress(toStr)
 
@@ -134,8 +137,7 @@ func (c *EthClient) SendTransaction(ctx context.Context, toStr, valueStr, dataSt
 		return nil, err
 	}
 
-	err = cli.SendTransaction(ctx, signedTx)
-	if err != nil {
+	if err = cli.SendTransaction(ctx, signedTx); err != nil {
 		return nil, err
 	}
 

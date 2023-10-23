@@ -328,10 +328,10 @@ type EthClient interface {
 	SendTransaction(ctx context.Context, toStr, valueStr, dataStr string, op *optypes.SyncOperator) (*ethtypes.Transaction, error)
 }
 
+// NewEthClient creates a new EthClient according to the chain type
 func NewEthClient(chain *types.Chain) EthClient {
 	if chain.IsZKSync() {
 		return clients.NewZKSyncClient(chain.Endpoint)
-	} else {
-		return clients.NewEthClient(chain.Endpoint)
 	}
+	return clients.NewEthClient(chain.Endpoint)
 }

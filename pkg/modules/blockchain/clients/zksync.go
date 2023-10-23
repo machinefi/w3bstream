@@ -11,30 +11,34 @@ import (
 )
 
 type (
+	// ZKSyncClient is a client for zksync chain
 	ZKSyncClient struct {
 		*EthClient
 	}
 )
 
+// NewZKSyncClient creates a new ZKSyncClient
 func NewZKSyncClient(endpoint string) *ZKSyncClient {
 	return &ZKSyncClient{
 		EthClient: NewEthClient(endpoint),
 	}
 }
 
+// TransactionByHash returns transaction by hash
 func (c *ZKSyncClient) TransactionByHash(ctx context.Context, hash string) (any, error) {
 	client, err := clients.Dial(c.endpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "dial chain address failed")
 	}
 
-	tx, _, err := client.TransactionByHash(context.Background(), common.HexToHash(hash))
+	tx, _, err := client.TransactionByHash(ctx, common.HexToHash(hash))
 	if err != nil {
 		return nil, errors.Wrap(err, "query transaction failed")
 	}
 	return tx, nil
 }
 
+// TransactionState returns transaction state
 func (c *ZKSyncClient) TransactionState(ctx context.Context, hash string) (enums.TransactionState, error) {
 	client, err := clients.Dial(c.endpoint)
 	if err != nil {
@@ -46,13 +50,11 @@ func (c *ZKSyncClient) TransactionState(ctx context.Context, hash string) (enums
 	if err != nil {
 		if err == ethereum.NotFound {
 			return enums.TRANSACTION_STATE__FAILED, nil
-		} else {
-			return enums.TRANSACTION_STATE_UNKNOWN, errors.Wrap(err, "get transaction by hash failed")
 		}
-	} else {
-		if p {
-			return enums.TRANSACTION_STATE__PENDING, nil
-		}
+		return enums.TRANSACTION_STATE_UNKNOWN, errors.Wrap(err, "get transaction by hash failed")
+	}
+	if p {
+		return enums.TRANSACTION_STATE__PENDING, nil
 	}
 
 	receipt, err := client.TransactionReceipt(ctx, nh)
