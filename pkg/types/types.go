@@ -81,6 +81,10 @@ func (c *Chain) IsSolana() bool {
 	return c.Name == enums.SOLANA_DEVNET || c.Name == enums.SOLANA_TESTNET || c.Name == enums.SOLANA_MAINNET_BETA
 }
 
+func (c *Chain) IsZKSync() bool {
+	return c.Name == enums.ZKSYNC_ERA_MAINNET || c.Name == enums.ZKSYNC_ERA_TESTNET
+}
+
 func (c *Chain) IsEth() bool {
 	return c.ChainID != 0
 }

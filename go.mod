@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/eclipse/paho.mqtt.golang v1.4.1
-	github.com/ethereum/go-ethereum v1.11.4
+	github.com/ethereum/go-ethereum v1.12.0
 	github.com/fatih/color v1.13.0
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/golang/protobuf v1.5.3
@@ -24,7 +24,7 @@ require (
 	golang.org/x/net v0.10.0
 	golang.org/x/term v0.8.0
 	golang.org/x/text v0.9.0
-	golang.org/x/tools v0.6.0
+	golang.org/x/tools v0.7.0
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v2 v2.4.0
 )
@@ -58,6 +58,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/spruceid/siwe-go v0.2.0
 	github.com/stretchr/testify v1.8.3
+	github.com/zksync-sdk/zksync2-go v0.3.1
 	go.uber.org/ratelimit v0.2.0
 	golang.org/x/exp v0.0.0-20230801115018-d63ba01acd4b
 	google.golang.org/grpc v1.55.0
@@ -82,6 +83,7 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emirpasic/gods v1.12.0 // indirect
+	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
@@ -96,6 +98,7 @@ require (
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect
+	github.com/holiman/uint256 v1.2.2-0.20230321075855-87b91420868c // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect

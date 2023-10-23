@@ -5,15 +5,13 @@ import (
 	"net/http"
 
 	"github.com/blocto/solana-go-sdk/client"
-	"github.com/ethereum/go-ethereum/common"
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/types"
+	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
 type readTxReq struct {
@@ -22,7 +20,7 @@ type readTxReq struct {
 }
 
 type readEthTxResp struct {
-	Transaction *ethtypes.Transaction `json:"transaction,omitempty"`
+	Transaction any `json:"transaction,omitempty"`
 }
 
 type readSolanaTxResp struct {
@@ -76,16 +74,10 @@ func (h *Handler) ReadTxAsync(c *gin.Context) {
 
 	switch {
 	case chain.IsEth():
-		client, err := ethclient.Dial(chain.Endpoint)
+		client := wasm.NewEthClient(chain)
+		tx, err := client.TransactionByHash(context.Background(), req.Hash)
 		if err != nil {
-			l.Error(errors.Wrap(err, "dial chain address failed"))
-			c.JSON(http.StatusInternalServerError, newErrResp(err))
-			return
-		}
-
-		tx, _, err := client.TransactionByHash(context.Background(), common.HexToHash(req.Hash))
-		if err != nil {
-			l.Error(errors.Wrap(err, "query transaction failed"))
+			l.Error(err)
 			c.JSON(http.StatusInternalServerError, newErrResp(err))
 			return
 		}
