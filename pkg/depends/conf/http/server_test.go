@@ -1,17 +1,20 @@
-package http
+package http_test
 
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"os"
+	"strconv"
 	"testing"
 	"time"
 
 	. "github.com/onsi/gomega"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
+	confhttp "github.com/machinefi/w3bstream/pkg/depends/conf/http"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
@@ -41,7 +44,7 @@ type GetOther struct {
 func (GetOther) Path() string { return "/other" }
 
 func (GetOther) Output(ctx context.Context) (interface{}, error) {
-	client := ClientEndpoint{
+	client := confhttp.ClientEndpoint{
 		Endpoint: types.Endpoint{
 			Scheme:   "http",
 			Hostname: "0.0.0.0",
@@ -52,7 +55,7 @@ func (GetOther) Output(ctx context.Context) (interface{}, error) {
 	client.SetDefault()
 	client.Init()
 
-	_, _ = client.Do(ctx, NewRequest(http.MethodGet, "/some")).Into(nil)
+	_, _ = client.Do(ctx, confhttp.NewRequest(http.MethodGet, "/some")).Into(nil)
 
 	return nil, nil
 }
@@ -61,87 +64,98 @@ func TestHttp(t *testing.T) {
 	ctx, l := logger.NewSpanContext(context.Background(), "TestHttp")
 	defer l.End()
 
-	server := &Server{}
-	server.SetDefault()
-	server.Port = 1234
-
-	server2 := &Server{}
-	server2.SetDefault()
-	server2.Port = 3456
+	servers := []*confhttp.Server{
+		{Protocol: "http", Port: 1234},
+		{Protocol: "http", Port: 3456},
+		{Protocol: "http+unix", Addr: "/tmp/server3.sock"},
+	}
+	clients := make([]*confhttp.ClientEndpoint, 0, len(servers))
 
 	router := kit.NewRouter(httptransport.Group("/"))
 	router.Register(kit.NewRouter(&GetSome{}))
 	router.Register(kit.NewRouter(&GetOther{}))
 
-	go func() {
-		err := server.Serve(router)
-		fmt.Println(err)
+	for i, srv := range servers {
+		srv.SetDefault()
+		go func(i int, srv *confhttp.Server) {
+			err := srv.Serve(router)
+			fmt.Printf("server#%d: %v", i, err)
+			time.Sleep(5 * time.Second)
+			p, _ := os.FindProcess(os.Getpid())
+			_ = p.Signal(os.Interrupt)
+		}(i, srv)
 
-		time.Sleep(5 * time.Second)
+		cli := &confhttp.ClientEndpoint{
+			Endpoint: types.Endpoint{
+				Scheme:   srv.Protocol,
+				Hostname: srv.Addr,
+				Port:     uint16(srv.Port),
+			},
+		}
+		cli.SetDefault()
+		cli.Init()
 
-		p, _ := os.FindProcess(os.Getpid())
-		_ = p.Signal(os.Interrupt)
-	}()
-
-	go func() {
-		err := server2.Serve(router)
-		fmt.Println(err)
-
-		time.Sleep(5 * time.Second)
-
-		p, _ := os.FindProcess(os.Getpid())
-		_ = p.Signal(os.Interrupt)
-	}()
-
-	client := ClientEndpoint{
-		Endpoint: types.Endpoint{
-			Scheme:   "http",
-			Hostname: "0.0.0.0",
-			Port:     uint16(server.Port),
-		},
+		clients = append(clients, cli)
 	}
-	client.SetDefault()
-	client.Init()
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(time.Second)
 
 	printer := func(rsp *http.Response) {
 		data, _ := httputil.DumpResponse(rsp, true)
 		fmt.Println(string(data))
 	}
 
-	t.Run("GetSome", func(t *testing.T) {
-		meta, err := client.Do(ctx, NewRequest(http.MethodGet, "/some")).Into(nil)
-		NewWithT(t).Expect(err).To(BeNil())
+	for i := 0; i < len(servers); i++ {
+		idx := strconv.Itoa(i + 1)
+		cli := clients[i]
+		srv := servers[i]
 
-		NewWithT(t).Expect(http.Header(meta).Get("b3")).NotTo(BeEmpty())
-	})
+		baseURL := srv.Protocol + "://" + srv.Addr
+		if srv.Port != 0 {
+			baseURL += ":" + strconv.Itoa(srv.Port)
+		}
+		if srv.Protocol == "http+unix" {
+			baseURL = "http://localhost"
+		}
 
-	t.Run("GetOther", func(t *testing.T) {
-		meta, err := client.Do(ctx, NewRequest(http.MethodGet, "/other")).Into(nil)
-		NewWithT(t).Expect(err).To(BeNil())
-		NewWithT(t).Expect(http.Header(meta).Get("b3")).NotTo(BeEmpty())
-	})
+		// use confhttp.ClientEndpoint
+		t.Run("GetSome#"+idx, func(t *testing.T) {
+			meta, err := cli.Do(ctx, confhttp.NewRequest(http.MethodGet, "/some")).Into(nil)
+			NewWithT(t).Expect(err).To(BeNil())
+			NewWithT(t).Expect(http.Header(meta).Get("b3")).NotTo(BeEmpty())
+		})
+		t.Run("GetOther#"+idx, func(t *testing.T) {
+			meta, err := cli.Do(ctx, confhttp.NewRequest(http.MethodGet, "/other")).Into(nil)
+			NewWithT(t).Expect(err).To(BeNil())
+			NewWithT(t).Expect(http.Header(meta).Get("b3")).NotTo(BeEmpty())
+		})
 
-	t.Run("Head", func(t *testing.T) {
-		resp, err := http.Head(fmt.Sprintf("http://0.0.0.0:%d", server.Port))
+		// use http.DefaultClient
+		if srv.Protocol == "http+unix" {
+			http.DefaultClient.Transport = &http.Transport{
+				DialContext: func(ctx context.Context, network, addr string) (conn net.Conn, err error) {
+					return net.Dial("unix", srv.Addr)
+				},
+			}
+		} else {
+			http.DefaultClient.Transport = http.DefaultTransport
+		}
 
-		NewWithT(t).Expect(err).To(BeNil())
-		printer(resp)
-	})
-
-	t.Run("Options", func(t *testing.T) {
-		req, _ := http.NewRequest(http.MethodOptions, fmt.Sprintf("http://0.0.0.0:%d/some", server.Port), nil)
-		req.Header.Add("Origin", "http://localhost:3000")
-		req.Header.Add("Access-Control-Request-Method", http.MethodPost)
-		req.Header.Set("Access-Control-Request-Headers", "authorization,content-type")
-		req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36")
-		resp, err := http.DefaultClient.Do(req)
-
-		NewWithT(t).Expect(err).To(BeNil())
-
-		printer(resp)
-	})
-
+		t.Run("Head#"+idx, func(t *testing.T) {
+			resp, err := http.Head(baseURL)
+			NewWithT(t).Expect(err).To(BeNil())
+			printer(resp)
+		})
+		t.Run("Options#"+idx, func(t *testing.T) {
+			req, _ := http.NewRequest(http.MethodOptions, fmt.Sprintf(baseURL+"/some"), nil)
+			req.Header.Add("Origin", "http://localhost:3000")
+			req.Header.Add("Access-Control-Request-Method", http.MethodPost)
+			req.Header.Set("Access-Control-Request-Headers", "authorization,content-type")
+			req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36")
+			resp, err := http.DefaultClient.Do(req)
+			NewWithT(t).Expect(err).To(BeNil())
+			printer(resp)
+		})
+	}
 	time.Sleep(1 * time.Second)
 }

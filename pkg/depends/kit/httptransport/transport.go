@@ -4,10 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"sort"
+	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -40,6 +43,8 @@ func NewHttpTransport(modifiers ...ServerModifier) *HttpTransport {
 
 type HttpTransport struct {
 	ServiceMeta
+	Protocol    string
+	Addr        string
 	Port        int
 	Modifiers   []ServerModifier    // for modifying http.Server
 	Middlewares []HttpMiddleware    // Middlewares https://github.com/gorilla/handlers
@@ -82,6 +87,8 @@ func (t *HttpTransport) Serve(router *kit.Router) error {
 	return t.ServeContext(context.Background(), router)
 }
 
+func (t *HttpTransport) IsTLS() bool { return t.CertFile != "" && t.KeyFile != "" }
+
 func (t *HttpTransport) ServeContext(ctx context.Context, router *kit.Router) error {
 	t.SetDefault()
 
@@ -103,24 +110,47 @@ func (t *HttpTransport) ServeContext(ctx context.Context, router *kit.Router) er
 	go func() {
 		outputln("%s listen on %s", t.ServiceMeta, t.srv.Addr)
 
-		if t.CertFile != "" && t.KeyFile != "" {
-			if err := t.srv.ListenAndServeTLS(t.CertFile, t.KeyFile); err != nil {
-				if err == http.ErrServerClosed {
-					logger.Error(err)
-				} else {
-					log.Fatal(err)
+		var (
+			ln   net.Listener
+			err  error
+			addr = t.srv.Addr
+		)
+
+		defer func() {
+			if ln != nil {
+				_ = ln.Close()
+			}
+		}()
+
+		if strings.HasPrefix(addr, ":unix@") {
+			file := strings.Split(addr, "@")[1]
+			_ = os.Remove(file)
+			ln, err = net.Listen("unix", file)
+		} else {
+			if t.Port != 0 {
+				addr = ":" + strconv.Itoa(t.Port)
+			}
+			if addr == "" {
+				addr = ":http"
+				if t.IsTLS() {
+					addr = ":https"
 				}
 			}
-			return
+			ln, err = net.Listen("tcp", addr)
 		}
 
-		if err := t.srv.ListenAndServe(); err != nil {
-			if err == http.ErrServerClosed {
-				logger.Error(err)
-			} else {
-				log.Fatal(err)
-			}
+		if err != nil {
+			logger.Error(err)
+			log.Fatal(err)
 		}
+
+		if t.IsTLS() {
+			err = t.srv.ServeTLS(ln, t.CertFile, t.KeyFile)
+		} else {
+			err = t.srv.Serve(ln)
+		}
+		logger.Error(err)
+		return
 	}()
 
 	stopCh := make(chan os.Signal, 1)
