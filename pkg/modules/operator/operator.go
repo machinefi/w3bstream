@@ -2,11 +2,15 @@ package operator
 
 import (
 	"context"
+	"crypto/ed25519"
 
+	solcommon "github.com/blocto/solana-go-sdk/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
+	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/projectoperator"
@@ -169,13 +173,23 @@ func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
 }
 
 func convDetail(d *models.Operator) (*Detail, error) {
-	prvkey, err := crypto.HexToECDSA(d.PrivateKey)
-	if err != nil {
-		return nil, err
+	var address string
+	if d.Type == enums.OPERATOR_KEY__ECDSA {
+		prvkey, err := crypto.HexToECDSA(d.PrivateKey)
+		if err != nil {
+			return nil, err
+		}
+		pubkey := crypto.PubkeyToAddress(prvkey.PublicKey)
+		address = pubkey.Hex()
+	} else {
+		b := common.FromHex(d.PrivateKey)
+		prik := ed25519.PrivateKey(b)
+		pubk := solcommon.PublicKeyFromBytes(prik.Public().(ed25519.PublicKey))
+		address = pubk.ToBase58()
 	}
-	pubkey := crypto.PubkeyToAddress(prvkey.PublicKey)
+
 	return &Detail{
 		Operator: *d,
-		Address:  pubkey.Hex(),
+		Address:  address,
 	}, nil
 }
