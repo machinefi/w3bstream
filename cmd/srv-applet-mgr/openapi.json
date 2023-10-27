@@ -10751,7 +10751,9 @@
           "polygon-mainnet",
           "solana-devnet",
           "solana-mainnet-beta",
-          "solana-testnet"
+          "solana-testnet",
+          "zksync-era-mainnet",
+          "zksync-era-testnet"
         ],
         "x-enum-labels": [
           "arbitrum-goerli",
@@ -10768,7 +10770,9 @@
           "polygon-mainnet",
           "solana-devnet",
           "solana-mainnet-beta",
-          "solana-testnet"
+          "solana-testnet",
+          "zksync-era-mainnet",
+          "zksync-era-testnet"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.ChainName",
         "x-id": "GithubComMachinefiW3BstreamPkgEnumsChainName"

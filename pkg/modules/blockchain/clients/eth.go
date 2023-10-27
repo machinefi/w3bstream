@@ -11,9 +11,10 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/pkg/errors"
+
 	"github.com/machinefi/w3bstream/pkg/enums"
 	optypes "github.com/machinefi/w3bstream/pkg/modules/operator/pool/types"
-	"github.com/pkg/errors"
 )
 
 // EthClient is a client for ethereum compatible chain

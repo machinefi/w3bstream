@@ -5,9 +5,10 @@ import (
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/pkg/errors"
 	"github.com/zksync-sdk/zksync2-go/clients"
+
+	"github.com/machinefi/w3bstream/pkg/enums"
 )
 
 type (
