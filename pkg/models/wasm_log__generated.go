@@ -57,9 +57,22 @@ func (*WasmLog) PrimaryKey() []string {
 	}
 }
 
+func (*WasmLog) Indexes() builder.Indexes {
+	return builder.Indexes{
+		"i_log_time": []string{
+			"LogTime",
+		},
+		"i_project_name": []string{
+			"ProjectName",
+		},
+	}
+}
+
 func (m *WasmLog) IndexFieldNames() []string {
 	return []string{
 		"ID",
+		"LogTime",
+		"ProjectName",
 		"WasmLogID",
 	}
 }

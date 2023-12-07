@@ -61,6 +61,12 @@ func MustPublisher(ctx context.Context) *CurrentPublisher {
 	return p
 }
 
+func MaybePublisher(ctx context.Context) (*CurrentPublisher, bool) {
+	v := ctx.Value(ctxPublisherAuthKey)
+	p, ok := v.(*CurrentPublisher)
+	return p, ok
+}
+
 type CurrentPublisher struct {
 	*models.Publisher
 }
