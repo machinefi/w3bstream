@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -38,6 +39,7 @@ const (
 type Instance struct {
 	ctx         context.Context
 	id          types.SFID
+	rtMtx       *sync.Mutex
 	rt          *Runtime
 	state       *atomic.Uint32
 	res         *mapx.Map[uint32, []byte]
@@ -75,6 +77,7 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte, st enums
 	state.Store(uint32(st))
 
 	ins := &Instance{
+		rtMtx:    &sync.Mutex{},
 		rt:       rt,
 		id:       id,
 		state:    state,
@@ -514,6 +517,9 @@ func (i *Instance) handle(ctx context.Context, task *Task) *wasm.EventHandleResu
 	l.Info("start processing task")
 	rid := i.AddResource([]byte(task.EventType), task.Payload)
 	defer i.RmvResource(rid)
+
+	i.rtMtx.Lock()
+	defer i.rtMtx.Unlock()
 
 	if err := i.rt.Instantiate(ctx); err != nil {
 		return &wasm.EventHandleResult{
