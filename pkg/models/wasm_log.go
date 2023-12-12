@@ -6,8 +6,10 @@ import (
 )
 
 // WasmLog database model event
-// @def primary                           ID
-// @def unique_index UI_wasm_log_id       WasmLogID
+// @def primary                     ID
+// @def unique_index UI_wasm_log_id WasmLogID
+// @def index        I_project_name ProjectName
+// @def index        I_log_time     LogTime
 //
 //go:generate toolkit gen model WasmLog --database DB
 type WasmLog struct {
