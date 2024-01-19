@@ -2,10 +2,10 @@ package wasm
 
 import (
 	"context"
-	"log/slog"
 	"os"
 
 	"github.com/pkg/errors"
+	"golang.org/x/exp/slog"
 
 	"github.com/machinefi/w3bstream/pkg/modules/wasm/consts"
 )
