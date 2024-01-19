@@ -1550,6 +1550,7 @@
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[InternalServerError][500999001][internal error]",
               "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
             ]
           }
@@ -1903,6 +1904,7 @@
               "@StatusErr[CreateInstanceFailed][500999008][Create Instance Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
+              "@StatusErr[InternalServerError][500999001][internal error]",
               "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
             ]
           }
@@ -2611,7 +2613,8 @@
               "@StatusErr[CreateInstanceFailed][500999008][Create Instance Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[FetchResourceFailed][500999004][Fetch Resource Failed]!"
+              "@StatusErr[FetchResourceFailed][500999004][Fetch Resource Failed]!",
+              "@StatusErr[InternalServerError][500999001][internal error]"
             ]
           }
         }

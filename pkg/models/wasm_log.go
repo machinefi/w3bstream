@@ -10,6 +10,7 @@ import (
 // @def unique_index UI_wasm_log_id WasmLogID
 // @def index        I_project_name ProjectName
 // @def index        I_log_time     LogTime
+// @def index        I_created_at   CreatedAt
 //
 //go:generate toolkit gen model WasmLog --database DB
 type WasmLog struct {

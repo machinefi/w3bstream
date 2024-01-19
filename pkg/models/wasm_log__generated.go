@@ -59,6 +59,9 @@ func (*WasmLog) PrimaryKey() []string {
 
 func (*WasmLog) Indexes() builder.Indexes {
 	return builder.Indexes{
+		"i_created_at": []string{
+			"CreatedAt",
+		},
 		"i_log_time": []string{
 			"LogTime",
 		},
@@ -70,6 +73,7 @@ func (*WasmLog) Indexes() builder.Indexes {
 
 func (m *WasmLog) IndexFieldNames() []string {
 	return []string{
+		"CreatedAt",
 		"ID",
 		"LogTime",
 		"ProjectName",
