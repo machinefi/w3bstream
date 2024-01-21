@@ -12,3 +12,9 @@ func WithContextCompose(withs ...WithContext) WithContext {
 		return ctx
 	}
 }
+
+func WithInjectFrom(from context.Context) WithContext {
+	return func(ctx context.Context) context.Context {
+		return from
+	}
+}
