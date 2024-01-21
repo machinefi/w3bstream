@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -39,7 +38,6 @@ const (
 type Instance struct {
 	ctx         context.Context
 	id          types.SFID
-	rtMtx       *sync.Mutex
 	rt          *Runtime
 	state       *atomic.Uint32
 	res         *mapx.Map[uint32, []byte]
@@ -77,7 +75,6 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte, st enums
 	state.Store(uint32(st))
 
 	ins := &Instance{
-		rtMtx:    &sync.Mutex{},
 		rt:       rt,
 		id:       id,
 		state:    state,
@@ -482,16 +479,17 @@ func (i *Instance) handleByRid(ctx context.Context, handlerName string, rids ...
 	_, l = l.Start(ctx, "instance.handleByRid")
 	defer l.End()
 
-	if err := i.rt.Instantiate(ctx); err != nil {
+	rt, err := i.rt.Instantiate(ctx)
+	if err != nil {
 		return &wasm.EventHandleResult{
 			InstanceID: i.id.String(),
 			ErrMsg:     err.Error(),
 			Code:       wasm.ResultStatusCode_Failed,
 		}
 	}
-	defer i.rt.Deinstantiate(ctx)
+	defer rt.Deinstantiate(ctx)
 
-	result, err := i.rt.Call(ctx, handlerName, rids...)
+	result, err := rt.Call(ctx, handlerName, rids...)
 	if err != nil {
 		l.Error(err)
 		return &wasm.EventHandleResult{
@@ -518,20 +516,18 @@ func (i *Instance) handle(ctx context.Context, task *Task) *wasm.EventHandleResu
 	rid := i.AddResource([]byte(task.EventType), task.Payload)
 	defer i.RmvResource(rid)
 
-	i.rtMtx.Lock()
-	defer i.rtMtx.Unlock()
-
-	if err := i.rt.Instantiate(ctx); err != nil {
+	rt, err := i.rt.Instantiate(ctx)
+	if err != nil {
 		return &wasm.EventHandleResult{
 			InstanceID: i.id.String(),
 			ErrMsg:     err.Error(),
 			Code:       wasm.ResultStatusCode_Failed,
 		}
 	}
-	defer i.rt.Deinstantiate(ctx)
+	defer rt.Deinstantiate(ctx)
 
 	// TODO support wasm return data(not only code) for HTTP responding
-	result, err := i.rt.Call(ctx, task.Handler, int32(rid))
+	result, err := rt.Call(ctx, task.Handler, int32(rid))
 	l.Debug("call wasm runtime completed.")
 	if err != nil {
 		l.Error(err)
