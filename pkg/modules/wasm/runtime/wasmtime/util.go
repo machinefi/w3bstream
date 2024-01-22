@@ -1,6 +1,11 @@
 package wasmtime
 
-import "github.com/bytecodealliance/wasmtime-go/v15"
+import (
+	"reflect"
+
+	"github.com/bytecodealliance/wasmtime-go/v8"
+	"github.com/pkg/errors"
+)
 
 func checkIfOverflow(addr, size uint64, mem []byte) bool {
 	return int(addr) > len(mem) || int(addr+size) > len(mem)
@@ -17,4 +22,51 @@ type wasmtimeNativeFunction struct {
 
 func (wf *wasmtimeNativeFunction) Call(args ...any) (any, error) {
 	return wf.f.Call(wf.store, args...)
+}
+
+func convertFromGoType(t reflect.Type) *wasmtime.ValType {
+	switch t.Kind() {
+	case reflect.Int32:
+		return wasmtime.NewValType(wasmtime.KindI32)
+	case reflect.Int64:
+		return wasmtime.NewValType(wasmtime.KindI64)
+	case reflect.Float32:
+		return wasmtime.NewValType(wasmtime.KindF32)
+	case reflect.Float64:
+		return wasmtime.NewValType(wasmtime.KindF64)
+	default:
+		panic(errors.Errorf("convertFromGoType unsupported go type: %s", t))
+	}
+}
+
+func convertToGoTypes(in wasmtime.Val) reflect.Value {
+	switch in.Kind() {
+	case wasmtime.KindI32:
+		return reflect.ValueOf(in.I32())
+	case wasmtime.KindI64:
+		return reflect.ValueOf(in.I64())
+	case wasmtime.KindF32:
+		return reflect.ValueOf(in.F32())
+	case wasmtime.KindF64:
+		return reflect.ValueOf(in.F64())
+	default:
+		panic(errors.Errorf("convertToGoType unsupported go type: %s", in.Kind().String()))
+	}
+}
+
+func convertToWasmtimeVal(v interface{}) wasmtime.Val {
+	switch _v := v.(type) {
+	case int32:
+		return wasmtime.ValI32(_v)
+	case int64:
+		return wasmtime.ValI64(_v)
+	case float32:
+		return wasmtime.ValF32(_v)
+	case float64:
+		return wasmtime.ValF64(_v)
+	case reflect.Value:
+		return convertToWasmtimeVal(_v.Interface())
+	default:
+		panic(errors.Errorf("convertToWasmtimeVal unsupported go type: %s", reflect.TypeOf(v)))
+	}
 }

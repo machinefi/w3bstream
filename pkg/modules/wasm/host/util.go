@@ -1,13 +1,13 @@
-package internal
+package host
 
 import (
 	"golang.org/x/text/encoding/unicode"
 
-	"github.com/machinefi/w3bstream/pkg/modules/wasm"
+	"github.com/machinefi/w3bstream/pkg/modules/wasm/abi/types"
 	"github.com/machinefi/w3bstream/pkg/modules/wasm/consts"
 )
 
-func GetImportsHandler(i Instance) ImportsHandler {
+func GetImportsHandler(i types.Instance) types.ImportsHandler {
 	ctx := GetContext(i)
 	if ctx == nil {
 		return nil
@@ -15,14 +15,14 @@ func GetImportsHandler(i Instance) ImportsHandler {
 	return ctx.GetImports()
 }
 
-func GetContext(i Instance) wasm.Context {
-	if c, ok := i.GetUserdata().(wasm.Context); ok {
+func GetContext(i types.Instance) types.Context {
+	if c, ok := i.GetUserdata().(types.Context); ok {
 		return c
 	}
 	return nil
 }
 
-func CopyDataToInstance(i Instance, data []byte, dataaddrptr, datasizeptr int32) error {
+func CopyDataToInstance(i types.Instance, data []byte, dataaddrptr, datasizeptr int32) error {
 	addr, err := i.Malloc(int32(len(data)))
 	if err != nil {
 		return err
@@ -46,7 +46,7 @@ func CopyDataToInstance(i Instance, data []byte, dataaddrptr, datasizeptr int32)
 	return nil
 }
 
-func ReadStringFromAddr(i Instance, addr int32) (string, error) {
+func ReadStringFromAddr(i types.Instance, addr int32) (string, error) {
 	if addr < 4 {
 		return "", consts.RESULT__INVALID_MEM_ACCESS
 	}

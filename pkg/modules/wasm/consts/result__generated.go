@@ -1,5 +1,5 @@
 // This is a generated source file. DO NOT EDIT
-// Source: internal/result__generated.go
+// Source: consts/result__generated.go
 
 package consts
 
@@ -25,6 +25,10 @@ func ParseResultFromString(s string) (Result, error) {
 		return RESULT__ENV_NOT_FOUND, nil
 	case "RESOURCE_NOT_FOUND":
 		return RESULT__RESOURCE_NOT_FOUND, nil
+	case "RESOURCE_EVENT_NOT_FOUND":
+		return RESULT__RESOURCE_EVENT_NOT_FOUND, nil
+	case "KV_DATA_NOT_FOUND":
+		return RESULT__KV_DATA_NOT_FOUND, nil
 	case "IMPORT_HANDLE_FAILED":
 		return RESULT__IMPORT_HANDLE_FAILED, nil
 	case "HOST_INVOKE_FAILED":
@@ -44,6 +48,10 @@ func ParseResultFromLabel(s string) (Result, error) {
 		return RESULT__ENV_NOT_FOUND, nil
 	case "RESOURCE_NOT_FOUND":
 		return RESULT__RESOURCE_NOT_FOUND, nil
+	case "RESOURCE_EVENT_NOT_FOUND":
+		return RESULT__RESOURCE_EVENT_NOT_FOUND, nil
+	case "KV_DATA_NOT_FOUND":
+		return RESULT__KV_DATA_NOT_FOUND, nil
 	case "IMPORT_HANDLE_FAILED":
 		return RESULT__IMPORT_HANDLE_FAILED, nil
 	case "HOST_INVOKE_FAILED":
@@ -67,6 +75,10 @@ func (v Result) String() string {
 		return "ENV_NOT_FOUND"
 	case RESULT__RESOURCE_NOT_FOUND:
 		return "RESOURCE_NOT_FOUND"
+	case RESULT__RESOURCE_EVENT_NOT_FOUND:
+		return "RESOURCE_EVENT_NOT_FOUND"
+	case RESULT__KV_DATA_NOT_FOUND:
+		return "KV_DATA_NOT_FOUND"
 	case RESULT__IMPORT_HANDLE_FAILED:
 		return "IMPORT_HANDLE_FAILED"
 	case RESULT__HOST_INVOKE_FAILED:
@@ -86,6 +98,10 @@ func (v Result) Label() string {
 		return "ENV_NOT_FOUND"
 	case RESULT__RESOURCE_NOT_FOUND:
 		return "RESOURCE_NOT_FOUND"
+	case RESULT__RESOURCE_EVENT_NOT_FOUND:
+		return "RESOURCE_EVENT_NOT_FOUND"
+	case RESULT__KV_DATA_NOT_FOUND:
+		return "KV_DATA_NOT_FOUND"
 	case RESULT__IMPORT_HANDLE_FAILED:
 		return "IMPORT_HANDLE_FAILED"
 	case RESULT__HOST_INVOKE_FAILED:
@@ -94,11 +110,11 @@ func (v Result) Label() string {
 }
 
 func (v Result) TypeName() string {
-	return "github.com/machinefi/w3bstream/pkg/modules/wasm/internal.Result"
+	return "github.com/machinefi/w3bstream/pkg/modules/wasm/consts.Result"
 }
 
 func (v Result) ConstValues() []enum.IntStringerEnum {
-	return []enum.IntStringerEnum{RESULT__INVALID_MEM_ACCESS, RESULT__ENV_NOT_FOUND, RESULT__RESOURCE_NOT_FOUND, RESULT__IMPORT_HANDLE_FAILED, RESULT__HOST_INVOKE_FAILED}
+	return []enum.IntStringerEnum{RESULT__INVALID_MEM_ACCESS, RESULT__ENV_NOT_FOUND, RESULT__RESOURCE_NOT_FOUND, RESULT__RESOURCE_EVENT_NOT_FOUND, RESULT__KV_DATA_NOT_FOUND, RESULT__IMPORT_HANDLE_FAILED, RESULT__HOST_INVOKE_FAILED}
 }
 
 func (v Result) MarshalText() ([]byte, error) {

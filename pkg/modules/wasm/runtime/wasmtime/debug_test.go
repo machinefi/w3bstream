@@ -1,18 +1,16 @@
 package wasmtime
 
 import (
-	_ "embed"
+	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
 )
 
-var (
-	//go:embed testdata/data.wasm
-	content []byte
-)
-
 func TestDebugParseDwarf(t *testing.T) {
+	content, err := os.ReadFile("../../testdata/data.wasm")
+	NewWithT(t).Expect(err).To(BeNil())
+
 	debug := ParseDwarf(content)
 	NewWithT(t).Expect(debug).NotTo(BeNil())
 	NewWithT(t).Expect(debug.data).NotTo(BeNil())

@@ -1,7 +1,8 @@
-package wasm
+package types
 
 // VM defines interface of the wasm virtual machine(engine)
 type VM interface {
+	ID() string
 	// Name the name of the wasm vm
 	Name() string
 	// Init was invoked when creating a new wasm vm
@@ -24,6 +25,7 @@ type Module interface {
 
 // Instance defines the wasm instance
 type Instance interface {
+	ID() string
 	// RegisterImports
 	RegisterImports(name string) error
 
@@ -31,6 +33,8 @@ type Instance interface {
 	Start() error
 	// Stop stops wasm instance
 	Stop()
+	// Started returns if instance is started
+	Started() bool
 
 	// GetModule get current wasm module
 	GetModule() Module
@@ -67,6 +71,8 @@ type Instance interface {
 	Acquire() bool
 	// Release decreases the refer count of wasm instance
 	Release()
+
+	Call(string, ...interface{}) (interface{}, error)
 
 	HandleError(error)
 }

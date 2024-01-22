@@ -76,6 +76,9 @@ func (*EventLog) Indexes() builder.Indexes {
 		"i_applet_id": []string{
 			"ProjectID",
 		},
+		"i_created_at": []string{
+			"CreatedAt",
+		},
 		"i_event_id": []string{
 			"EventID",
 		},
@@ -90,6 +93,7 @@ func (*EventLog) Indexes() builder.Indexes {
 
 func (m *EventLog) IndexFieldNames() []string {
 	return []string{
+		"CreatedAt",
 		"EventID",
 		"ID",
 		"ProjectID",

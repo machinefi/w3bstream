@@ -1,35 +1,38 @@
 package wasmtime
 
 import (
+	"context"
 	"encoding/binary"
+	"log/slog"
+	"reflect"
 	"sync"
 	"sync/atomic"
 
-	"github.com/bytecodealliance/wasmtime-go/v15"
-	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/bytecodealliance/wasmtime-go/v8"
 	"github.com/pkg/errors"
 
-	"github.com/machinefi/w3bstream/pkg/modules/wasm"
+	"github.com/machinefi/w3bstream/pkg/modules/wasm/abi/proxy"
+	"github.com/machinefi/w3bstream/pkg/modules/wasm/abi/types"
+	"github.com/machinefi/w3bstream/pkg/modules/wasm/host"
 )
 
-func NewWasmtimeInstance(vm *VM, mod *Module) wasm.Instance {
+func NewWasmtimeInstance(vm *VM, mod *Module) types.Instance {
 	i := &Instance{
 		vm:  vm,
 		mod: mod,
 	}
 	i.stopCond = sync.NewCond(&i.locker)
 
-	return nil
+	return i
 }
 
-var _ wasm.Instance = (*Instance)(nil)
-
 type Instance struct {
-	vm   *VM
-	mod  *Module
-	ins  *wasmtime.Instance
-	abis []abi.ABI
+	vm  *VM
+	mod *Module
+	ins *wasmtime.Instance
+	lnk *wasmtime.Linker
 
+	externs  []wasmtime.AsExtern
 	debug    *DwarfInfo
 	locker   sync.Mutex
 	started  atomic.Bool
@@ -48,30 +51,139 @@ func (i *Instance) ID() string {
 	return i.vm.id
 }
 
-func (i *Instance) Start() error {
-	_ = i.abis
-
-	abiNames := i.GetModule().GetABINameList()
-	for _, _ = range abiNames {
+func (i *Instance) register(namespace, fnName string, fn interface{}) error {
+	if namespace == "" || fnName == "" {
+		return ErrInvalidImportFunc
 	}
 
-	// TODO Instantiate
-	i.started.Store(true)
+	if fn == nil || reflect.ValueOf(fn).IsNil() || reflect.TypeOf(fn).Kind() != reflect.Func {
+		return ErrInvalidImportFunc
+	}
 
+	return i.lnk.FuncWrap(namespace, fnName, fn)
+
+	// fnType := reflect.TypeOf(fn)
+
+	// argsNum := fnType.NumIn()
+	// argKinds := make([]*wasmtime.ValType, argsNum)
+	// for i := 0; i < argsNum; i++ {
+	// 	argKinds[i] = convertFromGoType(fnType.In(i))
+	// }
+
+	// retsNum := fnType.NumOut()
+	// retKinds := make([]*wasmtime.ValType, retsNum)
+	// for i := 0; i < retsNum; i++ {
+	// 	retKinds[i] = convertFromGoType(fnType.Out(i))
+	// }
+
+	// return wasmtime.NewFunc(
+	// 	i.vm.store,
+	// 	wasmtime.NewFuncType(argKinds, retKinds),
+	// 	func(caller *wasmtime.Caller, args []wasmtime.Val) (rets []wasmtime.Val, trap *wasmtime.Trap) {
+	// 		if len(args) != len(argKinds) {
+	// 			return nil, wasmtime.NewTrap("wasmtime: unmatched input number of arguments")
+	// 		}
+
+	// 		for i := range args {
+	// 			if args[i].Kind() != argKinds[i].Kind() {
+	// 				return nil, wasmtime.NewTrap(fmt.Sprintf("wasmtime: unmatched input type of argument: %d", i))
+	// 			}
+	// 		}
+
+	// 		_args := make([]reflect.Value, len(args))
+	// 		for i := range args {
+	// 			_args[i] = convertToGoTypes(args[i])
+	// 		}
+
+	// 		defer func() {
+	// 			if r := recover(); r != nil {
+	// 				trap = wasmtime.NewTrap(fmt.Sprintf("wasmtime: call %s paniced, r: %v stack: %v", fnName, r, string(debug.Stack())))
+	// 				rets = nil
+	// 			}
+	// 		}()
+
+	// 		_rets := reflect.ValueOf(fn).Call(_args)
+	// 		rets = make([]wasmtime.Val, len(_rets))
+	// 		for i := range _rets {
+	// 			rets[i] = convertToWasmtimeVal(_rets[i])
+	// 		}
+	// 		return rets, nil
+
+	// 		// fn := caller.GetExport(fnName).Func()
+	// 		// result, err := fn.Call(i.vm.store, _args...)
+	// 		// if err != nil {
+	// 		// 	return nil, wasmtime.NewTrap(err.Error())
+	// 		// }
+	// 		// if result == nil {
+	// 		// 	return nil, nil
+	// 		// }
+	// 		// if v, ok := result.([]wasmtime.Val); ok {
+	// 		// 	return v, nil
+	// 		// }
+	// 		// return []wasmtime.Val{convertToWasmtimeVal(result)}, nil
+	// 	},
+	// ), nil
+}
+
+func (i *Instance) RegisterImports(name string) error {
+	if name != proxy.ABIName {
+		return errors.Wrap(ErrUnknownABIName, name)
+	}
+
+	hostFns, err := host.HostFunctions(i)
+	if err != nil {
+		return err
+	}
+
+	for fnName, fn := range hostFns {
+		if err = i.register("env", fnName, fn); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (i *Instance) Start() error {
+	i.lnk = wasmtime.NewLinker(i.vm.engine)
+	if err := i.lnk.DefineWasi(); err != nil {
+		slog.Error(err.Error())
+		return err
+	}
+
+	err := i.RegisterImports(proxy.ABIName)
+	if err != nil {
+		slog.Error(err.Error())
+		return err
+	}
+
+	i.ins, err = i.lnk.Instantiate(i.vm.store, i.mod.mod)
+	if err != nil {
+		slog.Error(err.Error())
+		return err
+	}
+
+	i.started.Store(true)
 	return nil
 }
 
 func (i *Instance) Stop() {
-	// TODO Deinstantiate
+	i.locker.Lock()
+	defer i.locker.Unlock()
+	for i.refCount > 0 {
+		i.stopCond.Wait()
+	}
+	if i.started.CompareAndSwap(true, false) {
+		// TODO destroy
+	}
 }
 
-func (i *Instance) RegisterImports(name string) error {
-	return nil
+func (i *Instance) Started() bool {
+	return i.started.Load()
 }
 
 func (i *Instance) Malloc(size int32) (uint64, error) {
-	if !i.started.Load() {
-		return 0, ErrInstanceNotStart
+	if !i.Started() {
+		return 0, ErrInstanceNotStarted
 	}
 
 	mallocFn, err := i.GetExportsFunc("malloc")
@@ -87,9 +199,9 @@ func (i *Instance) Malloc(size int32) (uint64, error) {
 	return uint64(addr.(uint32)), nil
 }
 
-func (i *Instance) GetExportsFunc(name string) (wasm.Function, error) {
-	if !i.started.Load() {
-		return nil, ErrInstanceNotStart
+func (i *Instance) GetExportsFunc(name string) (types.Function, error) {
+	if !i.Started() {
+		return nil, ErrInstanceNotStarted
 	}
 
 	if v, ok := i.fns.Load(name); ok {
@@ -98,12 +210,12 @@ func (i *Instance) GetExportsFunc(name string) (wasm.Function, error) {
 
 	export := i.ins.GetExport(i.vm.store, name)
 	if export == nil {
-		return nil, ErrInvalidExport
+		return nil, errors.Wrap(ErrInvalidExportFunc, name)
 	}
 
 	f := export.Func()
 	if f == nil {
-		return nil, ErrInvalidFunction
+		return nil, errors.Wrap(ErrInvalidExportFunc, name)
 	}
 	nf := newWasmtimeNativeFunction(i.vm.store, f)
 
@@ -113,18 +225,18 @@ func (i *Instance) GetExportsFunc(name string) (wasm.Function, error) {
 }
 
 func (i *Instance) GetExportsMem(name string) ([]byte, error) {
-	if !i.started.Load() {
-		return nil, ErrInstanceNotStart
+	if !i.Started() {
+		return nil, ErrInstanceNotStarted
 	}
 
 	if i.mem == nil {
 		exp := i.ins.GetExport(i.vm.store, name)
 		if exp == nil {
-			return nil, ErrInvalidExport
+			return nil, errors.Wrap(ErrInvalidExportMem, name)
 		}
 		m := exp.Memory()
 		if m == nil {
-			return nil, ErrInvalidMemory
+			return nil, errors.Wrap(ErrInvalidExportMem, name)
 		}
 		i.mem = m
 	}
@@ -217,7 +329,9 @@ func (i *Instance) PutUint32(addr uint64, v uint32) error {
 	return nil
 }
 
-func (i *Instance) GetModule() wasm.Module { return i.mod }
+func (i *Instance) GetModule() types.Module {
+	return i.mod
+}
 
 func (i *Instance) GetUserdata() any {
 	return i.data
@@ -241,7 +355,7 @@ func (i *Instance) Acquire() bool {
 	i.locker.Lock()
 	defer i.locker.Unlock()
 
-	if !i.started.Load() {
+	if !i.Started() {
 		return false
 	}
 
@@ -259,6 +373,38 @@ func (i *Instance) Release() {
 	i.locker.Unlock()
 }
 
+func (i *Instance) Call(name string, args ...interface{}) (interface{}, error) {
+	if !i.Started() {
+		return nil, ErrInstanceNotStarted
+	}
+
+	if v, ok := i.fns.Load(name); ok {
+		return v.(*wasmtimeNativeFunction), nil
+	}
+
+	// export := i.ins.GetExport(i.vm.store, name)
+	// if export == nil {
+	// 	return nil, errors.Wrap(ErrInvalidExportFunc, name)
+	// }
+
+	// f := export.Func()
+	// if f == nil {
+	// 	return nil, errors.Wrap(ErrInvalidExportFunc, name)
+	// }
+
+	f := i.ins.GetFunc(i.vm.store, name)
+	if f == nil {
+		return nil, errors.Wrap(ErrInvalidExportFunc, name)
+	}
+
+	ret, err := f.Call(i.vm.store, args...)
+	if err != nil {
+		i.HandleError(err)
+		return nil, err
+	}
+	return ret, nil
+}
+
 func (i *Instance) HandleError(err error) {
 	var trapErr *wasmtime.Trap
 	if !errors.As(err, &trapErr) {
@@ -271,19 +417,19 @@ func (i *Instance) HandleError(err error) {
 	}
 
 	for _, f := range frames {
-		// TODO @sincos output below info for wasm code debugging
-		_ = f.FuncIndex()    // funcIndex
-		_ = f.FuncOffset()   // funcOffset
-		_ = f.ModuleOffset() // moduleOffset PC
-		_ = ""               // file name
-		_ = 0                // line number
+		args := []any{
+			"func_index", f.FuncIndex(),
+			"func_offset", f.FuncOffset(),
+		}
+		pc := uint64(f.ModuleOffset())
 		if i.debug != nil {
-			pc := uint64(f.ModuleOffset())
-			ln := i.debug.SeekPC(pc)
-			if ln != nil {
-				_ = ln.File.Name
-				_ = ln.Line
+			if l := i.debug.SeekPC(pc); l != nil {
+				args = append(args,
+					"filename", l.File.Name,
+					"line", l.Line,
+				)
 			}
 		}
+		slog.Log(context.Background(), slog.LevelError, err.Error(), args...)
 	}
 }

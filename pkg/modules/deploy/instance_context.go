@@ -106,6 +106,7 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 	}
 
 	return contextx.WithContextCompose(
+		types.WithMgrDBExecutorContext(d),
 		types.WithWasmApiServerContext(apisrv),
 		types.WithLoggerContext(logger),
 		wasm.WithCustomMetricsContext(metric),

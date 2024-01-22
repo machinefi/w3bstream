@@ -8,6 +8,7 @@ import "github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 // @def index I_project_id   ProjectID
 // @def index I_applet_id    ProjectID
 // @def index I_publisher_id PublisherID
+// @def index I_created_at   CreatedAt
 //
 //go:generate toolkit gen model EventLog --database DB
 type EventLog struct {

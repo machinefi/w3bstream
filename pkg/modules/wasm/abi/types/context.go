@@ -1,4 +1,4 @@
-package wasm
+package types
 
 type Context interface {
 	Name() string
@@ -10,4 +10,7 @@ type Context interface {
 
 	GetInstance() Instance
 	SetInstance(Instance)
+
+	OnCreated(Instance)
+	OnDestroy(Instance)
 }

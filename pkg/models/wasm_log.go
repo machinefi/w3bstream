@@ -2,6 +2,8 @@ package models
 
 import (
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 )
 
@@ -32,4 +34,32 @@ type WasmLogInfo struct {
 	Level       string     `db:"f_level,default=''"           json:"level"`
 	LogTime     int64      `db:"f_log_time,default='0'"       json:"logTime"`
 	Msg         string     `db:"f_msg,default='',size=1024"   json:"msg"`
+}
+
+func BatchCreateWasmLogs(db sqlx.DBExecutor, vs ...*WasmLog) error {
+	vals := make([]any, 0, len(vs)*8)
+	for _, v := range vs {
+		vals = append(vals, v.WasmLogID, v.ProjectName, v.AppletName, v.InstanceID, v.Src, v.Level, v.LogTime, v.Msg)
+	}
+	if len(vals) == 0 {
+		return nil
+	}
+
+	m := &WasmLog{}
+	t := db.T(m)
+
+	_, err := db.Exec(builder.Insert().Into(t).Values(
+		builder.Cols(
+			m.FieldWasmLogID(),
+			m.FieldProjectName(),
+			m.FieldAppletName(),
+			m.FieldInstanceID(),
+			m.FieldSrc(),
+			m.FieldLevel(),
+			m.FieldLogTime(),
+			m.FieldMsg(),
+		),
+		vals...,
+	))
+	return err
 }
