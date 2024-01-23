@@ -13,6 +13,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
+	"github.com/machinefi/w3bstream/pkg/modules/job"
 	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/modules/projectoperator"
@@ -105,6 +106,7 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		ctx = c.WithContext(ctx)
 	}
 
+	job.AddChannel(mq.Channel)
 	return contextx.WithContextCompose(
 		types.WithWasmApiServerContext(apisrv),
 		types.WithLoggerContext(logger),

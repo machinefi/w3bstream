@@ -51,33 +51,32 @@ func (rt *Runtime) Link(lk ABILinker, code []byte) error {
 		return err
 	}
 	rt.module = module
+
+	_ = rt.Instantiate(context.Background())
 	return nil
 }
 
-func (rt *Runtime) Instantiate(ctx context.Context) (*Runtime, error) {
+func (rt *Runtime) Instantiate(ctx context.Context) error {
 	ctx, l := logr.Start(ctx, "modules.vm.wasmtime.Runtime.Instantiate")
 	defer l.End()
 
 	if rt.module == nil {
-		return nil, ErrNotLinked
+		return ErrNotLinked
 	}
 	if rt.instance != nil {
-		return nil, ErrAlreadyInstantiated
+		return ErrAlreadyInstantiated
 	}
 	store := wasmtime.NewStore(engine)
 	store.SetWasi(wasmtime.NewWasiConfig())
 
 	instance, err := rt.linker.Instantiate(store, rt.module)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &Runtime{
-		module:   rt.module,
-		linker:   rt.linker,
-		store:    store,
-		instance: instance,
-	}, nil
+	rt.store = store
+	rt.instance = instance
+	return nil
 }
 
 func (rt *Runtime) Deinstantiate(ctx context.Context) {
