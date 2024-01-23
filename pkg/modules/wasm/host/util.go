@@ -28,17 +28,17 @@ func CopyDataToInstance(i types.Instance, data []byte, dataaddrptr, datasizeptr 
 		return err
 	}
 
-	err = i.PutMemory(addr, uint64(len(data)), data)
+	err = i.PutMemory(addr, int32(len(data)), data)
 	if err != nil {
 		return err
 	}
 
-	err = i.PutUint32(uint64(dataaddrptr), uint32(addr))
+	err = i.PutUint32(dataaddrptr, uint32(addr))
 	if err != nil {
 		return err
 	}
 
-	err = i.PutUint32(uint64(datasizeptr), uint32(len(data)))
+	err = i.PutUint32(datasizeptr, uint32(len(data)))
 	if err != nil {
 		return err
 	}
@@ -52,11 +52,11 @@ func ReadStringFromAddr(i types.Instance, addr int32) (string, error) {
 	}
 	dec := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewDecoder()
 
-	size, err := i.GetUint32(uint64(addr - 4))
+	size, err := i.GetUint32(addr - 4)
 	if err != nil {
 		return "", err
 	}
-	mem, err := i.GetMemory(uint64(addr), uint64(size))
+	mem, err := i.GetMemory(addr, int32(size))
 	if err != nil {
 		return "", err
 	}

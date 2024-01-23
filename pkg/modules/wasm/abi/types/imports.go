@@ -74,11 +74,11 @@ type ImportsSQL interface {
 
 type ImportsChainOperation interface {
 	// SendTX send tx by chain id and data, returns tx hash and error
-	SendTX(chainID int32, data []byte) (string, error)
+	SendTX(chainID uint32, data []byte) (string, error)
 	// SendTXWithOperator
-	SendTXWithOperator(chainID int32, data []byte) (string, error)
+	SendTXWithOperator(chainID uint32, data []byte) (string, error)
 	// CallContract call contract by chain id and data, returns call result
-	CallContract(chainID int32, data []byte) ([]byte, error)
+	CallContract(chainID uint32, data []byte) ([]byte, error)
 }
 
 type ImportsMQTT interface {
@@ -206,15 +206,15 @@ func (*DefaultImportsSQL) QuerySQL(string) ([]byte, error) {
 
 type DefaultImportsChainOperation struct{}
 
-func (*DefaultImportsChainOperation) SendTX(chainID int32, data []byte) (string, error) {
+func (*DefaultImportsChainOperation) SendTX(chainID uint32, data []byte) (string, error) {
 	return "", ErrNotImplemented
 }
 
-func (*DefaultImportsChainOperation) SendTXWithOperator(chainID int32, data []byte) (string, error) {
+func (*DefaultImportsChainOperation) SendTXWithOperator(chainID uint32, data []byte) (string, error) {
 	return "", ErrNotImplemented
 }
 
-func (*DefaultImportsChainOperation) CallContract(chainID int32, data []byte) ([]byte, error) {
+func (*DefaultImportsChainOperation) CallContract(chainID uint32, data []byte) ([]byte, error) {
 	return nil, ErrNotImplemented
 }
 

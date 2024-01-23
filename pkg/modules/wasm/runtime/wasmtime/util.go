@@ -7,8 +7,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-func checkIfOverflow(addr, size uint64, mem []byte) bool {
-	return int(addr) > len(mem) || int(addr+size) > len(mem)
+func checkIfOverflow(addr, size int32, mem []byte) bool {
+	return addr > int32(len(mem)) || addr+size > int32(len(mem))
 }
 
 func newWasmtimeNativeFunction(store *wasmtime.Store, f *wasmtime.Func) *wasmtimeNativeFunction {

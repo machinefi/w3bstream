@@ -61,8 +61,8 @@ type host struct {
 	imports  types.ImportsHandler
 }
 
-func (h *host) Log(level int32, msgaddr, msgsize int32) int32 {
-	msg, err := h.instance.GetMemory(uint64(msgaddr), uint64(msgsize))
+func (h *host) Log(level, msgaddr, msgsize int32) int32 {
+	msg, err := h.instance.GetMemory(msgaddr, msgsize)
 	if err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
@@ -73,7 +73,7 @@ func (h *host) Log(level int32, msgaddr, msgsize int32) int32 {
 }
 
 func (h *host) Env(keyaddr, keysize, varaddrptr, varsizeptr int32) int32 {
-	key, err := h.instance.GetMemory(uint64(keyaddr), uint64(keysize))
+	key, err := h.instance.GetMemory(keyaddr, keysize)
 	if err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
@@ -122,7 +122,7 @@ func (h *host) Seed() float64 {
 	return h.imports.Seed()
 }
 
-func (h *host) GetResourceData(rid int32, retaddrptr, retsizeptr int32) int32 {
+func (h *host) GetResourceData(rid, retaddrptr, retsizeptr int32) int32 {
 	data, ok := h.imports.GetResourceData(uint32(rid))
 	if !ok {
 		h.error(errors.Wrap(consts.RESULT__RESOURCE_NOT_FOUND, fmt.Sprintf("GetResourceData:%d", rid)))
@@ -136,8 +136,8 @@ func (h *host) GetResourceData(rid int32, retaddrptr, retsizeptr int32) int32 {
 	return consts.RESULT_OK.Int32()
 }
 
-func (h *host) SetResourceData(rid int32, dataaddr, datasize int32) int32 {
-	data, err := h.instance.GetMemory(uint64(dataaddr), uint64(datasize))
+func (h *host) SetResourceData(rid, dataaddr, datasize int32) int32 {
+	data, err := h.instance.GetMemory(dataaddr, datasize)
 	if err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
@@ -149,7 +149,7 @@ func (h *host) SetResourceData(rid int32, dataaddr, datasize int32) int32 {
 	return consts.RESULT_OK.Int32()
 }
 
-func (h *host) GetEventType(rid int32, retaddrptr, retsizeptr int32) int32 {
+func (h *host) GetEventType(rid, retaddrptr, retsizeptr int32) int32 {
 	data, ok := h.imports.GetEventType(uint32(rid))
 	if !ok {
 		h.error(errors.Wrap(consts.RESULT__RESOURCE_EVENT_NOT_FOUND, fmt.Sprintf("GetResourceData:%d", rid)))
@@ -164,7 +164,7 @@ func (h *host) GetEventType(rid int32, retaddrptr, retsizeptr int32) int32 {
 }
 
 func (h *host) GetKVData(keyaddr, keysize, retaddrptr, retsizeptr int32) int32 {
-	key, err := h.instance.GetMemory(uint64(keyaddr), uint64(keysize))
+	key, err := h.instance.GetMemory(keyaddr, keysize)
 	if err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
@@ -185,13 +185,13 @@ func (h *host) GetKVData(keyaddr, keysize, retaddrptr, retsizeptr int32) int32 {
 }
 
 func (h *host) SetKVData(keyaddr, keysize, dataaddr, datasize int32) int32 {
-	key, err := h.instance.GetMemory(uint64(keyaddr), uint64(keysize))
+	key, err := h.instance.GetMemory(keyaddr, keysize)
 	if err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
 	}
 
-	data, err := h.instance.GetMemory(uint64(dataaddr), uint64(datasize))
+	data, err := h.instance.GetMemory(dataaddr, datasize)
 	if err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
@@ -205,7 +205,7 @@ func (h *host) SetKVData(keyaddr, keysize, dataaddr, datasize int32) int32 {
 }
 
 func (h *host) ExecSQL(queryaddr, querysize int32) int32 {
-	query, err := h.instance.GetMemory(uint64(queryaddr), uint64(querysize))
+	query, err := h.instance.GetMemory(queryaddr, querysize)
 	if err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
@@ -219,7 +219,7 @@ func (h *host) ExecSQL(queryaddr, querysize int32) int32 {
 }
 
 func (h *host) QuerySQL(queryaddr, querysize, retaddrptr, retsizeptr int32) int32 {
-	query, err := h.instance.GetMemory(uint64(queryaddr), uint64(querysize))
+	query, err := h.instance.GetMemory(queryaddr, querysize)
 	if err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
@@ -236,13 +236,13 @@ func (h *host) QuerySQL(queryaddr, querysize, retaddrptr, retsizeptr int32) int3
 	return consts.RESULT_OK.Int32()
 }
 
-func (h *host) SendTX(chainid int32, dataaddr, datasize, hashaddrptr, hashsizeptr int32) int32 {
-	data, err := h.instance.GetMemory(uint64(dataaddr), uint64(datasize))
+func (h *host) SendTX(chainid, dataaddr, datasize, hashaddrptr, hashsizeptr int32) int32 {
+	data, err := h.instance.GetMemory(dataaddr, datasize)
 	if err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
 	}
-	hash, err := h.imports.SendTX(chainid, data)
+	hash, err := h.imports.SendTX(uint32(chainid), data)
 	if err != nil {
 		h.error(errors.Wrap(err, "SendTX"))
 		return consts.RESULT__IMPORT_HANDLE_FAILED.Int32()
@@ -254,13 +254,13 @@ func (h *host) SendTX(chainid int32, dataaddr, datasize, hashaddrptr, hashsizept
 	return consts.RESULT_OK.Int32()
 }
 
-func (h *host) SendTXWithOperator(chainid int32, dataaddr, datasize, hashaddrptr, hashsizeptr int32) int32 {
-	data, err := h.instance.GetMemory(uint64(dataaddr), uint64(datasize))
+func (h *host) SendTXWithOperator(chainid, dataaddr, datasize, hashaddrptr, hashsizeptr int32) int32 {
+	data, err := h.instance.GetMemory(dataaddr, datasize)
 	if err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
 	}
-	hash, err := h.imports.SendTXWithOperator(chainid, data)
+	hash, err := h.imports.SendTXWithOperator(uint32(chainid), data)
 	if err != nil {
 		h.error(errors.Wrap(err, "SendTXWithOperator"))
 		return consts.RESULT__IMPORT_HANDLE_FAILED.Int32()
@@ -272,13 +272,13 @@ func (h *host) SendTXWithOperator(chainid int32, dataaddr, datasize, hashaddrptr
 	return consts.RESULT_OK.Int32()
 }
 
-func (h *host) CallContract(chainid int32, dataaddr, datasize, resultaddrptr, resultsizeptr int32) int32 {
-	data, err := h.instance.GetMemory(uint64(dataaddr), uint64(datasize))
+func (h *host) CallContract(chainid, dataaddr, datasize, resultaddrptr, resultsizeptr int32) int32 {
+	data, err := h.instance.GetMemory(dataaddr, datasize)
 	if err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
 	}
-	res, err := h.imports.CallContract(chainid, data)
+	res, err := h.imports.CallContract(uint32(chainid), data)
 	if err != nil {
 		h.error(errors.Wrap(err, "CallContract"))
 		return consts.RESULT__IMPORT_HANDLE_FAILED.Int32()
@@ -291,12 +291,12 @@ func (h *host) CallContract(chainid int32, dataaddr, datasize, resultaddrptr, re
 }
 
 func (h *host) PubMQTT(topicaddr, topicsize, msgaddr, msgsize int32) int32 {
-	topic, err := h.instance.GetMemory(uint64(topicaddr), uint64(topicsize))
+	topic, err := h.instance.GetMemory(topicaddr, topicsize)
 	if err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
 	}
-	msg, err := h.instance.GetMemory(uint64(msgaddr), uint64(msgsize))
+	msg, err := h.instance.GetMemory(msgaddr, msgsize)
 	if err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
@@ -310,7 +310,7 @@ func (h *host) PubMQTT(topicaddr, topicsize, msgaddr, msgsize int32) int32 {
 }
 
 func (h *host) SubmitMetrics(dataaddr, datasize int32) int32 {
-	data, err := h.instance.GetMemory(uint64(dataaddr), uint64(datasize))
+	data, err := h.instance.GetMemory(dataaddr, datasize)
 	if err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
@@ -323,7 +323,7 @@ func (h *host) SubmitMetrics(dataaddr, datasize int32) int32 {
 }
 
 func (h *host) AsyncAPICall(reqaddr, reqsize, rspaddrptr, rspsizeptr int32) int32 {
-	req, err := h.instance.GetMemory(uint64(reqaddr), uint64(reqsize))
+	req, err := h.instance.GetMemory(reqaddr, reqsize)
 	if err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()

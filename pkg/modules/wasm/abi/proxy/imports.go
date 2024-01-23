@@ -293,7 +293,7 @@ func (i *Imports) QuerySQL(q string) ([]byte, error) {
 	return sql_util.JsonifyRows(rows)
 }
 
-func (i *Imports) SendTX(chainID int32, data []byte) (string, error) {
+func (i *Imports) SendTX(chainID uint32, data []byte) (string, error) {
 	if !i.chain.Valid() {
 		return "", errWithoutChainConfig
 	}
@@ -310,7 +310,7 @@ func (i *Imports) SendTX(chainID int32, data []byte) (string, error) {
 	)
 }
 
-func (i *Imports) SendTXWithOperator(chainID int32, data []byte) (string, error) {
+func (i *Imports) SendTXWithOperator(chainID uint32, data []byte) (string, error) {
 	if !i.chain.Valid() {
 		return "", errWithoutChainConfig
 	}
@@ -332,7 +332,7 @@ func (i *Imports) SendTXWithOperator(chainID int32, data []byte) (string, error)
 	return tx.Hash, err
 }
 
-func (i *Imports) CallContract(chainID int32, data []byte) ([]byte, error) {
+func (i *Imports) CallContract(chainID uint32, data []byte) ([]byte, error) {
 	if !i.chain.Valid() {
 		return nil, errWithoutChainConfig
 	}

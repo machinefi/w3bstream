@@ -50,14 +50,14 @@ func BatchCreateWasmLogs(db sqlx.DBExecutor, vs ...*WasmLog) error {
 
 	_, err := db.Exec(builder.Insert().Into(t).Values(
 		builder.Cols(
-			m.FieldWasmLogID(),
-			m.FieldProjectName(),
-			m.FieldAppletName(),
-			m.FieldInstanceID(),
-			m.FieldSrc(),
-			m.FieldLevel(),
-			m.FieldLogTime(),
-			m.FieldMsg(),
+			m.ColWasmLogID().Name,
+			m.ColProjectName().Name,
+			m.ColAppletName().Name,
+			m.ColInstanceID().Name,
+			m.ColSrc().Name,
+			m.ColLevel().Name,
+			m.ColLogTime().Name,
+			m.ColMsg().Name,
 		),
 		vals...,
 	))

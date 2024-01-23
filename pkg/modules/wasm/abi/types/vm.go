@@ -44,19 +44,19 @@ type Instance interface {
 	GetExportsMem(name string) ([]byte, error)
 
 	// GetByte returns the wasm byte from the specified addr
-	GetByte(addr uint64) (byte, error)
+	GetByte(addr int32) (byte, error)
 	// PutByte set a wasm byte to specified addr
-	PutByte(addr uint64, v byte) error
+	PutByte(addr int32, v byte) error
 	// GetUint32 returns the u32 value from the specified addr
-	GetUint32(addr uint64) (uint32, error)
+	GetUint32(addr int32) (uint32, error)
 	// PutUint32 sets u32 value to the specified addr
-	PutUint32(addr uint64, v uint32) error
+	PutUint32(addr int32, v uint32) error
 	// GetMemory returns wasm memory
-	GetMemory(addr uint64, size uint64) ([]byte, error)
+	GetMemory(addr int32, size int32) ([]byte, error)
 	// PutMemory
-	PutMemory(addr uint64, size uint64, data []byte) error
+	PutMemory(addr int32, size int32, data []byte) error
 	// Malloc allocates size of memory from wasm default memory
-	Malloc(size int32) (uint64, error)
+	Malloc(size int32) (int32, error)
 
 	// GetUserdata get user-defined data
 	GetUserdata() any

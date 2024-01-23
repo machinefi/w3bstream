@@ -61,7 +61,7 @@ func (a *ABIContext) OnEventReceived(entry string, typ string, data []byte) (int
 	defer a.Imports.RemoveEventType(uint32(rid))
 	defer a.Imports.FlushLog()
 
-	return a.Instance.Call(entry, int32(rid))
+	return a.Instance.Call(entry, int(rid))
 }
 
 func (a *ABIContext) OnCreated(i types.Instance) {

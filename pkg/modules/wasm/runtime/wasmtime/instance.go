@@ -45,7 +45,7 @@ type Instance struct {
 	data any
 }
 
-var _ = (*Instance)(nil)
+var _ types.Instance = (*Instance)(nil)
 
 func (i *Instance) ID() string {
 	return i.vm.id
@@ -181,7 +181,7 @@ func (i *Instance) Started() bool {
 	return i.started.Load()
 }
 
-func (i *Instance) Malloc(size int32) (uint64, error) {
+func (i *Instance) Malloc(size int32) (int32, error) {
 	if !i.Started() {
 		return 0, ErrInstanceNotStarted
 	}
@@ -196,7 +196,7 @@ func (i *Instance) Malloc(size int32) (uint64, error) {
 		i.HandleError(err)
 		return 0, err
 	}
-	return uint64(addr.(uint32)), nil
+	return addr.(int32), nil
 }
 
 func (i *Instance) GetExportsFunc(name string) (types.Function, error) {
@@ -244,7 +244,7 @@ func (i *Instance) GetExportsMem(name string) ([]byte, error) {
 	return i.mem.UnsafeData(i.vm.store), nil
 }
 
-func (i *Instance) GetMemory(addr, size uint64) ([]byte, error) {
+func (i *Instance) GetMemory(addr, size int32) ([]byte, error) {
 	mem, err := i.GetExportsMem("memory")
 	if err != nil {
 		return nil, err
@@ -257,13 +257,13 @@ func (i *Instance) GetMemory(addr, size uint64) ([]byte, error) {
 	return mem[addr : addr+size], nil
 }
 
-func (i *Instance) PutMemory(addr, size uint64, mem []byte) error {
+func (i *Instance) PutMemory(addr, size int32, data []byte) error {
 	mem, err := i.GetExportsMem("memory")
 	if err != nil {
 		return err
 	}
 
-	if need := uint64(len(mem)); need > size {
+	if need := int32(len(data)); need > size {
 		size = need
 	}
 
@@ -275,7 +275,7 @@ func (i *Instance) PutMemory(addr, size uint64, mem []byte) error {
 	return nil
 }
 
-func (i *Instance) GetByte(addr uint64) (byte, error) {
+func (i *Instance) GetByte(addr int32) (byte, error) {
 	mem, err := i.GetExportsMem("memory")
 	if err != nil {
 		return 0, err
@@ -288,7 +288,7 @@ func (i *Instance) GetByte(addr uint64) (byte, error) {
 	return mem[addr], nil
 }
 
-func (i *Instance) PutByte(addr uint64, v byte) error {
+func (i *Instance) PutByte(addr int32, v byte) error {
 	mem, err := i.GetExportsMem("memory")
 	if err != nil {
 		return err
@@ -302,7 +302,7 @@ func (i *Instance) PutByte(addr uint64, v byte) error {
 	return nil
 }
 
-func (i *Instance) GetUint32(addr uint64) (uint32, error) {
+func (i *Instance) GetUint32(addr int32) (uint32, error) {
 	mem, err := i.GetExportsMem("memory")
 	if err != nil {
 		return 0, err
@@ -315,7 +315,7 @@ func (i *Instance) GetUint32(addr uint64) (uint32, error) {
 	return binary.LittleEndian.Uint32(mem[addr:]), nil
 }
 
-func (i *Instance) PutUint32(addr uint64, v uint32) error {
+func (i *Instance) PutUint32(addr int32, v uint32) error {
 	mem, err := i.GetExportsMem("memory")
 	if err != nil {
 		return err
@@ -378,9 +378,9 @@ func (i *Instance) Call(name string, args ...interface{}) (interface{}, error) {
 		return nil, ErrInstanceNotStarted
 	}
 
-	if v, ok := i.fns.Load(name); ok {
-		return v.(*wasmtimeNativeFunction), nil
-	}
+	// if v, ok := i.fns.Load(name); ok {
+	// 	return v.(*wasmtimeNativeFunction), nil
+	// }
 
 	// export := i.ins.GetExport(i.vm.store, name)
 	// if export == nil {
