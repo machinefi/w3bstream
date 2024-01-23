@@ -46,6 +46,7 @@ require (
 	github.com/agiledragon/gomonkey/v2 v2.10.1
 	github.com/aws/aws-sdk-go v1.44.245
 	github.com/blocto/solana-go-sdk v1.25.0
+	github.com/bytecodealliance/wasmtime-go/v15 v15.0.0
 	github.com/bytecodealliance/wasmtime-go/v8 v8.0.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-co-op/gocron v1.22.0

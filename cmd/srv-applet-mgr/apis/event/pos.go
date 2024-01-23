@@ -44,7 +44,11 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 		return handleDataPush(ctx, r.Channel, r.Payload.Bytes())
 	}
 
-	pub := middleware.MustPublisher(ctx)
+	pub, ok := middleware.MaybePublisher(ctx)
+	if !ok {
+		return nil, status.InvalidAuthPublisherID.StatusErr().
+			WithDesc("use publisher token do data-pushing")
+	}
 
 	var (
 		err error

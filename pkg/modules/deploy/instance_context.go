@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/tasks"
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	confmq "github.com/machinefi/w3bstream/pkg/depends/conf/mq"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
+	"github.com/machinefi/w3bstream/pkg/modules/job"
 	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/modules/projectoperator"
@@ -61,6 +64,12 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 	metric := metrics.NewCustomMetric(account, prj.Name)
 	logger := types.MustLoggerFromContext(parent)
 	sfid := confid.MustSFIDGeneratorFromContext(parent)
+	mq := &confmq.Config{Channel: ins.InstanceID.String()}
+	mq.SetDefault()
+	if err := mq.Init(); err != nil {
+		return nil, status.InternalServerError.StatusErr().WithDesc(err.Error())
+	}
+	go kit.Run(tasks.Root, mq.WithContextInjector(contextx.WithInjectFrom(parent)))
 
 	// wasm runtime context
 	// all configurations will be init from parent(host) context and with value to wasm runtime context
@@ -97,6 +106,7 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		ctx = c.WithContext(ctx)
 	}
 
+	job.AddChannel(mq.Channel)
 	return contextx.WithContextCompose(
 		types.WithWasmApiServerContext(apisrv),
 		types.WithLoggerContext(logger),
@@ -105,7 +115,7 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		types.WithProjectContext(prj),
 		types.WithAppletContext(app),
 		types.WithInstanceContext(ins),
-		confmq.WithMqContext(confmq.MustMqFromContext(parent)),
+		confmq.WithMqContext(mq),
 		types.WithChainConfigContext(types.MustChainConfigFromContext(parent)),
 		types.WithOperatorPoolContext(types.MustOperatorPoolFromContext(parent)),
 	)(ctx), nil

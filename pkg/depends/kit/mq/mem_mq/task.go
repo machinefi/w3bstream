@@ -45,7 +45,7 @@ func (tm *TaskManager) Push(ch string, t mq.Task) error {
 	case <-time.After(time.Second):
 		return errors.Wrap(
 			mq.ErrPushTaskTimeout,
-			fmt.Sprintf("len: %d capacity: %d", len(tm.sig), tm.lmt),
+			fmt.Sprintf("%s len: %d capacity: %d", ch, len(tm.sig), tm.lmt),
 		)
 	}
 }

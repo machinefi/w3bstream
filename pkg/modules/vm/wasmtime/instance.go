@@ -479,15 +479,6 @@ func (i *Instance) handleByRid(ctx context.Context, handlerName string, rids ...
 	_, l = l.Start(ctx, "instance.handleByRid")
 	defer l.End()
 
-	if err := i.rt.Instantiate(ctx); err != nil {
-		return &wasm.EventHandleResult{
-			InstanceID: i.id.String(),
-			ErrMsg:     err.Error(),
-			Code:       wasm.ResultStatusCode_Failed,
-		}
-	}
-	defer i.rt.Deinstantiate(ctx)
-
 	result, err := i.rt.Call(ctx, handlerName, rids...)
 	if err != nil {
 		l.Error(err)
@@ -514,15 +505,6 @@ func (i *Instance) handle(ctx context.Context, task *Task) *wasm.EventHandleResu
 	l.Info("start processing task")
 	rid := i.AddResource([]byte(task.EventType), task.Payload)
 	defer i.RmvResource(rid)
-
-	if err := i.rt.Instantiate(ctx); err != nil {
-		return &wasm.EventHandleResult{
-			InstanceID: i.id.String(),
-			ErrMsg:     err.Error(),
-			Code:       wasm.ResultStatusCode_Failed,
-		}
-	}
-	defer i.rt.Deinstantiate(ctx)
 
 	// TODO support wasm return data(not only code) for HTTP responding
 	result, err := i.rt.Call(ctx, task.Handler, int32(rid))

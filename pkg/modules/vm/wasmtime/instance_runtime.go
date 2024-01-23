@@ -51,6 +51,8 @@ func (rt *Runtime) Link(lk ABILinker, code []byte) error {
 		return err
 	}
 	rt.module = module
+
+	_ = rt.Instantiate(context.Background())
 	return nil
 }
 
@@ -71,9 +73,9 @@ func (rt *Runtime) Instantiate(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	rt.instance = instance
-	rt.store = store
 
+	rt.store = store
+	rt.instance = instance
 	return nil
 }
 
