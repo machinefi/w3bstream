@@ -24,6 +24,26 @@ func (wf *wasmtimeNativeFunction) Call(args ...any) (any, error) {
 	return wf.f.Call(wf.store, args...)
 }
 
+func (wf *wasmtimeNativeFunction) Params() []string {
+	params := wf.f.Type(wf.store).Params()
+
+	ret := make([]string, 0, len(params))
+	for _, t := range params {
+		ret = append(ret, t.String())
+	}
+	return ret
+}
+
+func (wf *wasmtimeNativeFunction) Results() []string {
+	results := wf.f.Type(wf.store).Results()
+
+	ret := make([]string, 0, len(results))
+	for _, t := range results {
+		ret = append(ret, t.String())
+	}
+	return ret
+}
+
 func convertFromGoType(t reflect.Type) *wasmtime.ValType {
 	switch t.Kind() {
 	case reflect.Int32:

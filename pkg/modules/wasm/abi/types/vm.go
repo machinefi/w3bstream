@@ -79,4 +79,6 @@ type Instance interface {
 
 type Function interface {
 	Call(args ...any) (any, error)
+	Params() []string
+	Results() []string
 }

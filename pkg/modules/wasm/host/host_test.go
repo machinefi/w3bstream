@@ -18,7 +18,7 @@ import (
 )
 
 func TestHostFunctions(t *testing.T) {
-	content, err := os.ReadFile("../testdata/data.wasm")
+	content, err := os.ReadFile("../testdata/log.wasm")
 	NewWithT(t).Expect(err).To(BeNil())
 
 	vmid := uuid.NewString()
@@ -52,4 +52,15 @@ func TestHostFunctions(t *testing.T) {
 	for _, key := range keys {
 		t.Logf("%s: %s", key, reflect.TypeOf(mapping[key]))
 	}
+
+	NewWithT(t).Expect(instance.Start()).To(BeNil())
+	defer instance.Stop()
+
+	f, err := instance.GetExportsFunc("malloc")
+	NewWithT(t).Expect(err).To(BeNil())
+	t.Log(f.Params(), f.Results())
+
+	f, err = instance.GetExportsFunc("alloc")
+	NewWithT(t).Expect(err).To(BeNil())
+	t.Log(f.Params(), f.Results())
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"log/slog"
 	"reflect"
+	"strings"
 	"sync"
 	"sync/atomic"
 
@@ -405,15 +406,12 @@ func (i *Instance) Call(name string, args ...interface{}) (interface{}, error) {
 	ret, err := f.Call(i.vm.store, args...)
 	if err != nil {
 		i.HandleError(err)
-		return nil, err
+		return nil, errors.New(strings.Split(err.Error(), ":")[0])
 	}
 	return ret, nil
 }
 
 func (i *Instance) HandleError(err error) {
-	// if i.debug == nil {
-	// 	return
-	// }
 	var trapErr *wasmtime.Trap
 	if !errors.As(err, &trapErr) {
 		return
@@ -439,6 +437,6 @@ func (i *Instance) HandleError(err error) {
 				)
 			}
 		}
-		slog.Log(context.Background(), slog.LevelError, err.Error(), args...)
+		slog.Log(context.Background(), slog.LevelError, strings.Split(err.Error(), ":")[0], args...)
 	}
 }
