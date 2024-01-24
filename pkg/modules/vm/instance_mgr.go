@@ -19,7 +19,7 @@ var (
 )
 
 func AddInstanceByID(ctx context.Context, id types.SFID, i wasm.Instance) {
-	ctx, l := logr.Start(ctx, "modules.vm.AddInstanceByID")
+	ctx, l := logr.Start(ctx, "vm.AddInstanceByID")
 	defer l.End()
 
 	instances.Store(id, i)
@@ -27,7 +27,7 @@ func AddInstanceByID(ctx context.Context, id types.SFID, i wasm.Instance) {
 }
 
 func DelInstance(ctx context.Context, id types.SFID) error {
-	ctx, l := logr.Start(ctx, "modules.vm.DelInstance")
+	ctx, l := logr.Start(ctx, "vm.DelInstance")
 	defer l.End()
 
 	i, _ := instances.LoadAndRemove(id)
@@ -38,7 +38,7 @@ func DelInstance(ctx context.Context, id types.SFID) error {
 }
 
 func StartInstance(ctx context.Context, id types.SFID) error {
-	ctx, l := logr.Start(ctx, "modules.vm.StartInstance")
+	ctx, l := logr.Start(ctx, "vm.StartInstance")
 	defer l.End()
 
 	l = l.WithValues("instance", id)
@@ -62,7 +62,7 @@ func StartInstance(ctx context.Context, id types.SFID) error {
 }
 
 func StopInstance(ctx context.Context, id types.SFID) error {
-	ctx, l := logr.Start(ctx, "modules.vm.StopInstance")
+	ctx, l := logr.Start(ctx, "vm.StopInstance")
 	defer l.End()
 
 	l = l.WithValues("instance", id)

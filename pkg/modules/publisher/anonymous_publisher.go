@@ -21,7 +21,7 @@ import (
 )
 
 func CreateAnonymousPublisher(ctx context.Context) (*models.Publisher, error) {
-	ctx, l := logr.Start(ctx, "modules.AnonymousPublisher.Create")
+	ctx, l := logr.Start(ctx, "publisher.CreateAnonymousPublisher")
 	defer l.End()
 
 	var (

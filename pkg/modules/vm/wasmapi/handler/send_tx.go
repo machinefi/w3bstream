@@ -35,7 +35,7 @@ type sendTxResp struct {
 
 func (h *Handler) SendTx(c *gin.Context) {
 	// l := types.MustLoggerFromContext(c.Request.Context())
-	_, l := logr.Start(c, "wasmapi.handler.SendTx")
+	_, l := logr.Start(c, "vm.Handler.SendTx")
 	defer l.End()
 
 	var req sendTxReq
@@ -92,7 +92,7 @@ func (h *Handler) SendTx(c *gin.Context) {
 
 func (h *Handler) SendTxAsync(c *gin.Context) {
 	// l := types.MustLoggerFromContext(c.Request.Context())
-	_, l := logr.Start(c, "wasmapi.handler.SendTxAsync")
+	_, l := logr.Start(c, "vm.Handler.SendTxAsync")
 	defer l.End()
 
 	chainCli := wasm.MustChainClientFromContext(c.Request.Context())
@@ -152,7 +152,7 @@ func (h *Handler) SendTxAsync(c *gin.Context) {
 
 func (h *Handler) SendTxAsyncStateCheck(c *gin.Context) {
 	// l := types.MustLoggerFromContext(c.Request.Context())
-	_, l := logr.Start(c, "wasmapi.handler.SendTxAsyncStateCheck")
+	_, l := logr.Start(c, "vm.Handler.SendTxAsyncStateCheck")
 	defer l.End()
 
 	var req sendTxReq

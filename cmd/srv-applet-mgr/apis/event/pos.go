@@ -33,7 +33,7 @@ func (r *HandleEvent) Path() string {
 }
 
 func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
-	ctx, l := logr.Start(ctx, "api.event.HandleEvent")
+	ctx, l := logr.Start(ctx, "api.HandleEvent")
 	defer l.End()
 
 	receivedTs := time.Now().UTC().UnixMilli()
@@ -124,7 +124,7 @@ type (
 )
 
 func handleDataPush(ctx context.Context, ch string, payload []byte) (interface{}, error) {
-	ctx, l := logr.Start(ctx, "api.Event.HandleDataPush")
+	ctx, l := logr.Start(ctx, "api.HandleDataPush")
 	defer l.End()
 
 	var err error

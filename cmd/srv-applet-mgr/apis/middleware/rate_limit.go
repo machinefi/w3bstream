@@ -10,7 +10,7 @@ import (
 type EventReqRateLimit struct{}
 
 func (r *EventReqRateLimit) Output(ctx context.Context) (interface{}, error) {
-	ctx, l := logr.Start(ctx, "middleware.EventReqRateLimit.Output")
+	ctx, l := logr.Start(ctx, "api.mw.EventReqRateLimit")
 	defer l.End()
 
 	rl := confrate.MustRateLimitKeyFromContext(ctx)

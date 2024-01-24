@@ -104,7 +104,7 @@ func NewSQLBatcher(preStatm string) *SQLBatcher {
 }
 
 func (b *SQLBatcher) Insert(query string) error {
-	_, l := logger.NewSpanContext(context.Background(), "modules.metrics.SQLBatcher.Insert")
+	_, l := logger.NewSpanContext(context.Background(), "metrics.SQLBatcher.Insert")
 	defer l.End()
 
 	if clickhouseCLI == nil {
@@ -151,7 +151,7 @@ func (b *SQLBatcher) run() {
 }
 
 func (b *SQLBatcher) insert() error {
-	_, l := logger.NewSpanContext(context.Background(), "modules.metrics.SQLBatcher.insert")
+	_, l := logger.NewSpanContext(context.Background(), "metrics.SQLBatcher.insert")
 	defer l.End()
 
 	err := clickhouseCLI.Insert(b.preStatm + "(" + strings.Join(b.buf, "),(") + ")")

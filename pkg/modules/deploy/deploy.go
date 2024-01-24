@@ -23,7 +23,7 @@ import (
 )
 
 func Init(ctx context.Context) error {
-	ctx, l := logr.Start(ctx, "modules.deploy.Init")
+	ctx, l := logr.Start(ctx, "deploy.Init")
 	defer l.End()
 
 	var (
@@ -238,7 +238,7 @@ func Remove(ctx context.Context, r *CondArgs) error {
 
 // UpsertByCode upsert instance and its config, and deploy wasm if needed
 func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.InstanceState, old ...types.SFID) (*models.Instance, error) {
-	ctx, l := logr.Start(ctx, "modules.deploy.UpsertByCode")
+	ctx, l := logr.Start(ctx, "deploy.UpsertByCode")
 	defer l.End()
 
 	var (

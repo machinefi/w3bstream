@@ -24,7 +24,7 @@ func (r *ForwardRequest) Path() string {
 }
 
 func Forward(ctx context.Context, channel string, ev *eventpb.Event) (interface{}, error) {
-	ctx, l := logr.Start(ctx, "modules.transporter.proxy.Forward")
+	ctx, l := logr.Start(ctx, "transporter.proxy.Forward")
 	defer l.End()
 
 	cli := types.MustProxyClientFromContext(ctx)

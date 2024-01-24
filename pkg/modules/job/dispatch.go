@@ -13,7 +13,7 @@ import (
 )
 
 func Dispatch(ctx context.Context, t mq.Task) {
-	ctx, l := logr.Start(ctx, "modules.job.Dispatch",
+	ctx, l := logr.Start(ctx, "job.Dispatch",
 		"subject", t.Subject(),
 		"task_id", t.ID(),
 	)

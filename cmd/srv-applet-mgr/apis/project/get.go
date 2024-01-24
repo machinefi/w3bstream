@@ -42,7 +42,7 @@ type ListProject struct {
 func (r *ListProject) Path() string { return "/datalist" }
 
 func (r *ListProject) Output(ctx context.Context) (interface{}, error) {
-	ctx, l := logr.Start(ctx, "ListProject")
+	ctx, l := logr.Start(ctx, "api.ListProject")
 	defer l.End()
 
 	ctx = middleware.MustCurrentAccountFromContext(ctx).WithAccount(ctx)

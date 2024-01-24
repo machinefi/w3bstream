@@ -59,7 +59,7 @@ func HandleEvent(ctx context.Context, t string, data []byte) (interface{}, error
 }
 
 func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
-	ctx, l := logr.Start(ctx, "modules.event.OnEvent", "event_id", types.MustEventIDFromContext(ctx))
+	ctx, l := logr.Start(ctx, "event.OnEvent", "event_id", types.MustEventIDFromContext(ctx))
 	defer l.End()
 
 	var (

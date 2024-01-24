@@ -15,7 +15,7 @@ import (
 
 func (h *Handler) GenRisc0Proof(c *gin.Context) {
 	// l := types.MustLoggerFromContext(c.Request.Context())
-	_, l := logr.Start(c, "wasmapi.handler.GenRisc0Proof")
+	_, l := logr.Start(c, "vm.Handler.GenRisc0Proof")
 	defer l.End()
 
 	var req risc0vm.CreateProofReq
@@ -40,7 +40,7 @@ func (h *Handler) GenRisc0Proof(c *gin.Context) {
 
 func (h *Handler) GenRisc0ProofAsync(c *gin.Context) {
 	// l := types.MustLoggerFromContext(c.Request.Context())
-	_, l := logr.Start(c, "wasmapi.handler.GenRisc0ProofAsync")
+	_, l := logr.Start(c, "vm.Handler.GenRisc0ProofAsync")
 	defer l.End()
 
 	var req risc0vm.CreateProofReq

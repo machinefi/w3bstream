@@ -80,6 +80,7 @@ func NewImports(ctx context.Context) *Imports {
 	i.kv, _ = wasm.KVStoreFromContext(ctx)
 	i.mqtt, _ = wasm.MQTTClientFromContext(ctx)
 	i.metrics, _ = wasm.CustomMetricsFromContext(ctx)
+	i.asyncsrv, _ = types.WasmApiServerFromContext(ctx)
 	return i
 }
 

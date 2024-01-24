@@ -31,7 +31,7 @@ func (t *tx) run(ctx context.Context) {
 }
 
 func (t *tx) do(ctx context.Context) {
-	ctx, l := logr.Start(ctx, "tx.run")
+	ctx, l := logr.Start(ctx, "bc.tx.run")
 	defer l.End()
 
 	d := types.MustMonitorDBExecutorFromContext(ctx)
@@ -66,7 +66,7 @@ func (t *tx) do(ctx context.Context) {
 }
 
 func (t *tx) checkTxAndSendEvent(ctx context.Context, c *models.ChainTx, address string) (bool, error) {
-	ctx, l := logr.Start(ctx, "tx.checkTxAndSendEvent")
+	ctx, l := logr.Start(ctx, "bc.tx.checkTxAndSendEvent")
 	defer l.End()
 
 	l = l.WithValues("type", "chain_tx", "chain_tx_id", c.ChainTxID)

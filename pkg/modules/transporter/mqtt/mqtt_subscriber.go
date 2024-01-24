@@ -14,7 +14,6 @@ import (
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/protocol/eventpb"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
@@ -27,10 +26,7 @@ type subscriber struct {
 	topic string
 }
 
-func ParseInboundMessage(ctx context.Context, msg mqtt.Message) (*eventpb.Event, error) {
-	ctx, l := logr.Start(ctx, "modules.transporter.mqtt.ParseInboundMessage")
-	defer l.End()
-
+func ParseInboundMessage(msg mqtt.Message) (*eventpb.Event, error) {
 	topic := msg.Topic()
 
 	parts := strings.Split(topic, "/")
@@ -77,10 +73,10 @@ func (s *subscriber) subscribing(ctx context.Context) error {
 	)(context.Background())
 	return s.cli.WithQoS(confmqtt.QOS__ONLY_ONCE).WithTopic(s.topic + "/#").Subscribe(
 		func(c mqtt.Client, msg mqtt.Message) {
-			ctx, l := logger.NewSpanContext(ctx, "modules.transporter.mqtt.subscriber.handle")
+			ctx, l := logger.NewSpanContext(ctx, "transporter.mqtt.subscriber.handle")
 			defer l.End()
 
-			ev, err := ParseInboundMessage(ctx, msg)
+			ev, err := ParseInboundMessage(msg)
 			if err != nil {
 				l.Error(err)
 				return

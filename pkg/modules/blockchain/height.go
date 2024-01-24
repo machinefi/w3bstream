@@ -32,7 +32,7 @@ func (h *height) run(ctx context.Context) {
 }
 
 func (h *height) do(ctx context.Context) {
-	ctx, l := logr.Start(ctx, "height.run")
+	ctx, l := logr.Start(ctx, "bc.height.run")
 	defer l.End()
 
 	d := types.MustMonitorDBExecutorFromContext(ctx)
@@ -66,7 +66,7 @@ func (h *height) do(ctx context.Context) {
 }
 
 func (h *height) checkHeightAndSendEvent(ctx context.Context, c *models.ChainHeight, chain *types.Chain) (bool, error) {
-	ctx, l := logr.Start(ctx, "height.checkHeightAndSendEvent")
+	ctx, l := logr.Start(ctx, "bc.height.checkHeightAndSendEvent")
 	defer l.End()
 
 	l = l.WithValues("type", "chain_height", "chain_height_id", c.ChainHeightID)

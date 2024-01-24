@@ -145,7 +145,7 @@ func init() {
 
 	sfIDGenerator := confid.MustNewSFIDGenerator()
 
-	wasmApiServer, err := wasmapi.NewServer(std, config.Redis, config.Postgres, redisKvDB, config.ChainConfig,
+	wasmApiServer, err := wasmapi.NewServer(config.Redis, config.Postgres, redisKvDB, config.ChainConfig,
 		config.Mq, operatorPool, sfIDGenerator, config.Risc0Config)
 	if err != nil {
 		std.Fatal(err)

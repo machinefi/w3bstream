@@ -276,7 +276,7 @@ func GetByProjectAndTypeMustDB(ctx context.Context, id types.SFID, apiType enums
 }
 
 func GetByProjectAndType(ctx context.Context, id types.SFID, apiType enums.TrafficLimitType) (*models.TrafficLimit, error) {
-	_, l := logr.Start(ctx, "modules.trafficLimit.GetByProjectAndType")
+	_, l := logr.Start(ctx, "trafficLimit.GetByProjectAndType")
 	defer l.End()
 
 	var (
@@ -388,7 +388,7 @@ func Remove(ctx context.Context, r *CondArgs) error {
 }
 
 func TrafficLimit(ctx context.Context, apiType enums.TrafficLimitType) error {
-	ctx, l := logr.Start(ctx, "modules.trafficLimit.TrafficLimit")
+	ctx, l := logr.Start(ctx, "trafficLimit.TrafficLimit")
 	defer l.End()
 
 	var (

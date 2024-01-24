@@ -29,7 +29,7 @@ type readSolanaTxResp struct {
 
 func (h *Handler) ReadTx(c *gin.Context) {
 	// l := types.MustLoggerFromContext(c.Request.Context())
-	_, l := logr.Start(c, "wasmapi.handler.ReadTx")
+	_, l := logr.Start(c, "vm.Handler.ReadTx")
 	defer l.End()
 
 	var req readTxReq
@@ -60,7 +60,7 @@ func (h *Handler) ReadTx(c *gin.Context) {
 
 func (h *Handler) ReadTxAsync(c *gin.Context) {
 	// l := types.MustLoggerFromContext(c.Request.Context())
-	_, l := logr.Start(c, "wasmapi.handler.ReadTxAsync")
+	_, l := logr.Start(c, "vm.Handler.ReadTxAsync")
 	defer l.End()
 
 	var req readTxReq

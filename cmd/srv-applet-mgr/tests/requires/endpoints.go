@@ -231,7 +231,7 @@ func init() {
 
 	sfIDGenerator := confid.MustNewSFIDGenerator()
 
-	wasmApiServer, err := wasmapi.NewServer(conflog.Std(), _redis, _dbMgr, redisKvDB, _chainConf, _taskMgr, operatorPool, sfIDGenerator, _risc0Conf)
+	wasmApiServer, err := wasmapi.NewServer(_redis, _dbMgr, redisKvDB, _chainConf, _taskMgr, operatorPool, sfIDGenerator, _risc0Conf)
 	if err != nil {
 		conflog.Std().Fatal(err)
 	}

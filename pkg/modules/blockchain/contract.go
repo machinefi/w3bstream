@@ -44,7 +44,7 @@ func (t *contract) run(ctx context.Context) {
 }
 
 func (t *contract) do(ctx context.Context) {
-	ctx, l := logr.Start(ctx, "contract.run")
+	ctx, l := logr.Start(ctx, "bc.contract.run")
 	defer l.End()
 
 	d := types.MustMonitorDBExecutorFromContext(ctx)
@@ -95,7 +95,7 @@ func (t *contract) do(ctx context.Context) {
 }
 
 func (t *contract) getListChainGroups(ctx context.Context, cs []models.ContractLog) ([]*listChainGroup, error) {
-	ctx, l := logr.Start(ctx, "contract.getListChainGroups")
+	ctx, l := logr.Start(ctx, "bc.contract.getListChainGroups")
 	defer l.End()
 
 	us := t.groupContractLog(cs)
@@ -147,7 +147,7 @@ func (t *contract) pruneListChainGroups(gs []*listChainGroup) {
 }
 
 func (t *contract) setToBlock(ctx context.Context, gs []*listChainGroup) error {
-	ctx, l := logr.Start(ctx, "contract.setToBlock")
+	ctx, l := logr.Start(ctx, "bc.contract.setToBlock")
 	defer l.End()
 
 	ethcli := types.MustETHClientConfigFromContext(ctx)
@@ -193,7 +193,7 @@ func (t *contract) setToBlock(ctx context.Context, gs []*listChainGroup) error {
 }
 
 func (t *contract) listChainAndSendEvent(ctx context.Context, g *listChainGroup) (uint64, error) {
-	ctx, l := logr.Start(ctx, "contract.listChainAndSendEvent")
+	ctx, l := logr.Start(ctx, "bc.contract.listChainAndSendEvent")
 	defer l.End()
 
 	ethcli := types.MustETHClientConfigFromContext(ctx)

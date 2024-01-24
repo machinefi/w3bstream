@@ -121,7 +121,7 @@ func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
 }
 
 func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
-	ctx, l := logr.Start(ctx, "modules.project.Create")
+	ctx, l := logr.Start(ctx, "project.Create")
 	defer l.End()
 
 	d := types.MustMgrDBExecutorFromContext(ctx)
@@ -207,7 +207,7 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 }
 
 func RemoveBySFID(ctx context.Context, id types.SFID) (err error) {
-	ctx, l := logr.Start(ctx, "modules.project.RemoveBySFID", "porject_id", id)
+	ctx, l := logr.Start(ctx, "project.RemoveBySFID", "porject_id", id)
 	defer l.End()
 
 	var (
@@ -244,7 +244,7 @@ func RemoveBySFID(ctx context.Context, id types.SFID) (err error) {
 }
 
 func Init(ctx context.Context) error {
-	ctx, l := logr.Start(ctx, "modules.project.Init")
+	ctx, l := logr.Start(ctx, "project.Init")
 	defer l.End()
 
 	d := types.MustMgrDBExecutorFromContext(ctx)

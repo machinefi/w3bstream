@@ -22,7 +22,7 @@ type Instance struct {
 }
 
 func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte, st enums.InstanceState) (i *Instance, err error) {
-	ctx, l := logr.Start(ctx, "modules.vm.wasmtime.NewInstanceByCode")
+	ctx, l := logr.Start(ctx, "vm.NewInstanceByCode")
 	defer l.End()
 
 	instance, err := runtime.NewRuntime(ctx, Engine, id.String(), code)
@@ -51,14 +51,14 @@ func (i *Instance) ID() string {
 }
 
 func (i *Instance) Start(ctx context.Context) error {
-	ctx, l := logr.Start(ctx, "modules.vm.Instance.Start", "instance_id", i.ID())
+	ctx, l := logr.Start(ctx, "vm.Instance.Start", "instance_id", i.ID())
 	defer l.End()
 
 	return i.instance.Start()
 }
 
 func (i *Instance) Stop(ctx context.Context) error {
-	ctx, l := logr.Start(ctx, "modules.vm.Instance.Stop", "instance_id", i.ID())
+	ctx, l := logr.Start(ctx, "vm.Instance.Stop", "instance_id", i.ID())
 	defer l.End()
 
 	i.instance.Stop()
@@ -73,7 +73,7 @@ func (i *Instance) State() wasm.InstanceState {
 }
 
 func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data []byte) *wasm.EventHandleResult {
-	ctx, l := logr.Start(ctx, "modules.vm.Instance.HandleEvent")
+	ctx, l := logr.Start(ctx, "vm.Instance.HandleEvent")
 	defer l.End()
 
 	if !i.instance.Acquire() {
