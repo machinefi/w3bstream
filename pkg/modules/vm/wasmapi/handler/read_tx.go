@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/enums"
-	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
 
@@ -28,8 +28,8 @@ type readSolanaTxResp struct {
 }
 
 func (h *Handler) ReadTx(c *gin.Context) {
-	l := types.MustLoggerFromContext(c.Request.Context())
-	_, l = l.Start(c, "wasmapi.handler.ReadTx")
+	// l := types.MustLoggerFromContext(c.Request.Context())
+	_, l := logr.Start(c, "wasmapi.handler.ReadTx")
 	defer l.End()
 
 	var req readTxReq
@@ -59,8 +59,8 @@ func (h *Handler) ReadTx(c *gin.Context) {
 }
 
 func (h *Handler) ReadTxAsync(c *gin.Context) {
-	l := types.MustLoggerFromContext(c.Request.Context())
-	_, l = l.Start(c, "wasmapi.handler.ReadTxAsync")
+	// l := types.MustLoggerFromContext(c.Request.Context())
+	_, l := logr.Start(c, "wasmapi.handler.ReadTxAsync")
 	defer l.End()
 
 	var req readTxReq

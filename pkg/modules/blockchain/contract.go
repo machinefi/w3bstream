@@ -14,6 +14,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
@@ -43,12 +44,11 @@ func (t *contract) run(ctx context.Context) {
 }
 
 func (t *contract) do(ctx context.Context) {
-	d := types.MustMonitorDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-	m := &models.ContractLog{}
-
-	_, l = l.Start(ctx, "contract.run")
+	ctx, l := logr.Start(ctx, "contract.run")
 	defer l.End()
+
+	d := types.MustMonitorDBExecutorFromContext(ctx)
+	m := &models.ContractLog{}
 
 	cs, err := m.List(d, builder.And(
 		builder.Or(
@@ -95,9 +95,7 @@ func (t *contract) do(ctx context.Context) {
 }
 
 func (t *contract) getListChainGroups(ctx context.Context, cs []models.ContractLog) ([]*listChainGroup, error) {
-	l := types.MustLoggerFromContext(ctx)
-
-	_, l = l.Start(ctx, "contract.getListChainGroups")
+	ctx, l := logr.Start(ctx, "contract.getListChainGroups")
 	defer l.End()
 
 	us := t.groupContractLog(cs)
@@ -149,11 +147,10 @@ func (t *contract) pruneListChainGroups(gs []*listChainGroup) {
 }
 
 func (t *contract) setToBlock(ctx context.Context, gs []*listChainGroup) error {
-	l := types.MustLoggerFromContext(ctx)
-	ethcli := types.MustETHClientConfigFromContext(ctx)
-
-	_, l = l.Start(ctx, "contract.setToBlock")
+	ctx, l := logr.Start(ctx, "contract.setToBlock")
 	defer l.End()
+
+	ethcli := types.MustETHClientConfigFromContext(ctx)
 
 	for _, g := range gs {
 		c := g.cs[0]
@@ -196,11 +193,10 @@ func (t *contract) setToBlock(ctx context.Context, gs []*listChainGroup) error {
 }
 
 func (t *contract) listChainAndSendEvent(ctx context.Context, g *listChainGroup) (uint64, error) {
-	l := types.MustLoggerFromContext(ctx)
-	ethcli := types.MustETHClientConfigFromContext(ctx)
-
-	_, l = l.Start(ctx, "contract.listChainAndSendEvent")
+	ctx, l := logr.Start(ctx, "contract.listChainAndSendEvent")
 	defer l.End()
+
+	ethcli := types.MustETHClientConfigFromContext(ctx)
 
 	c := g.cs[0]
 

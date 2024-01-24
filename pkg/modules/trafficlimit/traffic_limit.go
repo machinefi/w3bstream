@@ -19,6 +19,9 @@ import (
 )
 
 func Init(ctx context.Context) error {
+	_, l := logr.Start(ctx, "trafficLimit.Init")
+	defer l.End()
+
 	var (
 		d   = types.MustMgrDBExecutorFromContext(ctx)
 		rDB = kvdb.MustRedisDBKeyFromContext(ctx)
@@ -26,9 +29,6 @@ func Init(ctx context.Context) error {
 		traffic = &models.TrafficLimit{}
 		prj     *models.Project
 	)
-
-	_, l := types.MustLoggerFromContext(ctx).Start(ctx, "trafficLimit.Init")
-	defer l.End()
 
 	trafficList, err := traffic.List(d, nil)
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
@@ -15,8 +16,10 @@ import (
 var autoCollectCli = NewSQLBatcher("INSERT INTO ws_metrics.auto_collect_metrics VALUES")
 
 func GeoCollect(ctx context.Context, data []byte) {
+	ctx, l := logr.Start(ctx, "metrics.GeoCollect")
+	defer l.End()
+
 	var (
-		l       = types.MustLoggerFromContext(ctx)
 		project = types.MustProjectFromContext(ctx)
 		eventID = types.MustEventIDFromContext(ctx)
 

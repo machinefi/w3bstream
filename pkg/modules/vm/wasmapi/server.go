@@ -17,6 +17,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	confmq "github.com/machinefi/w3bstream/pkg/depends/conf/mq"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/redis"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	optypes "github.com/machinefi/w3bstream/pkg/modules/operator/pool/types"
 	"github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/async"
@@ -33,8 +34,7 @@ type Server struct {
 }
 
 func (s *Server) Call(ctx context.Context, data []byte) *apitypes.HttpResponse {
-	l := types.MustLoggerFromContext(ctx)
-	_, l = l.Start(ctx, "wasmapi.Call")
+	_, l := logr.Start(ctx, "wasmapi.Call")
 	defer l.End()
 
 	apiReq := apitypes.HttpRequest{}

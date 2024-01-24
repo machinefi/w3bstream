@@ -10,7 +10,7 @@ import (
 	"github.com/go-co-op/gocron"
 	"github.com/pkg/errors"
 
-	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -25,23 +25,24 @@ type cronJob struct {
 }
 
 func (t *cronJob) run(ctx context.Context) {
-	l := types.MustLoggerFromContext(ctx)
+	ctx, l := logr.Start(ctx, "cronjob.run")
+	defer l.End()
+
 	s := gocron.NewScheduler(time.UTC)
 	s.TagsUnique()
 
 	if _, err := s.Every(t.listIntervalSecond).Seconds().Do(t.do, ctx, s); err != nil {
-		l.Fatal(errors.Wrap(err, "create cronjob main loop failed"))
+		l.Error(errors.Wrap(err, "create cronjob main loop failed"))
 	}
 	s.StartAsync()
 }
 
 func (t *cronJob) do(ctx context.Context, s *gocron.Scheduler) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-	m := &models.CronJob{}
-
-	_, l = l.Start(ctx, "cronjob.run")
+	ctx, l := logr.Start(ctx, "cronjob.run")
 	defer l.End()
+
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	m := &models.CronJob{}
 
 	cs, err := m.List(d, nil)
 	if err != nil {
@@ -49,7 +50,7 @@ func (t *cronJob) do(ctx context.Context, s *gocron.Scheduler) {
 		return
 	}
 
-	t.tidyCronJobs(ctx, s, cs, l)
+	t.tidyCronJobs(ctx, s, cs)
 
 	for _, c := range cs {
 		if _, err := s.Cron(c.CronExpressions).Tag(c.CronJobID.String()).Do(t.sendEvent, ctx, c); err != nil {
@@ -60,7 +61,10 @@ func (t *cronJob) do(ctx context.Context, s *gocron.Scheduler) {
 	}
 }
 
-func (t *cronJob) tidyCronJobs(ctx context.Context, s *gocron.Scheduler, cs []models.CronJob, l log.Logger) {
+func (t *cronJob) tidyCronJobs(ctx context.Context, s *gocron.Scheduler, cs []models.CronJob) {
+	ctx, l := logr.Start(ctx, "cronjob.tidyCronJobs")
+	defer l.End()
+
 	cronJobIDs := make(map[types.SFID]bool, len(cs))
 	for _, c := range cs {
 		cronJobIDs[c.CronJobID] = true
@@ -82,12 +86,10 @@ func (t *cronJob) tidyCronJobs(ctx context.Context, s *gocron.Scheduler, cs []mo
 }
 
 func (t *cronJob) sendEvent(ctx context.Context, c models.CronJob) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-
-	_, l = l.Start(ctx, "cronjob.sendEvent")
+	ctx, l := logr.Start(ctx, "cronjob.sendEvent", "cronJobID", c.CronJobID)
 	defer l.End()
-	l = l.WithValues("cronJobID", c.CronJobID)
+
+	d := types.MustMgrDBExecutorFromContext(ctx)
 
 	m := &models.Project{RelProject: models.RelProject{ProjectID: c.ProjectID}}
 	if err := m.FetchByProjectID(d); err != nil {
