@@ -73,7 +73,7 @@ func (i *Instance) State() wasm.InstanceState {
 }
 
 func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data []byte) *wasm.EventHandleResult {
-	ctx, l := logr.Start(ctx, "modules.vm.wasmtime.Instance.HandleEvent")
+	ctx, l := logr.Start(ctx, "modules.vm.Instance.HandleEvent")
 	defer l.End()
 
 	if !i.instance.Acquire() {
@@ -95,6 +95,7 @@ func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data [
 		}
 	}
 	code, _ := res.(int32)
+	l.WithValues("code", code).Info("")
 	return &wasm.EventHandleResult{
 		InstanceID: i.ID(),
 		Code:       wasm.ResultStatusCode(code),

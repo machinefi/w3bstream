@@ -411,7 +411,6 @@ func (o *CreateAndStartInstance) Method() string {
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[FetchResourceFailed][500999004][Fetch Resource Failed]!
 // @StatusErr[InstanceNotFound][404999006][Instance Not Found]!
-// @StatusErr[InternalServerError][500999001][internal error]
 // @StatusErr[InvalidAppletContext][401999016][Invalid Applet]!
 // @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
 // @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
@@ -513,7 +512,6 @@ func (o *CreateApplet) Method() string {
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
-// @StatusErr[InternalServerError][500999001][internal error]
 // @StatusErr[InvalidAppletContext][401999016][Invalid Applet]!
 // @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
 // @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!
@@ -3000,7 +2998,6 @@ func (o *UpdateApplet) Method() string {
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[InstanceNotFound][404999006][Instance Not Found]!
-// @StatusErr[InternalServerError][500999001][internal error]
 // @StatusErr[InvalidAppletContext][401999016][Invalid Applet]!
 // @StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!
 // @StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!

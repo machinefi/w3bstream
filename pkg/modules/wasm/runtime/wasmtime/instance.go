@@ -369,12 +369,13 @@ func (i *Instance) Acquire() bool {
 
 func (i *Instance) Release() {
 	i.locker.Lock()
+	defer i.locker.Unlock()
 	i.refCount--
 
 	if i.refCount <= 0 {
 		i.stopCond.Broadcast()
 	}
-	i.locker.Unlock()
+	i.vm.store.GC()
 }
 
 func (i *Instance) Call(name string, args ...interface{}) (interface{}, error) {

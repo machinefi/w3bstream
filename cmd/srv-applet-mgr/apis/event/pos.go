@@ -16,7 +16,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
-	"github.com/machinefi/w3bstream/pkg/modules/job"
 	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	"github.com/machinefi/w3bstream/pkg/modules/publisher"
 	"github.com/machinefi/w3bstream/pkg/modules/strategy"
@@ -90,7 +89,7 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 	rsp.Results = event.OnEvent(ctx, r.Payload.Bytes())
 	rsp.Timestamp = time.Now().UTC().UnixMilli()
 
-	job.Dispatch(ctx, job.NewEventLogTask(&models.EventLog{
+	if err := (&models.EventLog{
 		EventInfo: models.EventInfo{
 			EventID:      r.EventID,
 			RelProject:   models.RelProject{ProjectID: prj.ProjectID},
@@ -99,7 +98,10 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 			ReceivedAt:   receivedTs,
 			RespondedAt:  time.Now().UTC().UnixMilli(),
 		},
-	}))
+	}).Create(types.MustMgrDBExecutorFromContext(ctx)); err != nil {
+		l.Warn(errors.Wrap(err, "event log"))
+	}
+
 	go metrics.EventMetricsInc(ctx, prj.AccountID.String(), prj.Name, pub.Key, r.EventType)
 	return rsp, nil
 }

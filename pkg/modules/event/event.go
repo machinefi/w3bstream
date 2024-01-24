@@ -72,9 +72,6 @@ func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
 		l = l.WithValues(
 			"prj", v.ProjectName,
 			"app", v.AppletName,
-			"ins", v.InstanceID,
-			"hdl", v.Handler,
-			"tpe", v.EventType,
 		)
 		ins := vm.GetConsumer(v.InstanceID)
 		if ins == nil {
@@ -93,7 +90,7 @@ func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
 		wg.Add(1)
 		go func(v *types.StrategyResult) {
 			defer wg.Done()
-			l.Debug("instance start to process.")
+			l.WithValues("ins", v.InstanceID, "hdl", v.Handler, "tpe", v.EventType).Info("handled")
 			rv := ins.HandleEvent(ctx, v.Handler, v.EventType, data)
 			results <- &Result{
 				AppletName:  v.AppletName,

@@ -8,7 +8,6 @@ import (
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/global"
-	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/tasks"
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
@@ -41,9 +40,6 @@ func main() {
 			},
 			func() {
 				kit.Run(apis.RootEvent, global.EventServer())
-			},
-			func() {
-				kit.Run(tasks.Root, global.TaskServer())
 			},
 			func() {
 				passwd, err := account.CreateAdminIfNotExist(ctx)
