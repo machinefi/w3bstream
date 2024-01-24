@@ -1,7 +1,7 @@
 # maybe use private hub?
 #ARG DOCKER_REGISTRY=hub.docker.com
 #ARG GO_VERSION=1.19
-FROM golang:1.19 AS builder
+FROM golang:1.21 AS builder
 
 # setup private pkg if needs
 #ARG GITHUB_CI_TOKEN
@@ -21,7 +21,7 @@ COPY ./ ./
 RUN cd ./cmd/srv-applet-mgr && make target
 
 # runtime
-FROM golang:1.19 AS runtime
+FROM golang:1.21 AS runtime
 
 COPY --from=builder /go/src/build/srv-applet-mgr/srv-applet-mgr /go/bin/srv-applet-mgr
 COPY --from=builder /go/src/build/srv-applet-mgr/openapi.json /go/bin/openapi.json
