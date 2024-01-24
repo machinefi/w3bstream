@@ -139,7 +139,7 @@ func (i *Imports) Log(lv consts.LogLevel, msg string) {
 }
 
 func (i *Imports) LogInternal(lv consts.LogLevel, msg string, args ...any) {
-	l := i.logger.WithValues(append(args, "@src", "host"))
+	l := i.logger.WithValues(append(args, "@src", "host")...)
 
 	switch lv {
 	case consts.LOG_LEVEL__ERROR:

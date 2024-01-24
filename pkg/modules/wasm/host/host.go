@@ -369,10 +369,6 @@ func (h *host) info(msg string, args ...any) {
 	h._log(consts.LOG_LEVEL__INFO, msg, args...)
 }
 
-func (h *host) Info(msg string, args ...any) {
-	h._log(consts.LOG_LEVEL__INFO, msg, args...)
-}
-
 func (h *host) error(err error, args ...any) {
-	h._log(consts.LOG_LEVEL__INFO, err.Error(), args...)
+	h._log(consts.LOG_LEVEL__ERROR, err.Error(), args...)
 }
