@@ -3,13 +3,13 @@ package wasmtime
 import (
 	"context"
 	"encoding/binary"
+	"log/slog"
 	"reflect"
 	"sync"
 	"sync/atomic"
 
 	"github.com/bytecodealliance/wasmtime-go/v8"
 	"github.com/pkg/errors"
-	"golang.org/x/exp/slog"
 
 	"github.com/machinefi/w3bstream/pkg/modules/wasm/abi/proxy"
 	"github.com/machinefi/w3bstream/pkg/modules/wasm/abi/types"

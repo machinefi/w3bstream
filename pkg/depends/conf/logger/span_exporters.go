@@ -2,11 +2,11 @@ package logger
 
 import (
 	"context"
+	"log/slog"
 	"strings"
 
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/sdk/trace"
-	"golang.org/x/exp/slog"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/metax"
 )

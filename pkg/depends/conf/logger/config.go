@@ -1,9 +1,8 @@
 package logger
 
 import (
+	"log/slog"
 	"os"
-
-	"golang.org/x/exp/slog"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
@@ -55,8 +54,8 @@ func (c *Config) Init() error {
 			skip :[
 				1. runtime.Callers,
 				2. pkg/depends/conf/logger.(*customJsonHandler).Handle
-				3. golang.org/x/exp/slog.(*Logger).logAttrs
-				4. golang.org/x/exp/slog.(*Logger).LogAttrs
+				3. log/slog.(*Logger).logAttrs
+				4. log/slog.(*Logger).LogAttrs
 				5. pkg/depends/conf/logger.(*stdoutSpanExporter).ExportSpans
 				6. pkg/depends/conf/logger.(*spanMapExporter).ExportSpans
 				7. go.opentelemetry.io/otel/sdk/trace.(*simpleSpanProcessor).OnEnd

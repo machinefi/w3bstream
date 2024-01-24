@@ -3,8 +3,7 @@ package logger
 import (
 	"context"
 	"fmt"
-
-	"golang.org/x/exp/slog"
+	"log/slog"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 )

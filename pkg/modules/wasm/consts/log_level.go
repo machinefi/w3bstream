@@ -1,6 +1,6 @@
 package consts
 
-import "golang.org/x/exp/slog"
+import "log/slog"
 
 //go:generate toolkit gen enum LogLevel
 type LogLevel int32
