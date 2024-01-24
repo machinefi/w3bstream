@@ -102,7 +102,6 @@ func (h *host) Abort(msgaddr, filenameaddr, line, col int32) {
 		h.error(err)
 		return
 	}
-	h.info("succeed")
 	h.imports.Abort(msg, filename, line, col)
 }
 
@@ -117,7 +116,6 @@ func (h *host) Trace(msgaddr, _ int32, arr ...float64) {
 	if len(str) > 0 {
 		str = " " + str
 	}
-	h.info("succeed")
 	h.imports.Trace(msg, str)
 }
 

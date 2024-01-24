@@ -201,7 +201,7 @@ func (i *Imports) Abort(msg, filename string, line, col int32) {
 	// fs := runtime.CallersFrames([]uintptr{pcs[0]})
 	// f, _ := fs.Next()
 	// fn := f.Function
-	i.LogInternal(consts.LOG_LEVEL__ERROR, msg, "filename", filename, "line", line, "col", col)
+	i.LogInternal(consts.LOG_LEVEL__ERROR, msg, "host_func", "Abort", "filename", filename, "line", line, "col", col)
 }
 
 func (i *Imports) Trace(msg, trace string) {
@@ -210,7 +210,7 @@ func (i *Imports) Trace(msg, trace string) {
 	// fs := runtime.CallersFrames([]uintptr{pcs[0]})
 	// f, _ := fs.Next()
 	// fn := f.Function
-	i.LogInternal(consts.LOG_LEVEL__DEBUG, msg, "trace", trace)
+	i.LogInternal(consts.LOG_LEVEL__DEBUG, msg, "host_func", "Trace", "trace", trace)
 }
 
 func (i *Imports) Seed() float64 {
