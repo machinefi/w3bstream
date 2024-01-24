@@ -411,9 +411,9 @@ func (i *Instance) Call(name string, args ...interface{}) (interface{}, error) {
 }
 
 func (i *Instance) HandleError(err error) {
-	if i.debug == nil {
-		return
-	}
+	// if i.debug == nil {
+	// 	return
+	// }
 	var trapErr *wasmtime.Trap
 	if !errors.As(err, &trapErr) {
 		return
@@ -428,6 +428,7 @@ func (i *Instance) HandleError(err error) {
 		args := []any{
 			"func_index", f.FuncIndex(),
 			"func_offset", f.FuncOffset(),
+			"instance_id", i.vm.id,
 		}
 		pc := uint64(f.ModuleOffset())
 		if i.debug != nil {
