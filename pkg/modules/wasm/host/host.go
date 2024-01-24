@@ -104,7 +104,7 @@ func (h *host) Abort(msgaddr, filenameaddr, line, col int32) {
 	h.imports.Abort(msg, filename, line, col)
 }
 
-func (h *host) Trace(msgaddr, _ int32, arr float64) {
+func (h *host) Trace(msgaddr, _ int32, arr ...float64) {
 	msg, err := ReadStringFromAddr(h.instance, msgaddr)
 	if err != nil {
 		h.error(errors.Wrap(err, "message"))

@@ -62,11 +62,20 @@ func (*WasmLog) Indexes() builder.Indexes {
 		"i_created_at": []string{
 			"CreatedAt",
 		},
+		"i_instance_id": []string{
+			"InstanceID",
+		},
+		"i_level": []string{
+			"Level",
+		},
 		"i_log_time": []string{
 			"LogTime",
 		},
 		"i_project_name": []string{
 			"ProjectName",
+		},
+		"i_src": []string{
+			"Src",
 		},
 	}
 }
@@ -75,8 +84,11 @@ func (m *WasmLog) IndexFieldNames() []string {
 	return []string{
 		"CreatedAt",
 		"ID",
+		"InstanceID",
+		"Level",
 		"LogTime",
 		"ProjectName",
+		"Src",
 		"WasmLogID",
 	}
 }

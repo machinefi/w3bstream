@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"runtime"
 	"time"
 
 	"github.com/pkg/errors"
@@ -196,31 +195,21 @@ func (i *Imports) Env(key string) (string, bool) {
 }
 
 func (i *Imports) Abort(msg, filename string, line, col int32) {
-	var pcs [1]uintptr
-	runtime.Callers(1, pcs[:])
-	fs := runtime.CallersFrames([]uintptr{pcs[0]})
-	f, _ := fs.Next()
-	fn := f.Function
-	i.LogInternal(consts.LOG_LEVEL__ERROR,
-		msg,
-		"function", fn,
-		"filename", filename,
-		"line", line,
-		"col", col,
-	)
+	// var pcs [1]uintptr
+	// runtime.Callers(1, pcs[:])
+	// fs := runtime.CallersFrames([]uintptr{pcs[0]})
+	// f, _ := fs.Next()
+	// fn := f.Function
+	i.LogInternal(consts.LOG_LEVEL__ERROR, msg, "filename", filename, "line", line, "col", col)
 }
 
 func (i *Imports) Trace(msg, trace string) {
-	var pcs [1]uintptr
-	runtime.Callers(1, pcs[:])
-	fs := runtime.CallersFrames([]uintptr{pcs[0]})
-	f, _ := fs.Next()
-	fn := f.Function
-	i.LogInternal(consts.LOG_LEVEL__DEBUG,
-		msg,
-		"function", fn,
-		"trace", trace,
-	)
+	// var pcs [1]uintptr
+	// runtime.Callers(1, pcs[:])
+	// fs := runtime.CallersFrames([]uintptr{pcs[0]})
+	// f, _ := fs.Next()
+	// fn := f.Function
+	i.LogInternal(consts.LOG_LEVEL__DEBUG, msg, "trace", trace)
 }
 
 func (i *Imports) Seed() float64 {

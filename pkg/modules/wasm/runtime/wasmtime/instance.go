@@ -411,6 +411,9 @@ func (i *Instance) Call(name string, args ...interface{}) (interface{}, error) {
 }
 
 func (i *Instance) HandleError(err error) {
+	if i.debug == nil {
+		return
+	}
 	var trapErr *wasmtime.Trap
 	if !errors.As(err, &trapErr) {
 		return

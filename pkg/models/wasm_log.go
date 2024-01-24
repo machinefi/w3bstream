@@ -13,6 +13,9 @@ import (
 // @def index        I_project_name ProjectName
 // @def index        I_log_time     LogTime
 // @def index        I_created_at   CreatedAt
+// @def index        I_level        Level
+// @def index        I_src          Src
+// @def index        I_instance_id  InstanceID
 //
 //go:generate toolkit gen model WasmLog --database DB
 type WasmLog struct {
