@@ -10,6 +10,7 @@ import (
 	"github.com/go-co-op/gocron"
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
@@ -38,7 +39,7 @@ func (t *cronJob) run(ctx context.Context) {
 }
 
 func (t *cronJob) do(ctx context.Context, s *gocron.Scheduler) {
-	ctx, l := logr.Start(ctx, "cronjob.run")
+	ctx, l := logger.NewSpanContext(ctx, "cronjob.do")
 	defer l.End()
 
 	d := types.MustMgrDBExecutorFromContext(ctx)

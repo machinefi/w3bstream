@@ -10,6 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
@@ -32,7 +33,7 @@ func (h *height) run(ctx context.Context) {
 }
 
 func (h *height) do(ctx context.Context) {
-	ctx, l := logr.Start(ctx, "bc.height.run")
+	ctx, l := logger.NewSpanContext(ctx, "bc.height.do")
 	defer l.End()
 
 	d := types.MustMonitorDBExecutorFromContext(ctx)

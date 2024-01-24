@@ -14,6 +14,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
@@ -44,7 +45,7 @@ func (t *contract) run(ctx context.Context) {
 }
 
 func (t *contract) do(ctx context.Context) {
-	ctx, l := logr.Start(ctx, "bc.contract.run")
+	ctx, l := logger.NewSpanContext(ctx, "bc.contract.do")
 	defer l.End()
 
 	d := types.MustMonitorDBExecutorFromContext(ctx)
