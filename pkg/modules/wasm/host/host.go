@@ -83,7 +83,7 @@ func (h *host) Env(keyaddr, keysize, varaddrptr, varsizeptr int32) int32 {
 		h.error(errors.Wrap(consts.RESULT__ENV_NOT_FOUND, string(key)))
 		return consts.RESULT__ENV_NOT_FOUND.Int32()
 	}
-	if err = CopyDataToInstance(h.instance, []byte(val), varaddrptr, varsizeptr); err != nil {
+	if err = CopyHostDataToWasm(h.instance, []byte(val), varaddrptr, varsizeptr); err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
 	}
@@ -129,7 +129,7 @@ func (h *host) GetResourceData(rid, retaddrptr, retsizeptr int32) int32 {
 		return consts.RESULT__RESOURCE_NOT_FOUND.Int32()
 	}
 
-	if err := CopyDataToInstance(h.instance, data, retaddrptr, retsizeptr); err != nil {
+	if err := CopyHostDataToWasm(h.instance, data, retaddrptr, retsizeptr); err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
 	}
@@ -156,7 +156,7 @@ func (h *host) GetEventType(rid, retaddrptr, retsizeptr int32) int32 {
 		return consts.RESULT__RESOURCE_EVENT_NOT_FOUND.Int32()
 	}
 
-	if err := CopyDataToInstance(h.instance, []byte(data), retaddrptr, retsizeptr); err != nil {
+	if err := CopyHostDataToWasm(h.instance, []byte(data), retaddrptr, retsizeptr); err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
 	}
@@ -177,7 +177,7 @@ func (h *host) GetKVData(keyaddr, keysize, retaddrptr, retsizeptr int32) int32 {
 	if val == nil {
 		return consts.RESULT__KV_DATA_NOT_FOUND.Int32()
 	}
-	if err = CopyDataToInstance(h.instance, val, retaddrptr, retsizeptr); err != nil {
+	if err = CopyHostDataToWasm(h.instance, val, retaddrptr, retsizeptr); err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
 	}
@@ -229,7 +229,7 @@ func (h *host) QuerySQL(queryaddr, querysize, retaddrptr, retsizeptr int32) int3
 		h.error(errors.Wrap(err, "QuerySQL"))
 		return consts.RESULT__IMPORT_HANDLE_FAILED.Int32()
 	}
-	if err = CopyDataToInstance(h.instance, res, retaddrptr, retsizeptr); err != nil {
+	if err = CopyHostDataToWasm(h.instance, res, retaddrptr, retsizeptr); err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
 	}
@@ -247,7 +247,7 @@ func (h *host) SendTX(chainid, dataaddr, datasize, hashaddrptr, hashsizeptr int3
 		h.error(errors.Wrap(err, "SendTX"))
 		return consts.RESULT__IMPORT_HANDLE_FAILED.Int32()
 	}
-	if err = CopyDataToInstance(h.instance, []byte(hash), hashaddrptr, hashsizeptr); err != nil {
+	if err = CopyHostDataToWasm(h.instance, []byte(hash), hashaddrptr, hashsizeptr); err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
 	}
@@ -265,7 +265,7 @@ func (h *host) SendTXWithOperator(chainid, dataaddr, datasize, hashaddrptr, hash
 		h.error(errors.Wrap(err, "SendTXWithOperator"))
 		return consts.RESULT__IMPORT_HANDLE_FAILED.Int32()
 	}
-	if err = CopyDataToInstance(h.instance, []byte(hash), hashaddrptr, hashsizeptr); err != nil {
+	if err = CopyHostDataToWasm(h.instance, []byte(hash), hashaddrptr, hashsizeptr); err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
 	}
@@ -283,7 +283,7 @@ func (h *host) CallContract(chainid, dataaddr, datasize, resultaddrptr, resultsi
 		h.error(errors.Wrap(err, "CallContract"))
 		return consts.RESULT__IMPORT_HANDLE_FAILED.Int32()
 	}
-	if err = CopyDataToInstance(h.instance, res, resultaddrptr, resultsizeptr); err != nil {
+	if err = CopyHostDataToWasm(h.instance, res, resultaddrptr, resultsizeptr); err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
 	}
@@ -333,7 +333,7 @@ func (h *host) AsyncAPICall(reqaddr, reqsize, rspaddrptr, rspsizeptr int32) int3
 		h.error(errors.Wrap(err, "AsyncAPICall"))
 		return consts.RESULT__IMPORT_HANDLE_FAILED.Int32()
 	}
-	if err = CopyDataToInstance(h.instance, rsp, rspaddrptr, rspsizeptr); err != nil {
+	if err = CopyHostDataToWasm(h.instance, rsp, rspaddrptr, rspsizeptr); err != nil {
 		h.error(err)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
 	}

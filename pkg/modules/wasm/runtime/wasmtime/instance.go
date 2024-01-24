@@ -186,12 +186,16 @@ func (i *Instance) Malloc(size int32) (int32, error) {
 		return 0, ErrInstanceNotStarted
 	}
 
-	mallocFn, err := i.GetExportsFunc("malloc")
+	// alloc func was implemented in w3bstream-golang-sdk
+	fn, err := i.GetExportsFunc("alloc")
 	if err != nil {
-		return 0, err
+		fn, err = i.GetExportsFunc("malloc")
+		if err != nil {
+			return 0, err
+		}
 	}
 
-	addr, err := mallocFn.Call(size)
+	addr, err := fn.Call(size)
 	if err != nil {
 		i.HandleError(err)
 		return 0, err
@@ -271,7 +275,7 @@ func (i *Instance) PutMemory(addr, size int32, data []byte) error {
 		return ErrMemAccessOverflow
 	}
 
-	copy(mem[addr:], mem[:size])
+	copy(mem[addr:], data[:size])
 	return nil
 }
 

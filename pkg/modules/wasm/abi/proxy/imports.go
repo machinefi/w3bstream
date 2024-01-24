@@ -84,9 +84,16 @@ func NewImports(ctx context.Context) *Imports {
 	return i
 }
 
+func NewImportsDebugMode(ctx context.Context) *Imports {
+	i := NewImports(ctx)
+	i.debug = true
+	return i
+}
+
 type Imports struct {
 	parent    context.Context
 	logger    logr.Logger
+	debug     bool
 	logs      chan *models.WasmLog
 	_rand     *rand.Rand
 	dbe       sqlx.DBExecutor
@@ -106,16 +113,18 @@ type Imports struct {
 }
 
 func (i *Imports) Log(lv consts.LogLevel, msg string) {
-	l := i.logger.WithValues("@src", "wasm")
-	switch lv {
-	case consts.LOG_LEVEL__ERROR:
-		l.Error(errors.New(msg))
-	case consts.LOG_LEVEL__WARN:
-		l.Warn(errors.New(msg))
-	case consts.LOG_LEVEL__INFO:
-		l.Info(msg)
-	default:
-		l.Debug(msg)
+	if i.debug {
+		l := i.logger.WithValues("@src", "wasm")
+		switch lv {
+		case consts.LOG_LEVEL__ERROR:
+			l.Error(errors.New(msg))
+		case consts.LOG_LEVEL__WARN:
+			l.Warn(errors.New(msg))
+		case consts.LOG_LEVEL__INFO:
+			l.Info(msg)
+		default:
+			l.Debug(msg)
+		}
 	}
 	i.logs <- &models.WasmLog{
 		WasmLogInfo: models.WasmLogInfo{
@@ -175,7 +184,7 @@ func (i *Imports) FlushLog() {
 	}
 	err := models.BatchCreateWasmLogs(i.dbe, logs...)
 	if err != nil {
-		i.logger.WithValues("@src", "host", "func", "FlushLog").Error(err)
+		i.logger.WithValues("@src", "host").Error(err)
 	}
 }
 

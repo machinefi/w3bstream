@@ -22,7 +22,7 @@ func GetContext(i types.Instance) types.Context {
 	return nil
 }
 
-func CopyDataToInstance(i types.Instance, data []byte, dataaddrptr, datasizeptr int32) error {
+func CopyHostDataToWasm(i types.Instance, data []byte, dataaddrptr, datasizeptr int32) error {
 	addr, err := i.Malloc(int32(len(data)))
 	if err != nil {
 		return err
