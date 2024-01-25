@@ -20,6 +20,7 @@ func SpanLogger(span trace.Span) logr.Logger {
 }
 
 func NewSpanContext(ctx context.Context, name string) (context.Context, logr.Logger) {
+	ctx = trace.ContextWithSpan(ctx, nil)
 	ctx, span := otel.Tracer(name).Start(ctx, name, trace.WithTimestamp(time.Now()))
 	l := SpanLogger(span)
 	return logr.WithLogger(ctx, l), l
