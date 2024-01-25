@@ -48,15 +48,15 @@ func (a *ABIContext) SetInstance(instance types.Instance) {
 	a.Instance = instance
 }
 
-func (a *ABIContext) OnEventReceived(entry string, typ string, data []byte) (interface{}, error) {
+func (a *ABIContext) OnEventReceived(entry string, typ string, data []byte) (interface{}, uint64, error) {
 	rid := int32(uuid.New().ID() % math.MaxInt32)
 
 	if err := a.Imports.SetResourceData(uint32(rid), data); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer a.Imports.RemoveResourceData(uint32(rid))
 	if err := a.Imports.SetEventType(uint32(rid), typ); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer a.Imports.RemoveEventType(uint32(rid))
 	defer a.Imports.FlushLog()

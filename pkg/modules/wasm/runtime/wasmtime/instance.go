@@ -379,9 +379,9 @@ func (i *Instance) Release() {
 	i.vm.store.GC()
 }
 
-func (i *Instance) Call(name string, args ...interface{}) (interface{}, error) {
+func (i *Instance) Call(name string, args ...interface{}) (interface{}, uint64, error) {
 	if !i.Started() {
-		return nil, ErrInstanceNotStarted
+		return nil, 0, ErrInstanceNotStarted
 	}
 
 	// if v, ok := i.fns.Load(name); ok {
@@ -400,15 +400,23 @@ func (i *Instance) Call(name string, args ...interface{}) (interface{}, error) {
 
 	f := i.ins.GetFunc(i.vm.store, name)
 	if f == nil {
-		return nil, errors.Wrap(ErrInvalidExportFunc, name)
+		return nil, 0, errors.Wrap(ErrInvalidExportFunc, name)
 	}
 
+	before, fuelset := i.vm.store.FuelConsumed()
 	ret, err := f.Call(i.vm.store, args...)
 	if err != nil {
 		i.HandleError(err)
-		return nil, errors.New(strings.Split(err.Error(), ":")[0])
+		return nil, 0, errors.New(strings.Split(err.Error(), ":")[0])
 	}
-	return ret, nil
+	after, _ := i.vm.store.FuelConsumed()
+	slog.Info("check fuel after call "+name, "instance_id", i.vm.id, "before", before, "after", after, "consumed", after-before)
+	if fuelset {
+		if err = i.vm.store.AddFuel(after - before); err != nil {
+			return nil, 0, err
+		}
+	}
+	return ret, after - before, nil
 }
 
 func (i *Instance) HandleError(err error) {

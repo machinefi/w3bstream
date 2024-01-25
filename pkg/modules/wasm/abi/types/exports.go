@@ -5,5 +5,5 @@ type Exports interface {
 	// entry wasm entry
 	// typ event type
 	// data payload
-	OnEventReceived(entry string, typ string, data []byte) (interface{}, error)
+	OnEventReceived(entry string, typ string, data []byte) (interface{}, uint64, error)
 }

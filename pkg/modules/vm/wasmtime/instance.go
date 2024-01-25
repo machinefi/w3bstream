@@ -85,7 +85,7 @@ func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data [
 	}
 	defer i.instance.Release()
 
-	res, err := i.abictx.GetExports().OnEventReceived(fn, eventType, data)
+	res, fuel, err := i.abictx.GetExports().OnEventReceived(fn, eventType, data)
 	if err != nil {
 		l.Error(err)
 		return &wasm.EventHandleResult{
@@ -95,7 +95,7 @@ func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data [
 		}
 	}
 	code, _ := res.(int32)
-	l.WithValues("code", code).Info("")
+	l.WithValues("code", code, "consumed", fuel).Info("")
 	return &wasm.EventHandleResult{
 		InstanceID: i.ID(),
 		Code:       wasm.ResultStatusCode(code),

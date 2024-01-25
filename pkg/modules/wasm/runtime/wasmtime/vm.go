@@ -7,9 +7,11 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/wasm/abi/types"
 )
 
+const MaxFuelInStore = 10240000
+
 // NewWasmtimeVM creates wasmtime vm
 func NewWasmtimeVM(id string) types.VM {
-	v := &VM{id: id}
+	v := &VM{id: id, _fuel: MaxFuelInStore}
 	v.Init()
 	return v
 }
@@ -20,6 +22,7 @@ type VM struct {
 	id     string
 	engine *wasmtime.Engine
 	store  *wasmtime.Store
+	_fuel  uint64
 }
 
 func (vm *VM) ID() string { return vm.id }
@@ -27,8 +30,14 @@ func (vm *VM) ID() string { return vm.id }
 func (vm *VM) Name() string { return "wasmtime" }
 
 func (vm *VM) Init() {
-	vm.engine = wasmtime.NewEngine()
+	config := wasmtime.NewConfig()
+	config.SetConsumeFuel(true)
+	// config.SetEpochInterruption(true)
+	vm.engine = wasmtime.NewEngineWithConfig(config)
 	vm.store = wasmtime.NewStore(vm.engine)
+	if err := vm.store.AddFuel(vm._fuel); err != nil {
+		panic(err)
+	}
 }
 
 func (vm *VM) NewModule(code []byte) (types.Module, error) {

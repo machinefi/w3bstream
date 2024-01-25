@@ -72,7 +72,8 @@ type Instance interface {
 	// Release decreases the refer count of wasm instance
 	Release()
 
-	Call(string, ...interface{}) (interface{}, error)
+	// Call wasm function with name and args, returns wasm return value, fuel consumed, and error
+	Call(string, ...interface{}) (interface{}, uint64, error)
 
 	HandleError(error)
 }
