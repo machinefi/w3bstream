@@ -404,19 +404,19 @@ func (i *Instance) Call(name string, args ...interface{}) (interface{}, uint64, 
 	}
 
 	before, fuelset := i.vm.store.FuelConsumed()
+
 	ret, err := f.Call(i.vm.store, args...)
 	if err != nil {
 		i.HandleError(err)
-		return nil, 0, errors.New(strings.Split(err.Error(), ":")[0])
+		err = errors.New(strings.Split(err.Error(), ":")[0])
 	}
 	after, _ := i.vm.store.FuelConsumed()
-	slog.Info("check fuel after call "+name, "instance_id", i.vm.id, "before", before, "after", after, "consumed", after-before)
+	consumed := after - before
+	slog.Info("check fuel after call "+name, "instance_id", i.vm.id, "before", before, "after", after, "consumed", consumed)
 	if fuelset {
-		if err = i.vm.store.AddFuel(after - before); err != nil {
-			return nil, 0, err
-		}
+		_ = i.vm.store.AddFuel(consumed)
 	}
-	return ret, after - before, nil
+	return ret, consumed, err
 }
 
 func (i *Instance) HandleError(err error) {

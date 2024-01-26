@@ -16,6 +16,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -136,6 +137,10 @@ func (i *Imports) Log(lv consts.LogLevel, msg string) {
 			LogTime:     time.Now().UnixNano(),
 			Msg:         subStringWithLength(msg, enums.WasmLogMaxLength),
 		},
+		OperationTimes: datatypes.OperationTimes{
+			CreatedAt: types.Timestamp{Time: time.Now()},
+			UpdatedAt: types.Timestamp{Time: time.Now()},
+		},
 	}
 }
 
@@ -162,6 +167,10 @@ func (i *Imports) LogInternal(lv consts.LogLevel, msg string, args ...any) {
 			Level:       lv.String(),
 			LogTime:     time.Now().UnixNano(),
 			Msg:         subStringWithLength(msg, enums.WasmLogMaxLength),
+		},
+		OperationTimes: datatypes.OperationTimes{
+			CreatedAt: types.Timestamp{Time: time.Now()},
+			UpdatedAt: types.Timestamp{Time: time.Now()},
 		},
 	}
 

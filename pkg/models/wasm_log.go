@@ -42,7 +42,7 @@ type WasmLogInfo struct {
 func BatchCreateWasmLogs(db sqlx.DBExecutor, vs ...*WasmLog) error {
 	vals := make([]any, 0, len(vs)*8)
 	for _, v := range vs {
-		vals = append(vals, v.WasmLogID, v.ProjectName, v.AppletName, v.InstanceID, v.Src, v.Level, v.LogTime, v.Msg)
+		vals = append(vals, v.WasmLogID, v.ProjectName, v.AppletName, v.InstanceID, v.Src, v.Level, v.LogTime, v.Msg, v.CreatedAt, v.UpdatedAt)
 	}
 	if len(vals) == 0 {
 		return nil
@@ -61,6 +61,8 @@ func BatchCreateWasmLogs(db sqlx.DBExecutor, vs ...*WasmLog) error {
 			m.ColLevel().Name,
 			m.ColLogTime().Name,
 			m.ColMsg().Name,
+			m.ColCreatedAt().Name,
+			m.ColUpdatedAt().Name,
 		),
 		vals...,
 	))
