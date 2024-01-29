@@ -7,6 +7,7 @@ import (
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/enums"
+	"github.com/machinefi/w3bstream/pkg/errors/status"
 	abitypes "github.com/machinefi/w3bstream/pkg/modules/wasm/abi/types"
 	"github.com/machinefi/w3bstream/pkg/modules/wasm/host"
 	"github.com/machinefi/w3bstream/pkg/modules/wasm/runtime"
@@ -80,7 +81,7 @@ func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data [
 		return &wasm.EventHandleResult{
 			InstanceID: i.ID(),
 			Code:       wasm.ResultStatusCode_Failed,
-			ErrMsg:     "instance not running",
+			ErrMsg:     status.InstanceNotRunning.Key(),
 		}
 	}
 	defer i.instance.Release()

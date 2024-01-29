@@ -17,6 +17,8 @@ const (
 )
 
 type EventReq struct {
+	// From transport source
+	From enums.EventSource `in:"query" name:"from,omitempty"`
 	// Channel message channel named (intact project name)
 	Channel string `in:"path"  name:"channel"`
 	// EventType used for filter strategies created in w3b before
@@ -77,4 +79,31 @@ type EventRsp struct {
 	Results []*Result `json:"results"`
 	// Error error message from w3b node (api level), different from Result.Error
 	Error string `json:"error,omitempty"`
+}
+
+type DataPushReqs []*DataPushReq
+
+func (reqs DataPushReqs) SetDefault() {
+	for _, r := range reqs {
+		if r.EventType == "" {
+			r.EventType = enums.EVENTTYPEDEFAULT
+		}
+		if r.Timestamp == 0 {
+			r.Timestamp = time.Now().UTC().UnixMilli()
+		}
+	}
+}
+
+type DataPushReq struct {
+	DeviceID  string `json:"device_id"`
+	EventType string `json:"event_type,omitempty"`
+	Payload   string `json:"payload"`
+	Timestamp int64  `json:"timestamp,omitempty"`
+}
+
+type DataPushRsps []*DataPushRsp
+
+type DataPushRsp struct {
+	Index   int       `json:"index"`
+	Results []*Result `json:"results"`
 }

@@ -88,6 +88,8 @@ type GithubComMachinefiW3BstreamPkgEnumsConfigType = enums.ConfigType
 
 type GithubComMachinefiW3BstreamPkgEnumsDeployCmd = enums.DeployCmd
 
+type GithubComMachinefiW3BstreamPkgEnumsEventSource = enums.EventSource
+
 type GithubComMachinefiW3BstreamPkgEnumsFlowOperator = enums.FlowOperator
 
 type GithubComMachinefiW3BstreamPkgEnumsFlowSink = enums.FlowSink
@@ -387,6 +389,10 @@ type GithubComMachinefiW3BstreamPkgModulesCronjobCreateReq struct {
 type GithubComMachinefiW3BstreamPkgModulesCronjobListRsp = cronjob.ListRsp
 
 type GithubComMachinefiW3BstreamPkgModulesDeployCreateReq = deploy.CreateReq
+
+type GithubComMachinefiW3BstreamPkgModulesEventDataPushRsp = event.DataPushRsp
+
+type GithubComMachinefiW3BstreamPkgModulesEventDataPushRsps = event.DataPushRsps
 
 type GithubComMachinefiW3BstreamPkgModulesEventEventRsp = event.EventRsp
 

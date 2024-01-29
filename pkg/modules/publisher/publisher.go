@@ -275,6 +275,47 @@ func Create(ctx context.Context, r *CreateReq) (*models.Publisher, error) {
 	return pub, nil
 }
 
+func CreateIfNotExist(ctx context.Context, r *CreateReq) (*models.Publisher, error) {
+	var (
+		prj    = types.MustProjectFromContext(ctx)
+		idg    = confid.MustSFIDGeneratorFromContext(ctx)
+		d      = types.MustMgrDBExecutorFromContext(ctx)
+		m      = &models.Publisher{}
+		exists = false
+	)
+
+	err := sqlx.NewTasks(d).With(
+		func(db sqlx.DBExecutor) error {
+			err := m.FetchByProjectIDAndKey(d)
+			if err == nil {
+				exists = true
+				return nil
+			}
+			if sqlx.DBErr(err).IsNotFound() {
+				return nil
+			}
+			return status.DatabaseError.StatusErr().WithDesc(err.Error())
+		},
+		func(db sqlx.DBExecutor) error {
+			if exists {
+				return nil
+			}
+			m.PublisherID = idg.MustGenSFID()
+			m.ProjectID = prj.ProjectID
+			m.Key = r.Key
+			m.Name = r.Name
+			if err := m.Create(d); err != nil {
+				return status.DatabaseError.StatusErr().WithDesc(err.Error())
+			}
+			return nil
+		},
+	).Do()
+	if err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 func Upsert(ctx context.Context, r *CreateReq) (*models.Publisher, error) {
 	ctx, l := logr.Start(ctx, "publisher.Upsert")
 	defer l.End()

@@ -20,7 +20,8 @@ func ParseJwtAuthContentFromContext(ctx context.Context) (*AuthPayload, error) {
 	var (
 		payload = jwt.AuthFromContext(ctx)
 		content []byte
-		ret     = &AuthPayload{
+
+		ret = &AuthPayload{
 			IdentityType: enums.ACCESS_KEY_IDENTITY_TYPE_UNKNOWN,
 		}
 	)

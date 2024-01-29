@@ -73,9 +73,6 @@ func (*EventLog) PrimaryKey() []string {
 
 func (*EventLog) Indexes() builder.Indexes {
 	return builder.Indexes{
-		"i_applet_id": []string{
-			"ProjectID",
-		},
 		"i_created_at": []string{
 			"CreatedAt",
 		},

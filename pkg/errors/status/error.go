@@ -81,6 +81,10 @@ const (
 	NoResourcePermission
 	// @errTalk Invalid Account Access Key
 	InvalidAccessKey
+	// @errTalk invalid data push should account
+	InvalidDataPushShouldAccount
+	// @errTalk invalid data push should publisher
+	InvalidDataPushShouldPublisher
 )
 
 const (
@@ -225,4 +229,6 @@ const (
 	ProjectOperatorNotFound
 	// @errTalk Account Key Not Found
 	AccessKeyNotFound
+	// @errTalk invalid data push payload
+	InvalidDataPushPayload
 )

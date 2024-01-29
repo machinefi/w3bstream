@@ -243,20 +243,19 @@ func BatchCreate(ctx context.Context, sty []models.Strategy) error {
 }
 
 func FilterByProjectAndEvent(ctx context.Context, id types.SFID, tpe string) ([]*types.StrategyResult, error) {
+	args := &CondArgs{
+		ProjectID:  id,
+		EventTypes: []string{enums.EVENTTYPEDEFAULT},
+	}
+	if tpe != "" && tpe != enums.EVENTTYPEDEFAULT {
+		args.EventTypes = append(args.EventTypes, tpe)
+	}
+
 	data, err := ListDetailByCond(ctx, &CondArgs{
 		ProjectID: id, EventTypes: []string{tpe}},
 	)
 	if err != nil {
 		return nil, err
-	}
-
-	if len(data) == 0 {
-		data, err = ListDetailByCond(ctx, &CondArgs{
-			ProjectID: id, EventTypes: []string{enums.EVENTTYPEDEFAULT}},
-		)
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	results := make([]*types.StrategyResult, 0, len(data))

@@ -15,6 +15,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/blockchain"
 	"github.com/machinefi/w3bstream/pkg/modules/cronjob"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
+	"github.com/machinefi/w3bstream/pkg/modules/event"
 	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
@@ -84,6 +85,10 @@ func main() {
 			},
 			func() {
 				metrics.Init(ctx)
+			},
+			func() {
+				sche := event.NewEventHandleScheduler(time.Minute / 2)
+				sche.Run(ctx)
 			},
 			func() {
 				body, err := lark.Build(

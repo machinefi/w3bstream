@@ -61,11 +61,6 @@ func MustCurrentAccountFromContext(ctx context.Context) *CurrentAccount {
 	return ca
 }
 
-func MaybeCurrentAccountFromContext(ctx context.Context) (*CurrentAccount, bool) {
-	ca, ok := ctx.Value(contextAccountAuthKey).(*CurrentAccount)
-	return ca, ok
-}
-
 func CurrentAccountFromContext(ctx context.Context) (*CurrentAccount, bool) {
 	ca, ok := ctx.Value(contextAccountAuthKey).(*CurrentAccount)
 	return ca, ok

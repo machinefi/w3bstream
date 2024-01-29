@@ -6,7 +6,6 @@ import "github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 // @def primary              ID
 // @def index I_event_id     EventID
 // @def index I_project_id   ProjectID
-// @def index I_applet_id    ProjectID
 // @def index I_publisher_id PublisherID
 // @def index I_created_at   CreatedAt
 //
