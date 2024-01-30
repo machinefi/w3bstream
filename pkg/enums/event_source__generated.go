@@ -23,6 +23,8 @@ func ParseEventSourceFromString(s string) (EventSource, error) {
 		return EVENT_SOURCE__MQTT, nil
 	case "HTTP":
 		return EVENT_SOURCE__HTTP, nil
+	case "MONITOR":
+		return EVENT_SOURCE__MONITOR, nil
 	}
 }
 
@@ -36,6 +38,8 @@ func ParseEventSourceFromLabel(s string) (EventSource, error) {
 		return EVENT_SOURCE__MQTT, nil
 	case "HTTP":
 		return EVENT_SOURCE__HTTP, nil
+	case "MONITOR":
+		return EVENT_SOURCE__MONITOR, nil
 	}
 }
 
@@ -53,6 +57,8 @@ func (v EventSource) String() string {
 		return "MQTT"
 	case EVENT_SOURCE__HTTP:
 		return "HTTP"
+	case EVENT_SOURCE__MONITOR:
+		return "MONITOR"
 	}
 }
 
@@ -66,6 +72,8 @@ func (v EventSource) Label() string {
 		return "MQTT"
 	case EVENT_SOURCE__HTTP:
 		return "HTTP"
+	case EVENT_SOURCE__MONITOR:
+		return "MONITOR"
 	}
 }
 
@@ -74,7 +82,7 @@ func (v EventSource) TypeName() string {
 }
 
 func (v EventSource) ConstValues() []enum.IntStringerEnum {
-	return []enum.IntStringerEnum{EVENT_SOURCE__MQTT, EVENT_SOURCE__HTTP}
+	return []enum.IntStringerEnum{EVENT_SOURCE__MQTT, EVENT_SOURCE__HTTP, EVENT_SOURCE__MONITOR}
 }
 
 func (v EventSource) MarshalText() ([]byte, error) {

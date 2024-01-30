@@ -83,8 +83,7 @@ func (*monitor) sendEvent(ctx context.Context, data []byte, projectName string, 
 		l.Error(err)
 		return err
 	}
-	res := ret.([]*event.Result)
-	for _, r := range res {
+	for _, r := range ret.Results {
 		if r.Error != "" {
 			err = errors.New(r.Error)
 			l.Error(err)

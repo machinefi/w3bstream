@@ -10703,11 +10703,13 @@
         "type": "string",
         "enum": [
           "MQTT",
-          "HTTP"
+          "HTTP",
+          "MONITOR"
         ],
         "x-enum-labels": [
           "MQTT",
-          "HTTP"
+          "HTTP",
+          "MONITOR"
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.EventSource",
         "x-id": "GithubComMachinefiW3BstreamPkgEnumsEventSource"

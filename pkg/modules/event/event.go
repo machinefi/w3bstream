@@ -28,7 +28,7 @@ import (
 // TODO the full project info is not in context so query and set here. this impl
 // is for support other module, which is temporary.
 // And it will be deprecated when rpc/http is ready
-func HandleEvent(ctx context.Context, tpe string, data []byte) (interface{}, error) {
+func HandleEvent(ctx context.Context, tpe string, data []byte) (*EventRsp, error) {
 	prj := &models.Project{ProjectName: models.ProjectName{
 		Name: types.MustProjectFromContext(ctx).Name,
 	}}
@@ -37,30 +37,30 @@ func HandleEvent(ctx context.Context, tpe string, data []byte) (interface{}, err
 	if err != nil {
 		return nil, err
 	}
+	ctx = types.WithProject(ctx, prj)
 
-	eventID := uuid.NewString() + "_monitor"
-	ctx = types.WithEventID(ctx, eventID)
-
-	if err := trafficlimit.TrafficLimit(ctx, enums.TRAFFIC_LIMIT_TYPE__EVENT); err != nil {
-		results := append([]*Result{}, &Result{
-			AppletName:  "",
-			InstanceID:  0,
-			Handler:     "",
-			ReturnValue: nil,
-			ReturnCode:  -1,
-			Error:       err.Error(),
-		})
-		return results, nil
-	}
-
-	strategies, err := strategy.FilterByProjectAndEvent(ctx, prj.ProjectID, tpe)
-	if err != nil {
+	if err = trafficlimit.TrafficLimit(ctx, enums.TRAFFIC_LIMIT_TYPE__EVENT); err != nil {
 		return nil, err
 	}
 
-	ctx = types.WithStrategyResults(ctx, strategies)
+	ctx = types.WithPublisher(ctx, &models.Publisher{
+		PrimaryID:    datatypes.PrimaryID{ID: 0},
+		RelProject:   models.RelProject{ProjectID: prj.ProjectID},
+		RelPublisher: models.RelPublisher{PublisherID: 0},
+		PublisherInfo: models.PublisherInfo{
+			Key:  "w3b_monitor",
+			Name: "w3b_monitor",
+		},
+	})
 
-	return OnEvent(ctx, data), nil
+	return Create(ctx, &EventReq{
+		From:      enums.EVENT_SOURCE__MONITOR,
+		Channel:   prj.Name,
+		EventType: tpe,
+		EventID:   uuid.NewString() + "_monitor",
+		Timestamp: time.Now().UTC().UnixMilli(),
+		Payload:   *bytes.NewBuffer(data),
+	})
 }
 
 func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
