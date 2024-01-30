@@ -41,6 +41,7 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 	}
 
 	if r.IsDataPush() {
+		l.Info("event push")
 		// require account auth
 		ca, ok := middleware.CurrentAccountFromContext(ctx)
 		if !ok {
@@ -55,10 +56,12 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 		if err != nil {
 			return nil, status.InvalidDataPushPayload.StatusErr().WithDesc(err.Error())
 		}
+		reqs.SetDefault()
 		return event.BatchCreate(ctx, reqs)
 	}
 
 	// require publisher auth
+	l.Info("event request")
 	pub, ok := middleware.MaybePublisher(ctx)
 	if !ok {
 		return nil, status.InvalidDataPushShouldPublisher

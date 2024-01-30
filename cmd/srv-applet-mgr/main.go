@@ -91,6 +91,10 @@ func main() {
 				sche.Run(ctx)
 			},
 			func() {
+				sche := event.NewEventCleanupScheduler(time.Hour, 90*time.Hour*24)
+				sche.Run(ctx)
+			},
+			func() {
 				body, err := lark.Build(
 					ctx,
 					"service started",

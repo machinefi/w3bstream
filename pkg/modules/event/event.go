@@ -275,3 +275,36 @@ func (s *EventHandleScheduler) Run(ctx context.Context) {
 		}
 	}
 }
+
+func NewEventCleanupScheduler(d time.Duration, keep time.Duration) *EventCleanupScheduler {
+	return &EventCleanupScheduler{
+		d:    d,
+		keep: keep,
+	}
+}
+
+type EventCleanupScheduler struct {
+	d    time.Duration
+	keep time.Duration
+}
+
+func (s *EventCleanupScheduler) Run(ctx context.Context) {
+	ticker := time.NewTicker(s.d)
+	m := &models.Event{}
+	d := types.MustMgrDBExecutorFromContext(ctx)
+	t := d.T(m)
+	for {
+		_, l := logger.NewSpanContext(ctx, "event.cleanup")
+
+		ts := time.Now().UTC().UnixMilli() - s.keep.Milliseconds()
+		_, err := d.Exec(builder.Delete().From(t, builder.Where(m.ColReceivedAt().Lt(ts))))
+		if err != nil {
+			l.Error(errors.Wrap(err, "event cleanup"))
+			l.End()
+		} else {
+			l.Info("event cleanup")
+		}
+		l.End()
+		<-ticker.C
+	}
+}
