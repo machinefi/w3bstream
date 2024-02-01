@@ -14,6 +14,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/account"
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/modules/publisher"
@@ -249,26 +250,28 @@ func Init(ctx context.Context) error {
 
 	d := types.MustMgrDBExecutorFromContext(ctx)
 
-	user, err := (&models.Account{}).List(d, nil)
-	for _, u := range user {
-		ctx = types.WithAccount(ctx, &u)
-		break
-	}
-
-	data, err := (&models.Project{}).List(d, nil)
+	projects, err := (&models.Project{}).List(d, nil)
 	if err != nil {
 		return err
 	}
-	for i := range data {
-		v := &data[i]
+	l.WithValues("projects", len(projects)).Info("")
+	for i := range projects {
+		v := &projects[i]
 		l = l.WithValues("prj", v.Name)
 		ctx = types.WithProject(ctx, v)
 		if err = mqtt.Subscribe(ctx, v.Name); err != nil {
 			l.Warn(errors.Wrap(err, "channel create failed"))
+			continue
 		}
 		l.Info("start subscribe")
 
 		if v.Public == datatypes.TRUE && jwt.WithAnonymousPublisherFn == nil {
+			acc, err := account.GetAccountByAccountID(ctx, v.AccountID)
+			if err != nil {
+				l.WithValues("account_id", v.AccountID).Error(errors.Wrap(err, "failed to get account info"))
+				continue
+			}
+			ctx = types.WithAccount(ctx, acc)
 			if _, err = publisher.CreateAnonymousPublisher(ctx); err != nil {
 				l.Warn(errors.Wrap(err, "anonymous publisher create failed"))
 			}
