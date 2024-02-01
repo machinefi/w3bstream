@@ -282,7 +282,7 @@ func (d *Database) Init(parent context.Context) (err error) {
 			l.Error(err)
 			return err
 		}
-		l.Info("migrated")
+		l.WithValues("project", prj.Name).Info("project database migrated")
 	}
 
 	return nil

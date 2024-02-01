@@ -11,6 +11,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/modules/account"
 	"github.com/machinefi/w3bstream/pkg/modules/blockchain"
 	"github.com/machinefi/w3bstream/pkg/modules/cronjob"
@@ -34,6 +35,7 @@ func main() {
 	ctx, l := logger.NewSpanContext(global.WithContext(context.Background()), "main")
 	defer l.End()
 
+	var sigProjectsInitialized = make(chan struct{})
 	app.Execute(func(args ...string) {
 		BatchRun(
 			func() {
@@ -43,6 +45,9 @@ func main() {
 				kit.Run(apis.RootEvent, global.EventServer())
 			},
 			func() {
+				ctx, l := logr.Start(ctx, "main.InitProjects")
+				defer l.End()
+
 				passwd, err := account.CreateAdminIfNotExist(ctx)
 				if err != nil {
 					l.Error(err)
@@ -62,6 +67,8 @@ func main() {
 					l.Error(err)
 					panic(err)
 				}
+				l.Info("all projects initialized")
+				sigProjectsInitialized <- struct{}{}
 			},
 			func() {
 				if err := trafficlimit.Init(ctx); err != nil {
@@ -87,6 +94,7 @@ func main() {
 				metrics.Init(ctx)
 			},
 			func() {
+				<-sigProjectsInitialized
 				sche := event.NewEventHandleScheduler(time.Minute / 2)
 				sche.Run(ctx)
 			},
