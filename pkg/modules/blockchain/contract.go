@@ -219,10 +219,10 @@ func (t *contract) listChainAndSendEvent(ctx context.Context, g *listChainGroup)
 	from, to := c.BlockCurrent, g.toBlock
 
 	if from > to {
-		l.WithValues("from block", from, "to block", to).Debug("no new block")
+		// l.WithValues("from block", from, "to block", to).Debug("no new block")
 		return to, nil
 	}
-	l.WithValues("from block", from, "to block", to).Debug("find new block")
+	// l.WithValues("from block", from, "to block", to).Debug("find new block")
 
 	as, mas := t.getAddresses(g.cs)
 	ts, mts := t.getTopic(g.cs)
