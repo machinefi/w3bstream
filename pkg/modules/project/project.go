@@ -254,10 +254,11 @@ func Init(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	l.WithValues("projects", len(projects)).Info("")
+
+	l = l.WithValues("total", len(projects))
 	for i := range projects {
 		v := &projects[i]
-		l = l.WithValues("prj", v.Name, "index", i)
+		l := l.WithValues("prj", v.Name, "index", i)
 		ctx = types.WithProject(ctx, v)
 		if err = mqtt.Subscribe(ctx, v.Name); err != nil {
 			l.Warn(errors.Wrap(err, "channel create failed"))

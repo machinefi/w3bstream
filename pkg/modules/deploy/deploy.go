@@ -41,10 +41,11 @@ func Init(ctx context.Context) error {
 		l.Error(err)
 		return err
 	}
+	l = l.WithValues("total", len(list))
 
 	for i := range list {
 		ins = &list[i]
-		l = l.WithValues("ins", ins.InstanceID)
+		l := l.WithValues("ins", ins.InstanceID, "index", i)
 
 		app = &models.Applet{RelApplet: models.RelApplet{AppletID: ins.AppletID}}
 		err = app.FetchByAppletID(d)
