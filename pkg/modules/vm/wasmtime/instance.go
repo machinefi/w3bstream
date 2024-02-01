@@ -77,14 +77,22 @@ func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data [
 	ctx, l := logr.Start(ctx, "vm.Instance.HandleEvent")
 	defer l.End()
 
-	if !i.instance.Acquire() {
+	if !i.instance.Started() {
 		return &wasm.EventHandleResult{
 			InstanceID: i.ID(),
 			Code:       wasm.ResultStatusCode_Failed,
 			ErrMsg:     status.InstanceNotRunning.Key() + "_acquire",
 		}
 	}
-	defer i.instance.Release()
+
+	// if !i.instance.Acquire() {
+	// 	return &wasm.EventHandleResult{
+	// 		InstanceID: i.ID(),
+	// 		Code:       wasm.ResultStatusCode_Failed,
+	// 		ErrMsg:     status.InstanceNotRunning.Key() + "_acquire",
+	// 	}
+	// }
+	// defer i.instance.Release()
 
 	res, fuel, err := i.abictx.GetExports().OnEventReceived(fn, eventType, data)
 	if err != nil {
@@ -95,8 +103,8 @@ func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data [
 			ErrMsg:     err.Error(),
 		}
 	}
-	code, _ := res.(int32)
-	l.WithValues("code", code, "consumed", fuel).Info("")
+	code, ok := res.(int32)
+	l.WithValues("code", code, "is_code", ok, "consumed", fuel).Info("")
 	return &wasm.EventHandleResult{
 		InstanceID: i.ID(),
 		Code:       wasm.ResultStatusCode(code),
