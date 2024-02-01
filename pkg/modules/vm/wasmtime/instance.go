@@ -81,7 +81,7 @@ func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data [
 		return &wasm.EventHandleResult{
 			InstanceID: i.ID(),
 			Code:       wasm.ResultStatusCode_Failed,
-			ErrMsg:     status.InstanceNotRunning.Key(),
+			ErrMsg:     status.InstanceNotRunning.Key() + "_acquire",
 		}
 	}
 	defer i.instance.Release()

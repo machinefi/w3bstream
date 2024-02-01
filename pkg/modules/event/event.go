@@ -228,7 +228,7 @@ func handle(ctx context.Context) int {
 		if ins == nil {
 			v.CompletedAt = time.Now().UTC().UnixMilli()
 			v.ResultCode = -1
-			v.Error = status.InstanceNotRunning.Key()
+			v.Error = status.InstanceNotRunning.Key() + "_nil"
 		} else {
 			res := ins.HandleEvent(ctx, v.Handler, v.EventType, v.Input)
 			v.CompletedAt = time.Now().UTC().UnixMilli()
@@ -236,7 +236,7 @@ func handle(ctx context.Context) int {
 			v.Error = res.ErrMsg
 		}
 		v.Stage = enums.EVENT_STAGE__COMPLETED
-		l = l.WithValues(
+		l := l.WithValues(
 			"evt", v.EventID,
 			"ins", v.InstanceID,
 			"hdl", v.Handler,
