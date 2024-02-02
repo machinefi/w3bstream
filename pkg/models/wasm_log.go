@@ -16,6 +16,7 @@ import (
 // @def index        I_level        Level
 // @def index        I_src          Src
 // @def index        I_instance_id  InstanceID
+// @def index        I_event_id     EventID
 //
 //go:generate toolkit gen model WasmLog --database DB
 type WasmLog struct {
@@ -33,6 +34,7 @@ type WasmLogInfo struct {
 	ProjectName string     `db:"f_project_name"               json:"projectName"`
 	AppletName  string     `db:"f_applet_name,default=''"     json:"appletName"`
 	InstanceID  types.SFID `db:"f_instance_id,default='0'"    json:"instanceID"`
+	EventID     string     `db:"f_event_id,default=''"        json:"eventID"`
 	Src         string     `db:"f_src,default=''"             json:"src"`
 	Level       string     `db:"f_level,default=''"           json:"level"`
 	LogTime     int64      `db:"f_log_time,default='0'"       json:"logTime"`
@@ -42,7 +44,7 @@ type WasmLogInfo struct {
 func BatchCreateWasmLogs(db sqlx.DBExecutor, vs ...*WasmLog) error {
 	vals := make([]any, 0, len(vs)*8)
 	for _, v := range vs {
-		vals = append(vals, v.WasmLogID, v.ProjectName, v.AppletName, v.InstanceID, v.Src, v.Level, v.LogTime, v.Msg, v.CreatedAt, v.UpdatedAt)
+		vals = append(vals, v.WasmLogID, v.ProjectName, v.AppletName, v.InstanceID, v.EventID, v.Src, v.Level, v.LogTime, v.Msg, v.CreatedAt, v.UpdatedAt)
 	}
 	if len(vals) == 0 {
 		return nil
@@ -57,6 +59,7 @@ func BatchCreateWasmLogs(db sqlx.DBExecutor, vs ...*WasmLog) error {
 			m.ColProjectName().Name,
 			m.ColAppletName().Name,
 			m.ColInstanceID().Name,
+			m.ColEventID().Name,
 			m.ColSrc().Name,
 			m.ColLevel().Name,
 			m.ColLogTime().Name,

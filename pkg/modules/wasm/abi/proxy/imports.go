@@ -23,6 +23,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	optypes "github.com/machinefi/w3bstream/pkg/modules/operator/pool/types"
 	wasmapi "github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/types"
+	abitypes "github.com/machinefi/w3bstream/pkg/modules/wasm/abi/types"
 	"github.com/machinefi/w3bstream/pkg/modules/wasm/consts"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
@@ -63,18 +64,19 @@ func NewImports(ctx context.Context) *Imports {
 	}
 
 	i := &Imports{
-		parent:    ctx,
-		logger:    conflogger.Std(),
-		logs:      make(chan *models.WasmLog, 1024),
-		_rand:     rand.New(rand.NewSource(time.Now().UnixNano())),
-		dbe:       types.MustMgrDBExecutorFromContext(ctx),
-		idg:       confid.MustNewSFIDGenerator(),
-		prj:       types.MustProjectFromContext(ctx),
-		app:       types.MustAppletFromContext(ctx),
-		ins:       types.MustInstanceFromContext(ctx),
-		resources: mapx.New[uint32, []byte](),
-		events:    mapx.New[uint32, string](),
-		chain:     chain,
+		parent:                ctx,
+		logger:                conflogger.Std(),
+		logs:                  make(chan *models.WasmLog, 1024),
+		_rand:                 rand.New(rand.NewSource(time.Now().UnixNano())),
+		dbe:                   types.MustMgrDBExecutorFromContext(ctx),
+		idg:                   confid.MustNewSFIDGenerator(),
+		prj:                   types.MustProjectFromContext(ctx),
+		app:                   types.MustAppletFromContext(ctx),
+		ins:                   types.MustInstanceFromContext(ctx),
+		resources:             mapx.New[uint32, []byte](),
+		events:                mapx.New[uint32, string](),
+		chain:                 chain,
+		DefaultImportsContext: abitypes.NewDefaultImportsContext(),
 	}
 	i.envs, _ = wasm.EnvFromContext(ctx)
 	i.db, _ = wasm.SQLStoreFromContext(ctx)
@@ -111,6 +113,7 @@ type Imports struct {
 	metrics   metrics.CustomMetrics
 	asyncsrv  wasmapi.Server
 	chain     *chainctx
+	*abitypes.DefaultImportsContext
 }
 
 func (i *Imports) Log(lv consts.LogLevel, msg string) {
@@ -132,6 +135,7 @@ func (i *Imports) Log(lv consts.LogLevel, msg string) {
 			ProjectName: i.prj.Name,
 			AppletName:  i.app.Name,
 			InstanceID:  i.ins.InstanceID,
+			EventID:     i.ContextID(),
 			Src:         "wasm",
 			Level:       lv.String(),
 			LogTime:     time.Now().UnixNano(),
@@ -163,6 +167,7 @@ func (i *Imports) LogInternal(lv consts.LogLevel, msg string, args ...any) {
 			ProjectName: i.prj.Name,
 			AppletName:  i.app.Name,
 			InstanceID:  i.ins.InstanceID,
+			EventID:     i.ContextID(),
 			Src:         "host",
 			Level:       lv.String(),
 			LogTime:     time.Now().UnixNano(),

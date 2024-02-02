@@ -58,6 +58,7 @@ require (
 	github.com/spruceid/siwe-go v0.2.0
 	github.com/stretchr/testify v1.8.3
 	github.com/zksync-sdk/zksync2-go v0.3.1
+	go.uber.org/atomic v1.10.0
 	go.uber.org/ratelimit v0.2.0
 	golang.org/x/exp v0.0.0-20230801115018-d63ba01acd4b
 	google.golang.org/grpc v1.55.0

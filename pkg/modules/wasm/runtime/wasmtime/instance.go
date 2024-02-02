@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"log/slog"
 	"reflect"
-	"strings"
 	"sync"
 	"sync/atomic"
 
@@ -408,13 +407,14 @@ func (i *Instance) Call(name string, args ...interface{}) (interface{}, uint64, 
 	ret, err := f.Call(i.vm.store, args...)
 	if err != nil {
 		i.HandleError(err)
-		err = errors.New(strings.Split(err.Error(), ":")[0])
 	}
 	after, _ := i.vm.store.FuelConsumed()
 	consumed := after - before
 	slog.Info("check fuel after call "+name, "instance_id", i.vm.id, "before", before, "after", after, "consumed", consumed)
 	if fuelset {
-		_ = i.vm.store.AddFuel(consumed)
+		if err := i.vm.store.AddFuel(consumed); err != nil {
+			slog.Error("failed to add fuel", "instance_id", i.vm.id, "err", err)
+		}
 	}
 	return ret, consumed, err
 }
@@ -445,6 +445,6 @@ func (i *Instance) HandleError(err error) {
 				)
 			}
 		}
-		slog.Log(context.Background(), slog.LevelError, strings.Split(err.Error(), ":")[0], args...)
+		slog.Log(context.Background(), slog.LevelError, err.Error(), args...)
 	}
 }

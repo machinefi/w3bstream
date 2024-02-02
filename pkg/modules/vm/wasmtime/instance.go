@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
+	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	abitypes "github.com/machinefi/w3bstream/pkg/modules/wasm/abi/types"
@@ -84,6 +85,12 @@ func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data [
 			ErrMsg:     status.InstanceNotRunning.Key() + "_acquire",
 		}
 	}
+
+	eventID := types.MustEventIDFromContext(ctx)
+	must.BeTrue(i.abictx.GetImports().Entry(eventID))
+	defer func() {
+		must.BeTrue(i.abictx.GetImports().Leave(eventID))
+	}()
 
 	// if !i.instance.Acquire() {
 	// 	return &wasm.EventHandleResult{

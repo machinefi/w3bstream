@@ -137,6 +137,9 @@ func Create(ctx context.Context, r *EventReq) (*EventRsp, error) {
 	events := make([]*models.Event, 0, len(strategies))
 	results := make([]*Result, 0, len(strategies))
 	for i, s := range strategies {
+		if state, _ := vm.GetInstanceState(s.InstanceID); state != enums.INSTANCE_STATE__STARTED {
+			continue
+		}
 		events = append(events, &models.Event{
 			EventContext: models.EventContext{
 				Stage:        enums.EVENT_STAGE__RECEIVED,
@@ -230,7 +233,7 @@ func handle(ctx context.Context) int {
 			v.ResultCode = -1
 			v.Error = status.InstanceNotRunning.Key() + "_nil"
 		} else {
-			res := ins.HandleEvent(ctx, v.Handler, v.EventType, v.Input)
+			res := ins.HandleEvent(types.WithEventID(ctx, v.EventID), v.Handler, v.EventType, v.Input)
 			v.CompletedAt = time.Now().UTC().UnixMilli()
 			v.ResultCode = int32(res.Code)
 			v.Error = res.ErrMsg

@@ -7,6 +7,7 @@ import (
 
 	"github.com/machinefi/w3bstream/pkg/modules/wasm/abi"
 	"github.com/machinefi/w3bstream/pkg/modules/wasm/abi/types"
+	"github.com/machinefi/w3bstream/pkg/modules/wasm/consts"
 )
 
 func init() {
@@ -61,7 +62,18 @@ func (a *ABIContext) OnEventReceived(entry string, typ string, data []byte) (int
 	defer a.Imports.RemoveEventType(uint32(rid))
 	defer a.Imports.FlushLog()
 
-	return a.Instance.Call(entry, int(rid))
+	res, fuel, err := a.Instance.Call(entry, int(rid))
+	if err != nil {
+		a.Imports.LogInternal(consts.LOG_LEVEL__ERROR, "[entry:%s] [fuel: %d] [err: %v]", entry, fuel, err)
+	} else {
+		code, _ := res.(int32)
+		if code == 0 {
+			a.Imports.LogInternal(consts.LOG_LEVEL__INFO, "[entry:%s] [fuel: %d]", entry, fuel)
+		} else {
+			a.Imports.LogInternal(consts.LOG_LEVEL__ERROR, "[entry:%s] [fuel: %d] [code: %d]", entry, fuel, code)
+		}
+	}
+	return res, fuel, err
 }
 
 func (a *ABIContext) OnCreated(i types.Instance) {
