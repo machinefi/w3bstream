@@ -9,6 +9,7 @@ import (
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
@@ -245,7 +246,7 @@ func RemoveBySFID(ctx context.Context, id types.SFID) (err error) {
 }
 
 func Init(ctx context.Context) error {
-	ctx, l := logr.Start(ctx, "project.Init")
+	ctx, l := logger.NewSpanContext(ctx, "project.Init")
 	defer l.End()
 
 	d := types.MustMgrDBExecutorFromContext(ctx)

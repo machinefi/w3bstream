@@ -92,7 +92,7 @@ func BatchFetchLast100UnhandledEvents(d sqlx.DBExecutor) ([]*Event, error) {
 			m.ColStage().Eq(enums.EVENT_STAGE__RECEIVED),
 		),
 		builder.OrderBy(
-			builder.DescOrder(m.ColReceivedAt()),
+			builder.AscOrder(m.ColReceivedAt()),
 		),
 		builder.Limit(100),
 		builder.Comment("BatchFetchLast100UnhandledEvents"),

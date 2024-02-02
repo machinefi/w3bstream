@@ -18,5 +18,6 @@ func NewInstance(ctx context.Context, code []byte, id types.SFID, state enums.In
 		return err
 	}
 	AddInstanceByID(ctx, id, ins)
+	l.WithValues("instance_id", id, "state", state.String()).Info("instance created")
 	return nil
 }

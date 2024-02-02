@@ -23,7 +23,7 @@ func AddInstanceByID(ctx context.Context, id types.SFID, i wasm.Instance) {
 	defer l.End()
 
 	instances.Store(id, i)
-	l.WithValues("instance", id).Info("created")
+	l.WithValues("instance", id).Info("instance created")
 }
 
 func DelInstance(ctx context.Context, id types.SFID) error {

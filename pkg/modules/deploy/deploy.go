@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
@@ -23,7 +24,7 @@ import (
 )
 
 func Init(ctx context.Context) error {
-	ctx, l := logr.Start(ctx, "deploy.Init")
+	ctx, l := logger.NewSpanContext(ctx, "deploy.Init")
 	defer l.End()
 
 	var (
