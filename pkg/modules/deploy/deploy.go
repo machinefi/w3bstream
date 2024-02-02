@@ -94,7 +94,7 @@ func Init(ctx context.Context) error {
 		state := ins.State
 		l = l.WithValues("state_db", ins.State)
 
-		ins, err = UpsertByCode(ctx, nil, code, state, ins.InstanceID)
+		_ins, err := UpsertByCode(ctx, nil, code, state, ins.InstanceID)
 		if err != nil {
 			err = errors.Errorf("%v: failed to deploy %v", ins.InstanceID, err)
 			fails = append(fails, err.Error())
@@ -102,7 +102,7 @@ func Init(ctx context.Context) error {
 			continue
 		}
 
-		if ins.State != state {
+		if _ins.State != state {
 			l.WithValues("state_mem", ins.State).Warn(errors.New("create vm failed"))
 			err = errors.Errorf("%v: instance not started", ins.InstanceID)
 			fails = append(fails, err.Error())
