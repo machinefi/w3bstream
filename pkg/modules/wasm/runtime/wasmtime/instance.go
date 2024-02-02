@@ -137,7 +137,7 @@ func (i *Instance) RegisterImports(name string) error {
 	}
 
 	for fnName, fn := range hostFns {
-		if err = i.register("env", fnName, fn); err != nil {
+		if err = i.register(fn.Namespace, fnName, fn.Func); err != nil {
 			return err
 		}
 	}

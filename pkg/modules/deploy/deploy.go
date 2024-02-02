@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -18,6 +19,8 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/modules/resource"
+	"github.com/machinefi/w3bstream/pkg/modules/robot_notifier"
+	"github.com/machinefi/w3bstream/pkg/modules/robot_notifier/lark"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/modules/wasmlog"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -35,7 +38,25 @@ func Init(ctx context.Context) error {
 		res *models.Resource
 
 		code []byte
+
+		fails = []string{"\ninstances failed to deploy:"}
+		succs = []string{"\ndeployed instances:"}
 	)
+
+	defer func() {
+		message := ""
+		if len(fails) > 1 {
+			message += strings.Join(fails, "\n")
+		}
+		if len(succs) > 1 {
+			message += strings.Join(succs, "\n")
+		}
+		body, err := lark.Build(ctx, "Instances Deploying", "INFO", message)
+		if err != nil {
+			return
+		}
+		_ = robot_notifier.Push(ctx, body)
+	}()
 
 	list, err := ins.List(d, nil)
 	if err != nil {
@@ -51,12 +72,16 @@ func Init(ctx context.Context) error {
 		app = &models.Applet{RelApplet: models.RelApplet{AppletID: ins.AppletID}}
 		err = app.FetchByAppletID(d)
 		if err != nil {
+			err = errors.Errorf("%v: failed to get applet %v %v", ins.InstanceID, ins.AppletID, err)
+			fails = append(fails, err.Error())
 			l.Warn(err)
 			continue
 		}
 
 		res, code, err = resource.GetContentBySFID(ctx, app.ResourceID)
 		if err != nil {
+			err = errors.Errorf("%v: failed to get resource %v %v", ins.InstanceID, app.ResourceID, err)
+			fails = append(fails, err.Error())
 			l.Warn(err)
 			continue
 		}
@@ -71,14 +96,19 @@ func Init(ctx context.Context) error {
 
 		ins, err = UpsertByCode(ctx, nil, code, state, ins.InstanceID)
 		if err != nil {
+			err = errors.Errorf("%v: failed to deploy %v", ins.InstanceID, err)
+			fails = append(fails, err.Error())
 			l.Warn(err)
 			continue
 		}
 
 		if ins.State != state {
 			l.WithValues("state_mem", ins.State).Warn(errors.New("create vm failed"))
+			err = errors.Errorf("%v: instance not started", ins.InstanceID)
+			fails = append(fails, err.Error())
 			continue
 		}
+		succs = append(succs, ins.InstanceID.String())
 		l.Info("started")
 	}
 	return nil

@@ -4,6 +4,7 @@ package project
 
 import (
 	"context"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -19,6 +20,8 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/modules/publisher"
+	"github.com/machinefi/w3bstream/pkg/modules/robot_notifier"
+	"github.com/machinefi/w3bstream/pkg/modules/robot_notifier/lark"
 	"github.com/machinefi/w3bstream/pkg/modules/transporter/mqtt"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
@@ -209,7 +212,7 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 }
 
 func RemoveBySFID(ctx context.Context, id types.SFID) (err error) {
-	ctx, l := logr.Start(ctx, "project.RemoveBySFID", "porject_id", id)
+	ctx, l := logr.Start(ctx, "project.RemoveBySFID", "project_id", id)
 	defer l.End()
 
 	var (
@@ -256,28 +259,52 @@ func Init(ctx context.Context) error {
 		return err
 	}
 
+	fails := []string{"\nprojects failed to start:"}
+	succs := []string{"\nstarted projects:"}
+
+	defer func() {
+		message := ""
+		if len(fails) > 1 {
+			message += strings.Join(fails, "\n")
+		}
+		if len(succs) > 1 {
+			message += strings.Join(succs, "\n")
+		}
+		body, err := lark.Build(ctx, "Project Channel Monitoring", "INFO", message)
+		if err != nil {
+			return
+		}
+		_ = robot_notifier.Push(ctx, body)
+	}()
+
 	l = l.WithValues("total", len(projects))
 	for i := range projects {
 		v := &projects[i]
 		l := l.WithValues("prj", v.Name, "index", i)
 		ctx = types.WithProject(ctx, v)
 		if err = mqtt.Subscribe(ctx, v.Name); err != nil {
-			l.Warn(errors.Wrap(err, "channel create failed"))
+			err = errors.Errorf("%v: failed to subscribe mqtt %v", v.ProjectID, err)
+			fails = append(fails, err.Error())
+			l.Warn(err)
 			continue
 		}
-		l.Info("start subscribe")
-
 		if v.Public == datatypes.TRUE && jwt.WithAnonymousPublisherFn == nil {
 			acc, err := account.GetAccountByAccountID(ctx, v.AccountID)
 			if err != nil {
-				l.WithValues("account_id", v.AccountID).Error(errors.Wrap(err, "failed to get account info"))
+				err = errors.Errorf("%v: failed to get account %v %v", v.ProjectID, v.AccountID, err)
+				fails = append(fails, err.Error())
+				l.Error(err)
 				continue
 			}
 			ctx = types.WithAccount(ctx, acc)
 			if _, err = publisher.CreateAnonymousPublisher(ctx); err != nil {
+				err = errors.Errorf("%v: failed to create publisher %v", v.ProjectID, err)
+				fails = append(fails, err.Error())
 				l.Warn(errors.Wrap(err, "anonymous publisher create failed"))
 			}
 		}
+		succs = append(succs, v.ProjectID.String())
+		l.Info("start subscribe")
 	}
 	return nil
 }

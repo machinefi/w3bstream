@@ -15,6 +15,18 @@ var (
 	errFailedToGetImportsHandler = errors.New("failed to get imports handler")
 )
 
+func NewImportFunc(ns string, f interface{}) *ImportFuncInfo {
+	return &ImportFuncInfo{
+		Namespace: ns,
+		Func:      f,
+	}
+}
+
+type ImportFuncInfo struct {
+	Namespace string
+	Func      interface{}
+}
+
 func newHost(i types.Instance) (*host, error) {
 	imports := GetImportsHandler(i)
 	if imports == nil {
@@ -27,31 +39,31 @@ func newHost(i types.Instance) (*host, error) {
 	}, nil
 }
 
-func HostFunctions(i types.Instance) (map[string]interface{}, error) {
-	fns := make(map[string]interface{})
+func HostFunctions(i types.Instance) (map[string]*ImportFuncInfo, error) {
+	fns := make(map[string]*ImportFuncInfo)
 	h, err := newHost(i)
 	if err != nil {
 		return nil, err
 	}
 
-	fns["abort"] = h.Abort
-	fns["trace"] = h.Trace
-	fns["seed"] = h.Seed
-	fns["ws_log"] = h.Log
-	fns["ws_get_data"] = h.GetResourceData
-	fns["ws_set_data"] = h.SetResourceData
-	fns["ws_get_event_type"] = h.GetEventType
-	fns["ws_get_db"] = h.GetKVData
-	fns["ws_set_db"] = h.SetKVData
-	fns["ws_set_sql_db"] = h.ExecSQL
-	fns["ws_get_sql_db"] = h.QuerySQL
-	fns["ws_send_tx"] = h.SendTX
-	fns["ws_send_tx_with_operator"] = h.SendTXWithOperator
-	fns["ws_call_contract"] = h.CallContract
-	fns["ws_get_env"] = h.Env
-	fns["ws_send_mqtt_msg"] = h.PubMQTT
-	fns["ws_submit_metrics"] = h.SubmitMetrics
-	fns["ws_api_call"] = h.AsyncAPICall
+	fns["abort"] = NewImportFunc("env", h.Abort)
+	fns["trace"] = NewImportFunc("env", h.Trace)
+	fns["seed"] = NewImportFunc("env", h.Seed)
+	fns["ws_log"] = NewImportFunc("env", h.Log)
+	fns["ws_get_data"] = NewImportFunc("env", h.GetResourceData)
+	fns["ws_set_data"] = NewImportFunc("env", h.SetResourceData)
+	fns["ws_get_event_type"] = NewImportFunc("env", h.GetEventType)
+	fns["ws_get_db"] = NewImportFunc("env", h.GetKVData)
+	fns["ws_set_db"] = NewImportFunc("env", h.SetKVData)
+	fns["ws_set_sql_db"] = NewImportFunc("env", h.ExecSQL)
+	fns["ws_get_sql_db"] = NewImportFunc("env", h.QuerySQL)
+	fns["ws_send_tx"] = NewImportFunc("env", h.SendTX)
+	fns["ws_send_tx_with_operator"] = NewImportFunc("env", h.SendTXWithOperator)
+	fns["ws_call_contract"] = NewImportFunc("env", h.CallContract)
+	fns["ws_get_env"] = NewImportFunc("env", h.Env)
+	fns["ws_send_mqtt_msg"] = NewImportFunc("env", h.PubMQTT)
+	fns["ws_submit_metrics"] = NewImportFunc("stat", h.SubmitMetrics)
+	fns["ws_api_call"] = NewImportFunc("env", h.AsyncAPICall)
 
 	return fns, nil
 }

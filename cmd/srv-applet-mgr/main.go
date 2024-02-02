@@ -45,6 +45,9 @@ func main() {
 				kit.Run(apis.RootEvent, global.EventServer())
 			},
 			func() {
+				kit.Run(apis.RootDebug, global.DebugServer())
+			},
+			func() {
 				ctx, l := logr.Start(ctx, "main.InitProjects")
 				defer l.End()
 

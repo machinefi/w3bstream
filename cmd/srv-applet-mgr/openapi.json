@@ -2351,6 +2351,71 @@
         }
       }
     },
+    "/srv-applet-mgr/v0/debug/instance/{id}": {
+      "get": {
+        "tags": [
+          "apis/debug"
+        ],
+        "operationId": "GetInstance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                },
+                {
+                  "x-go-field-name": "ID",
+                  "x-tag-name": "id"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsInstanceState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/srv-applet-mgr/v0/debug/instances": {
+      "get": {
+        "tags": [
+          "apis/debug"
+        ],
+        "summary": "FetchInstances fetch instances states in memory",
+        "operationId": "FetchInstances",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsInstanceState"
+                  },
+                  "propertyNames": {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/srv-applet-mgr/v0/deploy/applet/{appletID}": {
       "get": {
         "tags": [

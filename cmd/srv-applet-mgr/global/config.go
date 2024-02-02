@@ -190,6 +190,16 @@ func EventServer() kit.Transport {
 	return ServerEvent.WithContextInjector(WithContext).WithName("srv-event")
 }
 
+func DebugServer() kit.Transport {
+	srv := &confhttp.Server{
+		Protocol: "http",
+		Addr:     "",
+		Port:     10001,
+		Spec:     "./openapi.json",
+	}
+	return srv.WithContextInjector(WithContext).WithName("srv-debug")
+}
+
 func Migrate() {
 	ctx, l := conflogger.NewSpanContext(context.Background(), "global.Migrate")
 	defer l.End()

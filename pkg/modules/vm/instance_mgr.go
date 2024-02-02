@@ -95,3 +95,12 @@ func GetConsumer(id types.SFID) wasm.Instance {
 	}
 	return i
 }
+
+func FetchInstances() map[types.SFID]enums.InstanceState {
+	ret := map[types.SFID]enums.InstanceState{}
+	instances.Range(func(k types.SFID, v wasm.Instance) bool {
+		ret[k] = v.State()
+		return true
+	})
+	return ret
+}

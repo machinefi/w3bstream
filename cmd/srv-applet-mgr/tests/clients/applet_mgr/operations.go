@@ -1231,6 +1231,32 @@ func (o *EthClient) Invoke(cli kit.Client, metas ...kit.Metadata) (*EthClientRsp
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
+type FetchInstances struct {
+}
+
+func (o *FetchInstances) Path() string {
+	return "/srv-applet-mgr/v0/debug/instances"
+}
+
+func (o *FetchInstances) Method() string {
+	return "GET"
+}
+
+func (o *FetchInstances) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.FetchInstances")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *FetchInstances) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*map[GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID]GithubComMachinefiW3BstreamPkgEnumsInstanceState, kit.Metadata, error) {
+	rsp := new(map[GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID]GithubComMachinefiW3BstreamPkgEnumsInstanceState)
+	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
+	return rsp, meta, err
+}
+
+func (o *FetchInstances) Invoke(cli kit.Client, metas ...kit.Metadata) (*map[GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID]GithubComMachinefiW3BstreamPkgEnumsInstanceState, kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
 type GetAccessKeyByName struct {
 	Name         string `in:"path" name:"name"`
 	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
@@ -1348,6 +1374,33 @@ func (o *GetDownloadResourceUrl) InvokeContext(ctx context.Context, cli kit.Clie
 }
 
 func (o *GetDownloadResourceUrl) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesResourceDownLoadResourceRsp, kit.Metadata, error) {
+	return o.InvokeContext(context.Background(), cli, metas...)
+}
+
+type GetInstance struct {
+	ID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"id"`
+}
+
+func (o *GetInstance) Path() string {
+	return "/srv-applet-mgr/v0/debug/instance/:id"
+}
+
+func (o *GetInstance) Method() string {
+	return "GET"
+}
+
+func (o *GetInstance) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
+	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.GetInstance")
+	return cli.Do(ctx, o, metas...)
+}
+
+func (o *GetInstance) InvokeContext(ctx context.Context, cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgEnumsInstanceState, kit.Metadata, error) {
+	rsp := new(GithubComMachinefiW3BstreamPkgEnumsInstanceState)
+	meta, err := cli.Do(ctx, o, metas...).Into(rsp)
+	return rsp, meta, err
+}
+
+func (o *GetInstance) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgEnumsInstanceState, kit.Metadata, error) {
 	return o.InvokeContext(context.Background(), cli, metas...)
 }
 
