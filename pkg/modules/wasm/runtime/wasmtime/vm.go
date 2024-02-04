@@ -31,13 +31,13 @@ func (vm *VM) Name() string { return "wasmtime" }
 
 func (vm *VM) Init() {
 	config := wasmtime.NewConfig()
-	config.SetConsumeFuel(true)
+	// config.SetConsumeFuel(true)
 	// config.SetEpochInterruption(true)
 	vm.engine = wasmtime.NewEngineWithConfig(config)
 	vm.store = wasmtime.NewStore(vm.engine)
-	if err := vm.store.AddFuel(vm._fuel); err != nil {
-		panic(err)
-	}
+	// if err := vm.store.AddFuel(vm._fuel); err != nil {
+	// 	panic(err)
+	// }
 }
 
 func (vm *VM) NewModule(code []byte) (types.Module, error) {

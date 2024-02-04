@@ -402,21 +402,21 @@ func (i *Instance) Call(name string, args ...interface{}) (interface{}, uint64, 
 		return nil, 0, errors.Wrap(ErrInvalidExportFunc, name)
 	}
 
-	before, fuelset := i.vm.store.FuelConsumed()
+	// before, fuelset := i.vm.store.FuelConsumed()
 
 	ret, err := f.Call(i.vm.store, args...)
 	if err != nil {
 		i.HandleError(err)
 	}
-	after, _ := i.vm.store.FuelConsumed()
-	consumed := after - before
-	slog.Info("check fuel after call "+name, "instance_id", i.vm.id, "before", before, "after", after, "consumed", consumed)
-	if fuelset {
-		if err := i.vm.store.AddFuel(consumed); err != nil {
-			slog.Error("failed to add fuel", "instance_id", i.vm.id, "err", err)
-		}
-	}
-	return ret, consumed, err
+	// after, _ := i.vm.store.FuelConsumed()
+	// consumed := after - before
+	// slog.Info("check fuel after call "+name, "instance_id", i.vm.id, "before", before, "after", after, "consumed", consumed)
+	// if fuelset {
+	// 	if err := i.vm.store.AddFuel(consumed); err != nil {
+	// 		slog.Error("failed to add fuel", "instance_id", i.vm.id, "err", err)
+	// 	}
+	// }
+	return ret, 0, err
 }
 
 func (i *Instance) HandleError(err error) {
