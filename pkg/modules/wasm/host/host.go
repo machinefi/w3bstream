@@ -248,7 +248,7 @@ func (h *host) ExecSQL(queryaddr, querysize int32) int32 {
 		h.error(errors.Wrap(err, "ExecSQL::GetMemory"), "addr", queryaddr, "size", querysize)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
 	}
-	h.info("ExecSQL", "query", query)
+	h.info("ExecSQL", "query", string(query))
 
 	if err = h.imports.ExecSQL(string(query)); err != nil {
 		h.error(err)
@@ -264,14 +264,14 @@ func (h *host) QuerySQL(queryaddr, querysize, retaddrptr, retsizeptr int32) int3
 		h.error(errors.Wrap(err, "QuerySQL::GetMemory"), "addr", queryaddr, "size", querysize)
 		return consts.RESULT__INVALID_MEM_ACCESS.Int32()
 	}
-	h.info("QuerySQL", "query", query)
+	h.info("QuerySQL", "query", string(query))
 
 	res, err := h.imports.QuerySQL(string(query))
 	if err != nil {
 		h.error(err, "query", string(query))
 		return consts.RESULT__IMPORT_HANDLE_FAILED.Int32()
 	}
-	h.info("QuerySQL", "result", res)
+	h.info("QuerySQL", "result", string(res))
 
 	if err = CopyHostDataToWasm(h.instance, res, retaddrptr, retsizeptr); err != nil {
 		h.error(errors.Wrap(err, "QuerySQL::CopyHostDataToWasm"), "addr", retaddrptr, "size", retsizeptr)
