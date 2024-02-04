@@ -64,13 +64,13 @@ func (a *ABIContext) OnEventReceived(entry string, typ string, data []byte) (int
 
 	res, fuel, err := a.Instance.Call(entry, int(rid))
 	if err != nil {
-		a.Imports.LogInternal(consts.LOG_LEVEL__ERROR, "[entry:%s] [fuel: %d] [err: %v]", entry, fuel, err)
+		a.Imports.LogInternal(consts.LOG_LEVEL__ERROR, err.Error(), "entry", entry, "fuel", fuel)
 	} else {
 		code, _ := res.(int32)
 		if code == 0 {
-			a.Imports.LogInternal(consts.LOG_LEVEL__INFO, "[entry:%s] [fuel: %d]", entry, fuel)
+			a.Imports.LogInternal(consts.LOG_LEVEL__INFO, "", "entry", entry, "fuel", fuel)
 		} else {
-			a.Imports.LogInternal(consts.LOG_LEVEL__ERROR, "[entry:%s] [fuel: %d] [code: %d]", entry, fuel, code)
+			a.Imports.LogInternal(consts.LOG_LEVEL__ERROR, "", "entry", entry, "fuel", fuel, "code", code)
 		}
 	}
 	return res, fuel, err

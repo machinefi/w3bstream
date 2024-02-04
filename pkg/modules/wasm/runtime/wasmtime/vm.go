@@ -7,7 +7,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/wasm/abi/types"
 )
 
-const MaxFuelInStore = 10240000
+const MaxFuelInStore = 1024 * 1024 * 1024
 
 // NewWasmtimeVM creates wasmtime vm
 func NewWasmtimeVM(id string) types.VM {
