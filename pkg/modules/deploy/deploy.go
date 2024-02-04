@@ -274,6 +274,7 @@ func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.In
 	defer l.End()
 
 	var (
+		d         = types.MustMgrDBExecutorFromContext(ctx)
 		idg       = confid.MustSFIDGeneratorFromContext(ctx)
 		forUpdate = false
 	)
@@ -285,7 +286,7 @@ func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.In
 		return nil, status.InvalidVMState.StatusErr().WithDesc(state.String())
 	}
 
-	err := sqlx.NewTasks(types.MustMgrDBExecutorFromContext(ctx)).With(
+	err := sqlx.NewTasks(d).With(
 		func(d sqlx.DBExecutor) error {
 			ins.AppletID = app.AppletID
 			if err := ins.FetchByAppletID(d); err != nil {
@@ -338,6 +339,7 @@ func UpsertByCode(ctx context.Context, r *CreateReq, code []byte, state enums.In
 			return nil
 		},
 		func(d sqlx.DBExecutor) error {
+			ctx := types.WithMgrDBExecutor(ctx, d)
 			if forUpdate {
 				_ = vm.DelInstance(ctx, ins.InstanceID)
 			}

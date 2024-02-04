@@ -8,7 +8,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/bytecodealliance/wasmtime-go/v8"
+	"github.com/bytecodealliance/wasmtime-go/v17"
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/modules/wasm/abi/proxy"

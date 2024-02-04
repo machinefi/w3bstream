@@ -1,7 +1,7 @@
 package wasmtime
 
 import (
-	"github.com/bytecodealliance/wasmtime-go/v8"
+	"github.com/bytecodealliance/wasmtime-go/v17"
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/modules/wasm/abi/types"
@@ -35,6 +35,7 @@ func (vm *VM) Init() {
 	// config.SetEpochInterruption(true)
 	vm.engine = wasmtime.NewEngineWithConfig(config)
 	vm.store = wasmtime.NewStore(vm.engine)
+	vm.store.SetWasi(wasmtime.NewWasiConfig())
 	// if err := vm.store.AddFuel(vm._fuel); err != nil {
 	// 	panic(err)
 	// }

@@ -3,7 +3,7 @@ package wasmtime
 import (
 	"reflect"
 
-	"github.com/bytecodealliance/wasmtime-go/v8"
+	"github.com/bytecodealliance/wasmtime-go/v17"
 	"github.com/pkg/errors"
 )
 

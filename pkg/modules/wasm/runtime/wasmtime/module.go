@@ -1,7 +1,7 @@
 package wasmtime
 
 import (
-	"github.com/bytecodealliance/wasmtime-go/v8"
+	"github.com/bytecodealliance/wasmtime-go/v17"
 
 	"github.com/machinefi/w3bstream/pkg/modules/wasm/abi/types"
 )
