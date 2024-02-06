@@ -452,7 +452,7 @@ func (ef *ExportFuncs) SendTX(chainID int32, offset, size, vmAddrPtr, vmSizePtr 
 	to := ret.Get("to").String()
 	value := ret.Get("value").String()
 	data := ret.Get("data").String()
-	ef.HostLog(conflog.InfoLevel, fmt.Sprintf("send tx: [to %s] [value %s] [data %s]", to, value, data))
+	ef.HostLog(conflog.InfoLevel, fmt.Sprintf("send tx: [to %s] [value %s] [data %s] [op %v] [prj: %v]", to, value, data, ef.opPool, ef.prj))
 	txHash, err := ef.cl.SendTX(ef.cf, uint64(chainID), "", to, value, data, ef.opPool, ef.prj)
 	if err != nil {
 		ef.HostLog(conflog.ErrorLevel, err)
