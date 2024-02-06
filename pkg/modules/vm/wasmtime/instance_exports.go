@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -436,7 +437,7 @@ func (ef *ExportFuncs) GetSQLDB(addr, size int32, vmAddrPtr, vmSizePtr int32) in
 }
 
 // TODO: make sendTX async, and add callback if possible
-func (ef *ExportFuncs) SendTX(chainID int32, offset, size, vmAddrPtr, vmSizePtr int32) int32 {
+func (ef *ExportFuncs) SendTX(chainID int32, offset, size, vmAddrPtr, vmSizePtr int32) (result int32) {
 	ef.HostLog(conflog.InfoLevel, fmt.Sprintf("offset %d size %d vmAddrPtr %d vmSizePtr %d", offset, size, vmAddrPtr, vmSizePtr))
 	if ef.cl == nil {
 		ef.HostLog(conflog.ErrorLevel, errors.New("eth client doesn't exist"))
@@ -453,6 +454,13 @@ func (ef *ExportFuncs) SendTX(chainID int32, offset, size, vmAddrPtr, vmSizePtr 
 	value := ret.Get("value").String()
 	data := ret.Get("data").String()
 	ef.HostLog(conflog.InfoLevel, fmt.Sprintf("send tx: [to %s] [value %s] [data %s] [op %v] [prj: %v]", to, value, data, ef.opPool, ef.prj))
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Printf("panic: %s; calltrace:%s\n", fmt.Sprint(err), string(debug.Stack()))
+			result = -1
+			return
+		}
+	}()
 	txHash, err := ef.cl.SendTX(ef.cf, uint64(chainID), "", to, value, data, ef.opPool, ef.prj)
 	if err != nil {
 		ef.HostLog(conflog.ErrorLevel, err)

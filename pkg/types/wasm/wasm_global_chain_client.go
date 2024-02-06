@@ -119,9 +119,6 @@ func (c *ChainClient) SendTX(conf *wsTypes.ChainConfig, chainID uint64, chainNam
 	if err != nil {
 		return "", err
 	}
-	if op == nil {
-		return "", errors.Errorf("failed to get op: %s", prj.AccountID)
-	}
 	resp, err := c.sendTX(conf, chainID, chainName, toStr, valueStr, dataStr, op)
 	return resp.Hash, err
 }
