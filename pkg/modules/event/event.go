@@ -258,6 +258,8 @@ func handle(ctx context.Context) int {
 		}
 
 		if err = v.UpdateByIDWithFVs(d, builder.FieldValues{
+			v.FieldStage():       v.Stage,
+			v.FieldHandledAt():   v.HandledAt,
 			v.FieldCompletedAt(): v.CompletedAt,
 			v.FieldError():       v.Error,
 			v.FieldResultCode():  v.ResultCode,
