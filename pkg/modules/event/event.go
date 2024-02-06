@@ -225,8 +225,16 @@ func handle(ctx context.Context) int {
 
 	for _, v := range evs {
 		v.HandledAt = time.Now().UnixMilli()
-
 		v.Stage = enums.EVENT_STAGE__HANDLED
+
+		if err = v.UpdateByIDWithFVs(d, builder.FieldValues{
+			v.FieldStage():     v.Stage,
+			v.FieldHandledAt(): v.HandledAt,
+		}); err != nil {
+			l.WithValues("evt", v.EventID).Error(err)
+			continue
+		}
+
 		ins := vm.GetConsumer(v.InstanceID)
 		if ins == nil {
 			v.CompletedAt = time.Now().UTC().UnixMilli()
@@ -250,8 +258,6 @@ func handle(ctx context.Context) int {
 		}
 
 		if err = v.UpdateByIDWithFVs(d, builder.FieldValues{
-			v.FieldStage():       v.Stage,
-			v.FieldHandledAt():   v.HandledAt,
 			v.FieldCompletedAt(): v.CompletedAt,
 			v.FieldError():       v.Error,
 			v.FieldResultCode():  v.ResultCode,
