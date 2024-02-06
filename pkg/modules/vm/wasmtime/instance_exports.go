@@ -3,6 +3,7 @@ package wasmtime
 import (
 	"context"
 	"encoding/binary"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -11,6 +12,7 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+	"unicode/utf8"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -613,6 +615,9 @@ func (ef *ExportFuncs) StatSubmit(vmAddrPtr, vmSizePtr int32) int32 {
 }
 
 func subStringWithLength(str string, length int) string {
+	if !utf8.ValidString(str) {
+		str = hex.EncodeToString([]byte(str))
+	}
 	if length < 0 {
 		return ""
 	}
