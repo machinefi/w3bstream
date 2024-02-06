@@ -22,6 +22,7 @@ import (
 	confmqtt "github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
+	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	optypes "github.com/machinefi/w3bstream/pkg/modules/operator/pool/types"
@@ -141,6 +142,7 @@ func (ef *ExportFuncs) _log(level conflog.Level, src string, msg any) {
 	default:
 		l.Trace(msg.(string))
 	}
+	_msg := subStringWithLength(fmt.Sprint(msg), enums.WasmLogMaxLength)
 	ef.logs = append(ef.logs, &models.WasmLog{
 		WasmLogInfo: models.WasmLogInfo{
 			ProjectName: ef.prj.Name,
@@ -150,7 +152,7 @@ func (ef *ExportFuncs) _log(level conflog.Level, src string, msg any) {
 			Src:         src,
 			Level:       level.String(),
 			LogTime:     time.Now().UnixNano(),
-			Msg:         fmt.Sprint(msg),
+			Msg:         _msg,
 		},
 		OperationTimes: datatypes.OperationTimes{
 			CreatedAt: base.Timestamp{Time: time.Now()},
@@ -188,7 +190,7 @@ func (ef *ExportFuncs) LeaveContext(ctx context.Context, ctxID string, rid uint3
 		}
 		err := models.BatchCreateWasmLogs(d, ef.logs...)
 		if err != nil {
-			ef.WasmLog(conflog.WarnLevel, err)
+			ef.HostLog(conflog.WarnLevel, err)
 		}
 		ef.logs = ef.logs[:0]
 		ef.evs.Remove(rid)
@@ -445,16 +447,23 @@ func (ef *ExportFuncs) SendTX(chainID int32, offset, size, vmAddrPtr, vmSizePtr 
 		ef.HostLog(conflog.ErrorLevel, err)
 		return wasm.ResultStatusCode_Failed
 	}
+	ef.HostLog(conflog.InfoLevel, fmt.Sprintf("input data: %s", string(buf)))
 	ret := gjson.Parse(string(buf))
-	txHash, err := ef.cl.SendTX(ef.cf, uint64(chainID), "", ret.Get("to").String(), ret.Get("value").String(), ret.Get("data").String(), ef.opPool, ef.prj)
+	to := ret.Get("to").String()
+	value := ret.Get("value").String()
+	data := ret.Get("data").String()
+	ef.HostLog(conflog.InfoLevel, fmt.Sprintf("send tx: [to %s] [value %s] [data %s]", to, value, data))
+	txHash, err := ef.cl.SendTX(ef.cf, uint64(chainID), "", to, value, data, ef.opPool, ef.prj)
 	if err != nil {
 		ef.HostLog(conflog.ErrorLevel, err)
 		return wasm.ResultStatusCode_Failed
 	}
+	ef.HostLog(conflog.InfoLevel, fmt.Sprintf("send tx [hash %s]", txHash))
 	if err := ef.rt.Copy([]byte(txHash), vmAddrPtr, vmSizePtr); err != nil {
 		ef.HostLog(conflog.ErrorLevel, err)
 		return wasm.ResultStatusCode_Failed
 	}
+	ef.HostLog(conflog.InfoLevel, "send tx done")
 	return int32(wasm.ResultStatusCode_OK)
 }
 
@@ -593,4 +602,17 @@ func (ef *ExportFuncs) StatSubmit(vmAddrPtr, vmSizePtr int32) int32 {
 		return wasm.ResultStatusCode_Failed
 	}
 	return int32(wasm.ResultStatusCode_OK)
+}
+
+func subStringWithLength(str string, length int) string {
+	if length < 0 {
+		return ""
+	}
+	rs := []rune(str)
+	strLen := len(rs)
+
+	if length > strLen {
+		return str
+	}
+	return string(rs[0:length])
 }

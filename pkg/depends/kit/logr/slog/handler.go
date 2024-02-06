@@ -2,7 +2,6 @@ package slog
 
 import (
 	"context"
-
 	"log/slog"
 )
 

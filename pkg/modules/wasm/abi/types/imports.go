@@ -2,12 +2,12 @@ package types
 
 import (
 	"context"
+	"log/slog"
 	"math/rand"
 	"os"
 
 	"github.com/pkg/errors"
 	"go.uber.org/atomic"
-	"log/slog"
 
 	"github.com/machinefi/w3bstream/pkg/modules/wasm/consts"
 )

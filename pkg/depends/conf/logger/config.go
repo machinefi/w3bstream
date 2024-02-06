@@ -1,9 +1,8 @@
 package logger
 
 import (
-	"os"
-
 	"log/slog"
+	"os"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/consts"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"

@@ -3,9 +3,8 @@ package slog
 import (
 	"context"
 	"fmt"
-	"strings"
-
 	"log/slog"
+	"strings"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 )

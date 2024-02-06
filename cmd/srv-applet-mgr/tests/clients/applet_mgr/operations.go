@@ -11,20 +11,13 @@ import (
 )
 
 type BatchRemoveApplet struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AppletIDs []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"appletID,omitempty"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	LNameLike string `in:"query" name:"lName,omitempty"`
-	//
-	NameLike string `in:"query" name:"name,omitempty"`
-	//
-	Names []string `in:"query" name:"names,omitempty"`
+	ProjectName  string                                               `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                               `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AppletIDs    []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"appletID,omitempty"`
+	AuthInQuery  string                                               `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	LNameLike    string                                               `in:"query" name:"lName,omitempty"`
+	NameLike     string                                               `in:"query" name:"name,omitempty"`
+	Names        []string                                             `in:"query" name:"names,omitempty"`
 }
 
 func (o *BatchRemoveApplet) Path() string {
@@ -50,18 +43,12 @@ func (o *BatchRemoveApplet) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.M
 }
 
 type BatchRemoveInstance struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AppletIDs []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"appletID,omitempty"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	InstanceIDs []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"instanceID,omitempty"`
-	//
-	States []GithubComMachinefiW3BstreamPkgEnumsInstanceState `in:"query" name:"state,omitempty"`
+	ProjectName  string                                               `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                               `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AppletIDs    []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"appletID,omitempty"`
+	AuthInQuery  string                                               `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	InstanceIDs  []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"instanceID,omitempty"`
+	States       []GithubComMachinefiW3BstreamPkgEnumsInstanceState   `in:"query" name:"state,omitempty"`
 }
 
 func (o *BatchRemoveInstance) Path() string {
@@ -87,22 +74,14 @@ func (o *BatchRemoveInstance) Invoke(cli kit.Client, metas ...kit.Metadata) (kit
 }
 
 type BatchRemovePublisher struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	Keys []string `in:"query" name:"key,omitempty"`
-	//
-	LNameLike string `in:"query" name:"lname,omitempty"`
-	//
-	NameLike string `in:"query" name:"name,omitempty"`
-	//
+	ProjectName  string                                               `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                               `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                               `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	Keys         []string                                             `in:"query" name:"key,omitempty"`
+	LNameLike    string                                               `in:"query" name:"lname,omitempty"`
+	NameLike     string                                               `in:"query" name:"name,omitempty"`
 	PublisherIDs []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"publisherIDs,omitempty"`
-	//
-	RNameLike string `in:"query" name:"rname,omitempty"`
+	RNameLike    string                                               `in:"query" name:"rname,omitempty"`
 }
 
 func (o *BatchRemovePublisher) Path() string {
@@ -128,20 +107,13 @@ func (o *BatchRemovePublisher) Invoke(cli kit.Client, metas ...kit.Metadata) (ki
 }
 
 type BatchRemoveStrategy struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AppletIDs []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"appletID,omitempty"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	EventTypes []string `in:"query" name:"eventType,omitempty"`
-	//
-	Handlers []string `in:"query" name:"handler,omitempty"`
-	//
-	StrategyIDs []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"strategyID,omitempty"`
+	ProjectName  string                                               `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                               `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AppletIDs    []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"appletID,omitempty"`
+	AuthInQuery  string                                               `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	EventTypes   []string                                             `in:"query" name:"eventType,omitempty"`
+	Handlers     []string                                             `in:"query" name:"handler,omitempty"`
+	StrategyIDs  []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"strategyID,omitempty"`
 }
 
 func (o *BatchRemoveStrategy) Path() string {
@@ -167,14 +139,10 @@ func (o *BatchRemoveStrategy) Invoke(cli kit.Client, metas ...kit.Metadata) (kit
 }
 
 type BatchRemoveTrafficLimit struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	ApiType GithubComMachinefiW3BstreamPkgEnumsTrafficLimitType `in:"query" name:"apiType,omitempty"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	ProjectName  string                                              `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                              `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	ApiType      GithubComMachinefiW3BstreamPkgEnumsTrafficLimitType `in:"query" name:"apiType,omitempty"`
+	AuthInQuery  string                                              `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *BatchRemoveTrafficLimit) Path() string {
@@ -226,15 +194,10 @@ func (o *ChainConfig) Invoke(cli kit.Client, metas ...kit.Metadata) (*ChainConfi
 }
 
 type ControlChainHeight struct {
-	//
-	Cmd GithubComMachinefiW3BstreamPkgEnumsMonitorCmd `in:"path" name:"cmd"`
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
+	Cmd                   GithubComMachinefiW3BstreamPkgEnumsMonitorCmd                        `in:"path" name:"cmd"`
+	ProjectName           string                                                               `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader          string                                                               `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery           string                                                               `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 	BatchUpdateMonitorReq GithubComMachinefiW3BstreamPkgModulesBlockchainBatchUpdateMonitorReq `in:"body"`
 }
 
@@ -261,15 +224,10 @@ func (o *ControlChainHeight) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.
 }
 
 type ControlChainTx struct {
-	//
-	Cmd GithubComMachinefiW3BstreamPkgEnumsMonitorCmd `in:"path" name:"cmd"`
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
+	Cmd                   GithubComMachinefiW3BstreamPkgEnumsMonitorCmd                        `in:"path" name:"cmd"`
+	ProjectName           string                                                               `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader          string                                                               `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery           string                                                               `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 	BatchUpdateMonitorReq GithubComMachinefiW3BstreamPkgModulesBlockchainBatchUpdateMonitorReq `in:"body"`
 }
 
@@ -296,15 +254,10 @@ func (o *ControlChainTx) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Meta
 }
 
 type ControlContractLog struct {
-	//
-	Cmd GithubComMachinefiW3BstreamPkgEnumsMonitorCmd `in:"path" name:"cmd"`
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
+	Cmd                   GithubComMachinefiW3BstreamPkgEnumsMonitorCmd                        `in:"path" name:"cmd"`
+	ProjectName           string                                                               `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader          string                                                               `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery           string                                                               `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 	BatchUpdateMonitorReq GithubComMachinefiW3BstreamPkgModulesBlockchainBatchUpdateMonitorReq `in:"body"`
 }
 
@@ -331,14 +284,10 @@ func (o *ControlContractLog) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.
 }
 
 type ControlInstance struct {
-	//
-	Cmd GithubComMachinefiW3BstreamPkgEnumsDeployCmd `in:"path" name:"cmd"`
-	//
-	InstanceID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"instanceID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	Cmd          GithubComMachinefiW3BstreamPkgEnumsDeployCmd       `in:"path" name:"cmd"`
+	InstanceID   GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"instanceID"`
+	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *ControlInstance) Path() string {
@@ -364,11 +313,8 @@ func (o *ControlInstance) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Met
 }
 
 type CreateAccountAccessKey struct {
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
+	AuthInHeader              string                                                      `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery               string                                                      `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 	CreateAccountAccessKeyReq GithubComMachinefiW3BstreamPkgModulesAccessKeyCreateReqBase `in:"body"`
 }
 
@@ -406,7 +352,6 @@ func (o *CreateAccountAccessKey) Invoke(cli kit.Client, metas ...kit.Metadata) (
 }
 
 type CreateAccountByUsernameAndPassword struct {
-	//
 	CreateAccountByUsernameReq GithubComMachinefiW3BstreamPkgModulesAccountCreateAccountByUsernameReq `in:"body"`
 }
 
@@ -441,14 +386,10 @@ func (o *CreateAccountByUsernameAndPassword) Invoke(cli kit.Client, metas ...kit
 }
 
 type CreateAndStartInstance struct {
-	//
-	AppletID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"appletID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	CreateReq GithubComMachinefiW3BstreamPkgModulesDeployCreateReq `in:"body"`
+	AppletID     GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID   `in:"path" name:"appletID"`
+	AuthInHeader string                                               `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                               `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	CreateReq    GithubComMachinefiW3BstreamPkgModulesDeployCreateReq `in:"body"`
 }
 
 func (o *CreateAndStartInstance) Path() string {
@@ -500,12 +441,9 @@ func (o *CreateAndStartInstance) Invoke(cli kit.Client, metas ...kit.Metadata) (
 }
 
 type CreateAnonymousPublisher struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
+	ProjectName  string `in:"path" name:"projectName" validate:"@projectName"`
 	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *CreateAnonymousPublisher) Path() string {
@@ -548,14 +486,10 @@ func (o *CreateAnonymousPublisher) Invoke(cli kit.Client, metas ...kit.Metadata)
 }
 
 type CreateApplet struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	CreateReq GithubComMachinefiW3BstreamPkgModulesAppletCreateReq `in:"body" mime:"multipart"`
+	ProjectName  string                                               `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                               `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                               `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	CreateReq    GithubComMachinefiW3BstreamPkgModulesAppletCreateReq `in:"body" mime:"multipart"`
 }
 
 func (o *CreateApplet) Path() string {
@@ -612,13 +546,9 @@ func (o *CreateApplet) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubCom
 }
 
 type CreateChainHeight struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
+	ProjectName          string                                                              `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader         string                                                              `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery          string                                                              `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 	CreateChainHeightReq GithubComMachinefiW3BstreamPkgModulesBlockchainCreateChainHeightReq `in:"body"`
 }
 
@@ -661,13 +591,9 @@ func (o *CreateChainHeight) Invoke(cli kit.Client, metas ...kit.Metadata) (*Gith
 }
 
 type CreateChainTx struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
+	ProjectName      string                                                          `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader     string                                                          `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery      string                                                          `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 	CreateChainTxReq GithubComMachinefiW3BstreamPkgModulesBlockchainCreateChainTxReq `in:"body"`
 }
 
@@ -710,13 +636,9 @@ func (o *CreateChainTx) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubCo
 }
 
 type CreateContractLog struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
+	ProjectName          string                                                              `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader         string                                                              `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery          string                                                              `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 	CreateContractLogReq GithubComMachinefiW3BstreamPkgModulesBlockchainCreateContractLogReq `in:"body"`
 }
 
@@ -759,14 +681,10 @@ func (o *CreateContractLog) Invoke(cli kit.Client, metas ...kit.Metadata) (*Gith
 }
 
 type CreateCronJob struct {
-	//
-	ProjectID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"projectID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	CreateReq GithubComMachinefiW3BstreamPkgModulesCronjobCreateReq `in:"body"`
+	ProjectID    GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID    `in:"path" name:"projectID"`
+	AuthInHeader string                                                `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                                `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	CreateReq    GithubComMachinefiW3BstreamPkgModulesCronjobCreateReq `in:"body"`
 }
 
 func (o *CreateCronJob) Path() string {
@@ -805,12 +723,9 @@ func (o *CreateCronJob) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubCo
 }
 
 type CreateOperator struct {
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	CreateReq GithubComMachinefiW3BstreamPkgModulesOperatorCreateReq `in:"body"`
+	AuthInHeader string                                                 `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                                 `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	CreateReq    GithubComMachinefiW3BstreamPkgModulesOperatorCreateReq `in:"body"`
 }
 
 func (o *CreateOperator) Path() string {
@@ -847,14 +762,10 @@ func (o *CreateOperator) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubC
 }
 
 type CreateOrUpdateProjectEnv struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	Env GithubComMachinefiW3BstreamPkgTypesWasmEnv `in:"body"`
+	ProjectName  string                                     `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                     `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                     `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	Env          GithubComMachinefiW3BstreamPkgTypesWasmEnv `in:"body"`
 }
 
 func (o *CreateOrUpdateProjectEnv) Path() string {
@@ -899,14 +810,10 @@ func (o *CreateOrUpdateProjectEnv) Invoke(cli kit.Client, metas ...kit.Metadata)
 }
 
 type CreateOrUpdateProjectFlow struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	Flow GithubComMachinefiW3BstreamPkgTypesWasmFlow `in:"body"`
+	ProjectName  string                                      `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                      `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                      `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	Flow         GithubComMachinefiW3BstreamPkgTypesWasmFlow `in:"body"`
 }
 
 func (o *CreateOrUpdateProjectFlow) Path() string {
@@ -951,12 +858,9 @@ func (o *CreateOrUpdateProjectFlow) Invoke(cli kit.Client, metas ...kit.Metadata
 }
 
 type CreateProject struct {
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	CreateReq GithubComMachinefiW3BstreamPkgModulesProjectCreateReq `in:"body"`
+	AuthInHeader string                                                `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                                `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	CreateReq    GithubComMachinefiW3BstreamPkgModulesProjectCreateReq `in:"body"`
 }
 
 func (o *CreateProject) Path() string {
@@ -1006,14 +910,10 @@ func (o *CreateProject) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubCo
 }
 
 type CreateProjectOperator struct {
-	//
-	OperatorID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"operatorID"`
-	//
-	ProjectID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"projectID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	OperatorID   GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"operatorID"`
+	ProjectID    GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"projectID"`
+	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *CreateProjectOperator) Path() string {
@@ -1053,14 +953,10 @@ func (o *CreateProjectOperator) Invoke(cli kit.Client, metas ...kit.Metadata) (*
 }
 
 type CreateProjectSchema struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	Database GithubComMachinefiW3BstreamPkgTypesWasmDatabase `in:"body"`
+	ProjectName  string                                          `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                          `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                          `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	Database     GithubComMachinefiW3BstreamPkgTypesWasmDatabase `in:"body"`
 }
 
 func (o *CreateProjectSchema) Path() string {
@@ -1103,14 +999,10 @@ func (o *CreateProjectSchema) Invoke(cli kit.Client, metas ...kit.Metadata) (*Gi
 }
 
 type CreatePublisher struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	CreateReq GithubComMachinefiW3BstreamPkgModulesPublisherCreateReq `in:"body"`
+	ProjectName  string                                                  `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                                  `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                                  `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	CreateReq    GithubComMachinefiW3BstreamPkgModulesPublisherCreateReq `in:"body"`
 }
 
 func (o *CreatePublisher) Path() string {
@@ -1153,14 +1045,10 @@ func (o *CreatePublisher) Invoke(cli kit.Client, metas ...kit.Metadata) (*Github
 }
 
 type CreateStrategy struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	CreateReq GithubComMachinefiW3BstreamPkgModulesStrategyCreateReq `in:"body"`
+	ProjectName  string                                                 `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                                 `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                                 `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	CreateReq    GithubComMachinefiW3BstreamPkgModulesStrategyCreateReq `in:"body"`
 }
 
 func (o *CreateStrategy) Path() string {
@@ -1203,14 +1091,10 @@ func (o *CreateStrategy) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubC
 }
 
 type CreateTrafficLimit struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	CreateReq GithubComMachinefiW3BstreamPkgModulesTrafficlimitCreateReq `in:"body"`
+	ProjectName  string                                                     `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                                     `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                                     `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	CreateReq    GithubComMachinefiW3BstreamPkgModulesTrafficlimitCreateReq `in:"body"`
 }
 
 func (o *CreateTrafficLimit) Path() string {
@@ -1253,12 +1137,9 @@ func (o *CreateTrafficLimit) Invoke(cli kit.Client, metas ...kit.Metadata) (*Git
 }
 
 type DeleteAccountAccessKeyByName struct {
-	//
-	Name string `in:"path" name:"name"`
-	//
+	Name         string `in:"path" name:"name"`
 	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *DeleteAccountAccessKeyByName) Path() string {
@@ -1284,12 +1165,9 @@ func (o *DeleteAccountAccessKeyByName) Invoke(cli kit.Client, metas ...kit.Metad
 }
 
 type DownloadResource struct {
-	//
-	ResourceID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"resourceID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	ResourceID   GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"resourceID"`
+	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *DownloadResource) Path() string {
@@ -1380,12 +1258,9 @@ func (o *FetchInstances) Invoke(cli kit.Client, metas ...kit.Metadata) (*map[Git
 }
 
 type GetAccessKeyByName struct {
-	//
-	Name string `in:"path" name:"name"`
-	//
+	Name         string `in:"path" name:"name"`
 	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *GetAccessKeyByName) Path() string {
@@ -1421,12 +1296,9 @@ func (o *GetAccessKeyByName) Invoke(cli kit.Client, metas ...kit.Metadata) (*Git
 }
 
 type GetApplet struct {
-	//
-	AppletID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"appletID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	AppletID     GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"appletID"`
+	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *GetApplet) Path() string {
@@ -1465,12 +1337,9 @@ func (o *GetApplet) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMac
 }
 
 type GetDownloadResourceUrl struct {
-	//
-	ResourceID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"resourceID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	ResourceID   GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"resourceID"`
+	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *GetDownloadResourceUrl) Path() string {
@@ -1509,7 +1378,6 @@ func (o *GetDownloadResourceUrl) Invoke(cli kit.Client, metas ...kit.Metadata) (
 }
 
 type GetInstance struct {
-	//
 	ID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"id"`
 }
 
@@ -1537,12 +1405,9 @@ func (o *GetInstance) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComM
 }
 
 type GetInstanceByAppletID struct {
-	//
-	AppletID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"appletID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	AppletID     GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"appletID"`
+	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *GetInstanceByAppletID) Path() string {
@@ -1581,12 +1446,9 @@ func (o *GetInstanceByAppletID) Invoke(cli kit.Client, metas ...kit.Metadata) (*
 }
 
 type GetInstanceByInstanceID struct {
-	//
-	InstanceID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"instanceID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	InstanceID   GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"instanceID"`
+	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *GetInstanceByInstanceID) Path() string {
@@ -1626,12 +1488,10 @@ func (o *GetInstanceByInstanceID) Invoke(cli kit.Client, metas ...kit.Metadata) 
 }
 
 type GetOperatorAddr struct {
-	//
 	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
 	// account operator name
 	AccountOperatorName string `in:"query" name:"accountOperatorName,omitempty"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery         string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *GetOperatorAddr) Path() string {
@@ -1667,12 +1527,9 @@ func (o *GetOperatorAddr) Invoke(cli kit.Client, metas ...kit.Metadata) (*string
 }
 
 type GetProject struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
+	ProjectName  string `in:"path" name:"projectName" validate:"@projectName"`
 	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *GetProject) Path() string {
@@ -1713,12 +1570,9 @@ func (o *GetProject) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMa
 }
 
 type GetProjectEnv struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
+	ProjectName  string `in:"path" name:"projectName" validate:"@projectName"`
 	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *GetProjectEnv) Path() string {
@@ -1761,12 +1615,9 @@ func (o *GetProjectEnv) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubCo
 }
 
 type GetProjectFlow struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
+	ProjectName  string `in:"path" name:"projectName" validate:"@projectName"`
 	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *GetProjectFlow) Path() string {
@@ -1809,12 +1660,9 @@ func (o *GetProjectFlow) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubC
 }
 
 type GetProjectOperator struct {
-	//
-	ProjectID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"projectID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	ProjectID    GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"projectID"`
+	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *GetProjectOperator) Path() string {
@@ -1853,12 +1701,9 @@ func (o *GetProjectOperator) Invoke(cli kit.Client, metas ...kit.Metadata) (*Git
 }
 
 type GetProjectSchema struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
+	ProjectName  string `in:"path" name:"projectName" validate:"@projectName"`
 	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *GetProjectSchema) Path() string {
@@ -1901,12 +1746,9 @@ func (o *GetProjectSchema) Invoke(cli kit.Client, metas ...kit.Metadata) (*Githu
 }
 
 type GetPublisher struct {
-	//
-	PublisherID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"publisherID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	PublisherID  GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"publisherID"`
+	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *GetPublisher) Path() string {
@@ -1944,12 +1786,9 @@ func (o *GetPublisher) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubCom
 }
 
 type GetStrategy struct {
-	//
-	StrategyID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"strategyID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	StrategyID   GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"strategyID"`
+	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *GetStrategy) Path() string {
@@ -1987,12 +1826,9 @@ func (o *GetStrategy) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComM
 }
 
 type GetTrafficLimit struct {
-	//
 	TrafficLimitID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"trafficLimitID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	AuthInHeader   string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery    string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *GetTrafficLimit) Path() string {
@@ -2032,11 +1868,9 @@ func (o *GetTrafficLimit) Invoke(cli kit.Client, metas ...kit.Metadata) (*Github
 
 type HandleEvent struct {
 	// Channel message channel named (intact project name)
-	Channel string `in:"path" name:"channel"`
-	//
+	Channel      string `in:"path" name:"channel"`
 	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 	// EventID unique id for tracing event under channel
 	EventID string `in:"query" name:"eventID,omitempty"`
 	// EventType used for filter strategies created in w3b before
@@ -2089,10 +1923,8 @@ func (o *HandleEvent) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComM
 }
 
 type ListAccessGroupMetas struct {
-	//
 	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *ListAccessGroupMetas) Path() string {
@@ -2126,24 +1958,15 @@ func (o *ListAccessGroupMetas) Invoke(cli kit.Client, metas ...kit.Metadata) (*[
 }
 
 type ListAccountAccessKey struct {
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	ExpiredAtBegin GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp `in:"query" name:"expiredAtBegin,omitempty"`
-	//
-	ExpiredAtEnd GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp `in:"query" name:"expiredAtEnd,omitempty"`
-	//
-	IdentityIDs GithubComMachinefiW3BstreamPkgDependsBaseTypesSFIDs `in:"query" name:"identityID,omitempty"`
-	//
-	IdentityTypes []GithubComMachinefiW3BstreamPkgEnumsAccessKeyIdentityType `in:"query" name:"identityType,omitempty"`
-	//
-	Names []string `in:"query" name:"name,omitempty"`
-	//
-	Offset int64 `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
-	//
-	Size int64 `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
+	AuthInHeader   string                                                     `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery    string                                                     `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	ExpiredAtBegin GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp    `in:"query" name:"expiredAtBegin,omitempty"`
+	ExpiredAtEnd   GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp    `in:"query" name:"expiredAtEnd,omitempty"`
+	IdentityIDs    GithubComMachinefiW3BstreamPkgDependsBaseTypesSFIDs        `in:"query" name:"identityID,omitempty"`
+	IdentityTypes  []GithubComMachinefiW3BstreamPkgEnumsAccessKeyIdentityType `in:"query" name:"identityType,omitempty"`
+	Names          []string                                                   `in:"query" name:"name,omitempty"`
+	Offset         int64                                                      `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
+	Size           int64                                                      `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
 }
 
 func (o *ListAccountAccessKey) Path() string {
@@ -2178,24 +2001,15 @@ func (o *ListAccountAccessKey) Invoke(cli kit.Client, metas ...kit.Metadata) (*G
 }
 
 type ListApplet struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AppletIDs []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"appletID,omitempty"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	LNameLike string `in:"query" name:"lName,omitempty"`
-	//
-	NameLike string `in:"query" name:"name,omitempty"`
-	//
-	Names []string `in:"query" name:"names,omitempty"`
-	//
-	Offset int64 `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
-	//
-	Size int64 `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
+	ProjectName  string                                               `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                               `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AppletIDs    []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"appletID,omitempty"`
+	AuthInQuery  string                                               `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	LNameLike    string                                               `in:"query" name:"lName,omitempty"`
+	NameLike     string                                               `in:"query" name:"name,omitempty"`
+	Names        []string                                             `in:"query" name:"names,omitempty"`
+	Offset       int64                                                `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
+	Size         int64                                                `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
 }
 
 func (o *ListApplet) Path() string {
@@ -2235,20 +2049,13 @@ func (o *ListApplet) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComMa
 }
 
 type ListCronJob struct {
-	//
-	ProjectID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"projectID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	CronJobIDs []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"cronJobID,omitempty"`
-	//
-	EventTypes []string `in:"query" name:"eventType,omitempty"`
-	//
-	Offset int64 `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
-	//
-	Size int64 `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
+	ProjectID    GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID   `in:"path" name:"projectID"`
+	AuthInHeader string                                               `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                               `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	CronJobIDs   []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"cronJobID,omitempty"`
+	EventTypes   []string                                             `in:"query" name:"eventType,omitempty"`
+	Offset       int64                                                `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
+	Size         int64                                                `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
 }
 
 func (o *ListCronJob) Path() string {
@@ -2285,14 +2092,10 @@ func (o *ListCronJob) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComM
 }
 
 type ListOperator struct {
-	//
 	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	Offset int64 `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
-	//
-	Size int64 `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
+	AuthInQuery  string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	Offset       int64  `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
+	Size         int64  `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
 }
 
 func (o *ListOperator) Path() string {
@@ -2327,20 +2130,13 @@ func (o *ListOperator) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubCom
 }
 
 type ListProject struct {
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	Names []string `in:"query" name:"name,omitempty"`
-	//
-	Offset int64 `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
-	//
-	ProjectIDs []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"projectID,omitempty"`
-	//
-	Size int64 `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
-	//
-	Versions []string `in:"query" name:"version,omitempty"`
+	AuthInHeader string                                               `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                               `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	Names        []string                                             `in:"query" name:"name,omitempty"`
+	Offset       int64                                                `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
+	ProjectIDs   []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"projectID,omitempty"`
+	Size         int64                                                `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
+	Versions     []string                                             `in:"query" name:"version,omitempty"`
 }
 
 func (o *ListProject) Path() string {
@@ -2375,20 +2171,13 @@ func (o *ListProject) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubComM
 }
 
 type ListProjectDetail struct {
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	Names []string `in:"query" name:"name,omitempty"`
-	//
-	Offset int64 `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
-	//
-	ProjectIDs []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"projectID,omitempty"`
-	//
-	Size int64 `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
-	//
-	Versions []string `in:"query" name:"version,omitempty"`
+	AuthInHeader string                                               `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                               `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	Names        []string                                             `in:"query" name:"name,omitempty"`
+	Offset       int64                                                `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
+	ProjectIDs   []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"projectID,omitempty"`
+	Size         int64                                                `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
+	Versions     []string                                             `in:"query" name:"version,omitempty"`
 }
 
 func (o *ListProjectDetail) Path() string {
@@ -2425,26 +2214,16 @@ func (o *ListProjectDetail) Invoke(cli kit.Client, metas ...kit.Metadata) (*Gith
 }
 
 type ListPublisher struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	Keys []string `in:"query" name:"key,omitempty"`
-	//
-	LNameLike string `in:"query" name:"lname,omitempty"`
-	//
-	NameLike string `in:"query" name:"name,omitempty"`
-	//
-	Offset int64 `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
-	//
+	ProjectName  string                                               `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                               `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                               `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	Keys         []string                                             `in:"query" name:"key,omitempty"`
+	LNameLike    string                                               `in:"query" name:"lname,omitempty"`
+	NameLike     string                                               `in:"query" name:"name,omitempty"`
+	Offset       int64                                                `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
 	PublisherIDs []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"publisherIDs,omitempty"`
-	//
-	RNameLike string `in:"query" name:"rname,omitempty"`
-	//
-	Size int64 `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
+	RNameLike    string                                               `in:"query" name:"rname,omitempty"`
+	Size         int64                                                `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
 }
 
 func (o *ListPublisher) Path() string {
@@ -2484,29 +2263,17 @@ func (o *ListPublisher) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubCo
 }
 
 type ListResources struct {
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	ExpireAfter GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp `in:"query" name:"expireAfter,omitempty"`
-	//
-	ExpireBefore GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp `in:"query" name:"expireBefore,omitempty"`
-	//
-	Filenames []string `in:"query" name:"filename,omitempty"`
-	//
-	FilenameLike string `in:"query" name:"filenameLike,omitempty"`
-	//
-	Md5 string `in:"query" name:"md5,omitempty"`
-	//
-	Offset int64 `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
-	//
-	ResourceIDs []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"resourceID,omitempty"`
-	//
-	Size int64 `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
-	//
-	UploadedAfter GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp `in:"query" name:"uploadedAfter,omitempty"`
-	//
+	AuthInHeader   string                                                  `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery    string                                                  `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	ExpireAfter    GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp `in:"query" name:"expireAfter,omitempty"`
+	ExpireBefore   GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp `in:"query" name:"expireBefore,omitempty"`
+	Filenames      []string                                                `in:"query" name:"filename,omitempty"`
+	FilenameLike   string                                                  `in:"query" name:"filenameLike,omitempty"`
+	Md5            string                                                  `in:"query" name:"md5,omitempty"`
+	Offset         int64                                                   `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
+	ResourceIDs    []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID    `in:"query" name:"resourceID,omitempty"`
+	Size           int64                                                   `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
+	UploadedAfter  GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp `in:"query" name:"uploadedAfter,omitempty"`
 	UploadedBefore GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp `in:"query" name:"uploadedBefore,omitempty"`
 }
 
@@ -2542,24 +2309,15 @@ func (o *ListResources) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubCo
 }
 
 type ListStrategy struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AppletIDs []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"appletID,omitempty"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	EventTypes []string `in:"query" name:"eventType,omitempty"`
-	//
-	Handlers []string `in:"query" name:"handler,omitempty"`
-	//
-	Offset int64 `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
-	//
-	Size int64 `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
-	//
-	StrategyIDs []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"strategyID,omitempty"`
+	ProjectName  string                                               `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                               `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AppletIDs    []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"appletID,omitempty"`
+	AuthInQuery  string                                               `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	EventTypes   []string                                             `in:"query" name:"eventType,omitempty"`
+	Handlers     []string                                             `in:"query" name:"handler,omitempty"`
+	Offset       int64                                                `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
+	Size         int64                                                `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
+	StrategyIDs  []GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"query" name:"strategyID,omitempty"`
 }
 
 func (o *ListStrategy) Path() string {
@@ -2599,18 +2357,12 @@ func (o *ListStrategy) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubCom
 }
 
 type ListTrafficLimit struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	ApiType GithubComMachinefiW3BstreamPkgEnumsTrafficLimitType `in:"query" name:"apiType,omitempty"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	Offset int64 `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
-	//
-	Size int64 `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
+	ProjectName  string                                              `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                              `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	ApiType      GithubComMachinefiW3BstreamPkgEnumsTrafficLimitType `in:"query" name:"apiType,omitempty"`
+	AuthInQuery  string                                              `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	Offset       int64                                               `in:"query" default:"0" name:"offset,omitempty" validate:"@int64[0,]"`
+	Size         int64                                               `in:"query" default:"10" name:"size,omitempty" validate:"@int64[-1,]"`
 }
 
 func (o *ListTrafficLimit) Path() string {
@@ -2677,7 +2429,6 @@ func (o *Liveness) Invoke(cli kit.Client, metas ...kit.Metadata) (*map[string]st
 }
 
 type LoginByEthAddress struct {
-	//
 	LoginByEthAddressReq GithubComMachinefiW3BstreamPkgModulesAccountLoginByEthAddressReq `in:"body"`
 }
 
@@ -2715,7 +2466,6 @@ func (o *LoginByEthAddress) Invoke(cli kit.Client, metas ...kit.Metadata) (*Gith
 }
 
 type LoginByUsername struct {
-	//
 	LoginByUsernameReq GithubComMachinefiW3BstreamPkgModulesAccountLoginByUsernameReq `in:"body"`
 }
 
@@ -2751,12 +2501,9 @@ func (o *LoginByUsername) Invoke(cli kit.Client, metas ...kit.Metadata) (*Github
 }
 
 type RemoveApplet struct {
-	//
-	AppletID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"appletID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	AppletID     GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"appletID"`
+	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *RemoveApplet) Path() string {
@@ -2782,14 +2529,10 @@ func (o *RemoveApplet) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Metada
 }
 
 type RemoveChainHeight struct {
-	//
 	ChainHeightID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"chainHeightID"`
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	ProjectName   string                                             `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader  string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery   string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *RemoveChainHeight) Path() string {
@@ -2815,14 +2558,10 @@ func (o *RemoveChainHeight) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.M
 }
 
 type RemoveChainTx struct {
-	//
-	ChainTxID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"chainTxID"`
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	ChainTxID    GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"chainTxID"`
+	ProjectName  string                                             `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *RemoveChainTx) Path() string {
@@ -2848,14 +2587,10 @@ func (o *RemoveChainTx) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Metad
 }
 
 type RemoveContractLog struct {
-	//
 	ContractLogID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"contractLogID"`
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	ProjectName   string                                             `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader  string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery   string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *RemoveContractLog) Path() string {
@@ -2881,12 +2616,9 @@ func (o *RemoveContractLog) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.M
 }
 
 type RemoveCronJob struct {
-	//
-	CronJobID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"cronJobID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	CronJobID    GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"cronJobID"`
+	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *RemoveCronJob) Path() string {
@@ -2912,12 +2644,9 @@ func (o *RemoveCronJob) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Metad
 }
 
 type RemoveInstance struct {
-	//
-	InstanceID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"instanceID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	InstanceID   GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"instanceID"`
+	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *RemoveInstance) Path() string {
@@ -2943,12 +2672,9 @@ func (o *RemoveInstance) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Meta
 }
 
 type RemoveOperator struct {
-	//
-	OperatorID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"operatorID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	OperatorID   GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"operatorID"`
+	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *RemoveOperator) Path() string {
@@ -2974,12 +2700,9 @@ func (o *RemoveOperator) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Meta
 }
 
 type RemoveProject struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
+	ProjectName  string `in:"path" name:"projectName" validate:"@projectName"`
 	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *RemoveProject) Path() string {
@@ -3005,12 +2728,9 @@ func (o *RemoveProject) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Metad
 }
 
 type RemoveProjectOperator struct {
-	//
-	ProjectID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"projectID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	ProjectID    GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"projectID"`
+	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *RemoveProjectOperator) Path() string {
@@ -3036,12 +2756,9 @@ func (o *RemoveProjectOperator) Invoke(cli kit.Client, metas ...kit.Metadata) (k
 }
 
 type RemovePublisher struct {
-	//
-	PublisherID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"publisherID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	PublisherID  GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"publisherID"`
+	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *RemovePublisher) Path() string {
@@ -3067,12 +2784,9 @@ func (o *RemovePublisher) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Met
 }
 
 type RemoveResource struct {
-	//
-	ResourceID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"resourceID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	ResourceID   GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"resourceID"`
+	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *RemoveResource) Path() string {
@@ -3098,12 +2812,9 @@ func (o *RemoveResource) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Meta
 }
 
 type RemoveStrategy struct {
-	//
-	StrategyID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"strategyID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	StrategyID   GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"strategyID"`
+	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *RemoveStrategy) Path() string {
@@ -3129,14 +2840,10 @@ func (o *RemoveStrategy) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Meta
 }
 
 type RemoveTrafficLimit struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
+	ProjectName    string                                             `in:"path" name:"projectName" validate:"@projectName"`
 	TrafficLimitID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"trafficLimitID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	AuthInHeader   string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery    string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *RemoveTrafficLimit) Path() string {
@@ -3162,12 +2869,9 @@ func (o *RemoveTrafficLimit) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.
 }
 
 type RemoveWasmLogByInstanceID struct {
-	//
-	InstanceID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"instanceID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	InstanceID   GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"instanceID"`
+	AuthInHeader string                                             `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                             `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 }
 
 func (o *RemoveWasmLogByInstanceID) Path() string {
@@ -3193,14 +2897,10 @@ func (o *RemoveWasmLogByInstanceID) Invoke(cli kit.Client, metas ...kit.Metadata
 }
 
 type UpdateAccountAccessKeyByName struct {
-	//
-	Name string `in:"path" name:"name"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	UpdateReq GithubComMachinefiW3BstreamPkgModulesAccessKeyUpdateReq `in:"body"`
+	Name         string                                                  `in:"path" name:"name"`
+	AuthInHeader string                                                  `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                                  `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	UpdateReq    GithubComMachinefiW3BstreamPkgModulesAccessKeyUpdateReq `in:"body"`
 }
 
 func (o *UpdateAccountAccessKeyByName) Path() string {
@@ -3236,14 +2936,10 @@ func (o *UpdateAccountAccessKeyByName) Invoke(cli kit.Client, metas ...kit.Metad
 }
 
 type UpdateApplet struct {
-	//
-	AppletID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"appletID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	UpdateReq GithubComMachinefiW3BstreamPkgModulesAppletUpdateReq `in:"body" mime:"multipart"`
+	AppletID     GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID   `in:"path" name:"appletID"`
+	AuthInHeader string                                               `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                               `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	UpdateReq    GithubComMachinefiW3BstreamPkgModulesAppletUpdateReq `in:"body" mime:"multipart"`
 }
 
 func (o *UpdateApplet) Path() string {
@@ -3299,11 +2995,8 @@ func (o *UpdateApplet) Invoke(cli kit.Client, metas ...kit.Metadata) (*GithubCom
 }
 
 type UpdatePasswordByAccountID struct {
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
+	AuthInHeader      string                                                        `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery       string                                                        `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
 	UpdatePasswordReq GithubComMachinefiW3BstreamPkgModulesAccountUpdatePasswordReq `in:"body"`
 }
 
@@ -3330,16 +3023,11 @@ func (o *UpdatePasswordByAccountID) Invoke(cli kit.Client, metas ...kit.Metadata
 }
 
 type UpdatePublisher struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	PublisherID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"publisherID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	UpdateReq GithubComMachinefiW3BstreamPkgModulesPublisherUpdateReq `in:"body"`
+	ProjectName  string                                                  `in:"path" name:"projectName" validate:"@projectName"`
+	PublisherID  GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID      `in:"path" name:"publisherID"`
+	AuthInHeader string                                                  `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                                  `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	UpdateReq    GithubComMachinefiW3BstreamPkgModulesPublisherUpdateReq `in:"body"`
 }
 
 func (o *UpdatePublisher) Path() string {
@@ -3365,14 +3053,10 @@ func (o *UpdatePublisher) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Met
 }
 
 type UpdateStrategy struct {
-	//
-	StrategyID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"strategyID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	UpdateReq GithubComMachinefiW3BstreamPkgModulesStrategyCreateReq `in:"body"`
+	StrategyID   GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID     `in:"path" name:"strategyID"`
+	AuthInHeader string                                                 `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                                 `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	UpdateReq    GithubComMachinefiW3BstreamPkgModulesStrategyCreateReq `in:"body"`
 }
 
 func (o *UpdateStrategy) Path() string {
@@ -3398,16 +3082,11 @@ func (o *UpdateStrategy) Invoke(cli kit.Client, metas ...kit.Metadata) (kit.Meta
 }
 
 type UpdateTrafficLimit struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	TrafficLimitID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID `in:"path" name:"trafficLimitID"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	UpdateReq GithubComMachinefiW3BstreamPkgModulesTrafficlimitUpdateReq `in:"body"`
+	ProjectName    string                                                     `in:"path" name:"projectName" validate:"@projectName"`
+	TrafficLimitID GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID         `in:"path" name:"trafficLimitID"`
+	AuthInHeader   string                                                     `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery    string                                                     `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	UpdateReq      GithubComMachinefiW3BstreamPkgModulesTrafficlimitUpdateReq `in:"body"`
 }
 
 func (o *UpdateTrafficLimit) Path() string {
@@ -3451,14 +3130,10 @@ func (o *UpdateTrafficLimit) Invoke(cli kit.Client, metas ...kit.Metadata) (*Git
 }
 
 type UpsertPublisher struct {
-	//
-	ProjectName string `in:"path" name:"projectName" validate:"@projectName"`
-	//
-	AuthInHeader string `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
-	//
-	AuthInQuery string `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
-	//
-	CreateReq GithubComMachinefiW3BstreamPkgModulesPublisherCreateReq `in:"body"`
+	ProjectName  string                                                  `in:"path" name:"projectName" validate:"@projectName"`
+	AuthInHeader string                                                  `in:"header" name:"Authorization,omitempty" validate:"@string[1,]"`
+	AuthInQuery  string                                                  `in:"query" name:"authorization,omitempty" validate:"@string[1,]"`
+	CreateReq    GithubComMachinefiW3BstreamPkgModulesPublisherCreateReq `in:"body"`
 }
 
 func (o *UpsertPublisher) Path() string {
