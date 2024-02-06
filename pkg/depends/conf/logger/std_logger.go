@@ -3,6 +3,7 @@ package logger
 import (
 	"context"
 	"fmt"
+
 	"log/slog"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"

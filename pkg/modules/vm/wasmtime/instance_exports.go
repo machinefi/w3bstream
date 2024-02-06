@@ -435,6 +435,7 @@ func (ef *ExportFuncs) GetSQLDB(addr, size int32, vmAddrPtr, vmSizePtr int32) in
 
 // TODO: make sendTX async, and add callback if possible
 func (ef *ExportFuncs) SendTX(chainID int32, offset, size, vmAddrPtr, vmSizePtr int32) int32 {
+	ef.HostLog(conflog.InfoLevel, fmt.Sprintf("offset %d size %d vmAddrPtr %d vmSizePtr %d", offset, size, vmAddrPtr, vmSizePtr))
 	if ef.cl == nil {
 		ef.HostLog(conflog.ErrorLevel, errors.New("eth client doesn't exist"))
 		return wasm.ResultStatusCode_Failed

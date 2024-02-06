@@ -3,13 +3,13 @@ package wasmtime
 import (
 	"context"
 	"encoding/binary"
-	"log/slog"
 	"reflect"
 	"sync"
 	"sync/atomic"
 
 	"github.com/bytecodealliance/wasmtime-go/v17"
 	"github.com/pkg/errors"
+	"log/slog"
 
 	"github.com/machinefi/w3bstream/pkg/modules/wasm/abi/proxy"
 	"github.com/machinefi/w3bstream/pkg/modules/wasm/abi/types"

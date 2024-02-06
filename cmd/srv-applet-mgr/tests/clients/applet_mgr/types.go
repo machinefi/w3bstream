@@ -31,6 +31,7 @@ import (
 type BytesBuffer = bytes.Buffer
 
 type ChainConfigResp struct {
+	//
 	Chains string `json:"chains"`
 }
 
@@ -43,6 +44,7 @@ type CurrentPublisher struct {
 }
 
 type EthClientRsp struct {
+	//
 	Clients string `json:"clients"`
 }
 
@@ -137,6 +139,7 @@ type GithubComMachinefiW3BstreamPkgModelsChainHeight struct {
 
 type GithubComMachinefiW3BstreamPkgModelsChainHeightData struct {
 	GithubComMachinefiW3BstreamPkgModelsChainHeightInfo
+	//
 	ProjectName string `json:"projectName"`
 }
 
@@ -151,6 +154,7 @@ type GithubComMachinefiW3BstreamPkgModelsChainTx struct {
 
 type GithubComMachinefiW3BstreamPkgModelsChainTxData struct {
 	GithubComMachinefiW3BstreamPkgModelsChainTxInfo
+	//
 	ProjectName string `json:"projectName"`
 }
 
@@ -174,6 +178,7 @@ type GithubComMachinefiW3BstreamPkgModelsContractLog struct {
 
 type GithubComMachinefiW3BstreamPkgModelsContractLogData struct {
 	GithubComMachinefiW3BstreamPkgModelsContractLogInfo
+	//
 	ProjectName string `json:"projectName"`
 }
 
@@ -313,15 +318,21 @@ type GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaBase = access_key.Gr
 
 type GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaWithPrivilege struct {
 	GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaBase
+	//
 	Perm GithubComMachinefiW3BstreamPkgEnumsAccessPermission `json:"perm"`
 }
 
 type GithubComMachinefiW3BstreamPkgModulesAccessKeyListData struct {
 	GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesOperationTimes
-	Desc       string                                                                 `json:"desc,omitempty"`
-	ExpiredAt  *GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp               `json:"expiredAt,omitempty"`
-	LastUsed   *GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp               `json:"lastUsed,omitempty"`
-	Name       string                                                                 `json:"name"`
+	//
+	Desc string `json:"desc,omitempty"`
+	//
+	ExpiredAt *GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp `json:"expiredAt,omitempty"`
+	//
+	LastUsed *GithubComMachinefiW3BstreamPkgDependsBaseTypesTimestamp `json:"lastUsed,omitempty"`
+	//
+	Name string `json:"name"`
+	//
 	Privileges []GithubComMachinefiW3BstreamPkgModulesAccessKeyGroupMetaWithPrivilege `json:"privileges,omitempty"`
 }
 
@@ -335,6 +346,7 @@ type GithubComMachinefiW3BstreamPkgModulesAccountCreateAccountByUsernameReq = ac
 
 type GithubComMachinefiW3BstreamPkgModulesAccountCreateAccountByUsernameRsp struct {
 	GithubComMachinefiW3BstreamPkgModelsAccount
+	//
 	Password string `json:"password"`
 }
 
@@ -350,8 +362,11 @@ type GithubComMachinefiW3BstreamPkgModulesAppletCreateReq = applet.CreateReq
 
 type GithubComMachinefiW3BstreamPkgModulesAppletCreateRsp struct {
 	GithubComMachinefiW3BstreamPkgModelsApplet
-	Instance   *GithubComMachinefiW3BstreamPkgModelsInstance  `json:"instance"`
-	Resource   *GithubComMachinefiW3BstreamPkgModelsResource  `json:"resource,omitempty"`
+	//
+	Instance *GithubComMachinefiW3BstreamPkgModelsInstance `json:"instance"`
+	//
+	Resource *GithubComMachinefiW3BstreamPkgModelsResource `json:"resource,omitempty"`
+	//
 	Strategies []GithubComMachinefiW3BstreamPkgModelsStrategy `json:"strategies,omitempty"`
 }
 
@@ -402,6 +417,7 @@ type GithubComMachinefiW3BstreamPkgModulesOperatorCreateReq = operator.CreateReq
 
 type GithubComMachinefiW3BstreamPkgModulesOperatorDetail struct {
 	GithubComMachinefiW3BstreamPkgModelsOperator
+	//
 	Address string `json:"address"`
 }
 
@@ -410,17 +426,24 @@ type GithubComMachinefiW3BstreamPkgModulesOperatorListDetailRsp = operator.ListD
 type GithubComMachinefiW3BstreamPkgModulesProjectCreateReq struct {
 	GithubComMachinefiW3BstreamPkgModelsProjectName
 	GithubComMachinefiW3BstreamPkgModelsProjectBase
+	//
 	Database *GithubComMachinefiW3BstreamPkgTypesWasmDatabase `json:"database,omitempty"`
-	Env      *GithubComMachinefiW3BstreamPkgTypesWasmEnv      `json:"envs,omitempty"`
-	Flow     *GithubComMachinefiW3BstreamPkgTypesWasmFlow     `json:"flow,omitempty"`
+	//
+	Env *GithubComMachinefiW3BstreamPkgTypesWasmEnv `json:"envs,omitempty"`
+	//
+	Flow *GithubComMachinefiW3BstreamPkgTypesWasmFlow `json:"flow,omitempty"`
 }
 
 type GithubComMachinefiW3BstreamPkgModulesProjectCreateRsp struct {
 	GithubComMachinefiW3BstreamPkgModelsProject
+	//
 	ChannelState GithubComMachinefiW3BstreamPkgDependsKitSqlxDatatypesBool `json:"channelState"`
-	Database     *GithubComMachinefiW3BstreamPkgTypesWasmDatabase          `json:"database,omitempty"`
-	Env          *GithubComMachinefiW3BstreamPkgTypesWasmEnv               `json:"envs,omitempty"`
-	Flow         *GithubComMachinefiW3BstreamPkgTypesWasmFlow              `json:"flow,omitempty"`
+	//
+	Database *GithubComMachinefiW3BstreamPkgTypesWasmDatabase `json:"database,omitempty"`
+	//
+	Env *GithubComMachinefiW3BstreamPkgTypesWasmEnv `json:"envs,omitempty"`
+	//
+	Flow *GithubComMachinefiW3BstreamPkgTypesWasmFlow `json:"flow,omitempty"`
 }
 
 type GithubComMachinefiW3BstreamPkgModulesProjectDetail = project.Detail
@@ -490,5 +513,6 @@ type GithubComMachinefiW3BstreamPkgTypesWasmSource = wasm.Source
 type GithubComMachinefiW3BstreamPkgTypesWasmTable = wasm.Table
 
 type ProjectProvider struct {
+	//
 	ProjectName string `name:"projectName" validate:"@projectName"`
 }
