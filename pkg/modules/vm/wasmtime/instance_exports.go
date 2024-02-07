@@ -376,6 +376,7 @@ func (ef *ExportFuncs) SetSQLDB(addr, size int32) int32 {
 		ef.HostLog(conflog.ErrorLevel, err)
 		return int32(wasm.ResultStatusCode_ResourceNotFound)
 	}
+	ef.HostLog(conflog.InfoLevel, fmt.Sprintf("GetSQLDB: [query: %s]", string(data)))
 
 	prestate, params, err := sql_util.ParseQuery(data)
 	if err != nil {
@@ -406,6 +407,7 @@ func (ef *ExportFuncs) GetSQLDB(addr, size int32, vmAddrPtr, vmSizePtr int32) in
 		ef.HostLog(conflog.ErrorLevel, err)
 		return int32(wasm.ResultStatusCode_ResourceNotFound)
 	}
+	ef.HostLog(conflog.InfoLevel, fmt.Sprintf("GetSQLDB: [query: %s]", string(data)))
 
 	prestate, params, err := sql_util.ParseQuery(data)
 	if err != nil {

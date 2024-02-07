@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 var (
@@ -16,8 +17,14 @@ var (
 	ErrNotInstantiated     = errors.New("not instantiated")
 	ErrFuncNotImported     = errors.New("func not imported")
 	ErrAlreadyLinked       = errors.New("already linked")
-	engine                 = wasmtime.NewEngineWithConfig(wasmtime.NewConfig())
+	engine                 *wasmtime.Engine
 )
+
+func init() {
+	config := wasmtime.NewConfig()
+	config.SetConsumeFuel(true)
+	engine = wasmtime.NewEngineWithConfig(config)
+}
 
 type (
 	Runtime struct {
@@ -66,6 +73,11 @@ func (rt *Runtime) Instantiate(ctx context.Context) error {
 	}
 	store := wasmtime.NewStore(engine)
 	store.SetWasi(wasmtime.NewWasiConfig())
+	if fuel, _ := types.MaxWasmConsumeFuelFromContext(ctx); fuel > 0 {
+		if err := store.SetFuel(fuel); err != nil {
+			return err
+		}
+	}
 
 	instance, err := rt.linker.Instantiate(store, rt.module)
 	if err != nil {

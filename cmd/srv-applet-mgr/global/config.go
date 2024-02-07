@@ -79,6 +79,7 @@ func init() {
 		RobotNotifier *types.RobotNotifierConfig
 		Risc0Config   *types.Risc0Config
 		Mq            *confmq.Config
+		MaxWasmFuel   uint64
 	}{
 		Postgres:      db,
 		MonitorDB:     monitordb,
@@ -103,6 +104,7 @@ func init() {
 		RobotNotifier: &types.RobotNotifierConfig{},
 		Risc0Config:   &types.Risc0Config{},
 		Mq:            TaskMgr,
+		MaxWasmFuel:   1024 * 1024 * 1024,
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
@@ -174,6 +176,7 @@ func init() {
 		types.WithRobotNotifierConfigContext(config.RobotNotifier),
 		types.WithWasmApiServerContext(wasmApiServer),
 		types.WithOperatorPoolContext(operatorPool),
+		types.WithMaxWasmConsumeFuelContext(config.MaxWasmFuel),
 	)
 	Context = WithContext(context.Background())
 }

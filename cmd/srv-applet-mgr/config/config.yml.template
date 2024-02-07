@@ -21,6 +21,7 @@ SRV_APPLET_MGR__Logger_Level: debug
 SRV_APPLET_MGR__Logger_Name: srv-applet-mgr
 SRV_APPLET_MGR__Logger_Output: ALWAYS
 SRV_APPLET_MGR__Logger_ReportCaller: "false"
+SRV_APPLET_MGR__MaxWasmFuel: "1073741824"
 SRV_APPLET_MGR__MetricsCenter_ClickHouseDSN: ""
 SRV_APPLET_MGR__MetricsCenter_Endpoint: ""
 SRV_APPLET_MGR__MonitorDB_ConnMaxLifetime: 1h

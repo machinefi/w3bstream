@@ -492,9 +492,19 @@ func (i *Instance) handle(ctx context.Context, task *Task) *wasm.EventHandleResu
 	}
 	defer i.rt.Deinstantiate(ctx)
 
+	before, err := i.rt.store.GetFuel()
+	if err == nil {
+		defer func() {
+			after, err := i.rt.store.GetFuel()
+			if err == nil {
+				i.lk.HostLog(conflog.InfoLevel, fmt.Sprintf("consumed fuel: %d", before-after))
+			}
+		}()
+	}
+
 	// TODO support wasm return data(not only code) for HTTP responding
 	result, err := i.rt.Call(ctx, task.Handler, int32(rid))
-	l.Debug("call wasm runtime completed.")
+	l.WithValues("result", result, "error", err).Debug("call wasm runtime completed.")
 	if err != nil {
 		i.lk.HostLog(conflog.ErrorLevel, errors.Wrapf(err, "wasm call completed with error. code: %v", result))
 		return &wasm.EventHandleResult{

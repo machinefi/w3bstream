@@ -48,6 +48,8 @@ type (
 	CtxMetricsCenterConfig struct{}
 	// CtxOperatorPool type *operator.Pool global operator memory pool
 	CtxOperatorPool struct{}
+	// CtxMaxWasmConsumeFuel global wasm consume fuel per invoking
+	CtxMaxWasmConsumeFuel struct{}
 )
 
 // model contexts
@@ -809,6 +811,27 @@ func OperatorPoolFromContext(ctx context.Context) (optypes.Pool, bool) {
 
 func MustOperatorPoolFromContext(ctx context.Context) optypes.Pool {
 	v, ok := OperatorPoolFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithMaxWasmConsumeFuel(ctx context.Context, v uint64) context.Context {
+	return contextx.WithValue(ctx, CtxMaxWasmConsumeFuel{}, v)
+}
+
+func WithMaxWasmConsumeFuelContext(v uint64) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxMaxWasmConsumeFuel{}, v)
+	}
+}
+
+func MaxWasmConsumeFuelFromContext(ctx context.Context) (uint64, bool) {
+	v, ok := ctx.Value(CtxMaxWasmConsumeFuel{}).(uint64)
+	return v, ok
+}
+
+func MustMaxWasmConsumeFuelFromContext(ctx context.Context) uint64 {
+	v, ok := MaxWasmConsumeFuelFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }
