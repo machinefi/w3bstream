@@ -2,6 +2,7 @@ package publisher
 
 import (
 	"context"
+	"fmt"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
@@ -277,41 +278,27 @@ func Create(ctx context.Context, r *CreateReq) (*models.Publisher, error) {
 
 func CreateIfNotExist(ctx context.Context, r *CreateReq) (*models.Publisher, error) {
 	var (
-		prj    = types.MustProjectFromContext(ctx)
-		idg    = confid.MustSFIDGeneratorFromContext(ctx)
-		d      = types.MustMgrDBExecutorFromContext(ctx)
-		m      = &models.Publisher{}
-		exists = false
+		prj = types.MustProjectFromContext(ctx)
+		idg = confid.MustSFIDGeneratorFromContext(ctx)
+		d   = types.MustMgrDBExecutorFromContext(ctx)
+		m   = &models.Publisher{}
 	)
 
-	err := sqlx.NewTasks(d).With(
-		func(db sqlx.DBExecutor) error {
-			err := m.FetchByProjectIDAndKey(d)
-			if err == nil {
-				exists = true
-				return nil
-			}
-			if sqlx.DBErr(err).IsNotFound() {
-				return nil
-			}
-			return status.DatabaseError.StatusErr().WithDesc(err.Error())
-		},
-		func(db sqlx.DBExecutor) error {
-			if exists {
-				return nil
-			}
-			m.PublisherID = idg.MustGenSFID()
-			m.ProjectID = prj.ProjectID
-			m.Key = r.Key
-			m.Name = r.Name
-			if err := m.Create(d); err != nil {
-				return status.DatabaseError.StatusErr().WithDesc(err.Error())
-			}
-			return nil
-		},
-	).Do()
-	if err != nil {
-		return nil, err
+	m.PublisherID = idg.MustGenSFID()
+	m.ProjectID = prj.ProjectID
+	m.Key = r.Key
+	m.Name = r.Name
+	if err := m.Create(d); err != nil {
+		if !sqlx.DBErr(err).IsConflict() {
+			return nil, status.DatabaseError.StatusErr().
+				WithDesc(fmt.Sprintf("create publisher failed: %v", err))
+		}
+	} else {
+		return m, nil
+	}
+	if err := m.FetchByProjectIDAndKey(d); err != nil {
+		return nil, status.DatabaseError.StatusErr().
+			WithDesc(fmt.Sprintf("fetch publisher failed: %v", err))
 	}
 	return m, nil
 }

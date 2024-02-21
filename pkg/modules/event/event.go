@@ -3,6 +3,7 @@ package event
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -167,7 +168,8 @@ func Create(ctx context.Context, r *EventReq) (*EventRsp, error) {
 		})
 	}
 	if err = models.BatchCreateEvents(types.MustMgrDBExecutorFromContext(ctx), events...); err != nil {
-		return nil, err
+		return nil, status.DatabaseError.StatusErr().
+			WithDesc(fmt.Sprintf("batch create event failed: %v", err))
 	}
 	return &EventRsp{
 		Channel:      r.Channel,
