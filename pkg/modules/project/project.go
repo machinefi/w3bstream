@@ -248,7 +248,7 @@ func RemoveBySFID(ctx context.Context, id types.SFID) (err error) {
 	).Do()
 }
 
-func Init(ctx context.Context) error {
+func Init(ctx context.Context) ([]types.SFID, error) {
 	ctx, l := logger.NewSpanContext(ctx, "project.Init")
 	defer l.End()
 
@@ -256,19 +256,23 @@ func Init(ctx context.Context) error {
 
 	projects, err := (&models.Project{}).List(d, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	fails := []string{"\nprojects failed to start:"}
-	succs := []string{"\nstarted projects:"}
+	fails := make([]string, 0, len(projects))
+	succs := make([]types.SFID, 0, len(projects))
 
 	defer func() {
 		message := ""
 		if len(fails) > 1 {
+			message = "\nprojects failed to start:\n"
 			message += strings.Join(fails, "\n")
 		}
 		if len(succs) > 1 {
-			message += strings.Join(succs, "\n")
+			message = "\nstarted projects:\n"
+			for _, v := range succs {
+				message += v.String() + "\n"
+			}
 		}
 		body, err := lark.Build(ctx, "Project Channel Monitoring", "INFO", message)
 		if err != nil {
@@ -303,8 +307,8 @@ func Init(ctx context.Context) error {
 				l.Warn(errors.Wrap(err, "anonymous publisher create failed"))
 			}
 		}
-		succs = append(succs, v.ProjectID.String())
+		succs = append(succs, v.ProjectID)
 		l.Info("start subscribe")
 	}
-	return nil
+	return succs, nil
 }

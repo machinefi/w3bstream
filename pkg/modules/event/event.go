@@ -212,13 +212,13 @@ func BatchCreate(ctx context.Context, reqs DataPushReqs) (DataPushRsps, error) {
 	return ret, nil
 }
 
-func handle(ctx context.Context) int {
+func handle(ctx context.Context, batch int64, prj types.SFID) int {
 	ctx, l := logger.NewSpanContext(ctx, "event.handle")
 	defer l.End()
 
 	d := types.MustMgrDBExecutorFromContext(ctx)
 
-	evs, err := models.BatchFetchLast100UnhandledEvents(d)
+	evs, err := models.BatchFetchLastUnhandledEvents(d, batch, prj)
 	if err != nil {
 		l.Error(err)
 		return 0
@@ -273,18 +273,23 @@ func handle(ctx context.Context) int {
 	return len(evs)
 }
 
-func NewEventHandleScheduler(d time.Duration) *EventHandleScheduler {
-	return &EventHandleScheduler{d: d}
+func NewEventHandleScheduler(d time.Duration, batch int64, prj types.SFID) *EventHandleScheduler {
+	return &EventHandleScheduler{
+		du:  d,
+		prj: prj,
+	}
 }
 
 type EventHandleScheduler struct {
-	d time.Duration
+	prj   types.SFID    // prj project sfid
+	batch int64         // batch fetch
+	du    time.Duration // du interval
 }
 
 func (s *EventHandleScheduler) Run(ctx context.Context) {
 	for {
-		if handled := handle(ctx); handled == 0 {
-			time.Sleep(s.d)
+		if handled := handle(ctx, s.batch, s.prj); handled == 0 {
+			time.Sleep(s.du)
 		}
 	}
 }

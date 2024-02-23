@@ -35,7 +35,10 @@ func main() {
 	ctx, l := logger.NewSpanContext(global.WithContext(context.Background()), "main")
 	defer l.End()
 
-	var sigProjectsInitialized = make(chan struct{})
+	var (
+		sigProjectsInitialized = make(chan struct{})
+		projectIDs             []types.SFID
+	)
 	app.Execute(func(args ...string) {
 		BatchRun(
 			func() {
@@ -66,7 +69,7 @@ func main() {
 					l.Error(err)
 					panic(err)
 				}
-				if err := project.Init(ctx); err != nil {
+				if projectIDs, err = project.Init(ctx); err != nil {
 					l.Error(err)
 					panic(err)
 				}
@@ -98,8 +101,10 @@ func main() {
 			},
 			func() {
 				<-sigProjectsInitialized
-				sche := event.NewEventHandleScheduler(time.Minute / 2)
-				sche.Run(ctx)
+				for _, prj := range projectIDs {
+					sche := event.NewEventHandleScheduler(time.Minute/2, 300, prj)
+					go sche.Run(ctx)
+				}
 			},
 			func() {
 				sche := event.NewEventCleanupScheduler(time.Hour, 90*time.Hour*24)

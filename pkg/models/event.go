@@ -84,18 +84,21 @@ func BatchFetchEvents(d sqlx.DBExecutor, adds ...builder.Addition) (results []*E
 	return results, nil
 }
 
-func BatchFetchLast100UnhandledEvents(d sqlx.DBExecutor) ([]*Event, error) {
+func BatchFetchLastUnhandledEvents(d sqlx.DBExecutor, batch int64, prj types.SFID) ([]*Event, error) {
 	m := &Event{}
 	return BatchFetchEvents(
 		d,
 		builder.Where(
-			m.ColStage().Eq(enums.EVENT_STAGE__RECEIVED),
+			builder.And(
+				m.ColStage().Eq(enums.EVENT_STAGE__RECEIVED),
+				m.ColProjectID().Eq(prj),
+			),
 		),
 		builder.OrderBy(
 			builder.AscOrder(m.ColReceivedAt()),
 		),
-		builder.Limit(100),
-		builder.Comment("BatchFetchLast100UnhandledEvents"),
+		builder.Limit(batch),
+		builder.Comment("BatchFetchLastUnhandledEvents"),
 	)
 }
 
