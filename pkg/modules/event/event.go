@@ -223,6 +223,9 @@ func handle(ctx context.Context, batch int64, prj types.SFID) int {
 		l.Error(err)
 		return 0
 	}
+	if len(evs) == 0 {
+		return 0
+	}
 	l.WithValues("batch", len(evs)).Info("")
 
 	for _, v := range evs {
