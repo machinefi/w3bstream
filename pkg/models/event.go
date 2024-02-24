@@ -71,6 +71,8 @@ type EventContext struct {
 	HandledAt int64 `db:"f_handled_at,default='0'"   json:"handledAt"`
 	// CompletedAt event completed timestamp(epoch milliseconds)
 	CompletedAt int64 `db:"f_completed_at,default='0'" json:"completedAt"`
+	// AutoCollect if do geo collection
+	AutoCollect datatypes.Bool `db:"f_auto_collection,default='2'" json:"autoCollection"`
 }
 
 func BatchFetchEvents(d sqlx.DBExecutor, adds ...builder.Addition) (results []*Event, err error) {
@@ -129,6 +131,7 @@ func BatchCreateEvents(d sqlx.DBExecutor, vs ...*Event) error {
 			v.ReceivedAt,
 			v.HandledAt,
 			v.CompletedAt,
+			v.AutoCollect,
 		)
 	}
 	if len(args) == 0 {
@@ -158,6 +161,7 @@ func BatchCreateEvents(d sqlx.DBExecutor, vs ...*Event) error {
 			m.ColReceivedAt().Name,
 			m.ColHandledAt().Name,
 			m.ColCompletedAt().Name,
+			m.ColAutoCollect().Name,
 		),
 		args...,
 	))

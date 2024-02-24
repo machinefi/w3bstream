@@ -10,6 +10,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
+	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -79,14 +80,14 @@ func RemoveMetrics(ctx context.Context, account string, project string) {
 	}
 }
 
-func EventMetricsInc(ctx context.Context, account, project, publisher, eventtype string) {
+func EventMetricsInc(ctx context.Context, v *models.Event) {
 	ctx, l := logr.Start(ctx, "metrics.EventMetricsInc")
 	defer l.End()
 
-	eventMtc.WithLabelValues(account, project, publisher, eventtype).Inc()
+	eventMtc.WithLabelValues(v.AccountID.String(), v.ProjectName, v.PublisherKey, v.EventType).Inc()
 	if clickhouseCLI != nil {
-		if err := eventClickhouseCli.Insert(fmt.Sprintf(`now(), '%s', '%s', '%s', 
-		'%s', %d`, account, project, publisher, eventtype, 1)); err != nil {
+		if err := eventClickhouseCli.Insert(fmt.Sprintf(`now(), '%s', '%s', '%s', '%s', %d`,
+			v.AccountID, v.ProjectName, v.PublisherKey, v.EventType, 1)); err != nil {
 			l.Error(err)
 		}
 	}

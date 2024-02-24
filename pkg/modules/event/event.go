@@ -110,7 +110,7 @@ func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
 
 		go func(v *types.StrategyResult) {
 			if v.AutoCollect == datatypes.BooleanValue(true) {
-				metrics.GeoCollect(ctx, data)
+				// metrics.GeoCollect(ctx, data)
 			}
 		}(v)
 	}
@@ -159,6 +159,7 @@ func Create(ctx context.Context, r *EventReq) (*EventRsp, error) {
 				Total:        len(strategies),
 				PublishedAt:  r.Timestamp,
 				ReceivedAt:   time.Now().UTC().UnixMilli(),
+				AutoCollect:  s.AutoCollect,
 			},
 		})
 		results = append(results, &Result{
@@ -271,7 +272,12 @@ func handle(ctx context.Context, batch int64, prj types.SFID) int {
 		}); err != nil {
 			l.Error(err)
 		}
-		go metrics.EventMetricsInc(ctx, v.AccountID.String(), v.ProjectName, v.PublisherKey, v.EventType)
+		go func(v *models.Event) {
+			metrics.EventMetricsInc(ctx, v)
+			if v.AutoCollect == datatypes.TRUE {
+				metrics.GeoCollect(ctx, v)
+			}
+		}(v)
 	}
 	return len(evs)
 }

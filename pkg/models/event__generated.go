@@ -40,6 +40,7 @@ func (*Event) TableDesc() []string {
 func (*Event) Comments() map[string]string {
 	return map[string]string{
 		"AccountID":    "AccountID account ID",
+		"AutoCollect":  "AutoCollect if do geo collection",
 		"CompletedAt":  "CompletedAt event completed timestamp(epoch milliseconds)",
 		"Error":        "Error wasm handle error message",
 		"EventID":      "EventID event ID",
@@ -66,6 +67,9 @@ func (*Event) ColDesc() map[string][]string {
 	return map[string][]string{
 		"AccountID": []string{
 			"AccountID account ID",
+		},
+		"AutoCollect": []string{
+			"AutoCollect if do geo collection",
 		},
 		"CompletedAt": []string{
 			"CompletedAt event completed timestamp(epoch milliseconds)",
@@ -358,6 +362,14 @@ func (m *Event) ColCompletedAt() *builder.Column {
 
 func (*Event) FieldCompletedAt() string {
 	return "CompletedAt"
+}
+
+func (m *Event) ColAutoCollect() *builder.Column {
+	return EventTable.ColByFieldName(m.FieldAutoCollect())
+}
+
+func (*Event) FieldAutoCollect() string {
+	return "AutoCollect"
 }
 
 func (m *Event) CondByValue(db sqlx.DBExecutor) builder.SqlCondition {
