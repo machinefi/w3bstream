@@ -211,6 +211,10 @@ func (v Error) Key() string {
 		return "ProjectOperatorConflict"
 	case AccessKeyNameConflict:
 		return "AccessKeyNameConflict"
+	case TooManyRequest:
+		return "TooManyRequest"
+	case TrafficLimitExceededFailed:
+		return "TrafficLimitExceededFailed"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -237,8 +241,6 @@ func (v Error) Key() string {
 		return "BatchRemoveWasmLogFailed"
 	case GenTokenFailed:
 		return "GenTokenFailed"
-	case TrafficLimitExceededFailed:
-		return "TrafficLimitExceededFailed"
 	case CreateTrafficSchedulerFailed:
 		return "CreateTrafficSchedulerFailed"
 	case UpdateTrafficSchedulerFailed:
@@ -423,6 +425,10 @@ func (v Error) Msg() string {
 		return "Project Operator relationship Conflict"
 	case AccessKeyNameConflict:
 		return "Access Key Name Conflict"
+	case TooManyRequest:
+		return "TooManyRequest too many request"
+	case TrafficLimitExceededFailed:
+		return "Traffic Limit Exceeded Failed"
 	case InternalServerError:
 		return "internal error"
 	case DatabaseError:
@@ -449,8 +455,6 @@ func (v Error) Msg() string {
 		return "Batch Remove WasmLog Failed"
 	case GenTokenFailed:
 		return "Gen Token Failed"
-	case TrafficLimitExceededFailed:
-		return "Traffic Limit Exceeded Failed"
 	case CreateTrafficSchedulerFailed:
 		return "Create Traffic Scheduler Failed"
 	case UpdateTrafficSchedulerFailed:
@@ -635,6 +639,10 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case AccessKeyNameConflict:
 		return true
+	case TooManyRequest:
+		return true
+	case TrafficLimitExceededFailed:
+		return true
 	case InternalServerError:
 		return false
 	case DatabaseError:
@@ -660,8 +668,6 @@ func (v Error) CanBeTalk() bool {
 	case BatchRemoveWasmLogFailed:
 		return true
 	case GenTokenFailed:
-		return true
-	case TrafficLimitExceededFailed:
 		return true
 	case CreateTrafficSchedulerFailed:
 		return true

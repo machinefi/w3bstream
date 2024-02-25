@@ -3355,6 +3355,19 @@
               "@StatusErr[TrafficLimitNotFound][404999020][Traffic Limit Not Found]!"
             ]
           },
+          "429": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
+                }
+              }
+            },
+            "x-status-errors": [
+              "@StatusErr[TrafficLimitExceededFailed][429999002][Traffic Limit Exceeded Failed]!"
+            ]
+          },
           "500": {
             "description": "",
             "content": {
@@ -3366,8 +3379,7 @@
             },
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[TrafficLimitExceededFailed][500999014][Traffic Limit Exceeded Failed]!"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -9801,7 +9813,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CreateTrafficSchedulerFailed][500999015][Create Traffic Scheduler Failed]!",
+              "@StatusErr[CreateTrafficSchedulerFailed][500999014][Create Traffic Scheduler Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!"
@@ -10221,7 +10233,7 @@
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[UpdateTrafficSchedulerFailed][500999016][Update Traffic Scheduler Failed]!"
+              "@StatusErr[UpdateTrafficSchedulerFailed][500999015][Update Traffic Scheduler Failed]!"
             ]
           }
         }

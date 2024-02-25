@@ -36,8 +36,6 @@ const (
 	BatchRemoveWasmLogFailed
 	// @errTalk Gen Token Failed
 	GenTokenFailed
-	// @errTalk Traffic Limit Exceeded Failed
-	TrafficLimitExceededFailed
 	// @errTalk Create Traffic Scheduler Failed
 	CreateTrafficSchedulerFailed
 	// @errTalk Update Traffic Scheduler Failed
@@ -110,6 +108,13 @@ const (
 	AccessKeyExpired
 	// @errTalk Access Key Permission Denied
 	AccessKeyPermissionDenied
+)
+
+const (
+	// @errTalk TooManyRequest too many request
+	TooManyRequest Error = http.StatusTooManyRequests*1e6 + iota + 1
+	// @errTalk Traffic Limit Exceeded Failed
+	TrafficLimitExceededFailed
 )
 
 const (
