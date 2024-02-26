@@ -120,7 +120,8 @@ func main() {
 					}
 				}
 
-				body, err := lark.Build(ctx, "Projects Processes", "INFO", strings.Join(projects, "\n"))
+				body, err := lark.Build(ctx, "Projects Processes", "INFO",
+					fmt.Sprintf("black list: %v\nwhite list: %v \n%s", bl, wl, strings.Join(projects, "\n")))
 				if err != nil {
 					return
 				}
