@@ -3,6 +3,7 @@ package types
 import (
 	"context"
 
+	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
@@ -50,6 +51,10 @@ type (
 	CtxOperatorPool struct{}
 	// CtxMaxWasmConsumeFuel global wasm consume fuel per invoking
 	CtxMaxWasmConsumeFuel struct{}
+	// CtxProjectWhiteList global project white list for handle event
+	CtxProjectWhiteList struct{}
+	// CtxProjectBlackList global project black list for handle event
+	CtxProjectBlackList struct{}
 )
 
 // model contexts
@@ -832,6 +837,48 @@ func MaxWasmConsumeFuelFromContext(ctx context.Context) (uint64, bool) {
 
 func MustMaxWasmConsumeFuelFromContext(ctx context.Context) uint64 {
 	v, ok := MaxWasmConsumeFuelFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithProjectWhiteList(ctx context.Context, v []types.SFID) context.Context {
+	return contextx.WithValue(ctx, CtxProjectWhiteList{}, v)
+}
+
+func WithProjectWhiteListContext(v []types.SFID) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return WithProjectWhiteList(ctx, v)
+	}
+}
+
+func ProjectWhiteListFromContext(ctx context.Context) ([]types.SFID, bool) {
+	v, ok := ctx.Value(CtxProjectWhiteList{}).([]types.SFID)
+	return v, ok
+}
+
+func MastProjectWhiteListFromContext(ctx context.Context) []types.SFID {
+	v, ok := ProjectWhiteListFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithProjectBlackList(ctx context.Context, v []types.SFID) context.Context {
+	return contextx.WithValue(ctx, CtxProjectBlackList{}, v)
+}
+
+func WithProjectBlackListContext(v []types.SFID) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return WithProjectBlackList(ctx, v)
+	}
+}
+
+func ProjectBlackListFromContext(ctx context.Context) ([]types.SFID, bool) {
+	v, ok := ctx.Value(CtxProjectBlackList{}).([]types.SFID)
+	return v, ok
+}
+
+func MastProjectBlackListFromContext(ctx context.Context) []types.SFID {
+	v, ok := ProjectBlackListFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

@@ -3,12 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"slices"
 	"sync"
 	"time"
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/global"
-	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
@@ -23,6 +23,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/robot_notifier"
 	"github.com/machinefi/w3bstream/pkg/modules/robot_notifier/lark"
 	"github.com/machinefi/w3bstream/pkg/modules/trafficlimit"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 var app = global.App
@@ -101,13 +102,22 @@ func main() {
 			},
 			func() {
 				<-sigProjectsInitialized
+				wl, _ := types.ProjectWhiteListFromContext(ctx)
+				bl, _ := types.ProjectBlackListFromContext(ctx)
 				for _, prj := range projectIDs {
-					sche := event.NewEventHandleScheduler(time.Minute/2, 300, prj)
-					go sche.Run(ctx)
+					if slices.Contains(wl, prj) {
+						sche := event.NewEventHandleScheduler(time.Minute/2, 300, prj)
+						go sche.Run(ctx)
+						continue
+					}
+					if !slices.Contains(bl, prj) {
+						sche := event.NewEventHandleScheduler(time.Minute/2, 300, prj)
+						go sche.Run(ctx)
+					}
 				}
 			},
 			func() {
-				sche := event.NewEventCleanupScheduler(time.Hour, 90*time.Hour*24)
+				sche := event.NewEventCleanupScheduler(time.Hour, 14*time.Hour*24)
 				sche.Run(ctx)
 			},
 			func() {

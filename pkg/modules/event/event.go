@@ -272,20 +272,21 @@ func handle(ctx context.Context, batch int64, prj types.SFID) int {
 		}); err != nil {
 			l.Error(err)
 		}
-		go func(v *models.Event) {
+		go func(ctx context.Context, v *models.Event) {
 			metrics.EventMetricsInc(ctx, v)
 			if v.AutoCollect == datatypes.TRUE {
 				metrics.GeoCollect(ctx, v)
 			}
-		}(v)
+		}(ctx, v)
 	}
 	return len(evs)
 }
 
 func NewEventHandleScheduler(d time.Duration, batch int64, prj types.SFID) *EventHandleScheduler {
 	return &EventHandleScheduler{
-		du:  d,
-		prj: prj,
+		prj:   prj,
+		batch: batch,
+		du:    d,
 	}
 }
 

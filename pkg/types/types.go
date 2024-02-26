@@ -282,3 +282,7 @@ func (r *Risc0Config) LivenessCheck() map[string]string {
 
 	return m
 }
+
+type ProjectWhiteList []types.SFID
+
+type ProjectBlackList []types.SFID
