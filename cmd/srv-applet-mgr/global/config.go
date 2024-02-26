@@ -107,8 +107,8 @@ func init() {
 		Risc0Config:      &types.Risc0Config{},
 		Mq:               TaskMgr,
 		MaxWasmFuel:      1024 * 1024 * 1024,
-		ProjectBlackList: []types.SFID{},
-		ProjectWhiteList: []types.SFID{},
+		ProjectBlackList: []types.SFID{0},
+		ProjectWhiteList: []types.SFID{0},
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
