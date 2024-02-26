@@ -80,8 +80,8 @@ func init() {
 		Risc0Config      *types.Risc0Config
 		Mq               *confmq.Config
 		MaxWasmFuel      uint64
-		ProjectBlackList []types.SFID
-		ProjectWhiteList []types.SFID
+		ProjectBlackList *[]types.SFID
+		ProjectWhiteList *[]types.SFID
 	}{
 		Postgres:         db,
 		MonitorDB:        monitordb,
@@ -107,8 +107,8 @@ func init() {
 		Risc0Config:      &types.Risc0Config{},
 		Mq:               TaskMgr,
 		MaxWasmFuel:      1024 * 1024 * 1024,
-		ProjectBlackList: []types.SFID{0},
-		ProjectWhiteList: []types.SFID{0},
+		ProjectBlackList: new([]types.SFID),
+		ProjectWhiteList: new([]types.SFID),
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
@@ -181,8 +181,8 @@ func init() {
 		types.WithWasmApiServerContext(wasmApiServer),
 		types.WithOperatorPoolContext(operatorPool),
 		types.WithMaxWasmConsumeFuelContext(config.MaxWasmFuel),
-		types.WithProjectBlackListContext(config.ProjectBlackList),
-		types.WithProjectWhiteListContext(config.ProjectWhiteList),
+		types.WithProjectBlackListContext(*config.ProjectBlackList),
+		types.WithProjectWhiteListContext(*config.ProjectWhiteList),
 	)
 	Context = WithContext(context.Background())
 }
