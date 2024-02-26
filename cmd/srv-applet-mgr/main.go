@@ -123,6 +123,13 @@ func main() {
 						}
 					}
 				}
+				if len(wl) == 0 && len(bl) == 0 {
+					for _, prj := range projectIDs {
+						sche := event.NewEventHandleScheduler(time.Minute/2, 300, prj)
+						projects = append(projects, prj.String())
+						go sche.Run(ctx)
+					}
+				}
 
 				body, err := lark.Build(ctx, "Projects Processes", "INFO",
 					fmt.Sprintf("black list: %v\nwhite list: %v \n%s", bl, wl, strings.Join(projects, "\n")))
