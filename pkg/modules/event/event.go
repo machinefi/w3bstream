@@ -127,6 +127,9 @@ func OnEvent(ctx context.Context, data []byte) (ret []*Result) {
 }
 
 func Create(ctx context.Context, r *EventReq) (*EventRsp, error) {
+	_, l := logr.Start(ctx, "event.Create")
+	defer l.End()
+
 	prj := types.MustProjectFromContext(ctx)
 	pub := types.MustPublisherFromContext(ctx)
 
@@ -183,6 +186,9 @@ func Create(ctx context.Context, r *EventReq) (*EventRsp, error) {
 }
 
 func BatchCreate(ctx context.Context, reqs DataPushReqs) (DataPushRsps, error) {
+	_, l := logr.Start(ctx, "event.BatchCreate")
+	defer l.End()
+
 	ret := make(DataPushRsps, 0, len(reqs))
 	prj := types.MustProjectFromContext(ctx)
 	for i, v := range reqs {

@@ -4,7 +4,6 @@ package project
 
 import (
 	"context"
-	"strings"
 
 	"github.com/pkg/errors"
 
@@ -20,8 +19,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/modules/publisher"
-	"github.com/machinefi/w3bstream/pkg/modules/robot_notifier"
-	"github.com/machinefi/w3bstream/pkg/modules/robot_notifier/lark"
 	"github.com/machinefi/w3bstream/pkg/modules/transporter/mqtt"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
@@ -43,6 +40,9 @@ func GetBySFID(ctx context.Context, prj types.SFID) (*models.Project, error) {
 }
 
 func GetByName(ctx context.Context, name string) (*models.Project, error) {
+	_, l := logr.Start(ctx, "project.GetByName")
+	defer l.End()
+
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	m := &models.Project{
 		ProjectName: models.ProjectName{Name: name},
@@ -263,22 +263,22 @@ func Init(ctx context.Context) ([]types.SFID, error) {
 	succs := make([]types.SFID, 0, len(projects))
 
 	defer func() {
-		message := ""
-		if len(fails) > 1 {
-			message = "\nprojects failed to start:\n"
-			message += strings.Join(fails, "\n")
-		}
-		if len(succs) > 1 {
-			message = "\nstarted projects:\n"
-			for _, v := range succs {
-				message += v.String() + "\n"
-			}
-		}
-		body, err := lark.Build(ctx, "Project Channel Monitoring", "INFO", message)
-		if err != nil {
-			return
-		}
-		_ = robot_notifier.Push(ctx, body)
+		// message := ""
+		// if len(fails) > 1 {
+		// 	message = "\nprojects failed to start:\n"
+		// 	message += strings.Join(fails, "\n")
+		// }
+		// if len(succs) > 1 {
+		// 	message = "\nstarted projects:\n"
+		// 	for _, v := range succs {
+		// 		message += v.String() + "\n"
+		// 	}
+		// }
+		// body, err := lark.Build(ctx, "Project Channel Monitoring", "INFO", message)
+		// if err != nil {
+		// 	return
+		// }
+		// _ = robot_notifier.Push(ctx, body)
 	}()
 
 	l = l.WithValues("total", len(projects))

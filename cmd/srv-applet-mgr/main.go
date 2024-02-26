@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"slices"
+	"strings"
 	"sync"
 	"time"
 
@@ -104,17 +105,26 @@ func main() {
 				<-sigProjectsInitialized
 				wl, _ := types.ProjectWhiteListFromContext(ctx)
 				bl, _ := types.ProjectBlackListFromContext(ctx)
+				projects := make([]string, 0)
 				for _, prj := range projectIDs {
 					if slices.Contains(wl, prj) {
 						sche := event.NewEventHandleScheduler(time.Minute/2, 300, prj)
 						go sche.Run(ctx)
+						projects = append(projects, prj.String())
 						continue
 					}
 					if !slices.Contains(bl, prj) {
 						sche := event.NewEventHandleScheduler(time.Minute/2, 300, prj)
+						projects = append(projects, prj.String())
 						go sche.Run(ctx)
 					}
 				}
+
+				body, err := lark.Build(ctx, "Projects Processes", "INFO", strings.Join(projects, "\n"))
+				if err != nil {
+					return
+				}
+				_ = robot_notifier.Push(ctx, body, nil)
 			},
 			func() {
 				sche := event.NewEventCleanupScheduler(time.Hour, 14*time.Hour*24)
