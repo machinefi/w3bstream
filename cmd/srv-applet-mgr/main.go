@@ -106,17 +106,21 @@ func main() {
 				wl, _ := types.ProjectWhiteListFromContext(ctx)
 				bl, _ := types.ProjectBlackListFromContext(ctx)
 				projects := make([]string, 0)
-				for _, prj := range projectIDs {
-					if slices.Contains(wl, prj) {
-						sche := event.NewEventHandleScheduler(time.Minute/2, 300, prj)
-						go sche.Run(ctx)
-						projects = append(projects, prj.String())
-						continue
+				if len(wl) > 0 {
+					for _, prj := range projectIDs {
+						if slices.Contains(wl, prj) {
+							sche := event.NewEventHandleScheduler(time.Minute/2, 300, prj)
+							go sche.Run(ctx)
+							projects = append(projects, prj.String())
+						}
 					}
-					if !slices.Contains(bl, prj) {
-						sche := event.NewEventHandleScheduler(time.Minute/2, 300, prj)
-						projects = append(projects, prj.String())
-						go sche.Run(ctx)
+				} else if len(bl) > 0 {
+					for _, prj := range projectIDs {
+						if !slices.Contains(bl, prj) {
+							sche := event.NewEventHandleScheduler(time.Minute/2, 300, prj)
+							projects = append(projects, prj.String())
+							go sche.Run(ctx)
+						}
 					}
 				}
 
