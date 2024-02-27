@@ -3,13 +3,14 @@ package wasm
 import (
 	"context"
 	"fmt"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"net/url"
 	"strings"
+	"sync/atomic"
 
 	"github.com/pkg/errors"
 
 	confpostgres "github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
-	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	driverpostgres "github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/driver/postgres"
@@ -34,7 +35,9 @@ type Database struct {
 	// schemas reference of Schemas; key: schema name
 	schemas map[string]*Schema
 
-	ep *confpostgres.Endpoint // database endpoint
+	ep     *confpostgres.Endpoint // database endpoint
+	init   atomic.Bool
+	parent context.Context
 }
 
 type Schema struct {
@@ -186,6 +189,10 @@ func (d *Database) WithContext(ctx context.Context) context.Context {
 }
 
 func (d *Database) WithSchema(name string) (db sqlx.DBExecutor, err error) {
+	if err := d.lazyInit(); err != nil {
+		return nil, err
+	}
+
 	if name == "" {
 		name = "public"
 	}
@@ -205,8 +212,19 @@ func (d *Database) WithDefaultSchema() (sqlx.DBExecutor, error) {
 	return d.WithSchema("public")
 }
 
-func (d *Database) Init(parent context.Context) (err error) {
-	parent, l := logr.Start(parent, "types.wasm.Database.Init")
+func (d *Database) Init(parent context.Context) error {
+	d.init.Store(false)
+	d.parent = parent
+	return nil
+}
+
+func (d *Database) lazyInit() (err error) {
+	if !d.init.CompareAndSwap(false, true) {
+		return nil
+	}
+	parent := d.parent
+
+	parent, l := logger.NewSpanContext(parent, "types.wasm.Database.Init")
 	defer l.End()
 
 	// init database endpoint
