@@ -146,7 +146,7 @@ func init() {
 	proxy = &client.Client{Port: uint16(ServerEvent.Port), Timeout: 10 * time.Second}
 	proxy.SetDefault()
 
-	redisKvDB := kvdb.NewRedisDB(config.Redis)
+	redisKvDB := kvdb.NewRedisDB(config.Redis, "traffic_limit")
 	operatorPool := pool.NewPool(config.Postgres)
 
 	sfIDGenerator := confid.MustNewSFIDGenerator()

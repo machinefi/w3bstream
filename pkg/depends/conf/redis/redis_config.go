@@ -44,7 +44,7 @@ func (r *Redis) clone() *Redis {
 
 func (r *Redis) WithPrefix(prefix string) *Redis {
 	cloned := r.clone()
-	cloned.Prefix += "::" + prefix
+	cloned.Prefix += ":" + prefix
 	return cloned
 }
 

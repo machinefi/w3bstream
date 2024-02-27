@@ -20,9 +20,10 @@ type Cache struct {
 }
 
 func (c *Cache) Init(parent context.Context) error {
+	prj := types.MustProjectFromContext(parent)
 	switch c.Mode {
 	case enums.CACHE_MODE__REDIS:
-		c.kv = kvdb.NewRedisDB(types.MustRedisEndpointFromContext(parent))
+		c.kv = kvdb.NewRedisDB(types.MustRedisEndpointFromContext(parent), prj.ProjectID.String())
 	default:
 		c.kv = kvdb.NewMemDB()
 	}

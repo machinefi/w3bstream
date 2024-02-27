@@ -15,8 +15,8 @@ type RedisDB struct {
 	db *confredis.Redis
 }
 
-func NewRedisDB(d *confredis.Redis) *RedisDB {
-	return &RedisDB{db: d}
+func NewRedisDB(d *confredis.Redis, prefix string) *RedisDB {
+	return &RedisDB{db: d.WithPrefix(prefix)}
 }
 
 func (r *RedisDB) Get(key string) ([]byte, error) {
