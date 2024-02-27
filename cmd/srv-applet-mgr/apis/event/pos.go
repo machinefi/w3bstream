@@ -11,7 +11,6 @@ import (
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/modules/event"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
-	"github.com/machinefi/w3bstream/pkg/modules/trafficlimit"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
@@ -36,9 +35,9 @@ func (r *HandleEvent) Output(ctx context.Context) (interface{}, error) {
 	}
 	ctx = types.WithProject(ctx, prj)
 
-	if err = trafficlimit.TrafficLimit(ctx, enums.TRAFFIC_LIMIT_TYPE__EVENT); err != nil {
-		return nil, err
-	}
+	// if err = trafficlimit.TrafficLimit(ctx, enums.TRAFFIC_LIMIT_TYPE__EVENT); err != nil {
+	// 	return nil, err
+	// }
 
 	if r.IsDataPush() {
 		l.Info("event push")
