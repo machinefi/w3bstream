@@ -226,7 +226,7 @@ func init() {
 		CreateProofPath: "/ws/api/prove_file",
 	}
 
-	redisKvDB := kvdb.NewRedisDB(_redis)
+	redisKvDB := kvdb.NewRedisDB(_redis, "unittest")
 	operatorPool := pool.NewPool(_dbMgr)
 
 	sfIDGenerator := confid.MustNewSFIDGenerator()
