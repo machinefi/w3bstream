@@ -9,6 +9,7 @@ SRV_APPLET_MGR__AmazonS3_SessionToken: ""
 SRV_APPLET_MGR__AmazonS3_UrlExpire: 10m
 SRV_APPLET_MGR__ChainConfig_AAUserOpEndpoint: ""
 SRV_APPLET_MGR__ChainConfig_Configs: ""
+SRV_APPLET_MGR__EnableTrafficLimit: "false"
 SRV_APPLET_MGR__EthClient_Endpoints: ""
 SRV_APPLET_MGR__FileSystem_Type: LOCAL
 SRV_APPLET_MGR__Jwt_ExpIn: 0s

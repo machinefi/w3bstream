@@ -3,13 +3,13 @@ package wasm
 import (
 	"context"
 	"fmt"
-	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"net/url"
 	"strings"
 	"sync/atomic"
 
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	confpostgres "github.com/machinefi/w3bstream/pkg/depends/conf/postgres"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"

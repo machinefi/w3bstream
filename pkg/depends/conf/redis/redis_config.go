@@ -30,7 +30,7 @@ type Redis struct {
 	Prefix         string
 }
 
-func (r *Redis) Get() redis.Conn {
+func (r *Redis) Acquire() redis.Conn {
 	if r.pool != nil {
 		return r.pool.Get()
 	}
@@ -44,7 +44,9 @@ func (r *Redis) clone() *Redis {
 
 func (r *Redis) WithPrefix(prefix string) *Redis {
 	cloned := r.clone()
-	cloned.Prefix += ":" + prefix
+	if prefix != "" {
+		cloned.Prefix += ":" + prefix
+	}
 	return cloned
 }
 
@@ -55,7 +57,7 @@ func (r *Redis) WithDBIndex(n int) *Redis {
 }
 
 func (r *Redis) Exec(cmd *Cmd, others ...*Cmd) (interface{}, error) {
-	c := r.Get()
+	c := r.Acquire()
 	defer c.Close()
 
 	if (len(others)) == 0 {
@@ -95,7 +97,7 @@ func (r *Redis) Name() string { return "redis-cli" }
 func (r *Redis) LivenessCheck() map[string]string {
 	m := map[string]string{}
 
-	conn := r.Get()
+	conn := r.Acquire()
 	defer conn.Close()
 
 	_, err := conn.Do("PING")

@@ -15,9 +15,8 @@ type CreateReq struct {
 }
 
 type UpdateReq struct {
-	TrafficLimitID types.SFID     `json:"-"`
-	Threshold      int            `json:"threshold"`
-	Duration       types.Duration `json:"duration"`
+	Threshold int            `json:"threshold"`
+	Duration  types.Duration `json:"duration"`
 }
 
 type CondArgs struct {

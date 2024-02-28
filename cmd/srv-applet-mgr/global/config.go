@@ -56,59 +56,61 @@ func init() {
 	// TODO config struct should be defined outside this method and impl it's Init() interface{}
 	// TODO split this init too long
 	config := &struct {
-		Postgres         *confpostgres.Endpoint
-		MonitorDB        *confpostgres.Endpoint
-		MqttBroker       *confmqtt.Broker
-		Redis            *confredis.Redis
-		NewLogger        *conflogger.Config
-		Tracer           *conftracer.Config
-		Server           *confhttp.Server
-		Jwt              *confjwt.Jwt
-		Logger           *conflog.Log
-		UploadConf       *types.UploadConfig
-		EthClient        *types.ETHClientConfig
-		ChainConfig      *types.ChainConfig
-		WhiteList        *types.EthAddressWhiteList
-		ServerEvent      *confhttp.Server
-		FileSystem       *types.FileSystem
-		AmazonS3         *amazonS3.AmazonS3
-		LocalFS          *local.LocalFileSystem
-		WasmDBConfig     *types.WasmDBConfig
-		RateLimit        *confrate.RateLimit
-		MetricsCenter    *types.MetricsCenterConfig
-		RobotNotifier    *types.RobotNotifierConfig
-		Risc0Config      *types.Risc0Config
-		Mq               *confmq.Config
-		MaxWasmFuel      uint64
-		ProjectBlackList *[]types.SFID
-		ProjectWhiteList *[]types.SFID
+		Postgres           *confpostgres.Endpoint
+		MonitorDB          *confpostgres.Endpoint
+		MqttBroker         *confmqtt.Broker
+		Redis              *confredis.Redis
+		NewLogger          *conflogger.Config
+		Tracer             *conftracer.Config
+		Server             *confhttp.Server
+		Jwt                *confjwt.Jwt
+		Logger             *conflog.Log
+		UploadConf         *types.UploadConfig
+		EthClient          *types.ETHClientConfig
+		ChainConfig        *types.ChainConfig
+		WhiteList          *types.EthAddressWhiteList
+		ServerEvent        *confhttp.Server
+		FileSystem         *types.FileSystem
+		AmazonS3           *amazonS3.AmazonS3
+		LocalFS            *local.LocalFileSystem
+		WasmDBConfig       *types.WasmDBConfig
+		RateLimit          *confrate.RateLimit
+		MetricsCenter      *types.MetricsCenterConfig
+		RobotNotifier      *types.RobotNotifierConfig
+		Risc0Config        *types.Risc0Config
+		Mq                 *confmq.Config
+		MaxWasmFuel        uint64
+		ProjectBlackList   *[]types.SFID
+		ProjectWhiteList   *[]types.SFID
+		EnableTrafficLimit bool
 	}{
-		Postgres:         db,
-		MonitorDB:        monitordb,
-		MqttBroker:       &confmqtt.Broker{},
-		Redis:            &confredis.Redis{},
-		NewLogger:        &conflogger.Config{},
-		Tracer:           &conftracer.Config{},
-		Server:           ServerMgr,
-		Jwt:              &confjwt.Jwt{},
-		Logger:           &conflog.Log{},
-		UploadConf:       &types.UploadConfig{},
-		EthClient:        &types.ETHClientConfig{},
-		ChainConfig:      &types.ChainConfig{},
-		WhiteList:        &types.EthAddressWhiteList{},
-		ServerEvent:      ServerEvent,
-		FileSystem:       &types.FileSystem{},
-		AmazonS3:         &amazonS3.AmazonS3{},
-		LocalFS:          &local.LocalFileSystem{},
-		WasmDBConfig:     &types.WasmDBConfig{},
-		RateLimit:        &confrate.RateLimit{},
-		MetricsCenter:    &types.MetricsCenterConfig{},
-		RobotNotifier:    &types.RobotNotifierConfig{},
-		Risc0Config:      &types.Risc0Config{},
-		Mq:               TaskMgr,
-		MaxWasmFuel:      1024 * 1024 * 1024,
-		ProjectBlackList: new([]types.SFID),
-		ProjectWhiteList: new([]types.SFID),
+		Postgres:           db,
+		MonitorDB:          monitordb,
+		MqttBroker:         &confmqtt.Broker{},
+		Redis:              &confredis.Redis{},
+		NewLogger:          &conflogger.Config{},
+		Tracer:             &conftracer.Config{},
+		Server:             ServerMgr,
+		Jwt:                &confjwt.Jwt{},
+		Logger:             &conflog.Log{},
+		UploadConf:         &types.UploadConfig{},
+		EthClient:          &types.ETHClientConfig{},
+		ChainConfig:        &types.ChainConfig{},
+		WhiteList:          &types.EthAddressWhiteList{},
+		ServerEvent:        ServerEvent,
+		FileSystem:         &types.FileSystem{},
+		AmazonS3:           &amazonS3.AmazonS3{},
+		LocalFS:            &local.LocalFileSystem{},
+		WasmDBConfig:       &types.WasmDBConfig{},
+		RateLimit:          &confrate.RateLimit{},
+		MetricsCenter:      &types.MetricsCenterConfig{},
+		RobotNotifier:      &types.RobotNotifierConfig{},
+		Risc0Config:        &types.Risc0Config{},
+		Mq:                 TaskMgr,
+		MaxWasmFuel:        1024 * 1024 * 1024,
+		ProjectBlackList:   new([]types.SFID),
+		ProjectWhiteList:   new([]types.SFID),
+		EnableTrafficLimit: false,
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
@@ -146,7 +148,7 @@ func init() {
 	proxy = &client.Client{Port: uint16(ServerEvent.Port), Timeout: 10 * time.Second}
 	proxy.SetDefault()
 
-	redisKvDB := kvdb.NewRedisDB(config.Redis, "traffic_limit")
+	redisKvDB := kvdb.NewRedisDB(config.Redis, "")
 	operatorPool := pool.NewPool(config.Postgres)
 
 	sfIDGenerator := confid.MustNewSFIDGenerator()
@@ -183,6 +185,7 @@ func init() {
 		types.WithMaxWasmConsumeFuelContext(config.MaxWasmFuel),
 		types.WithProjectBlackListContext(*config.ProjectBlackList),
 		types.WithProjectWhiteListContext(*config.ProjectWhiteList),
+		types.WithEnableTrafficLimitContext(config.EnableTrafficLimit),
 	)
 	Context = WithContext(context.Background())
 }

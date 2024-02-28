@@ -13,17 +13,15 @@ func DefaultCache() *Cache {
 }
 
 type Cache struct {
-	Mode   enums.CacheMode `json:"mode"`
-	Prefix string          `json:"prefix,omitempty"`
-
-	kv KVStore
+	Mode enums.CacheMode `json:"mode"`
+	kv   KVStore
 }
 
 func (c *Cache) Init(parent context.Context) error {
 	prj := types.MustProjectFromContext(parent)
 	switch c.Mode {
 	case enums.CACHE_MODE__REDIS:
-		c.kv = kvdb.NewRedisDB(types.MustRedisEndpointFromContext(parent), prj.ProjectID.String())
+		c.kv = kvdb.NewRedisDB(types.MustRedisEndpointFromContext(parent), "wasm:"+prj.ProjectID.String())
 	default:
 		c.kv = kvdb.NewMemDB()
 	}

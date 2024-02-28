@@ -1107,7 +1107,6 @@ func (o *CreateTrafficLimit) Method() string {
 
 // @StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!
 // @StatusErr[AccountNotFound][404999017][Account Not Found]!
-// @StatusErr[CreateTrafficSchedulerFailed][500999014][Create Traffic Scheduler Failed]!
 // @StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
 // @StatusErr[DatabaseError][500999002][Database Error]!
@@ -1905,7 +1904,6 @@ func (o *HandleEvent) Method() string {
 // @StatusErr[ProjectNotFound][404999002][Project Not Found]!
 // @StatusErr[PublisherNotFound][404999008][Publisher Not Found]!
 // @StatusErr[TrafficLimitExceededFailed][429999002][Traffic Limit Exceeded Failed]!
-// @StatusErr[TrafficLimitNotFound][404999020][Traffic Limit Not Found]!
 
 func (o *HandleEvent) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
 	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.HandleEvent")
@@ -3108,11 +3106,7 @@ func (o *UpdateTrafficLimit) Method() string {
 // @StatusErr[InvalidClaim][401999003][Invalid Claim]!
 // @StatusErr[InvalidToken][401999002][Invalid Token]!
 // @StatusErr[NoAdminPermission][401999006][No Admin Permission]!
-// @StatusErr[NoProjectPermission][401999004][No Project Permission]!
-// @StatusErr[ProjectNotFound][404999002][Project Not Found]!
-// @StatusErr[TrafficLimitConflict][409999018][Traffic Limit Conflict]!
 // @StatusErr[TrafficLimitNotFound][404999020][Traffic Limit Not Found]!
-// @StatusErr[UpdateTrafficSchedulerFailed][500999015][Update Traffic Scheduler Failed]!
 
 func (o *UpdateTrafficLimit) Do(ctx context.Context, cli kit.Client, metas ...kit.Metadata) kit.Result {
 	ctx = metax.ContextWith(ctx, "operationID", "applet-mgr.UpdateTrafficLimit")

@@ -55,6 +55,8 @@ type (
 	CtxProjectWhiteList struct{}
 	// CtxProjectBlackList global project black list for handle event
 	CtxProjectBlackList struct{}
+	// CtxEnableTrafficLimit if enable traffic limit
+	CtxEnableTrafficLimit struct{}
 )
 
 // model contexts
@@ -856,7 +858,7 @@ func ProjectWhiteListFromContext(ctx context.Context) ([]types.SFID, bool) {
 	return v, ok
 }
 
-func MastProjectWhiteListFromContext(ctx context.Context) []types.SFID {
+func MustProjectWhiteListFromContext(ctx context.Context) []types.SFID {
 	v, ok := ProjectWhiteListFromContext(ctx)
 	must.BeTrue(ok)
 	return v
@@ -877,8 +879,23 @@ func ProjectBlackListFromContext(ctx context.Context) ([]types.SFID, bool) {
 	return v, ok
 }
 
-func MastProjectBlackListFromContext(ctx context.Context) []types.SFID {
+func MustProjectBlackListFromContext(ctx context.Context) []types.SFID {
 	v, ok := ProjectBlackListFromContext(ctx)
 	must.BeTrue(ok)
 	return v
+}
+
+func WithEnableTrafficLimit(ctx context.Context, v bool) context.Context {
+	return contextx.WithValue(ctx, CtxEnableTrafficLimit{}, v)
+}
+
+func WithEnableTrafficLimitContext(v bool) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return WithEnableTrafficLimit(ctx, v)
+	}
+}
+
+func EnableTrafficLimitFromContext(ctx context.Context) bool {
+	v, ok := ctx.Value(CtxEnableTrafficLimit{}).(bool)
+	return v && ok
 }

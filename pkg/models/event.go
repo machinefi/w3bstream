@@ -1,9 +1,11 @@
 package models
 
 import (
+	"context"
 	"reflect"
 
 	"github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
@@ -86,7 +88,10 @@ func BatchFetchEvents(d sqlx.DBExecutor, adds ...builder.Addition) (results []*E
 	return results, nil
 }
 
-func BatchFetchLastUnhandledEvents(d sqlx.DBExecutor, batch int64, prj types.SFID) ([]*Event, error) {
+func BatchFetchLastUnhandledEvents(ctx context.Context, d sqlx.DBExecutor, batch int64, prj types.SFID) ([]*Event, error) {
+	_, l := logger.NewSpanContext(ctx, "models.BatchFetchEvent")
+	defer l.End()
+
 	m := &Event{}
 	return BatchFetchEvents(
 		d,

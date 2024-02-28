@@ -40,7 +40,7 @@ func HandleEvent(ctx context.Context, tpe string, data []byte) (*EventRsp, error
 	}
 	ctx = types.WithProject(ctx, prj)
 
-	if err = trafficlimit.TrafficLimit(ctx, enums.TRAFFIC_LIMIT_TYPE__EVENT); err != nil {
+	if err = trafficlimit.TrafficLimit(ctx, prj.ProjectID, enums.TRAFFIC_LIMIT_TYPE__EVENT); err != nil {
 		return nil, err
 	}
 
@@ -225,7 +225,7 @@ func handle(ctx context.Context, batch int64, prj types.SFID) int {
 
 	d := types.MustMgrDBExecutorFromContext(ctx)
 
-	evs, err := models.BatchFetchLastUnhandledEvents(d, batch, prj)
+	evs, err := models.BatchFetchLastUnhandledEvents(ctx, d, batch, prj)
 	if err != nil {
 		l.Error(err)
 		return 0

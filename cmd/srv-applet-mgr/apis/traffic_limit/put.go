@@ -22,21 +22,10 @@ func (r *UpdateTrafficLimit) Path() string {
 }
 
 func (r *UpdateTrafficLimit) Output(ctx context.Context) (interface{}, error) {
-	ca, ok := middleware.MustCurrentAccountFromContext(ctx).CheckRole(enums.ACCOUNT_ROLE__ADMIN)
+	_, ok := middleware.MustCurrentAccountFromContext(ctx).CheckRole(enums.ACCOUNT_ROLE__ADMIN)
 	if !ok {
 		return nil, status.NoAdminPermission
 	}
 
-	ctx, err := ca.WithProjectContextByName(ctx, middleware.MustProjectName(ctx))
-	if err != nil {
-		return nil, err
-	}
-
-	ctx, err = ca.WithTrafficLimitContextBySFIDAndProjectName(ctx, r.TrafficLimitID)
-	if err != nil {
-		return nil, err
-	}
-
-	r.UpdateReq.TrafficLimitID = r.TrafficLimitID
-	return trafficlimit.Update(ctx, &r.UpdateReq)
+	return trafficlimit.Update(ctx, r.TrafficLimitID, &r.UpdateReq)
 }

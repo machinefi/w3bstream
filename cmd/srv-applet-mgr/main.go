@@ -109,7 +109,7 @@ func main() {
 				if len(wl) > 0 {
 					for _, prj := range projectIDs {
 						if slices.Contains(wl, prj) {
-							sche := event.NewEventHandleScheduler(time.Minute/2, 300, prj)
+							sche := event.NewEventHandleScheduler(time.Second*10, 100, prj)
 							go sche.Run(ctx)
 							projects = append(projects, prj.String())
 						}
@@ -117,7 +117,7 @@ func main() {
 				} else if len(bl) > 0 {
 					for _, prj := range projectIDs {
 						if !slices.Contains(bl, prj) {
-							sche := event.NewEventHandleScheduler(time.Minute/2, 300, prj)
+							sche := event.NewEventHandleScheduler(time.Second*10, 100, prj)
 							projects = append(projects, prj.String())
 							go sche.Run(ctx)
 						}
@@ -125,7 +125,7 @@ func main() {
 				}
 				if len(wl) == 0 && len(bl) == 0 {
 					for _, prj := range projectIDs {
-						sche := event.NewEventHandleScheduler(time.Minute/2, 300, prj)
+						sche := event.NewEventHandleScheduler(time.Second*10, 100, prj)
 						projects = append(projects, prj.String())
 						go sche.Run(ctx)
 					}
@@ -139,7 +139,7 @@ func main() {
 				_ = robot_notifier.Push(ctx, body, nil)
 			},
 			func() {
-				sche := event.NewEventCleanupScheduler(time.Hour, 14*time.Hour*24)
+				sche := event.NewEventCleanupScheduler(time.Hour, 3*time.Hour*24)
 				sche.Run(ctx)
 			},
 			func() {
