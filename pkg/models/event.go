@@ -25,6 +25,7 @@ import (
 // @def index I_received_at  ReceivedAt
 // @def index I_handled_at   HandledAt
 // @def index I_completed_at CompletedAt
+// @def index I_stage        Stage
 //
 //go:generate toolkit gen model Event --database DB
 type Event struct {

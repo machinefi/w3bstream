@@ -176,6 +176,9 @@ func (*Event) Indexes() builder.Indexes {
 		"i_result_code": []string{
 			"ResultCode",
 		},
+		"i_stage": []string{
+			"Stage",
+		},
 	}
 }
 
@@ -193,6 +196,7 @@ func (m *Event) IndexFieldNames() []string {
 		"PublisherID",
 		"ReceivedAt",
 		"ResultCode",
+		"Stage",
 	}
 }
 
