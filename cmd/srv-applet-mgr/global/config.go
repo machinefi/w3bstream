@@ -216,12 +216,18 @@ func Migrate() {
 	ctx, l := conflogger.NewSpanContext(context.Background(), "global.Migrate")
 	defer l.End()
 
-	if err := migration.Migrate(db.WithContext(ctx), nil); err != nil {
+	output, err := os.OpenFile("migrate.sql", os.O_CREATE|os.O_RDWR, 0666)
+	if err != nil {
+		panic(err)
+	}
+	defer output.Close()
+
+	if err := migration.Migrate(db.WithContext(ctx), output); err != nil {
 		l.Error(err)
 		panic(err)
 	}
 
-	if err := migration.Migrate(monitordb.WithContext(ctx), nil); err != nil {
+	if err := migration.Migrate(monitordb.WithContext(ctx), output); err != nil {
 		l.Error(err)
 		panic(err)
 	}
