@@ -30,7 +30,7 @@ import (
 var app = global.App
 
 func init() {
-	global.Migrate()
+	// global.Migrate()
 }
 
 func main() {
