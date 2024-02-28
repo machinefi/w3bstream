@@ -109,7 +109,7 @@ func NewServer(redisConf *redis.Redis, mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB, 
 
 	mux := asynq.NewServeMux()
 	mux.Handle(async.TaskNameApiCall, async.NewApiCallProcessor(router, asyncCli))
-	mux.Handle(async.TaskNameApiResult, async.NewApiResultProcessor(mgrDB, kv, tasks))
+	mux.Handle(async.TaskNameApiResult, async.NewApiResultProcessor(mgrDB, kv, tasks, redisConf))
 
 	if err := asyncSrv.Start(mux); err != nil {
 		return nil, err

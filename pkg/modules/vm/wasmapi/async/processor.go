@@ -16,6 +16,7 @@ import (
 
 	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	confmq "github.com/machinefi/w3bstream/pkg/depends/conf/mq"
+	confredis "github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -97,14 +98,16 @@ func (p *ApiCallProcessor) ProcessTask(ctx context.Context, t *asynq.Task) error
 type ApiResultProcessor struct {
 	mgrDB sqlx.DBExecutor
 	kv    *kvdb.RedisDB
+	redis *confredis.Redis
 	tasks *confmq.Config
 }
 
-func NewApiResultProcessor(mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB, tasks *confmq.Config) *ApiResultProcessor {
+func NewApiResultProcessor(mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB, tasks *confmq.Config, redis *confredis.Redis) *ApiResultProcessor {
 	return &ApiResultProcessor{
 		kv:    kv,
 		mgrDB: mgrDB,
 		tasks: tasks,
+		redis: redis,
 	}
 }
 
@@ -124,6 +127,7 @@ func (p *ApiResultProcessor) ProcessTask(ctx context.Context, t *asynq.Task) err
 		types.WithProjectContext(&models.Project{
 			ProjectName: models.ProjectName{Name: payload.ProjectName}},
 		),
+		types.WithRedisEndpointContext(p.redis),
 	)(ctx)
 
 	if _, err := event.HandleEvent(ctx, payload.EventType, payload.Data); err != nil {
