@@ -263,24 +263,34 @@ func TrafficLimit(ctx context.Context, prj types.SFID, tpe enums.TrafficLimitTyp
 	ctx, l := logr.Start(ctx, "trafficLimit.TrafficLimit")
 	defer l.End()
 
+	r := types.MustRedisEndpointFromContext(ctx)
+
+	// for statistics per hour
+	stat := r.WithPrefix("stat" + ":" + prj.String())
+	if total, err := stat.IncrBy(time.Now().Format("2006010215"), 1); err != nil {
+		l.WithValues("prj", prj, "total", total).Info("")
+	}
+
+	// for traffic limit
+	limit := r.WithPrefix(prefix)
 	l = l.WithValues("prj", prj, "tpe", tpe)
 	m := &models.TrafficLimit{
 		RelProject:       models.RelProject{ProjectID: prj},
 		TrafficLimitInfo: models.TrafficLimitInfo{ApiType: tpe},
 	}
-	kv := types.MustRedisEndpointFromContext(ctx).WithPrefix(prefix)
 
-	exists, _ := kv.Exists(m.CacheKey())
+	exists, _ := limit.Exists(m.CacheKey())
 	if !exists {
 		l.Info("no strategy")
 		return nil
 	}
 
-	count, _ := kv.IncrBy(m.CacheKey(), -1)
+	count, _ := limit.IncrBy(m.CacheKey(), -1)
 	if count <= 0 {
 		l.Info("limited")
 		return status.TrafficLimitExceededFailed
 	}
+
 	l.WithValues("remain", count).Info("")
 	return nil
 }
