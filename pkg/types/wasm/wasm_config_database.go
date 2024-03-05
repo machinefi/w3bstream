@@ -213,9 +213,13 @@ func (d *Database) WithDefaultSchema() (sqlx.DBExecutor, error) {
 }
 
 func (d *Database) Init(parent context.Context) error {
+	cfg := types.MustWasmDBConfigFromContext(parent)
 	d.init.Store(false)
 	d.parent = parent
-	return nil
+	if cfg.LazyInit {
+		return nil
+	}
+	return d.lazyInit()
 }
 
 func (d *Database) lazyInit() (err error) {

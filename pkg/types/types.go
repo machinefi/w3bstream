@@ -215,6 +215,7 @@ type WasmDBConfig struct {
 	MaxConnection   int
 	PoolSize        int
 	ConnMaxLifetime types.Duration
+	LazyInit        bool
 }
 
 func (c *WasmDBConfig) SetDefault() {

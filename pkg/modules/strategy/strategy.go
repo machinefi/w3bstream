@@ -247,12 +247,8 @@ func FilterByProjectAndEvent(ctx context.Context, id types.SFID, tpe string) ([]
 	_, l := logr.Start(ctx, "strategy.FilterByProjectAndEventType")
 	defer l.End()
 
-	args := &CondArgs{
-		ProjectID:  id,
-		EventTypes: []string{enums.EVENTTYPEDEFAULT},
-	}
-	if tpe != "" && tpe != enums.EVENTTYPEDEFAULT {
-		args.EventTypes = append(args.EventTypes, tpe)
+	if tpe == "" {
+		tpe = enums.EVENTTYPEDEFAULT
 	}
 
 	data, err := ListDetailByCond(ctx, &CondArgs{

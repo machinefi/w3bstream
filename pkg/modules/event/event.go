@@ -14,6 +14,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/statusx"
 	"github.com/machinefi/w3bstream/pkg/enums"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -39,10 +40,6 @@ func HandleEvent(ctx context.Context, tpe string, data []byte) (*EventRsp, error
 		return nil, err
 	}
 	ctx = types.WithProject(ctx, prj)
-
-	if err = trafficlimit.TrafficLimit(ctx, prj.ProjectID, enums.TRAFFIC_LIMIT_TYPE__EVENT); err != nil {
-		return nil, err
-	}
 
 	ctx = types.WithPublisher(ctx, &models.Publisher{
 		PrimaryID:    datatypes.PrimaryID{ID: 0},
@@ -133,6 +130,10 @@ func Create(ctx context.Context, r *EventReq) (*EventRsp, error) {
 	prj := types.MustProjectFromContext(ctx)
 	pub := types.MustPublisherFromContext(ctx)
 
+	if err := trafficlimit.TrafficLimit(ctx, prj.ProjectID, enums.TRAFFIC_LIMIT_TYPE__EVENT); err != nil {
+		return nil, err
+	}
+
 	strategies, err := strategy.FilterByProjectAndEvent(ctx, prj.ProjectID, r.EventType)
 	if err != nil {
 		return nil, err
@@ -209,6 +210,9 @@ func BatchCreate(ctx context.Context, reqs DataPushReqs) (DataPushRsps, error) {
 		}
 		res, err := Create(ctx, r)
 		if err != nil {
+			if se, ok := statusx.IsStatusErr(err); ok && se.Key == status.TrafficLimitExceededFailed.Key() {
+				break
+			}
 			return nil, err
 		}
 		ret = append(ret, &DataPushRsp{

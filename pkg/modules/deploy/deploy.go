@@ -55,6 +55,11 @@ func Init(ctx context.Context) error {
 		// _ = robot_notifier.Push(ctx, body)
 	}()
 
+	// make wasm database lazy init to reduce database connections
+	wasmdbconf := *(types.MustWasmDBConfigFromContext(ctx))
+	wasmdbconf.LazyInit = true
+	ctx = types.WithWasmDBConfig(ctx, &wasmdbconf)
+
 	list, err := ins.List(d, nil)
 	if err != nil {
 		l.Error(err)
