@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -18,6 +19,8 @@ import (
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
 	"github.com/machinefi/w3bstream/pkg/modules/resource"
+	"github.com/machinefi/w3bstream/pkg/modules/robot_notifier"
+	"github.com/machinefi/w3bstream/pkg/modules/robot_notifier/lark"
 	"github.com/machinefi/w3bstream/pkg/modules/vm"
 	"github.com/machinefi/w3bstream/pkg/modules/wasmlog"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -41,18 +44,18 @@ func Init(ctx context.Context) error {
 	)
 
 	defer func() {
-		// message := ""
-		// if len(fails) > 1 {
-		// 	message += strings.Join(fails, "\n")
-		// }
-		// if len(succs) > 1 {
-		// 	message += strings.Join(succs, "\n")
-		// }
-		// body, err := lark.Build(ctx, "Instances Deploying", "INFO", message)
-		// if err != nil {
-		// 	return
-		// }
-		// _ = robot_notifier.Push(ctx, body)
+		message := ""
+		if len(fails) > 1 {
+			message += strings.Join(fails, "\n")
+		}
+		if len(succs) > 1 {
+			message += strings.Join(succs, "\n")
+		}
+		body, err := lark.Build(ctx, "Instances Deploying", "INFO", message)
+		if err != nil {
+			return
+		}
+		_ = robot_notifier.Push(ctx, body)
 	}()
 
 	// make wasm database lazy init to reduce database connections
