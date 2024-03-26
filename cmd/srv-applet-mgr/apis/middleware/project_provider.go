@@ -38,9 +38,6 @@ func ProjectNameForDisplay(name string) (string, error) {
 }
 
 func ProjectNameModifier(ctx context.Context) (prefix string, err error) {
-	ctx, l := logr.Start(ctx, "middleware.ProjectNameModifier")
-	defer l.End()
-
 	ca, ok := CurrentAccountFromContext(ctx)
 	if !ok {
 		return "", status.CurrentAccountAbsence
@@ -70,6 +67,9 @@ func (ProjectProvider) Path() string {
 }
 
 func (r *ProjectProvider) Output(ctx context.Context) (interface{}, error) {
+	ctx, l := logr.Start(ctx, "api.mw.ProjectNameModifier")
+	defer l.End()
+
 	prefix, err := ProjectNameModifier(ctx)
 	if err != nil {
 		return nil, err

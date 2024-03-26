@@ -84,7 +84,7 @@ func JsonifyRows(rawRows *sql.Rows) ([]byte, error) {
 				scanArgs[i] = new(sql.NullBool)
 			case "INT", "INTEGER", "SMALLINT", "BIGINT", "INT2", "INT4", "INT8":
 				scanArgs[i] = new(sql.NullInt64)
-			case "FLOAT", "FLOAT4", "FLOAT8", "DOUBLE":
+			case "FLOAT", "FLOAT4", "FLOAT8", "DOUBLE", "NUMERIC":
 				scanArgs[i] = new(sql.NullFloat64)
 			default:
 				// fmt.Println(columnTypes[i].DatabaseTypeName(), columnTypes[i].ScanType().Name())

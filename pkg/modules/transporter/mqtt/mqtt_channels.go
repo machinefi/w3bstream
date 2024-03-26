@@ -13,7 +13,7 @@ import (
 var topics = mapx.New[string, *subscriber]()
 
 func Subscribe(ctx context.Context, topic string) error {
-	ctx, l := logr.Start(ctx, "modules.transporter.mqtt.Subscribe")
+	ctx, l := logr.Start(ctx, "transporter.mqtt.Subscribe")
 	defer l.End()
 
 	broker := types.MustMqttBrokerFromContext(ctx)
@@ -40,7 +40,7 @@ func Subscribe(ctx context.Context, topic string) error {
 }
 
 func Stop(ctx context.Context, topic string) {
-	ctx, l := logr.Start(ctx, "modules.transporter.mqtt.Stop")
+	ctx, l := logr.Start(ctx, "transporter.mqtt.Stop")
 	defer l.End()
 
 	broker := types.MustMqttBrokerFromContext(ctx)

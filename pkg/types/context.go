@@ -48,6 +48,12 @@ type (
 	CtxMetricsCenterConfig struct{}
 	// CtxOperatorPool type *operator.Pool global operator memory pool
 	CtxOperatorPool struct{}
+	// CtxMaxWasmConsumeFuel global wasm consume fuel per invoking
+	CtxMaxWasmConsumeFuel struct{}
+	// CtxEnableTrafficLimit if enable traffic limit
+	CtxEnableTrafficLimit struct{}
+	// CtxProjectFilter global project filter
+	CtxProjectFilter struct{}
 )
 
 // model contexts
@@ -809,6 +815,63 @@ func OperatorPoolFromContext(ctx context.Context) (optypes.Pool, bool) {
 
 func MustOperatorPoolFromContext(ctx context.Context) optypes.Pool {
 	v, ok := OperatorPoolFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithMaxWasmConsumeFuel(ctx context.Context, v uint64) context.Context {
+	return contextx.WithValue(ctx, CtxMaxWasmConsumeFuel{}, v)
+}
+
+func WithMaxWasmConsumeFuelContext(v uint64) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return contextx.WithValue(ctx, CtxMaxWasmConsumeFuel{}, v)
+	}
+}
+
+func MaxWasmConsumeFuelFromContext(ctx context.Context) (uint64, bool) {
+	v, ok := ctx.Value(CtxMaxWasmConsumeFuel{}).(uint64)
+	return v, ok
+}
+
+func MustMaxWasmConsumeFuelFromContext(ctx context.Context) uint64 {
+	v, ok := MaxWasmConsumeFuelFromContext(ctx)
+	must.BeTrue(ok)
+	return v
+}
+
+func WithEnableTrafficLimit(ctx context.Context, v bool) context.Context {
+	return contextx.WithValue(ctx, CtxEnableTrafficLimit{}, v)
+}
+
+func WithEnableTrafficLimitContext(v bool) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return WithEnableTrafficLimit(ctx, v)
+	}
+}
+
+func EnableTrafficLimitFromContext(ctx context.Context) bool {
+	v, ok := ctx.Value(CtxEnableTrafficLimit{}).(bool)
+	return v && ok
+}
+
+func WithProjectFilter(ctx context.Context, f *ProjectFilter) context.Context {
+	return contextx.WithValue(ctx, CtxProjectFilter{}, f)
+}
+
+func WithProjectFilterContext(f *ProjectFilter) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return WithProjectFilter(ctx, f)
+	}
+}
+
+func ProjectFilterFromContext(ctx context.Context) (*ProjectFilter, bool) {
+	v, ok := ctx.Value(CtxProjectFilter{}).(*ProjectFilter)
+	return v, ok && v != nil
+}
+
+func MustProjectFilterFromContext(ctx context.Context) *ProjectFilter {
+	v, ok := ProjectFilterFromContext(ctx)
 	must.BeTrue(ok)
 	return v
 }

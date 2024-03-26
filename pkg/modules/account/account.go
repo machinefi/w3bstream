@@ -277,7 +277,7 @@ func ValidateLoginByUsername(ctx context.Context, r *LoginByUsernameReq) (*model
 }
 
 func GetAccountByAccountID(ctx context.Context, accountID types.SFID) (*models.Account, error) {
-	ctx, l := logr.Start(ctx, "modules.account.GetAccountByAccountID")
+	ctx, l := logr.Start(ctx, "account.GetAccountByAccountID")
 	defer l.End()
 
 	d := types.MustMgrDBExecutorFromContext(ctx)

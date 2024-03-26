@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
-	confmq "github.com/machinefi/w3bstream/pkg/depends/conf/mq"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -62,10 +61,6 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 	logger := types.MustLoggerFromContext(parent)
 	sfid := confid.MustSFIDGeneratorFromContext(parent)
 
-	// wasm runtime context
-	// all configurations will be init from parent(host) context and with value to wasm runtime context
-	ctx := context.Background()
-
 	// with user defined contexts
 	configs, err := config.List(parent, &config.CondArgs{
 		RelIDs: []types.SFID{prj.ProjectID, app.AppletID, ins.InstanceID},
@@ -80,7 +75,7 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 				fmt.Sprintf("config init failed: [type] %s [err] %v", c.ConfigType(), err),
 			)
 		}
-		ctx = c.WithContext(ctx)
+		parent = c.WithContext(parent)
 	}
 
 	// with context from global configurations
@@ -94,10 +89,13 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 				fmt.Sprintf("global config init failed: [type] %s [err] %v", t, err),
 			)
 		}
-		ctx = c.WithContext(ctx)
+		parent = c.WithContext(parent)
 	}
+	chainconf := types.MustChainConfigFromContext(parent)
+	operators := types.MustOperatorPoolFromContext(parent)
 
 	return contextx.WithContextCompose(
+		types.WithMgrDBExecutorContext(d),
 		types.WithWasmApiServerContext(apisrv),
 		types.WithLoggerContext(logger),
 		wasm.WithCustomMetricsContext(metric),
@@ -105,8 +103,7 @@ func WithInstanceRuntimeContext(parent context.Context) (context.Context, error)
 		types.WithProjectContext(prj),
 		types.WithAppletContext(app),
 		types.WithInstanceContext(ins),
-		confmq.WithMqContext(confmq.MustMqFromContext(parent)),
-		types.WithChainConfigContext(types.MustChainConfigFromContext(parent)),
-		types.WithOperatorPoolContext(types.MustOperatorPoolFromContext(parent)),
-	)(ctx), nil
+		types.WithChainConfigContext(chainconf),
+		types.WithOperatorPoolContext(operators),
+	)(parent), nil
 }

@@ -99,6 +99,10 @@ func (v Error) Key() string {
 		return "NoResourcePermission"
 	case InvalidAccessKey:
 		return "InvalidAccessKey"
+	case InvalidDataPushShouldAccount:
+		return "InvalidDataPushShouldAccount"
+	case InvalidDataPushShouldPublisher:
+		return "InvalidDataPushShouldPublisher"
 	case Forbidden:
 		return "Forbidden"
 	case DisabledAccount:
@@ -165,6 +169,8 @@ func (v Error) Key() string {
 		return "ProjectOperatorNotFound"
 	case AccessKeyNotFound:
 		return "AccessKeyNotFound"
+	case InvalidDataPushPayload:
+		return "InvalidDataPushPayload"
 	case Conflict:
 		return "Conflict"
 	case ProjectNameConflict:
@@ -205,6 +211,10 @@ func (v Error) Key() string {
 		return "ProjectOperatorConflict"
 	case AccessKeyNameConflict:
 		return "AccessKeyNameConflict"
+	case TooManyRequest:
+		return "TooManyRequest"
+	case TrafficLimitExceededFailed:
+		return "TrafficLimitExceededFailed"
 	case InternalServerError:
 		return "InternalServerError"
 	case DatabaseError:
@@ -231,8 +241,6 @@ func (v Error) Key() string {
 		return "BatchRemoveWasmLogFailed"
 	case GenTokenFailed:
 		return "GenTokenFailed"
-	case TrafficLimitExceededFailed:
-		return "TrafficLimitExceededFailed"
 	case CreateTrafficSchedulerFailed:
 		return "CreateTrafficSchedulerFailed"
 	case UpdateTrafficSchedulerFailed:
@@ -305,6 +313,10 @@ func (v Error) Msg() string {
 		return "No Resource Permission"
 	case InvalidAccessKey:
 		return "Invalid Account Access Key"
+	case InvalidDataPushShouldAccount:
+		return "invalid data push should account"
+	case InvalidDataPushShouldPublisher:
+		return "invalid data push should publisher"
 	case Forbidden:
 		return "forbidden"
 	case DisabledAccount:
@@ -371,6 +383,8 @@ func (v Error) Msg() string {
 		return "Project Operator relationship Not Found"
 	case AccessKeyNotFound:
 		return "Account Key Not Found"
+	case InvalidDataPushPayload:
+		return "invalid data push payload"
 	case Conflict:
 		return "Conflict conflict error"
 	case ProjectNameConflict:
@@ -411,6 +425,10 @@ func (v Error) Msg() string {
 		return "Project Operator relationship Conflict"
 	case AccessKeyNameConflict:
 		return "Access Key Name Conflict"
+	case TooManyRequest:
+		return "TooManyRequest too many request"
+	case TrafficLimitExceededFailed:
+		return "Traffic Limit Exceeded Failed"
 	case InternalServerError:
 		return "internal error"
 	case DatabaseError:
@@ -437,8 +455,6 @@ func (v Error) Msg() string {
 		return "Batch Remove WasmLog Failed"
 	case GenTokenFailed:
 		return "Gen Token Failed"
-	case TrafficLimitExceededFailed:
-		return "Traffic Limit Exceeded Failed"
 	case CreateTrafficSchedulerFailed:
 		return "Create Traffic Scheduler Failed"
 	case UpdateTrafficSchedulerFailed:
@@ -511,6 +527,10 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case InvalidAccessKey:
 		return true
+	case InvalidDataPushShouldAccount:
+		return true
+	case InvalidDataPushShouldPublisher:
+		return true
 	case Forbidden:
 		return false
 	case DisabledAccount:
@@ -577,6 +597,8 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case AccessKeyNotFound:
 		return true
+	case InvalidDataPushPayload:
+		return true
 	case Conflict:
 		return true
 	case ProjectNameConflict:
@@ -617,6 +639,10 @@ func (v Error) CanBeTalk() bool {
 		return true
 	case AccessKeyNameConflict:
 		return true
+	case TooManyRequest:
+		return true
+	case TrafficLimitExceededFailed:
+		return true
 	case InternalServerError:
 		return false
 	case DatabaseError:
@@ -642,8 +668,6 @@ func (v Error) CanBeTalk() bool {
 	case BatchRemoveWasmLogFailed:
 		return true
 	case GenTokenFailed:
-		return true
-	case TrafficLimitExceededFailed:
 		return true
 	case CreateTrafficSchedulerFailed:
 		return true

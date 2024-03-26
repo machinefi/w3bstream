@@ -10,6 +10,7 @@ import (
 
 var (
 	Root = kit.NewRouter(httptransport.Group("/event"), &middleware.EventReqRateLimit{})
+	// Root = kit.NewRouter(httptransport.Group("/event"))
 )
 
 func init() {

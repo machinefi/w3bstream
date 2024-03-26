@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/binary"
 
-	"github.com/bytecodealliance/wasmtime-go/v8"
+	"github.com/bytecodealliance/wasmtime-go/v17"
 	"github.com/pkg/errors"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 var (
@@ -16,7 +17,6 @@ var (
 	ErrNotInstantiated     = errors.New("not instantiated")
 	ErrFuncNotImported     = errors.New("func not imported")
 	ErrAlreadyLinked       = errors.New("already linked")
-	engine                 = wasmtime.NewEngineWithConfig(wasmtime.NewConfig())
 )
 
 type (
@@ -25,18 +25,24 @@ type (
 		linker   *wasmtime.Linker
 		store    *wasmtime.Store
 		instance *wasmtime.Instance
+		engine   *wasmtime.Engine
 	}
 )
 
 func NewRuntime() *Runtime {
-	return &Runtime{}
+	config := wasmtime.NewConfig()
+	config.SetConsumeFuel(true)
+	engine := wasmtime.NewEngineWithConfig(config)
+	return &Runtime{
+		engine: engine,
+	}
 }
 
 func (rt *Runtime) Link(lk ABILinker, code []byte) error {
 	if rt.module != nil {
 		return ErrAlreadyLinked
 	}
-	linker := wasmtime.NewLinker(engine)
+	linker := wasmtime.NewLinker(rt.engine)
 	if err := lk.LinkABI(func(module, name string, fn interface{}) error {
 		return linker.FuncWrap(module, name, fn)
 	}); err != nil {
@@ -46,7 +52,7 @@ func (rt *Runtime) Link(lk ABILinker, code []byte) error {
 		return err
 	}
 	rt.linker = linker
-	module, err := wasmtime.NewModule(engine, code)
+	module, err := wasmtime.NewModule(rt.engine, code)
 	if err != nil {
 		return err
 	}
@@ -64,8 +70,13 @@ func (rt *Runtime) Instantiate(ctx context.Context) error {
 	if rt.instance != nil {
 		return ErrAlreadyInstantiated
 	}
-	store := wasmtime.NewStore(engine)
+	store := wasmtime.NewStore(rt.engine)
 	store.SetWasi(wasmtime.NewWasiConfig())
+	if fuel, _ := types.MaxWasmConsumeFuelFromContext(ctx); fuel > 0 {
+		if err := store.SetFuel(fuel); err != nil {
+			return err
+		}
+	}
 
 	instance, err := rt.linker.Instantiate(store, rt.module)
 	if err != nil {

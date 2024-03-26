@@ -2,9 +2,9 @@ package logger
 
 import (
 	"fmt"
+	"log/slog"
 
 	"go.opentelemetry.io/otel/attribute"
-	"golang.org/x/exp/slog"
 
 	"github.com/machinefi/w3bstream/pkg/depends/x/textx"
 )

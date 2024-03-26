@@ -13,7 +13,7 @@ import (
 func CreateProof(ctx context.Context, req *CreateProofReq, host string, path string) (*CreateProofRsp, error) {
 	params := make(map[string]interface{})
 
-	ctx, l := logr.Start(ctx, "modules.xvm.CreateProof")
+	ctx, l := logr.Start(ctx, "vm.risc0.CreateProof")
 	defer l.End()
 
 	params["private_input"] = req.PrivateInput

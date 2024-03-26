@@ -9,21 +9,18 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bytecodealliance/wasmtime-go/v8"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/reactivex/rxgo/v2"
 	"github.com/tidwall/gjson"
 
-	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	conflog "github.com/machinefi/w3bstream/pkg/depends/conf/log"
-	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/mq"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
+	"github.com/machinefi/w3bstream/pkg/depends/x/misc/must"
 	"github.com/machinefi/w3bstream/pkg/enums"
-	"github.com/machinefi/w3bstream/pkg/modules/job"
 	"github.com/machinefi/w3bstream/pkg/types"
 	"github.com/machinefi/w3bstream/pkg/types/wasm"
 )
@@ -39,12 +36,11 @@ type Instance struct {
 	ctx         context.Context
 	id          types.SFID
 	rt          *Runtime
+	lk          *ExportFuncs
 	state       *atomic.Uint32
 	res         *mapx.Map[uint32, []byte]
 	evs         *mapx.Map[uint32, []byte]
-	handlers    map[string]*wasmtime.Func
 	kvs         wasm.KVStore
-	msgQueue    chan *Task
 	ch          chan rxgo.Item
 	source      []string
 	operators   []wasm.Operator
@@ -75,15 +71,14 @@ func NewInstanceByCode(ctx context.Context, id types.SFID, code []byte, st enums
 	state.Store(uint32(st))
 
 	ins := &Instance{
-		rt:       rt,
-		id:       id,
-		state:    state,
-		res:      res,
-		evs:      evs,
-		handlers: make(map[string]*wasmtime.Func),
-		kvs:      wasm.MustKVStoreFromContext(ctx),
-		msgQueue: make(chan *Task, maxMsgPerInstance),
-		ch:       make(chan rxgo.Item),
+		rt:    rt,
+		lk:    lk,
+		id:    id,
+		state: state,
+		res:   res,
+		evs:   evs,
+		kvs:   wasm.MustKVStoreFromContext(ctx),
+		ch:    make(chan rxgo.Item),
 	}
 
 	flow, ok := wasm.FlowFromContext(ctx)
@@ -147,43 +142,7 @@ func (i *Instance) HandleEvent(ctx context.Context, fn, eventType string, data [
 		retrieve:  make(chan *wasm.EventHandleResult),
 	}
 
-	job.Dispatch(ctx, task)
-	return task.Wait()
-}
-
-func (i *Instance) queueWorker(ctx context.Context) {
-	for {
-		res := &wasm.EventHandleResult{}
-		task, more := <-i.msgQueue
-
-		ctx, l := logger.NewSpanContext(ctx, "modules.vm.wasmtime.Instance.queueWorker")
-		l.WithValues("queue", len(i.msgQueue), "more", more).Debug("")
-
-		if !more {
-			return
-		}
-		if task == nil {
-			return
-		}
-		l = l.WithValues("event_id", task.EventID)
-
-		for _, typ := range i.source {
-			if task.EventType == typ {
-				l.Info("Flow_op start.")
-				i.ch <- rxgo.Of(task)
-				goto Next
-			}
-		}
-
-		res = i.handle(ctx, task)
-		if len(res.ErrMsg) > 0 {
-			job.Dispatch(ctx, job.NewWasmLogTask(ctx, log.ErrorLevel.String(), "vmTask", res.ErrMsg))
-		} else {
-			job.Dispatch(ctx, job.NewWasmLogTask(ctx, log.InfoLevel.String(), "vmTask", fmt.Sprintf("the event, whose eventtype is %s, is successfully handled by %s, ", task.EventType, task.Handler)))
-		}
-	Next:
-		l.End()
-	}
+	return i.handle(ctx, task)
 }
 
 func (i *Instance) streamCompute(ch chan rxgo.Item) rxgo.Observable {
@@ -512,8 +471,17 @@ func (i *Instance) handle(ctx context.Context, task *Task) *wasm.EventHandleResu
 	defer l.End()
 
 	l.Info("start processing task")
-	rid := i.AddResource([]byte(task.EventType), task.Payload)
-	defer i.RmvResource(rid)
+	rid, ok := i.lk.EntryContext(ctx, task.EventID, []byte(task.EventType), task.Payload)
+	if !ok {
+		return &wasm.EventHandleResult{
+			InstanceID: i.id.String(),
+			ErrMsg:     "InstanceBusy",
+			Code:       wasm.ResultStatusCode_Failed,
+		}
+	}
+	defer func() {
+		must.BeTrue(i.lk.LeaveContext(ctx, task.EventID, rid))
+	}()
 
 	if err := i.rt.Instantiate(ctx); err != nil {
 		return &wasm.EventHandleResult{
@@ -524,18 +492,28 @@ func (i *Instance) handle(ctx context.Context, task *Task) *wasm.EventHandleResu
 	}
 	defer i.rt.Deinstantiate(ctx)
 
+	before, err := i.rt.store.GetFuel()
+	if err == nil {
+		defer func() {
+			after, err := i.rt.store.GetFuel()
+			if err == nil {
+				i.lk.HostLog(conflog.InfoLevel, fmt.Sprintf("consumed fuel: %d", before-after))
+			}
+		}()
+	}
+
 	// TODO support wasm return data(not only code) for HTTP responding
 	result, err := i.rt.Call(ctx, task.Handler, int32(rid))
-	l.Debug("call wasm runtime completed.")
+	l.WithValues("result", result, "error", err).Debug("call wasm runtime completed.")
 	if err != nil {
-		l.Error(err)
+		i.lk.HostLog(conflog.ErrorLevel, errors.Wrapf(err, "wasm call completed with error. code: %v", result))
 		return &wasm.EventHandleResult{
 			InstanceID: i.id.String(),
 			ErrMsg:     err.Error(),
 			Code:       wasm.ResultStatusCode_Failed,
 		}
 	}
-
+	i.lk.HostLog(conflog.InfoLevel, fmt.Sprintf("wasm call completed. code: %v", result))
 	return &wasm.EventHandleResult{
 		InstanceID: i.id.String(),
 		Code:       wasm.ResultStatusCode(result.(int32)),

@@ -36,8 +36,6 @@ const (
 	BatchRemoveWasmLogFailed
 	// @errTalk Gen Token Failed
 	GenTokenFailed
-	// @errTalk Traffic Limit Exceeded Failed
-	TrafficLimitExceededFailed
 	// @errTalk Create Traffic Scheduler Failed
 	CreateTrafficSchedulerFailed
 	// @errTalk Update Traffic Scheduler Failed
@@ -81,6 +79,10 @@ const (
 	NoResourcePermission
 	// @errTalk Invalid Account Access Key
 	InvalidAccessKey
+	// @errTalk invalid data push should account
+	InvalidDataPushShouldAccount
+	// @errTalk invalid data push should publisher
+	InvalidDataPushShouldPublisher
 )
 
 const (
@@ -106,6 +108,13 @@ const (
 	AccessKeyExpired
 	// @errTalk Access Key Permission Denied
 	AccessKeyPermissionDenied
+)
+
+const (
+	// @errTalk TooManyRequest too many request
+	TooManyRequest Error = http.StatusTooManyRequests*1e6 + iota + 1
+	// @errTalk Traffic Limit Exceeded Failed
+	TrafficLimitExceededFailed
 )
 
 const (
@@ -225,4 +234,6 @@ const (
 	ProjectOperatorNotFound
 	// @errTalk Account Key Not Found
 	AccessKeyNotFound
+	// @errTalk invalid data push payload
+	InvalidDataPushPayload
 )

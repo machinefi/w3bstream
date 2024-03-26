@@ -19,7 +19,7 @@ type Endpoint struct {
 	pool     *redis.Pool
 }
 
-func (r *Endpoint) Get() redis.Conn {
+func (r *Endpoint) Acquire() redis.Conn {
 	if r.pool != nil {
 		return r.pool.Get()
 	}
@@ -33,7 +33,7 @@ func (r *Endpoint) Key(key string) string {
 func (r *Endpoint) LivenessCheck() map[string]string {
 	m := map[string]string{}
 
-	conn := r.Get()
+	conn := r.Acquire()
 	defer conn.Close()
 	_, err := conn.Do("PING")
 	if err != nil {
@@ -113,7 +113,7 @@ func (r *Endpoint) init() {
 }
 
 func (r *Endpoint) Exec(cmd *Cmd, others ...*Cmd) (interface{}, error) {
-	c := r.Get()
+	c := r.Acquire()
 	defer c.Close()
 
 	if (len(others)) == 0 {

@@ -226,12 +226,12 @@ func init() {
 		CreateProofPath: "/ws/api/prove_file",
 	}
 
-	redisKvDB := kvdb.NewRedisDB(_redis)
+	redisKvDB := kvdb.NewRedisDB(_redis, "unittest")
 	operatorPool := pool.NewPool(_dbMgr)
 
 	sfIDGenerator := confid.MustNewSFIDGenerator()
 
-	wasmApiServer, err := wasmapi.NewServer(conflog.Std(), _redis, _dbMgr, redisKvDB, _chainConf, _taskMgr, operatorPool, sfIDGenerator, _risc0Conf)
+	wasmApiServer, err := wasmapi.NewServer(_redis, _dbMgr, redisKvDB, _chainConf, _taskMgr, operatorPool, sfIDGenerator, _risc0Conf)
 	if err != nil {
 		conflog.Std().Fatal(err)
 	}

@@ -2,8 +2,7 @@ package slog
 
 import (
 	"context"
-
-	"golang.org/x/exp/slog"
+	"log/slog"
 )
 
 func Default() *slog.Logger {

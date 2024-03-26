@@ -2,149 +2,124 @@ package trafficlimit
 
 import (
 	"context"
-	"strconv"
+	"sync"
 	"time"
 
-	"github.com/go-co-op/gocron"
+	"github.com/go-co-op/gocron/v2"
 	"github.com/pkg/errors"
 
-	"github.com/machinefi/w3bstream/pkg/depends/base/types"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 	"github.com/machinefi/w3bstream/pkg/depends/x/mapx"
 	"github.com/machinefi/w3bstream/pkg/models"
-	"github.com/machinefi/w3bstream/pkg/types/wasm/kvdb"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
-func GetStartAt(projectKey string, duration types.Duration) (startAt time.Time) {
-	ts, ok := trafficSchedulers.Load(projectKey)
-	if ok && ts != nil {
-		_, startAt = ts.sch.NextRun()
-		return
-	}
+func AddScheduler(ctx context.Context, v *models.TrafficLimit, start ...bool) error {
+	_, l := logger.NewSpanContext(ctx, "traffic_limit.AddScheduler")
+	defer l.End()
 
-	now := time.Now().UTC()
-	seconds := duration.Duration().Seconds()
-
-	if seconds >= 24*time.Hour.Seconds() {
-		startAt = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-	} else if seconds >= time.Hour.Seconds() {
-		startAt = time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, now.Location())
-	} else if seconds >= time.Minute.Seconds() {
-		startAt = time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, now.Location())
-	} else {
-		startAt = time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second(), 0, now.Location())
-	}
-	return
-}
-
-func CreateScheduler(ctx context.Context, projectKey string, trafficInfo *models.TrafficLimitInfo) error {
-	ts := &TrafficScheduler{
-		projectKey:  projectKey,
-		trafficInfo: trafficInfo,
-		sch:         gocron.NewScheduler(time.UTC),
-		rDB:         kvdb.MustRedisDBKeyFromContext(ctx),
-	}
-	ts.settingSchedulerJob(ts.trafficInfo.StartAt.Time)
-	trafficSchedulers.Store(projectKey, ts)
-	if err := ts.Do(); err != nil {
-		return err
-	}
-
-	ts.StartNow()
-	return nil
-}
-
-func UpdateScheduler(ctx context.Context, projectKey string, trafficInfo *models.TrafficLimitInfo) error {
-	ts, ok := trafficSchedulers.Load(projectKey)
-	if ok && ts != nil {
-		ts.Stop()
-		trafficSchedulers.Remove(projectKey)
-	}
-
-	ts = &TrafficScheduler{
-		projectKey:  projectKey,
-		trafficInfo: trafficInfo,
-		sch:         gocron.NewScheduler(time.UTC),
-		rDB:         kvdb.MustRedisDBKeyFromContext(ctx),
-	}
-	ts.settingSchedulerJob(ts.trafficInfo.StartAt.Time)
-	trafficSchedulers.Store(projectKey, ts)
-	if err := ts.Do(); err != nil {
-		return err
-	}
-
-	ts.Start()
-	return nil
-}
-
-func RestartScheduler(ctx context.Context, projectKey string, trafficInfo *models.TrafficLimitInfo) error {
-	ts := &TrafficScheduler{
-		projectKey:  projectKey,
-		trafficInfo: trafficInfo,
-		sch:         gocron.NewScheduler(time.UTC),
-		rDB:         kvdb.MustRedisDBKeyFromContext(ctx),
-	}
-	ts.settingSchedulerJob(ts.trafficInfo.StartAt.Time)
-	trafficSchedulers.Store(projectKey, ts)
-	if err := ts.Do(); err != nil {
-		return err
-	}
-
-	ts.Start()
-	return nil
-}
-
-func DeleteScheduler(projectKey string) error {
-	ts, ok := trafficSchedulers.Load(projectKey)
+	l = l.WithValues("traffic_limit", v.TrafficLimitID, "du", v.Duration, "count", v.Threshold)
+	s, ok := schedulers.Load(v.TrafficLimitID)
 	if !ok {
-		return errors.New("trafficScheduler not found")
+		s, err := NewScheduler(ctx, v, start...)
+		if err != nil {
+			l.Error(err)
+			return err
+		}
+		schedulers.Store(v.TrafficLimitID, s)
+		l.Info("schedule created")
+		return nil
 	}
-	if ts != nil {
-		ts.Stop()
-	}
-	trafficSchedulers.Remove(projectKey)
-	ts.rDB.DelKey(projectKey)
+	s.update(ctx, v)
 	return nil
 }
 
-var trafficSchedulers = *mapx.New[string, *TrafficScheduler]()
-
-type TrafficScheduler struct {
-	ctx         context.Context
-	projectKey  string
-	trafficInfo *models.TrafficLimitInfo
-	sch         *gocron.Scheduler
-	rDB         *kvdb.RedisDB
+func AddAndStartScheduler(ctx context.Context, v *models.TrafficLimit) error {
+	return AddScheduler(ctx, v, true)
 }
 
-func (ts *TrafficScheduler) settingSchedulerJob(startTime time.Time) {
-	ts.sch.Every(int(ts.trafficInfo.Duration.Duration().Seconds())).Second().StartAt(startTime)
+func RmvScheduler(ctx context.Context, id types.SFID) {
+	_, l := logger.NewSpanContext(ctx, "traffic_limit.RmvScheduler")
+	defer l.End()
+
+	s, _ := schedulers.Load(id)
+	if s != nil {
+		s.Stop()
+	}
+	schedulers.Remove(id)
+	l.WithValues("traffic_limit", id).Info("schedule removed")
 }
 
-func (ts *TrafficScheduler) StartNow() {
-	ts.sch.StartImmediately().StartAsync()
-}
+var schedulers = *mapx.New[types.SFID, *Scheduler]()
 
-func (ts *TrafficScheduler) Start() {
-	ts.sch.StartAsync()
-}
-
-func (ts *TrafficScheduler) Stop() {
-	ts.sch.Stop()
-}
-
-func (ts *TrafficScheduler) Do() error {
-	_, err := ts.sch.Do(resetWindow, ts.projectKey, ts.trafficInfo.Threshold,
-		int64(ts.trafficInfo.Duration.Duration().Seconds()), ts.rDB)
+func NewScheduler(ctx context.Context, v *models.TrafficLimit, start ...bool) (*Scheduler, error) {
+	s := &Scheduler{
+		key: v.CacheKey(),
+		du:  v.Duration.Duration(),
+		cnt: int64(v.Threshold),
+		kv:  types.MustRedisEndpointFromContext(ctx).WithPrefix(prefix),
+	}
+	var err error
+	s.sch, err = gocron.NewScheduler()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	_, err = s.sch.NewJob(gocron.DurationJob(s.du), gocron.NewTask(s.reset))
+	if err != nil {
+		return nil, err
+	}
+	if len(start) > 0 && start[0] {
+		s.Start()
+	}
+	return s, nil
 }
 
-func resetWindow(projectKey string, threshold int, exp int64, rDB *kvdb.RedisDB) error {
-	err := rDB.SetKeyWithEX(projectKey, []byte(strconv.Itoa(threshold)), exp)
-	if err != nil {
-		return err
+type Scheduler struct {
+	mu  sync.Mutex
+	key string
+	du  time.Duration
+	cnt int64
+	sch gocron.Scheduler
+	kv  *redis.Redis
+}
+
+func (s *Scheduler) Start() {
+	s.reset()
+	s.sch.Start()
+}
+
+func (s *Scheduler) Stop() {
+	_ = s.kv.Del(s.key)
+	_ = s.sch.Shutdown()
+}
+
+func (s *Scheduler) reset() {
+	s.mu.Lock()
+	key, cnt, du := s.key, s.cnt, s.du
+	s.mu.Unlock()
+	_ = s.kv.SetEx(key, cnt, du)
+}
+
+func (s *Scheduler) update(ctx context.Context, v *models.TrafficLimit) {
+	_, l := logger.NewSpanContext(ctx, "traffic_limit.AddScheduler")
+	defer l.End()
+
+	l = l.WithValues("traffic_limit", v.TrafficLimitID)
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.key != v.CacheKey() || s.cnt != int64(v.Threshold) || s.du != v.Duration.Duration() {
+		s.key = v.CacheKey()
+		s.du = v.Duration.Duration()
+		s.cnt = int64(v.Threshold)
+		err := s.kv.SetEx(s.key, s.cnt, s.du)
+		l = l.WithValues("traffic_limit", v.TrafficLimitInfo, "du", v.Duration, "count", s.cnt)
+		if err != nil {
+			l.Error(errors.Wrap(err, "schedule update failed: %v"))
+		} else {
+			l.Info("schedule updated")
+		}
 	}
-	return nil
 }

@@ -57,9 +57,42 @@ func (*WasmLog) PrimaryKey() []string {
 	}
 }
 
+func (*WasmLog) Indexes() builder.Indexes {
+	return builder.Indexes{
+		"i_created_at": []string{
+			"CreatedAt",
+		},
+		"i_event_id": []string{
+			"EventID",
+		},
+		"i_instance_id": []string{
+			"InstanceID",
+		},
+		"i_level": []string{
+			"Level",
+		},
+		"i_log_time": []string{
+			"LogTime",
+		},
+		"i_project_name": []string{
+			"ProjectName",
+		},
+		"i_src": []string{
+			"Src",
+		},
+	}
+}
+
 func (m *WasmLog) IndexFieldNames() []string {
 	return []string{
+		"CreatedAt",
+		"EventID",
 		"ID",
+		"InstanceID",
+		"Level",
+		"LogTime",
+		"ProjectName",
+		"Src",
 		"WasmLogID",
 	}
 }
@@ -114,6 +147,14 @@ func (m *WasmLog) ColInstanceID() *builder.Column {
 
 func (*WasmLog) FieldInstanceID() string {
 	return "InstanceID"
+}
+
+func (m *WasmLog) ColEventID() *builder.Column {
+	return WasmLogTable.ColByFieldName(m.FieldEventID())
+}
+
+func (*WasmLog) FieldEventID() string {
+	return "EventID"
 }
 
 func (m *WasmLog) ColSrc() *builder.Column {

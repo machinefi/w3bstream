@@ -2351,6 +2351,71 @@
         }
       }
     },
+    "/srv-applet-mgr/v0/debug/instance/{id}": {
+      "get": {
+        "tags": [
+          "apis/debug"
+        ],
+        "operationId": "GetInstance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                },
+                {
+                  "x-go-field-name": "ID",
+                  "x-tag-name": "id"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsInstanceState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/srv-applet-mgr/v0/debug/instances": {
+      "get": {
+        "tags": [
+          "apis/debug"
+        ],
+        "summary": "FetchInstances fetch instances states in memory",
+        "operationId": "FetchInstances",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsInstanceState"
+                  },
+                  "propertyNames": {
+                    "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/srv-applet-mgr/v0/deploy/applet/{appletID}": {
       "get": {
         "tags": [
@@ -3197,6 +3262,22 @@
             }
           },
           {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgEnumsEventSource"
+                },
+                {
+                  "description": "From transport source",
+                  "x-go-field-name": "From",
+                  "x-tag-name": "from,omitempty"
+                }
+              ]
+            }
+          },
+          {
             "name": "timestamp",
             "in": "query",
             "schema": {
@@ -3238,31 +3319,6 @@
               }
             }
           },
-          "400": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[BadRequest][400999001][BadRequest]!",
-              "@StatusErr[DeprecatedProject][400999003][Deprecated Project]!",
-              "@StatusErr[InvalidAccessKeyIdentityType][400999013][Invalid Access Key Identity Type]!",
-              "@StatusErr[InvalidChainHeightIDs][400999011][Invalid Chain Height IDs]!",
-              "@StatusErr[InvalidChainTxIDs][400999010][Invalid Chain Tx IDs]!",
-              "@StatusErr[InvalidConfigType][400999002][Invalid Config Type]!",
-              "@StatusErr[InvalidContractLogIDs][400999009][Invalid Contract Log IDs]!",
-              "@StatusErr[InvalidCronExpressions][400999005][Invalid Cron Expressions]!",
-              "@StatusErr[InvalidDeleteCondition][400999007][Invalid Delete Condition]!",
-              "@StatusErr[InvalidPrivateKey][400999006][Invalid Private Key]!",
-              "@StatusErr[InvalidVMState][400999012][Invalid VM State]!",
-              "@StatusErr[UnknownDeployCommand][400999004][Unknown Deploy Command]!",
-              "@StatusErr[UnknownMonitorCommand][400999008][Unknown Deploy Command]!"
-            ]
-          },
           "401": {
             "description": "",
             "content": {
@@ -3273,51 +3329,13 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CurrentAccountAbsence][401999013][Current Account Absence]!",
-              "@StatusErr[InvalidAccessKey][401999018][Invalid Account Access Key]!",
-              "@StatusErr[InvalidAppletContext][401999016][Invalid Applet]!",
-              "@StatusErr[InvalidAuthAccountID][401999003][Invalid Auth Account ID]!",
               "@StatusErr[InvalidAuthPublisherID][401999012][Invalid Auth Publisher ID]!",
-              "@StatusErr[InvalidAuthPublisherID][401999012][Invalid Auth Publisher ID]!",
-              "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
-              "@StatusErr[InvalidEthLoginMessage][401999011][Invalid Siwe Message]!",
-              "@StatusErr[InvalidEthLoginSignature][401999010][Invalid Siwe Signature]!",
-              "@StatusErr[InvalidEventChannel][401999014][Invalid Event Channel]!",
-              "@StatusErr[InvalidEventToken][401999015][Invalid Event Token]!",
-              "@StatusErr[InvalidNewPassword][401999008][Invalid New Password]!",
-              "@StatusErr[InvalidOldPassword][401999007][Invalid Old Password]!",
-              "@StatusErr[InvalidPassword][401999009][Invalid Password]!",
+              "@StatusErr[InvalidDataPushShouldAccount][401999019][invalid data push should account]!",
+              "@StatusErr[InvalidDataPushShouldPublisher][401999020][invalid data push should publisher]!",
               "@StatusErr[InvalidToken][401999002][Invalid Token]!",
-              "@StatusErr[NoAdminPermission][401999006][No Admin Permission]!",
-              "@StatusErr[NoOperatorPermission][401999005][No Operator Permission]!",
-              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!",
-              "@StatusErr[NoResourcePermission][401999017][No Resource Permission]!",
-              "@StatusErr[Unauthorized][401999001][unauthorized]"
-            ]
-          },
-          "403": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[AccessKeyExpired][403999010][Account Access Key Expired]!",
-              "@StatusErr[AccessKeyPermissionDenied][403999011][Access Key Permission Denied]!",
-              "@StatusErr[DisabledAccount][403999002][Disabled Account]!",
-              "@StatusErr[Forbidden][403999001][forbidden]",
-              "@StatusErr[OccupiedOperator][403999008][Occupied Operator]!",
-              "@StatusErr[TopicAlreadySubscribed][403999007][Topic Already Subscribed]!",
-              "@StatusErr[UnsupportedFSOperator][403999009][Unsupported FileSystem Operator]!",
-              "@StatusErr[UploadFileDiskLimit][403999006][Upload File Disk Limit]!",
-              "@StatusErr[UploadFileMd5Unmatched][403999005][Upload File Md5 Unmatched]!",
-              "@StatusErr[UploadFileSizeLimit][403999004][Upload File Size Limit]!",
-              "@StatusErr[WhiteListForbidden][403999003][White List Forbidden]!"
+              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
             ]
           },
           "404": {
@@ -3330,33 +3348,13 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[AccessKeyNotFound][404999022][Account Key Not Found]!",
-              "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
-              "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
-              "@StatusErr[AccountPasswordNotFound][404999018][Account Password Not Found]!",
-              "@StatusErr[AppletNotFound][404999005][Applet Not Found]!",
-              "@StatusErr[BlockchainNotFound][404999013][Blockchain Not Found]!",
-              "@StatusErr[ChainHeightNotFound][404999016][Chain Height Not Found]!",
-              "@StatusErr[ChainTxNotFound][404999015][Chain Tx Not Found]!",
-              "@StatusErr[ConfigNotFound][404999003][Config Not Found]!",
-              "@StatusErr[ContractLogNotFound][404999014][Contract Log Not Found]!",
-              "@StatusErr[CronJobNotFound][404999011][Cron Job Not Found]!",
-              "@StatusErr[InstanceNotFound][404999006][Instance Not Found]!",
-              "@StatusErr[InstanceNotRunning][404999012][Instance Not Running]!",
-              "@StatusErr[NotFound][404999001][NotFound]!",
-              "@StatusErr[OperatorNotFound][404999019][Operator Not Found]!",
+              "@StatusErr[InvalidDataPushPayload][404999023][invalid data push payload]!",
               "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
-              "@StatusErr[ProjectOperatorNotFound][404999021][Project Operator relationship Not Found]!",
-              "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!",
-              "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!",
-              "@StatusErr[ResourceNotFound][404999004][Resource Not Found]!",
-              "@StatusErr[ResourcePermNotFound][404999010][Resource Perm Not Found]!",
-              "@StatusErr[StrategyNotFound][404999007][Strategy Not Found]!",
-              "@StatusErr[TrafficLimitNotFound][404999020][Traffic Limit Not Found]!"
+              "@StatusErr[PublisherNotFound][404999008][Publisher Not Found]!"
             ]
           },
-          "409": {
+          "429": {
             "description": "",
             "content": {
               "application/json": {
@@ -3366,26 +3364,7 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[AccessKeyNameConflict][409999020][Access Key Name Conflict]!",
-              "@StatusErr[AccountConflict][409999015][Account Conflict]!",
-              "@StatusErr[AccountIdentityConflict][409999014][Account Identity Conflict]!",
-              "@StatusErr[AccountPasswordConflict][409999016][Account Password Conflict]!",
-              "@StatusErr[AppletNameConflict][409999009][Applet Name Conflict]!",
-              "@StatusErr[ChainHeightConflict][409999013][Chain Height Conflict]!",
-              "@StatusErr[ChainTxConflict][409999012][Chain Tx Conflict]!",
-              "@StatusErr[ConfigConflict][409999006][Config Conflict]!",
-              "@StatusErr[Conflict][409999001][Conflict conflict error]!",
-              "@StatusErr[ContractLogConflict][409999011][Contract Log Conflict]!",
-              "@StatusErr[CronJobConflict][409999010][Cron Job Conflict]!",
-              "@StatusErr[MultiInstanceDeployed][409999008][Multi Instance Deployed]!",
-              "@StatusErr[OperatorConflict][409999017][Operator Conflict]!",
-              "@StatusErr[ProjectNameConflict][409999002][Project Name Conflict]!",
-              "@StatusErr[ProjectOperatorConflict][409999019][Project Operator relationship Conflict]!",
-              "@StatusErr[PublisherConflict][409999007][Publisher Conflict]!",
-              "@StatusErr[ResourceConflict][409999003][Resource Conflict]!",
-              "@StatusErr[ResourceOwnerConflict][409999004][Resource Owner Conflict]!",
-              "@StatusErr[StrategyConflict][409999005][Strategy Conflict]!",
-              "@StatusErr[TrafficLimitConflict][409999018][Traffic Limit Conflict]!"
+              "@StatusErr[TrafficLimitExceededFailed][429999002][Traffic Limit Exceeded Failed]!"
             ]
           },
           "500": {
@@ -3398,23 +3377,8 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[BatchRemoveAppletFailed][500999009][Batch Remove Applet Failed]!",
-              "@StatusErr[BatchRemoveWasmLogFailed][500999012][Batch Remove WasmLog Failed]!",
-              "@StatusErr[ConfigInitFailed][500999005][Config Init Failed]!",
-              "@StatusErr[ConfigParseFailed][500999007][Config Parse Failed]!",
-              "@StatusErr[ConfigUninitFailed][500999006][Config Uninit Failed]!",
-              "@StatusErr[CreateInstanceFailed][500999008][Create Instance Failed]!",
-              "@StatusErr[CreateTrafficSchedulerFailed][500999015][Create Traffic Scheduler Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[FetchResourceFailed][500999004][Fetch Resource Failed]!",
-              "@StatusErr[GenTokenFailed][500999013][Gen Token Failed]!",
-              "@StatusErr[InternalServerError][500999001][internal error]",
-              "@StatusErr[MqttConnectFailed][500999011][MQTT Connect Failed]!",
-              "@StatusErr[MqttSubscribeFailed][500999010][MQTT Subscribe Failed]!",
-              "@StatusErr[TrafficLimitExceededFailed][500999014][Traffic Limit Exceeded Failed]!",
-              "@StatusErr[UpdateTrafficSchedulerFailed][500999016][Update Traffic Scheduler Failed]!",
-              "@StatusErr[UploadFileFailed][500999003][Upload File Failed]!"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -9848,7 +9812,6 @@
               }
             },
             "x-status-errors": [
-              "@StatusErr[CreateTrafficSchedulerFailed][500999015][Create Traffic Scheduler Failed]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!"
@@ -9951,8 +9914,7 @@
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
-              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
-              "@StatusErr[TrafficLimitNotFound][404999020][Traffic Limit Not Found]!"
+              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!"
             ]
           },
           "500": {
@@ -10222,8 +10184,7 @@
               "@StatusErr[InvalidAuthValue][401999002][Invalid Auth Value]!",
               "@StatusErr[InvalidClaim][401999003][Invalid Claim]!",
               "@StatusErr[InvalidToken][401999002][Invalid Token]!",
-              "@StatusErr[NoAdminPermission][401999006][No Admin Permission]!",
-              "@StatusErr[NoProjectPermission][401999004][No Project Permission]!"
+              "@StatusErr[NoAdminPermission][401999006][No Admin Permission]!"
             ]
           },
           "404": {
@@ -10238,21 +10199,7 @@
             "x-status-errors": [
               "@StatusErr[AccountIdentityNotFound][404999009][Account Identity Not Found]!",
               "@StatusErr[AccountNotFound][404999017][Account Not Found]!",
-              "@StatusErr[ProjectNotFound][404999002][Project Not Found]!",
               "@StatusErr[TrafficLimitNotFound][404999020][Traffic Limit Not Found]!"
-            ]
-          },
-          "409": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgDependsKitStatusxStatusErr"
-                }
-              }
-            },
-            "x-status-errors": [
-              "@StatusErr[TrafficLimitConflict][409999018][Traffic Limit Conflict]!"
             ]
           },
           "500": {
@@ -10267,8 +10214,7 @@
             "x-status-errors": [
               "@StatusErr[DatabaseError][500999002][Database Error]!",
               "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[DatabaseError][500999002][Database Error]!",
-              "@StatusErr[UpdateTrafficSchedulerFailed][500999016][Update Traffic Scheduler Failed]!"
+              "@StatusErr[DatabaseError][500999002][Database Error]!"
             ]
           }
         }
@@ -10741,6 +10687,8 @@
           "arbitrum-one",
           "base-goerli",
           "base-mainnet",
+          "conflux-espace-mainnet",
+          "conflux-espace-testnet",
           "ethereum-mainnet",
           "goerli",
           "iotex-mainnet",
@@ -10760,6 +10708,8 @@
           "arbitrum-one",
           "base-goerli",
           "base-mainnet",
+          "conflux-espace-mainnet",
+          "conflux-espace-testnet",
           "ethereum-mainnet",
           "goerli",
           "iotex-mainnet",
@@ -10806,6 +10756,21 @@
         ],
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.DeployCmd",
         "x-id": "GithubComMachinefiW3BstreamPkgEnumsDeployCmd"
+      },
+      "GithubComMachinefiW3BstreamPkgEnumsEventSource": {
+        "type": "string",
+        "enum": [
+          "MQTT",
+          "HTTP",
+          "MONITOR"
+        ],
+        "x-enum-labels": [
+          "MQTT",
+          "HTTP",
+          "MONITOR"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/enums.EventSource",
+        "x-id": "GithubComMachinefiW3BstreamPkgEnumsEventSource"
       },
       "GithubComMachinefiW3BstreamPkgEnumsFlowOperator": {
         "type": "string",
@@ -13147,6 +13112,39 @@
         "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/deploy.CreateReq",
         "x-id": "GithubComMachinefiW3BstreamPkgModulesDeployCreateReq"
       },
+      "GithubComMachinefiW3BstreamPkgModulesEventDataPushRsp": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "format": "int32",
+            "x-go-field-name": "Index",
+            "x-tag-json": "index"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesEventResult"
+            },
+            "x-go-field-name": "Results",
+            "x-tag-json": "results"
+          }
+        },
+        "required": [
+          "index",
+          "results"
+        ],
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/event.DataPushRsp",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesEventDataPushRsp"
+      },
+      "GithubComMachinefiW3BstreamPkgModulesEventDataPushRsps": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/GithubComMachinefiW3BstreamPkgModulesEventDataPushRsp"
+        },
+        "x-go-vendor-type": "github.com/machinefi/w3bstream/pkg/modules/event.DataPushRsps",
+        "x-id": "GithubComMachinefiW3BstreamPkgModulesEventDataPushRsps"
+      },
       "GithubComMachinefiW3BstreamPkgModulesEventEventRsp": {
         "type": "object",
         "properties": {
@@ -13854,11 +13852,6 @@
                 "x-tag-json": "mode"
               }
             ]
-          },
-          "prefix": {
-            "type": "string",
-            "x-go-field-name": "Prefix",
-            "x-tag-json": "prefix,omitempty"
           }
         },
         "required": [

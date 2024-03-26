@@ -6,6 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -69,11 +70,9 @@ func Monitor(ctx context.Context) {
 
 type monitor struct{}
 
-func (l *monitor) sendEvent(ctx context.Context, data []byte, projectName string, eventType string) error {
-	logger := types.MustLoggerFromContext(ctx)
-
-	_, logger = logger.Start(ctx, "monitor.sendEvent")
-	defer logger.End()
+func (*monitor) sendEvent(ctx context.Context, data []byte, projectName string, eventType string) error {
+	ctx, l := logr.Start(ctx, "bc.monitor.sendEvent", "prj", projectName, "event_type", eventType)
+	defer l.End()
 
 	// COMMENT: this should be a rpc, projectName is enough? TODO @zhiran
 	ctx = types.WithProject(ctx, &models.Project{
@@ -81,12 +80,14 @@ func (l *monitor) sendEvent(ctx context.Context, data []byte, projectName string
 	)
 	ret, err := event.HandleEvent(ctx, eventType, data)
 	if err != nil {
+		l.Error(err)
 		return err
 	}
-	res := ret.([]*event.Result)
-	for _, r := range res {
+	for _, r := range ret.Results {
 		if r.Error != "" {
-			return errors.New(r.Error)
+			err = errors.New(r.Error)
+			l.Error(err)
+			return err
 		}
 	}
 	return nil

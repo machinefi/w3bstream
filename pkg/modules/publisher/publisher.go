@@ -2,6 +2,7 @@ package publisher
 
 import (
 	"context"
+	"fmt"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
@@ -17,7 +18,7 @@ import (
 )
 
 func GetBySFID(ctx context.Context, id types.SFID) (*models.Publisher, error) {
-	ctx, l := logr.Start(ctx, "modules.publisher.GetBySFID")
+	ctx, l := logr.Start(ctx, "publisher.GetBySFID")
 	defer l.End()
 
 	d := types.MustMgrDBExecutorFromContext(ctx)
@@ -33,7 +34,7 @@ func GetBySFID(ctx context.Context, id types.SFID) (*models.Publisher, error) {
 }
 
 func GetByProjectAndKey(ctx context.Context, prj types.SFID, key string) (*models.Publisher, error) {
-	ctx, l := logr.Start(ctx, "modules.publisher.GetByProjectAndKey")
+	ctx, l := logr.Start(ctx, "publisher.GetByProjectAndKey")
 	defer l.End()
 
 	d := types.MustMgrDBExecutorFromContext(ctx)
@@ -52,7 +53,7 @@ func GetByProjectAndKey(ctx context.Context, prj types.SFID, key string) (*model
 }
 
 func ListByCond(ctx context.Context, r *CondArgs) (data []models.Publisher, err error) {
-	ctx, l := logr.Start(ctx, "modules.publisher.ListByCond")
+	ctx, l := logr.Start(ctx, "publisher.ListByCond")
 	defer l.End()
 
 	var (
@@ -67,7 +68,7 @@ func ListByCond(ctx context.Context, r *CondArgs) (data []models.Publisher, err 
 }
 
 func List(ctx context.Context, r *ListReq) (*ListRsp, error) {
-	ctx, l := logr.Start(ctx, "modules.publisher.List")
+	ctx, l := logr.Start(ctx, "publisher.List")
 	defer l.End()
 
 	var (
@@ -93,7 +94,7 @@ func List(ctx context.Context, r *ListReq) (*ListRsp, error) {
 }
 
 func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
-	ctx, l := logr.Start(ctx, "modules.publisher.ListDetail")
+	ctx, l := logr.Start(ctx, "publisher.ListDetail")
 	defer l.End()
 
 	var (
@@ -135,7 +136,7 @@ func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
 }
 
 func RemoveBySFID(ctx context.Context, acc *models.Account, prj *models.Project, id types.SFID) error {
-	ctx, l := logr.Start(ctx, "modules.publisher.RemoveBySFID")
+	ctx, l := logr.Start(ctx, "publisher.RemoveBySFID")
 	defer l.End()
 
 	d := types.MustMgrDBExecutorFromContext(ctx)
@@ -169,7 +170,7 @@ func RemoveBySFID(ctx context.Context, acc *models.Account, prj *models.Project,
 }
 
 func RemoveByProjectAndKey(ctx context.Context, prj types.SFID, key string) error {
-	ctx, l := logr.Start(ctx, "modules.publisher.RemoveByProjectAndKey")
+	ctx, l := logr.Start(ctx, "publisher.RemoveByProjectAndKey")
 	defer l.End()
 
 	d := types.MustMgrDBExecutorFromContext(ctx)
@@ -192,7 +193,7 @@ func RemoveByProjectAndKey(ctx context.Context, prj types.SFID, key string) erro
 }
 
 func Remove(ctx context.Context, acc *models.Account, r *CondArgs) error {
-	ctx, l := logr.Start(ctx, "modules.publisher.Remove")
+	ctx, l := logr.Start(ctx, "publisher.Remove")
 	defer l.End()
 
 	d := types.MustMgrDBExecutorFromContext(ctx)
@@ -216,7 +217,7 @@ func Remove(ctx context.Context, acc *models.Account, r *CondArgs) error {
 }
 
 func Create(ctx context.Context, r *CreateReq) (*models.Publisher, error) {
-	ctx, l := logr.Start(ctx, "modules.publisher.Create")
+	ctx, l := logr.Start(ctx, "publisher.Create")
 	defer l.End()
 
 	var (
@@ -275,8 +276,35 @@ func Create(ctx context.Context, r *CreateReq) (*models.Publisher, error) {
 	return pub, nil
 }
 
+func CreateIfNotExist(ctx context.Context, r *CreateReq) (*models.Publisher, error) {
+	var (
+		prj = types.MustProjectFromContext(ctx)
+		idg = confid.MustSFIDGeneratorFromContext(ctx)
+		d   = types.MustMgrDBExecutorFromContext(ctx)
+		m   = &models.Publisher{}
+	)
+
+	m.PublisherID = idg.MustGenSFID()
+	m.ProjectID = prj.ProjectID
+	m.Key = r.Key
+	m.Name = r.Name
+	if err := m.Create(d); err != nil {
+		if !sqlx.DBErr(err).IsConflict() {
+			return nil, status.DatabaseError.StatusErr().
+				WithDesc(fmt.Sprintf("create publisher failed: %v", err))
+		}
+	} else {
+		return m, nil
+	}
+	if err := m.FetchByProjectIDAndKey(d); err != nil {
+		return nil, status.DatabaseError.StatusErr().
+			WithDesc(fmt.Sprintf("fetch publisher failed: %v", err))
+	}
+	return m, nil
+}
+
 func Upsert(ctx context.Context, r *CreateReq) (*models.Publisher, error) {
-	ctx, l := logr.Start(ctx, "modules.publisher.Upsert")
+	ctx, l := logr.Start(ctx, "publisher.Upsert")
 	defer l.End()
 
 	var (

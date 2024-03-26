@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/enums"
@@ -243,20 +244,18 @@ func BatchCreate(ctx context.Context, sty []models.Strategy) error {
 }
 
 func FilterByProjectAndEvent(ctx context.Context, id types.SFID, tpe string) ([]*types.StrategyResult, error) {
+	_, l := logr.Start(ctx, "strategy.FilterByProjectAndEventType")
+	defer l.End()
+
+	if tpe == "" {
+		tpe = enums.EVENTTYPEDEFAULT
+	}
+
 	data, err := ListDetailByCond(ctx, &CondArgs{
 		ProjectID: id, EventTypes: []string{tpe}},
 	)
 	if err != nil {
 		return nil, err
-	}
-
-	if len(data) == 0 {
-		data, err = ListDetailByCond(ctx, &CondArgs{
-			ProjectID: id, EventTypes: []string{enums.EVENTTYPEDEFAULT}},
-		)
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	results := make([]*types.StrategyResult, 0, len(data))

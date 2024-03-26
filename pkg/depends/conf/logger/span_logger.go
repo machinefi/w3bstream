@@ -3,13 +3,13 @@ package logger
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
-	"golang.org/x/exp/slog"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/metax"
@@ -20,6 +20,7 @@ func SpanLogger(span trace.Span) logr.Logger {
 }
 
 func NewSpanContext(ctx context.Context, name string) (context.Context, logr.Logger) {
+	ctx = trace.ContextWithSpan(ctx, nil)
 	ctx, span := otel.Tracer(name).Start(ctx, name, trace.WithTimestamp(time.Now()))
 	l := SpanLogger(span)
 	return logr.WithLogger(ctx, l), l

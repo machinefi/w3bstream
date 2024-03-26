@@ -14,9 +14,9 @@ import (
 	"github.com/pkg/errors"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
-	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	confmq "github.com/machinefi/w3bstream/pkg/depends/conf/mq"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/redis"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	optypes "github.com/machinefi/w3bstream/pkg/modules/operator/pool/types"
 	"github.com/machinefi/w3bstream/pkg/modules/vm/wasmapi/async"
@@ -33,8 +33,7 @@ type Server struct {
 }
 
 func (s *Server) Call(ctx context.Context, data []byte) *apitypes.HttpResponse {
-	l := types.MustLoggerFromContext(ctx)
-	_, l = l.Start(ctx, "wasmapi.Call")
+	_, l := logr.Start(ctx, "vm.Server.Call")
 	defer l.End()
 
 	apiReq := apitypes.HttpRequest{}
@@ -91,7 +90,7 @@ func newRouter(mgrDB sqlx.DBExecutor, chainConf *types.ChainConfig, opPool optyp
 	return router
 }
 
-func NewServer(l log.Logger, redisConf *redis.Redis, mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB, chainConf *types.ChainConfig,
+func NewServer(redisConf *redis.Redis, mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB, chainConf *types.ChainConfig,
 	tasks *confmq.Config, opPool optypes.Pool, sfid confid.SFIDGenerator, risc0Conf *types.Risc0Config) (*Server, error) {
 
 	redisCli := asynq.RedisClientOpt{
@@ -109,8 +108,8 @@ func NewServer(l log.Logger, redisConf *redis.Redis, mgrDB sqlx.DBExecutor, kv *
 	router := newRouter(mgrDB, chainConf, opPool, sfid, asyncCli, risc0Conf)
 
 	mux := asynq.NewServeMux()
-	mux.Handle(async.TaskNameApiCall, async.NewApiCallProcessor(l, router, asyncCli))
-	mux.Handle(async.TaskNameApiResult, async.NewApiResultProcessor(l, mgrDB, kv, tasks))
+	mux.Handle(async.TaskNameApiCall, async.NewApiCallProcessor(router, asyncCli))
+	mux.Handle(async.TaskNameApiResult, async.NewApiResultProcessor(mgrDB, kv, tasks, redisConf))
 
 	if err := asyncSrv.Start(mux); err != nil {
 		return nil, err

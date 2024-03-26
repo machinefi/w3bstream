@@ -26,7 +26,7 @@ var ctxPublisherAuthKey = reflect.TypeOf(ContextAccountAuth{}).String()
 func (r *ContextPublisherAuth) ContextKey() string { return ctxPublisherAuthKey }
 
 func (r *ContextPublisherAuth) Output(ctx context.Context) (interface{}, error) {
-	ctx, l := logr.Start(ctx, "middleware.ContextPublisherAuth.Output")
+	ctx, l := logr.Start(ctx, "api.mw.ContextPublisherAuth")
 	defer l.End()
 
 	pl, err := ParseJwtAuthContentFromContext(ctx)
@@ -61,12 +61,18 @@ func MustPublisher(ctx context.Context) *CurrentPublisher {
 	return p
 }
 
+func MaybePublisher(ctx context.Context) (*CurrentPublisher, bool) {
+	v := ctx.Value(ctxPublisherAuthKey)
+	p, ok := v.(*CurrentPublisher)
+	return p, ok
+}
+
 type CurrentPublisher struct {
 	*models.Publisher
 }
 
 func (v *CurrentPublisher) WithProjectContext(ctx context.Context) (context.Context, error) {
-	ctx, l := logr.Start(ctx, "CurrentPublisher.WithProjectContext")
+	ctx, l := logr.Start(ctx, "api.wm.CurrentPublisher.WithProjectContext")
 	defer l.End()
 
 	p := MustPublisher(ctx)
@@ -79,7 +85,7 @@ func (v *CurrentPublisher) WithProjectContext(ctx context.Context) (context.Cont
 }
 
 func (v *CurrentPublisher) WithAccountContext(ctx context.Context) (context.Context, error) {
-	ctx, l := logr.Start(ctx, "CurrentPublisher.WithAccountContext")
+	ctx, l := logr.Start(ctx, "api.mw.CurrentPublisher.WithAccountContext")
 	defer l.End()
 
 	var (
@@ -98,7 +104,7 @@ func (v *CurrentPublisher) WithAccountContext(ctx context.Context) (context.Cont
 }
 
 func (v *CurrentPublisher) WithStrategiesByChanAndType(ctx context.Context, ch, tpe string) (context.Context, error) {
-	ctx, l := logr.Start(ctx, "CurrentPublisher.WithStrategiesByChanAndType")
+	ctx, l := logr.Start(ctx, "api.mw.CurrentPublisher.WithStrategiesByChanAndType")
 	defer l.End()
 	var (
 		err error

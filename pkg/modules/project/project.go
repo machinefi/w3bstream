@@ -9,13 +9,16 @@ import (
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/jwt"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/models"
+	"github.com/machinefi/w3bstream/pkg/modules/account"
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
+	"github.com/machinefi/w3bstream/pkg/modules/event"
 	"github.com/machinefi/w3bstream/pkg/modules/publisher"
 	"github.com/machinefi/w3bstream/pkg/modules/transporter/mqtt"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -38,6 +41,9 @@ func GetBySFID(ctx context.Context, prj types.SFID) (*models.Project, error) {
 }
 
 func GetByName(ctx context.Context, name string) (*models.Project, error) {
+	_, l := logr.Start(ctx, "project.GetByName")
+	defer l.End()
+
 	d := types.MustMgrDBExecutorFromContext(ctx)
 	m := &models.Project{
 		ProjectName: models.ProjectName{Name: name},
@@ -121,7 +127,7 @@ func ListDetail(ctx context.Context, r *ListReq) (*ListDetailRsp, error) {
 }
 
 func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
-	ctx, l := logr.Start(ctx, "modules.project.Create")
+	ctx, l := logr.Start(ctx, "project.Create")
 	defer l.End()
 
 	d := types.MustMgrDBExecutorFromContext(ctx)
@@ -203,11 +209,18 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 	}
 	rsp.ChannelState = datatypes.BooleanValue(err == nil)
 
+	filter, _ := types.ProjectFilterFromContext(ctx)
+	if filter != nil && filter.Filter(prj.ProjectID) {
+		sche := event.NewDefaultEventHandleScheduler(prj.ProjectID)
+		go sche.Run(ctx)
+		l.Info("event handler scheduler started")
+	}
+
 	return rsp, nil
 }
 
 func RemoveBySFID(ctx context.Context, id types.SFID) (err error) {
-	ctx, l := logr.Start(ctx, "modules.project.RemoveBySFID", "porject_id", id)
+	ctx, l := logr.Start(ctx, "project.RemoveBySFID", "project_id", id)
 	defer l.End()
 
 	var (
@@ -243,36 +256,74 @@ func RemoveBySFID(ctx context.Context, id types.SFID) (err error) {
 	).Do()
 }
 
-func Init(ctx context.Context) error {
-	ctx, l := logr.Start(ctx, "modules.project.Init")
+func Init(ctx context.Context) ([]types.SFID, error) {
+	ctx, l := logger.NewSpanContext(ctx, "project.Init")
 	defer l.End()
 
 	d := types.MustMgrDBExecutorFromContext(ctx)
 
-	user, err := (&models.Account{}).List(d, nil)
-	for _, u := range user {
-		ctx = types.WithAccount(ctx, &u)
-		break
+	projects, err := (&models.Project{}).List(d, nil)
+	if err != nil {
+		return nil, err
 	}
 
-	data, err := (&models.Project{}).List(d, nil)
-	if err != nil {
-		return err
-	}
-	for i := range data {
-		v := &data[i]
-		l = l.WithValues("prj", v.Name)
+	fails := make([]string, 0, len(projects))
+	succs := make([]types.SFID, 0, len(projects))
+
+	defer func() {
+		// message := ""
+		// if len(fails) > 1 {
+		// 	message = "\nprojects failed to start:\n"
+		// 	message += strings.Join(fails, "\n")
+		// }
+		// if len(succs) > 1 {
+		// 	message = "\nstarted projects:\n"
+		// 	for _, v := range succs {
+		// 		message += v.String() + "\n"
+		// 	}
+		// }
+		// body, err := lark.Build(ctx, "Project Channel Monitoring", "INFO", message)
+		// if err != nil {
+		// 	return
+		// }
+		// _ = robot_notifier.Push(ctx, body)
+	}()
+
+	filter, _ := types.ProjectFilterFromContext(ctx)
+
+	l = l.WithValues("total", len(projects))
+	for i := range projects {
+		v := &projects[i]
+		l := l.WithValues("prj", v.Name, "index", i)
+		if filter != nil && filter.Filter(v.ProjectID) {
+			sche := event.NewDefaultEventHandleScheduler(v.ProjectID)
+			go sche.Run(ctx)
+			l.Info("event handler scheduler started")
+		}
 		ctx = types.WithProject(ctx, v)
 		if err = mqtt.Subscribe(ctx, v.Name); err != nil {
-			l.Warn(errors.Wrap(err, "channel create failed"))
+			err = errors.Errorf("%v: failed to subscribe mqtt %v", v.ProjectID, err)
+			fails = append(fails, err.Error())
+			l.Warn(err)
+			continue
 		}
-		l.Info("start subscribe")
-
 		if v.Public == datatypes.TRUE && jwt.WithAnonymousPublisherFn == nil {
+			acc, err := account.GetAccountByAccountID(ctx, v.AccountID)
+			if err != nil {
+				err = errors.Errorf("%v: failed to get account %v %v", v.ProjectID, v.AccountID, err)
+				fails = append(fails, err.Error())
+				l.Error(err)
+				continue
+			}
+			ctx = types.WithAccount(ctx, acc)
 			if _, err = publisher.CreateAnonymousPublisher(ctx); err != nil {
+				err = errors.Errorf("%v: failed to create publisher %v", v.ProjectID, err)
+				fails = append(fails, err.Error())
 				l.Warn(errors.Wrap(err, "anonymous publisher create failed"))
 			}
 		}
+		succs = append(succs, v.ProjectID)
+		l.Info("start subscribe")
 	}
-	return nil
+	return succs, nil
 }

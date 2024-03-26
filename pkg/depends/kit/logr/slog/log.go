@@ -3,9 +3,8 @@ package slog
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strings"
-
-	"golang.org/x/exp/slog"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 )

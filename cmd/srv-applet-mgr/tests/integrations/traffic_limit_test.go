@@ -69,7 +69,13 @@ func TestTrafficLimitAPIs(t *testing.T) {
 
 				// update trafficLimit
 				{
-					req := &applet_mgr.UpdateTrafficLimit{ProjectName: projectName, TrafficLimitID: trafficLimitID}
+					req := &applet_mgr.UpdateTrafficLimit{
+						ProjectName:    projectName,
+						TrafficLimitID: trafficLimitID,
+						UpdateReq: applet_mgr.GithubComMachinefiW3BstreamPkgModulesTrafficlimitUpdateReq{
+							Threshold: 100, Duration: base.Duration(time.Second),
+						},
+					}
 					req.UpdateReq.Threshold = 3
 					req.UpdateReq.Duration = base.Duration(3 * time.Minute)
 

@@ -10,6 +10,8 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -31,13 +33,12 @@ func (h *height) run(ctx context.Context) {
 }
 
 func (h *height) do(ctx context.Context) {
+	ctx, l := logger.NewSpanContext(ctx, "bc.height.do")
+	defer l.End()
+
 	d := types.MustMonitorDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
 	chainConf := types.MustChainConfigFromContext(ctx)
 	m := &models.ChainHeight{}
-
-	_, l = l.Start(ctx, "height.run")
-	defer l.End()
 
 	cs, err := m.List(d, builder.And(m.ColFinished().Eq(datatypes.FALSE), m.ColPaused().Eq(datatypes.FALSE)))
 	if err != nil {
@@ -66,9 +67,7 @@ func (h *height) do(ctx context.Context) {
 }
 
 func (h *height) checkHeightAndSendEvent(ctx context.Context, c *models.ChainHeight, chain *types.Chain) (bool, error) {
-	l := types.MustLoggerFromContext(ctx)
-
-	_, l = l.Start(ctx, "height.checkHeightAndSendEvent")
+	ctx, l := logr.Start(ctx, "bc.height.checkHeightAndSendEvent")
 	defer l.End()
 
 	l = l.WithValues("type", "chain_height", "chain_height_id", c.ChainHeightID)

@@ -3,8 +3,7 @@ package logger
 import (
 	"context"
 	"fmt"
-
-	"golang.org/x/exp/slog"
+	"log/slog"
 
 	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 )
@@ -38,17 +37,17 @@ func (l *std) Start(ctx context.Context, name string, kvs ...interface{}) (conte
 func (l *std) End() {}
 
 func (l *std) Debug(format string, args ...interface{}) {
-	gStdLogger.LogAttrs(context.Background(), slog.LevelDebug, fmt.Sprintf(format, args...), KVsToSlogAttr(l.kvs)...)
+	gStdLogger.LogAttrs(context.Background(), slog.LevelDebug, fmt.Sprintf(format, args...), KVsToSlogAttr(l.kvs...)...)
 }
 
 func (l *std) Info(format string, args ...interface{}) {
-	gStdLogger.LogAttrs(context.Background(), slog.LevelInfo, fmt.Sprintf(format, args...), KVsToSlogAttr(l.kvs)...)
+	gStdLogger.LogAttrs(context.Background(), slog.LevelInfo, fmt.Sprintf(format, args...), KVsToSlogAttr(l.kvs...)...)
 }
 
 func (l *std) Warn(err error) {
-	gStdLogger.LogAttrs(context.Background(), slog.LevelWarn, err.Error(), KVsToSlogAttr(l.kvs)...)
+	gStdLogger.LogAttrs(context.Background(), slog.LevelWarn, err.Error(), KVsToSlogAttr(l.kvs...)...)
 }
 
 func (l *std) Error(err error) {
-	gStdLogger.LogAttrs(context.Background(), slog.LevelError, err.Error(), KVsToSlogAttr(l.kvs)...)
+	gStdLogger.LogAttrs(context.Background(), slog.LevelError, err.Error(), KVsToSlogAttr(l.kvs...)...)
 }

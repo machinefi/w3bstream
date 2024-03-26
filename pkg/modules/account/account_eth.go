@@ -18,7 +18,7 @@ import (
 )
 
 func FetchOrCreateAccountByEthAddress(ctx context.Context, address types.EthAddress) (*models.Account, *models.AccountIdentity, error) {
-	_, l := logr.Start(ctx, "modules.accountEth.FetchOrCreateAccountByEthAddress")
+	_, l := logr.Start(ctx, "account.FetchOrCreateAccountByEthAddress")
 	defer l.End()
 
 	d := types.MustMgrDBExecutorFromContext(ctx)
@@ -119,7 +119,7 @@ type LoginByEthAddressReq struct {
 }
 
 func ValidateLoginByEthAddress(ctx context.Context, r *LoginByEthAddressReq) (*models.Account, error) {
-	_, l := logr.Start(ctx, "modules.accountEth.ValidateLoginByEthAddress")
+	_, l := logr.Start(ctx, "account.ValidateLoginByEthAddress")
 	defer l.End()
 
 	msg, err := siwe.ParseMessage(r.Message)

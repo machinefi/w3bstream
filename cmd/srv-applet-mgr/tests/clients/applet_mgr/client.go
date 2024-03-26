@@ -43,9 +43,11 @@ type Interface interface {
 	DeleteAccountAccessKeyByName(req *DeleteAccountAccessKeyByName, metas ...kit.Metadata) (kit.Metadata, error)
 	DownloadResource(req *DownloadResource, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgDependsKitHttptransportHttpxAttachment, kit.Metadata, error)
 	EthClient(metas ...kit.Metadata) (*EthClientRsp, kit.Metadata, error)
+	FetchInstances(metas ...kit.Metadata) (*map[GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID]GithubComMachinefiW3BstreamPkgEnumsInstanceState, kit.Metadata, error)
 	GetAccessKeyByName(req *GetAccessKeyByName, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccessKeyListData, kit.Metadata, error)
 	GetApplet(req *GetApplet, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsApplet, kit.Metadata, error)
 	GetDownloadResourceUrl(req *GetDownloadResourceUrl, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesResourceDownLoadResourceRsp, kit.Metadata, error)
+	GetInstance(req *GetInstance, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgEnumsInstanceState, kit.Metadata, error)
 	GetInstanceByAppletID(req *GetInstanceByAppletID, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsInstance, kit.Metadata, error)
 	GetInstanceByInstanceID(req *GetInstanceByInstanceID, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModelsInstance, kit.Metadata, error)
 	GetOperatorAddr(req *GetOperatorAddr, metas ...kit.Metadata) (*string, kit.Metadata, error)
@@ -244,6 +246,10 @@ func (c *Client) EthClient(metas ...kit.Metadata) (*EthClientRsp, kit.Metadata, 
 	return (&EthClient{}).InvokeContext(c.Context(), c.Client, metas...)
 }
 
+func (c *Client) FetchInstances(metas ...kit.Metadata) (*map[GithubComMachinefiW3BstreamPkgDependsBaseTypesSFID]GithubComMachinefiW3BstreamPkgEnumsInstanceState, kit.Metadata, error) {
+	return (&FetchInstances{}).InvokeContext(c.Context(), c.Client, metas...)
+}
+
 func (c *Client) GetAccessKeyByName(req *GetAccessKeyByName, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesAccessKeyListData, kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
@@ -253,6 +259,10 @@ func (c *Client) GetApplet(req *GetApplet, metas ...kit.Metadata) (*GithubComMac
 }
 
 func (c *Client) GetDownloadResourceUrl(req *GetDownloadResourceUrl, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgModulesResourceDownLoadResourceRsp, kit.Metadata, error) {
+	return req.InvokeContext(c.Context(), c.Client, metas...)
+}
+
+func (c *Client) GetInstance(req *GetInstance, metas ...kit.Metadata) (*GithubComMachinefiW3BstreamPkgEnumsInstanceState, kit.Metadata, error) {
 	return req.InvokeContext(c.Context(), c.Client, metas...)
 }
 

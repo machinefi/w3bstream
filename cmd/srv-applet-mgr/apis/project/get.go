@@ -7,6 +7,7 @@ import (
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/middleware"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/httptransport/httpx"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/errors/status"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -41,13 +42,15 @@ type ListProject struct {
 func (r *ListProject) Path() string { return "/datalist" }
 
 func (r *ListProject) Output(ctx context.Context) (interface{}, error) {
+	ctx, l := logr.Start(ctx, "api.ListProject")
+	defer l.End()
+
 	ctx = middleware.MustCurrentAccountFromContext(ctx).WithAccount(ctx)
 	rsp, err := project.List(ctx, &r.ListReq)
 	if err != nil {
 		return nil, err
 	}
 
-	_, l := types.MustLoggerFromContext(ctx).Start(ctx, "ListProject")
 	for i := 0; i < len(rsp.Data); i++ {
 		v := &rsp.Data[i]
 		v.Name, err = middleware.ProjectNameForDisplay(v.Name)

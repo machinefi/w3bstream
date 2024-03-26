@@ -8,26 +8,27 @@ import (
 
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/global"
-	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/tasks"
-	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/kit"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/modules/account"
 	"github.com/machinefi/w3bstream/pkg/modules/blockchain"
 	"github.com/machinefi/w3bstream/pkg/modules/cronjob"
 	"github.com/machinefi/w3bstream/pkg/modules/deploy"
+	"github.com/machinefi/w3bstream/pkg/modules/event"
 	"github.com/machinefi/w3bstream/pkg/modules/metrics"
 	"github.com/machinefi/w3bstream/pkg/modules/operator"
 	"github.com/machinefi/w3bstream/pkg/modules/project"
 	"github.com/machinefi/w3bstream/pkg/modules/robot_notifier"
 	"github.com/machinefi/w3bstream/pkg/modules/robot_notifier/lark"
 	"github.com/machinefi/w3bstream/pkg/modules/trafficlimit"
+	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 var app = global.App
 
 func init() {
-	global.Migrate()
+	// global.Migrate()
 }
 
 func main() {
@@ -43,9 +44,12 @@ func main() {
 				kit.Run(apis.RootEvent, global.EventServer())
 			},
 			func() {
-				kit.Run(tasks.Root, global.TaskServer())
+				kit.Run(apis.RootDebug, global.DebugServer())
 			},
 			func() {
+				ctx, l := logr.Start(ctx, "main.InitProjects")
+				defer l.End()
+
 				passwd, err := account.CreateAdminIfNotExist(ctx)
 				if err != nil {
 					l.Error(err)
@@ -61,10 +65,11 @@ func main() {
 					l.Error(err)
 					panic(err)
 				}
-				if err := project.Init(ctx); err != nil {
+				if _, err = project.Init(ctx); err != nil {
 					l.Error(err)
 					panic(err)
 				}
+				l.Info("all projects initialized")
 			},
 			func() {
 				if err := trafficlimit.Init(ctx); err != nil {
@@ -90,11 +95,21 @@ func main() {
 				metrics.Init(ctx)
 			},
 			func() {
+				sche := event.NewDefaultEventCleanupScheduler()
+				sche.Run(ctx)
+			},
+			func() {
+				filter := types.MustProjectFilterFromContext(ctx)
+
 				body, err := lark.Build(
 					ctx,
 					"service started",
 					"INFO",
-					fmt.Sprintf("service started at: %s", types.Timestamp{Time: time.Now()}.String()),
+					fmt.Sprintf("service started at: %s\nblack list: %v\nwhite list: %v",
+						types.Timestamp{Time: time.Now()}.String(),
+						filter.BlackList,
+						filter.WhiteList,
+					),
 				)
 				if err != nil {
 					return

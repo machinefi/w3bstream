@@ -3,11 +3,10 @@ package logger
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"runtime"
-
-	"golang.org/x/exp/slog"
 )
 
 func NewJsonHandler(skip int) *customJsonHandler {

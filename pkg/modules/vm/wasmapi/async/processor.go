@@ -14,8 +14,9 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/pkg/errors"
 
-	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
+	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
 	confmq "github.com/machinefi/w3bstream/pkg/depends/conf/mq"
+	confredis "github.com/machinefi/w3bstream/pkg/depends/conf/redis"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/depends/x/contextx"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -27,20 +28,21 @@ import (
 )
 
 type ApiCallProcessor struct {
-	l      log.Logger
 	router *gin.Engine
 	cli    *asynq.Client
 }
 
-func NewApiCallProcessor(l log.Logger, router *gin.Engine, cli *asynq.Client) *ApiCallProcessor {
+func NewApiCallProcessor(router *gin.Engine, cli *asynq.Client) *ApiCallProcessor {
 	return &ApiCallProcessor{
-		l:      l,
 		router: router,
 		cli:    cli,
 	}
 }
 
 func (p *ApiCallProcessor) ProcessTask(ctx context.Context, t *asynq.Task) error {
+	ctx, l := logger.NewSpanContext(ctx, "vm.ApiCall.ProcessTask")
+	defer l.End()
+
 	payload := apiCallPayload{}
 	if err := json.Unmarshal(t.Payload(), &payload); err != nil {
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
@@ -53,16 +55,13 @@ func (p *ApiCallProcessor) ProcessTask(ctx context.Context, t *asynq.Task) error
 	req = req.WithContext(contextx.WithContextCompose(
 		types.WithProjectContext(payload.Project),
 		wasm.WithChainClientContext(payload.ChainClient),
-		types.WithLoggerContext(p.l),
 	)(context.Background()))
 
 	respRecorder := httptest.NewRecorder()
 	p.router.ServeHTTP(respRecorder, req)
 
-	_, l := p.l.Start(ctx, "wasmapi.ProcessTaskApiCall")
-	defer l.End()
 	prjName := payload.Project.ProjectName.Name
-	l = l.WithValues("ProjectName", prjName)
+	l = l.WithValues("prj", prjName)
 
 	apiResp, err := ConvHttpResponse(req.Header, respRecorder.Result())
 	if err != nil {
@@ -97,22 +96,25 @@ func (p *ApiCallProcessor) ProcessTask(ctx context.Context, t *asynq.Task) error
 }
 
 type ApiResultProcessor struct {
-	l     log.Logger
 	mgrDB sqlx.DBExecutor
 	kv    *kvdb.RedisDB
+	redis *confredis.Redis
 	tasks *confmq.Config
 }
 
-func NewApiResultProcessor(l log.Logger, mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB, tasks *confmq.Config) *ApiResultProcessor {
+func NewApiResultProcessor(mgrDB sqlx.DBExecutor, kv *kvdb.RedisDB, tasks *confmq.Config, redis *confredis.Redis) *ApiResultProcessor {
 	return &ApiResultProcessor{
-		l:     l,
 		kv:    kv,
 		mgrDB: mgrDB,
 		tasks: tasks,
+		redis: redis,
 	}
 }
 
 func (p *ApiResultProcessor) ProcessTask(ctx context.Context, t *asynq.Task) error {
+	ctx, l := logger.NewSpanContext(ctx, "vm.ApiResult.ProcessTask")
+	defer l.End()
+
 	payload := apiResultPayload{}
 	if err := json.Unmarshal(t.Payload(), &payload); err != nil {
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
@@ -120,16 +122,13 @@ func (p *ApiResultProcessor) ProcessTask(ctx context.Context, t *asynq.Task) err
 
 	ctx = contextx.WithContextCompose(
 		confmq.WithMqContext(p.tasks),
-		types.WithLoggerContext(p.l),
 		types.WithMgrDBExecutorContext(p.mgrDB),
 		kvdb.WithRedisDBKeyContext(p.kv),
 		types.WithProjectContext(&models.Project{
 			ProjectName: models.ProjectName{Name: payload.ProjectName}},
 		),
+		types.WithRedisEndpointContext(p.redis),
 	)(ctx)
-
-	_, l := p.l.Start(ctx, "wasmapi.ProcessTaskApiResult")
-	defer l.End()
 
 	if _, err := event.HandleEvent(ctx, payload.EventType, payload.Data); err != nil {
 		l.Error(errors.Wrap(err, "send event failed"))

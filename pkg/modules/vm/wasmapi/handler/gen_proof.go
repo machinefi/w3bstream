@@ -8,13 +8,14 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/modules/vm/risc0vm"
 	"github.com/machinefi/w3bstream/pkg/types"
 )
 
 func (h *Handler) GenRisc0Proof(c *gin.Context) {
-	l := types.MustLoggerFromContext(c.Request.Context())
-	_, l = l.Start(c, "wasmapi.handler.GenRisc0Proof")
+	// l := types.MustLoggerFromContext(c.Request.Context())
+	_, l := logr.Start(c, "vm.Handler.GenRisc0Proof")
 	defer l.End()
 
 	var req risc0vm.CreateProofReq
@@ -38,8 +39,8 @@ func (h *Handler) GenRisc0Proof(c *gin.Context) {
 }
 
 func (h *Handler) GenRisc0ProofAsync(c *gin.Context) {
-	l := types.MustLoggerFromContext(c.Request.Context())
-	_, l = l.Start(c, "wasmapi.handler.GenRisc0ProofAsync")
+	// l := types.MustLoggerFromContext(c.Request.Context())
+	_, l := logr.Start(c, "vm.Handler.GenRisc0ProofAsync")
 	defer l.End()
 
 	var req risc0vm.CreateProofReq

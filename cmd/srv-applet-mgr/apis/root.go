@@ -6,6 +6,7 @@ import (
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/applet"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/configuration"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/cronjob"
+	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/debug"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/deploy"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/event"
 	"github.com/machinefi/w3bstream/cmd/srv-applet-mgr/apis/login"
@@ -31,6 +32,7 @@ import (
 var (
 	RootMgr   = kit.NewRouter(httptransport.Group("/"))
 	RootEvent = kit.NewRouter(httptransport.Group("/"))
+	RootDebug = kit.NewRouter(httptransport.Group("/"))
 )
 
 func init() {
@@ -88,5 +90,15 @@ func init() {
 		v0.Register(auth)
 
 		auth.Register(event.Root)
+	}
+
+	{
+		serve := kit.NewRouter(httptransport.Group("/srv-applet-mgr"))
+		RootDebug.Register(serve)
+
+		v0 := kit.NewRouter(httptransport.Group("/v0"))
+		serve.Register(kit.NewRouter(&openapi.OpenAPI{}))
+		serve.Register(v0)
+		v0.Register(debug.Root)
 	}
 }

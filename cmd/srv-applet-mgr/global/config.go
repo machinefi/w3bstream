@@ -56,53 +56,59 @@ func init() {
 	// TODO config struct should be defined outside this method and impl it's Init() interface{}
 	// TODO split this init too long
 	config := &struct {
-		Postgres      *confpostgres.Endpoint
-		MonitorDB     *confpostgres.Endpoint
-		MqttBroker    *confmqtt.Broker
-		Redis         *confredis.Redis
-		NewLogger     *conflogger.Config
-		Tracer        *conftracer.Config
-		Server        *confhttp.Server
-		Jwt           *confjwt.Jwt
-		Logger        *conflog.Log
-		UploadConf    *types.UploadConfig
-		EthClient     *types.ETHClientConfig
-		ChainConfig   *types.ChainConfig
-		WhiteList     *types.EthAddressWhiteList
-		ServerEvent   *confhttp.Server
-		FileSystem    *types.FileSystem
-		AmazonS3      *amazonS3.AmazonS3
-		LocalFS       *local.LocalFileSystem
-		WasmDBConfig  *types.WasmDBConfig
-		RateLimit     *confrate.RateLimit
-		MetricsCenter *types.MetricsCenterConfig
-		RobotNotifier *types.RobotNotifierConfig
-		Risc0Config   *types.Risc0Config
-		Mq            *confmq.Config
+		Postgres           *confpostgres.Endpoint
+		MonitorDB          *confpostgres.Endpoint
+		MqttBroker         *confmqtt.Broker
+		Redis              *confredis.Redis
+		NewLogger          *conflogger.Config
+		Tracer             *conftracer.Config
+		Server             *confhttp.Server
+		Jwt                *confjwt.Jwt
+		Logger             *conflog.Log
+		UploadConf         *types.UploadConfig
+		EthClient          *types.ETHClientConfig
+		ChainConfig        *types.ChainConfig
+		WhiteList          *types.EthAddressWhiteList
+		ServerEvent        *confhttp.Server
+		FileSystem         *types.FileSystem
+		AmazonS3           *amazonS3.AmazonS3
+		LocalFS            *local.LocalFileSystem
+		WasmDBConfig       *types.WasmDBConfig
+		RateLimit          *confrate.RateLimit
+		MetricsCenter      *types.MetricsCenterConfig
+		RobotNotifier      *types.RobotNotifierConfig
+		Risc0Config        *types.Risc0Config
+		Mq                 *confmq.Config
+		MaxWasmFuel        uint64
+		ProjectFilter      *types.ProjectFilter
+		EnableTrafficLimit bool
 	}{
-		Postgres:      db,
-		MonitorDB:     monitordb,
-		MqttBroker:    &confmqtt.Broker{},
-		Redis:         &confredis.Redis{},
-		NewLogger:     &conflogger.Config{},
-		Tracer:        &conftracer.Config{},
-		Server:        ServerMgr,
-		Jwt:           &confjwt.Jwt{},
-		Logger:        &conflog.Log{},
-		UploadConf:    &types.UploadConfig{},
-		EthClient:     &types.ETHClientConfig{},
-		ChainConfig:   &types.ChainConfig{},
-		WhiteList:     &types.EthAddressWhiteList{},
-		ServerEvent:   ServerEvent,
-		FileSystem:    &types.FileSystem{},
-		AmazonS3:      &amazonS3.AmazonS3{},
-		LocalFS:       &local.LocalFileSystem{},
-		WasmDBConfig:  &types.WasmDBConfig{},
-		RateLimit:     &confrate.RateLimit{},
-		MetricsCenter: &types.MetricsCenterConfig{},
-		RobotNotifier: &types.RobotNotifierConfig{},
-		Risc0Config:   &types.Risc0Config{},
-		Mq:            TaskMgr,
+		Postgres:           db,
+		MonitorDB:          monitordb,
+		MqttBroker:         &confmqtt.Broker{},
+		Redis:              &confredis.Redis{},
+		NewLogger:          &conflogger.Config{},
+		Tracer:             &conftracer.Config{},
+		Server:             ServerMgr,
+		Jwt:                &confjwt.Jwt{},
+		Logger:             &conflog.Log{},
+		UploadConf:         &types.UploadConfig{},
+		EthClient:          &types.ETHClientConfig{},
+		ChainConfig:        &types.ChainConfig{},
+		WhiteList:          &types.EthAddressWhiteList{},
+		ServerEvent:        ServerEvent,
+		FileSystem:         &types.FileSystem{},
+		AmazonS3:           &amazonS3.AmazonS3{},
+		LocalFS:            &local.LocalFileSystem{},
+		WasmDBConfig:       &types.WasmDBConfig{},
+		RateLimit:          &confrate.RateLimit{},
+		MetricsCenter:      &types.MetricsCenterConfig{},
+		RobotNotifier:      &types.RobotNotifierConfig{},
+		Risc0Config:        &types.Risc0Config{},
+		Mq:                 TaskMgr,
+		MaxWasmFuel:        1024 * 1024 * 1024,
+		ProjectFilter:      &types.ProjectFilter{},
+		EnableTrafficLimit: false,
 	}
 
 	name := os.Getenv(consts.EnvProjectName)
@@ -140,12 +146,12 @@ func init() {
 	proxy = &client.Client{Port: uint16(ServerEvent.Port), Timeout: 10 * time.Second}
 	proxy.SetDefault()
 
-	redisKvDB := kvdb.NewRedisDB(config.Redis)
+	redisKvDB := kvdb.NewRedisDB(config.Redis, "")
 	operatorPool := pool.NewPool(config.Postgres)
 
 	sfIDGenerator := confid.MustNewSFIDGenerator()
 
-	wasmApiServer, err := wasmapi.NewServer(std, config.Redis, config.Postgres, redisKvDB, config.ChainConfig,
+	wasmApiServer, err := wasmapi.NewServer(config.Redis, config.Postgres, redisKvDB, config.ChainConfig,
 		config.Mq, operatorPool, sfIDGenerator, config.Risc0Config)
 	if err != nil {
 		std.Fatal(err)
@@ -174,6 +180,9 @@ func init() {
 		types.WithRobotNotifierConfigContext(config.RobotNotifier),
 		types.WithWasmApiServerContext(wasmApiServer),
 		types.WithOperatorPoolContext(operatorPool),
+		types.WithMaxWasmConsumeFuelContext(config.MaxWasmFuel),
+		types.WithProjectFilterContext(config.ProjectFilter),
+		types.WithEnableTrafficLimitContext(config.EnableTrafficLimit),
 	)
 	Context = WithContext(context.Background())
 }
@@ -190,16 +199,32 @@ func EventServer() kit.Transport {
 	return ServerEvent.WithContextInjector(WithContext).WithName("srv-event")
 }
 
+func DebugServer() kit.Transport {
+	srv := &confhttp.Server{
+		Protocol: "http",
+		Addr:     "",
+		Port:     10001,
+		Spec:     "./openapi.json",
+	}
+	return srv.WithContextInjector(WithContext).WithName("srv-debug")
+}
+
 func Migrate() {
 	ctx, l := conflogger.NewSpanContext(context.Background(), "global.Migrate")
 	defer l.End()
 
-	if err := migration.Migrate(db.WithContext(ctx), nil); err != nil {
+	output, err := os.OpenFile("migrate.sql", os.O_CREATE|os.O_RDWR, 0666)
+	if err != nil {
+		panic(err)
+	}
+	defer output.Close()
+
+	if err := migration.Migrate(db.WithContext(ctx), output); err != nil {
 		l.Error(err)
 		panic(err)
 	}
 
-	if err := migration.Migrate(monitordb.WithContext(ctx), nil); err != nil {
+	if err := migration.Migrate(monitordb.WithContext(ctx), output); err != nil {
 		l.Error(err)
 		panic(err)
 	}

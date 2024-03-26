@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -215,6 +216,7 @@ type WasmDBConfig struct {
 	MaxConnection   int
 	PoolSize        int
 	ConnMaxLifetime types.Duration
+	LazyInit        bool
 }
 
 func (c *WasmDBConfig) SetDefault() {
@@ -281,4 +283,19 @@ func (r *Risc0Config) LivenessCheck() map[string]string {
 	}
 
 	return m
+}
+
+type ProjectFilter struct {
+	WhiteList []SFID
+	BlackList []SFID
+}
+
+func (f *ProjectFilter) Filter(id types.SFID) bool {
+	if len(f.WhiteList) > 0 {
+		return slices.Contains(f.WhiteList, id)
+	}
+	if len(f.BlackList) > 0 {
+		return !slices.Contains(f.BlackList, id)
+	}
+	return true
 }

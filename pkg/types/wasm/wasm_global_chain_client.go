@@ -120,6 +120,9 @@ func (c *ChainClient) SendTX(conf *wsTypes.ChainConfig, chainID uint64, chainNam
 		return "", err
 	}
 	resp, err := c.sendTX(conf, chainID, chainName, toStr, valueStr, dataStr, op)
+	if err != nil {
+		return "", err
+	}
 	return resp.Hash, err
 }
 

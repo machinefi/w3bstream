@@ -9,6 +9,8 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
 
+	"github.com/machinefi/w3bstream/pkg/depends/conf/logger"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/builder"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx/datatypes"
 	"github.com/machinefi/w3bstream/pkg/models"
@@ -30,13 +32,12 @@ func (t *tx) run(ctx context.Context) {
 }
 
 func (t *tx) do(ctx context.Context) {
+	ctx, l := logger.NewSpanContext(ctx, "bc.tx.do")
+	defer l.End()
+
 	d := types.MustMonitorDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
 	ethcli := types.MustETHClientConfigFromContext(ctx)
 	m := &models.ChainTx{}
-
-	_, l = l.Start(ctx, "tx.run")
-	defer l.End()
 
 	cs, err := m.List(d, builder.And(m.ColFinished().Eq(datatypes.FALSE), m.ColPaused().Eq(datatypes.FALSE)))
 	if err != nil {
@@ -66,9 +67,7 @@ func (t *tx) do(ctx context.Context) {
 }
 
 func (t *tx) checkTxAndSendEvent(ctx context.Context, c *models.ChainTx, address string) (bool, error) {
-	l := types.MustLoggerFromContext(ctx)
-
-	_, l = l.Start(ctx, "tx.checkTxAndSendEvent")
+	ctx, l := logr.Start(ctx, "bc.tx.checkTxAndSendEvent")
 	defer l.End()
 
 	l = l.WithValues("type", "chain_tx", "chain_tx_id", c.ChainTxID)

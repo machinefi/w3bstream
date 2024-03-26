@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 
 	confid "github.com/machinefi/w3bstream/pkg/depends/conf/id"
+	"github.com/machinefi/w3bstream/pkg/depends/kit/logr"
 	"github.com/machinefi/w3bstream/pkg/depends/kit/sqlx"
 	"github.com/machinefi/w3bstream/pkg/models"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -13,11 +14,10 @@ import (
 
 // will delete at next version
 func Migrate(ctx context.Context) {
-	d := types.MustMgrDBExecutorFromContext(ctx)
-	l := types.MustLoggerFromContext(ctx)
-
-	_, l = l.Start(ctx, "operator.Migrate")
+	ctx, l := logr.Start(ctx, "operator.Migrate")
 	defer l.End()
+
+	d := types.MustMgrDBExecutorFromContext(ctx)
 
 	a := &models.Account{}
 	as, err := a.List(d, nil)
