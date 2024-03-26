@@ -3,7 +3,6 @@ package types
 import (
 	"context"
 
-	"github.com/machinefi/w3bstream/pkg/depends/base/types"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/filesystem"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/log"
 	"github.com/machinefi/w3bstream/pkg/depends/conf/mqtt"
@@ -51,12 +50,10 @@ type (
 	CtxOperatorPool struct{}
 	// CtxMaxWasmConsumeFuel global wasm consume fuel per invoking
 	CtxMaxWasmConsumeFuel struct{}
-	// CtxProjectWhiteList global project white list for handle event
-	CtxProjectWhiteList struct{}
-	// CtxProjectBlackList global project black list for handle event
-	CtxProjectBlackList struct{}
 	// CtxEnableTrafficLimit if enable traffic limit
 	CtxEnableTrafficLimit struct{}
+	// CtxProjectFilter global project filter
+	CtxProjectFilter struct{}
 )
 
 // model contexts
@@ -843,48 +840,6 @@ func MustMaxWasmConsumeFuelFromContext(ctx context.Context) uint64 {
 	return v
 }
 
-func WithProjectWhiteList(ctx context.Context, v []types.SFID) context.Context {
-	return contextx.WithValue(ctx, CtxProjectWhiteList{}, v)
-}
-
-func WithProjectWhiteListContext(v []types.SFID) contextx.WithContext {
-	return func(ctx context.Context) context.Context {
-		return WithProjectWhiteList(ctx, v)
-	}
-}
-
-func ProjectWhiteListFromContext(ctx context.Context) ([]types.SFID, bool) {
-	v, ok := ctx.Value(CtxProjectWhiteList{}).([]types.SFID)
-	return v, ok
-}
-
-func MustProjectWhiteListFromContext(ctx context.Context) []types.SFID {
-	v, ok := ProjectWhiteListFromContext(ctx)
-	must.BeTrue(ok)
-	return v
-}
-
-func WithProjectBlackList(ctx context.Context, v []types.SFID) context.Context {
-	return contextx.WithValue(ctx, CtxProjectBlackList{}, v)
-}
-
-func WithProjectBlackListContext(v []types.SFID) contextx.WithContext {
-	return func(ctx context.Context) context.Context {
-		return WithProjectBlackList(ctx, v)
-	}
-}
-
-func ProjectBlackListFromContext(ctx context.Context) ([]types.SFID, bool) {
-	v, ok := ctx.Value(CtxProjectBlackList{}).([]types.SFID)
-	return v, ok
-}
-
-func MustProjectBlackListFromContext(ctx context.Context) []types.SFID {
-	v, ok := ProjectBlackListFromContext(ctx)
-	must.BeTrue(ok)
-	return v
-}
-
 func WithEnableTrafficLimit(ctx context.Context, v bool) context.Context {
 	return contextx.WithValue(ctx, CtxEnableTrafficLimit{}, v)
 }
@@ -898,4 +853,25 @@ func WithEnableTrafficLimitContext(v bool) contextx.WithContext {
 func EnableTrafficLimitFromContext(ctx context.Context) bool {
 	v, ok := ctx.Value(CtxEnableTrafficLimit{}).(bool)
 	return v && ok
+}
+
+func WithProjectFilter(ctx context.Context, f *ProjectFilter) context.Context {
+	return contextx.WithValue(ctx, CtxProjectFilter{}, f)
+}
+
+func WithProjectFilterContext(f *ProjectFilter) contextx.WithContext {
+	return func(ctx context.Context) context.Context {
+		return WithProjectFilter(ctx, f)
+	}
+}
+
+func ProjectFilterFromContext(ctx context.Context) (*ProjectFilter, bool) {
+	v, ok := ctx.Value(CtxProjectFilter{}).(*ProjectFilter)
+	return v, ok && v != nil
+}
+
+func MustProjectFilterFromContext(ctx context.Context) *ProjectFilter {
+	v, ok := ProjectFilterFromContext(ctx)
+	must.BeTrue(ok)
+	return v
 }

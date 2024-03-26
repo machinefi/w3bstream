@@ -292,6 +292,10 @@ func handle(ctx context.Context, batch int64, prj types.SFID) int {
 	return len(evs)
 }
 
+func NewDefaultEventHandleScheduler(prj types.SFID) *EventHandleScheduler {
+	return NewEventHandleScheduler(time.Second*10, 100, prj)
+}
+
 func NewEventHandleScheduler(d time.Duration, batch int64, prj types.SFID) *EventHandleScheduler {
 	return &EventHandleScheduler{
 		prj:   prj,
@@ -312,6 +316,10 @@ func (s *EventHandleScheduler) Run(ctx context.Context) {
 			time.Sleep(s.du)
 		}
 	}
+}
+
+func NewDefaultEventCleanupScheduler() *EventCleanupScheduler {
+	return NewEventCleanupScheduler(time.Hour, 3*time.Hour*24)
 }
 
 func NewEventCleanupScheduler(d time.Duration, keep time.Duration) *EventCleanupScheduler {

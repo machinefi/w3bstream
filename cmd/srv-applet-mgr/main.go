@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"slices"
-	"strings"
 	"sync"
 	"time"
 
@@ -37,10 +35,6 @@ func main() {
 	ctx, l := logger.NewSpanContext(global.WithContext(context.Background()), "main")
 	defer l.End()
 
-	var (
-		sigProjectsInitialized = make(chan struct{})
-		projectIDs             []types.SFID
-	)
 	app.Execute(func(args ...string) {
 		BatchRun(
 			func() {
@@ -71,12 +65,11 @@ func main() {
 					l.Error(err)
 					panic(err)
 				}
-				if projectIDs, err = project.Init(ctx); err != nil {
+				if _, err = project.Init(ctx); err != nil {
 					l.Error(err)
 					panic(err)
 				}
 				l.Info("all projects initialized")
-				sigProjectsInitialized <- struct{}{}
 			},
 			func() {
 				if err := trafficlimit.Init(ctx); err != nil {
@@ -102,52 +95,21 @@ func main() {
 				metrics.Init(ctx)
 			},
 			func() {
-				<-sigProjectsInitialized
-				wl, _ := types.ProjectWhiteListFromContext(ctx)
-				bl, _ := types.ProjectBlackListFromContext(ctx)
-				projects := make([]string, 0)
-				if len(wl) > 0 {
-					for _, prj := range projectIDs {
-						if slices.Contains(wl, prj) {
-							sche := event.NewEventHandleScheduler(time.Second*10, 100, prj)
-							go sche.Run(ctx)
-							projects = append(projects, prj.String())
-						}
-					}
-				} else if len(bl) > 0 {
-					for _, prj := range projectIDs {
-						if !slices.Contains(bl, prj) {
-							sche := event.NewEventHandleScheduler(time.Second*10, 100, prj)
-							projects = append(projects, prj.String())
-							go sche.Run(ctx)
-						}
-					}
-				}
-				if len(wl) == 0 && len(bl) == 0 {
-					for _, prj := range projectIDs {
-						sche := event.NewEventHandleScheduler(time.Second*10, 100, prj)
-						projects = append(projects, prj.String())
-						go sche.Run(ctx)
-					}
-				}
-
-				body, err := lark.Build(ctx, "Projects Processes", "INFO",
-					fmt.Sprintf("black list: %v\nwhite list: %v \n%s", bl, wl, strings.Join(projects, "\n")))
-				if err != nil {
-					return
-				}
-				_ = robot_notifier.Push(ctx, body, nil)
-			},
-			func() {
-				sche := event.NewEventCleanupScheduler(time.Hour, 3*time.Hour*24)
+				sche := event.NewDefaultEventCleanupScheduler()
 				sche.Run(ctx)
 			},
 			func() {
+				filter := types.MustProjectFilterFromContext(ctx)
+
 				body, err := lark.Build(
 					ctx,
 					"service started",
 					"INFO",
-					fmt.Sprintf("service started at: %s", types.Timestamp{Time: time.Now()}.String()),
+					fmt.Sprintf("service started at: %s\nblack list: %v\nwhite list: %v",
+						types.Timestamp{Time: time.Now()}.String(),
+						filter.BlackList,
+						filter.WhiteList,
+					),
 				)
 				if err != nil {
 					return

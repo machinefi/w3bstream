@@ -80,8 +80,7 @@ func init() {
 		Risc0Config        *types.Risc0Config
 		Mq                 *confmq.Config
 		MaxWasmFuel        uint64
-		ProjectBlackList   *[]types.SFID
-		ProjectWhiteList   *[]types.SFID
+		ProjectFilter      *types.ProjectFilter
 		EnableTrafficLimit bool
 	}{
 		Postgres:           db,
@@ -108,8 +107,7 @@ func init() {
 		Risc0Config:        &types.Risc0Config{},
 		Mq:                 TaskMgr,
 		MaxWasmFuel:        1024 * 1024 * 1024,
-		ProjectBlackList:   new([]types.SFID),
-		ProjectWhiteList:   new([]types.SFID),
+		ProjectFilter:      &types.ProjectFilter{},
 		EnableTrafficLimit: false,
 	}
 
@@ -183,8 +181,7 @@ func init() {
 		types.WithWasmApiServerContext(wasmApiServer),
 		types.WithOperatorPoolContext(operatorPool),
 		types.WithMaxWasmConsumeFuelContext(config.MaxWasmFuel),
-		types.WithProjectBlackListContext(*config.ProjectBlackList),
-		types.WithProjectWhiteListContext(*config.ProjectWhiteList),
+		types.WithProjectFilterContext(config.ProjectFilter),
 		types.WithEnableTrafficLimitContext(config.EnableTrafficLimit),
 	)
 	Context = WithContext(context.Background())

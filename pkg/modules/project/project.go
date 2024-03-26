@@ -18,6 +18,7 @@ import (
 	"github.com/machinefi/w3bstream/pkg/modules/account"
 	"github.com/machinefi/w3bstream/pkg/modules/applet"
 	"github.com/machinefi/w3bstream/pkg/modules/config"
+	"github.com/machinefi/w3bstream/pkg/modules/event"
 	"github.com/machinefi/w3bstream/pkg/modules/publisher"
 	"github.com/machinefi/w3bstream/pkg/modules/transporter/mqtt"
 	"github.com/machinefi/w3bstream/pkg/types"
@@ -208,6 +209,13 @@ func Create(ctx context.Context, r *CreateReq) (*CreateRsp, error) {
 	}
 	rsp.ChannelState = datatypes.BooleanValue(err == nil)
 
+	filter, _ := types.ProjectFilterFromContext(ctx)
+	if filter != nil && filter.Filter(prj.ProjectID) {
+		sche := event.NewDefaultEventHandleScheduler(prj.ProjectID)
+		go sche.Run(ctx)
+		l.Info("event handler scheduler started")
+	}
+
 	return rsp, nil
 }
 
@@ -281,10 +289,17 @@ func Init(ctx context.Context) ([]types.SFID, error) {
 		// _ = robot_notifier.Push(ctx, body)
 	}()
 
+	filter, _ := types.ProjectFilterFromContext(ctx)
+
 	l = l.WithValues("total", len(projects))
 	for i := range projects {
 		v := &projects[i]
 		l := l.WithValues("prj", v.Name, "index", i)
+		if filter != nil && filter.Filter(v.ProjectID) {
+			sche := event.NewDefaultEventHandleScheduler(v.ProjectID)
+			go sche.Run(ctx)
+			l.Info("event handler scheduler started")
+		}
 		ctx = types.WithProject(ctx, v)
 		if err = mqtt.Subscribe(ctx, v.Name); err != nil {
 			err = errors.Errorf("%v: failed to subscribe mqtt %v", v.ProjectID, err)

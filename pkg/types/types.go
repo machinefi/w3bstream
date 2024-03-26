@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -284,6 +285,17 @@ func (r *Risc0Config) LivenessCheck() map[string]string {
 	return m
 }
 
-type ProjectWhiteList []types.SFID
+type ProjectFilter struct {
+	WhiteList []SFID
+	BlackList []SFID
+}
 
-type ProjectBlackList []types.SFID
+func (f *ProjectFilter) Filter(id types.SFID) bool {
+	if len(f.WhiteList) > 0 {
+		return slices.Contains(f.WhiteList, id)
+	}
+	if len(f.BlackList) > 0 {
+		return !slices.Contains(f.BlackList, id)
+	}
+	return true
+}
